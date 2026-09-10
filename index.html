@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Project Genesis — Prototype v0.8.3 Saneamiento</title>
+<title>Project Genesis — Prototype v0.8.4 Navegación Hotfix</title>
 
 <script type="importmap">
 {
@@ -43,6 +43,9 @@ pc-app{position:fixed;inset:0;display:block;width:100%;height:100%;background:#0
 #interact{position:absolute;right:max(22px,env(safe-area-inset-right));bottom:max(28px,env(safe-area-inset-bottom));width:70px;height:70px;border-radius:50%;display:grid;place-items:center;pointer-events:auto;background:#0c3146e6;border:1px solid #63d2e5ba;color:#fff;font-size:17px;font-weight:900;box-shadow:0 8px 28px #0008}
 #lookZone{position:absolute;right:0;top:0;width:58%;height:100%;pointer-events:auto}
 #lookHint{position:absolute;right:14px;bottom:110px;color:#c2ccd3a0;font-size:8px}
+#zoomControls{position:absolute;right:max(25px,env(safe-area-inset-right));bottom:max(112px,calc(env(safe-area-inset-bottom) + 84px));display:flex;flex-direction:column;gap:6px;pointer-events:auto;z-index:3}
+#zoomControls button{width:42px;height:42px;padding:0;border-radius:50%;border:1px solid #d6a84d8c;background:#071a28e8;color:#f5dfa8;font-size:22px;line-height:1;font-weight:800;box-shadow:0 6px 20px #0008}
+#zoomControls .zoomLabel{position:absolute;right:48px;top:27px;width:85px;text-align:right;color:#c2ccd39c;font-size:7px;letter-spacing:.08em;pointer-events:none}
 #modalLayer{position:fixed;inset:0;z-index:40;display:none;place-items:center;padding:16px;background:#02070bd4;backdrop-filter:blur(4px);pointer-events:auto}
 .modal{width:min(840px,100%);max-height:90vh;overflow:auto;background:linear-gradient(180deg,#102a3d,#071620);border:1px solid #d6a84d7d;border-radius:10px;box-shadow:0 28px 100px #000e;padding:18px}
 .modal .ey{color:var(--gold);font-size:9px;font-weight:900;letter-spacing:.15em}
@@ -87,7 +90,7 @@ button.secondary{background:#0d2b3d;color:#eff5f7;border-color:#63d2e56f}
 @media(pointer:coarse),(max-width:800px){#mobile{display:block}#desktopHelp{display:none}#quest{width:min(300px,calc(100vw - 28px))}#quest p{display:none}.swordStage{grid-template-columns:1fr}.swordStage img{height:48vh}}
 @media(max-width:700px) and (orientation:portrait){#rotate{display:block}#quest{top:40px;width:230px}#buttonsTop{top:40px}.uiBtn{padding:7px 8px}.swordStage img{height:40vh}}
 </style>
-<meta name="genesis-build" content="playcanvas-prototype-v0.8.2-2026-09-10">
+<meta name="genesis-build" content="playcanvas-prototype-v0.8.4-2026-09-10">
 </head>
 <body>
 
@@ -215,7 +218,7 @@ button.secondary{background:#0d2b3d;color:#eff5f7;border-color:#63d2e56f}
 <div id="loading">
  <div class="loadingCard">
    <div style="color:var(--gold);font-size:9px;font-weight:900;letter-spacing:.18em">PROJECT GENESIS · PLAYCANVAS</div>
-   <h1>Prototipo jugable v0.8.3 · saneamiento</h1>
+   <h1>Prototipo jugable v0.8.4 · navegación</h1>
    <p>Pase de saneamiento: puerta física, circulación corregida, reparación estructural visible y guía espacial reforzada.</p>
    <div class="spinner"></div>
    <div id="loadState" style="font-size:9px;color:#91a2ad">Inicializando...</div>
@@ -224,7 +227,7 @@ button.secondary{background:#0d2b3d;color:#eff5f7;border-color:#63d2e56f}
 
 <div id="hud">
  <div id="brand">PROJECT GENESIS</div>
- <div id="tech">PLAYCANVAS 2.22.1 · PROTOTIPO v0.8.3</div>
+ <div id="tech">PLAYCANVAS 2.22.1 · PROTOTIPO v0.8.4</div>
  <section id="quest">
    <div class="ey">FASE 1 · MONTAJE VISUAL</div>
    <h2>Valida el taller de Maese Ordan</h2>
@@ -244,7 +247,8 @@ button.secondary{background:#0d2b3d;color:#eff5f7;border-color:#63d2e56f}
  <div id="mobile">
    <div id="lookZone"></div>
    <div id="joy"><div id="joyKnob"></div></div>
-   <div id="lookHint">ARRASTRA ESTE LADO PARA GIRAR</div>
+   <div id="lookHint">ARRASTRA PARA GIRAR · PINZA PARA ZOOM</div>
+   <div id="zoomControls"><span class="zoomLabel">ZOOM</span><button id="zoomIn" aria-label="Acercar cámara">+</button><button id="zoomOut" aria-label="Alejar cámara">−</button></div>
    <div id="interact">E</div>
  </div>
 </div>
@@ -309,7 +313,7 @@ try{
    whenReady('#anvilModel'),
    whenReady('#benchModel'),
    whenReady('#chestModel')
- ]).then(()=>console.info('Genesis v0.8.3: sanitation asset pass settled.'));
+ ]).then(()=>console.info('Genesis v0.8.4: navigation hotfix assets settled.'));
  player=p.entity; ordan=o.entity; camera=c.entity;
  playerAnim=await whenReady('#playerAnim').catch(()=>null);
  ordanAnim=await whenReady('#ordanAnim').catch(()=>null);
@@ -354,7 +358,7 @@ const ordanIdle=chooseClip(ordanAnim,'idle') || ordanAnim?.clips?.[0];
 if(idleClip) playerAnim.transition(idleClip,0.01);
 if(ordanIdle) ordanAnim.transition(ordanIdle,0.01);
 
-loadState.textContent='Taller v0.8.3 cargado · saneamiento funcional aplicado.';
+loadState.textContent='Taller v0.8.4 cargado · navegación y zoom táctil corregidos.';
 setTimeout(()=>loading.style.display='none',350);
 
 // ----- character/camera state -----
@@ -491,17 +495,52 @@ function joyRelease(e){
 }
 joy.addEventListener('pointerup',joyRelease);joy.addEventListener('pointercancel',joyRelease);
 
-// mobile look zone
+// mobile look zone: one finger rotates; two fingers pinch to zoom.
 const look=document.getElementById('lookZone');
-let lookId=null,lx=0,ly=0;
-look.addEventListener('pointerdown',e=>{lookId=e.pointerId;look.setPointerCapture(e.pointerId);lx=e.clientX;ly=e.clientY});
-look.addEventListener('pointermove',e=>{
- if(e.pointerId!==lookId) return;
- const dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;
- camYaw-=dx*.28;camPitch=clamp(camPitch+dy*.20,8,54);
+const lookPointers=new Map();
+let lookPrimaryId=null,lastPinchDist=null;
+function pinchDistance(){
+ const pts=[...lookPointers.values()];
+ return pts.length>=2?Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y):null;
+}
+look.addEventListener('pointerdown',e=>{
+ e.preventDefault();
+ look.setPointerCapture?.(e.pointerId);
+ lookPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(lookPointers.size===1) lookPrimaryId=e.pointerId;
+ if(lookPointers.size>=2) lastPinchDist=pinchDistance();
 });
-look.addEventListener('pointerup',e=>{if(e.pointerId===lookId)lookId=null});
-look.addEventListener('pointercancel',()=>lookId=null);
+look.addEventListener('pointermove',e=>{
+ const prev=lookPointers.get(e.pointerId);
+ if(!prev) return;
+ lookPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(lookPointers.size>=2){
+   const d=pinchDistance();
+   if(lastPinchDist!=null && d!=null){
+     // Fingers apart = camera closer; fingers together = camera farther away.
+     camDist=clamp(camDist-(d-lastPinchDist)*.012,2.8,6.3);
+   }
+   lastPinchDist=d;
+   return;
+ }
+ if(e.pointerId===lookPrimaryId){
+   const dx=e.clientX-prev.x,dy=e.clientY-prev.y;
+   camYaw-=dx*.28;camPitch=clamp(camPitch+dy*.20,8,54);
+ }
+});
+function releaseLookPointer(e){
+ lookPointers.delete(e.pointerId);
+ lastPinchDist=null;
+ const remaining=[...lookPointers.entries()][0];
+ lookPrimaryId=remaining?remaining[0]:null;
+}
+look.addEventListener('pointerup',releaseLookPointer);
+look.addEventListener('pointercancel',releaseLookPointer);
+
+// Explicit touch zoom buttons as a discoverable fallback to pinch.
+const zoomIn=document.getElementById('zoomIn'),zoomOut=document.getElementById('zoomOut');
+zoomIn.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();camDist=clamp(camDist-.45,2.8,6.3)});
+zoomOut.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();camDist=clamp(camDist+.45,2.8,6.3)});
 document.getElementById('interact').addEventListener('pointerdown',e=>{e.preventDefault();interact()});
 
 // ----- interaction / tutorial repair sequence -----
@@ -624,6 +663,9 @@ function pointSegmentDistance(px0,pz0,ax,az,bx,bz){
  return Math.hypot(px0-qx,pz0-qz);
 }
 function doorCollisionAt(x,z,padding=.38){
+ // Once the leaf is parked against the exterior wall, it must not create an
+ // invisible obstacle in the doorway. While closed/opening it remains physical.
+ if(Math.abs(doorAngle)>=78) return false;
  const a=rad(doorAngle);
  const ex=DOOR_HINGE_X+Math.cos(a)*DOOR_WIDTH;
  const ez=DOOR_HINGE_Z-Math.sin(a)*DOOR_WIDTH;
@@ -676,7 +718,7 @@ renderRepairHUD();
 
 function beginRepairs(){
  tutorialStarted=true; repairIndex=0; workshopOperational=false; renderRepairHUD(); closeModal();
- animateDoorTo(88,850);
+ animateDoorTo(-92,850);
  toast('Entrá al taller. La primera reparación está marcada.',2400);
 }
 
@@ -845,7 +887,7 @@ function frame(now){
       if(ps.z>0){
         let dx=rs.x-ps.x,dy=rs.y-ps.y;
         if(rs.z<=0){dx=-dx;dy=-dy;}
-        let a=Math.atan2(dy,dx)*180/Math.PI+90;
+        let a=Math.atan2(dy,dx)*180/Math.PI+270; // ▲ glyph: corrected 180° after device playtest
         objectiveArrow.style.display='block';
         objectiveArrow.style.left=clamp(ps.x,48,innerWidth-48)+'px';
         objectiveArrow.style.top=clamp(ps.y-58,52,innerHeight-52)+'px';
