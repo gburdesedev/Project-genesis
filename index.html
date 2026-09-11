@@ -73,7 +73,13 @@ button.secondary{background:#0d2b3d;color:#eff5f7;border-color:#63d2e56f}
 #repairFlash{position:fixed;inset:0;pointer-events:none;z-index:9;background:radial-gradient(circle at 50% 50%,#d6a84d26,transparent 55%);opacity:0;transition:opacity .3s}
 #loading{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:radial-gradient(circle at 50% 34%,#172b37 0,#07111a 48%,#020609 100%);padding:18px}
 .loadingCard{width:min(560px,100%);text-align:center;padding:24px;background:#071a28e8;border:1px solid #d6a84d70;border-radius:10px;box-shadow:0 28px 90px #000d}
-.loadingCard h1{margin:5px 0 8px}.loadingCard p{font-size:11px;color:#bdc9d0;line-height:1.5}.spinner{width:36px;height:36px;margin:15px auto;border-radius:50%;border:3px solid #ffffff1b;border-top-color:var(--gold);animation:spin .8s linear infinite}
+.loadingCard h1{margin:5px 0 8px}.loadingCard p{font-size:11px;color:#bdc9d0;line-height:1.5}.spinner{width:30px;height:30px;margin:13px auto 10px;border-radius:50%;border:3px solid #ffffff1b;border-top-color:var(--gold);animation:spin .8s linear infinite}
+.loadProgress{margin:13px 0 9px;height:10px;border-radius:999px;overflow:hidden;background:#02070b;border:1px solid #ffffff18;box-shadow:inset 0 1px 5px #000}
+#loadBarFill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#8d692d,#d6a84d,#f0ca76);transition:width .22s ease;box-shadow:0 0 16px #d6a84d66}
+.loadMeta{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-top:6px;font-size:9px;color:#91a2ad}
+#loadPercent{font-weight:900;color:#e1b75f;min-width:38px;text-align:right}
+#loadState{min-height:15px;text-align:left;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#loadElapsed{font-variant-numeric:tabular-nums;color:#6f838f;min-width:44px;text-align:right}
 @keyframes spin{to{transform:rotate(360deg)}}
 #rotate{display:none;position:fixed;z-index:55;left:12px;right:12px;bottom:12px;background:#071b29e9;border:1px solid #d6a84d5c;border-radius:7px;padding:8px;text-align:center;font-size:9px;color:#d8e1e6}
 @media(pointer:coarse),(max-width:800px){#mobile{display:block}#desktopHelp{display:none}#quest{width:min(300px,calc(100vw - 28px))}#quest p{display:none}.swordStage{grid-template-columns:1fr}.swordStage img{height:48vh}}
@@ -84,7 +90,7 @@ button.secondary{background:#0d2b3d;color:#eff5f7;border-color:#63d2e56f}
 #quest p{color:#b9c5ca}
 #npcTag{letter-spacing:.12em}
 </style>
-<meta name="genesis-build" content="playcanvas-prototype-v0.8.6-phase1-visual-2026-09-11">
+<meta name="genesis-build" content="playcanvas-prototype-v0.8.7-controls-camera-loader-2026-09-11">
 </head>
 <body>
 
@@ -253,7 +259,7 @@ button.secondary{background:#0d2b3d;color:#eff5f7;border-color:#63d2e56f}
       </pc-model>
     </pc-model>
 
-    <pc-model id="ordanModel" name="Maese Ordan · provisional master artisan" asset="rangerMale086" position="1.72 0 1.90" rotation="0 180 0" scale="1.07 1.07 1.07">
+    <pc-model id="ordanModel" name="Maese Ordan · provisional master artisan" asset="rangerMale086" position="1.72 0 1.90" rotation="0 -21 0" scale="1.07 1.07 1.07">
       <pc-anim id="ordanAnim" clip="Idle_Loop" activate="true" transition-time="0.22">
         <pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip>
         <pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip>
@@ -279,10 +285,15 @@ button.secondary{background:#0d2b3d;color:#eff5f7;border-color:#63d2e56f}
 <div id="loading">
  <div class="loadingCard">
    <div style="color:var(--gold);font-size:9px;font-weight:900;letter-spacing:.18em">PROJECT GENESIS · PLAYCANVAS</div>
-   <h1>Prototipo v0.8.6 · Fase 1 visual</h1>
+   <h1>Prototipo v0.8.7 · Fase 1 visual</h1>
    <p>Prueba de presentación: personajes, movimiento, cámara 360°, taller, materiales, iluminación y escala WebGL.</p>
    <div class="spinner"></div>
-   <div id="loadState" style="font-size:9px;color:#91a2ad">Inicializando...</div>
+   <div class="loadProgress" aria-label="Progreso de carga"><div id="loadBarFill"></div></div>
+   <div class="loadMeta">
+     <div id="loadState">Inicializando...</div>
+     <div id="loadPercent">0%</div>
+     <div id="loadElapsed">0.0 s</div>
+   </div>
  </div>
 </div>
 
@@ -320,6 +331,13 @@ const deg=r=>r*180/Math.PI;
 
 const loadState=document.getElementById('loadState');
 const loading=document.getElementById('loading');
+const loadBarFill=document.getElementById('loadBarFill');
+const loadPercent=document.getElementById('loadPercent');
+const loadElapsed=document.getElementById('loadElapsed');
+const loadStarted=performance.now();
+let loadTimer=setInterval(()=>{
+  loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';
+},100);
 const toastEl=document.getElementById('toast');
 const promptEl=document.getElementById('prompt');
 const npcTag=document.getElementById('npcTag');
@@ -339,7 +357,41 @@ const ordanEl=document.getElementById('ordanModel');
 playerEl.addEventListener('error',()=>{loadState.textContent='No pudo cargarse el personaje provisional de Edric.'});
 ordanEl.addEventListener('error',()=>{loadState.textContent='No pudo cargarse el modelo CC0 de Maese Ordan.';});
 
-loadState.textContent='Cargando taller, materiales y personajes 3D...';
+loadState.textContent='Preparando lista de assets...';
+
+// Progreso real por recursos preparados. No simula bytes descargados: cada salto
+// corresponde a un modelo/componente que PlayCanvas terminó de preparar.
+const loadPlan=[
+  ['#playerModel','Edric · vestimenta'],
+  ['#playerHeadModel','Edric · cabeza'],
+  ['#playerHairModel','Edric · cabello'],
+  ['#ordanModel','Maese Ordan · vestimenta'],
+  ['#ordanHeadModel','Maese Ordan · cabeza'],
+  ['#ordanHairModel','Maese Ordan · barba'],
+  ['#roofFinalModel','Techo modular'],
+  ['#forgeModel','Fragua'],
+  ['#anvilModel','Yunque'],
+  ['#bellowsModel','Fuelle'],
+  ['#benchModel','Banco de trabajo'],
+  ['#chestModel','Baúl'],
+  ['#workshopShellModel','Estructura del taller'],
+  ['#doorFrameModel','Entrada y marco'],
+  ['#cameraRig','Cámara y escena']
+];
+const totalLoadSteps=loadPlan.length+1; // + biblioteca de animaciones UAL
+let completedLoadSteps=0, failedLoadSteps=0;
+function markLoad(label,failed=false){
+  completedLoadSteps++; if(failed) failedLoadSteps++;
+  const pct=Math.min(99,Math.round((completedLoadSteps/totalLoadSteps)*100));
+  loadBarFill.style.width=pct+'%'; loadPercent.textContent=pct+'%';
+  loadState.textContent=(failed?'No disponible: ':'Listo: ')+label;
+}
+const trackedLoads=loadPlan.map(([selector,label])=>
+  whenReady(selector).then(v=>{markLoad(label,false);return v}).catch(err=>{markLoad(label,true);console.warn('Genesis asset:',label,err);return null})
+);
+const trackedAnimations=Promise.allSettled([...document.querySelectorAll('pc-anim-clip')].map(c=>c.ready?.()||Promise.resolve()))
+  .then(()=>markLoad('Animaciones Idle / Walk',false));
+loadState.textContent='Cargando personajes y taller...';
 
 let player, ordan, camera;
 let playerAnim=null, playerHeadAnim=null, playerHairAnim=null;
@@ -420,11 +472,17 @@ const ordanAnimGroup=[ordanAnim,ordanHeadAnim,ordanHairAnim].filter(Boolean);
 const idleClip=chooseClip(playerAnim,'Idle_Loop') || chooseClip(playerAnim,'idle') || playerAnim?.clips?.[0];
 const walkClip=chooseClip(playerAnim,'Walk_Loop') || chooseClip(playerAnim,'walk');
 const ordanIdle=chooseClip(ordanAnim,'Idle_Loop') || chooseClip(ordanAnim,'idle') || ordanAnim?.clips?.[0];
+const ordanGesture=chooseClip(ordanAnim,'Idle_Talking_Loop') || chooseClip(ordanAnim,'talking') || null;
 playerAnimGroup.forEach(a=>{if(idleClip)a.transition(idleClip,0.01)});
 ordanAnimGroup.forEach(a=>{if(ordanIdle)a.transition(ordanIdle,0.01)});
+let ordanYaw=-21, ordanGestureAt=performance.now()+5200, ordanGestureReturn=0;
 
-loadState.textContent='Fase 1 v0.8.6 cargada · taller, cámara y locomoción listos.';
-setTimeout(()=>loading.style.display='none',350);
+await Promise.allSettled([...trackedLoads,trackedAnimations]);
+loadBarFill.style.width='100%'; loadPercent.textContent='100%';
+loadState.textContent=failedLoadSteps?('Escena lista · '+failedLoadSteps+' recurso(s) con fallback'):'Escena lista · todos los assets preparados';
+clearInterval(loadTimer);
+loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';
+setTimeout(()=>loading.style.display='none',550);
 
 // ----- character/camera state -----
 let px=0,pz=6.3;
@@ -703,9 +761,9 @@ function frame(now){
       const nx=px+vx*speed*dt,nz=pz+vz*speed*dt;
       if(!wallBlocked(nx,pz))px=nx;
       if(!wallBlocked(px,nz))pz=nz;
-      // El rig Universal usa una corrección de frente de 180° respecto a nuestra
-      // convención de movimiento; mantenemos el ajuste de forma explícita.
-      const lookYaw=deg(Math.atan2(vx,vz))+180;
+      // El antiguo Soldier necesitaba +180°. El rig Universal actual NO: mantener
+      // esa corrección hacía que Edric pareciera caminar con los controles al revés.
+      const lookYaw=deg(Math.atan2(vx,vz));
       player.setEulerAngles(0,lookYaw,0);
       setWalking(true);
    }else setWalking(false);
@@ -714,30 +772,57 @@ function frame(now){
    if(playerFillComp)playerFillComp.intensity=pz>.25?1.10:.70;
  }
 
- tmpTarget.set(px,1.32,pz);
- const pitch=rad(camPitch),yaw=rad(camYaw);
- const h=Math.cos(pitch)*camDist;
+ // Interior camera guard: inside the workshop the useful camera envelope is smaller
+ // than outside. This keeps roof/wall polygons from sitting between camera and Edric.
+ const insideWorkshop=pz<.25;
+ const focusY=insideWorkshop?1.43:1.32;
+ const effectiveDist=insideWorkshop?Math.min(camDist,3.15):camDist;
+ const effectivePitch=insideWorkshop?Math.min(camPitch,31):camPitch;
+ tmpTarget.set(px,focusY,pz);
+ const pitch=rad(effectivePitch),yaw=rad(camYaw);
+ const h=Math.cos(pitch)*effectiveDist;
  const desiredX=px+Math.sin(yaw)*h;
- const desiredY=1.32+Math.sin(pitch)*camDist;
+ let desiredY=focusY+Math.sin(pitch)*effectiveDist;
+ if(insideWorkshop) desiredY=Math.min(desiredY,2.62); // stay below roof structure
  const desiredZ=pz+Math.cos(yaw)*h;
 
- // Camera wall protection: sample outward from Edric. The doorway is a real opening,
- // so the ray can stay outside while Edric has just crossed the threshold.
- // Keep a small safe offset instead of ever collapsing the camera onto the character mesh.
- const safeT=.16;
+ // Camera wall protection: treat the camera as a small sphere instead of a point so
+ // it cannot graze through wall edges/columns and suddenly hide the player.
+ const cameraBlockedSafe=(x,z)=>{
+   const r=.22;
+   return cameraBlocked(x,z)||cameraBlocked(x+r,z)||cameraBlocked(x-r,z)||cameraBlocked(x,z+r)||cameraBlocked(x,z-r);
+ };
+ const safeT=insideWorkshop?.22:.16;
  let lastGood=[
    lerp(tmpTarget.x,desiredX,safeT),
    lerp(tmpTarget.y,desiredY,safeT),
    lerp(tmpTarget.z,desiredZ,safeT)
  ];
- for(let t=safeT;t<=1.001;t+=.055){
+ for(let t=safeT;t<=1.001;t+=.045){
    const x=lerp(tmpTarget.x,desiredX,t),y=lerp(tmpTarget.y,desiredY,t),z=lerp(tmpTarget.z,desiredZ,t);
-   if(cameraBlocked(x,z)) break;
+   if(cameraBlockedSafe(x,z)) break;
    lastGood=[x,y,z];
  }
  tmpCam.set(lastGood[0],lastGood[1],lastGood[2]);
  camera.setPosition(tmpCam);
  camera.lookAt(tmpTarget);
+
+ // Maese Ordan: face the arriving player instead of presenting his back.
+ // Uses the authored Universal idle and occasionally a second authored idle gesture.
+ const opNow=ordan.getPosition();
+ const od=Math.hypot(px-opNow.x,pz-opNow.z);
+ const desiredOrdanYaw=od<6.8?deg(Math.atan2(px-opNow.x,pz-opNow.z)):-21;
+ let yawDelta=((desiredOrdanYaw-ordanYaw+540)%360)-180;
+ ordanYaw+=yawDelta*Math.min(1,dt*4.2);
+ ordan.setEulerAngles(0,ordanYaw,0);
+ if(ordanGesture && now>ordanGestureAt && !ordanGestureReturn){
+   ordanAnimGroup.forEach(a=>a.transition(ordanGesture,.30));
+   ordanGestureReturn=now+2400;
+ }
+ if(ordanGestureReturn && now>ordanGestureReturn){
+   if(ordanIdle) ordanAnimGroup.forEach(a=>a.transition(ordanIdle,.35));
+   ordanGestureReturn=0; ordanGestureAt=now+7800;
+ }
 
  // Phase 1 proximity UI: no dialogue, quests or repair markers.
  if(nearOrdan()){
