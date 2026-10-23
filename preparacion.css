@@ -122,3 +122,100 @@
 .prepThermalProgress p{margin-top:8px}
 .prepThermalProgress #prepActionPoints{color:#e5be81;font-weight:600}
 @media(max-width:600px){.prepThermal{padding:11px;gap:9px}.prepThermalHeading{align-items:flex-start;flex-direction:column}.prepThermalBatch{padding:6px;min-width:0}.prepThermalStage,.prepThermalControls{padding:9px}.prepFireVisual{height:70px}.prepFireIcon{font-size:52px}.prepBellowButtons{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.prepBellow b{font-size:11px}.prepRoot .prepBellow{min-height:70px}.prepThermalReadouts{gap:4px}.prepReadout{padding:7px 3px}.prepReadout span{font-size:7px}.prepReadout strong{font-size:14px}}
+
+ /* 39 piezas visuales originales del menú Preparación V002 (1536×1024).
+    Las capas decorativas nunca bloquean las interacciones de JS. */
+ .modal.preparationModal.prepSkinModal{width:min(1536px,calc(100vw - 12px));max-height:calc(100dvh - 12px);overflow:hidden;padding:0!important;border:0!important;background:#080605}
+ .prepSkinScroll{max-height:calc(100dvh - 12px);max-width:100%;overflow:auto;overscroll-behavior:contain;background:#080605}
+ .prepArtboard{position:relative;width:100%;min-width:760px;aspect-ratio:1536/1024;isolation:isolate;container-type:inline-size;background:#080605;color:#f2ddb6;font-family:Georgia,'Times New Roman',serif}
+ .prepArtboard *{box-sizing:border-box}
+ .prepSkinPiece{position:absolute;display:block;object-fit:fill;pointer-events:none;user-select:none;-webkit-user-drag:none}
+ .prepSkinPiece[data-role="fondo_marco_principal"]{z-index:1}
+ .prepSkinPiece[data-role="pestana"]{z-index:4}
+ .prepSkinPiece[data-role="grupo_de_10_materiales_basicos"],.prepSkinPiece[data-role="grupo_de_10_materiales_preparados"],.prepSkinPiece[data-role="fondo_visor"],.prepSkinPiece[data-role="contenedor_sin_campos_estaticos"],.prepSkinPiece[data-role="panel_accion_sin_boton"]{z-index:5}
+ .prepSkinPiece[data-role="casilla_marco_transparente"]{z-index:21}
+ .prepSkinPiece[data-role="marco_visor_superpuesto"]{z-index:22}
+ .prepSkinPiece[data-role^="boton_"]{z-index:23;opacity:0}
+ .prepArtboard:not(:has(.prepSkinStart:disabled)) .prepSkinPiece[data-state="normal"]{opacity:1}
+ .prepArtboard:has(.prepSkinStart:disabled) .prepSkinPiece[data-state="deshabilitado"]{opacity:1}
+ .prepArtboard:has(.prepSkinStart:not(:disabled):hover) .prepSkinPiece[data-state="normal"],.prepArtboard:has(.prepSkinStart:not(:disabled):active) .prepSkinPiece[data-state="normal"]{opacity:0}
+ .prepArtboard:has(.prepSkinStart:not(:disabled):hover) .prepSkinPiece[data-state="hover"]{opacity:1}
+ .prepArtboard:has(.prepSkinStart:not(:disabled):active) .prepSkinPiece[data-state="hover"]{opacity:0}
+ .prepArtboard:has(.prepSkinStart:not(:disabled):active) .prepSkinPiece[data-state="presionado"]{opacity:1}
+ .prepSkinPiece[data-role="hover_overlay"]{z-index:40;opacity:0;transition:opacity .13s}
+ .prepArtboard:has(.prepSkinTab[data-tab="Inventario"]:hover) .prepSkinPiece[data-hover="Inventario"],
+ .prepArtboard:has(.prepSkinTab[data-tab="Fabricaciones"]:not(:disabled):hover) .prepSkinPiece[data-hover="Fabricaciones"],
+ .prepArtboard:has(.prepSkinTab[data-tab="Comparacion"]:hover) .prepSkinPiece[data-hover="Comparacion"]{opacity:1}
+ .prepSkinSlot,.prepSkinTab,.prepSkinStart{position:absolute;z-index:34;display:block;background:transparent!important;border:0!important;padding:0!important;border-radius:0!important;color:#e8c38a;touch-action:manipulation}
+ .prepSkinSlot{z-index:19}
+ .prepSkinSlot.occupied{cursor:pointer}
+ .prepSkinSlot.empty,.prepSkinSlot:disabled{cursor:default;opacity:1!important}
+ .prepSkinSlot .prepSkinItemSymbol{display:grid;place-items:center;position:absolute;inset:9% 10% 16%;font-size:clamp(20px,3.5cqw,52px);color:#bd9371;text-shadow:0 0 10px #ed9342}
+ .prepSkinItemSymbol.ingot{color:#dac093;text-shadow:0 0 8px #ffe2a36b}
+ .prepSkinSlot strong{position:absolute;bottom:6%;right:9%;color:#fff4d6;font:bold clamp(10px,1.15cqw,18px) system-ui,sans-serif;text-shadow:0 2px 5px #000,1px 1px 2px #000}
+ .prepSkinSlot.selected .prepSkinItemSymbol{filter:drop-shadow(0 0 6px #ffd167)}
+ .prepSkinTab{z-index:51;cursor:default}
+ .prepSkinTab:not(:disabled){cursor:pointer}
+ .prepSkinStart{z-index:52;cursor:pointer}
+ .prepSkinStart:disabled{cursor:default;opacity:1!important}
+ .prepSkinClose{position:absolute;top:1.1%;right:1.7%;z-index:70;border:1px solid #89623c;border-radius:50%;background:#1c140dcc;color:#f4d69a;font-size:clamp(16px,2cqw,27px);line-height:1;width:2.6%;height:4%;cursor:pointer}
+ .prepSkinClose:hover{background:#51331c}
+ .prepSkinDetails{position:absolute;z-index:45;left:75.1%;top:20.6%;width:22.1%;height:52.9%;padding:.5% .7%;overflow:auto;scrollbar-width:thin;scrollbar-color:#855a31 #15100d;line-height:1.3;font-size:clamp(11px,1.04cqw,16px);color:#eddac0}
+ .prepSkinDetails h3,.prepSkinDetails h4,.prepSkinCenter h3{margin:3% 0;color:#ffdda1;font-weight:500;text-align:center}
+ .prepSkinDetails h3{font-size:1.4em}
+ .prepSkinDetails h4{font-size:1.15em;text-align:left}
+ .prepSkinDetails p,.prepSkinCenter p{font:inherit;color:#c7ac8a;line-height:1.36;margin:3% 0}
+ .prepSkinKicker{color:#daa35c!important;font-size:.77em!important;letter-spacing:.12em;text-align:center}
+ .prepSkinIntro{font-size:.9em!important}
+ .prepSkinStat{display:flex;justify-content:space-between;align-items:center;gap:5%;border-bottom:1px solid #6a4b2a;padding:3% 0;font-size:.9em}
+ .prepSkinStat span{color:#c9b08f}
+ .prepSkinStat b{color:#fce5ad;font-size:1.1em;white-space:nowrap}
+ .prepSkinQty{display:flex;justify-content:space-between;align-items:center;gap:3%;margin-top:5%;font-size:.85em}
+ .prepSkinQty>div{display:flex;align-items:center;justify-content:space-evenly;min-width:42%}
+ .prepArtboard .prepSkinQty button{border:1px solid #a6783f;background:#2a1d11;color:#f3d29e;min-width:25%;padding:2% 4%;cursor:pointer;font-size:1.25em}
+ .prepArtboard button:disabled{cursor:default}
+ .prepArtboard .prepSkinQty button:disabled{opacity:.3}
+ .prepSkinMinor{font-size:.76em!important}
+ .prepSkinDivider{height:1px;background:#73532f;margin:6% 0}
+ .prepSkinNeed{display:flex;justify-content:space-between;align-items:center;gap:4%;padding:3% 0;border-bottom:1px solid #3e3021;font-size:.8em}
+ .prepSkinNeed b{color:#b76e58;white-space:nowrap}
+ .prepSkinNeed.met b{color:#9acf91}
+ .prepSkinReady{font-size:.81em!important}
+ .prepArtboard .prepSkinCraft{width:100%;margin-top:5%;background:#37210e;border:1px solid #c28c43;color:#ffe0a2;padding:3% 2%;cursor:pointer;font:inherit;font-size:.9em;touch-action:manipulation}
+ .prepArtboard .prepSkinCraft:hover{background:#59351b}
+ .prepArtboard .prepSkinCraft.secondary{background:#1b1511;color:#cdbb9d}
+ .prepSkinCenter{position:absolute;z-index:30;left:39.4%;top:21%;width:32.3%;height:64.5%;display:flex;align-items:center;justify-content:center;text-align:center;pointer-events:none;font-size:clamp(11px,1.09cqw,17px)}
+ .prepSkinCenter *{pointer-events:auto}
+ .prepSkinCenter[data-stage="menu"]{top:78.6%;height:7%;align-items:flex-end}
+ .prepSkinCenterBadge{border:1px solid #c18d4d73;background:#130d09d8;padding:1.5% 5%;width:93%;text-shadow:0 1px 5px #000}
+ .prepSkinCenterBadge span,.prepSkinCenterBadge small{display:block;color:#f4dcae;font-size:.91em;letter-spacing:.06em}
+ .prepSkinCenterBadge small{font:normal .7em system-ui,sans-serif;color:#c2a47d;letter-spacing:0}
+ .prepSkinCenter[data-stage="running"]{top:21%;height:66%}
+ .prepSkinHeatWindow,.prepSkinResultBox{width:96%;height:auto;max-height:98%;overflow:auto;border:1px solid #b1844d;box-shadow:0 0 25px #000c,inset 0 0 20px #000c;background:#100b09ed;padding:4% 4.5%;color:#f3d5a3;text-align:center;scrollbar-width:thin}
+ .prepSkinHeatWindow h3,.prepSkinResultBox h3{font-size:1.35em;margin:1% 0 3%}
+ .prepSkinHeatWindow p{font-size:.82em;line-height:1.35}
+ .prepSkinHeatGauge{position:relative;border:2px solid #b78a57;height:clamp(17px,2.3cqw,34px);margin:7% 0 2%;box-shadow:inset 0 0 8px #000}
+ .prepSkinHeatGauge .prepHeatTarget{position:absolute;top:-23%;bottom:-23%;width:2px;background:#111;box-shadow:0 0 3px #f7f0d0}
+ .prepSkinHeatGauge .prepHeatNeedle{position:absolute;top:-23%;bottom:-23%;width:3px;background:white;box-shadow:0 0 8px white;transition:left .09s linear}
+ .prepSkinHeatEnds{display:flex;justify-content:space-between;gap:1%;font:normal .57em system-ui,sans-serif;color:#f1d4a3}
+ .prepSkinProgressTitle{display:flex;justify-content:space-between;margin-top:8%;color:#ecd0a1;font-size:.8em}
+ .prepSkinProgressBar{height:clamp(10px,1.4cqw,22px);border:1px solid #b38c54;background:#090707;margin:2% 0 4%;overflow:hidden}
+ .prepSkinProgressBar span{display:block;height:100%;width:0;background:linear-gradient(90deg,#8e431a,#f2b76d);transition:width .12s linear}
+ .prepSkinDirections{font-size:.75em!important}
+ .prepSkinBellowButtons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2%;margin-top:5%}
+ .prepArtboard .prepSkinBellowButtons button{border:1px solid #ae7c3d;min-width:0;padding:7% 2%;background:linear-gradient(#4b2a15,#1e130c);color:#eac895;cursor:pointer;touch-action:manipulation;font:inherit}
+ .prepArtboard .prepSkinBellowButtons button:active{filter:brightness(1.45)}
+ .prepSkinBellowButtons b,.prepSkinBellowButtons small,.prepSkinBellowButtons em{display:block}
+ .prepSkinBellowButtons b{font-size:.9em}
+ .prepSkinBellowButtons small{font:normal .6em system-ui,sans-serif;margin:4% 0;color:#baa080}
+ .prepSkinBellowButtons em{font:normal .6em system-ui,sans-serif;color:#d3a45f}
+ .prepSkinCooling{font-size:.72em!important}
+ .prepSkinHeatMessage{padding:3%;border:1px solid #876138;color:#f3d39e!important}
+ .prepSkinHeatMessage[data-tone="cold"]{border-color:#5588bd;color:#a5d3ff!important}
+ .prepSkinHeatMessage[data-tone="hot"]{border-color:#c0653c;color:#ffa672!important}
+ .prepSkinHeatMessage[data-tone="good"]{border-color:#4ba667;color:#9ce6b1!important}
+ .prepSkinEffectiveness{font-size:.78em!important}
+ .prepSkinResultBox{padding:7% 5%}
+ .prepSkinResultIcon{font-size:clamp(35px,5cqw,74px);color:#a8e1a6}
+ .prepSkinFooter{position:absolute;z-index:30;left:4%;top:92.8%;width:92%;text-align:center;color:#c3a179;font:normal clamp(10px,.8cqw,14px) system-ui,sans-serif;letter-spacing:.04em;white-space:normal}
+ @media(max-width:790px){.modal.preparationModal.prepSkinModal{width:calc(100vw - 4px)}.prepSkinScroll{max-height:calc(100dvh - 8px)}.prepArtboard{min-width:760px}}

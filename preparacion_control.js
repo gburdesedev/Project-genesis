@@ -26,6 +26,49 @@
     { label: 'MODERADO', gain: 8.5, key: '2', description: 'Aporte equilibrado' },
     { label: 'ALTO', gain: 14.5, key: '3', description: 'Recuperación intensa' }
   ]);
+  // 39 capas originales: coordenadas del layout aprobado V002.
+  const SKIN_ROOT = 'assets/ui/preparacion/';
+  const SKIN_LAYERS = Object.freeze([
+    ["FondoEstructural", "01_Capas/Fondo/FondoEstructural.png", 0, 0, 1536, 1024, "fondo_marco_principal"],
+    ["Pestana_Inventario", "01_Capas/Pestanas/Pestana_Inventario.png", 164, 42, 294, 94, "pestana"],
+    ["Pestana_Preparacion", "01_Capas/Pestanas/Pestana_Preparacion.png", 458, 42, 320, 94, "pestana"],
+    ["Pestana_Fabricaciones", "01_Capas/Pestanas/Pestana_Fabricaciones.png", 778, 42, 328, 94, "pestana"],
+    ["Pestana_Comparacion", "01_Capas/Pestanas/Pestana_Comparacion.png", 1106, 42, 298, 94, "pestana"],
+    ["PanelBasicos", "01_Capas/Paneles/PanelBasicos.png", 17, 153, 562, 380, "grupo_de_10_materiales_basicos"],
+    ["PanelPreparados", "01_Capas/Paneles/PanelPreparados.png", 17, 533, 562, 380, "grupo_de_10_materiales_preparados"],
+    ["FondoVisorHerreria", "01_Capas/Paneles/FondoVisorHerreria.png", 579, 153, 548, 760, "fondo_visor"],
+    ["PanelDatos", "01_Capas/Paneles/PanelDatos.png", 1127, 153, 399, 624, "contenedor_sin_campos_estaticos"],
+    ["PanelAccionSinBoton", "01_Capas/Paneles/PanelAccionSinBoton.png", 1127, 777, 399, 136, "panel_accion_sin_boton"],
+    ["Casilla_Basicos_01", "01_Capas/Casillas/Casilla_Basicos_01.png", 37, 274, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Basicos_02", "01_Capas/Casillas/Casilla_Basicos_02.png", 145, 274, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Basicos_03", "01_Capas/Casillas/Casilla_Basicos_03.png", 245, 274, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Basicos_04", "01_Capas/Casillas/Casilla_Basicos_04.png", 348, 274, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Basicos_05", "01_Capas/Casillas/Casilla_Basicos_05.png", 451, 274, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Basicos_06", "01_Capas/Casillas/Casilla_Basicos_06.png", 37, 387, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Basicos_07", "01_Capas/Casillas/Casilla_Basicos_07.png", 145, 387, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Basicos_08", "01_Capas/Casillas/Casilla_Basicos_08.png", 245, 387, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Basicos_09", "01_Capas/Casillas/Casilla_Basicos_09.png", 348, 387, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Basicos_10", "01_Capas/Casillas/Casilla_Basicos_10.png", 451, 387, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Preparados_01", "01_Capas/Casillas/Casilla_Preparados_01.png", 37, 646, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Preparados_02", "01_Capas/Casillas/Casilla_Preparados_02.png", 145, 646, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Preparados_03", "01_Capas/Casillas/Casilla_Preparados_03.png", 245, 646, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Preparados_04", "01_Capas/Casillas/Casilla_Preparados_04.png", 348, 646, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Preparados_05", "01_Capas/Casillas/Casilla_Preparados_05.png", 451, 646, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Preparados_06", "01_Capas/Casillas/Casilla_Preparados_06.png", 37, 757, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Preparados_07", "01_Capas/Casillas/Casilla_Preparados_07.png", 145, 757, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Preparados_08", "01_Capas/Casillas/Casilla_Preparados_08.png", 245, 757, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Preparados_09", "01_Capas/Casillas/Casilla_Preparados_09.png", 348, 757, 99, 108, "casilla_marco_transparente"],
+    ["Casilla_Preparados_10", "01_Capas/Casillas/Casilla_Preparados_10.png", 451, 757, 99, 108, "casilla_marco_transparente"],
+    ["MarcoVisorSuperior", "01_Capas/Paneles/MarcoVisorSuperior.png", 579, 153, 548, 760, "marco_visor_superpuesto"],
+    ["BotonPreparar_Normal", "01_Capas/BotonPreparar/BotonPreparar_Normal.png", 1137, 777, 378, 122, "boton_normal"],
+    ["BotonPreparar_Hover", "01_Capas/BotonPreparar/BotonPreparar_Hover.png", 1137, 777, 378, 122, "boton_hover"],
+    ["BotonPreparar_Presionado", "01_Capas/BotonPreparar/BotonPreparar_Presionado.png", 1137, 777, 378, 122, "boton_presionado"],
+    ["BotonPreparar_Deshabilitado", "01_Capas/BotonPreparar/BotonPreparar_Deshabilitado.png", 1137, 777, 378, 122, "boton_deshabilitado"],
+    ["Pestana_Inventario_HoverBrillo", "01_Capas/Efectos/Pestana_Inventario_HoverBrillo.png", 164, 42, 294, 94, "hover_overlay"],
+    ["Pestana_Preparacion_HoverBrillo", "01_Capas/Efectos/Pestana_Preparacion_HoverBrillo.png", 458, 42, 320, 94, "hover_overlay"],
+    ["Pestana_Fabricaciones_HoverBrillo", "01_Capas/Efectos/Pestana_Fabricaciones_HoverBrillo.png", 778, 42, 328, 94, "hover_overlay"],
+    ["Pestana_Comparacion_HoverBrillo", "01_Capas/Efectos/Pestana_Comparacion_HoverBrillo.png", 1106, 42, 298, 94, "hover_overlay"]
+  ]);
   const escape = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const countOf = (inventory, name) => Math.max(0, Number(inventory?.[name]) || 0);
   const whole = value => Number.isSafeInteger(value) && value > 0;
@@ -203,6 +246,56 @@
     ctx.closeModal();
   }
 
+  // Recompone la interfaz de 1536 × 1024 mediante las piezas originales.
+  // El mismo marco sirve para selección, control térmico y resultado.
+  const skinPos = (x, y, width, height) =>
+    `left:${(x / 1536 * 100).toFixed(4)}%;top:${(y / 1024 * 100).toFixed(4)}%;width:${(width / 1536 * 100).toFixed(4)}%;height:${(height / 1024 * 100).toFixed(4)}%`;
+
+  function skinImage(layer) {
+    const [name, file, x, y, width, height, role] = layer;
+    const state = role.startsWith('boton_') ? role.slice(6) : '';
+    const hover = role === 'hover_overlay' ? name.replace('Pestana_', '').replace('_HoverBrillo', '') : '';
+    return `<img class="prepSkinPiece" data-role="${role}" data-state="${state}" data-hover="${hover}" src="${SKIN_ROOT + file}" alt="" aria-hidden="true" draggable="false" style="${skinPos(x,y,width,height)}">`;
+  }
+
+  function skinSlots(ctx) {
+    const basic = countOf(ctx.inventory, RAW), prepared = countOf(ctx.inventory, PREPARED);
+    return SKIN_LAYERS.filter(layer => layer[6] === 'casilla_marco_transparente').map(layer => {
+      const [name, , x, y, width, height] = layer;
+      const rawSlot = name === 'Casilla_Basicos_01';
+      const ironSlot = name === 'Casilla_Preparados_01';
+      const n = rawSlot ? basic : ironSlot ? prepared : 0;
+      const symbol = rawSlot ? '◆' : '▰';
+      const label = rawSlot ? RAW : ironSlot ? PREPARED : 'Casilla vacía';
+      const active = n > 0;
+      return `<button class="prepSkinSlot ${active ? 'occupied' : 'empty'} ${rawSlot && active ? 'selected' : ''}" ${rawSlot ? 'id="prepSelectIron"' : ''} aria-label="${escape(label)}: ${n}" title="${escape(label)}: ${n}" style="${skinPos(x+5,y+5,width-10,height-10)}" ${active && rawSlot && ctx.mode === 'menu' ? '' : 'disabled'}>${active ? `<span class="prepSkinItemSymbol ${rawSlot ? 'ore' : 'ingot'}">${symbol}</span><strong>${n}</strong>` : ''}</button>`;
+    }).join('');
+  }
+
+  function skinDisplay(stage, center, details, footer) {
+    const ctx = session;
+    if (!ctx) return;
+    const canCraft = ready(ctx.formula, ctx.inventory);
+    const canPrepare = stage === 'menu' && ctx.profession === 'Herrero' && countOf(ctx.inventory, RAW) > 0;
+    const layerHTML = SKIN_LAYERS.map(skinImage).join('');
+    ctx.modal(`<div class="prepSkinScroll"><div class="prepArtboard" data-stage="${stage}">
+      ${layerHTML}
+      ${skinSlots(ctx)}
+      <div class="prepSkinCenter" data-stage="${stage}">${center}</div>
+      <section class="prepSkinDetails" aria-label="Detalles de preparación">${details}</section>
+      <button class="prepSkinTab" data-tab="Inventario" aria-label="Inventario (no disponible en este menú)" disabled style="${skinPos(164,42,294,94)}"></button>
+      <button class="prepSkinTab" data-tab="Preparacion" aria-label="Preparación, pestaña actual" aria-current="page" disabled style="${skinPos(458,42,320,94)}"></button>
+      <button class="prepSkinTab" data-tab="Fabricaciones" id="prepFabricateTab" aria-label="Ir a fabricar" ${canCraft && stage === 'menu' ? '' : 'disabled'} style="${skinPos(778,42,328,94)}"></button>
+      <button class="prepSkinTab" data-tab="Comparacion" aria-label="Comparación (aún no disponible)" disabled style="${skinPos(1106,42,298,94)}"></button>
+      <button class="prepSkinStart" id="prepStart" ${canPrepare ? '' : 'disabled'} aria-label="${canPrepare ? 'Empezar la preparación del lote' : 'Preparar no disponible'}" style="${skinPos(1137,777,378,122)}"></button>
+      <button class="prepSkinClose" id="prepClose" aria-label="Cerrar preparación" title="Cerrar">×</button>
+      <div class="prepSkinFooter" aria-live="polite">${footer || 'Preparación · minerales en bruto → lingotes · no otorga experiencia'}</div>
+    </div></div>`, 'preparationModal prepSkinModal');
+    bind('prepClose', close);
+    bind('prepSelectIron', () => { if (ctx.mode === 'menu') renderMenu(); });
+    bind('prepFabricateTab', craft);
+  }
+
   function display(content, compact = false) {
     const ctx = session;
     if (!ctx) return;
@@ -213,7 +306,7 @@
     bind('prepClose', close);
   }
 
-  function renderMenu() {
+  function renderLegacyMenu() {
     const ctx = session;
     if (!ctx) return;
     halt();
@@ -236,6 +329,38 @@
     bind('prepFabricateTab', craft);
   }
 
+  function renderMenu() {
+    const ctx = session;
+    if (!ctx) return;
+    if (ctx.profession !== 'Herrero') { renderLegacyMenu(); return; }
+    halt();
+    ctx.mode = 'menu';
+    const raw = countOf(ctx.inventory, RAW), ingots = countOf(ctx.inventory, PREPARED);
+    ctx.count = raw ? Math.min(Math.max(ctx.count || 1, 1), raw) : 0;
+    const batch = raw ? batchProfile(ctx.count, PREPARED) : null;
+    const missing = shortages(ctx.formula, ctx.inventory);
+    const canCraft = ready(ctx.formula, ctx.inventory);
+    const details = `<p class="prepSkinKicker">TALLER DEL HERRERO</p>
+      <h3>Fundición de hierro</h3>
+      <p class="prepSkinIntro">Transformá el mineral en lingotes antes de fabricar. Cada tanda se completa al llegar a 100.</p>
+      <div class="prepSkinStat"><span>Mineral de hierro</span><b>${raw}</b></div>
+      <div class="prepSkinStat"><span>Lingotes disponibles</span><b>${ingots}</b></div>
+      <div class="prepSkinQty"><label>Cantidad del lote</label><div><button id="prepLess" ${ctx.count <= 1 ? 'disabled' : ''}>−</button><b>${ctx.count}</b><button id="prepMore" ${ctx.count >= raw ? 'disabled' : ''}>+</button></div></div>
+      <p class="prepSkinMinor">${batch ? `Dificultad relativa: ${Math.round(batch.difficultyMultiplier * 100)} %. A más mineral, mayor exigencia térmica.` : 'No queda mineral de hierro sin preparar.'}</p>
+      <div class="prepSkinDivider"></div>
+      <p class="prepSkinKicker">PRÓXIMA FABRICACIÓN</p>
+      <h4>${escape(ctx.recipeName)}</h4>
+      ${missing.map(row => `<div class="prepSkinNeed ${row.missing ? 'short' : 'met'}"><span>${escape(row.material)}</span><b>${row.available}/${row.needed}</b></div>`).join('')}
+      <p class="prepSkinReady">${canCraft ? '✓ Materiales listos para fabricar.' : 'Prepará los materiales que requiere la fórmula.'}</p>
+      ${canCraft ? '<button class="prepSkinCraft" id="prepFabricate">Ir a fabricar →</button>' : ''}`;
+    const center = `<div class="prepSkinCenterBadge"><span>MINERAL → LINGOTE</span><small>Seleccioná la cantidad y pulsá PREPARAR</small></div>`;
+    skinDisplay('menu', center, details, `En bruto: ${raw} · preparados: ${ingots} · la preparación no modifica rareza ni receta`);
+    bind('prepLess', () => { ctx.count = Math.max(1, ctx.count - 1); renderMenu(); });
+    bind('prepMore', () => { ctx.count = Math.min(raw, ctx.count + 1); renderMenu(); });
+    bind('prepStart', start);
+    bind('prepFabricate', craft);
+  }
+
   function craft() {
     const ctx = session;
     if (!ctx || !ready(ctx.formula, ctx.inventory)) return;
@@ -251,7 +376,7 @@
     const batch = batchProfile(ctx.count, PREPARED), target = batch.target;
     ctx.mode = 'running';
     ctx.work = { count: ctx.count, batch, target, temperature: Math.max(0, target - batch.initialGap), progress: 0, clicks: 0, done: false };
-    renderThermal();
+    renderThermalSkin();
   }
 
   function intervene(action) {
@@ -295,6 +420,43 @@
     }
   }
 
+  function renderThermalSkin() {
+    const ctx = session, work = ctx?.work;
+    if (!ctx || !work) return;
+    halt();
+    work.lastThermalAt = performance.now();
+    const gradient = heatGradient(work.target, work.batch.tolerance);
+    const center = `<section class="prepSkinHeatWindow">
+      <h3>Control de la fragua</h3>
+      <p>Mantené la temperatura cerca del verde. Cuanto más te alejás, menos avanza la preparación.</p>
+      <div class="prepSkinHeatGauge" id="prepHeatGauge" role="meter" aria-label="Temperatura de la fragua" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(work.temperature)}" style="background:${gradient}">
+        <span class="prepHeatTarget" style="left:${work.target}%" aria-hidden="true"></span>
+        <span class="prepHeatNeedle" id="prepHeatNeedle" aria-hidden="true"></span>
+      </div>
+      <div class="prepSkinHeatEnds"><span>AZUL · FRÍO</span><span>VERDE · IDEAL</span><span>NARANJA · EXCESO</span></div>
+      <div class="prepSkinProgressTitle"><span>AVANCE DE PREPARACIÓN</span><b id="prepCraftNumber">0.0 / 100</b></div>
+      <div class="prepSkinProgressBar"><span id="prepCraftProgress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Avance de preparación"></span></div>
+      <p class="prepSkinDirections">El progreso aumenta mientras la fragua permanece en temperatura útil; no hay límite de tiempo.</p>
+      <div class="prepSkinBellowButtons">${BELLOWS.map((power, index) => `<button id="prepBellow${index}" aria-label="Fuelle ${power.label.toLowerCase()}"><b>${power.label}</b><small>${power.description}</small><em>${power.key}</em></button>`).join('')}</div>
+      <p class="prepSkinCooling">Sin pulsar, la temperatura baja naturalmente.</p>
+    </section>`;
+    const details = `<p class="prepSkinKicker">PREPARACIÓN EN CURSO</p><h3>Mineral de hierro</h3>
+      <div class="prepSkinStat"><span>Lote</span><b>${work.count}</b></div>
+      <div class="prepSkinStat"><span>Dificultad</span><b>${Math.round(work.batch.difficultyMultiplier * 100)} %</b></div>
+      <div class="prepSkinStat"><span>Temperatura</span><b id="prepHeatNumber">${Math.round(work.temperature)} / 100</b></div>
+      <div class="prepSkinStat"><span>Punto ideal</span><b>${Math.round(work.target)} / 100</b></div>
+      <div class="prepSkinStat"><span>Intervenciones</span><b id="prepActions">0</b></div>
+      <p class="prepSkinHeatMessage" id="prepHeatMessage" aria-live="polite">Acercá la línea blanca al centro verde.</p>
+      <p class="prepSkinEffectiveness" id="prepActionPoints">El avance se calcula continuamente, no por golpe.</p>
+      <div class="prepSkinDivider"></div>
+      <button class="prepSkinCraft" id="prepAbandon">Cancelar tanda sin consumir mineral</button>`;
+    skinDisplay('running', center, details, '1/2/3: intensidad del fuelle · sin pulsar: reposo · progreso 0–100');
+    BELLOWS.forEach((power, index) => bind(`prepBellow${index}`, () => intervene(power.key)));
+    bind('prepAbandon', renderMenu);
+    drawThermal();
+    thermalTimer = setInterval(passiveStep, THERMAL_TICK_MS);
+  }
+
   function renderThermal() {
     const ctx = session, work = ctx?.work;
     if (!ctx || !work) return;
@@ -311,6 +473,24 @@
     thermalTimer = setInterval(passiveStep, THERMAL_TICK_MS);
   }
 
+  function renderResultSkin(ctx, work, success) {
+    const raw = countOf(ctx.inventory, RAW), ingots = countOf(ctx.inventory, PREPARED);
+    const center = `<section class="prepSkinResultBox"><div class="prepSkinResultIcon">${success ? '✓' : '!'}</div>
+      <h3>${success ? 'Preparación completada' : 'Lote no aplicado'}</h3>
+      <p>${success ? `${work.count} lingote${work.count === 1 ? '' : 's'} incorporado${work.count === 1 ? '' : 's'} al inventario.` : 'El inventario cambió durante el proceso. No se descontó mineral.'}</p>
+      <p>La fabricación conserva su fórmula y resolución procedural.</p></section>`;
+    const details = `<p class="prepSkinKicker">RESULTADO DE LA TANDA</p><h3>${success ? 'Lingotes preparados' : 'Preparación interrumpida'}</h3>
+      <div class="prepSkinStat"><span>Mineral restante</span><b>${raw}</b></div>
+      <div class="prepSkinStat"><span>Lingotes listos</span><b>${ingots}</b></div>
+      <div class="prepSkinStat"><span>Intervenciones</span><b>${work.clicks}</b></div>
+      <div class="prepSkinDivider"></div>
+      <button id="prepResultBack" class="prepSkinCraft">Volver a Preparación</button>
+      <button id="prepResultClose" class="prepSkinCraft secondary">Cerrar menú</button>`;
+    skinDisplay('result', center, details, 'Tanda completada · los materiales preparados están disponibles para Fabricación');
+    bind('prepResultBack', renderMenu);
+    bind('prepResultClose', close);
+  }
+
   function finish() {
     const ctx = session, work = ctx?.work;
     if (!ctx || !work || work.done) return;
@@ -319,6 +499,7 @@
     const success = convert(ctx.inventory, work.count);
     if (success) ctx.onInventoryChanged?.();
     ctx.mode = 'result';
+    if (ctx.profession === 'Herrero') { renderResultSkin(ctx, work, success); return; }
     display(`<div class="prepResult"><div class="prepResultSymbol">${success ? '✓' : '!'}</div><p class="prepEy">${success ? 'PREPARACIÓN COMPLETADA' : 'LOTE NO APLICADO'}</p><h3>${work.count}× ${PREPARED}</h3><p>${success ? 'Los lingotes se incorporaron al inventario. La fórmula procedural y sus futuros resultados permanecen intactos.' : 'El inventario cambió durante el proceso. No se descontó material.'}</p><div class="prepBalance"><span>Mineral restante<b>${countOf(ctx.inventory, RAW)}</b></span><span>Lingotes listos<b>${countOf(ctx.inventory, PREPARED)}</b></span><span>Intervenciones<b>${work.clicks}</b></span></div><div class="prepGameActions"><button id="prepResultClose" class="secondary">Cerrar</button><button id="prepResultBack" class="prepPrimary">Volver al menú del taller</button></div></div>`, false);
     bind('prepResultClose', close);
     bind('prepResultBack', renderMenu);
@@ -351,3 +532,4 @@
 
   window.GenesisPreparation = Object.freeze({ rawStock, shortages, ready, batchProfile, actionEffect, progressRate, progressGain, temperatureStatus, heatBands, heatGradient, passiveCooling, convert, open });
 })();
+
