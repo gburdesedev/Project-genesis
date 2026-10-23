@@ -1,6 +1,7 @@
 /* Project Genesis / PlayCanvas · Preparación de hierro.
-   Cada intervención modifica la temperatura y concede de 0 a 100 puntos acumulados.
-   No hay duración prefijada ni resultados de fabricación ligados a esta puntuación.
+   Las intervenciones regulan el calor; el avance de 0 a 100 ocurre
+   CONTINUAMENTE mientras la temperatura permanece en rangos válidos.
+   No hay tiempo límite ni resultados de fabricación ligados a este avance.
    Temperaturas normalizadas y equivalencia 1:1: DEMO provisional. */
 (() => {
   'use strict';
@@ -9,7 +10,7 @@
   const PREPARED = 'Lingote de hierro';
   const TARGETS = Object.freeze({ [PREPARED]: 72 }); // Escala 0–100; NO grados Celsius.
   const INITIAL_HEAT_GAP = 17; // Fragua encendida: la tanda empieza precalentada (ajuste de demo).
-  const BASE_ACTION_POINTS = 20; // Referencia jugable: ~5 buenas intervenciones para 1 lingote.
+  const BASE_PROGRESS_PER_SECOND = 3; // Caudal de avance en verde, valor provisional de demo; sin duración fija.
   const BASE_COOLING_PER_SECOND = 0.45; // Temperatura normalizada, valor de demo; nunca puntúa por sí sola.
   const MASS_COOLING_ADJUSTMENT = 0.02; // Diferencia suave entre tamaños dentro de un mismo tramo de dificultad.
   const THERMAL_TICK_MS = 125;
@@ -76,14 +77,8 @@
     const power = BELLOWS.find(b => b.key === String(action));
     if (!power && action !== 'rest') throw new Error('Intervención desconocida');
     const nextTemperature = Math.max(0, Math.min(100, temperature + (power ? power.gain / profile.thermalInertia : -profile.coolingPerAction)));
-    const difference = Math.abs(nextTemperature - target);
-    // Las franjas visuales mandan: verde = progreso; amarillo = poco;
-    // rojo/azul = nada. Dentro del verde, la precisión varía CONTINUAMENTE,
-    // sin escalones enteros de porcentaje: cada acción aporta puntos decimales.
-    const bandRate = progressRate(nextTemperature, target, profile.tolerance);
-    const greenCloseness = Math.max(0, 1 - difference / profile.tolerance);
-    const precision = bandRate === 1 ? 1 + 0.2 * greenCloseness : bandRate;
-    return { temperature: nextTemperature, points: BASE_ACTION_POINTS * precision / profile.effortMultiplier, precision };
+    // Una intervención SOLO cambia la temperatura; no entrega puntos.
+    return { temperature: nextTemperature };
   }
 
   function progressRate(temperature, target, tolerance) {
@@ -96,7 +91,7 @@
   function temperatureStatus(temperature, target, tolerance) {
     if (temperature < target - tolerance * 1.55) return { tone: 'cold', message: 'Fragua fría: aplicá un impulso para recuperar calor.' };
     if (temperature < target - tolerance) return { tone: 'near', message: 'Cerca del objetivo: ajustá con cuidado.' };
-    if (temperature <= target + tolerance) return { tone: 'good', message: 'Temperatura adecuada: intervení para sumar puntos.' };
+    if (temperature <= target + tolerance) return { tone: 'good', message: 'Temperatura adecuada: la barra avanza continuamente.' };
     if (temperature <= target + tolerance * 1.55) return { tone: 'near', message: 'Calor elevado: dejá reposar o reducí las impulsiones.' };
     return { tone: 'hot', message: 'Exceso de temperatura: esperá a que la fragua se estabilice.' };
   }
@@ -121,6 +116,22 @@
     return Math.max(0, temperature - elapsed * profile.coolingPerSecond);
   }
 
+  function progressGain(temperature, target, profile, elapsedSeconds) {
+    const elapsed = Math.max(0, elapsedSeconds);
+    // Verde: avance completo; amarillo: avance lento; rojo/azul: detenido.
+    // La dificultad por cantidad afecta al caudal además de exigir precisión.
+    return elapsed * BASE_PROGRESS_PER_SECOND * progressRate(temperature, target, profile.tolerance) / profile.effortMultiplier;
+  }
+
+  function advanceWork(work, elapsedSeconds) {
+    const elapsed = Math.max(0, elapsedSeconds);
+    // Muestra intermedia del calor para que el avance sea estable entre ticks
+    // aunque se crucen levemente los bordes de una franja.
+    const midTemperature = passiveCooling(work.temperature, elapsed / 2, work.batch);
+    work.progress = Math.min(100, work.progress + progressGain(midTemperature, work.target, work.batch, elapsed));
+    work.temperature = passiveCooling(work.temperature, elapsed, work.batch);
+  }
+
   let session = null;
   let thermalTimer = null;
 
@@ -137,8 +148,13 @@
     work.lastThermalAt = now;
     // Las pestañas en segundo plano no deben castigar ni agotar tandas.
     if (document.hidden) return;
-    work.temperature = passiveCooling(work.temperature, elapsed, work.batch);
-    drawThermal();
+    advanceWork(work, elapsed);
+    if (work.progress >= 100 - 0.000001) {
+      work.progress = 100;
+      finish();
+    } else {
+      drawThermal();
+    }
   }
 
   function bind(id, fn) {
@@ -177,7 +193,7 @@
     const batch = raw ? batchProfile(ctx.count) : null;
     const materialPanel = ctx.profession === 'Herrero' ? `<div class="prepMaterials"><button class="prepMaterial selected" id="prepSelectIron" ${raw ? '' : 'disabled'}><span class="prepMaterialIcon">◆</span><span><b>${PREPARED}</b><small>Desde ${RAW} · fundición</small></span><span class="prepMaterialCount"><strong>${raw}</strong> en bruto<br><em>${iron} preparado${iron !== 1 ? 's' : ''}</em></span></button></div>`
       : `<div class="prepNotice">El proceso térmico de lingotes corresponde al Herrero. Esta ruta conserva sus materiales de sesión; no se inventó un minijuego de fuelle para Curtidor.</div>`;
-    const preview = raw && ctx.profession === 'Herrero' ? `<div class="prepSelectedSymbol">◆</div><p class="prepEy">MINERAL → LINGOTE</p><h3>Fundición de hierro</h3><p class="prepSub">Regulá la temperatura con intervenciones en el fuelle y reposo de la fragua. Cada acción suma puntos según su precisión.</p><div class="prepBalance"><span>En bruto<b>${raw}</b></span><span>Preparados<b>${iron}</b></span><span>Total de sesión<b>${max}</b></span></div><div class="prepQuantity"><span>Cantidad de la tanda</span><div><button id="prepLess" aria-label="Reducir cantidad" ${ctx.count <= 1 ? 'disabled' : ''}>−</button><strong>${ctx.count}</strong><button id="prepMore" aria-label="Aumentar cantidad" ${ctx.count >= raw ? 'disabled' : ''}>+</button></div></div><p class="prepBatchInfo">Dificultad relativa: <strong>${Math.round(batch.difficultyMultiplier * 100)} %</strong> · Tolerancia térmica ${batch.tolerance.toFixed(1)} puntos.</p><button class="prepPrimary" id="prepStart">INICIAR TANDA DE ${ctx.count} LINGOTE${ctx.count === 1 ? '' : 'S'}</button>`
+    const preview = raw && ctx.profession === 'Herrero' ? `<div class="prepSelectedSymbol">◆</div><p class="prepEy">MINERAL → LINGOTE</p><h3>Fundición de hierro</h3><p class="prepSub">Regulá el calor con el fuelle y el reposo. La barra avanza mientras la fragua está en la temperatura de trabajo, no al pulsar los controles.</p><div class="prepBalance"><span>En bruto<b>${raw}</b></span><span>Preparados<b>${iron}</b></span><span>Total de sesión<b>${max}</b></span></div><div class="prepQuantity"><span>Cantidad de la tanda</span><div><button id="prepLess" aria-label="Reducir cantidad" ${ctx.count <= 1 ? 'disabled' : ''}>−</button><strong>${ctx.count}</strong><button id="prepMore" aria-label="Aumentar cantidad" ${ctx.count >= raw ? 'disabled' : ''}>+</button></div></div><p class="prepBatchInfo">Dificultad relativa: <strong>${Math.round(batch.difficultyMultiplier * 100)} %</strong> · Tolerancia térmica ${batch.tolerance.toFixed(1)} puntos.</p><button class="prepPrimary" id="prepStart">INICIAR TANDA DE ${ctx.count} LINGOTE${ctx.count === 1 ? '' : 'S'}</button>`
       : `<div class="prepSelectedSymbol">✓</div><h3>${ctx.profession === 'Herrero' ? 'No quedan minerales por preparar' : 'Ruta de fabricación disponible'}</h3><p class="prepSub">${ctx.profession === 'Herrero' ? 'Todos los lingotes de esta sesión ya se procesaron.' : 'El sistema térmico del Herrero se encuentra separado de esta profesión.'}</p>`;
     display(`<nav class="prepTabs" aria-label="Menú de trabajo"><span class="prepTab active">PREPARACIÓN</span><button id="prepFabricateTab" class="prepTab ${canCraft ? 'available' : ''}" ${canCraft ? '' : 'disabled'}>FABRICACIÓN ${canCraft ? '↗' : '🔒'}</button><button class="prepTab locked" disabled>REFINAMIENTO 🔒</button><button class="prepTab locked" disabled>FUSIONES 🔒</button></nav>
       <div class="prepColumns"><section class="prepPanel prepList"><h3>MATERIALES</h3><p>El inventario distingue materia prima y material preparado. Las fórmulas permanecen intactas.</p>${materialPanel}</section><section class="prepPanel prepScene"><div class="prepSceneTop"><span>FRAGUA · CONTROL TÉRMICO</span><span>VISTA DE DEMO</span></div>${preview}</section><section class="prepPanel prepRequirement"><h3>${escape(ctx.recipeName)}</h3><p>Materiales requeridos para la próxima fabricación.</p><div class="prepChecklist">${currentNeeds}</div><div class="prepStatus ${canCraft ? 'ready' : ''}">${canCraft ? '✓ FÓRMULA COMPLETA' : '◌ PREPARAR MATERIALES'}</div><button class="prepPrimary" id="prepFabricate" ${canCraft ? '' : 'disabled'}>FABRICAR</button><p class="prepNotice">Ni la cantidad de la tanda ni la habilidad térmica modifican el cierre procedural del objeto.</p></section></div>`);
@@ -202,21 +218,19 @@
     if (!ctx || ctx.profession !== 'Herrero' || !whole(ctx.count) || ctx.count > countOf(ctx.inventory, RAW)) return;
     const batch = batchProfile(ctx.count), target = TARGETS[PREPARED];
     ctx.mode = 'running';
-    ctx.work = { count: ctx.count, batch, target, temperature: Math.max(0, target - INITIAL_HEAT_GAP), progress: 0, clicks: 0, lastPoints: 0, done: false };
+    ctx.work = { count: ctx.count, batch, target, temperature: Math.max(0, target - INITIAL_HEAT_GAP), progress: 0, clicks: 0, done: false };
     renderThermal();
   }
 
   function intervene(action) {
     const ctx = session, work = ctx?.work;
     if (!ctx || ctx.mode !== 'running' || !work || work.done) return false;
-    passiveStep(); // Liquidar enfriamiento pendiente antes de evaluar esta acción.
+    passiveStep(); // Primero liquidar el avance térmico acumulado, sin premios por clic.
+    if (work.done || ctx.mode !== 'running') return false;
     const result = actionEffect(work.temperature, work.target, work.batch, action);
     work.temperature = result.temperature;
-    work.lastPoints = Math.min(100 - work.progress, result.points);
-    work.progress = Math.min(100, work.progress + work.lastPoints);
     work.clicks++;
     drawThermal();
-    if (work.progress >= 100 - 0.000001) { work.progress = 100; finish(); }
     return true;
   }
 
@@ -240,7 +254,14 @@
     if (progress) { progress.style.width = `${Math.min(100, work.progress)}%`; progress.setAttribute('aria-valuenow', work.progress.toFixed(2)); }
     if (progressText) progressText.textContent = `${work.progress.toFixed(1)} / 100`;
     if (clicksText) clicksText.textContent = String(work.clicks);
-    if (pointsText) pointsText.textContent = work.clicks ? `Última intervención: +${work.lastPoints.toFixed(1)} puntos` : 'Iniciá las intervenciones para puntuar.';
+    if (pointsText) {
+      pointsText.textContent = status.tone === 'good'
+        ? '● AVANCE ACTIVO · la barra crece mientras la fragua siga en verde.'
+        : status.tone === 'near'
+          ? '● AVANCE LENTO · la temperatura está en amarillo.'
+          : '● AVANCE DETENIDO · recuperá el rango de trabajo.';
+      pointsText.dataset.tone = status.tone;
+    }
   }
 
   function renderThermal() {
@@ -251,10 +272,10 @@
     const bands = heatBands(work.target, work.batch.tolerance);
     const left = bands[2].from, right = bands[2].to;
     const renderedBands = bands.map(band => `<span class="prepHeatBand ${band.tone}" style="left:${band.from}%;width:${band.to - band.from}%" title="${band.label}: ${band.from.toFixed(0)}–${band.to.toFixed(0)}"></span>`).join('');
-    display(`<div class="prepThermal"><div class="prepThermalHeading"><div><p class="prepEy">MINIJUEGO · PREPARACIÓN DE MATERIALES</p><h3>Control de la fragua</h3><p>${work.count}× ${PREPARED} · cada decisión modifica la temperatura y puede sumar puntos.</p></div><div class="prepThermalBatch">TANDA: ${work.count} · DIFICULTAD ${Math.round(work.batch.difficultyMultiplier * 100)}%</div></div>
+    display(`<div class="prepThermal"><div class="prepThermalHeading"><div><p class="prepEy">MINIJUEGO · PREPARACIÓN DE MATERIALES</p><h3>Control de la fragua</h3><p>${work.count}× ${PREPARED} · mantené el calor en la franja de trabajo para completar la barra.</p></div><div class="prepThermalBatch">TANDA: ${work.count} · DIFICULTAD ${Math.round(work.batch.difficultyMultiplier * 100)}%</div></div>
       <section class="prepThermalStage"><div class="prepFireVisual"><div class="prepFireIcon" aria-hidden="true">♨</div><span>FRAGUA · DEMOSTRACIÓN</span></div><div class="prepThermalReadouts"><div class="prepReadout"><span>TEMPERATURA ACTUAL</span><strong id="prepHeatNumber">${Math.round(work.temperature)} / 100</strong></div><div class="prepReadout"><span>RANGO VERDE DE ESTA TANDA</span><strong>${Math.round(left)}–${Math.round(right)}</strong></div><div class="prepReadout"><span>INTERVENCIONES</span><strong id="prepActions">0</strong></div></div><div class="prepHeatGauge" id="prepHeatGauge" role="meter" aria-label="Temperatura de la fragua" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(work.temperature)}">${renderedBands}<span class="prepHeatNeedle" id="prepHeatNeedle" aria-hidden="true"></span></div><div class="prepHeatLegend" aria-label="Significado de los colores"><span><i class="cold"></i>AZUL · FRÍO</span><span><i class="near"></i>AMARILLO · AJUSTE</span><span><i class="good"></i>VERDE · IDEAL</span><span><i class="hot"></i>ROJO · EXCESO</span></div><div class="prepHeatMessage" id="prepHeatMessage" aria-live="polite">Ajustá el calor dentro de la zona verde.</div><p>La línea blanca indica la temperatura. La fragua pierde calor entre acciones; cuanto más grande la tanda, más rápido se enfría.</p></section>
-      <section class="prepThermalControls"><h4>INTERVENÍ SOBRE LA FRAGUA</h4><p>Verde: cuanto más cerca del centro, más puntos decimales. Amarillo: avance reducido. Azul o rojo: sin avance. Con lotes mayores la franja verde es más exigente y la temperatura cambia entre acciones, sin límite de tiempo para completar.</p><div class="prepBellowButtons">${BELLOWS.map((power, index) => `<button id="prepBellow${index}" class="prepBellow"><b>${power.label}</b><small>${power.description}</small><span>TECLA ${power.key}</span></button>`).join('')}<button id="prepRest" class="prepBellow prepRest"><b>REPOSAR</b><small>Reducir temperatura</small><span>TECLA 4</span></button></div></section>
-      <section class="prepThermalProgress"><div class="prepThermalProgressTitle"><strong>PUNTUACIÓN DE PREPARACIÓN</strong><b id="prepCraftNumber">0.0 / 100</b></div><div class="prepProgressBar"><span id="prepCraftProgress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Puntuación de preparación"></span></div><p id="prepActionPoints">Iniciá las intervenciones para puntuar.</p><p>Los puntos nunca retroceden. Llegar a 100 completa la preparación; no altera las propiedades del futuro objeto.</p></section><div class="prepGameActions"><button id="prepAbandon" class="secondary">Cancelar tanda sin consumir mineral</button></div></div>`, false);
+      <section class="prepThermalControls"><h4>INTERVENÍ SOBRE LA FRAGUA</h4><p>El fuelle y el reposo solo modifican el calor. Verde: la barra se llena continuamente. Amarillo: carga más despacio. Azul o rojo: se detiene. Las tandas grandes requieren más precisión; no hay tiempo límite.</p><div class="prepBellowButtons">${BELLOWS.map((power, index) => `<button id="prepBellow${index}" class="prepBellow"><b>${power.label}</b><small>${power.description}</small><span>TECLA ${power.key}</span></button>`).join('')}<button id="prepRest" class="prepBellow prepRest"><b>REPOSAR</b><small>Reducir temperatura</small><span>TECLA 4</span></button></div></section>
+      <section class="prepThermalProgress"><div class="prepThermalProgressTitle"><strong>AVANCE DE PREPARACIÓN</strong><b id="prepCraftNumber">0.0 / 100</b></div><div class="prepProgressBar"><span id="prepCraftProgress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Avance de preparación"></span></div><p id="prepActionPoints">La barra avanzará cuando la fragua entre en el rango de trabajo.</p><p>El avance nunca retrocede. Llegar a 100 completa la preparación; las intervenciones no otorgan puntos por sí mismas ni modifican el futuro objeto.</p></section><div class="prepGameActions"><button id="prepAbandon" class="secondary">Cancelar tanda sin consumir mineral</button></div></div>`, false);
     BELLOWS.forEach((power, index) => bind(`prepBellow${index}`, () => intervene(power.key)));
     bind('prepRest', () => intervene('rest'));
     bind('prepAbandon', renderMenu);
@@ -300,5 +321,5 @@
     renderMenu();
   }
 
-  window.GenesisPreparation = Object.freeze({ rawStock, shortages, ready, batchProfile, actionEffect, progressRate, temperatureStatus, heatBands, passiveCooling, convert, open });
+  window.GenesisPreparation = Object.freeze({ rawStock, shortages, ready, batchProfile, actionEffect, progressRate, progressGain, temperatureStatus, heatBands, passiveCooling, convert, open });
 })();
