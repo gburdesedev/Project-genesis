@@ -83,6 +83,21 @@
     return { tone: 'hot', message: 'Exceso de temperatura: esperá a que la fragua se estabilice.' };
   }
 
+  function heatBands(target, tolerance) {
+    const bound = value => Math.max(0, Math.min(100, value));
+    const coldEnd = bound(target - tolerance * 1.55);
+    const idealStart = bound(target - tolerance);
+    const idealEnd = bound(target + tolerance);
+    const hotStart = bound(target + tolerance * 1.55);
+    return [
+      { tone: 'cold', label: 'Frío', from: 0, to: coldEnd },
+      { tone: 'near', label: 'Aproximación', from: coldEnd, to: idealStart },
+      { tone: 'good', label: 'Trabajo ideal', from: idealStart, to: idealEnd },
+      { tone: 'near', label: 'Aproximación', from: idealEnd, to: hotStart },
+      { tone: 'hot', label: 'Exceso', from: hotStart, to: 100 }
+    ];
+  }
+
   let session = null;
   const halt = () => {};
 
@@ -169,14 +184,16 @@
     if (!ctx || !work || ctx.mode !== 'running') return;
     const temperature = Math.max(0, Math.min(100, work.temperature));
     const status = temperatureStatus(temperature, work.target, work.batch.tolerance);
-    const fill = document.getElementById('prepHeatFill');
+    const needle = document.getElementById('prepHeatNeedle');
+    const gauge = document.getElementById('prepHeatGauge');
     const number = document.getElementById('prepHeatNumber');
     const message = document.getElementById('prepHeatMessage');
     const progress = document.getElementById('prepCraftProgress');
     const progressText = document.getElementById('prepCraftNumber');
     const clicksText = document.getElementById('prepActions');
     const pointsText = document.getElementById('prepActionPoints');
-    if (fill) { fill.style.width = `${temperature}%`; fill.dataset.tone = status.tone; }
+    if (needle) { needle.style.left = `${temperature}%`; needle.dataset.tone = status.tone; }
+    if (gauge) { gauge.setAttribute('aria-valuenow', String(Math.round(temperature))); gauge.setAttribute('aria-valuetext', status.message); }
     if (number) number.textContent = `${Math.round(temperature)} / 100`;
     if (message) { message.textContent = status.message; message.dataset.tone = status.tone; }
     if (progress) { progress.style.width = `${Math.min(100, work.progress)}%`; progress.setAttribute('aria-valuenow', String(Math.floor(work.progress))); }
@@ -189,9 +206,11 @@
     const ctx = session, work = ctx?.work;
     if (!ctx || !work) return;
     halt();
-    const left = Math.max(0, work.target - work.batch.tolerance), right = Math.min(100, work.target + work.batch.tolerance);
+    const bands = heatBands(work.target, work.batch.tolerance);
+    const left = bands[2].from, right = bands[2].to;
+    const renderedBands = bands.map(band => `<span class="prepHeatBand ${band.tone}" style="left:${band.from}%;width:${band.to - band.from}%" title="${band.label}: ${band.from.toFixed(0)}–${band.to.toFixed(0)}"></span>`).join('');
     display(`<div class="prepThermal"><div class="prepThermalHeading"><div><p class="prepEy">MINIJUEGO · PREPARACIÓN DE MATERIALES</p><h3>Control de la fragua</h3><p>${work.count}× ${PREPARED} · cada decisión modifica la temperatura y puede sumar puntos.</p></div><div class="prepThermalBatch">TANDA: ${work.count} · ESFUERZO ${Math.round(work.batch.effortMultiplier * 100)}%</div></div>
-      <section class="prepThermalStage"><div class="prepFireVisual"><div class="prepFireIcon" aria-hidden="true">♨</div><span>FRAGUA · DEMOSTRACIÓN</span></div><div class="prepThermalReadouts"><div class="prepReadout"><span>TEMPERATURA ACTUAL</span><strong id="prepHeatNumber">22 / 100</strong></div><div class="prepReadout"><span>ZONA OBJETIVO</span><strong>${Math.round(left)}–${Math.round(right)}</strong></div><div class="prepReadout"><span>INTERVENCIONES</span><strong id="prepActions">0</strong></div></div><div class="prepHeatGauge" role="img" aria-label="Temperatura con zona objetivo"><div class="prepHeatTarget" style="left:${left}%;width:${right - left}%"></div><div class="prepHeatFill" id="prepHeatFill"></div></div><div class="prepHeatScale"><span>FRÍO</span><span>RANGO ADECUADO</span><span>CALOR EXCESIVO</span></div><div class="prepHeatMessage" id="prepHeatMessage" aria-live="polite">La fragua está fría. Aplicá aire al fuelle.</div></section>
+      <section class="prepThermalStage"><div class="prepFireVisual"><div class="prepFireIcon" aria-hidden="true">♨</div><span>FRAGUA · DEMOSTRACIÓN</span></div><div class="prepThermalReadouts"><div class="prepReadout"><span>TEMPERATURA ACTUAL</span><strong id="prepHeatNumber">22 / 100</strong></div><div class="prepReadout"><span>RANGO VERDE DE ESTA TANDA</span><strong>${Math.round(left)}–${Math.round(right)}</strong></div><div class="prepReadout"><span>INTERVENCIONES</span><strong id="prepActions">0</strong></div></div><div class="prepHeatGauge" id="prepHeatGauge" role="meter" aria-label="Temperatura de la fragua" aria-valuemin="0" aria-valuemax="100" aria-valuenow="22">${renderedBands}<span class="prepHeatNeedle" id="prepHeatNeedle" aria-hidden="true"></span></div><div class="prepHeatLegend" aria-label="Significado de los colores"><span><i class="cold"></i>AZUL · FRÍO</span><span><i class="near"></i>AMARILLO · AJUSTE</span><span><i class="good"></i>VERDE · IDEAL</span><span><i class="hot"></i>ROJO · EXCESO</span></div><div class="prepHeatMessage" id="prepHeatMessage" aria-live="polite">La fragua está fría. Aplicá aire al fuelle.</div><p>Respetá la franja verde marcada para este material y tamaño de tanda. La línea blanca muestra la temperatura actual.</p></section>
       <section class="prepThermalControls"><h4>INTERVENÍ SOBRE LA FRAGUA</h4><p>Usá el fuelle o dejá reposar el metal. La puntuación depende de la temperatura tras cada acción. No existe un cronómetro ni un número máximo de intentos.</p><div class="prepBellowButtons">${BELLOWS.map((power, index) => `<button id="prepBellow${index}" class="prepBellow"><b>${power.label}</b><small>${power.description}</small><span>TECLA ${power.key}</span></button>`).join('')}<button id="prepRest" class="prepBellow prepRest"><b>REPOSAR</b><small>Reducir temperatura</small><span>TECLA 4</span></button></div></section>
       <section class="prepThermalProgress"><div class="prepThermalProgressTitle"><strong>PUNTUACIÓN DE PREPARACIÓN</strong><b id="prepCraftNumber">0 / 100</b></div><div class="prepProgressBar"><span id="prepCraftProgress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Puntuación de preparación"></span></div><p id="prepActionPoints">Iniciá las intervenciones para puntuar.</p><p>Los puntos nunca retroceden. Llegar a 100 completa la preparación; no altera las propiedades del futuro objeto.</p></section><div class="prepGameActions"><button id="prepAbandon" class="secondary">Cancelar tanda sin consumir mineral</button></div></div>`, false);
     BELLOWS.forEach((power, index) => bind(`prepBellow${index}`, () => intervene(power.key)));
@@ -238,5 +257,5 @@
     renderMenu();
   }
 
-  window.GenesisPreparation = Object.freeze({ rawStock, shortages, ready, batchProfile, actionEffect, progressRate, temperatureStatus, convert, open });
+  window.GenesisPreparation = Object.freeze({ rawStock, shortages, ready, batchProfile, actionEffect, progressRate, temperatureStatus, heatBands, convert, open });
 })();
