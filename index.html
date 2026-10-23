@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Project Genesis — Prototipo Jugable v0.10a27 · Powered by NGE Alpha</title>
+<link rel="stylesheet" href="./preparacion.css">
 
 <script type="importmap">
 {
@@ -700,9 +701,73 @@ window.__genesisAppError=function(event){
 
 <div id="modalLayer"><div class="modal" id="modal"></div></div>
 
+<script src="./preparacion_control.js"></script>
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
 import { Vec3 } from 'playcanvas';
+
+/* Preparación V27: adaptador local sin modificar el motor procedural ni las
+   resoluciones de Fabricación/Cierre. Conserva ambas rutas del tutorial. */
+queueMicrotask(() => {
+  const prep = window.GenesisPreparation;
+  if (!prep) { console.error('Falta preparacion_control.js'); return; }
+  const originalChest = openActiveChest;
+  openActiveChest = function (...args) {
+    const before = chestOpen;
+    const result = originalChest(...args);
+    if (!before && chestOpen && craftSession) {
+      playerInventory = prep.rawStock(craftSession.requiredStock || craftSession.stock);
+      refreshInventorySummary();
+      const body = modalBox.querySelector('.dialogueBody p');
+      if (body) body.textContent = 'El baúl contiene materias primas para la sesión. Abrí el inventario con TAB o INV y comprobá el lote. Después, en la estación de trabajo, usá Preparación para obtener los materiales que necesitan las fórmulas. Fabricación quedará bloqueada hasta reunirlos.';
+    }
+    return result;
+  };
+  const originalInventoryClose = closeInventory;
+  closeInventory = function (...args) {
+    const before = tutorialStep;
+    const result = originalInventoryClose(...args);
+    if (before === 9 && tutorialStep === 10) {
+      const body = modalBox.querySelector('.dialogueBody p');
+      if (body) body.textContent = 'Excelente. Las materias primas están en tu inventario, pero todavía no se pueden usar directamente en una fórmula. Acercate al yunque o a tu estación, abrí el menú de taller y elegí PREPARACIÓN. Transformá el lote que necesites antes de FABRICAR.';
+    }
+    return result;
+  };
+  const originalRouteCopy = routeCopy;
+  routeCopy = function (step) {
+    if (step >= 10 && step <= 13) {
+      const recipeId = currentRecipe(), formula = recipeId && formulaFor(recipeId);
+      if (formula && !prep.ready(formula, playerInventory)) {
+        return ['Prepará los materiales', 'Interactuá con la estación de trabajo. Elegí Preparación, transformá las materias primas y reuní los materiales de la fórmula antes de fabricar.'];
+      }
+    }
+    return originalRouteCopy(step);
+  };
+  const originalCraftConfirm = showCraftConfirm;
+  showCraftConfirm = function () {
+    const recipeId = currentRecipe();
+    const formula = recipeId && formulaFor(recipeId);
+    const rec = recipeId && window.GenesisPrototypeEngines?.recipes?.[recipeId];
+    if (!chestOpen || !formula || !rec || !craftSession) return;
+    prep.open({
+      profession: selectedProfession,
+      inventory: playerInventory,
+      requiredStock: craftSession.requiredStock || craftSession.stock,
+      formula,
+      recipeName: rec.name,
+      modal,
+      closeModal,
+      onInventoryChanged: refreshInventorySummary,
+      onCraft: () => {
+        if (!prep.ready(formula, playerInventory)) {
+          toast('Necesitás preparar los materiales de la fórmula.', 1700);
+          return;
+        }
+        originalCraftConfirm();
+      }
+    });
+  };
+});
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const lerp=(a,b,t)=>a+(b-a)*t;
