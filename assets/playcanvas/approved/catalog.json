@@ -22,6 +22,22 @@
       "file_count": 39,
       "directory_migration": "deferred_to_preserve_existing_references",
       "reason": "Fuente de las 39 capas aprobadas del menú. Sin copia duplicada."
+    },
+    {
+      "id": "material_iron_ingot_v175_transparent_poster",
+      "category": "material_preparado_preview",
+      "version": "V175_WEB_RGBA_01",
+      "approval": "approved_visual_for_preparation_ui",
+      "current_status": "ready_for_static_preview",
+      "path": "assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png",
+      "format": "PNG_RGBA",
+      "width": 1024,
+      "height": 576,
+      "bytes": 425045,
+      "sha256": "ce2cc3df57050215f14426ce1e417447ef6652a977c8a16178e5db8a8378eee0",
+      "transparent_background_verified": true,
+      "source_run": "https://github.com/gburdesedev/genesis-blender-render/actions/runs/40143233270",
+      "note": "Poster estático aprobado para la interfaz. El GLB sigue como candidato sin aprobación visual ni mapa normal."
     }
   ],
   "approved_masters_pending_web_conversion": [
@@ -31,7 +47,7 @@
       "category": "material_preparado",
       "approved_master_version": "V175",
       "approval": "approved_master_reference",
-      "current_status": "needs_transparent_thumbnail_and_optimized_glb",
+      "current_status": "transparent_poster_ready__glb_pending_visual_review",
       "reference_render": {
         "path": "assets/ui/preparacion/modelos/PG_Iron_Ingot_V175_CHECKPOINT_APROBADO.png",
         "git_blob_sha": "f0c91b0b4a92ab3cecfcbb0a9e22ba4ba7b4c069",
@@ -40,7 +56,8 @@
       },
       "web_variants": {
         "thumbnail": null,
-        "model_glb": null
+        "model_glb": null,
+        "transparent_poster": "assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png"
       },
       "notes": "El render existente conserva fondo gris. No usar como versión web aprobada final."
     }

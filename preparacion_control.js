@@ -16,7 +16,7 @@
       poster: 'assets/ui/preparacion/modelos/V006_HIERRO_PRIMER_PLANO.png', model: null
     }),
     [PREPARED]: Object.freeze({
-      poster: 'assets/ui/preparacion/modelos/PG_Iron_Ingot_V175_CHECKPOINT_APROBADO.png', model: null
+      poster: 'assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png', model: null
     })
   });
   // Perfil térmico por material. Solo el hierro tiene cifras DEMO: aún no
@@ -275,7 +275,7 @@
     const name = escape(material);
     const poster = escape(art.poster);
     const visual = art.model
-      ? `<model-viewer class="prepMaterialModel" src="${escape(art.model)}" poster="${poster}" camera-controls disable-zoom interaction-prompt="none" camera-orbit="0deg 75deg auto" shadow-intensity="0.8" alt="${name}"></model-viewer>`
+      ? `<model-viewer class="prepMaterialModel" src="${escape(art.model)}" poster="${poster}" ${type === 'featured' ? '' : 'camera-controls disable-zoom'} interaction-prompt="none" camera-orbit="0deg 75deg auto" shadow-intensity="0.8" alt="${name}"></model-viewer>`
       : `<img class="prepMaterialPoster" src="${poster}" alt="${name}" loading="lazy" draggable="false">`;
     return `<span class="prepMaterialVisual ${type}" data-material="${name}">${visual}</span>`;
   }
@@ -286,7 +286,8 @@
   function bindModelHover() {
     if (!window.matchMedia?.('(hover: hover) and (pointer: fine)').matches ||
         window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-    document.querySelectorAll('.prepSkinModal .prepMaterialVisual').forEach(surface => {
+    // El modelo grande exhibido sobre el yunque NUNCA oscila.
+    document.querySelectorAll('.prepSkinModal .prepSkinSlot .prepMaterialVisual').forEach(surface => {
       const viewer = surface.querySelector('model-viewer');
       if (!viewer) return;
       let hovering = false, angle = 0, last = 0, orbitStart = 0, frame = 0;
@@ -312,8 +313,9 @@
         if (!frame) frame = requestAnimationFrame(animate);
       };
       const leave = () => { hovering = false; };
-      surface.closest('.prepSkinSlot, .prepSkinFeatured')?.addEventListener('pointerenter', enter);
-      surface.closest('.prepSkinSlot, .prepSkinFeatured')?.addEventListener('pointerleave', leave);
+      const slot = surface.closest('.prepSkinSlot');
+      slot?.addEventListener('pointerenter', enter);
+      slot?.addEventListener('pointerleave', leave);
     });
   }
 
@@ -331,6 +333,26 @@
     }).join('');
   }
 
+  function skinIngredients(ctx) {
+    // Equivalencia 1 mineral -> 1 lingote: DEMO provisional de hierro.
+    // El contador expresa la materia prima requerida PARA LA TANDA,
+    // no lo que ya existe en inventario ni nuevos productos obtenidos.
+    const needed = ctx.count || 0;
+    const available = countOf(ctx.inventory, RAW);
+    const frame = `${SKIN_ROOT}01_Capas/Casillas/Casilla_Basicos_01.png`;
+    return `<section class="prepSkinIngredients" aria-label="Materiales necesarios para preparar el lingote">
+      <h3>MATERIALES NECESARIOS</h3>
+      <div class="prepSkinIngredientRow">
+        <div class="prepSkinSlot prepSkinRecipeSlot ${available >= needed && needed ? 'occupied' : 'insufficient'}" role="img" tabindex="0" aria-label="${escape(RAW)}: ${needed} necesario${needed === 1 ? '' : 's'} para esta tanda">
+          ${materialVisual(RAW, 'ore')}
+          <img class="prepSkinRecipeFrame" src="${frame}" alt="" aria-hidden="true" draggable="false">
+          <strong>${needed ? `×${needed}` : '0'}</strong>
+        </div>
+      </div>
+      <p>${escape(RAW)}${needed ? ` · ${needed} para esta tanda` : ' · sin minerales disponibles'}</p>
+    </section>`;
+  }
+
   function skinDisplay(stage, center, details, footer) {
     const ctx = session;
     if (!ctx) return;
@@ -340,7 +362,7 @@
     ctx.modal(`<div class="prepSkinScroll"><div class="prepArtboard" data-stage="${stage}">
       ${layerHTML}
       ${skinSlots(ctx)}
-      ${stage === 'menu' ? `<div class="prepSkinFeatured" aria-label="Vista previa del lingote a preparar">${materialVisual(PREPARED, 'ingot')}</div>` : ''}
+      ${stage === 'menu' ? `<div class="prepSkinFeatured" aria-label="Resultado de preparación: lingote de hierro, vista estática">${materialVisual(PREPARED, 'featured')}</div>${skinIngredients(ctx)}` : ''}
       <div class="prepSkinCenter" data-stage="${stage}">${center}</div>
       <section class="prepSkinDetails" aria-label="Detalles de preparación">${details}</section>
       <button class="prepSkinTab" data-tab="Inventario" aria-label="Inventario (no disponible en este menú)" disabled style="${skinPos(164,42,294,94)}"></button>
@@ -414,7 +436,9 @@
       ${missing.map(row => `<div class="prepSkinNeed ${row.missing ? 'short' : 'met'}"><span>${escape(row.material)}</span><b>${row.available}/${row.needed}</b></div>`).join('')}
       <p class="prepSkinReady">${canCraft ? '✓ Materiales listos para fabricar.' : 'Prepará los materiales que requiere la fórmula.'}</p>
       ${canCraft ? '<button class="prepSkinCraft" id="prepFabricate">Ir a fabricar →</button>' : ''}`;
-    const center = `<div class="prepSkinCenterBadge"><span>MINERAL → LINGOTE</span><small>Seleccioná la cantidad y pulsá PREPARAR</small></div>`;
+    // Las instrucciones están en el panel derecho; el centro queda libre
+    // para la pieza final estática y los materiales necesarios debajo.
+    const center = '';
     skinDisplay('menu', center, details, `En bruto: ${raw} · preparados: ${ingots} · la preparación no modifica rareza ni receta`);
     bind('prepLess', () => { ctx.count = Math.max(1, ctx.count - 1); renderMenu(); });
     bind('prepMore', () => { ctx.count = Math.min(raw, ctx.count + 1); renderMenu(); });
