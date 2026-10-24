@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "project": "Project Genesis",
+  "platform": "PlayCanvas / WebGL",
+  "registry_root": "assets/playcanvas/approved",
+  "updated_on": "2026-10-24",
+  "policy": {
+    "ship_only_approved": true,
+    "no_unapproved_candidates": true,
+    "one_canonical_file_per_variant": true,
+    "no_blend_or_zip_in_web_bundle": true,
+    "asset_variants_require_runtime_validation": true
+  },
+  "approved_existing_assets": [
+    {
+      "id": "ui_preparacion_v002",
+      "category": "ui",
+      "version": "V002",
+      "approval": "approved_visual_layout",
+      "current_status": "already_used_by_prototype",
+      "path": "assets/ui/preparacion/01_Capas/",
+      "file_count": 39,
+      "directory_migration": "deferred_to_preserve_existing_references",
+      "reason": "Fuente de las 39 capas aprobadas del menú. Sin copia duplicada."
+    }
+  ],
+  "approved_masters_pending_web_conversion": [
+    {
+      "id": "material_iron_ingot",
+      "profession": "Herrero",
+      "category": "material_preparado",
+      "approved_master_version": "V175",
+      "approval": "approved_master_reference",
+      "current_status": "needs_transparent_thumbnail_and_optimized_glb",
+      "reference_render": {
+        "path": "assets/ui/preparacion/modelos/PG_Iron_Ingot_V175_CHECKPOINT_APROBADO.png",
+        "git_blob_sha": "f0c91b0b4a92ab3cecfcbb0a9e22ba4ba7b4c069",
+        "has_effective_transparency": false,
+        "for_reference_only": true
+      },
+      "web_variants": {
+        "thumbnail": null,
+        "model_glb": null
+      },
+      "notes": "El render existente conserva fondo gris. No usar como versión web aprobada final."
+    }
+  ],
+  "hover_contract": {
+    "small_3d_slots": {
+      "yaw_min_degrees": -45,
+      "yaw_max_degrees": 45,
+      "continuous_while_hover": true,
+      "smooth_return_to_front_on_leave": true,
+      "static_slot_frame_and_counter": true
+    }
+  }
+}
