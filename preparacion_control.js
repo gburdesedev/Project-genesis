@@ -8,6 +8,17 @@
 
   const RAW = 'Mineral de hierro';
   const PREPARED = 'Lingote de hierro';
+  // Renders originales para carga instantánea; los GLB web optimizados se
+  // añaden aquí cuando superen la auditoría de triángulos/peso en Actions.
+  // Un PNG nunca se anima como si fuese geometría 3D.
+  const MATERIAL_ART = Object.freeze({
+    [RAW]: Object.freeze({
+      poster: 'assets/ui/preparacion/modelos/V006_HIERRO_PRIMER_PLANO.png', model: null
+    }),
+    [PREPARED]: Object.freeze({
+      poster: 'assets/ui/preparacion/modelos/PG_Iron_Ingot_V175_CHECKPOINT_APROBADO.png', model: null
+    })
+  });
   // Perfil térmico por material. Solo el hierro tiene cifras DEMO: aún no
   // existen umbrales canónicos aprobados para cobre, estaño o bronce.
   // Los perfiles futuros podrán variar objetivo, tolerancia, enfriamiento,
@@ -258,6 +269,54 @@
     return `<img class="prepSkinPiece" data-role="${role}" data-state="${state}" data-hover="${hover}" src="${SKIN_ROOT + file}" alt="" aria-hidden="true" draggable="false" style="${skinPos(x,y,width,height)}">`;
   }
 
+  function materialVisual(material, type) {
+    const art = MATERIAL_ART[material];
+    if (!art) return '';
+    const name = escape(material);
+    const poster = escape(art.poster);
+    const visual = art.model
+      ? `<model-viewer class="prepMaterialModel" src="${escape(art.model)}" poster="${poster}" camera-controls disable-zoom interaction-prompt="none" camera-orbit="0deg 75deg auto" shadow-intensity="0.8" alt="${name}"></model-viewer>`
+      : `<img class="prepMaterialPoster" src="${poster}" alt="${name}" loading="lazy" draggable="false">`;
+    return `<span class="prepMaterialVisual ${type}" data-material="${name}">${visual}</span>`;
+  }
+
+  // El modelo 3D solo oscila durante hover de mouse: -45° ↔ +45°.
+  // Al abandonar el slot desacelera y retorna de forma suave a 0° (frente).
+  // No se rota la casilla, el texto, ni un render plano de respaldo.
+  function bindModelHover() {
+    if (!window.matchMedia?.('(hover: hover) and (pointer: fine)').matches ||
+        window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    document.querySelectorAll('.prepSkinModal .prepMaterialVisual').forEach(surface => {
+      const viewer = surface.querySelector('model-viewer');
+      if (!viewer) return;
+      let hovering = false, angle = 0, last = 0, orbitStart = 0, frame = 0;
+      const animate = now => {
+        if (!viewer.isConnected) return;
+        const dt = last ? Math.min(now - last, 64) : 16;
+        last = now;
+        if (hovering) {
+          // Período ~4 s; oscilación completa y continua mientras haya foco.
+          angle = 45 * Math.sin((now - orbitStart) * Math.PI * 2 / 4000);
+        } else {
+          angle *= Math.exp(-dt / 180);
+          if (Math.abs(angle) < 0.08) angle = 0;
+        }
+        viewer.cameraOrbit = `${angle.toFixed(3)}deg 75deg auto`;
+        if (hovering || angle !== 0) frame = requestAnimationFrame(animate);
+        else frame = 0;
+      };
+      const enter = () => {
+        if (hovering) return;
+        hovering = true;
+        orbitStart = performance.now() - Math.asin(Math.max(-1, Math.min(1, angle / 45))) * 4000 / (Math.PI * 2);
+        if (!frame) frame = requestAnimationFrame(animate);
+      };
+      const leave = () => { hovering = false; };
+      surface.closest('.prepSkinSlot, .prepSkinFeatured')?.addEventListener('pointerenter', enter);
+      surface.closest('.prepSkinSlot, .prepSkinFeatured')?.addEventListener('pointerleave', leave);
+    });
+  }
+
   function skinSlots(ctx) {
     const basic = countOf(ctx.inventory, RAW), prepared = countOf(ctx.inventory, PREPARED);
     return SKIN_LAYERS.filter(layer => layer[6] === 'casilla_marco_transparente').map(layer => {
@@ -265,10 +324,10 @@
       const rawSlot = name === 'Casilla_Basicos_01';
       const ironSlot = name === 'Casilla_Preparados_01';
       const n = rawSlot ? basic : ironSlot ? prepared : 0;
-      const symbol = rawSlot ? '◆' : '▰';
       const label = rawSlot ? RAW : ironSlot ? PREPARED : 'Casilla vacía';
       const active = n > 0;
-      return `<button class="prepSkinSlot ${active ? 'occupied' : 'empty'} ${rawSlot && active ? 'selected' : ''}" ${rawSlot ? 'id="prepSelectIron"' : ''} aria-label="${escape(label)}: ${n}" title="${escape(label)}: ${n}" style="${skinPos(x+5,y+5,width-10,height-10)}" ${active && rawSlot && ctx.mode === 'menu' ? '' : 'disabled'}>${active ? `<span class="prepSkinItemSymbol ${rawSlot ? 'ore' : 'ingot'}">${symbol}</span><strong>${n}</strong>` : ''}</button>`;
+      const selectable = active && rawSlot && ctx.mode === 'menu';
+      return `<button class="prepSkinSlot ${active ? 'occupied' : 'empty'} ${rawSlot && active ? 'selected' : ''}" ${rawSlot ? 'id="prepSelectIron"' : ''} aria-label="${escape(label)}: ${n}" title="${escape(label)}: ${n}" style="${skinPos(x+5,y+5,width-10,height-10)}" ${!active ? 'disabled' : selectable ? '' : 'aria-disabled="true"'}>${active ? `${materialVisual(label, rawSlot ? 'ore' : 'ingot')}<strong>${n}</strong>` : ''}</button>`;
     }).join('');
   }
 
@@ -281,6 +340,7 @@
     ctx.modal(`<div class="prepSkinScroll"><div class="prepArtboard" data-stage="${stage}">
       ${layerHTML}
       ${skinSlots(ctx)}
+      ${stage === 'menu' ? `<div class="prepSkinFeatured" aria-label="Vista previa del lingote a preparar">${materialVisual(PREPARED, 'ingot')}</div>` : ''}
       <div class="prepSkinCenter" data-stage="${stage}">${center}</div>
       <section class="prepSkinDetails" aria-label="Detalles de preparación">${details}</section>
       <button class="prepSkinTab" data-tab="Inventario" aria-label="Inventario (no disponible en este menú)" disabled style="${skinPos(164,42,294,94)}"></button>
@@ -294,6 +354,7 @@
     bind('prepClose', close);
     bind('prepSelectIron', () => { if (ctx.mode === 'menu') renderMenu(); });
     bind('prepFabricateTab', craft);
+    bindModelHover();
   }
 
   function display(content, compact = false) {
