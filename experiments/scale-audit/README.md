@@ -17,6 +17,10 @@ Abrir `ciudad_63x63_escala.html` en servidor web estático:
 - La escena es un mapa 2D independiente de evaluación de proporciones; no se debe confundir con integración jugable del mapa original.
 - Se comprobó que el script tiene sintaxis JavaScript válida y que las cinco huellas comparten dimensiones.
 
+
+## Integración 3D preliminar
+`index_village_trial.html` conserva el prototipo original y agrega terreno 63×63, dos calles, plaza, zona de mercado y tres fachadas volumétricas provisionales de 8×6. Amplía el límite de desplazamiento del jugador hasta ±31.2 unidades, sin cambiar las colisiones internas ni el código del tutorial de los dos talleres funcionales. No representa todavía cinco edificios terminados ni una reducción de los interiores existentes. Esta copia aún requiere prueba visual, de carga, FPS, navegación y cámara en navegador; no se debe presentar como validada ni fusionar con `main`.
+
 ## Pendiente antes de introducir la ciudad en `index.html`
 1. Medir bounds *renderizados* de GLB externos: personajes, herramientas, estaciones y puerta. No aplicar factor global a ciegas.
 2. Definir metros/casilla y preservar altura del jugador, velocidad en m/s y distancias/interacciones en unidades físicas.
