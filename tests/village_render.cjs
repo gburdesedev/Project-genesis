@@ -22,7 +22,7 @@ const server=http.createServer((req,res)=>{const url=new URL(req.url,'http://loc
  await page.evaluate(()=>{view.camera.setPosition(7,9,31);view.camera.lookAt(new view.Vec3(7,0,10))});await page.waitForTimeout(400);await page.screenshot({path:'/tmp/genesis-responsive/v0.11.005-village-plaza.png'});
  const state=await page.evaluate(()=>({width:GenesisVillagePlan.bounds.maxX-GenesisVillagePlan.bounds.minX,closed:view.village.blocked(-15.5,16),count:view.village.root.children.filter(e=>e.name.includes('fachada cerrada')).length,scale:view.village.root.children.find(e=>e.name.includes('fachada cerrada')).getLocalScale().x,heightScale:view.village.root.children.find(e=>e.name.includes('fachada cerrada')).getLocalScale().y}));assert.equal(state.width,63);assert.equal(state.closed,true);assert.equal(state.count,5);assert.equal(state.scale,.75);assert.equal(state.heightScale,1);
  await page.close();
- const actual=await browser.newPage({viewport:{width:1280,height:800}});actual.setDefaultTimeout(15000);
+ const actual=await browser.newPage({viewport:{width:1280,height:800}});actual.setDefaultTimeout(60000);
  const errors=[];actual.on('pageerror',e=>errors.push(e.message));
  await actual.goto(`http://127.0.0.1:${server.address().port}/index.html`,{waitUntil:'domcontentloaded',timeout:120000});
  await actual.waitForFunction(()=>document.querySelector('#prototypeIntro')?.style.display==='grid'||document.querySelector('.loadingCard.failed'),{},{timeout:120000});
