@@ -28,6 +28,10 @@ export async function mountVillage(app,{shell,roof,door}){
  const b=plan.bounds;
  mesh(root,'Pavimento exterior adoquín','plane',7,-.024,17,63,1,63,pavedMaterial('Adoquín · exterior',cobble,63,63));
  mesh(root,'Plaza central','plane',plan.plaza.x,-.010,plan.plaza.z,16,1,16,pavedMaterial('Adoquín · plaza',cobble,16,16,2.4));
+ // A flush paving border defines the square while leaving crossings open.
+ for(const [x,z,w,d] of [[-1,16,.35,16],[15,16,.35,16],[7,8,16,.35],[7,24,16,.35]]){
+  const m=pavedMaterial('Borde de plaza',cobble,w,d,1.2);m.diffuse.set(.68,.68,.64);m.update();mesh(root,'Marco de plaza','plane',x,-.004,z,w,1,d,m);
+ }
  const edge=edgeMask(app);
  for(const p of plan.roads){const m=pavedMaterial(p.name,traffic,p.w,p.d);m.opacityMap=edge;m.opacityMapChannel='a';m.blendType=BLEND_NORMAL;m.depthWrite=false;m.update();mesh(root,p.name,'plane',p.x,.006,p.z,p.w,1,p.d,m)}
  const trim=material('Piedra de borde',[.35,.34,.29]);
@@ -46,10 +50,11 @@ export async function mountVillage(app,{shell,roof,door}){
  const marker=material('Referencia mercado',[.55,.42,.22]);
  for(const x of [market.x-market.w/2,market.x+market.w/2])mesh(root,'Borde de referencia mercado','box',x,.025,market.z,.12,.05,market.d,marker);
  for(const z of [market.z-market.d/2,market.z+market.d/2])mesh(root,'Borde de referencia mercado','box',market.x,.025,z,market.w,.05,.12,marker);
- sign(app,root,'MERCADO','Área reservada · puestos pendientes',market.x,market.z,-90,2.1,5);
- mesh(root,'Poste cartel mercado','box',market.x,.8,market.z,.18,1.6,.18,marker);
- sign(app,root,'PLAZA CENTRAL','Aldea de los artesanos',7,9,0,1.9,4.4);
- mesh(root,'Poste cartel plaza','box',7,.65,9,.14,1.3,.14,marker);
- const fixedObstacles=[{x:market.x,z:market.z,r:.2},{x:7,z:9,r:.18}];
+ const marketSign={x:market.x-market.w/2+1,z:market.z-market.d/2+1};
+ sign(app,root,'MERCADO','Área reservada · puestos pendientes',marketSign.x,marketSign.z,-90,2.1,5);
+ mesh(root,'Poste cartel mercado','box',marketSign.x,.8,marketSign.z,.18,1.6,.18,marker);
+ sign(app,root,'PLAZA CENTRAL','Aldea de los artesanos',-.5,8,0,1.9,4.4);
+ mesh(root,'Poste cartel plaza','box',-.5,.65,8,.14,1.3,.14,marker);
+ const fixedObstacles=[{x:marketSign.x,z:marketSign.z,r:.2},{x:-.5,z:8,r:.18}];
  return Object.freeze({root,plan,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
 }
