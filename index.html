@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Project Genesis — Prototipo Jugable v0.11 · Powered by NGE Alpha</title>
-<link rel="stylesheet" href="./preparacion.css?v=preparacion-3d-v008-v175-20261025">
+<link rel="stylesheet" href="./preparacion.css?v=responsive-20261025-1">
 
 <script type="importmap">
 {
@@ -184,6 +184,7 @@ html.modalOpen,body.modalOpen{overflow:hidden!important;overscroll-behavior:none
 </style>
 <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>
 <meta name="genesis-build" content="playcanvas-prototype-v0.11-tanner-wearable-concept-2026-09-24">
+<link rel="stylesheet" href="./responsive.css?v=20261025-1">
 </head>
 <body>
 
@@ -701,7 +702,7 @@ window.__genesisAppError=function(event){
 
 <div id="modalLayer"><div class="modal" id="modal"></div></div>
 
-<script src="./preparacion_control.js?v=preparacion-3d-v008-v175-20261025"></script>
+<script src="./preparacion_control.js?v=responsive-20261025-1"></script>
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
 import { Vec3 } from 'playcanvas';
@@ -816,6 +817,19 @@ function toast(msg,ms=1700){toastEl.textContent=msg;toastEl.style.display='block
 function modal(html,extraClass=''){modalBox.className='modal'+(extraClass?' '+extraClass:'');modalBox.innerHTML=html;modalLayer.style.display='grid';document.documentElement.classList.add('modalOpen');document.body.classList.add('modalOpen');clearMovementInput();if(document.pointerLockElement)document.exitPointerLock?.()}
 function closeModal(){modalLayer.style.display='none';modalBox.className='modal';document.documentElement.classList.remove('modalOpen');document.body.classList.remove('modalOpen')}
 
+// Preserve useful horizontal framing on narrow screens. pc-app already observes
+// its CSS box and resizes the canvas; camera FOV is independent of pixel density.
+function setupGameViewport(){
+ const cameraElement=document.querySelector('#cameraRig pc-camera');
+ let scheduled=0;
+ const sync=()=>{scheduled=0;const rect=appEl.getBoundingClientRect(),component=cameraElement?.component;if(!component||rect.width<=0||rect.height<=0)return;const aspect=rect.width/rect.height;component.fov=Math.min(78,Math.max(52,2*Math.atan(Math.tan(26*Math.PI/180)*1.2/aspect)*180/Math.PI));};
+ const requestSync=()=>{if(!scheduled)scheduled=requestAnimationFrame(sync)};
+ new ResizeObserver(requestSync).observe(appEl);
+ addEventListener('resize',requestSync,{passive:true});
+ window.visualViewport?.addEventListener('resize',requestSync,{passive:true});
+ requestSync();
+}
+
 // ---------- Boot: wait for every asset/model/animation before allowing play ----------
 const bootState=window.__genesisBoot||{loaded:0,total:0,error:null};
 function syncPreloadProgress(loaded,total){if(!(total>0))return;setLoadUI((loaded/total)*85,'Descargando assets · '+loaded+'/'+total,'La escena permanecerá bloqueada hasta terminar descarga y preparación.');}
@@ -836,7 +850,7 @@ try{
  const bootWait=(promise,label,timeout=18000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Tiempo agotado preparando '+label)),timeout))]);
  await Promise.all(prepItems.map(async item=>{await bootWait(item.el.ready(),item.label);if(item.kind==='modelo'&&!item.el.contentEntity)throw new Error('No pudo instanciarse: '+item.label);prepared++;setLoadUI(85+(prepared/prepTotal)*15,'Preparando escena · '+prepared+'/'+prepTotal,item.kind+': '+item.label)}));
  const [p,o,t,c]=await Promise.all([bootWait(whenReady('#playerModel'),'Edric cuerpo'),bootWait(whenReady('#ordanModel'),'Ordan'),bootWait(whenReady('#tannerMentorModel'),'mentor Curtidor'),bootWait(whenReady('#cameraRig'),'cámara')]);
- player=p.entity;ordan=o.entity;tannerMentor=t.entity;camera=c.entity;
+ player=p.entity;ordan=o.entity;tannerMentor=t.entity;camera=c.entity;setupGameViewport();
  [playerAnim,playerHeadAnim,playerHairAnim,ordanAnim,ordanHeadAnim,ordanHairAnim,tannerMentorAnim,tannerMentorHeadAnim,tannerMentorHairAnim,tannerChestAnim]=await bootWait(Promise.all([
    whenReady('#playerAnim'),whenReady('#playerHeadAnim'),whenReady('#playerHairAnim'),whenReady('#ordanAnim'),whenReady('#ordanHeadAnim'),whenReady('#ordanHairAnim'),whenReady('#tannerMentorAnim'),whenReady('#tannerMentorHeadAnim'),whenReady('#tannerMentorHairAnim'),whenReady('#tannerChestAnim')
  ]),'animaciones núcleo',18000);

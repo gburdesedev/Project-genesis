@@ -377,15 +377,15 @@
     const layerHTML = SKIN_LAYERS.map(skinImage).join('');
     ctx.modal(`<div class="prepSkinScroll"><div class="prepArtboard" data-stage="${stage}">
       ${layerHTML}
-      ${skinSlots(ctx)}
+      <h2 class="prepCompactTitle">PREPARACIÓN</h2><div class="prepSkinInventory" aria-label="Materiales básicos y preparados">${skinSlots(ctx)}</div>
       ${stage === 'menu' ? `<div class="prepSkinFeatured" aria-label="Resultado de preparación: lingote de hierro, vista estática">${materialVisual(PREPARED, 'featured')}</div>${skinIngredients(ctx)}` : ''}
       <div class="prepSkinCenter" data-stage="${stage}">${center}</div>
       <section class="prepSkinDetails" aria-label="Detalles de preparación">${details}</section>
-      <button class="prepSkinTab" data-tab="Inventario" aria-label="Inventario (no disponible en este menú)" disabled style="${skinPos(164,42,294,94)}"></button>
-      <button class="prepSkinTab" data-tab="Preparacion" aria-label="Preparación, pestaña actual" aria-current="page" disabled style="${skinPos(458,42,320,94)}"></button>
-      <button class="prepSkinTab" data-tab="Fabricaciones" id="prepFabricateTab" aria-label="Ir a fabricar" ${canCraft && stage === 'menu' ? '' : 'disabled'} style="${skinPos(778,42,328,94)}"></button>
-      <button class="prepSkinTab" data-tab="Comparacion" aria-label="Comparación (aún no disponible)" disabled style="${skinPos(1106,42,298,94)}"></button>
-      <button class="prepSkinStart" id="prepStart" ${canPrepare ? '' : 'disabled'} aria-label="${canPrepare ? 'Empezar la preparación del lote' : 'Preparar no disponible'}" style="${skinPos(1137,777,378,122)}"></button>
+      <button class="prepSkinTab" data-tab="Inventario" data-label="Inventario" aria-label="Inventario (no disponible en este menú)" disabled style="${skinPos(164,42,294,94)}"></button>
+      <button class="prepSkinTab" data-tab="Preparacion" data-label="Preparación" aria-label="Preparación, pestaña actual" aria-current="page" disabled style="${skinPos(458,42,320,94)}"></button>
+      <button class="prepSkinTab" data-tab="Fabricaciones" data-label="Fabricación" id="prepFabricateTab" aria-label="Ir a fabricar" ${canCraft && stage === 'menu' ? '' : 'disabled'} style="${skinPos(778,42,328,94)}"></button>
+      <button class="prepSkinTab" data-tab="Comparacion" data-label="Comparación" aria-label="Comparación (aún no disponible)" disabled style="${skinPos(1106,42,298,94)}"></button>
+      <button class="prepSkinStart" id="prepStart" data-label="Preparar lote" ${canPrepare ? '' : 'disabled'} aria-label="${canPrepare ? 'Empezar la preparación del lote' : 'Preparar no disponible'}" style="${skinPos(1137,777,378,122)}"></button>
       <button class="prepSkinClose" id="prepClose" aria-label="Cerrar preparación" title="Cerrar">×</button>
       <div class="prepSkinFooter" aria-live="polite">${footer || 'Preparación · minerales en bruto → lingotes · no otorga experiencia'}</div>
     </div></div>`, 'preparationModal prepSkinModal');

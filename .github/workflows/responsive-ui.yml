@@ -1,0 +1,26 @@
+name: Responsive game UI
+on:
+  push:
+    branches: [main, 'fix/responsive-game']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  layout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/responsive-ui playwright@1.56.1
+      - run: /tmp/responsive-ui/node_modules/.bin/playwright install --with-deps chromium
+      - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/responsive.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: responsive-screenshots
+          path: /tmp/genesis-responsive
+          retention-days: 3
