@@ -1,0 +1,23 @@
+name: Menu study v0.1.001
+on:
+  push:
+    branches: ['design/menus-v001']
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/menu-preview playwright@1.56.1
+      - run: /tmp/menu-preview/node_modules/.bin/playwright install --with-deps chromium
+      - run: NODE_PATH=/tmp/menu-preview/node_modules node tests/menu_study.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: menu-study
+          path: /tmp/menu-study
+          retention-days: 3
