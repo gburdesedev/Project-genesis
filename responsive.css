@@ -114,3 +114,8 @@ pc-app,#hud,#grade,#modalLayer,#loading,#prototypeIntro{height:var(--view-height
  #cameraGuide{left:35%;right:170px;bottom:var(--safe-bottom);max-width:none;font-size:8px;max-height:50px;overflow:auto}
  #ngeWatermark{display:none}
 }
+@media(max-width:1000px),(max-height:600px){
+ .prepCompactTitle{min-height:44px;display:flex;align-items:center}
+ .prepSkinInventory .prepSkinSlot.empty{display:none}
+ .prepArtboard:not([data-stage="menu"]) .prepSkinInventory{display:none}
+}
