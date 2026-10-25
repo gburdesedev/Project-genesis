@@ -119,3 +119,6 @@ pc-app,#hud,#grade,#modalLayer,#loading,#prototypeIntro{height:var(--view-height
  .prepSkinInventory .prepSkinSlot.empty{display:none}
  .prepArtboard:not([data-stage="menu"]) .prepSkinInventory{display:none}
 }
+
+#mouseCaptureHint{position:absolute;left:50%;bottom:calc(var(--safe-bottom) + 38px);transform:translateX(-50%);max-width:calc(100% - var(--safe-left) - var(--safe-right));pointer-events:auto;z-index:15;padding:9px 12px;font-size:11px;line-height:1.4;background:#081b29ed;color:#f4dfa9;border:1px solid #d6a84d88;white-space:normal}
+#mouseCaptureHint[hidden]{display:none}
