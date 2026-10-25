@@ -11,6 +11,7 @@ assert.equal(c.workshopAt(0,-7).profession,'Herrero');assert.equal(c.workshopAt(
 const back=plan.toLocal(2.25,-6,0);assert.equal(back.x,3);assert.equal(back.z,-8);const point=plan.toWorld({x:17,y:1,z:-8},14);assert.equal(point.x,16.25);assert.equal(point.z,-6);assert.equal(point.y,1);
 assert(source.includes('id="compactBlacksmithRoot" scale=".75 1 .75"'));assert(/id="tannerWorkshopRoot"[^>]*scale=".75 1 .75"/.test(source));
 for(const w of plan.workshops)assert(w.w*w.d<=71,'footprint should be about 44% smaller');
+assert(source.includes('data-preserve-proportions="true"'));
 const keys=new Set();assert.equal(plan.movementSpeed(keys),2.75);keys.add('ShiftLeft');assert.equal(plan.movementSpeed(keys),5);keys.delete('ShiftLeft');keys.add('ShiftRight');assert.equal(plan.movementSpeed(keys),5);keys.clear();assert.equal(plan.movementSpeed(keys),2.75);
 const input={keys:new Set(['KeyW','ShiftLeft','ShiftRight']),MOVEMENT_KEYS:new Set(['KeyW','ShiftLeft','ShiftRight']),NOTEBOOK_CAMERA_KEYS:new Set(),moveX:1,moveY:1,setWalking(){}};vm.createContext(input);vm.runInContext(declaration('clearMovementInput'),input);input.clearMovementInput();assert.equal(input.keys.size,0);
 console.log('PASS proportions/sprint: 25% smaller sides, unchanged height, aligned doors/walls/camera, open tutorial aisle, both Shift keys and focus reset');
