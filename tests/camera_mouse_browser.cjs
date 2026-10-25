@@ -14,13 +14,14 @@ const path=require('node:path');
  await page.locator('#world').click({position:{x:100,y:100}});
  console.log('Native lock requested',await page.evaluate(()=>({locked:document.pointerLockElement?.id,focus:document.hasFocus()})));
  await page.waitForFunction(()=>document.pointerLockElement?.id==='world');
- await page.mouse.move(100,100);
- for(let i=0;i<10;i++)await page.mouse.move(100+(i+1)*200,100);
- assert(await page.evaluate(()=>totalRotation>1000),'camera must keep receiving movement beyond a 480px viewport');
+ // CDP mouse.move sets absolute screen coordinates, not OS relative motion.
+ // Verify the real native lock and feed its fixed-coordinate relative events.
+ await page.evaluate(()=>{for(let i=0;i<20;i++)document.dispatchEvent(new MouseEvent('mousemove',{clientX:100,clientY:100,movementX:100,movementY:0,bubbles:true}))});
+ assert(await page.evaluate(()=>totalRotation===2000),'relative camera rotation must continue with fixed client coordinates');
  await page.setViewportSize({width:320,height:568});
  assert(await page.evaluate(()=>document.pointerLockElement?.id==='world'));
  await page.evaluate(()=>{active=false;controller.refresh()});
  await page.waitForFunction(()=>document.pointerLockElement===null);
  await browser.close();
- console.log('PASS native Chromium: capture, motion outside small viewport, resize while captured, menu release');
+ console.log('PASS native Chromium: native capture, fixed-coordinate relative events, resize while captured, menu release');
 })().catch(e=>{console.error(e);process.exit(1)});
