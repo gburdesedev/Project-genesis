@@ -29,13 +29,13 @@
 
   const RAW = 'Mineral de hierro';
   const PREPARED = 'Lingote de hierro';
-  // Renders originales para carga instantánea; los GLB web optimizados se
-  // añaden aquí cuando superen la auditoría de triángulos/peso en Actions.
+  // Mineral V008 aprobado: 55.000 triángulos y PBR 1536; PNG RGBA en móvil.
+  // El lingote V175 conserva su modelo y render anteriores.
   // Un PNG nunca se anima como si fuese geometría 3D.
   const MATERIAL_ART = Object.freeze({
     [RAW]: Object.freeze({
-      poster: 'assets/playcanvas/candidates/materials/iron_ore/v008/mineral_hierro_v008_web_transparent.png',
-      model: 'assets/playcanvas/candidates/materials/iron_ore/v008/mineral_hierro_v008_web_candidate.glb'
+      poster: 'assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png',
+      model: 'assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_55k_pbr1536_v007.glb'
     }),
     [PREPARED]: Object.freeze({
       poster: 'assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png',
