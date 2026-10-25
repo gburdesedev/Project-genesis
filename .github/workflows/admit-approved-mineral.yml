@@ -1,0 +1,27 @@
+name: Admit approved mineral bytes
+on:
+  push:
+    branches: ['import/approved-mineral-v007']
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Verify approved payload and store GLB object
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          python - <<'PY'
+          import os,urllib.request,json,base64,zlib,hashlib
+          api='https://api.github.com/repos/'+os.environ['REPO']+'/git/blobs'
+          headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'}
+          raw=json.load(urllib.request.urlopen(urllib.request.Request(api+'/69813a099181632b5450f7f2c8c1b3681a95c546',headers=headers)))
+          b=zlib.decompress(base64.b64decode(raw['content']))
+          assert len(b)==13239988
+          assert hashlib.sha256(b).hexdigest()=='22c2392c49cece478f6609d9103e37a1b0501c395aeb8ba71ebbb8a4583c5481'
+          body=json.dumps({'content':base64.b64encode(b).decode(),'encoding':'base64'}).encode()
+          result=json.load(urllib.request.urlopen(urllib.request.Request(api,data=body,headers=headers,method='POST')))
+          print('VERIFIED_APPROVED_GLB_SHA='+result['sha'])
+          PY
