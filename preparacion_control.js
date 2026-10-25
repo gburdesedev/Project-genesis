@@ -6,6 +6,16 @@
 (() => {
   'use strict';
 
+  const safePreviews = !!window.GenesisDevice?.safePreviews;
+  const desktopSkin = window.matchMedia?.('(min-width: 1001px) and (min-height: 601px)');
+  function syncSkinAssets(){
+    document.querySelectorAll('.prepSkinPiece[data-desktop-src]').forEach(image => {
+      if (!safePreviews && desktopSkin?.matches) image.src = image.dataset.desktopSrc;
+      else image.removeAttribute('src');
+    });
+  }
+  desktopSkin?.addEventListener('change', syncSkinAssets);
+
   const RAW = 'Mineral de hierro';
   const PREPARED = 'Lingote de hierro';
   // Renders originales para carga instantánea; los GLB web optimizados se
@@ -268,7 +278,7 @@
     const [name, file, x, y, width, height, role] = layer;
     const state = role.startsWith('boton_') ? role.slice(6) : '';
     const hover = role === 'hover_overlay' ? name.replace('Pestana_', '').replace('_HoverBrillo', '') : '';
-    return `<img class="prepSkinPiece" data-role="${role}" data-state="${state}" data-hover="${hover}" src="${SKIN_ROOT + file}" alt="" aria-hidden="true" draggable="false" style="${skinPos(x,y,width,height)}">`;
+    return `<img class="prepSkinPiece" data-role="${role}" data-state="${state}" data-hover="${hover}" data-desktop-src="${SKIN_ROOT + file}" ${!safePreviews && desktopSkin?.matches ? `src="${SKIN_ROOT + file}"` : ''} alt="" aria-hidden="true" draggable="false" style="${skinPos(x,y,width,height)}">`;
   }
 
   function materialVisual(material, type) {
@@ -276,7 +286,7 @@
     if (!art) return '';
     const name = escape(material);
     const poster = escape(art.poster);
-    const visual = art.model && type !== 'featured'
+    const visual = !safePreviews && art.model && type !== 'featured'
       ? `<model-viewer class="prepMaterialModel" src="${escape(art.model)}" poster="${poster}" loading="eager" reveal="auto" interaction-prompt="none" camera-orbit="0deg 75deg auto" environment-image="neutral" exposure="1.45" shadow-intensity="0" alt="${name}"></model-viewer>`
       : `<img class="prepMaterialPoster" src="${poster}" alt="${name}" loading="lazy" draggable="false">`;
     return `<span class="prepMaterialVisual ${type}" data-material="${name}">${visual}</span>`;

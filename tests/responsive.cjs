@@ -30,6 +30,7 @@ const html = source.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replace(/
   await page.evaluate(()=>document.querySelector('#prototypeIntro').style.display='grid');
   await bounds('.protoIntroCard');
   await page.evaluate(()=>document.querySelector('#prototypeIntro').style.display='none');
+  await page.addScriptTag({content:fs.readFileSync(path.join(root,'device_policy.js'),'utf8')});
   // Same production preparation logic and inventory state.
   await page.addScriptTag({content:fs.readFileSync(path.join(root,'preparacion_control.js'),'utf8')});
   await page.evaluate(()=>{

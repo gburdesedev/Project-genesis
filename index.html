@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<script src="./device_policy.js?v=0.11.001"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Project Genesis — Prototipo Jugable v0.11 · Powered by NGE Alpha</title>
+<title>Project Genesis — Prototipo Jugable v0.11.001 · Powered by NGE Alpha</title>
 <link rel="stylesheet" href="./preparacion.css?v=responsive-20261025-1">
 
 <script type="importmap">
@@ -182,9 +183,11 @@ html.modalOpen,body.modalOpen{overflow:hidden!important;overscroll-behavior:none
 @media(max-width:720px){.mercDossierModal{width:calc(100vw - 12px);height:calc(100vh - 12px);max-height:calc(100vh - 12px);padding:9px}.mercSheetBody{grid-template-columns:1fr;overflow:auto}.mercInventoryPanel{grid-column:auto}.mercDossierModal .mercInventory{grid-template-columns:1fr 1fr}.mercDossierModal .mercProtoFlag{display:none}.mercDossierModal .mercTopline{margin-bottom:5px}.elementStatRow{grid-template-columns:minmax(120px,1fr) 58px 56px}}
 
 </style>
-<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>
-<meta name="genesis-build" content="playcanvas-prototype-v0.11-tanner-wearable-concept-2026-09-24">
-<link rel="stylesheet" href="./responsive.css?v=20261025-3">
+<script>
+if(!window.GenesisDevice.safePreviews){const script=document.createElement('script');script.type='module';script.src='https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js';document.head.append(script)}
+</script>
+<meta name="genesis-build" content="playcanvas-v0.11.001-mobile-memory-landscape">
+<link rel="stylesheet" href="./responsive.css?v=0.11.001">
 </head>
 <body>
 
@@ -621,6 +624,7 @@ window.__genesisAppError=function(event){
     </pc-entity>
   </pc-scene>
 </pc-app>
+<script>window.GenesisDevice.configureApp(document.getElementById('genesisApp'));</script>
 
 <div id="grade"></div>
 
@@ -677,7 +681,7 @@ window.__genesisAppError=function(event){
 </div>
 
 <div id="hud">
- <div id="brand">PROJECT GENESIS · PROTOTIPO</div>
+ <div id="brand">PROJECT GENESIS · v0.11.001</div>
  <div id="tech">PLAYCANVAS 2.22.1 · PROTOTIPO · v0.11</div>
  <div id="buttonsTop"><button id="cameraSettingsBtn" class="uiBtn" type="button" aria-label="Configurar cámara">⚙ CÁMARA</button></div>
  <section id="quest">
@@ -698,13 +702,13 @@ window.__genesisAppError=function(event){
  </div>
 </div>
 
-<div id="rotate">En iPhone se disfruta mejor girando el teléfono en horizontal.</div>
+<div id="rotate">Para jugar con más espacio, girá el teléfono en horizontal.</div>
 
 <div id="modalLayer"><div class="modal" id="modal"></div></div>
 
 <script src="./fps_counter.js?v=20261025-1"></script>
 <script src="./camera_mouse.js?v=20261025-1"></script>
-<script src="./preparacion_control.js?v=responsive-20261025-1"></script>
+<script src="./preparacion_control.js?v=0.11.001"></script>
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
 import { Vec3 } from 'playcanvas';
@@ -1115,7 +1119,7 @@ const EQUIP_MODEL_URLS=Object.freeze({
  espada_hierro:'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/sword.glb',
  escudo_hierro:'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/shield_round.glb'
 });
-const MOBILE_SAFE_PREVIEWS=/iPad|iPhone|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const MOBILE_SAFE_PREVIEWS=window.GenesisDevice.safePreviews;
 function itemAssetMarkup(item){const src=EQUIP_MODEL_URLS[item.recipe],kind=recipeKind(item.recipe);if(MOBILE_SAFE_PREVIEWS||!src)return `<img alt="${esc(kind)}" src="${itemIcon(item.recipe)}">`;return `<model-viewer src="${src}" alt="${esc(item.name)}" camera-orbit="35deg 70deg auto" auto-rotate rotation-per-second="18deg" shadow-intensity="1" exposure="1.05" interaction-prompt="none" disable-zoom></model-viewer>`}
 function formulaWeightBreakdown(formula){if(!formula?.materials?.length)return[];const weighted=formula.materials.map(m=>({material:m.material,qty:Number(m.qty)||0,weight:(Number(m.qty)||0)})).sort((a,b)=>b.weight-a.weight||b.qty-a.qty||a.material.localeCompare(b.material,'es'));const total=weighted.reduce((s,m)=>s+m.weight,0)||1;return weighted.map(m=>({...m,pct:Math.round(m.weight*100/total)}))}
 function namingReason(item){const sortedAff=[...item.affinities].sort((a,b)=>b[1]-a[1]);if(!sortedAff.length)return `Cierre Inútil: NGE nombra desde la función base, su intensidad y la composición real de la fórmula, sin inventar afinidades.`;if(sortedAff.length===1)return `La identidad visible del nombre corresponde a ${esc(sortedAff[0][0])}, la afinidad elemental de este cierre.`;return `El nombre muestra las dos afinidades certificadas del cierre, priorizando ${esc(sortedAff[0][0])} por su mayor intensidad.`}

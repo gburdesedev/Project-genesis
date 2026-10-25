@@ -62,7 +62,7 @@ pc-app,#hud,#grade,#modalLayer,#loading,#prototypeIntro{height:var(--view-height
 }
 /* Compact preparation uses the same assets/data, but flows instead of clipping
    a desktop artboard. No transform scaling of text or interaction coordinates. */
-@media(max-width:1000px),(max-height:600px){
+@media(max-width:1000px),(max-height:600px),(pointer:coarse){
  .modal.preparationModal.prepSkinModal{width:min(100%,1000px);max-height:var(--menu-height);border:1px solid #89623c!important}
  .prepArtboard{aspect-ratio:auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:12px;font-size:14px;background:radial-gradient(ellipse at 50% 30%,#402615,#0e0b09 70%)}
  .prepSkinPiece{display:none}
@@ -114,7 +114,7 @@ pc-app,#hud,#grade,#modalLayer,#loading,#prototypeIntro{height:var(--view-height
  #cameraGuide{left:35%;right:170px;bottom:var(--safe-bottom);max-width:none;font-size:8px;max-height:50px;overflow:auto}
  #ngeWatermark{display:none}
 }
-@media(max-width:1000px),(max-height:600px){
+@media(max-width:1000px),(max-height:600px),(pointer:coarse){
  .prepCompactTitle{min-height:44px;display:flex;align-items:center}
  .prepSkinInventory .prepSkinSlot.empty{display:none}
  .prepArtboard:not([data-stage="menu"]) .prepSkinInventory{display:none}
@@ -125,3 +125,8 @@ pc-app,#hud,#grade,#modalLayer,#loading,#prototypeIntro{height:var(--view-height
 
 #tech.fpsCounter{font-size:11px;font-weight:700;line-height:1.2;letter-spacing:0;color:#bce9cb;font-variant-numeric:tabular-nums;white-space:nowrap;pointer-events:none;padding:4px 7px}
 @media(max-width:760px){#tech.fpsCounter{font-size:10px;padding:3px 5px}}
+
+@media(orientation:portrait){
+ .mobile-device #rotate{display:block;left:50%;right:auto;bottom:calc(var(--safe-bottom) + 116px);transform:translateX(-50%);width:min(300px,calc(100% - 24px));pointer-events:none;z-index:20;font-size:11px}
+ .mobile-device.modalOpen #rotate{display:none}
+}
