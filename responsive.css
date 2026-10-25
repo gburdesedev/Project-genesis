@@ -60,52 +60,6 @@ pc-app,#hud,#grade,#modalLayer,#loading,#prototypeIntro{height:var(--view-height
  #ngeWatermark{right:var(--safe-right);bottom:calc(var(--safe-bottom) + 220px);width:100px;height:32px}
  #lookHint{display:none}
 }
-/* Compact preparation uses the same assets/data, but flows instead of clipping
-   a desktop artboard. No transform scaling of text or interaction coordinates. */
-@media(max-width:1000px),(max-height:600px),(pointer:coarse){
- .modal.preparationModal.prepSkinModal{width:min(100%,1000px);max-height:var(--menu-height);border:1px solid #89623c!important}
- .prepArtboard{aspect-ratio:auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:12px;font-size:14px;background:radial-gradient(ellipse at 50% 30%,#402615,#0e0b09 70%)}
- .prepSkinPiece{display:none}
- .prepCompactTitle{display:block;grid-column:1/-1;grid-row:1;margin:0 44px 0 0!important;font-size:18px!important;color:#efcc94}
- .prepArtboard .prepSkinTab{position:relative!important;inset:auto!important;width:auto!important;height:auto!important;grid-row:2;min-height:44px;z-index:auto;border:1px solid #89623c!important;background:#281b10!important;font-size:12px}
- .prepSkinTab::after{content:attr(data-label)}
- .prepSkinTab[aria-current]{box-shadow:inset 0 -3px #eac280}
- .prepSkinTab:disabled{color:#ae9a80}
- .prepSkinInventory{display:grid;grid-column:1/-1;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px}
- .prepSkinInventory::before{content:'MATERIALES BÁSICOS Y PREPARADOS';grid-column:1/-1;font:11px system-ui,sans-serif;color:#dfb779}
- .prepSkinInventory .prepSkinSlot{position:relative!important;inset:auto!important;width:100%!important;height:auto!important;aspect-ratio:1;min-height:44px;border:1px solid #89623c!important;background:#1c130e!important;border-radius:5px!important;z-index:auto}
- .prepSkinSlot strong{font-size:13px}
- .prepSkinFeatured{position:relative;inset:auto;width:100%;height:160px;grid-column:1/3;z-index:auto;background:radial-gradient(ellipse,#59371f44,transparent)}
- .prepSkinIngredients{position:relative;inset:auto;width:100%;height:auto;min-height:150px;grid-column:3/5;z-index:auto;padding:10px;gap:8px}
- .prepSkinIngredients h3{font-size:13px;white-space:normal}
- .prepSkinIngredients p{font-size:12px;white-space:normal}
- .prepSkinRecipeSlot{width:64px;height:70px}
- .prepSkinCenter{position:relative;inset:auto!important;width:100%;height:auto!important;grid-column:1/-1;z-index:auto;font-size:14px;pointer-events:auto}
- .prepSkinCenterBadge{width:100%;padding:10px}
- .prepSkinDetails{position:relative;inset:auto;width:100%;height:auto;max-height:none;grid-column:1/-1;z-index:auto;padding:12px;overflow:visible;font-size:14px;border:1px solid #765431;background:#130e0b}
- .prepSkinDetails h3,.prepSkinDetails h4,.prepSkinDetails p{margin:8px 0}
- .prepSkinDetails .prepSkinStat,.prepSkinDetails .prepSkinNeed{padding:8px 0}
- .prepSkinQty{margin-top:10px}
- .prepArtboard .prepSkinQty button{min-width:44px;min-height:44px;padding:6px}
- .prepSkinDivider{margin:12px 0}
- .prepArtboard .prepSkinStart{position:relative!important;inset:auto!important;width:100%!important;height:auto!important;grid-column:1/-1;min-height:48px;border:1px solid #d8ac65!important;background:linear-gradient(#875728,#4c2b15)!important;font-size:15px;z-index:auto}
- .prepSkinStart::after{content:attr(data-label)}
- .prepArtboard .prepSkinStart:disabled{opacity:.5!important}
- .prepSkinClose{top:8px;right:8px;width:44px;height:44px;font-size:26px}
- .prepSkinFooter{position:relative;inset:auto;width:100%;grid-column:1/-1;z-index:auto;font-size:11px;line-height:1.4}
- .prepSkinHeatWindow,.prepSkinResultBox{width:100%;max-height:none;overflow:visible;padding:14px}
- .prepSkinHeatGauge{height:26px}.prepSkinProgressBar{height:14px}
- .prepSkinBellowButtons{gap:8px}
- .prepArtboard .prepSkinBellowButtons button{min-height:64px;font-size:16px;padding:10px 3px}
- .prepSkinBellowButtons small,.prepSkinBellowButtons em,.prepSkinHeatEnds{font-size:10px}
- .prepArtboard .prepSkinCraft{min-height:44px;padding:10px}
-}
-@media(max-width:540px){
- .prepArtboard{padding:8px;gap:8px}
- .prepSkinInventory{grid-template-columns:repeat(5,minmax(0,1fr))}
- .prepArtboard .prepSkinTab{font-size:10px}
- .prepSkinBellowButtons{grid-template-columns:minmax(0,1fr)}
-}
 @media(max-height:500px) and (orientation:landscape){
  #quest{top:42px;width:min(340px,45vw);max-height:28dvh;padding:6px 9px}
  #professionChip{top:calc(42px + 28dvh + 6px);max-width:45vw}
@@ -114,11 +68,7 @@ pc-app,#hud,#grade,#modalLayer,#loading,#prototypeIntro{height:var(--view-height
  #cameraGuide{left:35%;right:170px;bottom:var(--safe-bottom);max-width:none;font-size:8px;max-height:50px;overflow:auto}
  #ngeWatermark{display:none}
 }
-@media(max-width:1000px),(max-height:600px),(pointer:coarse){
- .prepCompactTitle{min-height:44px;display:flex;align-items:center}
- .prepSkinInventory .prepSkinSlot.empty{display:none}
- .prepArtboard:not([data-stage="menu"]) .prepSkinInventory{display:none}
-}
+
 
 #mouseCaptureHint{position:absolute;left:50%;bottom:calc(var(--safe-bottom) + 38px);transform:translateX(-50%);max-width:calc(100% - var(--safe-left) - var(--safe-right));pointer-events:auto;z-index:15;padding:9px 12px;font-size:11px;line-height:1.4;background:#081b29ed;color:#f4dfa9;border:1px solid #d6a84d88;white-space:normal}
 #mouseCaptureHint[hidden]{display:none}
@@ -130,3 +80,10 @@ pc-app,#hud,#grade,#modalLayer,#loading,#prototypeIntro{height:var(--view-height
  .mobile-device #rotate{display:block;left:50%;right:auto;bottom:calc(var(--safe-bottom) + 116px);transform:translateX(-50%);width:min(300px,calc(100% - 24px));pointer-events:none;z-index:20;font-size:11px}
  .mobile-device.modalOpen #rotate{display:none}
 }
+
+/* v0.11.002: preserve the original 1536x1024 artwork composition on every device. */
+.modal.preparationModal.prepSkinModal{width:max-content;max-width:100%;max-height:var(--menu-height);overflow:hidden}
+.prepSkinScroll{position:relative;overflow:hidden;width:var(--prep-layout-width,1536px);height:var(--prep-layout-height,1024px);max-height:none;max-width:none;touch-action:manipulation}
+.prepArtboard{position:absolute;left:0;top:0;width:1536px!important;min-width:1536px!important;height:1024px;aspect-ratio:1536/1024;transform:scale(var(--prep-scale,1));transform-origin:top left}
+.prepSkinInventory{display:contents}
+.prepCompactTitle{display:none}

@@ -23,13 +23,13 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/<script
   assert.equal(await page.locator('pc-app').getAttribute('max-pixel-ratio'),'1.5');
   for(let round=0;round<3;round++){
    assert.equal(await page.locator('model-viewer').count(),0);
-   assert.equal(await page.locator('.prepSkinPiece[src]').count(),0);
+   assert(await page.locator('.prepSkinPiece[src]').count()>0);
    assert(await page.locator('.prepMaterialPoster').count()>0);
    await page.locator('#prepMore').click();assert.equal(await page.locator('.prepSkinQty b').textContent(),'2');
    await page.setViewportSize({width:844,height:390});
    await page.locator('#rotate').waitFor({state:'hidden'});
    assert.equal(await page.locator('.prepSkinQty b').textContent(),'2');
-   const overflow=await page.locator('#modal').evaluate(el=>el.scrollWidth>el.clientWidth+2);assert.equal(overflow,false);
+   const fits=await page.locator('#modal').evaluate(el=>{const r=el.getBoundingClientRect();return r.left>=-1&&r.right<=innerWidth+1&&r.top>=-1&&r.bottom<=innerHeight+1});assert(fits);
    await page.locator('#prepStart').scrollIntoViewIfNeeded();await page.locator('#prepStart').click();
    assert.equal(await page.locator('.prepSkinBellowButtons button').count(),3);
    await page.locator('#prepBellow1').scrollIntoViewIfNeeded();await page.locator('#prepBellow1').click();
@@ -37,8 +37,8 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/<script
    await page.setViewportSize({width:390,height:844});await page.locator('#rotate').waitFor({state:'visible'});
    await page.evaluate(()=>openTestMenu());
   }
-  assert.equal(requests.filter(url=>/\.glb/.test(url)).length,0,'mobile menu must not request GLB or hidden desktop skin assets');
-  console.log(`PASS ${name}: mobile posters only, no hidden layers/GLB, 1.5 DPR cap, orientation, repeated menu use and thermal controls`);
+  assert.equal(requests.filter(url=>/\.glb/.test(url)).length,0,'mobile menu must not request GLB');
+  console.log(`PASS ${name}: mobile posters only, original artwork and no GLB, 1.5 DPR cap, orientation, repeated menu use and thermal controls`);
   await browser.close();
  }
 })().catch(error=>{console.error(error);process.exit(1)});

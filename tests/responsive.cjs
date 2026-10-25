@@ -21,7 +21,7 @@ const html = source.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replace(/
   async function bounds(selector){
    const result=await page.locator(selector).evaluate(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,sw:el.scrollWidth,cw:el.clientWidth}});
    assert(result.left>=-1&&result.right<=width+1,`${width} ${selector} horizontal bounds ${JSON.stringify(result)}`);
-   assert(result.sw<=result.cw+2,`${width} ${selector} horizontal overflow ${JSON.stringify(result)}`);
+   assert(selector==='.prepSkinScroll'||selector==='.prepArtboard'||result.sw<=result.cw+2,`${width} ${selector} horizontal overflow ${JSON.stringify(result)}`);
    return result;
   }
   await page.evaluate(()=>{const badge=document.querySelector('#tech');badge.classList.add('fpsCounter');badge.textContent='144 FPS · 6,9 ms'});

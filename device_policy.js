@@ -1,4 +1,4 @@
-/* v0.11.001: budget menu previews and world buffers separately from UI pixels. */
+/* v0.11.002: budget menu previews and world buffers separately from UI pixels. */
 (() => {
   'use strict';
   const safePreviews = /Android|iPad|iPhone|iPod|Mobile/i.test(navigator.userAgent)

@@ -7,14 +7,25 @@
   'use strict';
 
   const safePreviews = !!window.GenesisDevice?.safePreviews;
-  const desktopSkin = window.matchMedia?.('(min-width: 1001px) and (min-height: 601px)');
-  function syncSkinAssets(){
-    document.querySelectorAll('.prepSkinPiece[data-desktop-src]').forEach(image => {
-      if (!safePreviews && desktopSkin?.matches) image.src = image.dataset.desktopSrc;
-      else image.removeAttribute('src');
-    });
+  let layoutFrame = 0, layoutObserver;
+  function syncOriginalLayout(){
+    layoutFrame = 0;
+    const wrapper = document.querySelector('.prepSkinModal .prepSkinScroll');
+    const layer = document.getElementById('modalLayer');
+    if (!wrapper || !layer || !layer.clientWidth || !layer.clientHeight) return;
+    const style = getComputedStyle(layer);
+    const width = layer.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    const height = layer.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+    const scale = Math.max(.01, Math.min(1, width / 1536, height / 1024));
+    wrapper.style.setProperty('--prep-layout-width', `${1536 * scale}px`);
+    wrapper.style.setProperty('--prep-layout-height', `${1024 * scale}px`);
+    wrapper.style.setProperty('--prep-scale', scale);
   }
-  desktopSkin?.addEventListener('change', syncSkinAssets);
+  function scheduleOriginalLayout(){
+    if (!layoutFrame) layoutFrame = requestAnimationFrame(syncOriginalLayout);
+  }
+  addEventListener('resize', scheduleOriginalLayout, {passive:true});
+  window.visualViewport?.addEventListener('resize', scheduleOriginalLayout, {passive:true});
 
   const RAW = 'Mineral de hierro';
   const PREPARED = 'Lingote de hierro';
@@ -278,7 +289,7 @@
     const [name, file, x, y, width, height, role] = layer;
     const state = role.startsWith('boton_') ? role.slice(6) : '';
     const hover = role === 'hover_overlay' ? name.replace('Pestana_', '').replace('_HoverBrillo', '') : '';
-    return `<img class="prepSkinPiece" data-role="${role}" data-state="${state}" data-hover="${hover}" data-desktop-src="${SKIN_ROOT + file}" ${!safePreviews && desktopSkin?.matches ? `src="${SKIN_ROOT + file}"` : ''} alt="" aria-hidden="true" draggable="false" style="${skinPos(x,y,width,height)}">`;
+    return `<img class="prepSkinPiece" data-role="${role}" data-state="${state}" data-hover="${hover}" src="${SKIN_ROOT + file}" alt="" aria-hidden="true" draggable="false" style="${skinPos(x,y,width,height)}">`;
   }
 
   function materialVisual(material, type) {
@@ -399,6 +410,11 @@
       <button class="prepSkinClose" id="prepClose" aria-label="Cerrar preparación" title="Cerrar">×</button>
       <div class="prepSkinFooter" aria-live="polite">${footer || 'Preparación · minerales en bruto → lingotes · no otorga experiencia'}</div>
     </div></div>`, 'preparationModal prepSkinModal');
+    syncOriginalLayout();
+    if (!layoutObserver && typeof ResizeObserver !== 'undefined') {
+      layoutObserver = new ResizeObserver(scheduleOriginalLayout);
+      layoutObserver.observe(document.getElementById('modalLayer'));
+    }
     bind('prepClose', close);
     bind('prepSelectIron', () => { if (ctx.mode === 'menu') renderMenu(); });
     bind('prepFabricateTab', craft);
