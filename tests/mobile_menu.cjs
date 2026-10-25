@@ -27,14 +27,14 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/<script
    assert(await page.locator('.prepMaterialPoster').count()>0);
    await page.locator('#prepMore').click();assert.equal(await page.locator('.prepSkinQty b').textContent(),'2');
    await page.setViewportSize({width:844,height:390});
-   assert.equal(await page.locator('#rotate').isVisible(),false);
+   await page.locator('#rotate').waitFor({state:'hidden'});
    assert.equal(await page.locator('.prepSkinQty b').textContent(),'2');
    const overflow=await page.locator('#modal').evaluate(el=>el.scrollWidth>el.clientWidth+2);assert.equal(overflow,false);
    await page.locator('#prepStart').scrollIntoViewIfNeeded();await page.locator('#prepStart').click();
    assert.equal(await page.locator('.prepSkinBellowButtons button').count(),3);
    await page.locator('#prepBellow1').scrollIntoViewIfNeeded();await page.locator('#prepBellow1').click();
    await page.locator('#prepClose').scrollIntoViewIfNeeded();await page.locator('#prepClose').click();
-   await page.setViewportSize({width:390,height:844});assert.equal(await page.locator('#rotate').isVisible(),true);
+   await page.setViewportSize({width:390,height:844});await page.locator('#rotate').waitFor({state:'visible'});
    await page.evaluate(()=>openTestMenu());
   }
   assert.equal(requests.filter(url=>/\.glb/.test(url)).length,0,'mobile menu must not request GLB or hidden desktop skin assets');
