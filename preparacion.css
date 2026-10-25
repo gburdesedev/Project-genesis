@@ -198,8 +198,9 @@
  .prepSkinStat span{color:#c9b08f}
  .prepSkinStat b{color:#fce5ad;font-size:1.1em;white-space:nowrap}
  .prepSkinQty{display:flex;justify-content:space-between;align-items:center;gap:3%;margin-top:5%;font-size:.85em}
- .prepSkinQty>div{display:flex;align-items:center;justify-content:space-evenly;min-width:42%}
- .prepArtboard .prepSkinQty button{border:1px solid #a6783f;background:#2a1d11;color:#f3d29e;min-width:25%;padding:2% 4%;cursor:pointer;font-size:1.25em}
+ .prepSkinQty>div{display:grid;grid-template-columns:34px minmax(48px,1fr) 34px;align-items:center;gap:10px;width:156px;max-width:60%;flex:none}
+ .prepSkinQty>div>b{display:block;text-align:center;min-width:48px;font-size:20px;line-height:34px;font-variant-numeric:tabular-nums;white-space:nowrap}
+ .prepArtboard .prepSkinQty button{border:1px solid #a6783f;background:#2a1d11;color:#f3d29e;min-width:0;width:34px;height:34px;padding:0;cursor:pointer;font-size:20px;line-height:1}
  .prepArtboard button:disabled{cursor:default}
  .prepArtboard .prepSkinQty button:disabled{opacity:.3}
  .prepSkinMinor{font-size:.76em!important}

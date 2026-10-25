@@ -24,11 +24,13 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/<script
   assert.equal(await page.locator('.prepSkinSlot.empty').first().isVisible(),true);
   assert.equal(await page.locator('.prepSkinPiece').first().isVisible(),true);
   assert.equal(await page.locator('.prepCompactTitle').isVisible(),false);
-  if(width===844){await page.evaluate(()=>Promise.all([...document.images].filter(i=>i.closest('.prepSkinModal')).map(i=>i.decode().catch(()=>{}))));await page.screenshot({path:`${out}/v0.11.002-original-menu-landscape.png`})}
+  const separated=await page.locator('.prepSkinQty>div').evaluate(el=>{const [less,value,more]=[...el.children].map(c=>c.getBoundingClientRect());return less.right<value.left&&value.right<more.left&&value.width>=value.height});
+  assert(separated,'quantity must have its own centered space between controls');
+  if(width===844){await page.evaluate(()=>Promise.all([...document.images].filter(i=>i.closest('.prepSkinModal')).map(i=>i.decode().catch(()=>{}))));await page.screenshot({path:`${out}/v0.11.003-original-menu-landscape.png`})}
  }
  await page.setViewportSize({width:844,height:390});await page.locator('#prepStart').click();
  await composition('.prepSkinCenter',.394,.21,.323,.66);
  await composition('.prepSkinDetails',.751,.206,.221,.529);
- await page.screenshot({path:`${out}/v0.11.002-original-minigame-landscape.png`});
+ await page.screenshot({path:`${out}/v0.11.003-original-minigame-landscape.png`});
  await browser.close();console.log('PASS original artwork composition: fixed asset positions, uniform scale, frames and minigame restored');
 })().catch(e=>{console.error(e);process.exit(1)});

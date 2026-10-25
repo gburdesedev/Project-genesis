@@ -470,7 +470,7 @@
       <p class="prepSkinIntro">Transformá el mineral en lingotes antes de fabricar. Cada tanda se completa al llegar a 100.</p>
       <div class="prepSkinStat"><span>Mineral de hierro</span><b>${raw}</b></div>
       <div class="prepSkinStat"><span>Lingotes disponibles</span><b>${ingots}</b></div>
-      <div class="prepSkinQty"><label>Cantidad del lote</label><div><button id="prepLess" ${ctx.count <= 1 ? 'disabled' : ''}>−</button><b>${ctx.count}</b><button id="prepMore" ${ctx.count >= raw ? 'disabled' : ''}>+</button></div></div>
+      <div class="prepSkinQty"><label>Cantidad del lote</label><div><button id="prepLess" aria-label="Reducir cantidad de lingotes" ${ctx.count <= 1 ? 'disabled' : ''}>−</button><b>${ctx.count}</b><button id="prepMore" aria-label="Aumentar cantidad de lingotes" ${ctx.count >= raw ? 'disabled' : ''}>+</button></div></div>
       <p class="prepSkinMinor">${batch ? `Dificultad relativa: ${Math.round(batch.difficultyMultiplier * 100)} %. A más mineral, mayor exigencia térmica.` : 'No queda mineral de hierro sin preparar.'}</p>
       <div class="prepSkinDivider"></div>
       <p class="prepSkinKicker">PRÓXIMA FABRICACIÓN</p>

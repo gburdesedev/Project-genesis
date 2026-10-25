@@ -1,7 +1,7 @@
 name: Responsive game UI
 on:
   push:
-    branches: [main, 'fix/responsive-game', 'fix/mouse-capture', 'feat/fps-counter', 'fix/mobile-v0.11.001', 'fix/layout-v0.11.002']
+    branches: [main, 'fix/responsive-game', 'fix/mouse-capture', 'feat/fps-counter', 'fix/mobile-v0.11.001', 'fix/layout-v0.11.002', 'fix/quantity-v0.11.003']
   pull_request:
   workflow_dispatch:
 permissions:
