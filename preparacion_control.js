@@ -13,10 +13,12 @@
   // Un PNG nunca se anima como si fuese geometría 3D.
   const MATERIAL_ART = Object.freeze({
     [RAW]: Object.freeze({
-      poster: 'assets/ui/preparacion/modelos/V006_HIERRO_PRIMER_PLANO.png', model: null
+      poster: 'assets/playcanvas/candidates/materials/iron_ore/v008/mineral_hierro_v008_web_transparent.png',
+      model: 'assets/playcanvas/candidates/materials/iron_ore/v008/mineral_hierro_v008_web_candidate.glb'
     }),
     [PREPARED]: Object.freeze({
-      poster: 'assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png', model: null
+      poster: 'assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png',
+      model: 'assets/playcanvas/candidates/materials/iron_ingot/v175/iron_v175_web_candidate.glb'
     })
   });
   // Perfil térmico por material. Solo el hierro tiene cifras DEMO: aún no
@@ -274,48 +276,62 @@
     if (!art) return '';
     const name = escape(material);
     const poster = escape(art.poster);
-    const visual = art.model
-      ? `<model-viewer class="prepMaterialModel" src="${escape(art.model)}" poster="${poster}" ${type === 'featured' ? '' : 'camera-controls disable-zoom'} interaction-prompt="none" camera-orbit="0deg 75deg auto" shadow-intensity="0.8" alt="${name}"></model-viewer>`
+    const visual = art.model && type !== 'featured'
+      ? `<model-viewer class="prepMaterialModel" src="${escape(art.model)}" poster="${poster}" loading="eager" reveal="auto" interaction-prompt="none" camera-orbit="0deg 75deg auto" environment-image="neutral" exposure="1.45" shadow-intensity="0" alt="${name}"></model-viewer>`
       : `<img class="prepMaterialPoster" src="${poster}" alt="${name}" loading="lazy" draggable="false">`;
     return `<span class="prepMaterialVisual ${type}" data-material="${name}">${visual}</span>`;
   }
 
-  // El modelo 3D solo oscila durante hover de mouse: -45° ↔ +45°.
-  // Al abandonar el slot desacelera y retorna de forma suave a 0° (frente).
-  // No se rota la casilla, el texto, ni un render plano de respaldo.
+  // Solo assets 3D de slots pequenos: oscilacion -45 a +45 en hover o
+  // pulsacion sostenida; al retirar raton o dedo se suaviza hasta 0 grados.
+  // El objeto 3D nunca gira fuera de sus slots; el resultado central es PNG fijo.
   function bindModelHover() {
-    if (!window.matchMedia?.('(hover: hover) and (pointer: fine)').matches ||
-        window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-    // El modelo grande exhibido sobre el yunque NUNCA oscila.
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
     document.querySelectorAll('.prepSkinModal .prepSkinSlot .prepMaterialVisual').forEach(surface => {
       const viewer = surface.querySelector('model-viewer');
-      if (!viewer) return;
-      let hovering = false, angle = 0, last = 0, orbitStart = 0, frame = 0;
+      const slot = surface.closest('.prepSkinSlot');
+      if (!viewer || !slot) return;
+      let active = false, heldPointer = null, angle = 0, last = 0, orbitStart = 0, frame = 0;
       const animate = now => {
-        if (!viewer.isConnected) return;
+        if (!viewer.isConnected) { frame = 0; return; }
         const dt = last ? Math.min(now - last, 64) : 16;
         last = now;
-        if (hovering) {
-          // Período ~4 s; oscilación completa y continua mientras haya foco.
-          angle = 45 * Math.sin((now - orbitStart) * Math.PI * 2 / 4000);
-        } else {
+        if (active) angle = 45 * Math.sin((now - orbitStart) * Math.PI * 2 / 4000);
+        else {
           angle *= Math.exp(-dt / 180);
           if (Math.abs(angle) < 0.08) angle = 0;
         }
         viewer.cameraOrbit = `${angle.toFixed(3)}deg 75deg auto`;
-        if (hovering || angle !== 0) frame = requestAnimationFrame(animate);
+        if (active || angle !== 0) frame = requestAnimationFrame(animate);
         else frame = 0;
       };
       const enter = () => {
-        if (hovering) return;
-        hovering = true;
+        if (active) return;
+        active = true;
         orbitStart = performance.now() - Math.asin(Math.max(-1, Math.min(1, angle / 45))) * 4000 / (Math.PI * 2);
         if (!frame) frame = requestAnimationFrame(animate);
       };
-      const leave = () => { hovering = false; };
-      const slot = surface.closest('.prepSkinSlot');
-      slot?.addEventListener('pointerenter', enter);
-      slot?.addEventListener('pointerleave', leave);
+      const leave = () => { active = false; };
+      slot.addEventListener('pointerenter', event => {
+        if (event.pointerType === 'mouse' && window.matchMedia?.('(hover: hover) and (pointer: fine)').matches) enter();
+      });
+      slot.addEventListener('pointerleave', event => {
+        if (event.pointerType === 'mouse' || heldPointer === event.pointerId) leave();
+      });
+      slot.addEventListener('pointerdown', event => {
+        if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
+        heldPointer = event.pointerId;
+        try { slot.setPointerCapture?.(event.pointerId); } catch (_) { /* Safari may decline capture. */ }
+        enter();
+      });
+      const release = event => {
+        if (heldPointer !== event.pointerId) return;
+        heldPointer = null;
+        leave();
+      };
+      slot.addEventListener('pointerup', release);
+      slot.addEventListener('pointercancel', release);
+      slot.addEventListener('lostpointercapture', release);
     });
   }
 

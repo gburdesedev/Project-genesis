@@ -156,7 +156,9 @@
  .prepSkinSlot .prepMaterialVisual.ore .prepMaterialPoster{transform:scale(1.75) translateY(-16%)}
  .prepSkinSlot .prepMaterialVisual.ingot .prepMaterialPoster{object-fit:contain;transform:scale(1.24)}
  .prepSkinSlot .prepMaterialVisual .prepMaterialPoster{mask-image:radial-gradient(ellipse 66% 63% at center, #000 58%, transparent 100%)}
- .prepSkinSlot .prepMaterialModel{--progress-bar-color:transparent}
+ .prepSkinSlot .prepMaterialModel{--progress-bar-color:transparent;--poster-color:transparent;background:transparent!important;touch-action:manipulation}
+ .prepSkinSlot .prepMaterialVisual.ore .prepMaterialModel{transform:scale(1.16)}
+ .prepSkinSlot .prepMaterialVisual.ingot .prepMaterialModel{transform:scale(1.07)}
  .prepSkinSlot.selected .prepMaterialVisual{filter:drop-shadow(0 0 4px #f8c26e)}
  /* Resultado aprobado V175, inmóvil, sobre el yunque; PNG con alfa real. */
  .prepSkinFeatured{position:absolute;z-index:29;left:39.5%;top:27.4%;width:32.6%;height:28%;pointer-events:none;display:grid;place-items:center}
