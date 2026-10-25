@@ -2,10 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<script src="./device_policy.js?v=0.11.003"></script>
+<script src="./village_plan.js?v=0.11.004"></script>
+<script src="./device_policy.js?v=0.11.004"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Project Genesis — Prototipo Jugable v0.11.003 · Powered by NGE Alpha</title>
-<link rel="stylesheet" href="./preparacion.css?v=0.11.003">
+<title>Project Genesis — Prototipo Jugable v0.11.004 · Powered by NGE Alpha</title>
+<link rel="stylesheet" href="./preparacion.css?v=0.11.004">
 
 <script type="importmap">
 {
@@ -186,8 +187,8 @@ html.modalOpen,body.modalOpen{overflow:hidden!important;overscroll-behavior:none
 <script>
 if(!window.GenesisDevice.safePreviews){const script=document.createElement('script');script.type='module';script.src='https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js';document.head.append(script)}
 </script>
-<meta name="genesis-build" content="playcanvas-v0.11.003-quantity-selector-spacing">
-<link rel="stylesheet" href="./responsive.css?v=0.11.003">
+<meta name="genesis-build" content="playcanvas-v0.11.004-village-63-pbr">
+<link rel="stylesheet" href="./responsive.css?v=0.11.004">
 </head>
 <body>
 
@@ -330,33 +331,12 @@ window.__genesisAppError=function(event){
       <pc-light id="playerFillLight" type="omni" color="#d7e8f0" intensity="1.10" range="5.6"></pc-light>
     </pc-entity>
 
+    <!-- Shared façade templates; mesh/texture resources are reused by the village. -->
+    <pc-model id="villageShellSource" asset="workshopShell" position="0 -1000 0"></pc-model>
+    <pc-model id="villageRoofSource" asset="roofReal086" position="0 -1000 0" scale="1.28 .55 .86"></pc-model>
+    <pc-model id="villageDoorSource" asset="doorLeaf083" position="0 -1000 0"></pc-model>
     <!-- Navigation ground + real modular paving/floor. -->
-    <pc-entity name="ExteriorGround" position="7 -0.025 4.4" scale="34 1 12"><pc-render type="plane" material="groundMat" receive-shadows></pc-render></pc-entity>
-    <pc-model name="Workshop approach" data-asset="floorBrick" data-route="Herrero" data-priority="stream" position="-2 0.018 1"></pc-model>
-    <pc-model name="Workshop approach" data-asset="floorBrick" data-route="Herrero" data-priority="stream" position="-2 0.018 3"></pc-model>
-    <pc-model name="Workshop approach" data-asset="floorBrick" data-route="Herrero" data-priority="stream" position="-2 0.018 5"></pc-model>
-    <pc-model name="Workshop approach" data-asset="floorBrick" data-route="Herrero" data-priority="stream" position="-2 0.018 7"></pc-model>
-    <pc-model name="Workshop approach" data-asset="floorBrick" data-route="Herrero" data-priority="stream" position="0 0.018 1"></pc-model>
-    <pc-model name="Workshop approach" data-asset="floorBrick" data-route="Herrero" data-priority="stream" position="0 0.018 3"></pc-model>
-    <pc-model name="Workshop approach" data-asset="floorBrick" data-route="Herrero" data-priority="stream" position="0 0.018 5"></pc-model>
-    <pc-model name="Workshop approach" data-asset="floorBrick" data-route="Herrero" data-priority="stream" position="0 0.018 7"></pc-model>
-    <pc-model name="Workshop approach" data-asset="floorBrick" data-route="Herrero" data-priority="stream" position="2 0.018 1"></pc-model>
-    <pc-model name="Workshop approach" data-asset="floorBrick" data-route="Herrero" data-priority="stream" position="2 0.018 3"></pc-model>
-    <pc-model name="Workshop approach" data-asset="floorBrick" data-route="Herrero" data-priority="stream" position="2 0.018 5"></pc-model>
-    <pc-model name="Workshop approach" data-asset="floorBrick" data-route="Herrero" data-priority="stream" position="2 0.018 7"></pc-model>
     <!-- v0.9a.2 · acceso del Curtidor desde la misma pequeña plaza. -->
-    <pc-model name="Tanner approach" data-asset="floorBrick" data-route="Curtidor" data-priority="stream" position="12 0.018 1"></pc-model>
-    <pc-model name="Tanner approach" data-asset="floorBrick" data-route="Curtidor" data-priority="stream" position="12 0.018 3"></pc-model>
-    <pc-model name="Tanner approach" data-asset="floorBrick" data-route="Curtidor" data-priority="stream" position="12 0.018 5"></pc-model>
-    <pc-model name="Tanner approach" data-asset="floorBrick" data-route="Curtidor" data-priority="stream" position="12 0.018 7"></pc-model>
-    <pc-model name="Tanner approach" data-asset="floorBrick" data-route="Curtidor" data-priority="stream" position="14 0.018 1"></pc-model>
-    <pc-model name="Tanner approach" data-asset="floorBrick" data-route="Curtidor" data-priority="stream" position="14 0.018 3"></pc-model>
-    <pc-model name="Tanner approach" data-asset="floorBrick" data-route="Curtidor" data-priority="stream" position="14 0.018 5"></pc-model>
-    <pc-model name="Tanner approach" data-asset="floorBrick" data-route="Curtidor" data-priority="stream" position="14 0.018 7"></pc-model>
-    <pc-model name="Tanner approach" data-asset="floorBrick" data-route="Curtidor" data-priority="stream" position="16 0.018 1"></pc-model>
-    <pc-model name="Tanner approach" data-asset="floorBrick" data-route="Curtidor" data-priority="stream" position="16 0.018 3"></pc-model>
-    <pc-model name="Tanner approach" data-asset="floorBrick" data-route="Curtidor" data-priority="stream" position="16 0.018 5"></pc-model>
-    <pc-model name="Tanner approach" data-asset="floorBrick" data-route="Curtidor" data-priority="stream" position="16 0.018 7"></pc-model>
 
     <!-- v0.8.2 interior finish: irregular flagstones, visible mortar, lower stonework, aged lime plaster and oak framing. -->
     <pc-model id="interiorFinishModel" name="Legacy workshop interior finish hidden" data-asset="interiorFinish" data-route="Herrero" data-priority="stream" position="0 0 0" scale=".001 .001 .001"></pc-model>
@@ -681,7 +661,7 @@ window.__genesisAppError=function(event){
 </div>
 
 <div id="hud">
- <div id="brand">PROJECT GENESIS · v0.11.003</div>
+ <div id="brand">PROJECT GENESIS · v0.11.004</div>
  <div id="tech">PLAYCANVAS 2.22.1 · PROTOTIPO · v0.11</div>
  <div id="buttonsTop"><button id="cameraSettingsBtn" class="uiBtn" type="button" aria-label="Configurar cámara">⚙ CÁMARA</button></div>
  <section id="quest">
@@ -708,10 +688,11 @@ window.__genesisAppError=function(event){
 
 <script src="./fps_counter.js?v=20261025-1"></script>
 <script src="./camera_mouse.js?v=20261025-1"></script>
-<script src="./preparacion_control.js?v=0.11.003"></script>
+<script src="./preparacion_control.js?v=0.11.004"></script>
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
 import { Vec3 } from 'playcanvas';
+import { mountVillage } from './village_world.js?v=0.11.004';
 
 /* Preparación v0.11: adaptador local sin modificar el motor procedural ni las
    resoluciones de Fabricación/Cierre. Conserva ambas rutas del tutorial. */
@@ -863,6 +844,10 @@ try{
  ]),'animaciones núcleo',18000);
 }catch(err){failLoading(err?.message||String(err),'La escena no se habilitó; el recurso indicado no terminó de prepararse.');throw err}
 
+let village;
+try{setLoadUI(98,'Armando la aldea','Preparando calles, plaza y talleres.');village=await mountVillage(appEl.app,{shell:document.getElementById('villageShellSource').entity,roof:document.getElementById('villageRoofSource').entity,door:document.getElementById('villageDoorSource').entity});}catch(err){failLoading(err.message,'La aldea no terminó de cargar. Reintentá.');throw err}
+window.__genesisVillage=village;
+
 function hideCollisionMeshes(modelEl){const root=modelEl?.contentEntity;if(!root)return;const stack=[root];while(stack.length){const node=stack.pop();const n=(node.name||'').toLowerCase();let collisionLike=n.includes('convcolonly')||n.startsWith('collision_')||n==='collision';const meshes=node.render?.meshInstances||[];if(meshes.length&&meshes.every(mi=>(mi.material?.name||'').toLowerCase().includes('collision')))collisionLike=true;if(collisionLike)node.enabled=false;for(const child of node.children||[])stack.push(child)}}
 document.querySelectorAll('pc-model').forEach(hideCollisionMeshes);
 
@@ -945,12 +930,12 @@ function workshopWallCollision(x,z,cx,r){
  if(z<-10.25+r&&z>-10.62-r&&Math.abs(lx)<5.95+r)return true;
  return false
 }
-function wallBlocked(x,z){const r=.33;if(x<-8.5+r||x>22.5-r||z<-10.1+r||z>9.5-r)return true;if(doorwayPortalFree(x,z,0,r)||doorwayPortalFree(x,z,14,r))return false;if(workshopWallCollision(x,z,0,r)||workshopWallCollision(x,z,14,r)||doorCollisionAt(x,z,r+.10))return true;
+function wallBlocked(x,z){const r=.33;const b=GenesisVillagePlan.bounds;if(x<b.minX+r||x>b.maxX-r||z<b.minZ+r||z>b.maxZ-r||village.blocked(x,z,r))return true;if(doorwayPortalFree(x,z,0,r)||doorwayPortalFree(x,z,14,r))return false;if(workshopWallCollision(x,z,0,r)||workshopWallCollision(x,z,14,r)||doorCollisionAt(x,z,r+.10))return true;
  const obs=[[3.02,-8.56,1.22],[4.18,-7.22,.90],[-3.74,-8.58,1.05],[-4.08,-3.02,.76],[3.35,-5.74,.56],[10.72,-8.16,1.05],[15.18,-8.88,.72],[17.42,-5.92,.84],[9.98,-3.03,.76]];for(const[ox,oz,rr]of obs)if(Math.hypot(x-ox,z-oz)<rr+r)return true;
  if(anvilEntity){const p=anvilEntity.getPosition();if(Math.hypot(x-p.x,z-p.z)<.46+r)return true}return false}
 // Q1 navigation diagnostic: samples the central aisle. Exposed for field debugging.
 window.__genesisQ1CollisionProbe=function(cx=0){const pts=[];for(let z=.8;z>=-9.6;z-=.4)pts.push({x:cx,z:+z.toFixed(2),blocked:wallBlocked(cx,z)});return pts}
-function cameraBlocked(x,z){for(const cx of [0,14]){const lx=x-cx;if(doorwayPortalFree(x,z,cx,.16))continue;if(oneDoorCollision(x,z,.16,cx,cx===0?doorAngle:tannerDoorAngle))return true;if(z>-.40&&z<.40&&Math.abs(lx)>1.22&&Math.abs(lx)<5.70)return true;if(z>-10.28&&z<.40&&((lx<-5.56&&lx>-5.92)||(lx>5.56&&lx<5.92)))return true;if(z>-10.38&&z<-9.96&&Math.abs(lx)<5.92)return true}return false}
+function cameraBlocked(x,z){if(village.blocked(x,z,.20))return true;for(const cx of [0,14]){const lx=x-cx;if(doorwayPortalFree(x,z,cx,.16))continue;if(oneDoorCollision(x,z,.16,cx,cx===0?doorAngle:tannerDoorAngle))return true;if(z>-.40&&z<.40&&Math.abs(lx)>1.22&&Math.abs(lx)<5.70)return true;if(z>-10.28&&z<.40&&((lx<-5.56&&lx>-5.92)||(lx>5.56&&lx<5.92)))return true;if(z>-10.38&&z<-9.96&&Math.abs(lx)<5.92)return true}return false}
 function workshopAt(x,z){if(z<.25&&z>-10.4){if(Math.abs(x)<5.55)return{profession:'Herrero',center:0,localX:x};if(Math.abs(x-14)<5.55)return{profession:'Curtidor',center:14,localX:x-14}}return null}
 
 window.__GENESIS_RUNTIME_ERRORS=[];addEventListener('error',e=>{window.__GENESIS_RUNTIME_ERRORS.push({type:'error',message:e.message||String(e.error||e),source:e.filename||'',line:e.lineno||0});console.error('GENESIS RUNTIME ERROR',e.error||e.message)});addEventListener('unhandledrejection',e=>{window.__GENESIS_RUNTIME_ERRORS.push({type:'rejection',message:String(e.reason?.message||e.reason||'Unhandled rejection')});console.error('GENESIS UNHANDLED REJECTION',e.reason)});
@@ -1307,7 +1292,7 @@ async function prepareRoute(prof){if(routeReady.has(prof))return;routeLoading=tr
 function streamRouteDecor(prof){const models=routeModels(prof,'stream');let index=0;const pump=()=>{if(index>=models.length)return;const batch=models.slice(index,index+4);index+=4;for(const el of batch)activateDeferredModel(el,45000).then(()=>{hideCollisionMeshes(el);if(prof==='Curtidor'){applyTannerVisualPass()}}).catch(err=>console.warn('Decoración diferida:',err.message));setTimeout(pump,180)};(window.requestIdleCallback?requestIdleCallback(()=>pump(),{timeout:420}):setTimeout(pump,160))}
 async function chooseProfessionRoute(prof){if(routeLoading||gameStarted)return;const buttons=[...document.querySelectorAll('[data-profession]')];buttons.forEach(b=>b.disabled=true);try{await prepareRoute(prof);startRoute(prof);loading.style.display='none';streamRouteDecor(prof)}catch(err){console.error(err);failLoading(err?.message||String(err),'No se habilitó la ruta. Reintentá; el resto del prototipo no se cargó.');intro.style.display='none'}finally{routeLoading=false;buttons.forEach(b=>b.disabled=false)}}
 
-function startRoute(prof){selectedProfession=prof;activeRoute=ROUTES[prof];const engine=window.GenesisPrototypeEngines;if(!engine){toast('Motor NGE Alpha no disponible.',1600);return}craftSession=engine.generateSession(prof);gameStarted=true;tutorialStep=0;workshopKey=false;debrisCleared=false;auxCleared=false;chestOpen=false;playerInventory={};inventoryOpen=false;inventoryTutorialOpened=false;craftedItems=[];usedItemNames=new Set();resetMercenaryExtension();forgeHot=false;tannerOperational=false;igniteForgeVisual();if(tannerWorkLight)tannerWorkLight.intensity=.72;doorAngle=doorTarget=tannerDoorAngle=tannerDoorTarget=0;if(doorLeafEntity)doorLeafEntity.setEulerAngles(0,0,0);if(tannerDoorLeafEntity)tannerDoorLeafEntity.setEulerAngles(0,0,0);const center=activeRoute.center;px=center;pz=6.3;player.setPosition(px,0,pz);camera.setPosition(center,3,10);camYaw=0;camPitch=24;camDist=cameraSolvedDist=4.7;const mentor=activeRoute.mentor();mentor.setPosition(center+1.72,0,1.90);mentorYaw=-21;mentor.setEulerAngles(0,mentorYaw,0);mentorFollowState='outside';mentorFollowDelay=0;mentorPath=[];mentorWaypoint=0;setMentorAnim(activeRoute.mentorIdle,.01);npcTag.textContent=activeRoute.mentorName.toUpperCase();professionChip.textContent=`PROFESIÓN · ${prof.toUpperCase()} · 2 FAMILIAS · 4 FABRICACIONES`;professionChip.style.display='block';materialsPanel.style.display='none';if(inventoryTouch){inventoryTouch.classList.add('locked');inventoryTouch.classList.remove('ready')}intro.style.display='none';mouseCapture.refresh();const fastSetup=applyDevFastTestState();restoreKnownLightingProfile();if(forgeHot){igniteForgeVisual();pulseForge(.10)}if(!fastSetup){setTutorialStep(0);toast(`Recorrido ${prof} iniciado.`,1500);mentorGestureAt=performance.now()+4800;mentorGestureReturn=0}}
+function startRoute(prof){village.setProfession(prof);selectedProfession=prof;activeRoute=ROUTES[prof];const engine=window.GenesisPrototypeEngines;if(!engine){toast('Motor NGE Alpha no disponible.',1600);return}craftSession=engine.generateSession(prof);gameStarted=true;tutorialStep=0;workshopKey=false;debrisCleared=false;auxCleared=false;chestOpen=false;playerInventory={};inventoryOpen=false;inventoryTutorialOpened=false;craftedItems=[];usedItemNames=new Set();resetMercenaryExtension();forgeHot=false;tannerOperational=false;igniteForgeVisual();if(tannerWorkLight)tannerWorkLight.intensity=.72;doorAngle=doorTarget=tannerDoorAngle=tannerDoorTarget=0;if(doorLeafEntity)doorLeafEntity.setEulerAngles(0,0,0);if(tannerDoorLeafEntity)tannerDoorLeafEntity.setEulerAngles(0,0,0);const center=activeRoute.center;px=center;pz=6.3;player.setPosition(px,0,pz);camera.setPosition(center,3,10);camYaw=0;camPitch=24;camDist=cameraSolvedDist=4.7;const mentor=activeRoute.mentor();mentor.setPosition(center+1.72,0,1.90);mentorYaw=-21;mentor.setEulerAngles(0,mentorYaw,0);mentorFollowState='outside';mentorFollowDelay=0;mentorPath=[];mentorWaypoint=0;setMentorAnim(activeRoute.mentorIdle,.01);npcTag.textContent=activeRoute.mentorName.toUpperCase();professionChip.textContent=`PROFESIÓN · ${prof.toUpperCase()} · 2 FAMILIAS · 4 FABRICACIONES`;professionChip.style.display='block';materialsPanel.style.display='none';if(inventoryTouch){inventoryTouch.classList.add('locked');inventoryTouch.classList.remove('ready')}intro.style.display='none';mouseCapture.refresh();const fastSetup=applyDevFastTestState();restoreKnownLightingProfile();if(forgeHot){igniteForgeVisual();pulseForge(.10)}if(!fastSetup){setTutorialStep(0);toast(`Recorrido ${prof} iniciado.`,1500);mentorGestureAt=performance.now()+4800;mentorGestureReturn=0}}
 document.querySelectorAll('[data-profession]').forEach(btn=>btn.addEventListener('click',()=>{getAudio();uiTick();chooseProfessionRoute(btn.dataset.profession)}));
 
 // ---------- Frame ----------
