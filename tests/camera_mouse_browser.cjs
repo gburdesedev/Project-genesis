@@ -23,4 +23,4 @@ const path=require('node:path');
  await page.waitForFunction(()=>document.pointerLockElement===null);
  await browser.close();
  console.log('PASS native Chromium: capture, motion outside small viewport, resize while captured, menu release');
-})().catch(e=>{console.error(e);process.exitCode=1});
+})().catch(e=>{console.error(e);process.exit(1)});
