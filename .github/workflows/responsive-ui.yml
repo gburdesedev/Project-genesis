@@ -1,7 +1,7 @@
 name: Responsive game UI
 on:
   push:
-    branches: [main, 'fix/responsive-game', 'fix/mouse-capture', 'feat/fps-counter', 'fix/mobile-v0.11.001', 'fix/layout-v0.11.002', 'fix/quantity-v0.11.003', 'feat/world-v0.11.004']
+    branches: [main, 'fix/responsive-game', 'fix/mouse-capture', 'feat/fps-counter', 'fix/mobile-v0.11.001', 'fix/layout-v0.11.002', 'fix/quantity-v0.11.003', 'feat/world-v0.11.004', 'feat/proportions-v0.11.005']
   pull_request:
   workflow_dispatch:
 permissions:
@@ -15,6 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node tests/workshop_geometry.cjs
       - run: node tests/village_plan.cjs
       - run: node tests/fps_counter.cjs
       - run: node tests/camera_mouse.cjs

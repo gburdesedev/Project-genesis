@@ -16,8 +16,8 @@ const path=require('node:path');
  await page.waitForFunction(()=>document.pointerLockElement?.id==='world');
  // CDP mouse.move sets absolute screen coordinates, not OS relative motion.
  // Verify the real native lock and feed its fixed-coordinate relative events.
- await page.evaluate(()=>{totalRotation=0;for(let i=0;i<20;i++){const event=new MouseEvent('mousemove',{clientX:100,clientY:100,bubbles:true});Object.defineProperties(event,{movementX:{value:100},movementY:{value:0}});document.dispatchEvent(event)}});
- assert(await page.evaluate(()=>totalRotation===2000),'relative camera rotation must continue with fixed client coordinates');
+ const rotation=await page.evaluate(()=>{totalRotation=0;for(let i=0;i<20;i++){const event=new MouseEvent('mousemove',{clientX:100,clientY:100,bubbles:true});Object.defineProperties(event,{movementX:{value:100},movementY:{value:0}});document.dispatchEvent(event)}return totalRotation});
+ assert(rotation===2000,'relative camera rotation must continue with fixed client coordinates');
  await page.setViewportSize({width:320,height:568});
  assert(await page.evaluate(()=>document.pointerLockElement?.id==='world'));
  await page.evaluate(()=>{active=false;controller.refresh()});

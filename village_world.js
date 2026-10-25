@@ -23,13 +23,14 @@ function textMaterial(app,title,subtitle){
 }
 function sign(app,parent,title,subtitle,x,z,yaw,height=2.9,width=3.8){const root=new Entity(title+' cartel');parent.addChild(root);root.setPosition(x,0,z);root.setEulerAngles(0,yaw,0);const e=mesh(root,title,'plane',0,height,.30,width,1,.95,textMaterial(app,title,subtitle));e.setLocalEulerAngles(90,0,0);return root}
 export async function mountVillage(app,{shell,roof,door}){
- const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.11.004');app.root.addChild(root);
+ const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.11.005');app.root.addChild(root);
  const [cobble,traffic]=await Promise.all([maps(app,'cobble'),maps(app,'traffic')]);
  const b=plan.bounds;
  mesh(root,'Pavimento exterior adoquín','plane',7,-.024,17,63,1,63,pavedMaterial('Adoquín · exterior',cobble,63,63));
- mesh(root,'Plaza central','plane',plan.plaza.x,-.010,plan.plaza.z,16,1,16,pavedMaterial('Adoquín · plaza',cobble,16,16,2.4));
+ mesh(root,'Plaza central','plane',plan.plaza.x,-.010,plan.plaza.z,plan.plaza.w,1,plan.plaza.d,pavedMaterial('Adoquín · plaza',cobble,plan.plaza.w,plan.plaza.d,2.4));
  // A flush paving border defines the square while leaving crossings open.
- for(const [x,z,w,d] of [[-1,16,.35,16],[15,16,.35,16],[7,8,16,.35],[7,24,16,.35]]){
+ const square=plan.plaza;
+ for(const [x,z,w,d] of [[square.x-square.w/2,square.z,.35,square.d],[square.x+square.w/2,square.z,.35,square.d],[square.x,square.z-square.d/2,square.w,.35],[square.x,square.z+square.d/2,square.w,.35]]){
   const m=pavedMaterial('Borde de plaza',cobble,w,d,1.2);m.diffuse.set(.68,.68,.64);m.update();mesh(root,'Marco de plaza','plane',x,-.004,z,w,1,d,m);
  }
  const edge=edgeMask(app);
@@ -39,10 +40,10 @@ export async function mountVillage(app,{shell,roof,door}){
  for(const z of [b.minZ,b.maxZ])mesh(root,'Límite de aldea','box',7,.12,z,63,.24,.25,trim);
  const proxies=new Map();
  for(const p of plan.workshops){
-  const building=new Entity(p.profession+' · fachada cerrada');root.addChild(building);building.setLocalPosition(p.x,0,p.z);building.setLocalEulerAngles(0,p.yaw,0);
+  const building=new Entity(p.profession+' · fachada cerrada');root.addChild(building);building.setLocalPosition(p.x,0,p.z);building.setLocalScale(plan.workshopScale,1,plan.workshopScale);building.setLocalEulerAngles(0,p.yaw,0);
   for(const [source,pos]of [[shell,[0,0,0]],[roof,[0,3.45,-5.05]],[door,[-1.1,0,.12]]]){const clone=source.clone();clone.setLocalPosition(...pos);clone.setLocalEulerAngles(0,0,0);building.addChild(clone)}
   proxies.set(p.profession,building);
-  sign(app,root,p.label,p.existing?'Taller de oficio':'Taller cerrado',p.x,p.z,p.yaw);
+  sign(app,root,p.label,p.existing?'Taller de oficio':'Taller cerrado',p.x,p.z,p.yaw,2.9,3.2);
  }
  const market=plan.market;
  mesh(root,'Mercado · área de referencia','plane',market.x,-.006,market.z,market.w,1,market.d,pavedMaterial('Adoquín · mercado',cobble,market.w,market.d));
@@ -53,8 +54,9 @@ export async function mountVillage(app,{shell,roof,door}){
  const marketSign={x:market.x-market.w/2+1,z:market.z-market.d/2+1};
  sign(app,root,'MERCADO','Área reservada · puestos pendientes',marketSign.x,marketSign.z,-90,2.1,5);
  mesh(root,'Poste cartel mercado','box',marketSign.x,.8,marketSign.z,.18,1.6,.18,marker);
- sign(app,root,'PLAZA CENTRAL','Aldea de los artesanos',-.5,8,0,1.9,4.4);
- mesh(root,'Poste cartel plaza','box',-.5,.65,8,.14,1.3,.14,marker);
- const fixedObstacles=[{x:marketSign.x,z:marketSign.z,r:.2},{x:-.5,z:8,r:.18}];
+ const plazaSign={x:square.x-square.w/2-1,z:square.z-square.d/2};
+ sign(app,root,'PLAZA CENTRAL','Aldea de los artesanos',plazaSign.x,plazaSign.z,0,1.9,4.4);
+ mesh(root,'Poste cartel plaza','box',plazaSign.x,.65,plazaSign.z,.14,1.3,.14,marker);
+ const fixedObstacles=[{x:marketSign.x,z:marketSign.z,r:.2},{x:plazaSign.x,z:plazaSign.z,r:.18}];
  return Object.freeze({root,plan,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
 }
