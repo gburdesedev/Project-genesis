@@ -184,7 +184,7 @@ html.modalOpen,body.modalOpen{overflow:hidden!important;overscroll-behavior:none
 </style>
 <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>
 <meta name="genesis-build" content="playcanvas-prototype-v0.11-tanner-wearable-concept-2026-09-24">
-<link rel="stylesheet" href="./responsive.css?v=20261025-2">
+<link rel="stylesheet" href="./responsive.css?v=20261025-3">
 </head>
 <body>
 
@@ -702,6 +702,7 @@ window.__genesisAppError=function(event){
 
 <div id="modalLayer"><div class="modal" id="modal"></div></div>
 
+<script src="./fps_counter.js?v=20261025-1"></script>
 <script src="./camera_mouse.js?v=20261025-1"></script>
 <script src="./preparacion_control.js?v=responsive-20261025-1"></script>
 <script type="module">
@@ -844,6 +845,7 @@ let playerAnim,playerHeadAnim,playerHairAnim,ordanAnim,ordanHeadAnim,ordanHairAn
 try{
  if(bootState.error)throw new Error(bootState.error);
  await Promise.race([whenReady('#genesisApp'),new Promise((_,reject)=>appEl.addEventListener('error',e=>reject(new Error(e?.message||'Fallo iniciando PlayCanvas.')),{once:true}))]);
+ window.GenesisFPS.attach(appEl.app,document.getElementById('tech'));
  const modelEls=[...document.querySelectorAll('pc-model[asset]:not([data-route])')];
  const clipEls=[...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]'));
  const prepItems=[...modelEls.map(el=>({kind:'modelo',label:el.getAttribute('name')||el.id||el.getAttribute('asset')||'modelo',el})),...clipEls.map(el=>({kind:'animación',label:el.getAttribute('name')||el.getAttribute('asset')||'clip',el}))];

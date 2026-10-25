@@ -1,7 +1,7 @@
 name: Responsive game UI
 on:
   push:
-    branches: [main, 'fix/responsive-game', 'fix/mouse-capture']
+    branches: [main, 'fix/responsive-game', 'fix/mouse-capture', 'feat/fps-counter']
   pull_request:
   workflow_dispatch:
 permissions:
@@ -15,6 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node tests/fps_counter.cjs
       - run: node tests/camera_mouse.cjs
       - run: npm install --prefix /tmp/responsive-ui playwright@1.56.1
       - run: /tmp/responsive-ui/node_modules/.bin/playwright install --with-deps chromium

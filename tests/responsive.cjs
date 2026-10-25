@@ -24,7 +24,8 @@ const html = source.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replace(/
    assert(result.sw<=result.cw+2,`${width} ${selector} horizontal overflow ${JSON.stringify(result)}`);
    return result;
   }
-  await bounds('#hud');await bounds('pc-app');
+  await page.evaluate(()=>{const badge=document.querySelector('#tech');badge.classList.add('fpsCounter');badge.textContent='144 FPS · 6,9 ms'});
+  await bounds('#tech');await bounds('#hud');await bounds('pc-app');
   // Real introduction is reachable at every size.
   await page.evaluate(()=>document.querySelector('#prototypeIntro').style.display='grid');
   await bounds('.protoIntroCard');
