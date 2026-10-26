@@ -1,0 +1,71 @@
+{
+  "original_camera": {
+    "theta": 38.1628,
+    "phi": 66.3498,
+    "source": "HERO_CAMERA_V078"
+  },
+  "period_seconds": 18,
+  "amplitude_degrees": 45,
+  "shots": [
+    {
+      "name": "previous_20_35",
+      "sha256": "5ee8f17a057757da73a50dec723f31d5acd554ef9cd3b958fda5e256c975dcbe",
+      "state": {
+        "thetaDeg": 20,
+        "phiDeg": 35,
+        "exposure": 1.45
+      }
+    },
+    {
+      "name": "original_38_66",
+      "sha256": "b6640dda7b85ccddff4fcaee83e2a2753d54310dcfd527d0c30aea959713e99d",
+      "state": {
+        "thetaDeg": 38.163,
+        "phiDeg": 66.35,
+        "exposure": 1.45
+      }
+    },
+    {
+      "name": "original_exposure_185",
+      "sha256": "fe842936f2a9427d50305c54be5eb75fc9fd9c0ca61a012610b1791568234264",
+      "state": {
+        "thetaDeg": 38.163,
+        "phiDeg": 66.35,
+        "exposure": 1.85
+      }
+    },
+    {
+      "name": "original_exposure_225",
+      "sha256": "66fee1313d2df5bbb9cec1a1b219f995792bd862a7888702183f8780af125d44",
+      "state": {
+        "thetaDeg": 38.163,
+        "phiDeg": 66.35,
+        "exposure": 2.25
+      }
+    }
+  ],
+  "t0": {
+    "thetaBase": 38.1628,
+    "phi": 66.3498,
+    "offset": 0,
+    "loaded": true
+  },
+  "t1": {
+    "thetaBase": 38.1628,
+    "phi": 66.3498,
+    "offset": 44.85315373934812,
+    "loaded": true
+  },
+  "t2": {
+    "thetaBase": 38.1628,
+    "phi": 66.3498,
+    "offset": 0.4979322740785579,
+    "loaded": true
+  },
+  "t3": {
+    "thetaBase": 38.1628,
+    "phi": 66.3498,
+    "offset": -0.5042150698501144,
+    "loaded": true
+  }
+}
