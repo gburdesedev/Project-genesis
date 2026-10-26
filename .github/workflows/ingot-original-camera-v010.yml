@@ -23,7 +23,7 @@ jobs:
         run: |
           FFMPEG_BIN=$(NODE_PATH=/tmp/ingot-v010-test/node_modules node -p "require('@ffmpeg-installer/ffmpeg').path")
           "$FFMPEG_BIN" -y -pattern_type glob -i '/tmp/genesis-ingot-v010/*_*.png' -vf 'scale=440:-1:flags=lanczos,tile=2x2' -frames:v 1 /tmp/genesis-ingot-v010/original_camera_contact.png
-          "$FFMPEG_BIN" -y -i /tmp/genesis-ingot-v010/ingot_smooth_actual_18s.webm -vf 'fps=24,scale=960:-2:flags=lanczos' -c:v libx264 -pix_fmt yuv420p -crf 23 -movflags +faststart /tmp/genesis-ingot-v010/ingot_smooth_actual_18s.mp4
+          "$FFMPEG_BIN" -y -sseof -18 -i /tmp/genesis-ingot-v010/ingot_smooth_actual_18s.webm -vf 'fps=24,scale=960:-2:flags=lanczos' -c:v libx264 -pix_fmt yuv420p -crf 23 -movflags +faststart /tmp/genesis-ingot-v010/ingot_smooth_actual_18s.mp4
       - name: Publish camera proof to review branch only
         if: success()
         run: |
