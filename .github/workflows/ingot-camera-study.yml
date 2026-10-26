@@ -13,7 +13,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --prefix /tmp/ingot-camera-test playwright@1.56.1
-      - run: /tmp/ingot-camera-test/node_modules/.bin/playwright install --with-deps chromium
+      - run: /tmp/ingot-camera-test/node_modules/.bin/playwright install chromium
       - name: Verify camera with live GLB and capture 3D frames
         run: NODE_PATH=/tmp/ingot-camera-test/node_modules node tests/ingot_camera_study.cjs
       - name: Assemble comparison sheet and real-GLB animation
