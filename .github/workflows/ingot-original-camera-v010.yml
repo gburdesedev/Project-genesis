@@ -1,0 +1,45 @@
+name: Genesis V175 original camera and 18s soft orbit proof
+on:
+  push:
+    branches: ['review/ingot-v175-original-pose-20261026']
+    paths-ignore: ['previews/ingot-camera-study-v0.1.010/**']
+permissions:
+  contents: write
+jobs:
+  proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/ingot-v010-test playwright@1.56.1 @ffmpeg-installer/ffmpeg
+      - run: /tmp/ingot-v010-test/node_modules/.bin/playwright install chromium
+      - name: Capture authentic Blender V175 camera and slow WebGL motion
+        run: NODE_PATH=/tmp/ingot-v010-test/node_modules node tests/ingot_original_camera_v010.cjs
+      - name: Make comparison PNG and full-speed MP4
+        if: success()
+        run: |
+          FFMPEG_BIN=$(NODE_PATH=/tmp/ingot-v010-test/node_modules node -p "require('@ffmpeg-installer/ffmpeg').path")
+          "$FFMPEG_BIN" -y -pattern_type glob -i '/tmp/genesis-ingot-v010/*_*.png' -vf 'scale=440:-1:flags=lanczos,tile=2x2' -frames:v 1 /tmp/genesis-ingot-v010/original_camera_contact.png
+          "$FFMPEG_BIN" -y -i /tmp/genesis-ingot-v010/ingot_smooth_actual_18s.webm -vf 'fps=24,scale=960:-2:flags=lanczos' -c:v libx264 -pix_fmt yuv420p -crf 23 -movflags +faststart /tmp/genesis-ingot-v010/ingot_smooth_actual_18s.mp4
+      - name: Publish camera proof to review branch only
+        if: success()
+        run: |
+          mkdir -p previews/ingot-camera-study-v0.1.010
+          cp /tmp/genesis-ingot-v010/original_camera_contact.png previews/ingot-camera-study-v0.1.010/
+          cp /tmp/genesis-ingot-v010/ingot_smooth_actual_18s.mp4 previews/ingot-camera-study-v0.1.010/
+          cp /tmp/genesis-ingot-v010/full_study_v010.png previews/ingot-camera-study-v0.1.010/
+          cp /tmp/genesis-ingot-v010/camera_audit.json previews/ingot-camera-study-v0.1.010/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add previews/ingot-camera-study-v0.1.010/
+          git commit -m "preview: source V175 camera and 18s sway proof v0.1.010 [skip ci]"
+          git push origin HEAD:review/ingot-v175-original-pose-20261026
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ingot-v175-original-camera-v0.1.010
+          path: /tmp/genesis-ingot-v010
+          retention-days: 7
