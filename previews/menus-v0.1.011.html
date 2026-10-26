@@ -212,6 +212,45 @@ nav{position:absolute;inset:0;pointer-events:none;z-index:5}
 @keyframes icePulse{from{opacity:.47}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.fabWeaponFrame.fxDemo .fabSword,.affinityFX *{animation:none!important}}
 
+
+/* Teléfonos: menú de Fabricación legible, con pestañas desplazables y controles táctiles */
+@media(max-width:860px){
+body.fabResponsive{overflow-y:auto}
+body.fabResponsive header{height:auto;min-height:62px;padding:8px 12px;gap:5px;flex-wrap:wrap}
+body.fabResponsive header small{font-size:10px}
+body.fabResponsive #viewport{display:block;height:auto;min-height:calc(100dvh - 62px);overflow:visible}
+body.fabResponsive #wrapper{width:100%!important;height:auto!important}
+body.fabResponsive #board{position:relative;width:100%!important;height:auto!important;min-height:100dvh;overflow:visible;transform:none!important;background-size:cover;background-position:center top}
+body.fabResponsive nav{position:relative;inset:auto;height:80px;display:flex;align-items:center;gap:5px;overflow-x:auto;overflow-y:hidden;padding:6px 12px;pointer-events:auto;scrollbar-color:#c49b61 #141b18}
+body.fabResponsive .tab{position:relative!important;left:auto!important;top:auto!important;width:200px!important;height:65px;flex:0 0 200px}
+body.fabResponsive #content{position:relative;inset:auto;min-height:0}
+body.fabResponsive .fabLayout{position:relative;left:auto;right:auto;top:auto;height:auto;display:flex;flex-direction:column;gap:12px;padding:8px 10px 18px}
+body.fabResponsive .fabPane{width:100%}
+body.fabResponsive .fabCenter{order:0;height:755px;flex:0 0 auto}
+body.fabResponsive .fabRight{order:1;height:auto}
+body.fabResponsive .fabLeft{order:2;height:auto}
+body.fabResponsive .fabRight .fabBodyScroll,body.fabResponsive .fabLeft .fabBodyScroll{height:auto;max-height:none;overflow:visible}
+body.fabResponsive .fabCenterBar{padding:10px 12px;gap:8px}
+body.fabResponsive .fabCenterBar h2{font-size:clamp(17px,5vw,25px)}
+body.fabResponsive .fabCenterBar small{font-size:9px}
+body.fabResponsive .fabSeal{width:39px;height:39px;font-size:25px;flex:0 0 39px}
+body.fabResponsive .fabStages{padding:0 3px}
+body.fabResponsive .fabStageBtn{font-size:11px;gap:3px;letter-spacing:0}
+body.fabResponsive .fabStageBtn span{width:20px;height:24px}
+body.fabResponsive .fabWeaponFrame:before{width:250px;height:250px}
+body.fabResponsive .fabInscription{left:14px;right:14px;font-size:9px}
+body.fabResponsive .fabItemLegend{left:12px;right:12px}
+body.fabResponsive .fabItemLegend strong{font-size:16px}
+body.fabResponsive .fabItemLegend small{font-size:10px}
+body.fabResponsive .fabFootAction{padding:11px}
+body.fabResponsive .fabFootAction p{font-size:11px}
+body.fabResponsive .fabButton{padding:10px 6px;font-size:12px}
+body.fabResponsive .fabStepper .fabStepBtns button{width:44px;height:44px}
+body.fabResponsive .fabBodyScroll{padding:13px 11px}
+body.fabResponsive .note{position:relative;bottom:auto;left:auto;right:auto;display:block;margin:0;padding:8px 15px 20px;font-size:10px}
+body.fabResponsive .note span{display:block;margin:4px 0}
+}
+
 </style>
 </head>
 <body>
@@ -245,8 +284,8 @@ var inventory = [
   {id:"sword",kind:"crafted",cat:"swords",name:"Espada de hierro",rarity:"Bueno"}
 ];
 var mainTab="Fabricaciones",view="inventory",cat="basic",selected="ore",sheetTab="channels",page=0,yaw=0,dragging=false,dragX=0,reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
-function scaleBoard(){var s=Math.min((innerWidth-10)/1536,(innerHeight-70)/1024,1);wrapper.style.width=1536*s+"px";wrapper.style.height=1024*s+"px";board.style.transform="scale("+s+")"}
-addEventListener("resize",scaleBoard);scaleBoard();
+function scaleBoard(){if(innerWidth<=860&&mainTab==="Fabricaciones"){wrapper.style.width="100%";wrapper.style.height="auto";board.style.transform="none";return}var s=Math.min((innerWidth-10)/1536,(innerHeight-70)/1024,1);wrapper.style.width=1536*s+"px";wrapper.style.height=1024*s+"px";board.style.transform="scale("+s+")"}
+addEventListener("resize",function(){document.body.classList.toggle("fabResponsive",mainTab==="Fabricaciones"&&innerWidth<=860);scaleBoard()});scaleBoard();
 function esc(s){return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
 function current(){return inventory.find(function(i){return i.id===selected}) || inventory[0]}
 function shownItems(){return inventory.filter(function(i){return i.cat===cat || (cat==="crafted" && i.kind==="crafted")})}
@@ -292,7 +331,7 @@ function fabRight(){
 function fabricationHtml(){return '<div class="fabLayout">'+fabButtons()+fabCenter()+fabRight()+'</div>'}
 
 function otherHtml(){var title=mainTab==="Preparacion"?"PREPARACIÓN YA APROBADA":mainTab==="Fabricaciones"?"FABRICACIONES · SIGUIENTE FASE":"COMPARACIÓN · SIGUIENTE FASE";var body=mainTab==="Preparacion"?"El minijuego y la distribución de las 39 capas originales permanecen intactos. Esta maqueta sólo estudia Inventario y Ficha de Creación.":"Esta pantalla se diseñará después de aprobar Inventario y Ficha de Creación, con datos reales del motor y sin adelantar resultados.";return '<section class="panel bronze messagePanel"><h1>'+title+'</h1><p>'+body+'</p>'+(mainTab==="Preparacion"?'<a class="action" style="text-decoration:none" href="../index.html" target="_blank" rel="noopener">ABRIR PREPARACIÓN JUGABLE</a>':'')+'<button class="action" data-top="Inventario">VOLVER AL INVENTARIO</button></section>'}
-function render(){document.getElementById("board").dataset.activeMenu=mainTab;document.querySelector("nav").innerHTML=tabsHtml();document.getElementById("content").innerHTML=mainTab==="Fabricaciones"?fabricationHtml():mainTab==="Inventario"?(view==="sheet"?sheetHtml():inventoryHtml()):otherHtml();wireSword();wireModelHover()}
+function render(){document.body.classList.toggle("fabResponsive",mainTab==="Fabricaciones"&&innerWidth<=860);scaleBoard();document.getElementById("board").dataset.activeMenu=mainTab;document.querySelector("nav").innerHTML=tabsHtml();document.getElementById("content").innerHTML=mainTab==="Fabricaciones"?fabricationHtml():mainTab==="Inventario"?(view==="sheet"?sheetHtml():inventoryHtml()):otherHtml();wireSword();wireModelHover()}
 function switchMenu(next){if(!tabs.some(function(t){return t.id===next}))return;mainTab=next;view="inventory";render()}
 function wireModelHover(){
   if(reduced)return;
