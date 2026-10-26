@@ -47,9 +47,9 @@ footer{padding:12px 20px;text-align:center;color:#9d8966;font:12px system-ui}
 <footer>Estudio aislado: no afecta al inventario ni a Preparación. La aprobación del GLB sigue pendiente de revisión visual.</footer>
 <script>
 "use strict";
-var viewer=document.getElementById("ingot"),status=document.getElementById("status");
+var viewer=document.getElementById("ingot"),statusEl=document.getElementById("status");
 var thetaBase=20,phi=35,playing=true,offset=0,started=performance.now();
-function paint(angle,jump){offset=Math.max(-45,Math.min(45,angle));viewer.cameraOrbit=(thetaBase+offset).toFixed(3)+"deg "+phi.toFixed(3)+"deg auto";status.textContent="Cámara "+thetaBase+"° horizontal · "+phi+"° desde arriba · oscilación "+offset.toFixed(1)+"°";if(jump&&viewer.jumpCameraToGoal)viewer.jumpCameraToGoal()}
+function paint(angle,jump){offset=Math.max(-45,Math.min(45,angle));viewer.cameraOrbit=(thetaBase+offset).toFixed(3)+"deg "+phi.toFixed(3)+"deg auto";statusEl.textContent="Cámara "+thetaBase+"° horizontal · "+phi+"° desde arriba · oscilación "+offset.toFixed(1)+"°";if(jump&&viewer.jumpCameraToGoal)viewer.jumpCameraToGoal()}
 function pause(){playing=false;document.getElementById("play").textContent="REANUDAR";document.getElementById("play").setAttribute("aria-pressed","false")}
 function resume(){playing=true;started=performance.now()-Math.asin(Math.max(-1,Math.min(1,offset/45)))*4000/(2*Math.PI);document.getElementById("play").textContent="PAUSAR";document.getElementById("play").setAttribute("aria-pressed","true")}
 document.getElementById("play").onclick=function(){playing?pause():resume()};
@@ -57,8 +57,8 @@ document.getElementById("front").onclick=function(){pause();paint(0,true)};
 document.querySelectorAll("[data-phi]").forEach(function(b){b.onclick=function(){phi=Number(b.dataset.phi);document.querySelectorAll("[data-phi]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));paint(offset,true)}})
 document.querySelectorAll("[data-theta]").forEach(function(b){b.onclick=function(){thetaBase=Number(b.dataset.theta);document.querySelectorAll("[data-theta]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));paint(offset,true)}})
 window.IngotStudy={pause:pause,resume:resume,setFrame:function(angle,theta,polar){pause();if(Number.isFinite(theta))thetaBase=theta;if(Number.isFinite(polar))phi=polar;paint(angle,true)},getState:function(){return {thetaBase:thetaBase,phi:phi,offset:offset,loaded:viewer.loaded}}};
-viewer.addEventListener("load",function(){status.textContent="Modelo GLB cargado. Oscilación ±45° activa.";});
-viewer.addEventListener("error",function(){status.textContent="El dispositivo no pudo cargar el GLB. Se conserva la referencia PNG."});
+viewer.addEventListener("load",function(){statusEl.textContent="Modelo GLB cargado. Oscilación ±45° activa.";});
+viewer.addEventListener("error",function(){statusEl.textContent="El dispositivo no pudo cargar el GLB. Se conserva la referencia PNG."});
 function frame(t){if(playing)paint(45*Math.sin((t-started)*Math.PI*2/4000),false);requestAnimationFrame(frame)}
 requestAnimationFrame(frame);
 </script>
