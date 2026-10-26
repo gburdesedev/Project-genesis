@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project Genesis · Estudio de cámara del lingote V175 · v0.1.010</title>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/model-viewer.min.js"></script>
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#0e1210;color:#ebd8ab;font-family:Georgia,serif}
+header{padding:16px 24px;border-bottom:1px solid #715832;background:#171b18}header h1{font-weight:400;letter-spacing:1px;margin:0;font-size:25px}header small{color:#a99672;font:13px system-ui}
+main{max-width:1320px;margin:24px auto;padding:0 20px;display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:16px}
+.panel{background:#121815;border:2px solid #83623b;box-shadow:inset 0 0 32px #0008;padding:14px}
+h2{font-size:19px;font-weight:400;color:#d9bd80;margin:6px 0 12px}
+model-viewer{display:block;width:100%;height:min(68vh,680px);min-height:400px;background:#050605}
+.poster{width:100%;aspect-ratio:16/9;object-fit:contain;background:#070a09;border:1px solid #5f4b31}
+button{cursor:pointer;background:#372b1a;border:1px solid #ac8248;color:#f2d797;padding:10px 15px;font:15px Georgia}
+button[aria-pressed=true]{background:#73552d;box-shadow:0 0 8px #ca933c}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.info{font:14px/1.5 system-ui;color:#cbb992}
+.live{font:16px system-ui;color:#f5ce79}
+footer{padding:12px 20px;text-align:center;color:#9d8966;font:12px system-ui}
+@media(max-width:800px){main{grid-template-columns:1fr;margin:12px auto;padding:0 10px}model-viewer{height:55vh;min-height:300px}}
+</style>
+</head>
+<body>
+<header><h1>PROJECT GENESIS · ESTUDIO DE CÁMARA DEL LINGOTE</h1><small>v0.1.010 · GLB candidato V175, sin modificar geometría ni texturas</small></header>
+<main>
+<section class="panel">
+<h2>Modelo 3D real · oscilación ±45°</h2>
+<model-viewer id="ingot" src="../assets/playcanvas/candidates/materials/iron_ingot/v175/iron_v175_web_candidate.glb"
+ poster="../assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png" reveal="auto"
+ camera-orbit="38.1628deg 66.3498deg auto" environment-image="neutral" exposure="1.85" shadow-intensity="0" interaction-prompt="none" camera-controls field-of-view="15deg"
+ loading="eager" alt="Lingote de hierro V175, prueba de orientación"></model-viewer>
+<div class="controls"><button id="play" aria-pressed="true">PAUSAR</button><button id="front">VISTA ORIGINAL V175</button></div>
+<div class="live" id="status" role="status">Preparando modelo 3D…</div>
+</section>
+<aside class="panel">
+<h2>Referencia visual aprobada · PNG V175</h2>
+<img class="poster" src="../assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png" alt="Render aprobado V175">
+<p class="info">Cámara original recuperada del archivo V175 (HERO_CAMERA_V078): horizontal 38,16°, elevación polar 66,35°. Vaivén mucho más lento: 18 segundos por ciclo completo, ±45° máximo. Arrastrá con el dedo o el mouse para inspeccionar.</p>
+<h2>Elevación de la cámara</h2>
+<div class="controls"><button data-phi="60">60°</button><button data-phi="66.3498" aria-pressed="true">66,35°</button><button data-phi="72">72°</button></div>
+<h2>Ángulo horizontal inicial</h2>
+<div class="controls"><button data-theta="28">28°</button><button data-theta="38.1628" aria-pressed="true">38,16°</button><button data-theta="48">48°</button></div>
+<p class="info">Mismo GLB y texturas: el fondo de estudio ahora es negro. Si la franja gris permanece sobre la pieza, pertenece al GLB o su sombreado. Este visor no modifica el modelo.</p>
+</aside>
+</main>
+<footer>Estudio aislado: no afecta al inventario ni a Preparación. La aprobación del GLB sigue pendiente de revisión visual.</footer>
+<script>
+"use strict";
+var viewer=document.getElementById("ingot"),statusEl=document.getElementById("status");
+var thetaBase=38.1628,phi=66.3498,playing=true,offset=0,started=performance.now();
+function paint(angle,jump){offset=Math.max(-45,Math.min(45,angle));viewer.cameraOrbit=(thetaBase+offset).toFixed(3)+"deg "+phi.toFixed(3)+"deg auto";statusEl.textContent="Cámara "+thetaBase+"° horizontal · "+phi+"° desde arriba · oscilación "+offset.toFixed(1)+"°";if(jump&&viewer.jumpCameraToGoal)viewer.jumpCameraToGoal()}
+function pause(){playing=false;document.getElementById("play").textContent="REANUDAR";document.getElementById("play").setAttribute("aria-pressed","false")}
+function resume(){playing=true;started=performance.now()-Math.asin(Math.max(-1,Math.min(1,offset/45)))*18000/(2*Math.PI);document.getElementById("play").textContent="PAUSAR";document.getElementById("play").setAttribute("aria-pressed","true")}
+document.getElementById("play").onclick=function(){playing?pause():resume()};
+document.getElementById("front").onclick=function(){pause();thetaBase=38.1628;phi=66.3498;paint(0,true)};
+document.querySelectorAll("[data-phi]").forEach(function(b){b.onclick=function(){phi=Number(b.dataset.phi);document.querySelectorAll("[data-phi]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));paint(offset,true)}})
+document.querySelectorAll("[data-theta]").forEach(function(b){b.onclick=function(){thetaBase=Number(b.dataset.theta);document.querySelectorAll("[data-theta]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));paint(offset,true)}})
+window.IngotStudy={pause:pause,resume:resume,setFrame:function(angle,theta,polar){pause();if(Number.isFinite(theta))thetaBase=theta;if(Number.isFinite(polar))phi=polar;paint(angle,true)},getState:function(){return {thetaBase:thetaBase,phi:phi,offset:offset,loaded:viewer.loaded}}};
+viewer.addEventListener("load",function(){statusEl.textContent="GLB V175 cargado. Cámara original restaurada; vaivén de 18 s ±45°.";});viewer.addEventListener("pointerdown",pause);
+viewer.addEventListener("error",function(){statusEl.textContent="El dispositivo no pudo cargar el GLB. Se conserva la referencia PNG."});
+function frame(t){if(playing)paint(45*Math.sin((t-started)*Math.PI*2/18000),false);requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+</script>
+</body></html>
