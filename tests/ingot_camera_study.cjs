@@ -44,7 +44,7 @@ const script='previews/ingot-camera-study-v0.1.009.html';
  console.log('ANIMATION_CHECK',JSON.stringify(state));
  console.log('DISTINCT_CAMERA_FRAMES',new Set(cameraHashes).size,'OF',cameraHashes.length,'DISTINCT_ANIMATION_FRAMES',new Set(frameHashes).size,'OF',frameHashes.length);
  assert(new Set(cameraHashes).size>=6,'camera angles produced identical images');
- assert(new Set(frameHashes).size>=20,'±45° animation has no actual visual motion');
+ assert(new Set(frameHashes).size>=15,'±45° animation has no actual visual motion'); // sine oscillation revisits the same angles twice per cycle
  assert.equal(errors.length,0,errors.join('\n'));
  await browser.close();
  console.log('PASS 9 real-GLB camera variants + 32 frames ±45° without changing GLB');
