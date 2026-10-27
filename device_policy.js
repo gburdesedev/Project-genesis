@@ -32,7 +32,7 @@
       const ratio=Math.max(0.75, Math.min(native,1.5,budgetDpr));
       if(lastRatio===null || Math.abs(lastRatio-ratio)>.025) {
         lastRatio=ratio;
-        appElement.setAttribute('max-pixel-ratio',ratio.toFixed(2));
+        appElement.setAttribute('max-pixel-ratio',String(Number(ratio.toFixed(2))));
       }
     }
   }
