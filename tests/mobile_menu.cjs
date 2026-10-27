@@ -20,7 +20,10 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/<script
    window.openTestMenu=()=>GenesisPreparation.open({profession:'Herrero',recipeName:'Espada de hierro',inventory,requiredStock:{'Lingote de hierro':3},formula:{materials:[{material:'Lingote de hierro',qty:3}]},onCraft(){},closeModal(){document.querySelector('#modalLayer').style.display='none';document.documentElement.classList.remove('modalOpen')},modal(html,extra){const box=document.querySelector('#modal');box.className='modal '+extra;box.innerHTML=html;document.querySelector('#modalLayer').style.display='grid';document.documentElement.classList.add('modalOpen')}});
    openTestMenu();
   });
-  assert.equal(await page.locator('pc-app').getAttribute('max-pixel-ratio'),'1.5');
+  assert.equal(await page.locator('pc-app').getAttribute('max-pixel-ratio'),'1.15');
+  assert.equal(await page.locator('pc-app').getAttribute('antialias'),null,'mobile canvas must avoid multisample antialiasing');
+  assert.equal(await page.locator('#worldSunLight').getAttribute('shadow-resolution'),'512','mobile sun shadows must be capped');
+  assert.equal(await page.locator('#forgeCoreLight').getAttribute('shadow-resolution'),'256','mobile forge shadows must be capped');
   await page.locator('#rotate').waitFor({state:'visible'});
   assert.equal(await page.locator('#rotateTitle').textContent(),'GIRÁ EL TELÉFONO');
   assert(await page.locator('html').evaluate(e=>e.classList.contains('genesis-landscape-required')),'portrait must block the game');
@@ -52,7 +55,7 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/<script
   await page.waitForFunction(()=>Number(document.querySelector('pc-app').getAttribute('max-pixel-ratio'))<1);
   assert(Number(await page.locator('pc-app').getAttribute('max-pixel-ratio'))<1,'render resolution must adapt to oversized mobile viewport');
   assert.equal(requests.filter(url=>/\.glb/.test(url)).length,0,'mobile menu must not request GLB');
-  console.log(`PASS ${name}: mobile posters only, original artwork and no GLB, 1.5 DPR cap, orientation, repeated menu use and thermal controls`);
+  console.log(`PASS ${name}: mobile posters only, original artwork and no GLB, 1.15 DPR cap, orientation, repeated menu use and thermal controls`);
   await browser.close();
  }
 })().catch(error=>{console.error(error);process.exit(1)});

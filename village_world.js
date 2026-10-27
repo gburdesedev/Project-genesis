@@ -1,10 +1,30 @@
 import {Entity,StandardMaterial,Texture,Color,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
 const ROOT='./assets/world/v0.11.004/';
-async function loadTexture(app,name){
- const image=new Image();image.src=ROOT+name;await image.decode();
- const texture=new Texture(app.graphicsDevice,{name,srgb:name.endsWith('_color.png'),mipmaps:true,minFilter:FILTER_LINEAR_MIPMAP_LINEAR,magFilter:FILTER_LINEAR,addressU:ADDRESS_REPEAT,addressV:ADDRESS_REPEAT});texture.setSource(image);return texture;
+const MOBILE_TEXTURE_EDGE=1024;
+// Decode one full-resolution source at a time on touch devices, then keep only
+// a small PBR texture in GPU memory. Desktop retains the approved 4K originals.
+async function loadTexture(app,name,mobile=false){
+ const image=new Image();image.decoding='async';image.src=ROOT+name;await image.decode();
+ let source=image;
+ if(mobile&&Math.max(image.naturalWidth,image.naturalHeight)>MOBILE_TEXTURE_EDGE){
+  const factor=MOBILE_TEXTURE_EDGE/Math.max(image.naturalWidth,image.naturalHeight);
+  const canvas=document.createElement('canvas');
+  canvas.width=Math.max(1,Math.round(image.naturalWidth*factor));
+  canvas.height=Math.max(1,Math.round(image.naturalHeight*factor));
+  const context=canvas.getContext('2d',{alpha:false});
+  if(context){context.drawImage(image,0,0,canvas.width,canvas.height);source=canvas}
+ }
+ const texture=new Texture(app.graphicsDevice,{name,srgb:name.endsWith('_color.png'),mipmaps:true,minFilter:FILTER_LINEAR_MIPMAP_LINEAR,magFilter:FILTER_LINEAR,addressU:ADDRESS_REPEAT,addressV:ADDRESS_REPEAT});
+ texture.setSource(source);
+ if(source!==image)image.src='';
+ return texture;
 }
-async function maps(app,name){const values=await Promise.all(['color','normal','gloss','ao'].map(key=>loadTexture(app,`${name}_${key}.png`)));return Object.fromEntries(['color','normal','gloss','ao'].map((key,i)=>[key,values[i]]))}
+async function maps(app,name,mobile=false){
+ const keys=['color','normal','gloss','ao'],values=[];
+ if(mobile){for(const key of keys)values.push(await loadTexture(app,`${name}_${key}.png`,true))}
+ else values.push(...await Promise.all(keys.map(key=>loadTexture(app,`${name}_${key}.png`))));
+ return Object.fromEntries(keys.map((key,i)=>[key,values[i]]));
+}
 function material(name,color){const m=new StandardMaterial();m.name=name;m.diffuse=new Color(...color);m.gloss=.15;m.update();return m}
 function pavedMaterial(name,maps,w,d,meters=2){
  const m=material(name,[1,1,1]);m.diffuseMap=maps.color;m.normalMap=maps.normal;m.bumpiness=.75;m.glossMap=maps.gloss;m.glossMapChannel='r';m.gloss=1;m.aoMap=maps.ao;m.aoMapUv=0;
@@ -24,7 +44,10 @@ function textMaterial(app,title,subtitle){
 function sign(app,parent,title,subtitle,x,z,yaw,height=2.9,width=3.8){const root=new Entity(title+' cartel');parent.addChild(root);root.setPosition(x,0,z);root.setEulerAngles(0,yaw,0);const e=mesh(root,title,'plane',0,height,.30,width,1,.95,textMaterial(app,title,subtitle));e.setLocalEulerAngles(90,0,0);return root}
 export async function mountVillage(app,{shell,roof,door}){
  const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.11.005');app.root.addChild(root);
- const [cobble,traffic]=await Promise.all([maps(app,'cobble'),maps(app,'traffic')]);
+ const mobile=globalThis.GenesisDevice?.safePreviews===true;
+ const [cobble,traffic]=mobile
+  ? [await maps(app,'cobble',true),await maps(app,'traffic',true)]
+  : await Promise.all([maps(app,'cobble'),maps(app,'traffic')]);
  const b=plan.bounds;
  mesh(root,'Pavimento exterior adoquín','plane',7,-.024,17,63,1,63,pavedMaterial('Adoquín · exterior',cobble,63,63));
  mesh(root,'Plaza central','plane',plan.plaza.x,-.010,plan.plaza.z,plan.plaza.w,1,plan.plaza.d,pavedMaterial('Adoquín · plaza',cobble,plan.plaza.w,plan.plaza.d,2.4));

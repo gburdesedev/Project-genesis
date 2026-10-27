@@ -1,4 +1,4 @@
-/* Project Genesis v0.11.010 · mobile orientation and dynamic render pixel budget.
+/* Project Genesis v0.11.011 · mobile orientation and dynamic render pixel budget.
    Screen rotation is requested only where the browser permits it (fullscreen + gesture).
    iOS Safari cannot lock physical orientation: portrait receives a blocking gate. */
 (() => {
@@ -15,6 +15,16 @@
     return h > w;
   };
   let appElement=null, frame=0, lastRatio=null;
+  function configureMobileShadows() {
+    if(!safePreviews)return;
+    // Keep two expensive real-time shadow maps within mobile GPU budgets.
+    for(const [id,resolution] of [['worldSunLight',512],['forgeCoreLight',256]]) {
+      const light=document.getElementById(id);
+      if(!light)continue;
+      light.setAttribute('shadow-resolution',String(resolution));
+      if(light.component)light.component.shadowResolution=resolution;
+    }
+  }
   function updateViewport() {
     frame=0;
     const vp=window.visualViewport, w=Math.max(1, vp?.width || window.innerWidth);
@@ -29,7 +39,8 @@
     if (safePreviews && appElement) {
       const native = Math.max(1,Number(window.devicePixelRatio)||1);
       const budgetDpr = Math.sqrt(1900000 / Math.max(1,w*h));
-      const ratio=Math.max(0.75, Math.min(native,1.5,budgetDpr));
+      const dprCap=Math.max(w,h)>=1024?1.3:1.15;
+      const ratio=Math.max(0.75, Math.min(native,dprCap,budgetDpr));
       if(lastRatio===null || Math.abs(lastRatio-ratio)>.025) {
         lastRatio=ratio;
         appElement.setAttribute('max-pixel-ratio',String(Number(ratio.toFixed(2))));
@@ -77,6 +88,11 @@
     safePreviews,
     configureApp(element) {
       appElement=element;
+      // Disable multisample antialiasing before web-components initialize WebGL.
+      // This avoids large mobile color/depth render buffers when the scene moves.
+      if(safePreviews)element.removeAttribute('antialias');
+      configureMobileShadows();
+      requestAnimationFrame(configureMobileShadows);
       updateViewport();
       if(typeof ResizeObserver!=='undefined')new ResizeObserver(scheduleViewport).observe(element);
     },
