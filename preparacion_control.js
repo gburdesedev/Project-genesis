@@ -421,7 +421,7 @@
     const canCraft = ready(ctx.formula, ctx.inventory);
     const canPrepare = stage === 'menu' && ctx.profession === 'Herrero' && countOf(ctx.inventory, RAW) > 0;
     const layerHTML = SKIN_LAYERS.map(skinImage).join('');
-    ctx.modal(`<div class="prepSkinScroll"><div class="prepArtboard" data-stage="${stage}">
+    ctx.modal(`<div class="prepSkinScroll"><div class="prepArtboard" data-stage="${stage}" data-active-tab="${escape(ctx.tab || 'Preparacion')}">
       ${layerHTML}
       <h2 class="prepCompactTitle">PREPARACIÓN</h2><div class="prepSkinInventory" aria-label="Materiales básicos y preparados">${skinSlots(ctx)}</div>
       ${stage === 'menu' ? `<div class="prepSkinFeatured" aria-label="Resultado de preparación: lingote de hierro, vista estática">${materialVisual(PREPARED, 'featured')}</div>${skinIngredients(ctx)}` : ''}
