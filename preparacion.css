@@ -284,3 +284,9 @@
 .prepSkinStart.workspaceAction:not(:disabled):hover{background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Hover.png')!important}
 .prepSkinStart.workspaceAction:disabled{background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Deshabilitado.png')!important;color:#a58b6a!important}
 .prepSkinStart.workspaceAction:disabled::before{opacity:.82}
+
+/* Estado declarado por el controlador: no depende de hover ni de :has(). */
+.prepArtboard[data-active-tab="Inventario"] .prepSkinPiece[data-hover="Inventario"],
+.prepArtboard[data-active-tab="Preparacion"] .prepSkinPiece[data-hover="Preparacion"],
+.prepArtboard[data-active-tab="Fabricaciones"] .prepSkinPiece[data-hover="Fabricaciones"],
+.prepArtboard[data-active-tab="Comparacion"] .prepSkinPiece[data-hover="Comparacion"]{opacity:1!important}
