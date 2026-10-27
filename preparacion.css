@@ -250,3 +250,37 @@
 
 /* v0.11.007: live workshop tabs inside the approved artboard. */
 .workspaceLabel{display:block;margin:10px 0;color:#edc38a}.workspaceLabel select{display:block;width:100%;margin-top:5px;padding:8px;color:#eed6b1;background:#1a100b;border:1px solid #89623c;font:inherit}.workspaceMaterial{display:block;width:100%;text-align:left;margin:7px 0;padding:8px;color:#edd2a5;background:#1a100b;border:1px solid #89623c;font:inherit}.workspaceMaterial b{float:right}.workspaceViewer{position:absolute;z-index:31;left:40.5%;top:25%;width:30%;height:56%;display:grid;place-items:center;text-align:center;color:#f1d6ab}.workspaceViewer>img,.workspaceViewer>model-viewer{width:100%;height:100%;object-fit:contain}.workspaceViewer .prepMaterialVisual{width:100%;height:100%;position:relative}.workspacePair{display:grid;grid-template-columns:1fr 1fr;width:100%;height:100%;gap:10px}.workspacePair img,.workspacePair model-viewer{width:100%;height:75%;object-fit:contain}.workspacePair p{font-size:16px}.prepSkinStart.workspaceAction{background:#25170df5!important;border:1px solid #b58a53!important;color:#ffdc9f;font:22px Georgia,serif}.workspaceAction:disabled{color:#a58b6a}.prepSkinTab[aria-current=page]:not([data-tab=Preparacion]){outline:1px solid #cda365;outline-offset:-16px}.prepSkinDetails .itemCard{padding:10px;margin-top:12px}.prepSkinDetails .itemAssetFrame{height:150px}.prepSkinDetails .itemAssetFrame model-viewer{height:150px;width:100%}.prepSkinDetails .itemCard h2{font-size:20px}.prepSkinDetails .ngeStamp{max-width:100%}
+
+
+/* Workspace integrates the approved 39 PNG layers and their active glow. */
+.prepArtboard:has(.prepSkinTab[data-tab="Inventario"][aria-current="page"]) .prepSkinPiece[data-hover="Inventario"],
+.prepArtboard:has(.prepSkinTab[data-tab="Preparacion"][aria-current="page"]) .prepSkinPiece[data-hover="Preparacion"],
+.prepArtboard:has(.prepSkinTab[data-tab="Fabricaciones"][aria-current="page"]) .prepSkinPiece[data-hover="Fabricaciones"],
+.prepArtboard:has(.prepSkinTab[data-tab="Comparacion"][aria-current="page"]) .prepSkinPiece[data-hover="Comparacion"],
+.prepArtboard:has(.prepSkinTab[data-tab="Preparacion"]:not(:disabled):hover) .prepSkinPiece[data-hover="Preparacion"]{opacity:1}
+.prepSkinTab[aria-current="page"]{outline:none!important}
+.prepSkinTab:focus-visible{outline:2px solid #f7d291!important;outline-offset:-10px!important}
+.workspaceSlotArtwork{display:block;position:absolute;inset:5% 3% 18%;overflow:hidden;pointer-events:none;border-radius:5px}
+.workspaceSlotArtwork>*{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;margin:0!important;padding:0!important;border:0!important;object-fit:contain}
+.workspaceSlotArtwork img,.workspaceSlotArtwork model-viewer,.workspaceSlotArtwork .itemAssetFrame{display:block;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain;pointer-events:none}
+.workspaceStockSlot:hover:not(:disabled) .workspaceSlotArtwork,.workspaceStockSlot.selected .workspaceSlotArtwork{filter:drop-shadow(0 0 7px #e3ab61aa)}
+.workspaceStockSlot:focus-visible{outline:2px solid #f6cd86;outline-offset:-6px}
+.workspaceMaterialInitial{position:absolute;inset:4% 8% 16%;display:grid;place-items:center;font:normal clamp(19px,3.1cqw,47px) Georgia,serif;color:#cc985b;text-shadow:0 0 8px #000}
+.workspaceItemBadge{position:absolute;bottom:1%;left:2%;right:2%;display:block;font:normal clamp(8px,.62cqw,11px) Georgia,serif;color:#f7d8a8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 4px black}
+.workspaceInventoryHeader{position:absolute;left:6.5%;top:54.2%;width:28%;height:6.3%;z-index:24;pointer-events:none}
+.workspaceInventoryHeader.works{display:flex;align-items:center;justify-content:center;gap:2%;color:#f5cd91;letter-spacing:.07em;font:normal clamp(11px,1.16cqw,18px) Georgia,serif;text-shadow:0 1px 3px #000;background:linear-gradient(180deg,#20140d 0%,#080604 60%,#22140c 100%);border-top:1px solid #8c6239;border-bottom:1px solid #77502a;box-shadow:inset 0 0 12px #000b,0 0 9px #000a}
+.workspaceGoldSeal{font-size:1.3em;color:#d2a15c}
+.workspaceSwitchGroup{position:absolute;z-index:48;left:27.5%;top:60.5%;width:8.2%;height:2.6%;border:1px solid #ba874b!important;color:#f5cf91!important;background:linear-gradient(180deg,#3b2514,#100b08)!important;font:normal clamp(9px,.68cqw,12px) Georgia,serif!important;letter-spacing:.03em;cursor:pointer;white-space:nowrap;box-shadow:0 1px 3px #000}
+.workspaceSwitchGroup:hover,.workspaceSwitchGroup:focus-visible{border-color:#e6bb79!important;box-shadow:0 0 9px #db934566}
+.workspaceDetailEyebrow{font:normal .76em Georgia,serif!important;letter-spacing:.1em;color:#e9bb7f!important;text-align:center}
+.workspaceHelper{font-size:.83em!important;color:#bfa98c!important}
+.workspaceItemDescription .itemAssetFrame{display:none!important}
+.workspaceItemDescription .itemCard{padding:1% 2%;margin:2% 0;border:0;background:none;box-shadow:none}
+.workspaceItemDescription .itemCard h2{font-size:1.1em;line-height:1.1}
+.workspaceItemDescription .ngeStamp{max-width:100%;overflow:auto}
+.prepSkinStart.workspaceAction{position:absolute;display:flex;align-items:center;justify-content:center;background:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Normal.png') center/100% 100% no-repeat!important;border:0!important;padding:0!important;color:#ffe5ac!important;text-align:center;font:normal clamp(15px,1.4cqw,22px) Georgia,serif!important;letter-spacing:.055em;text-shadow:0 1px 2px #000,0 0 9px #000}
+.prepSkinStart.workspaceAction::before{content:"";position:absolute;inset:27% 9%;z-index:1;border:1px solid #b6874c;background:linear-gradient(180deg,#332016,#120b07 58%,#35200e);box-shadow:inset 0 0 10px #000a}
+.prepSkinStart.workspaceAction .workspaceActionLabel{position:relative;z-index:2;max-width:82%;line-height:1.05}
+.prepSkinStart.workspaceAction:not(:disabled):hover{background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Hover.png')!important}
+.prepSkinStart.workspaceAction:disabled{background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Deshabilitado.png')!important;color:#a58b6a!important}
+.prepSkinStart.workspaceAction:disabled::before{opacity:.82}
