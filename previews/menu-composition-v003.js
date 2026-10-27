@@ -14,7 +14,7 @@
  const board=template.cloneNode(true);board.dataset.stage='study';document.querySelector('.prepSkinScroll').replaceChildren(board);
  board.querySelector('.prepSkinCenter').remove();board.querySelector('.prepSkinIngredients')?.remove();board.querySelector('.prepSkinFeatured')?.remove();board.querySelector('.prepSkinStart')?.remove();
  board.querySelectorAll('[data-role^="boton_"]').forEach(e=>e.remove());
- board.querySelector('.prepSkinFooter').textContent='Composición v0.1.002 · '+({Inventario:'Seleccionar · consultar · preparar o fabricar',Fabricaciones:'Elegir fórmula · revisar materiales · fabricar',Comparacion:'Elegir dos creaciones · consultar sus diferencias'}[tab]);
+ board.querySelector('.prepSkinFooter').textContent='Composición v0.1.003 · '+({Inventario:'Seleccionar · consultar · preparar o fabricar',Fabricaciones:'Elegir fórmula · revisar materiales · fabricar',Comparacion:'Elegir dos creaciones · consultar sus diferencias'}[tab]);
  const detail=board.querySelector('.prepSkinDetails');let content='',bottom='',action='';
  if(tab==='Inventario'){
  content=`<p class="prepSkinKicker">INVENTARIO DEL ARTESANO</p><h3>${category==='materials'?material:'Objetos fabricados'}</h3>`;

@@ -1,4 +1,4 @@
-# Composición de menús v0.1.002
+# Composición de menús v0.1.003
 
 Base: menú real de Preparación, con sus 39 capas, las 20 casillas, visor y panel derecho en sus posiciones originales. La vista usa `GenesisPreparation.open` y clona su artboard para componer Inventario, Fabricaciones y Comparación. La pestaña Preparación ejecuta el minijuego original sobre existencias de muestra.
 
