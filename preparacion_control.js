@@ -621,6 +621,7 @@
     const batch = raw ? batchProfile(ctx.count, PREPARED) : null;
     const missing = shortages(ctx.formula, ctx.inventory);
     const canCraft = ready(ctx.formula, ctx.inventory);
+    const craftAllowed = canCraft && (typeof ctx.canCraftNow !== 'function' || ctx.canCraftNow());
     const details = `<p class="prepSkinKicker">TALLER DEL HERRERO</p>
       <h3>Fundición de hierro</h3>
       <p class="prepSkinIntro">Transformá el mineral en lingotes antes de fabricar. Cada tanda se completa al llegar a 100.</p>
@@ -633,7 +634,7 @@
       <h4>${escape(ctx.recipeName)}</h4>
       ${missing.map(row => `<div class="prepSkinNeed ${row.missing ? 'short' : 'met'}"><span>${escape(row.material)}</span><b>${row.available}/${row.needed}</b></div>`).join('')}
       <p class="prepSkinReady">${canCraft ? '✓ Materiales listos para fabricar.' : 'Prepará los materiales que requiere la fórmula.'}</p>
-      ${canCraft ? '<button class="prepSkinCraft" id="prepFabricate">Ir a fabricar →</button>' : ''}`;
+      ${craftAllowed ? '<button class="prepSkinCraft" id="prepFabricate">Ir a fabricar →</button>' : ''}`;
     // Las instrucciones están en el panel derecho; el centro queda libre
     // para la pieza final estática y los materiales necesarios debajo.
     const center = '';
@@ -646,7 +647,7 @@
 
   function craft() {
     const ctx = session;
-    if (!ctx || !ready(ctx.formula, ctx.inventory)) return;
+    if (!ctx || !ready(ctx.formula, ctx.inventory) || (typeof ctx.canCraftNow === 'function' && !ctx.canCraftNow())) return;
     halt();
     session = null;
     document.removeEventListener('keydown', onKeyDown, true);
