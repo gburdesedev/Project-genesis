@@ -106,6 +106,10 @@
   const escape = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const countOf = (inventory, name) => Math.max(0, Number(inventory?.[name]) || 0);
   const whole = value => Number.isSafeInteger(value) && value > 0;
+  // Los materiales ya preparados o tratados se usan en Fabricaciones, no en Preparación.
+  const isPreparedStockName = name => /^(Lingote|Material preparado|Material tratado)/i.test(String(name || ''));
+  const isCraftMaterial = (ctx, name) => name !== RAW &&
+    (isPreparedStockName(name) || !!ctx.formula?.materials?.some(entry => entry.material === name));
 
   function batchProfile(count, material = PREPARED) {
     if (!whole(count)) throw new Error('Cantidad inválida');
@@ -364,8 +368,8 @@
     const frames = SKIN_LAYERS.filter(layer => layer[6] === 'casilla_marco_transparente');
     const items = ctx.getItems ? ctx.getItems() : [];
     const stock = Object.entries(ctx.inventory).filter(([,qty]) => Number(qty) > 0);
-    const basic = stock.filter(([name]) => !/^(Lingote|Material preparado)/i.test(name)).slice(0, 10);
-    const prepared = stock.filter(([name]) => /^(Lingote|Material preparado)/i.test(name)).slice(0, 10);
+    const basic = stock.filter(([name]) => !isPreparedStockName(name)).slice(0, 10);
+    const prepared = stock.filter(([name]) => isPreparedStockName(name)).slice(0, 10);
     return frames.map((layer, index) => {
       const [, , x, y, width, height] = layer;
       const item = crafted ? items[index] : null;
@@ -435,6 +439,16 @@
     if(!ctx.getItems)bind('prepFabricateTab', craft);
     bindModelHover();
     bindWorkspaceTabs(stage);
+    if (stage === 'menu' && ctx.getItems) {
+      // Desde Preparación: pulsar un material tratado va directo a Fabricaciones.
+      document.querySelectorAll('.prepSkinSlot[data-stock-name]').forEach(slot => {
+        slot.onclick = () => {
+          ctx.selectedMaterial = slot.dataset.stockName;
+          if (isCraftMaterial(ctx, ctx.selectedMaterial)) renderWorkspace('Fabricaciones');
+          else renderMenu();
+        };
+      });
+    }
   }
 
   function bindWorkspaceTabs(stage) {
@@ -513,8 +527,8 @@
         if(ctx.manageGear)details+='<button type="button" class="workspaceMaterial" id="workspaceGear">Gestionar equipo del mercenario</button>';
         if(ctx.extraInventory)details+=ctx.extraInventory();
         viewer=materialVisual(material,'featured');
-        action=material===RAW?'Ir a Preparación':'Ir a Fabricaciones';enabled=true;
-        run=()=>{if(material===RAW)renderMenu();else renderWorkspace('Fabricaciones')};
+        action=isCraftMaterial(ctx,material)?'Ir a Fabricaciones':'Ir a Preparación';enabled=true;
+        run=()=>{if(isCraftMaterial(ctx,material))renderWorkspace('Fabricaciones');else renderMenu()};
       }
     } else if(tab==='Fabricaciones') {
       const needs=shortages(ctx.formula,ctx.inventory);
@@ -572,9 +586,13 @@
       else {ctx.inventoryCategory='creations';ctx.selectedItem=index;ctx.viewItem=true;}
       renderWorkspace(tab);
     });
-    board.querySelectorAll('[data-stock-name]').forEach(e=>e.onclick=()=>{ctx.selectedMaterial=e.dataset.stockName;ctx.viewItem=false;ctx.inventoryCategory='materials';renderWorkspace('Inventario')});
+    board.querySelectorAll('[data-stock-name]').forEach(e=>e.onclick=()=>{
+      ctx.selectedMaterial=e.dataset.stockName;ctx.viewItem=false;ctx.inventoryCategory='materials';
+      if(isCraftMaterial(ctx,ctx.selectedMaterial))renderWorkspace('Fabricaciones');
+      else renderWorkspace('Inventario');
+    });
     board.querySelectorAll('[data-inventory-category]').forEach(e=>e.onclick=()=>{ctx.inventoryCategory=e.dataset.inventoryCategory;ctx.viewItem=ctx.inventoryCategory==='creations';renderWorkspace('Inventario')});
-    board.querySelectorAll('[data-material]').forEach(e=>{if(e.tagName==='BUTTON')e.onclick=()=>{ctx.selectedMaterial=e.dataset.material;renderWorkspace('Inventario')}});
+    board.querySelectorAll('[data-material]').forEach(e=>{if(e.tagName==='BUTTON')e.onclick=()=>{ctx.selectedMaterial=e.dataset.material;renderWorkspace(isCraftMaterial(ctx,ctx.selectedMaterial)?'Fabricaciones':'Inventario')}});
     const select=document.getElementById('workspaceItem');if(select)select.onchange=()=>{ctx.selectedItem=Math.max(0,Number(select.value));ctx.inventoryCategory='creations';renderWorkspace('Inventario')};
     for(const [id,key] of [['workspaceA','compareA'],['workspaceB','compareB']]){const el=document.getElementById(id);if(el)el.onchange=()=>{ctx[key]=Number(el.value);ctx.comparePick=key==='compareA'?'B':'A';renderWorkspace('Comparacion')}}
     board.querySelectorAll('[data-sheet-tab]').forEach(e=>e.onclick=()=>{ctx.sheetTab=e.dataset.sheetTab;renderWorkspace('Inventario')});
@@ -819,6 +837,13 @@
     if(options.startTab&&options.startTab!=='Preparacion'&&options.getItems)renderWorkspace(options.startTab);else renderMenu();
   }
 
-  window.GenesisPreparation = Object.freeze({ dismiss(){halt();session=null;document.removeEventListener('keydown',onKeyDown,true)}, rawStock, shortages, ready, batchProfile, actionEffect, progressRate, progressGain, temperatureStatus, heatBands, heatGradient, passiveCooling, convert, open });
+  // Navegación explícita para TAB/INV del juego; no confundir una sesión abierta con su pestaña activa.
+  function activeTab(){return session?.getItems ? (session.tab || 'Preparacion') : null;}
+  function navigate(tab){
+    if (!session?.getItems || session.mode === 'running' || !['Inventario','Preparacion','Fabricaciones','Comparacion'].includes(tab)) return false;
+    if (tab === 'Preparacion') renderMenu(); else renderWorkspace(tab);
+    return true;
+  }
+  window.GenesisPreparation = Object.freeze({ dismiss(){halt();session=null;document.removeEventListener('keydown',onKeyDown,true)}, activeTab, navigate, rawStock, shortages, ready, batchProfile, actionEffect, progressRate, progressGain, temperatureStatus, heatBands, heatGradient, passiveCooling, convert, open });
 })();
 
