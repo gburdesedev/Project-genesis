@@ -1182,7 +1182,8 @@ function openInventory(){if(!gameStarted||!chestOpen){toast('El inventario se ha
 function closeInventory(countTutorial=false){if(!inventoryOpen)return;window.GenesisPreparation?.dismiss();inventoryRustle(false);inventoryOpen=false;closeModal();if(countTutorial&&tutorialStep===9&&inventoryTutorialOpened){setTutorialStep(10);toast('Inventario aprendido · ahora podés empezar a fabricar.',1500);mentorModal('Perfecto. El baúl queda como alijo del taller y TAB en PC o INV en táctil abre tu inventario. Ahora acercate a la estación de trabajo para fabricar la primera familia.','Ir a fabricar')}}
 function toggleInventory(){
  const activeTab=window.GenesisPreparation?.activeTab?.();
- if(inventoryOpen&&(!activeTab||activeTab==='Inventario')){closeInventory(true);return}
+ const legacyInventoryVisible=inventoryOpen&&document.getElementById('modal')?.classList.contains('inventoryModal')&&document.getElementById('modalLayer')?.style.display!=='none';
+ if(inventoryOpen&&(activeTab==='Inventario'||legacyInventoryVisible)){closeInventory(true);return}
  if(activeTab){
    // Si el taller muestra Preparación o Fabricaciones, INV/TAB cambia a Inventario.
    if(window.GenesisPreparation.navigate('Inventario')){
@@ -1190,6 +1191,7 @@ function toggleInventory(){
    }
    return; // No interrumpir un minijuego térmico activo.
  }
+ inventoryOpen=false; // Evitar estado obsoleto al volver desde otro panel.
  openInventory();
 }
 function consumeFormula(formula){if(!formula||!chestOpen)return false;for(const m of formula.materials)if((playerInventory[m.material]||0)<m.qty)return false;for(const m of formula.materials)playerInventory[m.material]-=m.qty;refreshInventorySummary();return true}
