@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<script src="./village_plan.js?v=0.11.006"></script>
-<script src="./device_policy.js?v=0.11.006"></script>
+<script src="./village_plan.js?v=0.11.007"></script>
+<script src="./device_policy.js?v=0.11.007"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Project Genesis — Prototipo Jugable v0.11.006 · Powered by NGE Alpha</title>
-<link rel="stylesheet" href="./preparacion.css?v=0.11.006">
+<title>Project Genesis — Prototipo Jugable v0.11.007 · Powered by NGE Alpha</title>
+<link rel="stylesheet" href="./preparacion.css?v=0.11.007">
 
 <script type="importmap">
 {
@@ -187,8 +187,8 @@ html.modalOpen,body.modalOpen{overflow:hidden!important;overscroll-behavior:none
 <script>
 if(!window.GenesisDevice.safePreviews){const script=document.createElement('script');script.type='module';script.src='https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js';document.head.append(script)}
 </script>
-<meta name="genesis-build" content="playcanvas-v0.11.006-approved-iron-ore">
-<link rel="stylesheet" href="./responsive.css?v=0.11.006">
+<meta name="genesis-build" content="playcanvas-v0.11.007-approved-iron-ore">
+<link rel="stylesheet" href="./responsive.css?v=0.11.007">
 </head>
 <body>
 
@@ -730,7 +730,7 @@ window.__genesisAppError=function(event){
 </div>
 
 <div id="hud">
- <div id="brand">PROJECT GENESIS · v0.11.006</div>
+ <div id="brand">PROJECT GENESIS · v0.11.007</div>
  <div id="tech">PLAYCANVAS 2.22.1 · PROTOTIPO · v0.11</div>
  <div id="buttonsTop"><button id="cameraSettingsBtn" class="uiBtn" type="button" aria-label="Configurar cámara">⚙ CÁMARA</button></div>
  <section id="quest">
@@ -757,11 +757,11 @@ window.__genesisAppError=function(event){
 
 <script src="./fps_counter.js?v=20261025-1"></script>
 <script src="./camera_mouse.js?v=20261025-1"></script>
-<script src="./preparacion_control.js?v=0.11.006"></script>
+<script src="./preparacion_control.js?v=0.11.007"></script>
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
 import { Vec3 } from 'playcanvas';
-import { mountVillage } from './village_world.js?v=0.11.006';
+import { mountVillage } from './village_world.js?v=0.11.007';
 
 /* Preparación v0.11: adaptador local sin modificar el motor procedural ni las
    resoluciones de Fabricación/Cierre. Conserva ambas rutas del tutorial. */
@@ -800,7 +800,36 @@ queueMicrotask(() => {
     }
     return originalRouteCopy(step);
   };
-  const originalCraftConfirm = showCraftConfirm;
+  const legacyInventory = openInventory;
+  openInventory = function(){
+    if(selectedProfession!=='Herrero'||!gameStarted||!chestOpen||!craftSession){legacyInventory();return}
+    inventoryRustle(true);inventoryOpen=true;if(tutorialStep===9)inventoryTutorialOpened=true;
+    const recipeId=currentRecipe(),formula=recipeId&&formulaFor(recipeId),rec=window.GenesisPrototypeEngines?.recipes?.[recipeId];
+    prep.open({profession:selectedProfession,inventory:playerInventory,requiredStock:craftSession.requiredStock||craftSession.stock,
+      formula:formula||{materials:[]},recipeName:rec?.name||'Fabricación',startTab:'Inventario',modal,
+      closeModal:()=>closeInventory(true),onInventoryChanged:refreshInventorySummary,
+      getItems:()=>craftedItems,renderItem:renderItemCard,renderAsset:itemAssetMarkup,
+      recipeAsset:()=>rec?`<img alt="${esc(rec.name)}" src="${itemIcon(recipeId)}">`:'',
+      canCraftNow:()=>!!formula&&tutorialStep>=10&&tutorialStep<=13,
+      onCraft:()=>{inventoryOpen=false;if(formula&&prep.ready(formula,playerInventory)&&tutorialStep>=10&&tutorialStep<=13)performCraft()},
+      manageGear:canManageMercGearFromInventory()?()=>showMercenaryEquipment(true):null,
+      extraInventory:demoMaterialInventoryBlock,
+      bindExtraInventory:()=>{const b=document.getElementById('inventoryDemoMaterialUse');if(b)b.onclick=()=>{prep.dismiss();inventoryOpen=false;closeModal();attemptUseDemoMaterial()}}
+    });
+  };
+  const legacyComparison=showComparison;
+  showComparison=function(familyItems,finalFamily,onContinue){
+    if(selectedProfession!=='Herrero'){legacyComparison(familyItems,finalFamily,onContinue);return}
+    const recipeId=familyItems[0]?.recipe,rec=window.GenesisPrototypeEngines.recipes[recipeId];
+    inventoryOpen=false;
+    prep.open({profession:selectedProfession,inventory:playerInventory,requiredStock:craftSession.requiredStock||craftSession.stock,
+      formula:familyItems[0].formula,recipeName:rec.name,startTab:'Comparacion',modal,closeModal,
+      getItems:()=>craftedItems,compareA:craftedItems.indexOf(familyItems[0]),compareB:craftedItems.indexOf(familyItems[1]),
+      renderItem:renderItemCard,renderAsset:itemAssetMarkup,recipeAsset:()=>`<img alt="${esc(rec.name)}" src="${itemIcon(recipeId)}">`,
+      canCraftNow:()=>false,onCraft:()=>{},onComparisonContinue:onContinue
+    });
+  };
+
   showCraftConfirm = function () {
     const recipeId = currentRecipe();
     const formula = recipeId && formulaFor(recipeId);
@@ -814,13 +843,18 @@ queueMicrotask(() => {
       recipeName: rec.name,
       modal,
       closeModal,
+      getItems: () => craftedItems,
+      renderItem: renderItemCard,
+      renderAsset: itemAssetMarkup,
+      recipeAsset: () => `<img alt="${esc(rec.name)}" src="${itemIcon(recipeId)}">`,
+      canCraftNow: () => tutorialStep>=10&&tutorialStep<=13,
       onInventoryChanged: refreshInventorySummary,
       onCraft: () => {
         if (!prep.ready(formula, playerInventory)) {
           toast('Necesitás preparar los materiales de la fórmula.', 1700);
           return;
         }
-        originalCraftConfirm();
+        if(tutorialStep>=10&&tutorialStep<=13)performCraft();
       }
     });
   };
@@ -1144,7 +1178,7 @@ function inventoryCraftedRows(){if(!craftedItems.length)return '<div class="inve
 function canManageMercGearFromInventory(){return ['Herrero','Curtidor'].includes(selectedProfession)&&mercCandidate!=null&&mercGearAttached&&tutorialStep>=17&&mercenaryState!=='departing'&&mercenaryState!=='away'}
 function refreshInventorySummary(){if(!chestOpen)return;const baseKinds=Object.values(playerInventory||{}).filter(q=>q>0).length,baseTotal=Object.values(playerInventory||{}).reduce((s,q)=>s+Math.max(0,q||0),0),sampleQty=Math.max(0,expeditionMaterialQty||0),kinds=baseKinds+(sampleQty>0?1:0),total=baseTotal+sampleQty,objects=craftedItems.length;materialsPanel.style.display='block';materialsText.textContent=`Inventario · TAB / INV · ${kinds} materiales · ${total} unidades · ${objects} objetos${expeditionMaterial?' · muestra '+demoMaterialStateLabel():''}`;const invTouch=document.getElementById('inventoryTouch');if(invTouch){invTouch.classList.toggle('locked',!chestOpen);invTouch.classList.toggle('ready',chestOpen)}}
 function openInventory(){if(!gameStarted||!chestOpen){toast('El inventario se habilita al retirar el lote del baúl.',1400);return}inventoryRustle(true);inventoryOpen=true;if(tutorialStep===9)inventoryTutorialOpened=true;const manageGear=canManageMercGearFromInventory()?'<button class="secondary" id="inventoryManageGear">Gestionar equipo del Guerrero</button>':'';modal(`<div class="inventoryHead"><div><div class="ik">INVENTARIO DEL ARTESANO</div><h2>Materiales y creaciones</h2></div><div class="ih">Alijo del taller + objetos fabricados en esta sesión<br><span class="inventoryKey">TAB</span> PC · <span class="inventoryKey">INV</span> táctil</div></div><div class="inventoryExplain"><b>El inventario conserva dos tipos de contenido.</b> Los materiales se consumen al fabricar; los objetos terminados quedan disponibles para comparar, conservar y equipar al mercenario.</div><div class="inventorySectionTitle">MATERIALES</div><div class="inventoryGrid">${inventoryRows()}</div>${demoMaterialInventoryBlock()}<div class="inventorySectionTitle">OBJETOS FABRICADOS</div><div class="inventoryCraftGrid">${inventoryCraftedRows()}</div>${canManageMercGearFromInventory()?'<div class="inventoryManageHint">El equipo marcado como <strong>EQUIPADO</strong> está actualmente sobre el Guerrero. Podés reemplazarlo por cualquiera de las otras creaciones compatibles disponibles.</div>':''}<div class="inventoryFooter"><strong>${Object.values(playerInventory||{}).reduce((s,q)=>s+Math.max(0,q||0),0)+Math.max(0,expeditionMaterialQty||0)} unidades de material</strong> · <strong>${craftedItems.length} objetos fabricados</strong>.</div><div class="actions">${manageGear}<button id="inventoryClose">Cerrar inventario</button></div>`,'inventoryModal');document.getElementById('inventoryClose').onclick=()=>closeInventory(true);const gearBtn=document.getElementById('inventoryManageGear');if(gearBtn)gearBtn.onclick=()=>{inventoryOpen=false;closeModal();showMercenaryEquipment(true)};const demoUse=document.getElementById('inventoryDemoMaterialUse');if(demoUse)demoUse.onclick=()=>{inventoryOpen=false;attemptUseDemoMaterial()}}
-function closeInventory(countTutorial=false){if(!inventoryOpen)return;inventoryRustle(false);inventoryOpen=false;closeModal();if(countTutorial&&tutorialStep===9&&inventoryTutorialOpened){setTutorialStep(10);toast('Inventario aprendido · ahora podés empezar a fabricar.',1500);mentorModal('Perfecto. El baúl queda como alijo del taller y TAB en PC o INV en táctil abre tu inventario. Ahora acercate a la estación de trabajo para fabricar la primera familia.','Ir a fabricar')}}
+function closeInventory(countTutorial=false){if(!inventoryOpen)return;window.GenesisPreparation?.dismiss();inventoryRustle(false);inventoryOpen=false;closeModal();if(countTutorial&&tutorialStep===9&&inventoryTutorialOpened){setTutorialStep(10);toast('Inventario aprendido · ahora podés empezar a fabricar.',1500);mentorModal('Perfecto. El baúl queda como alijo del taller y TAB en PC o INV en táctil abre tu inventario. Ahora acercate a la estación de trabajo para fabricar la primera familia.','Ir a fabricar')}}
 function toggleInventory(){if(inventoryOpen){closeInventory(true);return}openInventory()}
 function consumeFormula(formula){if(!formula||!chestOpen)return false;for(const m of formula.materials)if((playerInventory[m.material]||0)<m.qty)return false;for(const m of formula.materials)playerInventory[m.material]-=m.qty;refreshInventorySummary();return true}
 function openActiveChest(){if(tutorialStep!==8||!workshopKey)return;chestLatchSound();chestOpen=true;if(selectedProfession==='Herrero'){chestLidTarget=-102;woodCreak()}else{woodCreak();if(tannerChestOpen)tannerChestAnim.transition(tannerChestOpen,.08);setTimeout(()=>tannerChestOpened&&tannerChestAnim.transition(tannerChestOpened,.08),900)}playerInventory={...craftSession.stock};const expectedStock=craftSession.requiredStock||craftSession.stock;for(const [material,qty] of Object.entries(expectedStock))if(playerInventory[material]!==qty)throw Error('inventory stock mismatch: '+material);refreshInventorySummary();toast('Lote exacto de sesión retirado al inventario.',1500);setTutorialStep(9);mentorModal('El baúl es el alijo del taller. El lote inicial ya pasó a tu inventario. Antes de fabricar, en PC presioná TAB; en táctil tocá INV. Revisá qué materiales recibiste y cerrá el panel para continuar.','Entendido')}

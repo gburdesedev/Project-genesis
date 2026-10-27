@@ -1,7 +1,7 @@
 name: Responsive game UI
 on:
   push:
-    branches: [main, 'fix/responsive-game', 'fix/mouse-capture', 'feat/fps-counter', 'fix/mobile-v0.11.001', 'fix/layout-v0.11.002', 'fix/quantity-v0.11.003', 'feat/world-v0.11.004', 'feat/proportions-v0.11.005', 'feat/mineral-v0.11.006']
+    branches: [main, 'fix/responsive-game', 'fix/mouse-capture', 'feat/fps-counter', 'fix/mobile-v0.11.001', 'fix/layout-v0.11.002', 'fix/quantity-v0.11.003', 'feat/world-v0.11.004', 'feat/proportions-v0.11.005', 'feat/mineral-v0.11.006', 'feat/functional-menus']
   pull_request:
   workflow_dispatch:
 permissions:
@@ -25,6 +25,7 @@ jobs:
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/camera_mouse_browser.cjs
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/mobile_menu.cjs
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/original_layout.cjs
+      - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/functional_menus.cjs
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/approved_mineral.cjs
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/village_render.cjs
       - uses: actions/upload-artifact@v4

@@ -417,8 +417,56 @@
     }
     bind('prepClose', close);
     bind('prepSelectIron', () => { if (ctx.mode === 'menu') renderMenu(); });
-    bind('prepFabricateTab', craft);
+    if(!ctx.getItems)bind('prepFabricateTab', craft);
     bindModelHover();
+    bindWorkspaceTabs(stage);
+  }
+
+  function bindWorkspaceTabs(stage) {
+    const ctx=session;
+    if(!ctx?.getItems||!['menu','workspace'].includes(stage))return;
+    document.querySelectorAll('.prepSkinTab').forEach(button=>{
+      button.disabled=false;button.removeAttribute('aria-current');
+      const tab=button.dataset.tab;
+      button.setAttribute('aria-label',button.dataset.label||tab);
+      if(tab===(ctx.tab||'Preparacion'))button.setAttribute('aria-current','page');
+      button.onclick=()=>{ctx.tab=tab;if(tab==='Preparacion')renderMenu();else renderWorkspace(tab)};
+    });
+  }
+  function renderWorkspace(tab) {
+    const ctx=session;if(!ctx)return;halt();ctx.mode='workspace';ctx.tab=tab;
+    const items=ctx.getItems(),stock=Object.entries(ctx.inventory).filter(([,q])=>q>0);
+    ctx.selectedItem=Math.min(ctx.selectedItem||0,Math.max(0,items.length-1));
+    const item=items[ctx.selectedItem],material=ctx.selectedMaterial||stock[0]?.[0]||RAW;
+    const optionList=selected=>items.map((it,i)=>`<option value="${i}" ${i===selected?'selected':''}>${escape(it.name)} · ${escape(it.rarity)}</option>`).join('');
+    let details='',viewer='',action='',enabled=false,run=()=>{};
+    const choices=`<label class="workspaceLabel">Ver objeto fabricado<select id="workspaceItem"><option value="-1" ${ctx.viewItem?'':'selected'}>Material seleccionado</option>${optionList(ctx.viewItem?ctx.selectedItem:-1)}</select></label>`;
+    if(tab==='Inventario'){
+      details=`<p class="prepSkinKicker">INVENTARIO DEL ARTESANO</p>${choices}`;
+      if(ctx.viewItem&&item){details+=ctx.renderItem(item);viewer=ctx.renderAsset(item)}
+      else{details+=`<h3>${escape(material)}</h3><p class="prepSkinIntro">${material===RAW?'Materia prima para preparar en la fragua.':'Material disponible para fabricar.'}</p><div class="prepSkinStat"><span>Existencias</span><b>${countOf(ctx.inventory,material)}</b></div><div class="prepSkinDivider"></div>`+stock.map(([m,q])=>`<button class="workspaceMaterial" data-material="${escape(m)}">${escape(m)} <b>${q}</b></button>`).join('');viewer=materialVisual(material,'featured')}
+      action=ctx.viewItem?'Ver comparación':material===RAW?'Ir a preparación':'Ir a fabricación';enabled=ctx.viewItem?items.length>1:true;run=()=>{ctx.tab=ctx.viewItem?'Comparacion':material===RAW?'Preparacion':'Fabricaciones';if(ctx.tab==='Preparacion')renderMenu();else renderWorkspace(ctx.tab)};
+      if(ctx.manageGear)details+='<button class="workspaceMaterial" id="workspaceGear">Gestionar equipo del mercenario</button>';
+      if(ctx.extraInventory)details+=ctx.extraInventory();
+    }else if(tab==='Fabricaciones'){
+      details=`<p class="prepSkinKicker">FABRICACIÓN ACTUAL</p><h3>${escape(ctx.recipeName)}</h3><p class="prepSkinIntro">Se consumirán los materiales de esta fórmula al confirmar.</p>`+shortages(ctx.formula,ctx.inventory).map(r=>`<div class="prepSkinNeed ${r.missing?'short':'met'}"><span>${escape(r.material)}</span><b>${r.available}/${r.needed}</b></div>`).join('');
+      enabled=ready(ctx.formula,ctx.inventory)&&ctx.canCraftNow();details+=`<p class="prepSkinReady">${!ctx.canCraftNow()?'Avanzá en el tutorial hasta la fabricación correspondiente.':enabled?'Materiales listos.':'Prepará los materiales que faltan.'}</p>`;viewer=ctx.recipeAsset();action='Confirmar fabricación';run=craft;
+    }else{
+      ctx.compareA=Math.min(ctx.compareA||0,Math.max(0,items.length-1));ctx.compareB=Math.min(ctx.compareB??1,Math.max(0,items.length-1));
+      const a=items[ctx.compareA],b=items[ctx.compareB],valid=a&&b&&a!==b&&a.recipe===b.recipe;
+      details='<p class="prepSkinKicker">COMPARACIÓN DE TUS CREACIONES</p><h3>Seleccionar dos objetos</h3>';
+      if(items.length){details+=`<label class="workspaceLabel">Objeto A<select id="workspaceA">${optionList(ctx.compareA)}</select></label><label class="workspaceLabel">Objeto B<select id="workspaceB">${optionList(ctx.compareB)}</select></label>`;details+=valid?ctx.renderItem(a)+ctx.renderItem(b):'<p>Elegí dos objetos distintos de la misma familia.</p>';viewer=valid?`<div class="workspacePair"><div>${ctx.renderAsset(a)}<p>${escape(a.name)}</p></div><div>${ctx.renderAsset(b)}<p>${escape(b.name)}</p></div></div>`:ctx.renderAsset(a)}else details+='<p>Todavía no fabricaste objetos. Tus creaciones aparecerán acá al terminar una fabricación.</p>';
+      action=ctx.onComparisonContinue?'Continuar recorrido':'Volver al inventario';enabled=ctx.onComparisonContinue?!!valid:true;run=()=>{if(ctx.onComparisonContinue){const done=ctx.onComparisonContinue;close();done()}else renderWorkspace('Inventario')};
+    }
+    skinDisplay('workspace','',details,`${tab} · ${stock.reduce((n,[,q])=>n+q,0)} unidades de material · ${items.length} objetos fabricados`);
+    const board=document.querySelector('.prepArtboard');board.querySelectorAll('[data-role^="boton_"]').forEach(e=>e.remove());
+    const view=document.createElement('div');view.className='workspaceViewer';view.innerHTML=viewer;board.append(view);
+    const button=document.getElementById('prepStart');button.classList.add('workspaceAction');button.textContent=action;button.disabled=!enabled;button.onclick=run;
+    document.querySelectorAll('[data-material]').forEach(e=>{if(e.tagName==='BUTTON')e.onclick=()=>{ctx.selectedMaterial=e.dataset.material;ctx.viewItem=false;renderWorkspace('Inventario')}});
+    document.querySelectorAll('.prepSkinSlot.occupied').forEach(e=>{e.removeAttribute('aria-disabled');e.onclick=()=>{ctx.selectedMaterial=e.querySelector('[data-material]')?.dataset.material||RAW;ctx.viewItem=false;renderWorkspace('Inventario')}});
+    const select=document.getElementById('workspaceItem');if(select)select.onchange=()=>{ctx.viewItem=Number(select.value)>=0;ctx.selectedItem=Math.max(0,Number(select.value));renderWorkspace(tab)};
+    for(const [id,key]of [['workspaceA','compareA'],['workspaceB','compareB']]){const e=document.getElementById(id);if(e)e.onchange=()=>{ctx[key]=Number(e.value);renderWorkspace(tab)}}
+    bind('workspaceGear',()=>{const fn=ctx.manageGear;close();fn()});ctx.bindExtraInventory?.();
   }
 
   function display(content, compact = false) {
@@ -459,7 +507,7 @@
     if (!ctx) return;
     if (ctx.profession !== 'Herrero') { renderLegacyMenu(); return; }
     halt();
-    ctx.mode = 'menu';
+    ctx.mode = 'menu';ctx.tab='Preparacion';
     const raw = countOf(ctx.inventory, RAW), ingots = countOf(ctx.inventory, PREPARED);
     ctx.count = raw ? Math.min(Math.max(ctx.count || 1, 1), raw) : 0;
     const batch = raw ? batchProfile(ctx.count, PREPARED) : null;
@@ -654,9 +702,9 @@
     if (session) close();
     session = { ...options, mode: 'menu', count: 1, work: null };
     document.addEventListener('keydown', onKeyDown, true);
-    renderMenu();
+    if(options.startTab&&options.startTab!=='Preparacion'&&options.getItems)renderWorkspace(options.startTab);else renderMenu();
   }
 
-  window.GenesisPreparation = Object.freeze({ rawStock, shortages, ready, batchProfile, actionEffect, progressRate, progressGain, temperatureStatus, heatBands, heatGradient, passiveCooling, convert, open });
+  window.GenesisPreparation = Object.freeze({ dismiss(){halt();session=null;document.removeEventListener('keydown',onKeyDown,true)}, rawStock, shortages, ready, batchProfile, actionEffect, progressRate, progressGain, temperatureStatus, heatBands, heatGradient, passiveCooling, convert, open });
 })();
 
