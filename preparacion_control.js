@@ -411,7 +411,7 @@
     const canCraft = ready(ctx.formula, ctx.inventory);
     const canPrepare = stage === 'menu' && ctx.profession === 'Herrero' && countOf(ctx.inventory, RAW) > 0;
     const layerHTML = SKIN_LAYERS.map(skinImage).join('');
-    ctx.modal(`<div class="prepSkinScroll"><div class="prepArtboard" data-stage="${stage}">
+    ctx.modal(`<div class="prepSkinScroll"><div class="prepArtboard" data-stage="${stage}" data-active-tab="${escape(ctx.tab || 'Preparacion')}">
       ${layerHTML}
       <h2 class="prepCompactTitle">${escape(ctx.tab || "PREPARACIÓN")}</h2><div class="prepSkinInventory" aria-label="Materiales básicos y preparados">${skinSlots(ctx)}</div>
       ${stage === 'menu' ? `<div class="prepSkinFeatured" aria-label="Resultado de preparación: lingote de hierro, vista estática">${materialVisual(PREPARED, 'featured')}</div>${skinIngredients(ctx)}` : ''}
@@ -492,13 +492,12 @@
     if(tab==='Inventario') {
       const crafted=ctx.inventoryCategory==='creations';
       ctx.viewItem=crafted && items.length>0;
-      const select='<label class="workspaceLabel">Creación seleccionada<select id="workspaceItem" '+(!items.length?'disabled':'')+'>'+optionList(ctx.selectedItem)+'</select></label>';
       details='<p class="prepSkinKicker">INVENTARIO DEL HERRERO</p><div class="workspaceCategory" role="group" aria-label="Categorías del inventario">' +
         '<button data-inventory-category="materials" aria-pressed="'+(!crafted)+'">MATERIALES</button><button data-inventory-category="creations" aria-pressed="'+crafted+'">CREACIONES ('+items.length+')</button></div>';
       if(crafted) {
         if(items.length) {
           const item=items[ctx.selectedItem];
-          details+=select+sheetForItem(ctx,item);
+          details+=sheetForItem(ctx,item);
           viewer='<div class="workspaceHero">'+ctx.renderAsset(item)+'<p>'+escape(item.name)+' · '+escape(item.rarity)+'</p></div>';
           action='Comparar creaciones';enabled=items.length>1;
           run=()=>renderWorkspace('Comparacion');
@@ -510,7 +509,7 @@
       } else {
         details+='<h3>'+escape(material)+'</h3><p class="prepSkinIntro">Existencias del baúl y materiales preparados en la partida.</p>' +
           '<div class="prepSkinStat"><span>Disponibles</span><b>'+countOf(ctx.inventory,material)+'</b></div>' +
-          '<div class="workspaceStockList">'+stock.map(([m,q])=>'<button type="button" class="workspaceMaterial" data-material="'+escape(m)+'">'+escape(m)+' <b>'+q+'×</b></button>').join('')+'</div>';
+          '<p class="workspaceFootnote">Elegí un material directamente en las casillas del inventario para consultar sus existencias.</p>';
         if(ctx.manageGear)details+='<button type="button" class="workspaceMaterial" id="workspaceGear">Gestionar equipo del mercenario</button>';
         if(ctx.extraInventory)details+=ctx.extraInventory();
         viewer=materialVisual(material,'featured');
@@ -559,8 +558,14 @@
     }
     skinDisplay('workspace','',details,tab+' · '+stock.reduce((n,[,q])=>n+Number(q),0)+' unidades · '+items.length+' creaciones');
     const board=document.querySelector('.prepArtboard');
+    // Se preserva el botón decorativo, pero no el rótulo PREPARAR horneado en Preparación.
+    board.querySelectorAll('[data-role^="boton_"]').forEach(piece => piece.remove());
+    if(tab==='Comparacion'||(tab==='Inventario'&&ctx.inventoryCategory==='creations')) {
+      const titles=['CREACIONES · 1–10','CREACIONES · 11–20'];
+      titles.forEach((title,i)=>board.insertAdjacentHTML('beforeend','<div class="workspaceCollectionLabel '+(i?'lower':'upper')+'" aria-hidden="true"><span>✦</span>'+title+'<span>✦</span></div>'));
+    }
     const view=document.createElement('div');view.className='workspaceViewer';view.innerHTML=viewer;board.append(view);
-    const button=document.getElementById('prepStart');button.classList.add('workspaceAction');button.textContent=action;button.disabled=!enabled;button.onclick=run;
+    const button=document.getElementById('prepStart');button.classList.add('workspaceAction');button.innerHTML='<span class="workspaceActionLabel">'+escape(action)+'</span>';button.disabled=!enabled;button.onclick=run;
     board.querySelectorAll('[data-item-index]').forEach(e=>e.onclick=()=>{
       const index=Number(e.dataset.itemIndex);
       if(tab==='Comparacion') {if(ctx.comparePick==='B')ctx.compareB=index;else ctx.compareA=index;ctx.comparePick=ctx.comparePick==='B'?'A':'B';}
