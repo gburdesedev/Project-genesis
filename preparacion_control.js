@@ -356,10 +356,35 @@
     });
   }
 
+
+  // Inventario: las 20 casillas originales siguen siendo interactivas.
+  // Los objetos únicos se muestran en el panel inferior al elegir "Obras";
+  // los materiales permanecen agrupados por básicos y preparados.
   function skinSlots(ctx) {
+    const isInventory = ctx.mode === 'workspace' && ctx.tab === 'Inventario' && !!ctx.getItems;
     const basic = countOf(ctx.inventory, RAW), prepared = countOf(ctx.inventory, PREPARED);
-    return SKIN_LAYERS.filter(layer => layer[6] === 'casilla_marco_transparente').map(layer => {
+    const items = isInventory ? ctx.getItems() : [];
+    const stocks = Object.entries(ctx.inventory).filter(([,q]) => Number(q) > 0);
+    const rawMaterials = stocks.filter(([name]) => !/lingote|preparad|refinad|aleaci[oó]n/i.test(name));
+    const readyMaterials = stocks.filter(([name]) => /lingote|preparad|refinad|aleaci[oó]n/i.test(name));
+    const slots = SKIN_LAYERS.filter(layer => layer[6] === 'casilla_marco_transparente');
+    return slots.map((layer, index) => {
       const [name, , x, y, width, height] = layer;
+      const firstRow = index < 10;
+      if (isInventory) {
+        const itemIndex = index - 10;
+        const showWorks = !firstRow && ctx.inventorySection === 'fabricados';
+        const work = showWorks ? items[itemIndex] : null;
+        const entry = firstRow ? rawMaterials[index] : showWorks ? null : readyMaterials[itemIndex];
+        const material = entry?.[0];
+        const qty = entry?.[1];
+        const occupied = !!work || !!material;
+        const selected = showWorks ? !!work && ctx.viewItem && ctx.selectedItem === itemIndex : !!material && !ctx.viewItem && ctx.selectedMaterial === material;
+        const title = work ? `${work.name} · ${work.rarity}` : material ? `${material}: ${qty}` : 'Casilla vacía';
+        const visual = work ? `<span class="workspaceSlotArtwork">${ctx.renderAsset(work)}</span><span class="workspaceItemBadge">${escape(work.rarity || 'Creación')}</span>`
+          : material ? `${materialVisual(material, material === RAW ? 'ore' : 'ingot') || `<span class="workspaceMaterialInitial">${escape(material.charAt(0))}</span>`}<strong>${escape(qty)}</strong>` : '';
+        return `<button class="prepSkinSlot workspaceStockSlot ${occupied ? 'occupied' : 'empty'} ${selected ? 'selected' : ''}" ${showWorks && work ? `data-workspace-item="${itemIndex}"` : material ? `data-workspace-material="${escape(material)}"` : ''} aria-label="${escape(title)}" title="${escape(title)}" style="${skinPos(x+5,y+5,width-10,height-10)}" ${occupied?'':'disabled'}>${visual}</button>`;
+      }
       const rawSlot = name === 'Casilla_Basicos_01';
       const ironSlot = name === 'Casilla_Preparados_01';
       const n = rawSlot ? basic : ironSlot ? prepared : 0;
@@ -436,16 +461,20 @@
   function renderWorkspace(tab) {
     const ctx=session;if(!ctx)return;halt();ctx.mode='workspace';ctx.tab=tab;
     const items=ctx.getItems(),stock=Object.entries(ctx.inventory).filter(([,q])=>q>0);
-    ctx.selectedItem=Math.min(ctx.selectedItem||0,Math.max(0,items.length-1));
+    ctx.selectedItem=Math.min(ctx.selectedItem ?? Math.max(0,items.length-1),Math.max(0,items.length-1));
+    if(tab==='Inventario' && !ctx.inventorySection) ctx.inventorySection=items.length?'fabricados':'preparados';
+    if(tab==='Inventario' && ctx.inventorySection==='fabricados' && items.length) ctx.viewItem=true;
     const item=items[ctx.selectedItem],material=ctx.selectedMaterial||stock[0]?.[0]||RAW;
     const optionList=selected=>items.map((it,i)=>`<option value="${i}" ${i===selected?'selected':''}>${escape(it.name)} · ${escape(it.rarity)}</option>`).join('');
     let details='',viewer='',action='',enabled=false,run=()=>{};
     const choices=`<label class="workspaceLabel">Ver objeto fabricado<select id="workspaceItem"><option value="-1" ${ctx.viewItem?'':'selected'}>Material seleccionado</option>${optionList(ctx.viewItem?ctx.selectedItem:-1)}</select></label>`;
     if(tab==='Inventario'){
-      details=`<p class="prepSkinKicker">INVENTARIO DEL ARTESANO</p>${choices}`;
-      if(ctx.viewItem&&item){details+=ctx.renderItem(item);viewer=ctx.renderAsset(item)}
-      else{details+=`<h3>${escape(material)}</h3><p class="prepSkinIntro">${material===RAW?'Materia prima para preparar en la fragua.':'Material disponible para fabricar.'}</p><div class="prepSkinStat"><span>Existencias</span><b>${countOf(ctx.inventory,material)}</b></div><div class="prepSkinDivider"></div>`+stock.map(([m,q])=>`<button class="workspaceMaterial" data-material="${escape(m)}">${escape(m)} <b>${q}</b></button>`).join('');viewer=materialVisual(material,'featured')}
-      action=ctx.viewItem?'Ver comparación':material===RAW?'Ir a preparación':'Ir a fabricación';enabled=ctx.viewItem?items.length>1:true;run=()=>{ctx.tab=ctx.viewItem?'Comparacion':material===RAW?'Preparacion':'Fabricaciones';if(ctx.tab==='Preparacion')renderMenu();else renderWorkspace(ctx.tab)};
+      details=`<p class="prepSkinKicker">INVENTARIO DEL ARTESANO</p>`;
+      if(ctx.viewItem&&item){details+=`<p class="workspaceDetailEyebrow">CREACIÓN ÚNICA · ${escape(item.rarity||'')}</p><div class="workspaceItemDescription">${ctx.renderItem(item)}</div>`;viewer=ctx.renderAsset(item)}
+      else{const selected=ctx.selectedMaterial||material;details+=`<h3>${escape(selected)}</h3><p class="prepSkinIntro">${selected===RAW?'Materia prima: se transforma en la fragua antes de fabricar.':'Material disponible para tus futuras fabricaciones.'}</p><div class="prepSkinStat"><span>En el inventario</span><b>${countOf(ctx.inventory,selected)}</b></div><div class="prepSkinDivider"></div><p class="workspaceHelper">Seleccioná una casilla para examinar el material en el visor.</p>`;viewer=materialVisual(selected,'featured')}
+      const compare=!!ctx.viewItem&&items.length>1;
+      action=compare?'Comparar creaciones':ctx.viewItem?'Volver a fabricar':material===RAW?'Ir a preparación':'Ir a fabricación';
+      enabled=true;run=()=>{ctx.tab=compare?'Comparacion':ctx.viewItem?'Fabricaciones':material===RAW?'Preparacion':'Fabricaciones';if(ctx.tab==='Preparacion')renderMenu();else renderWorkspace(ctx.tab)};
       if(ctx.manageGear)details+='<button class="workspaceMaterial" id="workspaceGear">Gestionar equipo del mercenario</button>';
       if(ctx.extraInventory)details+=ctx.extraInventory();
     }else if(tab==='Fabricaciones'){
@@ -461,10 +490,28 @@
     skinDisplay('workspace','',details,`${tab} · ${stock.reduce((n,[,q])=>n+q,0)} unidades de material · ${items.length} objetos fabricados`);
     const board=document.querySelector('.prepArtboard');board.querySelectorAll('[data-role^="boton_"]').forEach(e=>e.remove());
     const view=document.createElement('div');view.className='workspaceViewer';view.innerHTML=viewer;board.append(view);
-    const button=document.getElementById('prepStart');button.classList.add('workspaceAction');button.textContent=action;button.disabled=!enabled;button.onclick=run;
+    const button=document.getElementById('prepStart');button.classList.add('workspaceAction');button.innerHTML='<span class="workspaceActionLabel">'+escape(action)+'</span>';button.disabled=!enabled;button.onclick=run;
     document.querySelectorAll('[data-material]').forEach(e=>{if(e.tagName==='BUTTON')e.onclick=()=>{ctx.selectedMaterial=e.dataset.material;ctx.viewItem=false;renderWorkspace('Inventario')}});
-    document.querySelectorAll('.prepSkinSlot.occupied').forEach(e=>{e.removeAttribute('aria-disabled');e.onclick=()=>{ctx.selectedMaterial=e.querySelector('[data-material]')?.dataset.material||RAW;ctx.viewItem=false;renderWorkspace('Inventario')}});
-    const select=document.getElementById('workspaceItem');if(select)select.onchange=()=>{ctx.viewItem=Number(select.value)>=0;ctx.selectedItem=Math.max(0,Number(select.value));renderWorkspace(tab)};
+    // La selección de slots de inventario se enlaza exclusivamente en esa pestaña.
+    if(tab==='Inventario'){
+      const board=document.querySelector('.prepArtboard');
+      const hasWorks=items.length>0;
+      const fabricated=ctx.inventorySection==='fabricados';
+      if(hasWorks){
+        const label=document.createElement('div');
+        label.className='workspaceInventoryHeader'+(fabricated?' works':'');
+        label.innerHTML=fabricated?'<span class="workspaceGoldSeal" aria-hidden="true">⚒</span><span>OBRAS DEL ARTESANO</span>':'';
+        board.append(label);
+        const switcher=document.createElement('button');
+        switcher.id='workspaceSwitchGroup';switcher.className='workspaceSwitchGroup';
+        switcher.textContent=fabricated?'VER LINGOTES':'VER OBRAS';
+        switcher.setAttribute('aria-label',fabricated?'Mostrar los materiales preparados':'Mostrar mis objetos fabricados');
+        board.append(switcher);
+        switcher.onclick=()=>{ctx.inventorySection=fabricated?'preparados':'fabricados';ctx.viewItem=!fabricated;renderWorkspace('Inventario')};
+      }
+      board.querySelectorAll('[data-workspace-material]').forEach(e=>{e.onclick=()=>{ctx.selectedMaterial=e.dataset.workspaceMaterial;ctx.viewItem=false;renderWorkspace('Inventario')}});
+      board.querySelectorAll('[data-workspace-item]').forEach(e=>{e.onclick=()=>{ctx.selectedItem=Number(e.dataset.workspaceItem);ctx.viewItem=true;renderWorkspace('Inventario')}});
+    }
     for(const [id,key]of [['workspaceA','compareA'],['workspaceB','compareB']]){const e=document.getElementById(id);if(e)e.onchange=()=>{ctx[key]=Number(e.value);renderWorkspace(tab)}}
     bind('workspaceGear',()=>{const fn=ctx.manageGear;close();fn()});ctx.bindExtraInventory?.();
   }
