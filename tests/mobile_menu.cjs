@@ -21,6 +21,8 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/<script
    openTestMenu();
   });
   assert.equal(await page.locator('pc-app').getAttribute('max-pixel-ratio'),'1.5');
+  assert.equal(await page.locator('#worldSunLight').getAttribute('shadow-resolution'),'512','mobile sun shadows must be capped');
+  assert.equal(await page.locator('#forgeCoreLight').getAttribute('shadow-resolution'),'256','mobile forge shadows must be capped');
   await page.locator('#rotate').waitFor({state:'visible'});
   assert.equal(await page.locator('#rotateTitle').textContent(),'GIRÁ EL TELÉFONO');
   assert(await page.locator('html').evaluate(e=>e.classList.contains('genesis-landscape-required')),'portrait must block the game');

@@ -1,4 +1,4 @@
-/* Project Genesis v0.11.010 · mobile orientation and dynamic render pixel budget.
+/* Project Genesis v0.11.011 · mobile orientation and dynamic render pixel budget.
    Screen rotation is requested only where the browser permits it (fullscreen + gesture).
    iOS Safari cannot lock physical orientation: portrait receives a blocking gate. */
 (() => {
@@ -15,6 +15,16 @@
     return h > w;
   };
   let appElement=null, frame=0, lastRatio=null;
+  function configureMobileShadows() {
+    if(!safePreviews)return;
+    // Keep two expensive real-time shadow maps within mobile GPU budgets.
+    for(const [id,resolution] of [['worldSunLight',512],['forgeCoreLight',256]]) {
+      const light=document.getElementById(id);
+      if(!light)continue;
+      light.setAttribute('shadow-resolution',String(resolution));
+      if(light.component)light.component.shadowResolution=resolution;
+    }
+  }
   function updateViewport() {
     frame=0;
     const vp=window.visualViewport, w=Math.max(1, vp?.width || window.innerWidth);
@@ -77,6 +87,8 @@
     safePreviews,
     configureApp(element) {
       appElement=element;
+      configureMobileShadows();
+      requestAnimationFrame(configureMobileShadows);
       updateViewport();
       if(typeof ResizeObserver!=='undefined')new ResizeObserver(scheduleViewport).observe(element);
     },

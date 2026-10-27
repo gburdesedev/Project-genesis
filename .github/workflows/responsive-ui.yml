@@ -24,6 +24,7 @@ jobs:
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/responsive.cjs
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/camera_mouse_browser.cjs
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/mobile_menu.cjs
+      - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/mobile_pbr_budget.cjs
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/original_layout.cjs
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/functional_menus.cjs
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/approved_mineral.cjs
