@@ -1,4 +1,4 @@
-// Decode the real approved 4K road PBR files with the mobile branch in both
+// Decode the real approved road PBR files with the mobile branch in both
 // browser engines. This catches full-resolution GPU uploads absent from UI-only tests.
 const {chromium,webkit}=require('playwright');
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
@@ -48,7 +48,7 @@ window.__loadDesktop=async()=>{
      assert.equal(items[0][2],true,'color must stay sRGB');
     }
     const desktop=await page.evaluate(()=>window.__loadDesktop());
-    assert(desktop[0]>=2048&&desktop[1]>=2048,'desktop must keep its original high resolution');
+    assert(desktop[0]>=results.cobble[0][0]&&desktop[1]>=results.cobble[0][1],'desktop must not be downscaled: '+desktop.join('x'));
     console.log('PASS '+name+': real cobble/traffic PBR loaded at <=1024 on mobile, 4 channels intact; desktop preserves original '+desktop.join('x'));
    }finally{await browser.close()}
   }

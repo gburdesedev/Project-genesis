@@ -39,7 +39,8 @@
     if (safePreviews && appElement) {
       const native = Math.max(1,Number(window.devicePixelRatio)||1);
       const budgetDpr = Math.sqrt(1900000 / Math.max(1,w*h));
-      const ratio=Math.max(0.75, Math.min(native,1.5,budgetDpr));
+      const dprCap=Math.max(w,h)>=1024?1.3:1.15;
+      const ratio=Math.max(0.75, Math.min(native,dprCap,budgetDpr));
       if(lastRatio===null || Math.abs(lastRatio-ratio)>.025) {
         lastRatio=ratio;
         appElement.setAttribute('max-pixel-ratio',String(Number(ratio.toFixed(2))));
@@ -87,6 +88,9 @@
     safePreviews,
     configureApp(element) {
       appElement=element;
+      // Disable multisample antialiasing before web-components initialize WebGL.
+      // This avoids large mobile color/depth render buffers when the scene moves.
+      if(safePreviews)element.removeAttribute('antialias');
       configureMobileShadows();
       requestAnimationFrame(configureMobileShadows);
       updateViewport();
