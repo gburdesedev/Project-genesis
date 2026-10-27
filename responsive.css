@@ -176,3 +176,12 @@ html.mobile-device:not(.genesis-landscape-required) #rotate{display:none!importa
   html.mobile-device #cameraGuide{max-width:40vw;left:35%;right:auto;bottom:var(--safe-bottom)}
   html.mobile-device #materialsPanel{left:var(--safe-left);bottom:calc(var(--safe-bottom) + 24vh)}
 }
+
+/* Keep tap targets above the right-side camera-look surface. */
+@media (orientation:landscape) and (pointer:coarse){
+  html.mobile-device #mobile{z-index:3}
+  html.mobile-device #buttonsTop,
+  html.mobile-device #quest,
+  html.mobile-device #professionChip{z-index:6}
+  html.mobile-device #cameraGuide{z-index:7}
+}
