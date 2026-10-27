@@ -21,22 +21,36 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/<script
    openTestMenu();
   });
   assert.equal(await page.locator('pc-app').getAttribute('max-pixel-ratio'),'1.5');
+  await page.locator('#rotate').waitFor({state:'visible'});
+  assert.equal(await page.locator('#rotateTitle').textContent(),'GIRÁ EL TELÉFONO');
+  assert(await page.locator('html').evaluate(e=>e.classList.contains('genesis-landscape-required')),'portrait must block the game');
   for(let round=0;round<3;round++){
+   await page.setViewportSize({width:844,height:390});
+   await page.locator('#rotate').waitFor({state:'hidden'});
+   assert(!(await page.locator('html').evaluate(e=>e.classList.contains('genesis-landscape-required'))));
+   for(const selector of ['#joy','#interact','#inventoryTouch','#zoomControls']){
+    const bounds=await page.locator(selector).evaluate(el=>{const r=el.getBoundingClientRect();return [r.left,r.right,r.top,r.bottom]});
+    assert(bounds[0]>=-1&&bounds[1]<=844+1&&bounds[2]>=-1&&bounds[3]<=390+1,
+      selector+' must stay inside the landscape viewport: '+bounds);
+   }
    assert.equal(await page.locator('model-viewer').count(),0);
    assert(await page.locator('.prepSkinPiece[src]').count()>0);
    assert(await page.locator('.prepMaterialPoster').count()>0);
    await page.locator('#prepMore').click();assert.equal(await page.locator('.prepSkinQty b').textContent(),'2');
-   await page.setViewportSize({width:844,height:390});
-   await page.locator('#rotate').waitFor({state:'hidden'});
    assert.equal(await page.locator('.prepSkinQty b').textContent(),'2');
    const fits=await page.locator('#modal').evaluate(el=>{const r=el.getBoundingClientRect();return r.left>=-1&&r.right<=innerWidth+1&&r.top>=-1&&r.bottom<=innerHeight+1});assert(fits);
    await page.locator('#prepStart').scrollIntoViewIfNeeded();await page.locator('#prepStart').click();
    assert.equal(await page.locator('.prepSkinBellowButtons button').count(),3);
    await page.locator('#prepBellow1').scrollIntoViewIfNeeded();await page.locator('#prepBellow1').click();
    await page.locator('#prepClose').scrollIntoViewIfNeeded();await page.locator('#prepClose').click();
-   await page.setViewportSize({width:390,height:844});await page.locator('#rotate').waitFor({state:'visible'});
+   await page.setViewportSize({width:390,height:844});
+   await page.locator('#rotate').waitFor({state:'visible'});
    await page.evaluate(()=>openTestMenu());
   }
+  await page.setViewportSize({width:2560,height:1440});
+  await page.locator('#rotate').waitFor({state:'hidden'});
+  await page.waitForFunction(()=>Number(document.querySelector('pc-app').getAttribute('max-pixel-ratio'))<1);
+  assert(Number(await page.locator('pc-app').getAttribute('max-pixel-ratio'))<1,'render resolution must adapt to oversized mobile viewport');
   assert.equal(requests.filter(url=>/\.glb/.test(url)).length,0,'mobile menu must not request GLB');
   console.log(`PASS ${name}: mobile posters only, original artwork and no GLB, 1.5 DPR cap, orientation, repeated menu use and thermal controls`);
   await browser.close();
