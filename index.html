@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<script src="./village_plan.js?v=0.11.007"></script>
-<script src="./device_policy.js?v=0.11.007"></script>
+<script src="./village_plan.js?v=0.11.008"></script>
+<script src="./device_policy.js?v=0.11.008"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Project Genesis — Prototipo Jugable v0.11.007 · Powered by NGE Alpha</title>
-<link rel="stylesheet" href="./preparacion.css?v=0.11.007">
+<title>Project Genesis — Prototipo Jugable v0.11.008 · Powered by NGE Alpha</title>
+<link rel="stylesheet" href="./preparacion.css?v=0.11.008">
 
 <script type="importmap">
 {
@@ -187,8 +187,8 @@ html.modalOpen,body.modalOpen{overflow:hidden!important;overscroll-behavior:none
 <script>
 if(!window.GenesisDevice.safePreviews){const script=document.createElement('script');script.type='module';script.src='https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js';document.head.append(script)}
 </script>
-<meta name="genesis-build" content="playcanvas-v0.11.007-approved-iron-ore">
-<link rel="stylesheet" href="./responsive.css?v=0.11.007">
+<meta name="genesis-build" content="playcanvas-v0.11.008-live-workshop-menus">
+<link rel="stylesheet" href="./responsive.css?v=0.11.008">
 </head>
 <body>
 
@@ -730,7 +730,7 @@ window.__genesisAppError=function(event){
 </div>
 
 <div id="hud">
- <div id="brand">PROJECT GENESIS · v0.11.007</div>
+ <div id="brand">PROJECT GENESIS · v0.11.008</div>
  <div id="tech">PLAYCANVAS 2.22.1 · PROTOTIPO · v0.11</div>
  <div id="buttonsTop"><button id="cameraSettingsBtn" class="uiBtn" type="button" aria-label="Configurar cámara">⚙ CÁMARA</button></div>
  <section id="quest">
@@ -757,11 +757,11 @@ window.__genesisAppError=function(event){
 
 <script src="./fps_counter.js?v=20261025-1"></script>
 <script src="./camera_mouse.js?v=20261025-1"></script>
-<script src="./preparacion_control.js?v=0.11.007"></script>
+<script src="./preparacion_control.js?v=0.11.008"></script>
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
 import { Vec3 } from 'playcanvas';
-import { mountVillage } from './village_world.js?v=0.11.007';
+import { mountVillage } from './village_world.js?v=0.11.008';
 
 /* Preparación v0.11: adaptador local sin modificar el motor procedural ni las
    resoluciones de Fabricación/Cierre. Conserva ambas rutas del tutorial. */
@@ -808,7 +808,7 @@ queueMicrotask(() => {
     prep.open({profession:selectedProfession,inventory:playerInventory,requiredStock:craftSession.requiredStock||craftSession.stock,
       formula:formula||{materials:[]},recipeName:rec?.name||'Fabricación',startTab:'Inventario',modal,
       closeModal:()=>closeInventory(true),onInventoryChanged:refreshInventorySummary,
-      getItems:()=>craftedItems,renderItem:renderItemCard,renderAsset:itemAssetMarkup,
+      getItems:()=>craftedItems,renderItem:renderItemCard,renderAsset:itemAssetMarkup,metricForChannel,namingReason,
       recipeAsset:()=>rec?`<img alt="${esc(rec.name)}" src="${itemIcon(recipeId)}">`:'',
       canCraftNow:()=>!!formula&&tutorialStep>=10&&tutorialStep<=13,
       onCraft:()=>{inventoryOpen=false;if(formula&&prep.ready(formula,playerInventory)&&tutorialStep>=10&&tutorialStep<=13)performCraft()},
@@ -825,7 +825,7 @@ queueMicrotask(() => {
     prep.open({profession:selectedProfession,inventory:playerInventory,requiredStock:craftSession.requiredStock||craftSession.stock,
       formula:familyItems[0].formula,recipeName:rec.name,startTab:'Comparacion',modal,closeModal,
       getItems:()=>craftedItems,compareA:craftedItems.indexOf(familyItems[0]),compareB:craftedItems.indexOf(familyItems[1]),
-      renderItem:renderItemCard,renderAsset:itemAssetMarkup,recipeAsset:()=>`<img alt="${esc(rec.name)}" src="${itemIcon(recipeId)}">`,
+      renderItem:renderItemCard,renderAsset:itemAssetMarkup,metricForChannel,namingReason,recipeAsset:()=>`<img alt="${esc(rec.name)}" src="${itemIcon(recipeId)}">`,
       canCraftNow:()=>false,onCraft:()=>{},onComparisonContinue:onContinue
     });
   };
@@ -846,6 +846,7 @@ queueMicrotask(() => {
       getItems: () => craftedItems,
       renderItem: renderItemCard,
       renderAsset: itemAssetMarkup,
+      metricForChannel, namingReason,
       recipeAsset: () => `<img alt="${esc(rec.name)}" src="${itemIcon(recipeId)}">`,
       canCraftNow: () => tutorialStep>=10&&tutorialStep<=13,
       onInventoryChanged: refreshInventorySummary,

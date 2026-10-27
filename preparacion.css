@@ -250,3 +250,109 @@
 
 /* v0.11.007: live workshop tabs inside the approved artboard. */
 .workspaceLabel{display:block;margin:10px 0;color:#edc38a}.workspaceLabel select{display:block;width:100%;margin-top:5px;padding:8px;color:#eed6b1;background:#1a100b;border:1px solid #89623c;font:inherit}.workspaceMaterial{display:block;width:100%;text-align:left;margin:7px 0;padding:8px;color:#edd2a5;background:#1a100b;border:1px solid #89623c;font:inherit}.workspaceMaterial b{float:right}.workspaceViewer{position:absolute;z-index:31;left:40.5%;top:25%;width:30%;height:56%;display:grid;place-items:center;text-align:center;color:#f1d6ab}.workspaceViewer>img,.workspaceViewer>model-viewer{width:100%;height:100%;object-fit:contain}.workspaceViewer .prepMaterialVisual{width:100%;height:100%;position:relative}.workspacePair{display:grid;grid-template-columns:1fr 1fr;width:100%;height:100%;gap:10px}.workspacePair img,.workspacePair model-viewer{width:100%;height:75%;object-fit:contain}.workspacePair p{font-size:16px}.prepSkinStart.workspaceAction{background:#25170df5!important;border:1px solid #b58a53!important;color:#ffdc9f;font:22px Georgia,serif}.workspaceAction:disabled{color:#a58b6a}.prepSkinTab[aria-current=page]:not([data-tab=Preparacion]){outline:1px solid #cda365;outline-offset:-16px}.prepSkinDetails .itemCard{padding:10px;margin-top:12px}.prepSkinDetails .itemAssetFrame{height:150px}.prepSkinDetails .itemAssetFrame model-viewer{height:150px;width:100%}.prepSkinDetails .itemCard h2{font-size:20px}.prepSkinDetails .ngeStamp{max-width:100%}
+
+
+/* v0.11.008 · Tres menús jugables sobre el MISMO tablero de 39 capas.
+   La composición se escala como una unidad; ninguna casilla ni panel se mueve. */
+.prepSkinScroll{
+  width:var(--prep-layout-width,1536px);
+  height:var(--prep-layout-height,1024px);
+  max-width:100%;max-height:100%;
+  overflow:hidden;position:relative;margin:auto;
+}
+.prepArtboard{
+  width:1536px!important;height:1024px!important;min-width:1536px!important;
+  aspect-ratio:auto!important;
+  transform:scale(var(--prep-scale,1));transform-origin:top left;
+}
+.prepCompactTitle{display:none!important}
+.prepArtboard[data-stage="workspace"] .prepSkinSlot.occupied:hover,
+.prepArtboard[data-stage="workspace"] .prepSkinSlot.occupied:focus-visible{
+  outline:2px solid #e9bc71;outline-offset:-5px;
+  box-shadow:inset 0 0 22px #c9965155;
+}
+.prepArtboard[data-stage="workspace"] .prepSkinSlot.selected{
+  outline:2px solid #78b3ca;outline-offset:-5px;
+  background:linear-gradient(#2d4d6040,#10202631)!important;
+}
+.prepArtboard[data-stage="workspace"] .prepSkinSlot.compareB{
+  outline:2px solid #f6c16e;outline-offset:-5px;
+  background:linear-gradient(#63401940,#2d210d31)!important;
+}
+.workspaceSlotAsset{display:block;position:absolute;inset:6% 9% 16%;pointer-events:none}
+.workspaceSlotAsset img,.workspaceSlotAsset model-viewer{width:100%;height:100%;object-fit:contain;pointer-events:none;--poster-color:transparent;background:transparent}
+.workspaceSlotAsset model-viewer{--progress-bar-color:transparent}
+.workspaceSlotRarity{
+  position:absolute;left:7%;right:7%;bottom:3%;
+  font:normal 10px system-ui,sans-serif;color:#e4cb9e;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;text-align:center;text-shadow:0 1px 4px #000;
+}
+.workspaceViewer{left:40.2%;top:24%;width:31.2%;height:60%;overflow:hidden}
+.workspaceHero{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;gap:10px}
+.workspaceHero>img,.workspaceHero>model-viewer{display:block;width:94%;height:82%;object-fit:contain;background:transparent;--poster-color:transparent}
+.workspaceHero p{font:normal 17px Georgia,serif;color:#f1d6ac;text-shadow:0 2px 5px #000;margin:0;text-align:center}
+.workspaceRecipeHero img{height:78%;filter:drop-shadow(0 6px 12px #000b)}
+.workspaceViewEmpty,.workspaceEmptyText{font:normal 16px/1.5 Georgia,serif;color:#c2a582;text-align:center;padding:20px}
+.workspaceEmptyText{border:1px solid #80603e;background:#17100bbb;margin-top:18px;font-size:14px}
+.workspaceCategory{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0}
+.prepArtboard .workspaceCategory button,.prepArtboard .workspaceSheetTabs button{
+  border:1px solid #6a4b31;background:#1a120e;color:#d4b487;
+  padding:10px 4px;font:normal 13px Georgia,serif;cursor:pointer;min-height:38px
+}
+.prepArtboard .workspaceCategory button[aria-pressed="true"],
+.prepArtboard .workspaceSheetTabs button[aria-selected="true"]{
+  background:linear-gradient(#51341e,#29190e);border-color:#d7a15a;color:#ffe0ac;
+  box-shadow:inset 0 -2px 0 #c99652
+}
+.prepSkinDetails .workspaceLabel{font-size:13px;margin:8px 0}
+.prepSkinDetails .workspaceLabel select,.workspaceSelectPair select{
+  width:100%;max-width:100%;margin-top:5px;padding:7px 6px;
+  border:1px solid #9d7543;background:#150f0d;color:#f6dcb0;
+  font:normal 13px Georgia,serif
+}
+.workspaceStockList{max-height:205px;overflow-y:auto;scrollbar-width:thin;margin:11px 0}
+.prepSkinDetails .workspaceMaterial{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+.workspaceObjectTitle{font-size:19px!important;text-align:center;overflow-wrap:anywhere}
+.workspaceSheetTabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:10px 0}
+.prepArtboard .workspaceSheetTabs button{font-size:12px;padding:9px 3px}
+.workspaceSheetBody{min-height:110px;max-height:192px;overflow-y:auto;scrollbar-width:thin;padding:2px 3px 5px}
+.workspaceMetric{
+  display:flex;justify-content:space-between;align-items:center;gap:9px;
+  border-bottom:1px solid #5b412a;padding:9px 2px;font:normal 12px/1.3 system-ui,sans-serif
+}
+.workspaceMetric span{color:#d4b993;overflow-wrap:anywhere}
+.workspaceMetric b{color:#f9dfaa;font-size:13px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.workspaceMetric.short b{color:#eb9588}
+.workspaceMetric.met b{color:#a8d6a4}
+.workspaceSubhead{font-size:12px!important;color:#d8ae78!important;letter-spacing:.03em}
+.workspaceFootnote{font:normal 11px/1.4 system-ui,sans-serif!important;color:#b9a287!important;margin-top:12px!important}
+.workspaceNge{display:flex;flex-direction:column;height:125px;max-height:125px;
+  margin-top:12px;border:1px solid #82613b;background:#0f0c0aee;overflow:hidden}
+.workspaceNgeLabel{flex:none;background:#302117;color:#e9c68c;padding:7px 9px;
+  font:normal 11px system-ui,sans-serif;letter-spacing:.06em}
+.workspaceNgeScroll{flex:1;overflow-y:auto;padding:8px 10px;
+  scrollbar-width:thin;color:#c9ad8b;font:normal 12px/1.5 Georgia,serif}
+.workspaceNgeScroll:focus-visible{outline:2px solid #e9bc79;outline-offset:-2px}
+.workspaceIngredients{margin:12px 0}
+.workspaceCraftState{padding:9px;border:1px solid #735536;background:#22170d;font-size:13px!important}
+.workspaceSelectPair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:11px 0}
+.workspaceSelectPair label{font:normal 11px system-ui,sans-serif;color:#dfb57d}
+.workspaceCompareHeader,.workspaceCompareRow{display:grid;grid-template-columns:minmax(80px,1.4fr) 1fr 1fr;gap:5px;align-items:center;padding:8px 3px;font:normal 11px/1.25 system-ui,sans-serif}
+.workspaceCompareHeader{background:#3b2919;color:#f6ce91}
+.workspaceCompareRow{border-bottom:1px solid #5b3f28}
+.workspaceCompareRow span{color:#cdb89c;overflow-wrap:anywhere}
+.workspaceCompareRow b{color:#f2d7a8;text-align:right;font-size:11px;overflow-wrap:anywhere}
+.workspaceCompareHint{color:#e1b784!important;border:1px solid #785531;padding:10px}
+.workspacePair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);width:100%;height:100%;gap:10px}
+.workspacePair>div{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;height:100%;border:1px solid #426e7b88;background:#111c2066}
+.workspacePair>.workspacePairB{border-color:#b7864388;background:#241a1066}
+.workspacePair model-viewer,.workspacePair img{display:block;width:100%;height:76%;object-fit:contain;--poster-color:transparent;background:transparent}
+.workspacePair p{font:normal 13px/1.2 Georgia,serif;color:#e8c994;overflow-wrap:anywhere;padding:5px;margin:0}
+.prepSkinStart.workspaceAction{
+  background:transparent!important;border:0!important;
+  color:#fff1cb!important;text-shadow:0 2px 7px #000,0 0 9px #7b4b23;
+  font:normal 22px Georgia,serif;letter-spacing:.04em;cursor:pointer
+}
+.prepSkinStart.workspaceAction:disabled{color:#9d8c70!important;text-shadow:0 1px 3px #000}
+.prepSkinTab[aria-current="page"]{outline:2px solid #ffdb96!important;outline-offset:-14px}
+.prepSkinTab:focus-visible{outline:2px solid #fff4c5;outline-offset:-12px}

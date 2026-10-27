@@ -356,20 +356,35 @@
     });
   }
 
+  // Las veinte casillas conservan las posiciones exactas de Preparación.
+  // El contenido depende del inventario y las creaciones reales de la partida.
   function skinSlots(ctx) {
-    const basic = countOf(ctx.inventory, RAW), prepared = countOf(ctx.inventory, PREPARED);
-    return SKIN_LAYERS.filter(layer => layer[6] === 'casilla_marco_transparente').map(layer => {
-      const [name, , x, y, width, height] = layer;
-      const rawSlot = name === 'Casilla_Basicos_01';
-      const ironSlot = name === 'Casilla_Preparados_01';
-      const n = rawSlot ? basic : ironSlot ? prepared : 0;
-      const label = rawSlot ? RAW : ironSlot ? PREPARED : 'Casilla vacía';
-      const active = n > 0;
-      const selectable = active && rawSlot && ctx.mode === 'menu';
-      return `<button class="prepSkinSlot ${active ? 'occupied' : 'empty'} ${rawSlot && active ? 'selected' : ''}" ${rawSlot ? 'id="prepSelectIron"' : ''} aria-label="${escape(label)}: ${n}" title="${escape(label)}: ${n}" style="${skinPos(x+5,y+5,width-10,height-10)}" ${!active ? 'disabled' : selectable ? '' : 'aria-disabled="true"'}>${active ? `${materialVisual(label, rawSlot ? 'ore' : 'ingot')}<strong>${n}</strong>` : ''}</button>`;
+    const tab = ctx.tab || 'Preparacion';
+    const crafted = tab === 'Comparacion' || (tab === 'Inventario' && ctx.inventoryCategory === 'creations');
+    const frames = SKIN_LAYERS.filter(layer => layer[6] === 'casilla_marco_transparente');
+    const items = ctx.getItems ? ctx.getItems() : [];
+    const stock = Object.entries(ctx.inventory).filter(([,qty]) => Number(qty) > 0);
+    const basic = stock.filter(([name]) => !/^(Lingote|Material preparado)/i.test(name)).slice(0, 10);
+    const prepared = stock.filter(([name]) => /^(Lingote|Material preparado)/i.test(name)).slice(0, 10);
+    return frames.map((layer, index) => {
+      const [, , x, y, width, height] = layer;
+      const item = crafted ? items[index] : null;
+      const entry = crafted ? null : index < 10 ? basic[index] : prepared[index - 10];
+      const selected = crafted
+        ? !!item && (tab === 'Comparacion' ? ctx.compareA === index || ctx.compareB === index : !!ctx.viewItem && ctx.selectedItem === index)
+        : !!entry && !ctx.viewItem && (ctx.selectedMaterial || RAW) === entry[0];
+      const active = !!item || !!entry;
+      const label = item ? item.name + ' · ' + item.rarity : entry ? entry[0] + ' · ' + entry[1] : 'Casilla vacía';
+      const visual = item
+        ? '<span class="workspaceSlotAsset">' + (ctx.renderAsset ? ctx.renderAsset(item) : '') + '</span><small class="workspaceSlotRarity">' + escape(item.rarity) + '</small>'
+        : entry ? materialVisual(entry[0], entry[0] === RAW ? 'ore' : 'ingot') + '<strong>' + entry[1] + '</strong>' : '';
+      const kind = item ? ' data-item-index="' + index + '"' : entry ? ' data-stock-name="' + escape(entry[0]) + '"' : '';
+      const compareSide = item && tab === 'Comparacion' ? (ctx.compareA === index ? ' compareA' : ctx.compareB === index ? ' compareB' : '') : '';
+      return '<button type="button" class="prepSkinSlot ' + (active ? 'occupied' : 'empty') + (selected ? ' selected' : '') + compareSide +
+        '" aria-label="' + escape(label) + '" title="' + escape(label) + '"' + kind +
+        ' style="' + skinPos(x+5,y+5,width-10,height-10) + '"' + (active ? '' : ' disabled') + '>' + visual + '</button>';
     }).join('');
   }
-
   function skinIngredients(ctx) {
     // Equivalencia 1 mineral -> 1 lingote: DEMO provisional de hierro.
     // El contador expresa la materia prima requerida PARA LA TANDA,
@@ -398,7 +413,7 @@
     const layerHTML = SKIN_LAYERS.map(skinImage).join('');
     ctx.modal(`<div class="prepSkinScroll"><div class="prepArtboard" data-stage="${stage}">
       ${layerHTML}
-      <h2 class="prepCompactTitle">PREPARACIÓN</h2><div class="prepSkinInventory" aria-label="Materiales básicos y preparados">${skinSlots(ctx)}</div>
+      <h2 class="prepCompactTitle">${escape(ctx.tab || "PREPARACIÓN")}</h2><div class="prepSkinInventory" aria-label="Materiales básicos y preparados">${skinSlots(ctx)}</div>
       ${stage === 'menu' ? `<div class="prepSkinFeatured" aria-label="Resultado de preparación: lingote de hierro, vista estática">${materialVisual(PREPARED, 'featured')}</div>${skinIngredients(ctx)}` : ''}
       <div class="prepSkinCenter" data-stage="${stage}">${center}</div>
       <section class="prepSkinDetails" aria-label="Detalles de preparación">${details}</section>
@@ -433,42 +448,135 @@
       button.onclick=()=>{ctx.tab=tab;if(tab==='Preparacion')renderMenu();else renderWorkspace(tab)};
     });
   }
-  function renderWorkspace(tab) {
-    const ctx=session;if(!ctx)return;halt();ctx.mode='workspace';ctx.tab=tab;
-    const items=ctx.getItems(),stock=Object.entries(ctx.inventory).filter(([,q])=>q>0);
-    ctx.selectedItem=Math.min(ctx.selectedItem||0,Math.max(0,items.length-1));
-    const item=items[ctx.selectedItem],material=ctx.selectedMaterial||stock[0]?.[0]||RAW;
-    const optionList=selected=>items.map((it,i)=>`<option value="${i}" ${i===selected?'selected':''}>${escape(it.name)} · ${escape(it.rarity)}</option>`).join('');
-    let details='',viewer='',action='',enabled=false,run=()=>{};
-    const choices=`<label class="workspaceLabel">Ver objeto fabricado<select id="workspaceItem"><option value="-1" ${ctx.viewItem?'':'selected'}>Material seleccionado</option>${optionList(ctx.viewItem?ctx.selectedItem:-1)}</select></label>`;
-    if(tab==='Inventario'){
-      details=`<p class="prepSkinKicker">INVENTARIO DEL ARTESANO</p>${choices}`;
-      if(ctx.viewItem&&item){details+=ctx.renderItem(item);viewer=ctx.renderAsset(item)}
-      else{details+=`<h3>${escape(material)}</h3><p class="prepSkinIntro">${material===RAW?'Materia prima para preparar en la fragua.':'Material disponible para fabricar.'}</p><div class="prepSkinStat"><span>Existencias</span><b>${countOf(ctx.inventory,material)}</b></div><div class="prepSkinDivider"></div>`+stock.map(([m,q])=>`<button class="workspaceMaterial" data-material="${escape(m)}">${escape(m)} <b>${q}</b></button>`).join('');viewer=materialVisual(material,'featured')}
-      action=ctx.viewItem?'Ver comparación':material===RAW?'Ir a preparación':'Ir a fabricación';enabled=ctx.viewItem?items.length>1:true;run=()=>{ctx.tab=ctx.viewItem?'Comparacion':material===RAW?'Preparacion':'Fabricaciones';if(ctx.tab==='Preparacion')renderMenu();else renderWorkspace(ctx.tab)};
-      if(ctx.manageGear)details+='<button class="workspaceMaterial" id="workspaceGear">Gestionar equipo del mercenario</button>';
-      if(ctx.extraInventory)details+=ctx.extraInventory();
-    }else if(tab==='Fabricaciones'){
-      details=`<p class="prepSkinKicker">FABRICACIÓN ACTUAL</p><h3>${escape(ctx.recipeName)}</h3><p class="prepSkinIntro">Se consumirán los materiales de esta fórmula al confirmar.</p>`+shortages(ctx.formula,ctx.inventory).map(r=>`<div class="prepSkinNeed ${r.missing?'short':'met'}"><span>${escape(r.material)}</span><b>${r.available}/${r.needed}</b></div>`).join('');
-      enabled=ready(ctx.formula,ctx.inventory)&&ctx.canCraftNow();details+=`<p class="prepSkinReady">${!ctx.canCraftNow()?'Avanzá en el tutorial hasta la fabricación correspondiente.':enabled?'Materiales listos.':'Prepará los materiales que faltan.'}</p>`;viewer=ctx.recipeAsset();action='Confirmar fabricación';run=craft;
-    }else{
-      ctx.compareA=Math.min(ctx.compareA||0,Math.max(0,items.length-1));ctx.compareB=Math.min(ctx.compareB??1,Math.max(0,items.length-1));
-      const a=items[ctx.compareA],b=items[ctx.compareB],valid=a&&b&&a!==b&&a.recipe===b.recipe;
-      details='<p class="prepSkinKicker">COMPARACIÓN DE TUS CREACIONES</p><h3>Seleccionar dos objetos</h3>';
-      if(items.length){details+=`<label class="workspaceLabel">Objeto A<select id="workspaceA">${optionList(ctx.compareA)}</select></label><label class="workspaceLabel">Objeto B<select id="workspaceB">${optionList(ctx.compareB)}</select></label>`;details+=valid?ctx.renderItem(a)+ctx.renderItem(b):'<p>Elegí dos objetos distintos de la misma familia.</p>';viewer=valid?`<div class="workspacePair"><div>${ctx.renderAsset(a)}<p>${escape(a.name)}</p></div><div>${ctx.renderAsset(b)}<p>${escape(b.name)}</p></div></div>`:ctx.renderAsset(a)}else details+='<p>Todavía no fabricaste objetos. Tus creaciones aparecerán acá al terminar una fabricación.</p>';
-      action=ctx.onComparisonContinue?'Continuar recorrido':'Volver al inventario';enabled=ctx.onComparisonContinue?!!valid:true;run=()=>{if(ctx.onComparisonContinue){const done=ctx.onComparisonContinue;close();done()}else renderWorkspace('Inventario')};
+  function sheetForItem(ctx, item) {
+    const isProtection = /escudo|armadura|botas/i.test(item.recipe || '');
+    const channels = Array.isArray(item.channels) ? item.channels : [];
+    const formula = item.formula?.materials || [];
+    const tab = ctx.sheetTab || 'channels';
+    const heading = '<p class="prepSkinKicker">FICHA DE CREACIÓN · ' + escape(item.rarity || '—') + '</p><h3 class="workspaceObjectTitle">' + escape(item.name) + '</h3>' +
+      '<div class="workspaceSheetTabs" role="tablist" aria-label="Datos de la creación">' +
+      '<button type="button" data-sheet-tab="channels" role="tab" aria-selected="' + (tab === 'channels') + '">CANALES Y DAÑO</button>' +
+      '<button type="button" data-sheet-tab="craft" role="tab" aria-selected="' + (tab === 'craft') + '">FABRICACIÓN</button></div>';
+    let body;
+    if (tab === 'channels') {
+      body = channels.length ? channels.map((channel, index) => {
+        const metric = ctx.metricForChannel ? ctx.metricForChannel(item, channel, index) :
+          {label:index === 0 ? (isProtection ? 'Protección base' : 'Daño base') : (isProtection ? 'Protección de ' : 'Daño de ') + channel[0],
+           display:(index === 0 ? '' : '+') + String(channel[1]) + (index === 0 ? '' : '%')};
+        return '<div class="workspaceMetric"><span>' + escape(metric.label) + '</span><b>' + escape(metric.display) + '</b></div>';
+      }).join('') : '<p>La ficha de canales se habilita al terminar la fabricación.</p>';
+      body += '<div class="workspaceMetric"><span>Canales activos</span><b>' + channels.length + '</b></div>';
+    } else {
+      body = '<p class="workspaceSubhead">Fórmula utilizada en este cierre</p>' +
+        (formula.length ? formula.map(m => '<div class="workspaceMetric"><span>' + escape(m.material) + '</span><b>' + Number(m.qty || 0) + '×</b></div>').join('') : '<p>Sin fórmula registrada.</p>') +
+        '<p class="workspaceFootnote">La fórmula pertenece a la sesión. Cada fabricación produce un objeto individual, incluso si su rareza es Inútil.</p>';
     }
-    skinDisplay('workspace','',details,`${tab} · ${stock.reduce((n,[,q])=>n+q,0)} unidades de material · ${items.length} objetos fabricados`);
-    const board=document.querySelector('.prepArtboard');board.querySelectorAll('[data-role^="boton_"]').forEach(e=>e.remove());
-    const view=document.createElement('div');view.className='workspaceViewer';view.innerHTML=viewer;board.append(view);
-    const button=document.getElementById('prepStart');button.classList.add('workspaceAction');button.textContent=action;button.disabled=!enabled;button.onclick=run;
-    document.querySelectorAll('[data-material]').forEach(e=>{if(e.tagName==='BUTTON')e.onclick=()=>{ctx.selectedMaterial=e.dataset.material;ctx.viewItem=false;renderWorkspace('Inventario')}});
-    document.querySelectorAll('.prepSkinSlot.occupied').forEach(e=>{e.removeAttribute('aria-disabled');e.onclick=()=>{ctx.selectedMaterial=e.querySelector('[data-material]')?.dataset.material||RAW;ctx.viewItem=false;renderWorkspace('Inventario')}});
-    const select=document.getElementById('workspaceItem');if(select)select.onchange=()=>{ctx.viewItem=Number(select.value)>=0;ctx.selectedItem=Math.max(0,Number(select.value));renderWorkspace(tab)};
-    for(const [id,key]of [['workspaceA','compareA'],['workspaceB','compareB']]){const e=document.getElementById(id);if(e)e.onchange=()=>{ctx[key]=Number(e.value);renderWorkspace(tab)}}
-    bind('workspaceGear',()=>{const fn=ctx.manageGear;close();fn()});ctx.bindExtraInventory?.();
+    const reading = typeof ctx.namingReason === 'function' ? ctx.namingReason(item) : 'Nombre y rareza proceden del cierre registrado.';
+    return heading + '<div class="workspaceSheetBody">' + body + '</div>' +
+      '<section class="workspaceNge"><div class="workspaceNgeLabel">NGE · LECTURA DEL NOMBRE</div>' +
+      '<div class="workspaceNgeScroll" tabindex="0">' + reading + '</div></section>';
   }
 
+  function renderWorkspace(tab) {
+    const ctx=session;
+    if(!ctx) return;
+    halt();
+    ctx.mode='workspace';ctx.tab=tab;
+    const items=ctx.getItems ? ctx.getItems() : [];
+    const stock=Object.entries(ctx.inventory).filter(([,q])=>Number(q)>0);
+    ctx.selectedItem=Math.min(Math.max(0,ctx.selectedItem||0),Math.max(0,items.length-1));
+    if(!ctx.inventoryCategory) ctx.inventoryCategory='materials';
+    let details='',viewer='',action='',enabled=false,run=()=>{};
+    const optionList=selected=>items.map((it,i)=>'<option value="'+i+'" '+(i===selected?'selected':'')+'>'+escape(it.name)+' · '+escape(it.rarity)+'</option>').join('');
+    const material=stock.some(([m])=>m===ctx.selectedMaterial)?ctx.selectedMaterial:(stock[0]?.[0]||RAW);
+    if(tab==='Inventario') {
+      const crafted=ctx.inventoryCategory==='creations';
+      ctx.viewItem=crafted && items.length>0;
+      const select='<label class="workspaceLabel">Creación seleccionada<select id="workspaceItem" '+(!items.length?'disabled':'')+'>'+optionList(ctx.selectedItem)+'</select></label>';
+      details='<p class="prepSkinKicker">INVENTARIO DEL HERRERO</p><div class="workspaceCategory" role="group" aria-label="Categorías del inventario">' +
+        '<button data-inventory-category="materials" aria-pressed="'+(!crafted)+'">MATERIALES</button><button data-inventory-category="creations" aria-pressed="'+crafted+'">CREACIONES ('+items.length+')</button></div>';
+      if(crafted) {
+        if(items.length) {
+          const item=items[ctx.selectedItem];
+          details+=select+sheetForItem(ctx,item);
+          viewer='<div class="workspaceHero">'+ctx.renderAsset(item)+'<p>'+escape(item.name)+' · '+escape(item.rarity)+'</p></div>';
+          action='Comparar creaciones';enabled=items.length>1;
+          run=()=>renderWorkspace('Comparacion');
+        } else {
+          details+='<div class="workspaceEmptyText">Todavía no hay objetos terminados. Cada fabricación aparecerá en estas casillas al cerrar su creación.</div>';
+          viewer='<p class="workspaceViewEmpty">Tus creaciones aparecerán aquí</p>';
+          action='Volver a materiales';enabled=true;run=()=>{ctx.inventoryCategory='materials';renderWorkspace('Inventario')};
+        }
+      } else {
+        details+='<h3>'+escape(material)+'</h3><p class="prepSkinIntro">Existencias del baúl y materiales preparados en la partida.</p>' +
+          '<div class="prepSkinStat"><span>Disponibles</span><b>'+countOf(ctx.inventory,material)+'</b></div>' +
+          '<div class="workspaceStockList">'+stock.map(([m,q])=>'<button type="button" class="workspaceMaterial" data-material="'+escape(m)+'">'+escape(m)+' <b>'+q+'×</b></button>').join('')+'</div>';
+        if(ctx.manageGear)details+='<button type="button" class="workspaceMaterial" id="workspaceGear">Gestionar equipo del mercenario</button>';
+        if(ctx.extraInventory)details+=ctx.extraInventory();
+        viewer=materialVisual(material,'featured');
+        action=material===RAW?'Ir a Preparación':'Ir a Fabricaciones';enabled=true;
+        run=()=>{if(material===RAW)renderMenu();else renderWorkspace('Fabricaciones')};
+      }
+    } else if(tab==='Fabricaciones') {
+      const needs=shortages(ctx.formula,ctx.inventory);
+      const canCraft=ctx.canCraftNow?.() === true;
+      enabled=ready(ctx.formula,ctx.inventory)&&canCraft;
+      details='<p class="prepSkinKicker">RECETA DISPONIBLE EN LA PARTIDA</p><h3>'+escape(ctx.recipeName)+'</h3>' +
+        '<p class="prepSkinIntro">Se utilizará la fórmula fijada en esta sesión. Los materiales se descontarán al confirmar.</p>' +
+        '<div class="workspaceIngredients">'+needs.map(r=>'<div class="workspaceMetric '+(r.missing?'short':'met')+'"><span>'+escape(r.material)+'</span><b>'+r.available+' / '+r.needed+'</b></div>').join('')+'</div>' +
+        '<p class="workspaceCraftState">'+(!canCraft?'La fabricación se habilita al alcanzar su etapa del tutorial.':enabled?'Materiales preparados: fabricación disponible.':'Faltan materiales. Prepará los lingotes necesarios.')+'</p>' +
+        '<button type="button" class="prepSkinCraft secondary" id="workspaceGoPrep">Ver Preparación</button>' +
+        '<p class="workspaceFootnote">La Preparación controla la temperatura. El cierre de Fabricación resuelve rareza, canales y nombre mediante el motor actual.</p>';
+      viewer='<div class="workspaceHero workspaceRecipeHero">'+(ctx.recipeAsset?ctx.recipeAsset():'')+'<p>'+escape(ctx.recipeName)+'</p></div>';
+      action='Confirmar fabricación';run=craft;
+    } else if(tab==='Comparacion') {
+      ctx.compareA=Math.min(Math.max(0,ctx.compareA||0),Math.max(0,items.length-1));
+      ctx.compareB=Math.min(Math.max(0,ctx.compareB??1),Math.max(0,items.length-1));
+      const a=items[ctx.compareA],b=items[ctx.compareB];
+      const valid=!!(a&&b&&a!==b&&a.recipe===b.recipe);
+      details='<p class="prepSkinKicker">COMPARACIÓN DE CREACIONES REALES</p><h3>Dos cierres · una familia</h3>';
+      if(items.length) {
+        details+='<div class="workspaceSelectPair"><label>OBJETO A<select id="workspaceA">'+optionList(ctx.compareA)+'</select></label>' +
+          '<label>OBJETO B<select id="workspaceB">'+optionList(ctx.compareB)+'</select></label></div>';
+        if(valid) {
+          const keys=[...new Set([...(a.channels||[]),...(b.channels||[])].map(c=>c[0]))];
+          const fmt=(item,key)=>{const ix=(item.channels||[]).findIndex(c=>c[0]===key);if(ix<0)return '—';const ch=item.channels[ix];return ctx.metricForChannel?ctx.metricForChannel(item,ch,ix).display:String(ch[1])+(ix?'%':'')};
+          details+='<div class="workspaceCompareHeader"><span>RESULTADO</span><b>A</b><b>B</b></div>' +
+            '<div class="workspaceCompareRow"><span>Rareza</span><b>'+escape(a.rarity)+'</b><b>'+escape(b.rarity)+'</b></div>' +
+            '<div class="workspaceCompareRow"><span>Canales</span><b>'+(a.channels||[]).length+'</b><b>'+(b.channels||[]).length+'</b></div>' +
+            keys.map(key=>'<div class="workspaceCompareRow"><span>'+escape(key)+'</span><b>'+escape(fmt(a,key))+'</b><b>'+escape(fmt(b,key))+'</b></div>').join('') +
+            '<p class="workspaceFootnote">Misma familia y fórmula de sesión. Cada cierre conserva sus valores propios.</p>';
+        } else details+='<p class="workspaceCompareHint">Elegí dos objetos distintos de la misma familia para comparar sus canales.</p>';
+        viewer=valid?'<div class="workspacePair"><div class="workspacePairA">'+ctx.renderAsset(a)+'<p>A · '+escape(a.name)+'</p></div><div class="workspacePairB">'+ctx.renderAsset(b)+'<p>B · '+escape(b.name)+'</p></div></div>':
+          '<p class="workspaceViewEmpty">Elegí dos creaciones compatibles</p>';
+      } else {
+        details+='<p class="workspaceEmptyText">Todavía no fabricaste objetos. Acá aparecerán sus propiedades reales al cerrar al menos dos creaciones.</p>';
+        viewer='<p class="workspaceViewEmpty">Sin creaciones para comparar</p>';
+      }
+      action=ctx.onComparisonContinue?'Continuar recorrido':'Volver al inventario';
+      enabled=ctx.onComparisonContinue?valid:true;
+      run=()=>{if(ctx.onComparisonContinue){const done=ctx.onComparisonContinue;close();done()}else{ctx.inventoryCategory='creations';renderWorkspace('Inventario')}};
+    }
+    skinDisplay('workspace','',details,tab+' · '+stock.reduce((n,[,q])=>n+Number(q),0)+' unidades · '+items.length+' creaciones');
+    const board=document.querySelector('.prepArtboard');
+    const view=document.createElement('div');view.className='workspaceViewer';view.innerHTML=viewer;board.append(view);
+    const button=document.getElementById('prepStart');button.classList.add('workspaceAction');button.textContent=action;button.disabled=!enabled;button.onclick=run;
+    board.querySelectorAll('[data-item-index]').forEach(e=>e.onclick=()=>{
+      const index=Number(e.dataset.itemIndex);
+      if(tab==='Comparacion') {if(ctx.comparePick==='B')ctx.compareB=index;else ctx.compareA=index;ctx.comparePick=ctx.comparePick==='B'?'A':'B';}
+      else {ctx.inventoryCategory='creations';ctx.selectedItem=index;ctx.viewItem=true;}
+      renderWorkspace(tab);
+    });
+    board.querySelectorAll('[data-stock-name]').forEach(e=>e.onclick=()=>{ctx.selectedMaterial=e.dataset.stockName;ctx.viewItem=false;ctx.inventoryCategory='materials';renderWorkspace('Inventario')});
+    board.querySelectorAll('[data-inventory-category]').forEach(e=>e.onclick=()=>{ctx.inventoryCategory=e.dataset.inventoryCategory;ctx.viewItem=ctx.inventoryCategory==='creations';renderWorkspace('Inventario')});
+    board.querySelectorAll('[data-material]').forEach(e=>{if(e.tagName==='BUTTON')e.onclick=()=>{ctx.selectedMaterial=e.dataset.material;renderWorkspace('Inventario')}});
+    const select=document.getElementById('workspaceItem');if(select)select.onchange=()=>{ctx.selectedItem=Math.max(0,Number(select.value));ctx.inventoryCategory='creations';renderWorkspace('Inventario')};
+    for(const [id,key] of [['workspaceA','compareA'],['workspaceB','compareB']]){const el=document.getElementById(id);if(el)el.onchange=()=>{ctx[key]=Number(el.value);ctx.comparePick=key==='compareA'?'B':'A';renderWorkspace('Comparacion')}}
+    board.querySelectorAll('[data-sheet-tab]').forEach(e=>e.onclick=()=>{ctx.sheetTab=e.dataset.sheetTab;renderWorkspace('Inventario')});
+    bind('workspaceGoPrep',renderMenu);
+    bind('workspaceGear',()=>{const fn=ctx.manageGear;close();fn()});
+    ctx.bindExtraInventory?.();
+  }
   function display(content, compact = false) {
     const ctx = session;
     if (!ctx) return;
