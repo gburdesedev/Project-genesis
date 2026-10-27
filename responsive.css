@@ -87,3 +87,92 @@ pc-app,#hud,#grade,#modalLayer,#loading,#prototypeIntro{height:var(--view-height
 .prepArtboard{position:absolute;left:0;top:0;width:1536px!important;min-width:1536px!important;height:1024px;aspect-ratio:1536/1024;transform:scale(var(--prep-scale,1));transform-origin:top left}
 .prepSkinInventory{display:contents}
 .prepCompactTitle{display:none}
+
+
+/* v0.11.010 · El prototipo táctil es exclusivamente horizontal.
+   Safari/iOS: orientación manual obligatoria; Android: fullscreen + lock cuando posible. */
+#rotate[hidden],#rotateLock[hidden]{display:none!important}
+html.mobile-device.genesis-landscape-required #rotate{
+  display:flex!important;position:fixed;inset:0;z-index:99999;box-sizing:border-box;
+  width:100vw;height:var(--view-height,100dvh);padding:calc(env(safe-area-inset-top) + 20px) 24px calc(env(safe-area-inset-bottom) + 20px);
+  background:radial-gradient(ellipse at 50% 30%,#263521 0%,#101b1c 45%,#070a0b 100%);
+  border:0;border-radius:0;transform:none;pointer-events:auto;
+  align-items:center;justify-content:center;flex-direction:column;gap:18px;
+  color:#efdfba;text-align:center;overflow:auto;overscroll-behavior:contain;
+}
+html.mobile-device.genesis-landscape-required #rotate .rotateGlyph{
+  font:normal 76px/1 Georgia,serif;color:#d7ad62;
+  text-shadow:0 2px 30px #a8652888;transform:rotate(-90deg);
+}
+html.mobile-device.genesis-landscape-required #rotate h2{
+  margin:0;font:normal clamp(23px,6vw,34px) Georgia,serif;
+  color:#f9dba0;text-shadow:0 2px 12px #000;
+}
+html.mobile-device.genesis-landscape-required #rotate p{
+  max-width:440px;font:normal 15px/1.5 system-ui,sans-serif;
+  color:#dbc6a4;margin:0;
+}
+html.mobile-device.genesis-landscape-required #rotate #rotateLock{
+  min-height:48px;padding:12px 22px;border:1px solid #d9a45a;border-radius:6px;
+  background:linear-gradient(#684020,#28180c);color:#ffdfa8;
+  font:normal 16px Georgia,serif;touch-action:manipulation;cursor:pointer;
+}
+html.mobile-device.genesis-landscape-required #rotate #rotateStatus{
+  font-size:12px;color:#c8aa7d;min-height:16px;
+}
+html.mobile-device.genesis-landscape-required{
+  overflow:hidden!important;overscroll-behavior:none;
+}
+html.mobile-device.genesis-landscape-required :is(pc-app,#hud,#modalLayer,#prototypeIntro){
+  pointer-events:none!important;
+}
+html.mobile-device:not(.genesis-landscape-required) #rotate{display:none!important}
+
+/* Tamaños dinámicos para todas las relaciones panorámicas reales
+   (16:9, 19.5:9 y otras), respetando notch y barras del navegador. */
+@media (orientation:landscape) and (pointer:coarse){
+  html.mobile-device,html.mobile-device body{width:100%;height:var(--view-height);margin:0;overflow:hidden}
+  html.mobile-device pc-app{width:100vw!important;height:var(--view-height)!important}
+  html.mobile-device #hud{display:block;width:100%;height:var(--view-height);padding:0}
+  html.mobile-device #brand{position:absolute;top:var(--safe-top);left:var(--safe-left);font-size:8px}
+  html.mobile-device #tech{position:absolute;top:var(--safe-top);right:var(--safe-right);font-size:8px}
+  html.mobile-device #buttonsTop{
+    position:absolute;top:calc(var(--safe-top) + 25px);right:var(--safe-right);
+    left:auto;width:auto;max-width:min(52vw,490px);display:flex;justify-content:flex-end;
+    flex-wrap:wrap;gap:4px;grid-area:auto;
+  }
+  html.mobile-device #buttonsTop .uiBtn{min-height:30px;padding:5px 7px;font-size:9px}
+  html.mobile-device #quest{
+    position:absolute;left:var(--safe-left);top:calc(var(--safe-top) + 32px);
+    width:min(31vw,310px);max-height:min(31vh,160px);
+    padding:7px 9px;grid-area:auto;font-size:10px;
+  }
+  html.mobile-device #professionChip{
+    position:absolute;left:var(--safe-left);top:auto;
+    bottom:calc(var(--safe-bottom) + min(25vh,105px) + 6px);
+    max-width:32vw;font-size:8px;grid-area:auto;
+  }
+  html.mobile-device #mobile{display:block}
+  html.mobile-device #joy{
+    left:var(--safe-left);bottom:var(--safe-bottom);
+    width:clamp(64px,22dvh,104px);height:clamp(64px,22dvh,104px);
+  }
+  html.mobile-device #joyKnob{left:calc(50% - 18px);top:calc(50% - 18px)}
+  html.mobile-device #interact{
+    right:var(--safe-right);bottom:var(--safe-bottom);
+    width:clamp(46px,15dvh,70px);height:clamp(46px,15dvh,70px);font-size:15px;
+  }
+  html.mobile-device #inventoryTouch{
+    right:calc(var(--safe-right) + clamp(50px,15dvh,70px) + 12px);
+    bottom:calc(var(--safe-bottom) + 3px);
+    width:clamp(44px,14dvh,58px);height:clamp(44px,14dvh,58px);
+  }
+  html.mobile-device #zoomControls{
+    right:var(--safe-right);bottom:calc(var(--safe-bottom) + clamp(58px,19dvh,88px));
+  }
+  html.mobile-device #zoomControls button{width:clamp(30px,9dvh,42px);height:clamp(30px,9dvh,42px)}
+  html.mobile-device #lookZone{width:56%;height:100%}
+  html.mobile-device #prompt{bottom:calc(var(--safe-bottom) + 18px);max-width:50vw}
+  html.mobile-device #cameraGuide{max-width:40vw;left:35%;right:auto;bottom:var(--safe-bottom)}
+  html.mobile-device #materialsPanel{left:var(--safe-left);bottom:calc(var(--safe-bottom) + 24vh)}
+}
