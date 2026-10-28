@@ -64,7 +64,14 @@ export async function mountVillage(app,{shell,roof,door}){
  const proxies=new Map();
  for(const p of plan.workshops){
   const building=new Entity(p.profession+' · fachada cerrada');root.addChild(building);building.setLocalPosition(p.x,0,p.z);building.setLocalScale(plan.workshopScale,1,plan.workshopScale);building.setLocalEulerAngles(0,p.yaw,0);
-  for(const [source,pos]of [[shell,[0,0,0]],[roof,[0,3.45,-5.05]],[door,[-1.1,0,.12]]]){const clone=source.clone();clone.setLocalPosition(...pos);clone.setLocalEulerAngles(0,0,0);building.addChild(clone)}
+  // Only the architecture is shorter; the 63×63 world, footprints, player and props keep their dimensions.
+  const architecturalHeight=.75;
+  for(const [source,pos]of [[shell,[0,0,0]],[roof,[0,3.45*architecturalHeight,-5.05]],[door,[-1.1,0,.12]]]){
+   const clone=source.clone(),size=clone.getLocalScale();
+   clone.setLocalPosition(...pos);clone.setLocalEulerAngles(0,0,0);
+   clone.setLocalScale(size.x,size.y*architecturalHeight,size.z);
+   building.addChild(clone);
+  }
   proxies.set(p.profession,building);
   sign(app,root,p.label,p.existing?'Taller de oficio':'Taller cerrado',p.x,p.z,p.yaw,2.9,3.2);
  }
