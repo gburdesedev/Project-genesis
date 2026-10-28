@@ -13,6 +13,10 @@ await page.locator('[data-tab="Fabricaciones"]').click();assert(await page.locat
 for(let i=0;i<100&&await page.locator('#prepHeatGauge').count();i++){const heat=Number(await page.locator('#prepHeatGauge').getAttribute('aria-valuenow'));if(heat<70)await page.locator('#prepBellow0').click();await page.clock.runFor(1000)}
 assert.equal(await page.evaluate(()=>stock['Lingote de hierro']),1);assert.equal(await page.evaluate(()=>stock['Mineral de hierro']),3);await page.evaluate(()=>openLive());
 assert.equal(await page.locator('.prepArtboard').getAttribute('data-active-tab'),'Inventario','INV opens inventory, not preparation');
+assert.equal(await page.locator('.prepSkinTab[aria-current="page"]').getAttribute('data-tab'),'Inventario','inventory highlight belongs to the selected tab');
+assert.equal(await page.locator('.prepSkinPiece[src$="/Pestana_Preparacion.png"]').evaluate(e=>getComputedStyle(e).filter.includes('brightness(0.49)')),true,'baked Preparation gold must be dimmed outside Preparation');
+assert.equal(await page.locator('.prepSkinStart.workspaceAction').evaluate(e=>getComputedStyle(e,'::before').display),'none','dynamic action button cannot get opaque patch over baked PREPARAR');
+assert.equal(await page.locator('.prepSkinScroll').evaluate(e=>Math.abs(e.getBoundingClientRect().width/e.getBoundingClientRect().height-16/9)<.005),true,'widescreen frame must actually be 16:9');
 await page.locator('[data-tab="Preparacion"]').click();
 assert.equal(await page.locator('.prepArtboard').getAttribute('data-active-tab'),'Preparacion');
 assert.equal(await page.evaluate(()=>GenesisPreparation.navigate('Inventario')),true,'HUD TAB/INV reopens inventory');

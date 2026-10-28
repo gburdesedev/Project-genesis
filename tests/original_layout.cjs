@@ -17,7 +17,7 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/<script
  }
  for(const [width,height] of [[390,844],[844,390],[1366,768],[1920,1080]]){
   await page.setViewportSize({width,height});
-  await page.waitForFunction(()=>{const a=document.querySelector('.prepArtboard').getBoundingClientRect();return a.width<=innerWidth&&a.height<=innerHeight&&Math.abs(a.width/a.height-1.5)<.005});
+  await page.waitForFunction(()=>{const a=document.querySelector('.prepArtboard').getBoundingClientRect(),w=document.querySelector('.prepSkinScroll').getBoundingClientRect();return a.width<=innerWidth&&a.height<=innerHeight&&Math.abs(a.width/a.height-1.5)<.005&&Math.abs(w.width/w.height-16/9)<.005&&a.left>=w.left&&a.right<=w.right+1});
   await composition('.prepSkinDetails',.751,.206,.221,.529);
   await composition('.prepSkinFeatured',.395,.274,.326,.28);
   await composition('#prepStart',1137/1536,777/1024,378/1536,122/1024);
