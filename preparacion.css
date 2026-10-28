@@ -439,24 +439,27 @@
   pointer-events:none;
 }
 .prepArtboard .prepSkinTab[data-tab="Preparacion"][aria-current="page"]::after{display:none}
-/* Botón de acción dinámico: el bitmap "PREPARAR" no se reutiliza,
-   porque tiene texto incrustado y ocultarlo producía el rectángulo negro. */
+/* Acción dinámica sobre la botonera original: conservar marco y relieves.
+   PREPARAR está pintado en el PNG; la máscara suave oculta solo ese rótulo. */
 .prepArtboard .prepSkinStart.workspaceAction{
-  background:linear-gradient(180deg,#b7833c 0%,#72441f 16%,#25150c 46%,#28180e 56%,#78471d 87%,#b7863d 100%)!important;
-  border:2px solid #b48647!important;border-radius:5px!important;
-  box-shadow:inset 0 0 0 3px #241409,inset 0 0 0 5px #d3a05b,0 3px 10px #090503bd;
-  color:#ffe2a6!important;
-  text-shadow:0 2px 4px #000,0 0 6px #281000;
-  font:normal 22px Georgia,serif!important;
-  letter-spacing:.04em;
+  background:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Normal.png') center/100% 100% no-repeat!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+  color:#ffe6ad!important;text-shadow:0 2px 3px #000,0 0 4px #000;
+  font:normal 22px Georgia,serif!important;letter-spacing:.025em;
 }
-.prepArtboard .prepSkinStart.workspaceAction::before{display:none!important}
+.prepArtboard .prepSkinStart.workspaceAction::before{
+  content:"";display:block!important;position:absolute;
+  inset:18% 16%;z-index:1;border:0!important;box-shadow:none!important;
+  background:linear-gradient(180deg,#b27736 0%,#8b521e 38%,#713b17 85%,#724018 100%)!important;
+  mask-image:radial-gradient(ellipse 75% 70% at center,#000 75%,transparent 100%);
+  filter:blur(3px);pointer-events:none;
+}
+.prepArtboard .prepSkinStart.workspaceAction .workspaceActionLabel{position:relative;z-index:2}
 .prepArtboard .prepSkinStart.workspaceAction:not(:disabled):hover{
-  background:linear-gradient(180deg,#dca65b,#865121 16%,#372010 47%,#3a210f 55%,#915925 87%,#deb36b)!important;
-  border-color:#f0c77d!important;
-  box-shadow:inset 0 0 0 3px #321a0a,inset 0 0 0 5px #f8ce85,0 0 15px #efb45c60;
+  background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Hover.png')!important;
+  filter:brightness(1.06);
 }
 .prepArtboard .prepSkinStart.workspaceAction:disabled{
-  background:linear-gradient(180deg,#6f5942,#3a2b1e 16%,#201711 50%,#47311c 87%,#61503a)!important;
-  border-color:#8f724e!important;color:#bdab93!important;
+  background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Deshabilitado.png')!important;
+  color:#ad9981!important;filter:saturate(.63);
 }
