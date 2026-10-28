@@ -34,6 +34,9 @@ const server=http.createServer((req,res)=>{const url=new URL(req.url,'http://loc
  assert(Math.abs(scales.anvil.x-scales.anvil.y)<.001&&Math.abs(scales.anvil.z-scales.anvil.y)<.001,'anvil proportions changed');
  assert(Math.abs(scales.player.x-scales.player.y)<.001,'character proportions changed');
  assert(Math.abs(scales.shell.x-.75)<.001&&Math.abs(scales.shell.y-1)<.001,'active workshop scale mismatch');
+ await actual.setViewportSize({width:1600,height:900});
+ await actual.screenshot({path:'/tmp/genesis-responsive/herrero-v018-first-look-16x9.png'});
+ await actual.setViewportSize({width:1280,height:800});
  await actual.keyboard.down('KeyW');await actual.waitForTimeout(400);await actual.keyboard.up('KeyW');
  await actual.keyboard.down('ShiftLeft');await actual.keyboard.down('KeyW');await actual.waitForTimeout(500);
  const run=await actual.evaluate(()=>document.getElementById('playerAnim').component.baseLayer.activeState);assert.equal(run,'Sprint_Loop');
