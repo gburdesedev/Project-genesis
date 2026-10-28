@@ -13,12 +13,25 @@ try{
  const light=new Entity('sun');light.addComponent('light',{type:'directional',color:new Color(1,.94,.84),intensity:1.8,castShadows:true,shadowDistance:100,shadowResolution:1024});app.root.addChild(light);light.setEulerAngles(45,25,0);
  const load=url=>new Promise((resolve,reject)=>app.assets.loadFromUrl(url,'container',(error,asset)=>error?reject(error):resolve(asset.resource.instantiateRenderEntity())));
  const [shell,door,roof]=await Promise.all([load('/test-shell.glb'),load('/test-door.glb'),load('https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Roof_RoundTiles_6x10.gltf')]);roof.setLocalScale(1.28,.55,.86);
- const village=await mountVillage(app,{shell,roof,door});window.view={app,village,camera,Vec3};window.ready=true;
+ const village=await mountVillage(app,{shell,roof,door});
+ const herrero=village.root.children.find(e=>e.name.includes('Herrero · fachada cerrada'));
+ if(!herrero)throw Error('missing Herrero proxy for visual QA');
+ herrero.children[2].enabled=false; // Existing closed door only; preview the actual incoming GLB.
+ const newLeaf=await load('https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/integration/herrero-door-webgl-v018/assets/candidates/herrero-door-v018-pbr1024.glb');
+ newLeaf.setLocalPosition(-.0045,0,.12);
+ newLeaf.setLocalScale(1.816667,1.298701,1);
+ herrero.addChild(newLeaf);
+ window.view={app,village,camera,Vec3};window.ready=true;
 }catch(error){window.failure=error.stack||String(error)}
 </script></body></html>`;
 const server=http.createServer((req,res)=>{const url=new URL(req.url,'http://localhost').pathname;if(url==='/'){res.setHeader('Content-Type','text/html');return res.end(html)}if(assets[url]){res.setHeader('Content-Type','model/gltf-binary');return res.end(assets[url])}const file=url==='/engine.mjs'?engine:path.join(root,url);if(!file.startsWith(root)&&file!==engine){res.writeHead(403);return res.end()}if(!fs.existsSync(file)){res.writeHead(404);return res.end()}res.setHeader('Content-Type',file.endsWith('.js')||file.endsWith('.mjs')?'text/javascript':file.endsWith('.png')?'image/png':file.endsWith('.html')?'text/html':'application/octet-stream');fs.createReadStream(file).pipe(res)});
 (async()=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});const page=await browser.newPage({viewport:{width:1440,height:1080}});await page.goto(`http://127.0.0.1:${server.address().port}/`);await page.waitForFunction(()=>window.ready||window.failure,{},{timeout:90000});const failure=await page.evaluate(()=>window.failure);assert(!failure,failure);await page.waitForTimeout(700);
  fs.mkdirSync('/tmp/genesis-responsive',{recursive:true});await page.screenshot({path:'/tmp/genesis-responsive/v0.11.005-village-overview.png'});
+ await page.setViewportSize({width:1600,height:900});
+ await page.evaluate(()=>{view.camera.setPosition(0,3.3,7.4);view.camera.lookAt(new view.Vec3(0,1.5,0))});
+ await page.waitForTimeout(700);
+ await page.screenshot({path:'/tmp/genesis-responsive/herrero-v018-facade-lit-16x9.png'});
+ await page.setViewportSize({width:1440,height:1080});
  await page.evaluate(()=>{view.camera.setPosition(7,9,31);view.camera.lookAt(new view.Vec3(7,0,10))});await page.waitForTimeout(400);await page.screenshot({path:'/tmp/genesis-responsive/v0.11.005-village-plaza.png'});
  const state=await page.evaluate(()=>({width:GenesisVillagePlan.bounds.maxX-GenesisVillagePlan.bounds.minX,closed:view.village.blocked(-15.5,16),count:view.village.root.children.filter(e=>e.name.includes('fachada cerrada')).length,scale:view.village.root.children.find(e=>e.name.includes('fachada cerrada')).getLocalScale().x,heightScale:view.village.root.children.find(e=>e.name.includes('fachada cerrada')).getLocalScale().y}));assert.equal(state.width,63);assert.equal(state.closed,true);assert.equal(state.count,5);assert.equal(state.scale,.75);assert.equal(state.heightScale,1);
  await page.close();
