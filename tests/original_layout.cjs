@@ -32,5 +32,19 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/<script
  await composition('.prepSkinCenter',.394,.21,.323,.66);
  await composition('.prepSkinDetails',.751,.206,.221,.529);
  await page.screenshot({path:`${out}/v0.11.003-original-minigame-landscape.png`});
+ await page.evaluate(()=>{
+  GenesisPreparation.open({
+   profession:'Herrero',recipeName:'Espada de hierro',
+   inventory:{'Mineral de hierro':10,'Lingote de hierro':2},
+   requiredStock:{'Lingote de hierro':3},
+   formula:{materials:[{material:'Lingote de hierro',qty:3}]},
+   startTab:'Inventario',getItems:()=>[],onCraft(){},
+   closeModal(){document.querySelector('#modalLayer').style.display='none'},
+   modal(html,extra){const box=document.querySelector('#modal');box.className='modal '+extra;box.innerHTML=html;document.querySelector('#modalLayer').style.display='grid'}
+  });
+ });
+ await page.waitForFunction(()=>document.querySelector('.prepArtboard')?.dataset.activeTab==='Inventario');
+ await page.evaluate(()=>Promise.all([...document.images].filter(i=>i.closest('.prepSkinModal')).map(i=>i.decode().catch(()=>{}))));
+ await page.screenshot({path:`${out}/v0.11.014-inventory-landscape.png`});
  await browser.close();console.log('PASS original artwork composition: fixed asset positions, uniform scale, frames and minigame restored');
 })().catch(e=>{console.error(e);process.exit(1)});
