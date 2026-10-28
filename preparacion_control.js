@@ -520,6 +520,13 @@
           viewer='<p class="workspaceViewEmpty">Tus creaciones aparecerán aquí</p>';
           action='Volver a materiales';enabled=true;run=()=>{ctx.inventoryCategory='materials';renderWorkspace('Inventario')};
         }
+      } else if (!stock.length) {
+        // Las casillas empiezan vacías; jamás exhibir recursos que no posee el jugador.
+        details+='<div class="workspaceEmptyText">Todavía no hay materiales básicos ni preparados. Al recogerlos, aparecerán en estas casillas.</div>';
+        if(ctx.manageGear)details+='<button type="button" class="workspaceMaterial" id="workspaceGear">Gestionar equipo del mercenario</button>';
+        if(ctx.extraInventory)details+=ctx.extraInventory();
+        viewer='<p class="workspaceViewEmpty">Casillas vacías · sin materiales</p>';
+        action='Sin materiales';enabled=false;
       } else {
         details+='<h3>'+escape(material)+'</h3><p class="prepSkinIntro">Existencias del baúl y materiales preparados en la partida.</p>' +
           '<div class="prepSkinStat"><span>Disponibles</span><b>'+countOf(ctx.inventory,material)+'</b></div>' +
