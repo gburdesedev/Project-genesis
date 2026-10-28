@@ -14,8 +14,8 @@ try{
  const load=url=>new Promise((resolve,reject)=>app.assets.loadFromUrl(url,'container',(error,asset)=>error?reject(error):resolve(asset.resource.instantiateRenderEntity())));
  const [shell,door,roof]=await Promise.all([load('/test-shell.glb'),load('/test-door.glb'),load('https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Roof_RoundTiles_6x10.gltf')]);roof.setLocalScale(1.28,.55,.86);
  const village=await mountVillage(app,{shell,roof,door});
- const herrero=village.root.children.find(e=>e.name.includes('Herrero · fachada cerrada'));
- if(!herrero)throw Error('missing Herrero proxy for visual QA');
+ const herrero=village.root.children.filter(e=>e.name.includes('fachada cerrada')).find(e=>Math.abs(e.getLocalPosition().x)<.01&&Math.abs(e.getLocalPosition().z)<.01);
+ if(!herrero)throw Error('missing Herrero facade at origin: '+village.root.children.filter(e=>e.name.includes('fachada')).map(e=>e.name+':'+e.getLocalPosition().x).join(','));
  herrero.children[2].enabled=false; // Existing closed door only; preview the actual incoming GLB.
  const newLeaf=await load('https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/integration/herrero-door-webgl-v018/assets/candidates/herrero-door-v018-pbr1024.glb');
  newLeaf.setLocalPosition(-.0045,0,.12);
