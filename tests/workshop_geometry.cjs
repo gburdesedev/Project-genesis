@@ -15,7 +15,7 @@ for(const id of ['modularWalls089','workshopShellModel','doorFrameModel','doorLe
  assert(new RegExp('id="'+id+'"[^>]*scale="1 \\.75 1"').test(source),`${id} must be 75% architectural height`);
 assert(/id="roofFinalModel"[^>]*position="0 2\.5875 -5\.05"[^>]*scale="1\.28 \.4125 \.86"/.test(source),'blacksmith roof must be lowered proportionally');
 assert(/id="tannerRoofModel"[^>]*position="0 2\.5875 -5\.05"[^>]*scale="1\.75 \.4125 1\.25"/.test(source),'tanner roof must be lowered proportionally');
-assert.equal(3*.75,2.25,'door height');assert.equal(3.25*.75,2.4375,'frame height');assert.equal(6.1395246*.75,4.60464345,'roof height');
+assert.equal(3*.75,2.25,'door height');assert.equal(3.25*.75,2.4375,'frame height');assert(Math.abs(6.1395246*.75-4.60464345)<.000001,'roof height');
 for(const w of plan.workshops)assert(w.w*w.d<=71,'footprint should be about 44% smaller');
 assert(source.includes('data-preserve-proportions="true"'));
 const keys=new Set();assert.equal(plan.movementSpeed(keys),2.75);keys.add('ShiftLeft');assert.equal(plan.movementSpeed(keys),5);keys.delete('ShiftLeft');keys.add('ShiftRight');assert.equal(plan.movementSpeed(keys),5);keys.clear();assert.equal(plan.movementSpeed(keys),2.75);
