@@ -16,8 +16,11 @@
     const style = getComputedStyle(layer);
     const width = layer.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
     const height = layer.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
-    const scale = Math.max(.01, Math.min(1, width / 1536, height / 1024));
-    wrapper.style.setProperty('--prep-layout-width', `${1536 * scale}px`);
+    // El lienzo original (1536x1024) conserva su geometría; el marco exterior
+    // se amplía a 16:9 sin estirar texto, casillas ni controles del minijuego.
+    const PANORAMA_WIDTH = 1820.4444444444443;
+    const scale = Math.max(.01, Math.min(1, width / PANORAMA_WIDTH, height / 1024));
+    wrapper.style.setProperty('--prep-layout-width', `${PANORAMA_WIDTH * scale}px`);
     wrapper.style.setProperty('--prep-layout-height', `${1024 * scale}px`);
     wrapper.style.setProperty('--prep-scale', scale);
   }

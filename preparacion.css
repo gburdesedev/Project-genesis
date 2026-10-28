@@ -399,3 +399,67 @@
   color:#a58b6b!important;text-shadow:0 1px 2px #000!important
 }
 .prepSkinStart.workspaceAction:disabled::before{opacity:.82}
+
+
+/* v0.11.014 · Visor 16:9 real, con lienzo aprobado centrado sin deformaciones.
+   Las alas laterales usan el fondo original; las 39 piezas y el minijuego mantienen posiciones. */
+.modal.preparationModal.prepSkinModal{
+  width:min(1820px,calc(100vw - 12px));
+}
+.prepSkinScroll{
+  isolation:isolate;
+  background:#080605 url('assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png') center/100% 100% no-repeat;
+  box-shadow:inset 0 0 0 2px #9b6932,inset 0 0 24px #000;
+}
+.prepSkinScroll::before,.prepSkinScroll::after{
+  content:"";position:absolute;top:0;bottom:0;
+  width:calc(142.222222px * var(--prep-scale,1));
+  pointer-events:none;z-index:0;
+  background:linear-gradient(90deg,#080605c9,#1d130eb3 45%,#080605d8);
+}
+.prepSkinScroll::before{left:0;border-right:1px solid #a37130}
+.prepSkinScroll::after{right:0;border-left:1px solid #a37130}
+.prepSkinScroll .prepArtboard{
+  left:calc(142.222222px * var(--prep-scale,1));
+}
+/* Preparación trae el brillo grabado en su PNG: apagarlo cuando no está elegida. */
+.prepArtboard:not([data-active-tab="Preparacion"]) .prepSkinPiece[src$="/Pestana_Preparacion.png"]{
+  filter:brightness(.49) saturate(.7);
+}
+.prepArtboard[data-active-tab="Inventario"] .prepSkinPiece[src$="/Pestana_Inventario.png"],
+.prepArtboard[data-active-tab="Fabricaciones"] .prepSkinPiece[src$="/Pestana_Fabricaciones.png"],
+.prepArtboard[data-active-tab="Comparacion"] .prepSkinPiece[src$="/Pestana_Comparacion.png"]{
+  filter:brightness(1.32) saturate(1.17);
+}
+/* Subrayado dorado del tab actual, no del último tab tocado. */
+.prepArtboard .prepSkinTab[aria-current="page"]::after{
+  content:"";position:absolute;left:10%;right:10%;bottom:15%;height:4px;
+  background:linear-gradient(90deg,transparent 0%,#ffc55e 13%,#ffeca8 48%,#ffc55e 87%,transparent 100%);
+  border-radius:50%;box-shadow:0 0 10px 3px #e6a439a6,0 0 3px 1px #ffe3a9;
+  pointer-events:none;
+}
+.prepArtboard .prepSkinTab[data-tab="Preparacion"][aria-current="page"]::after{display:none}
+/* Acción dinámica sobre la botonera original: conservar marco y relieves.
+   PREPARAR está pintado en el PNG; la máscara suave oculta solo ese rótulo. */
+.prepArtboard .prepSkinStart.workspaceAction{
+  background:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Normal.png') center/100% 100% no-repeat!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+  color:#ffe6ad!important;text-shadow:0 2px 3px #000,0 0 4px #000;
+  font:normal 22px Georgia,serif!important;letter-spacing:.025em;
+}
+.prepArtboard .prepSkinStart.workspaceAction::before{
+  content:"";display:block!important;position:absolute;
+  inset:18% 16%;z-index:1;border:0!important;box-shadow:none!important;
+  background:linear-gradient(180deg,#b27736 0%,#8b521e 38%,#713b17 85%,#724018 100%)!important;
+  mask-image:radial-gradient(ellipse 75% 70% at center,#000 75%,transparent 100%);
+  filter:blur(3px);pointer-events:none;
+}
+.prepArtboard .prepSkinStart.workspaceAction .workspaceActionLabel{position:relative;z-index:2}
+.prepArtboard .prepSkinStart.workspaceAction:not(:disabled):hover{
+  background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Hover.png')!important;
+  filter:brightness(1.06);
+}
+.prepArtboard .prepSkinStart.workspaceAction:disabled{
+  background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Deshabilitado.png')!important;
+  color:#ad9981!important;filter:saturate(.63);
+}
