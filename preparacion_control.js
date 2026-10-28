@@ -392,6 +392,26 @@
         ' style="' + skinPos(x+5,y+5,width-10,height-10) + '"' + (active ? '' : ' disabled') + '>' + visual + '</button>';
     }).join('');
   }
+  // Fabricaciones comparte el arte aprobado, pero sus casillas centrales muestran
+  // exclusivamente los insumos de la formula real de esta sesion.
+  function skinCraftRequirements(ctx) {
+    const rows = shortages(ctx.formula, ctx.inventory);
+    const frame = `${SKIN_ROOT}01_Capas/Casillas/Casilla_Basicos_01.png`;
+    if (!rows.length) return '<section class="workspaceCraftTray"><h3>MATERIALES DE LA RECETA</h3><p>La receta todavía no tiene insumos definidos.</p></section>';
+    return '<section class="workspaceCraftTray" aria-label="Insumos de la fabricacion seleccionada">' +
+      '<h3>MATERIALES DE LA RECETA</h3><div class="workspaceCraftTraySlots">' +
+      rows.map(row => {
+        const art = MATERIAL_ART[row.material];
+        const visual = art ? '<img src="' + escape(art.poster) + '" alt="" loading="lazy">' :
+          '<span class="workspaceCraftMaterialInitial">' + escape(row.material.slice(0, 2).toUpperCase()) + '</span>';
+        return '<div class="workspaceCraftTrayItem ' + (row.missing ? 'missing' : 'complete') +
+          '" title="' + escape(row.material + ': ' + row.available + ' de ' + row.needed) + '">' +
+          '<div class="workspaceCraftTraySlot">' + visual + '<img class="workspaceCraftTrayFrame" src="' + frame + '" alt="" aria-hidden="true">' +
+          '<b>' + row.available + '/' + row.needed + '</b></div>' +
+          '<small>' + escape(row.material) + '</small></div>';
+      }).join('') + '</div></section>';
+  }
+
   function skinIngredients(ctx) {
     // Equivalencia 1 mineral -> 1 lingote: DEMO provisional de hierro.
     // El contador expresa la materia prima requerida PARA LA TANDA,
@@ -542,16 +562,16 @@
       }
     } else if(tab==='Fabricaciones') {
       const needs=shortages(ctx.formula,ctx.inventory);
-      const canCraft=ctx.canCraftNow?.() === true;
+      const canCraft=typeof ctx.canCraftNow === 'function' ? ctx.canCraftNow() === true : true;
       enabled=ready(ctx.formula,ctx.inventory)&&canCraft;
       details='<p class="prepSkinKicker">RECETA DISPONIBLE EN LA PARTIDA</p><h3>'+escape(ctx.recipeName)+'</h3>' +
-        '<p class="prepSkinIntro">Se utilizará la fórmula fijada en esta sesión. Los materiales se descontarán al confirmar.</p>' +
+        '<p class="prepSkinIntro">Fórmula de esta partida. Los materiales se consumen únicamente al realizar el cierre de fabricación.</p>' +
         '<div class="workspaceIngredients">'+needs.map(r=>'<div class="workspaceMetric '+(r.missing?'short':'met')+'"><span>'+escape(r.material)+'</span><b>'+r.available+' / '+r.needed+'</b></div>').join('')+'</div>' +
-        '<p class="workspaceCraftState">'+(!canCraft?'La fabricación se habilita al alcanzar su etapa del tutorial.':enabled?'Materiales preparados: fabricación disponible.':'Faltan materiales. Prepará los lingotes necesarios.')+'</p>' +
+        '<p class="workspaceCraftState">'+(!canCraft?'Aún no corresponde fabricar: avanzá en el tutorial.':enabled?'✓ Insumos disponibles. Podés comenzar la fabricación.':'Faltan '+needs.filter(r=>r.missing).map(r=>escape(r.material)+' (×'+r.missing+')').join(', ')+'.')+'</p>' +
         '<button type="button" class="prepSkinCraft secondary" id="workspaceGoPrep">Ver Preparación</button>' +
         '<p class="workspaceFootnote">La Preparación controla la temperatura. El cierre de Fabricación resuelve rareza, canales y nombre mediante el motor actual.</p>';
       viewer='<div class="workspaceHero workspaceRecipeHero">'+(ctx.recipeAsset?ctx.recipeAsset():'')+'<p>'+escape(ctx.recipeName)+'</p></div>';
-      action='Confirmar fabricación';run=craft;
+      action='Iniciar fabricación';run=craft;
     } else if(tab==='Comparacion') {
       ctx.compareA=Math.min(Math.max(0,ctx.compareA||0),Math.max(0,items.length-1));
       ctx.compareB=Math.min(Math.max(0,ctx.compareB??1),Math.max(0,items.length-1));
@@ -582,6 +602,7 @@
     }
     skinDisplay('workspace','',details,tab+' · '+stock.reduce((n,[,q])=>n+Number(q),0)+' unidades · '+items.length+' creaciones');
     const board=document.querySelector('.prepArtboard');
+    if (tab === 'Fabricaciones') board.insertAdjacentHTML('beforeend', skinCraftRequirements(ctx));
     // Se preserva el botón decorativo, pero no el rótulo PREPARAR horneado en Preparación.
     board.querySelectorAll('[data-role^="boton_"]').forEach(piece => piece.remove());
     if(tab==='Comparacion'||(tab==='Inventario'&&ctx.inventoryCategory==='creations')) {
