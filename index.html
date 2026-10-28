@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<script src="./village_plan.js?v=0.11.014"></script>
-<script src="./device_policy.js?v=0.11.014"></script>
+<script src="./village_plan.js?v=0.11.015"></script>
+<script src="./device_policy.js?v=0.11.015"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Project Genesis — Prototipo Jugable v0.11.014 · Powered by NGE Alpha</title>
-<link rel="stylesheet" href="./preparacion.css?v=0.11.014">
+<title>Project Genesis — Prototipo Jugable v0.11.015 · Powered by NGE Alpha</title>
+<link rel="stylesheet" href="./preparacion.css?v=0.11.015">
 
 <script type="importmap">
 {
@@ -187,8 +187,8 @@ html.modalOpen,body.modalOpen{overflow:hidden!important;overscroll-behavior:none
 <script>
 if(!window.GenesisDevice.safePreviews){const script=document.createElement('script');script.type='module';script.src='https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js';document.head.append(script)}
 </script>
-<meta name="genesis-build" content="playcanvas-v0.11.014-live-workshop-menus">
-<link rel="stylesheet" href="./responsive.css?v=0.11.014">
+<meta name="genesis-build" content="playcanvas-v0.11.015-live-workshop-menus">
+<link rel="stylesheet" href="./responsive.css?v=0.11.015">
 </head>
 <body>
 
@@ -345,7 +345,7 @@ window.__genesisAppError=function(event){
 
     <!-- Prototipo v0.9a.2: paredes modulares authored del Medieval Village MegaKit.
          These replace the flat plaster boxes that looked like placeholders. -->
-    <pc-entity id="modularWalls089" name="Authored modular workshop walls">
+    <pc-entity id="modularWalls089" name="Authored modular workshop walls" scale="1 .75 1">
       <!-- back wall: plaster/timber, with masonry around the forge -->
       <pc-model name="Back wall west" data-asset="wallWoodGrid2A" data-route="Herrero" data-priority="critical" position="-3.56 0 -10.02" scale="1.78 1 1"></pc-model>
       <pc-model name="Back wall center" data-asset="wallWoodGrid2A" data-route="Herrero" data-priority="critical" position="0 0 -10.02" scale="1.78 1 1"></pc-model>
@@ -370,13 +370,13 @@ window.__genesisAppError=function(event){
     </pc-entity>
 
     <!-- Detailed workshop shell: stone courses, aged plaster, timber frame, eaves, rafters and actual doorway opening. -->
-    <pc-model id="workshopShellModel" name="Blacksmith workshop shell" data-asset="workshopShell" data-route="Herrero" data-priority="critical" position="0 0 0"></pc-model>
+    <pc-model id="workshopShellModel" name="Blacksmith workshop shell" data-asset="workshopShell" data-route="Herrero" data-priority="critical" position="0 0 0" scale="1 .75 1"></pc-model>
     <!-- Prototipo v0.9a.2: techo modular authored. -->
-    <pc-model id="roofFinalModel" name="Complete tiled workshop roof" data-asset="roofReal086" data-route="Herrero" data-priority="critical" position="0 3.45 -5.05" rotation="0 0 0" scale="1.28 .55 .86"></pc-model>
+    <pc-model id="roofFinalModel" name="Complete tiled workshop roof" data-asset="roofReal086" data-route="Herrero" data-priority="critical" position="0 2.5875 -5.05" rotation="0 0 0" scale="1.28 .4125 .86"></pc-model>
 
     <!-- v0.8.3: door and frame are a matched solid Genesis assembly. The door pivots around its real hinge. -->
-    <pc-model id="doorFrameModel" name="Genesis workshop door frame" data-asset="doorFrame083" data-route="Herrero" data-priority="critical" position="0 0 .10" scale="1 1 1"></pc-model>
-    <pc-model id="doorLeafModel" name="Genesis solid plank door" data-asset="doorLeaf083" data-route="Herrero" data-priority="critical" position="-1.10 0 .12" rotation="0 0 0" scale="1 1 1"></pc-model>
+    <pc-model id="doorFrameModel" name="Genesis workshop door frame" data-asset="doorFrame083" data-route="Herrero" data-priority="critical" position="0 0 .10" scale="1 .75 1"></pc-model>
+    <pc-model id="doorLeafModel" name="Genesis solid plank door" data-asset="doorLeaf083" data-route="Herrero" data-priority="critical" position="-1.10 0 .12" rotation="0 0 0" scale="1 .75 1"></pc-model>
 
     <!-- Blacksmith work zone: masonry hearth, coals, extraction hood and chimney. -->
     <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="3.02 0 -8.56" scale="1.333333333333 1 1.333333333333">
@@ -458,7 +458,7 @@ window.__genesisAppError=function(event){
       <pc-model name="Curtidor wood floor 4_2" data-asset="tannerFloor09" data-route="Curtidor" data-priority="critical" position="4 .014 -5"></pc-model>
       <pc-model name="Curtidor wood floor 4_3" data-asset="tannerFloor09" data-route="Curtidor" data-priority="critical" position="4 .014 -3"></pc-model>
       <pc-model name="Curtidor wood floor 4_4" data-asset="tannerFloor09" data-route="Curtidor" data-priority="critical" position="4 .014 -1"></pc-model>
-      <pc-entity id="tannerWalls09" name="Curtidor authored timber/plaster walls">
+      <pc-entity id="tannerWalls09" name="Curtidor authored timber/plaster walls" scale="1 .75 1">
         <pc-model name="Tanner back west" data-asset="wallWoodGrid2A" data-route="Curtidor" data-priority="critical" position="-3.56 0 -10.02" scale="1.78 1 1"></pc-model>
         <pc-model name="Tanner back center" data-asset="wallWoodGrid2A" data-route="Curtidor" data-priority="critical" position="0 0 -10.02" scale="1.78 1 1"></pc-model>
         <pc-model name="Tanner back east" data-asset="wallWoodGrid2A" data-route="Curtidor" data-priority="critical" position="3.56 0 -10.02" scale="1.78 1 1"></pc-model>
@@ -474,9 +474,9 @@ window.__genesisAppError=function(event){
         <pc-model name="Tanner front right" data-asset="wallWoodGrid2A" data-route="Curtidor" data-priority="critical" position="2.13 0 -.12" rotation="0 180 0" scale="1.06 1 1"></pc-model>
         <pc-model name="Tanner front far right" data-asset="wallWoodGrid2A" data-route="Curtidor" data-priority="critical" position="4.25 0 -.12" rotation="0 180 0" scale="1.06 1 1"></pc-model>
       </pc-entity>
-      <pc-model id="tannerRoofModel" name="Curtidor compact tiled roof" data-asset="tannerRoof09" data-route="Curtidor" data-priority="critical" position="0 3.45 -5.05" scale="1.75 .55 1.25"></pc-model>
-      <pc-model id="tannerDoorFrameModel" name="Curtidor workshop door frame" data-asset="doorFrame083" data-route="Curtidor" data-priority="critical" position="0 0 .10"></pc-model>
-      <pc-model id="tannerDoorLeafModel" name="Curtidor solid plank door" data-asset="doorLeaf083" data-route="Curtidor" data-priority="critical" position="-1.10 0 .12"></pc-model>
+      <pc-model id="tannerRoofModel" name="Curtidor compact tiled roof" data-asset="tannerRoof09" data-route="Curtidor" data-priority="critical" position="0 2.5875 -5.05" scale="1.75 .4125 1.25"></pc-model>
+      <pc-model id="tannerDoorFrameModel" name="Curtidor workshop door frame" data-asset="doorFrame083" data-route="Curtidor" data-priority="critical" position="0 0 .10" scale="1 .75 1"></pc-model>
+      <pc-model id="tannerDoorLeafModel" name="Curtidor solid plank door" data-asset="doorLeaf083" data-route="Curtidor" data-priority="critical" position="-1.10 0 .12" scale="1 .75 1"></pc-model>
 
       <!-- v0.9f · Curtidor: layout curado y apoyado con bounds reales de GLTF. -->
       <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="-3.72 0 -8.42" scale="1.333333333333 1 1.333333333333">
@@ -730,7 +730,7 @@ window.__genesisAppError=function(event){
 </div>
 
 <div id="hud">
- <div id="brand">PROJECT GENESIS · v0.11.014</div>
+ <div id="brand">PROJECT GENESIS · v0.11.015</div>
  <div id="tech">PLAYCANVAS 2.22.1 · PROTOTIPO · v0.11</div>
  <div id="buttonsTop"><button id="cameraSettingsBtn" class="uiBtn" type="button" aria-label="Configurar cámara">⚙ CÁMARA</button></div>
  <section id="quest">
@@ -757,11 +757,11 @@ window.__genesisAppError=function(event){
 
 <script src="./fps_counter.js?v=20261025-1"></script>
 <script src="./camera_mouse.js?v=20261025-1"></script>
-<script src="./preparacion_control.js?v=0.11.014"></script>
+<script src="./preparacion_control.js?v=0.11.015"></script>
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
 import { Vec3 } from 'playcanvas';
-import { mountVillage } from './village_world.js?v=0.11.014';
+import { mountVillage } from './village_world.js?v=0.11.015';
 
 /* Preparación v0.11: adaptador local sin modificar el motor procedural ni las
    resoluciones de Fabricación/Cierre. Conserva ambas rutas del tutorial. */
