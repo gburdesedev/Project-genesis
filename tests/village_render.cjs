@@ -11,8 +11,13 @@ try{
  const app=new Application(document.querySelector('canvas'),{graphicsDeviceOptions:{antialias:false}});app.setCanvasFillMode('FILL_WINDOW');app.setCanvasResolution('AUTO');app.scene.ambientLight=new Color(.68,.68,.65);app.start();
  const camera=new Entity('camera');camera.addComponent('camera',{clearColor:new Color(.10,.13,.15),farClip:180,fov:64});app.root.addChild(camera);camera.setPosition(7,55,62);camera.lookAt(new Vec3(7,0,17));
  const light=new Entity('sun');light.addComponent('light',{type:'directional',color:new Color(1,.94,.84),intensity:1.8,castShadows:true,shadowDistance:100,shadowResolution:1024});app.root.addChild(light);light.setEulerAngles(45,25,0);
- const load=url=>new Promise((resolve,reject)=>app.assets.loadFromUrl(url,'container',(error,asset)=>error?reject(error):resolve(asset.resource.instantiateRenderEntity())));
- const [shell,door,roof]=await Promise.all([load('/test-shell.glb'),load('/test-door.glb'),load('https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Roof_RoundTiles_6x10.gltf')]);roof.setLocalScale(1.28,.55,.86);
+ const load=url=>new Promise((resolve,reject)=>app.assets.loadFromUrl(url,'container',(error,asset)=>error?reject(new Error(url+': '+String(error))):resolve(asset.resource.instantiateRenderEntity())));
+ const [shell,door]=await Promise.all([load('/test-shell.glb'),load('/test-door.glb')]);
+ const roofPath='Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Roof_RoundTiles_6x10.gltf';
+ const roof=await load('https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/'+roofPath)
+  .catch(primary=>load('https://raw.githubusercontent.com/agentkaerf/FreeModels/main/'+roofPath)
+  .catch(secondary=>{throw Error('Roof external source failed: '+primary+'; fallback: '+secondary)}));
+ roof.setLocalScale(1.28,.55,.86);
  const village=await mountVillage(app,{shell,roof,door});window.view={app,village,camera,Vec3};window.ready=true;
 }catch(error){window.failure=error.stack||String(error)}
 </script></body></html>`;
@@ -34,7 +39,7 @@ const server=http.createServer((req,res)=>{const url=new URL(req.url,'http://loc
  await page.waitForTimeout(450);await page.screenshot({path:'/tmp/genesis-responsive/v0.11.015-talleres-DESPUES-16x9.png'});
   const state=await page.evaluate(()=>({width:GenesisVillagePlan.bounds.maxX-GenesisVillagePlan.bounds.minX,closed:view.village.blocked(-15.5,16),count:view.village.root.children.filter(e=>e.name.includes('fachada cerrada')).length,scale:view.village.root.children.find(e=>e.name.includes('fachada cerrada')).getLocalScale().x,heightScale:view.village.root.children.find(e=>e.name.includes('fachada cerrada')).getLocalScale().y}));assert.equal(state.width,63);assert.equal(state.closed,true);assert.equal(state.count,5);assert.equal(state.scale,.75);assert.equal(state.heightScale,1);const architecture=await page.evaluate(()=>{const b=view.village.root.children.find(e=>e.name.includes('fachada cerrada'));return b.children.map(e=>({name:e.name,scale:e.getLocalScale().y,vertical:e.getLocalPosition().y}))});assert(Math.abs(architecture[0].scale-.75)<.0001);assert(Math.abs(architecture[1].scale-.4125)<.0001);assert(Math.abs(architecture[1].vertical-2.5875)<.0001);assert(Math.abs(architecture[2].scale-.75)<.0001);
  await page.close();
- const actual=await browser.newPage({viewport:{width:1280,height:800}});actual.setDefaultTimeout(60000);
+ const actual=await browser.newPage({viewport:{width:1600,height:900}});actual.setDefaultTimeout(60000);
  const errors=[];actual.on('pageerror',e=>errors.push(e.message));
  await actual.goto(`http://127.0.0.1:${server.address().port}/index.html`,{waitUntil:'domcontentloaded',timeout:120000});
  await actual.waitForFunction(()=>document.querySelector('#prototypeIntro')?.style.display==='grid'||document.querySelector('.loadingCard.failed'),{},{timeout:120000});
