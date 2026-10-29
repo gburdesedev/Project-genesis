@@ -17,6 +17,7 @@ try{
  const portal=mountArcanePortal(app,building,fallback);window.__arcana={portal,fallback,app};window.ready=true;
 }catch(e){window.failure=e.stack||String(e)}
 </script></body></html>`;
+let browser;
 const server=http.createServer((req,res)=>{
  const url=new URL(req.url,'http://localhost').pathname;
  if(url==='/'){res.setHeader('Content-Type','text/html');return res.end(html)}
@@ -28,7 +29,7 @@ const server=http.createServer((req,res)=>{
 });
 (async()=>{
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
- const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+ browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  const page=await browser.newPage({viewport:{width:1280,height:900}});const errors=[];
  page.on('pageerror',error=>errors.push(error.message));
  page.on('console',line=>{if(line.type()==='error')errors.push(line.text())});
@@ -44,4 +45,4 @@ const server=http.createServer((req,res)=>{
  await page.screenshot({path:'/tmp/genesis-trees/arcanista-v027-webgl-v0.11.017.png'});
  console.log('PASS real PlayCanvas Arcanist V027',JSON.stringify(status));
  await browser.close();
-})().finally(()=>server.close()).catch(err=>{console.error(err);process.exitCode=1});
+})().catch(async err=>{console.error(err);process.exitCode=1;try{await browser?.close()}catch(_){}}).finally(()=>server.close());

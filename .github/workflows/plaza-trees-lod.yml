@@ -35,10 +35,10 @@ jobs:
           node tests/village_trees.cjs
       - name: Install test runner
         run: npm install --prefix /tmp/genesis-tree-test playwright@1.56.1 playcanvas@2.22.1
-      - name: Real WebGL scene with tree GLBs
-        run: NODE_PATH=/tmp/genesis-tree-test/node_modules node tests/village_trees_browser.cjs
       - name: Real WebGL Arcanist V027 GLB
-        run: NODE_PATH=/tmp/genesis-tree-test/node_modules node tests/village_arcanist_browser.cjs
+        run: NODE_PATH=/tmp/genesis-tree-test/node_modules timeout 150s node tests/village_arcanist_browser.cjs
+      - name: Real WebGL scene with tree GLBs
+        run: NODE_PATH=/tmp/genesis-tree-test/node_modules timeout 190s node tests/village_trees_browser.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
