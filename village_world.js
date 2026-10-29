@@ -1,6 +1,6 @@
 import {Entity,StandardMaterial,Texture,Color,Mesh,MeshInstance,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
-import {mountVillageTrees} from './village_trees.js?v=0.14';
-import {mountArcanePortal} from './village_arcanist.js?v=0.14';
+import {mountVillageTrees} from './village_trees.js?v=0.14a';
+import {mountArcanePortal} from './village_arcanist.js?v=0.14a';
 const ROOT='./assets/world/v0.11.004/';
 const MOBILE_TEXTURE_EDGE=1024;
 // Decode one full-resolution source at a time on touch devices, then keep only
@@ -132,7 +132,7 @@ function arcaneSurround(app,building,cobble,shell){
  return frame;
 }
 export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{}}){
- const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14');app.root.addChild(root);
+ const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14a');app.root.addChild(root);
  // Begin tree transfers before road PBR maps: four species are part of the initial scene.
  const trees=mountVillageTrees(app,root,{onResourceLoaded});
  onPhase('arboles');
@@ -143,7 +143,7 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
   : await Promise.all([maps(app,'cobble',false,onResourceLoaded),maps(app,'traffic',false,onResourceLoaded)]);
  // Gentle opposing sky bounce prevents near-black backsides without flattening PBR.
  const bounce=new Entity('Rebote celeste cálido · sin sombras');
- bounce.addComponent('light',{type:'directional',color:new Color(.84,.79,.73),intensity:.24,castShadows:false});
+ bounce.addComponent('light',{type:'directional',color:new Color(.84,.79,.73),intensity:.43,castShadows:false});
  bounce.setLocalEulerAngles(28,145,0);root.addChild(bounce);
  const b=plan.bounds;
  mesh(root,'Pavimento exterior adoquín','plane',7,-.024,17,63,1,63,pavedMaterial('Adoquín · exterior',cobble,63,63));

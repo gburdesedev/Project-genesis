@@ -6,6 +6,7 @@ const html=`<!doctype html><html><head><style>html,body{margin:0;width:100%;heig
 import {Application,Entity,Color,Vec3,StandardMaterial} from 'playcanvas';
 import {mountVillageTrees} from '/village_trees.js';
 try{
+ globalThis.GenesisDevice={safePreviews:true}; // iOS runtime path on Chromium WebGL
  const app=new Application(document.querySelector('canvas'),{graphicsDeviceOptions:{antialias:true}});
  app.setCanvasFillMode('FILL_WINDOW');app.setCanvasResolution('AUTO');
  app.scene.ambientLight=new Color(.68,.68,.69);app.start();
@@ -43,7 +44,10 @@ const server=http.createServer((req,res)=>{
  await page.waitForTimeout(700);
  const status=await page.evaluate(()=>window.__genesisTreeStatus);
  assert.equal(status.planned,14);assert.equal(status.failedVariants,0,'Tree GLB load errors');
- try{await page.screenshot({path:'/tmp/genesis-trees/plaza-14-arboles-v0.14.png',timeout:12000})}
+ const materials=await page.evaluate(()=>{const root=window.__scene.trees.root;let foliage=0,opaque=0,triangles=0,textureReady=0;for(const anchor of root.children){for(const render of anchor.findComponents('render'))for(const mi of render.meshInstances){const m=mi.material;triangles+=mi.mesh?.primitive?.[0]?.count?mi.mesh.primitive[0].count/3:0;if(m?.alphaTest>0||m?.opacityMap){foliage++;if(m.opacityMap||m.diffuseMap)textureReady++}else opaque++}}return {foliage,opaque,triangles,textureReady}});
+ assert(materials.foliage>0&&materials.textureReady>0,'No hay hojas transparentes/PBR en la escena: '+JSON.stringify(materials));
+ console.log('LEAFY_PBR_CHECK',JSON.stringify(materials));
+ try{await page.screenshot({path:'/tmp/genesis-trees/plaza-14-arboles-v0.14a.png',timeout:12000})}
  catch(error){console.warn('Captura opcional de árboles no disponible; render confirmado:',error.message)}
  console.log('PASS real PlayCanvas tree screenshot',JSON.stringify(status));
  await browser.close();

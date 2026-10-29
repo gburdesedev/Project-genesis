@@ -1,12 +1,13 @@
-name: Preview v0.14 Arcanist and trees
+name: Preview v0.14a approved foliage and V027 glow
 on:
   push:
-    branches: ['feature/v0.14-arcane-loading']
+    branches: ['feature/v0.14a-leafy-glow']
     paths:
       - 'village_arcanist.js'
       - 'village_world.js'
       - 'village_trees.js'
       - 'tests/village_arcanist_browser.cjs'
+      - 'index.html'
       - 'tests/v014_arch_browser.cjs'
       - '.github/workflows/v014-arcane-preview.yml'
   workflow_dispatch:
@@ -31,6 +32,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: v014-arcanist-and-trees
+          name: v014a-arcanist-and-trees
           path: /tmp/genesis-trees
           retention-days: 5

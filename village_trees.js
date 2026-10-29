@@ -1,12 +1,12 @@
-/* Project Genesis v0.13.1 — approved plaza trees, prioritized safe streaming.
+/* Project Genesis v0.14a — complete approved foliage, prioritized safe streaming.
  * Artwork: oak V017, ash V020, linden V022, burgundy maple V021.
- * The art masters are immutable. The v003 LOD1/2 are separate, validated assets.
+ * The art masters are immutable. The v005 derivatives preserve ALL approved master geometry, plus native PNG/JPEG alpha.
  * 14 trunks over the 63x63-metre village: 4 in the plaza, 10 along the town and perimeter.
  */
 import { Entity } from 'playcanvas';
 
 const ORIGINALS = 'https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/94d2fe3262af163d9cd7277cc4e31e20acf3bcaa/';
-const REPO = 'https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/dd8dc0693a0d419373eb3f88db06366ab1df7ea2/';
+const REPO = 'https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/1801cf9ac2394ac80bbe3f2d97dc00c8fd49e57d/';
 const TYPES = Object.freeze({
  oak: { label: 'Roble', height: 9.1, master: 'assets/plaza_trees_v017/oak/oak_easytree_v017.glb' },
  ash: { label: 'Fresno', height: 9.7, master: 'assets/plaza_trees_v020/ash/ash_easytree_v020.glb' },
@@ -30,7 +30,7 @@ export const TREE_SITES = Object.freeze(RAW_SITES.map((item,index)=>Object.freez
 })));
 const assetPath = (species,lod) => lod===0
  ? ORIGINALS+TYPES[species].master
- : REPO+'assets/tree_webgl_v004/'+species+'/lod'+lod+'.glb';
+ : REPO+'assets/tree_webgl_v005/'+species+'/lod'+lod+'.glb';
 function boundsOf(entity){
  const stack=[entity];let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
  entity.syncHierarchy();
@@ -50,7 +50,7 @@ function boundsOf(entity){
 }
 export function mountVillageTrees(app, villageRoot, options={}){
  const safeMobile = globalThis.GenesisDevice?.safePreviews===true;
- const treeRoot=new Entity('Vegetación aprobada — 14 árboles · LOD 1/2');
+ const treeRoot=new Entity('Vegetación aprobada — 14 árboles · follaje íntegro PBR');
  villageRoot.addChild(treeRoot);
  const nodes=TREE_SITES.map(site=>{
   const anchor=new Entity('Árbol '+site.id+' · '+TYPES[site.species].label+' · '+site.region);
@@ -154,7 +154,7 @@ export function mountVillageTrees(app, villageRoot, options={}){
   }
   globalThis.__genesisTreeStatus=status();
  }
- // Fetch one visible baseline per approved species immediately, before navigation.
+ // Fetch one visible baseline with full-approved master leaves per species before navigation.
  for(const species of Object.keys(TYPES))request(species,2);
  update(0,0,true);
  return Object.freeze({

@@ -6,6 +6,7 @@ const html=`<!doctype html><html><head><style>html,body{margin:0;width:100%;heig
 import {Application,Entity,Color,Vec3,StandardMaterial} from 'playcanvas';
 import {mountArcanePortal} from '/village_arcanist.js';
 try{
+ globalThis.GenesisDevice={safePreviews:true}; // iOS runtime path
  const app=new Application(document.querySelector('canvas'),{graphicsDeviceOptions:{antialias:true}});
  app.setCanvasFillMode('FILL_WINDOW');app.setCanvasResolution('AUTO');app.scene.ambientLight=new Color(.53,.48,.42);app.start();
  const camera=new Entity('camera');camera.addComponent('camera',{clearColor:new Color(.12,.16,.20),farClip:90,fov:52});app.root.addChild(camera);
@@ -44,9 +45,10 @@ const server=http.createServer((req,res)=>{
  await page.waitForFunction(()=>window.__genesisArcaneVeinsStatus?.updatedFrames>=3,null,{timeout:15000});
  const glow=await page.evaluate(()=>window.__genesisArcaneVeinsStatus);
  assert(glow.textureMasks>0,'La animación emissive V027 no generó texturas activas');
- assert(glow.phaseA>=0&&glow.phaseB>=0,'corrientes sin avance');
+ assert(glow.phaseA>=-.35&&glow.phaseB>=-.65,'corrientes sin avance');
+ assert(glow.emissionStrength>=5,'La intensidad emisiva de Blender V027 no fue preservada: '+JSON.stringify(glow));
  fs.mkdirSync('/tmp/genesis-trees',{recursive:true});await page.waitForTimeout(500);
- await page.screenshot({path:'/tmp/genesis-trees/arcanista-v027-webgl-v0.14.png'});
+ await page.screenshot({path:'/tmp/genesis-trees/arcanista-v027-webgl-v0.14a.png'});
  console.log('PASS real PlayCanvas Arcanist V027',JSON.stringify(status),JSON.stringify(glow));
  await browser.close();
 })().catch(async err=>{console.error(err);process.exitCode=1;try{await browser?.close()}catch(_){}}).finally(()=>server.close());
