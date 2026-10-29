@@ -401,7 +401,7 @@
 .prepSkinStart.workspaceAction:disabled::before{opacity:.82}
 
 
-/* v0.11.014 · Visor 16:9 real, con lienzo aprobado centrado sin deformaciones.
+/* v0.11.015 · Visor 16:9 real, con lienzo aprobado centrado sin deformaciones.
    Las alas laterales usan el fondo original; las 39 piezas y el minijuego mantienen posiciones. */
 .modal.preparationModal.prepSkinModal{
   width:min(1820px,calc(100vw - 12px));
@@ -462,4 +462,44 @@
 .prepArtboard .prepSkinStart.workspaceAction:disabled{
   background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Deshabilitado.png')!important;
   color:#ad9981!important;filter:saturate(.63);
+}
+
+/* Fabricaciones 16:9: árbol de Familias → Subfamilias Materiales de la partida.
+   Se inserta dentro del PanelDatos original; los 39 marcos no se mueven. */
+.prepArtboard[data-active-tab="Fabricaciones"] .prepSkinDetails {
+  scrollbar-color:#aa7844 #1b130c;
+}
+.workspaceRecipeTree {
+  display:grid;gap:9px;max-height:245px;overflow-y:auto;scrollbar-width:thin;
+  margin:10px 0;padding:3px 3px 8px;
+}
+.workspaceRecipeFamily {
+  border:1px solid #795632;
+  background:linear-gradient(180deg,#362416d9,#1a120df0);
+  padding:8px;
+}
+.prepSkinDetails .workspaceRecipeFamily h4 {
+  margin:0 0 7px;text-align:left;color:#f2cc91;
+  font:600 15px/1.2 Georgia,serif;letter-spacing:.025em;
+}
+.prepArtboard .workspaceRecipeChoice {
+  display:block;width:100%;padding:9px 10px;margin:5px 0 0;
+  border:1px solid #6b4a2c;background:#130f0c;color:#d7c0a0;
+  font:normal 12px/1.35 Georgia,serif;text-align:left;cursor:pointer;
+  overflow-wrap:anywhere;
+}
+.prepArtboard .workspaceRecipeChoice:hover,
+.prepArtboard .workspaceRecipeChoice:focus-visible {
+  border-color:#d9a765;color:#fff0c4;outline:1px solid #d9a765;
+}
+.prepArtboard .workspaceRecipeChoice[aria-pressed="true"] {
+  border-color:#d9a765;
+  color:#ffe4ae;
+  background:linear-gradient(100deg,#65401f,#2c1b0f);
+  box-shadow:inset 3px 0 #edba71;
+}
+.workspaceRecipeSubhead {
+  color:#e2b87d!important;
+  font:600 11px/1.35 system-ui,sans-serif!important;
+  letter-spacing:.06em;margin-top:11px!important;
 }
