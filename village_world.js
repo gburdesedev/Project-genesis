@@ -1,5 +1,6 @@
 import {Entity,StandardMaterial,Texture,Color,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
-import {mountVillageTrees} from './village_trees.js';
+import {mountVillageTrees} from './village_trees.js?v=0.11.017';
+import {mountArcanePortal} from './village_arcanist.js?v=0.11.017';
 const ROOT='./assets/world/v0.11.004/';
 const MOBILE_TEXTURE_EDGE=1024;
 // Decode one full-resolution source at a time on touch devices, then keep only
@@ -44,12 +45,49 @@ function textMaterial(app,title,subtitle){
  const texture=new Texture(app.graphicsDevice,{name:title,mipmaps:true});texture.setSource(canvas);const m=material(title,[1,1,1]);m.diffuseMap=texture;m.emissiveMap=texture;m.emissive=new Color(.2,.2,.2);m.update();return m;
 }
 function sign(app,parent,title,subtitle,x,z,yaw,height=2.9,width=3.8){const root=new Entity(title+' cartel');parent.addChild(root);root.setPosition(x,0,z);root.setEulerAngles(0,yaw,0);const e=mesh(root,title,'plane',0,height,.30,width,1,.95,textMaterial(app,title,subtitle));e.setLocalEulerAngles(90,0,0);return root}
+function tintArcaneFacade(shell){
+ // Reuse the approved workshop PBR maps. Only the Arcanist façade receives a
+ // subdued mineral tint; every other workshop keeps its original materials.
+ const copies=new Map(),stack=[shell];
+ while(stack.length){
+  const node=stack.pop();
+  for(const child of node.children)stack.push(child);
+  for(const mi of node.render?.meshInstances||[]){
+   const source=mi.material;
+   if(!source?.clone)continue;
+   let m=copies.get(source);
+   if(!m){
+    m=source.clone();
+    if(m.diffuse)m.diffuse.set(m.diffuse.r*.76,m.diffuse.g*.81,m.diffuse.b*.94);
+    m.gloss=Math.min(m.gloss??.35,.34);
+    m.update();copies.set(source,m);
+   }
+   mi.material=m;
+  }
+ }
+}
+function arcaneSurround(app,building,cobble){
+ // The V027 door is 1.253 m wide and 2.32 m high in Blender's GLB export.
+ // Mineral masonry physically frames its sides and lintel without sealing it.
+ const frame=new Entity('Arcanista · jambas PBR y dintel ajustados a V027');
+ frame.setLocalPosition(-1.1,0,.22);building.addChild(frame);
+ const stone=pavedMaterial('Piedra mineral mate · portal arcanista',cobble,1.75,2.50,1.4);
+ stone.diffuse.set(.48,.49,.55);stone.bumpiness=.88;stone.gloss=.17;stone.update();
+ mesh(frame,'Jamba mineral izquierda','box',-.77,1.20,0,.16,2.40,.25,stone,true);
+ mesh(frame,'Jamba mineral derecha','box',.74,1.20,0,.16,2.40,.25,stone,true);
+ mesh(frame,'Dintel mineral superior','box',-.015,2.43,0,1.67,.18,.25,stone,true);
+ return frame;
+}
 export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{}}){
- const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.11.016');app.root.addChild(root);
+ const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.11.017');app.root.addChild(root);
  const mobile=globalThis.GenesisDevice?.safePreviews===true;
  const [cobble,traffic]=mobile
   ? [await maps(app,'cobble',true,onResourceLoaded),await maps(app,'traffic',true,onResourceLoaded)]
   : await Promise.all([maps(app,'cobble',false,onResourceLoaded),maps(app,'traffic',false,onResourceLoaded)]);
+ // Gentle opposing sky bounce prevents near-black backsides without flattening PBR.
+ const bounce=new Entity('Rebote celeste cálido · sin sombras');
+ bounce.addComponent('light',{type:'directional',color:new Color(.84,.79,.73),intensity:.24,castShadows:false});
+ bounce.setLocalEulerAngles(28,145,0);root.addChild(bounce);
  const b=plan.bounds;
  mesh(root,'Pavimento exterior adoquín','plane',7,-.024,17,63,1,63,pavedMaterial('Adoquín · exterior',cobble,63,63));
  mesh(root,'Plaza central','plane',plan.plaza.x,-.010,plan.plaza.z,plan.plaza.w,1,plan.plaza.d,pavedMaterial('Adoquín · plaza',cobble,plan.plaza.w,plan.plaza.d,2.4));
@@ -63,10 +101,18 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{}}
  const trim=material('Piedra de borde',[.35,.34,.29]);
  for(const x of [b.minX,b.maxX])mesh(root,'Límite de aldea','box',x,.12,17,.25,.24,63,trim);
  for(const z of [b.minZ,b.maxZ])mesh(root,'Límite de aldea','box',7,.12,z,63,.24,.25,trim);
- const proxies=new Map();
+ const proxies=new Map(),arcanePortals=[];
  for(const p of plan.workshops){
   const building=new Entity(p.profession+' · fachada cerrada');root.addChild(building);building.setLocalPosition(p.x,0,p.z);building.setLocalScale(plan.workshopScale,1,plan.workshopScale);building.setLocalEulerAngles(0,p.yaw,0);
-  for(const [source,pos]of [[shell,[0,0,0]],[roof,[0,3.45,-5.05]],[door,[-1.1,0,.12]]]){const clone=source.clone();clone.setLocalPosition(...pos);clone.setLocalEulerAngles(0,0,0);building.addChild(clone)}
+  const shellClone=shell.clone(),roofClone=roof.clone(),doorClone=door.clone();
+  for(const [clone,pos] of [[shellClone,[0,0,0]],[roofClone,[0,3.45,-5.05]],[doorClone,[-1.1,0,.12]]]){
+   clone.setLocalPosition(...pos);clone.setLocalEulerAngles(0,0,0);building.addChild(clone);
+  }
+  if(p.profession==='Arcanista'){
+   tintArcaneFacade(shellClone);
+   arcaneSurround(app,building,cobble);
+   arcanePortals.push(mountArcanePortal(app,building,doorClone));
+  }
   proxies.set(p.profession,building);
   sign(app,root,p.label,p.existing?'Taller de oficio':'Taller cerrado',p.x,p.z,p.yaw,2.9,3.2);
  }
@@ -84,5 +130,5 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{}}
  mesh(root,'Poste cartel plaza','box',plazaSign.x,.65,plazaSign.z,.14,1.3,.14,marker);
  const fixedObstacles=[{x:marketSign.x,z:marketSign.z,r:.2},{x:plazaSign.x,z:plazaSign.z,r:.18}];
  const trees=mountVillageTrees(app,root);
- return Object.freeze({root,plan,trees,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
+ return Object.freeze({root,plan,trees,arcanePortals,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
 }

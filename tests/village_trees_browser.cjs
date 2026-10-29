@@ -1,4 +1,4 @@
-// Standalone real PlayCanvas/WebGL screenshot of the approved 29-tree village layout.
+// Standalone real PlayCanvas/WebGL screenshot of the approved 14-tree village layout.
 const {chromium}=require('playwright');
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..'),engine=require.resolve('playcanvas/build/playcanvas.mjs');
@@ -40,9 +40,9 @@ const server=http.createServer((req,res)=>{
  catch(error){throw new Error('Trees not rendered: '+JSON.stringify(await page.evaluate(()=>window.__genesisTreeStatus))+' | '+errors.join(' | '))}
  fs.mkdirSync('/tmp/genesis-trees',{recursive:true});
  await page.waitForTimeout(700);
- await page.screenshot({path:'/tmp/genesis-trees/plaza-29-arboles-v0.11.016.png'});
+ await page.screenshot({path:'/tmp/genesis-trees/plaza-14-arboles-v0.11.017.png'});
  const status=await page.evaluate(()=>window.__genesisTreeStatus);
- assert.equal(status.planned,29);assert.equal(status.failedVariants,0,'Tree GLB load errors');
+ assert.equal(status.planned,14);assert.equal(status.failedVariants,0,'Tree GLB load errors');
  console.log('PASS real PlayCanvas tree screenshot',JSON.stringify(status));
  await browser.close();
 })().finally(()=>server.close()).catch(err=>{console.error(err);process.exitCode=1});

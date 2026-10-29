@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<script src="./village_plan.js?v=0.11.016"></script>
-<script src="./device_policy.js?v=0.11.016"></script>
+<script src="./village_plan.js?v=0.11.017"></script>
+<script src="./device_policy.js?v=0.11.017"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Project Genesis — Prototipo Jugable v0.11.016 · Powered by NGE Alpha</title>
-<link rel="stylesheet" href="./preparacion.css?v=0.11.016">
+<title>Project Genesis — Prototipo Jugable v0.11.017 · Powered by NGE Alpha</title>
+<link rel="stylesheet" href="./preparacion.css?v=0.11.017">
 
 <script type="importmap">
 {
@@ -188,8 +188,8 @@ html.modalOpen,body.modalOpen{overflow:hidden!important;overscroll-behavior:none
 <script>
 if(!window.GenesisDevice.safePreviews){const script=document.createElement('script');script.type='module';script.src='https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js';document.head.append(script)}
 </script>
-<meta name="genesis-build" content="playcanvas-v0.11.016-live-workshop-menus">
-<link rel="stylesheet" href="./responsive.css?v=0.11.016">
+<meta name="genesis-build" content="playcanvas-v0.11.017-live-workshop-menus">
+<link rel="stylesheet" href="./responsive.css?v=0.11.017">
 </head>
 <body>
 
@@ -295,13 +295,13 @@ window.__genesisAppError=function(event){
   <pc-material id="mercBootAccentAMat" name="Boot affinity accent A" diffuse="#b7c2ca" gloss="0.24"></pc-material>
   <pc-material id="mercBootAccentBMat" name="Boot affinity accent B" diffuse="#b7c2ca" gloss="0.24"></pc-material>
 
-  <pc-scene ambient-light="#60717d" exposure="1.32">
+  <pc-scene ambient-light="#887a6c" exposure="1.18">
     <pc-entity id="cameraRig" name="ThirdPersonCamera" position="0 3 10">
       <pc-camera clear-color="#53616b" fov="52" near-clip="0.08" far-clip="95"></pc-camera>
     </pc-entity>
 
-    <pc-entity id="worldSunEntity" name="Cold daylight" rotation="48 -35 0">
-      <pc-light id="worldSunLight" type="directional" color="#e2edf2" intensity="2.05" cast-shadows shadow-distance="42" shadow-resolution="2048"></pc-light>
+    <pc-entity id="worldSunEntity" name="Daylight warm-neutral" rotation="48 -35 0">
+      <pc-light id="worldSunLight" type="directional" color="#f3e3d0" intensity="1.48" cast-shadows shadow-distance="42" shadow-resolution="2048"></pc-light>
     </pc-entity>
     <pc-entity id="forgeCoreEntity" name="Forge core light" position="2.2875 1.18 -6.165">
       <pc-light id="forgeCoreLight" type="omni" color="#ff6422" intensity="2.85" range="7.2" cast-shadows shadow-resolution="1024"></pc-light>
@@ -310,16 +310,16 @@ window.__genesisAppError=function(event){
       <pc-light id="forgeBounceLight" type="omni" color="#ffb15f" intensity="0.72" range="8"></pc-light>
     </pc-entity>
     <pc-entity id="doorCoolFillEntity" name="Door cool fill" position="0 2.3 0.9">
-      <pc-light id="doorCoolFillLight" type="omni" color="#bdd8e5" intensity="1.08" range="8.8"></pc-light>
+      <pc-light id="doorCoolFillLight" type="omni" color="#bdd8e5" intensity="0.78" range="8.8"></pc-light>
     </pc-entity>
     <pc-entity id="workshopFillAEntity" name="Workshop cold fill A" position="-1.8 2.35 -3">
-      <pc-light id="workshopFillALight" type="omni" color="#aac4d1" intensity="0.78" range="7.8"></pc-light>
+      <pc-light id="workshopFillALight" type="omni" color="#aac4d1" intensity="0.64" range="7.8"></pc-light>
     </pc-entity>
     <pc-entity id="workshopFillBEntity" name="Workshop cold fill B" position="1.5 2.45 -5.4375">
-      <pc-light id="workshopFillBLight" type="omni" color="#93b2c2" intensity="0.64" range="7.0"></pc-light>
+      <pc-light id="workshopFillBLight" type="omni" color="#93b2c2" intensity="0.52" range="7.0"></pc-light>
     </pc-entity>
     <pc-entity id="tannerDoorFillEntity" name="Tanner doorway fill" position="14 2.35 0.825">
-      <pc-light id="tannerDoorFillLight" type="omni" color="#c8d9d4" intensity="0.82" range="8.2"></pc-light>
+      <pc-light id="tannerDoorFillLight" type="omni" color="#c8d9d4" intensity="0.70" range="8.2"></pc-light>
     </pc-entity>
     <pc-entity id="tannerWorkLightEntity" name="Tanner work light" position="14 2.45 -4.275">
       <pc-light id="tannerWorkLight" type="omni" color="#d8b781" intensity="0.54" range="8.4"></pc-light>
@@ -330,7 +330,7 @@ window.__genesisAppError=function(event){
 
     <!-- v0.8.5 readability: camera-side character fill + repair-state interior light. -->
     <pc-entity id="playerFillEntity" name="Player readability fill" position="0 2.6 5.2">
-      <pc-light id="playerFillLight" type="omni" color="#d7e8f0" intensity="1.10" range="5.6"></pc-light>
+      <pc-light id="playerFillLight" type="omni" color="#e2dacd" intensity="0.44" range="5.6"></pc-light>
     </pc-entity>
 
     <!-- Shared façade templates; mesh/texture resources are reused by the village. -->
@@ -733,7 +733,7 @@ window.__genesisAppError=function(event){
 </div>
 
 <div id="hud">
- <div id="brand">PROJECT GENESIS · v0.11.016</div>
+ <div id="brand">PROJECT GENESIS · v0.11.017</div>
  <div id="tech">PLAYCANVAS 2.22.1 · PROTOTIPO · v0.11</div>
  <div id="buttonsTop"><button id="cameraSettingsBtn" class="uiBtn" type="button" aria-label="Configurar cámara">⚙ CÁMARA</button></div>
  <section id="quest">
@@ -760,11 +760,11 @@ window.__genesisAppError=function(event){
 
 <script src="./fps_counter.js?v=20261025-1"></script>
 <script src="./camera_mouse.js?v=20261025-1"></script>
-<script src="./preparacion_control.js?v=0.11.016"></script>
+<script src="./preparacion_control.js?v=0.11.017"></script>
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
 import { Vec3 } from 'playcanvas';
-import { mountVillage } from './village_world.js?v=0.11.016';
+import { mountVillage } from './village_world.js?v=0.11.017';
 
 /* Preparación v0.11: adaptador local sin modificar el motor procedural ni las
    resoluciones de Fabricación/Cierre. Conserva ambas rutas del tutorial. */
@@ -996,8 +996,8 @@ const C=id=>document.getElementById(id)?.component||null;
 let anvilEntity=E('anvilModel'),bellowsEntity=E('bellowsModel'),benchEntity=E('benchModel'),chestEntity=E('chestModel'),doorLeafEntity=E('doorLeafModel');
 let tannerTableEntity=E('tannerTableModel'),tannerRackEntity=E('tannerRackModel'),tannerTubEntity=E('tannerTubModel'),tannerChestEntity=E('tannerChestModel'),tannerDoorLeafEntity=E('tannerDoorLeafModel');
 let forgeCoreComp=C('forgeCoreLight'),forgeBounceComp=C('forgeBounceLight'),playerFillComp=C('playerFillLight'),playerFillEntity=E('playerFillEntity'),tannerWorkLight=C('tannerWorkLight');
-const KNOWN_LIGHTING_PROFILE=Object.freeze({worldSunLight:{color:'#e2edf2',intensity:2.05},doorCoolFillLight:{color:'#bdd8e5',intensity:1.08,range:8.8},workshopFillALight:{color:'#aac4d1',intensity:.78,range:7.8},workshopFillBLight:{color:'#93b2c2',intensity:.64,range:7},tannerDoorFillLight:{color:'#c8d9d4',intensity:.82,range:8.2},tannerBackFill:{color:'#b98658',intensity:.38,range:5.2},playerFillLight:{color:'#d7e8f0',intensity:1.10,range:5.6}});
-function restoreKnownLightingProfile(){const sceneEl=document.querySelector('pc-scene');if(sceneEl){sceneEl.setAttribute('ambient-light','#60717d');sceneEl.setAttribute('exposure','1.32')}for(const[id,p]of Object.entries(KNOWN_LIGHTING_PROFILE)){const c=C(id),ent=document.getElementById(id)?.entity;if(ent)ent.enabled=true;if(!c)continue;c.enabled=true;if(p.color){const[r,g,b]=hexRgb(p.color);c.color?.set?.(r,g,b)}c.intensity=p.intensity;if(p.range!=null)c.range=p.range;c.update?.()}if(playerFillEntity)playerFillEntity.enabled=true;if(tannerWorkLight){tannerWorkLight.enabled=true;tannerWorkLight.intensity=tannerOperational?1.18:.72;tannerWorkLight.range=8.4;tannerWorkLight.update?.()}}
+const KNOWN_LIGHTING_PROFILE=Object.freeze({worldSunLight:{color:'#f3e3d0',intensity:1.48},doorCoolFillLight:{color:'#bdd8e5',intensity:.78,range:8.8},workshopFillALight:{color:'#aac4d1',intensity:.64,range:7.8},workshopFillBLight:{color:'#93b2c2',intensity:.52,range:7},tannerDoorFillLight:{color:'#c8d9d4',intensity:.70,range:8.2},tannerBackFill:{color:'#b98658',intensity:.38,range:5.2},playerFillLight:{color:'#e2dacd',intensity:.44,range:5.6}});
+function restoreKnownLightingProfile(){const sceneEl=document.querySelector('pc-scene');if(sceneEl){sceneEl.setAttribute('ambient-light','#887a6c');sceneEl.setAttribute('exposure','1.18')}for(const[id,p]of Object.entries(KNOWN_LIGHTING_PROFILE)){const c=C(id),ent=document.getElementById(id)?.entity;if(ent)ent.enabled=true;if(!c)continue;c.enabled=true;if(p.color){const[r,g,b]=hexRgb(p.color);c.color?.set?.(r,g,b)}c.intensity=p.intensity;if(p.range!=null)c.range=p.range;c.update?.()}if(playerFillEntity)playerFillEntity.enabled=true;if(tannerWorkLight){tannerWorkLight.enabled=true;tannerWorkLight.intensity=tannerOperational?1.18:.72;tannerWorkLight.range=8.4;tannerWorkLight.update?.()}}
 
 let chestLid=null,chestLidBase={x:0,y:0,z:0},chestLidAngle=0,chestLidTarget=0;
 const chestRoot=document.getElementById('chestModel')?.contentEntity;chestLid=chestRoot?.findByName?.('Lid')||null;if(chestLid){const e=chestLid.getLocalEulerAngles();chestLidBase={x:e.x,y:e.y,z:e.z}}
@@ -1466,7 +1466,7 @@ function frame(now){requestAnimationFrame(frame);village.trees?.update(px,pz);co
  if(forgeHot){const flick=.88+Math.sin(now*.011)*.075+Math.sin(now*.027)*.045,boost=1+forgeImpulse*.55;if(forgeCoreComp)forgeCoreComp.intensity=3.45*flick*boost;if(forgeBounceComp)forgeBounceComp.intensity=.96*(.93+Math.sin(now*.008)*.06)*(1+forgeImpulse*.42)}
  if(chestLid){chestLidAngle=lerp(chestLidAngle,chestLidTarget,1-Math.exp(-dt*6.2));chestLid.setLocalEulerAngles(chestLidBase.x+chestLidAngle,chestLidBase.y,chestLidBase.z)}
  if(doorLeafEntity){doorAngle=lerp(doorAngle,doorTarget,1-Math.exp(-dt*5));doorLeafEntity.setEulerAngles(0,doorAngle,0)}if(tannerDoorLeafEntity){tannerDoorAngle=lerp(tannerDoorAngle,tannerDoorTarget,1-Math.exp(-dt*5));tannerDoorLeafEntity.setEulerAngles(0,tannerDoorAngle,0)}
- const canMove=gameStarted&&modalLayer.style.display!=='grid'&&intro.style.display!=='grid';if(canMove){let sx=moveX,sy=moveY;if(keys.has('KeyA')||keys.has('ArrowLeft'))sx-=1;if(keys.has('KeyD')||keys.has('ArrowRight'))sx+=1;if(keys.has('KeyW')||keys.has('ArrowUp'))sy+=1;if(keys.has('KeyS')||keys.has('ArrowDown'))sy-=1;let m=Math.hypot(sx,sy);if(m>1){sx/=m;sy/=m;m=1}const yaw=rad(camYaw),fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw),vx=fx*sy+rx*sx,vz=fz*sy+rz*sx;if(m>.03){const sprint=keys.has('ShiftLeft')||keys.has('ShiftRight'),speed=GenesisVillagePlan.movementSpeed(keys),nx=px+vx*speed*dt,nz=pz+vz*speed*dt;if(!wallBlocked(nx,pz))px=nx;if(!wallBlocked(px,nz))pz=nz;const lookYaw=deg(Math.atan2(vx,vz));player.setEulerAngles(0,lookYaw,0);setWalking(true,sprint);if(now-lastPlayerStep>(sprint?240:390)){footstepSound(!!workshopAt(px,pz),.026);lastPlayerStep=now}}else setWalking(false);player.setPosition(px,0,pz);if(playerFillEntity){const fy=rad(camYaw);playerFillEntity.setPosition(px-Math.sin(fy)*1.15,2.55,pz-Math.cos(fy)*1.15)}const w=workshopAt(px,pz);if(playerFillComp)playerFillComp.intensity=w?(w.profession==='Herrero'?.70:.84):1.08;if(inputProfile==='notebook'){const turnSpeed=92*(cameraSensitivity/.20),pitchSpeed=62*(cameraSensitivity/.20),zoomSpeed=2.45*(cameraZoomSensitivity/.004);if(keys.has('KeyJ'))camYaw=(camYaw+turnSpeed*dt)%360;if(keys.has('KeyL'))camYaw=(camYaw-turnSpeed*dt)%360;const pitchDir=(cameraInvertY?-1:1);if(keys.has('KeyI'))camPitch=clamp(camPitch-pitchSpeed*dt*pitchDir,8,54);if(keys.has('KeyK'))camPitch=clamp(camPitch+pitchSpeed*dt*pitchDir,8,54);if(keys.has('KeyU'))camDist=clamp(camDist-zoomSpeed*dt,2.8,6.3);if(keys.has('KeyO'))camDist=clamp(camDist+zoomSpeed*dt,2.8,6.3)}}else setWalking(false);
+ const canMove=gameStarted&&modalLayer.style.display!=='grid'&&intro.style.display!=='grid';if(canMove){let sx=moveX,sy=moveY;if(keys.has('KeyA')||keys.has('ArrowLeft'))sx-=1;if(keys.has('KeyD')||keys.has('ArrowRight'))sx+=1;if(keys.has('KeyW')||keys.has('ArrowUp'))sy+=1;if(keys.has('KeyS')||keys.has('ArrowDown'))sy-=1;let m=Math.hypot(sx,sy);if(m>1){sx/=m;sy/=m;m=1}const yaw=rad(camYaw),fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw),vx=fx*sy+rx*sx,vz=fz*sy+rz*sx;if(m>.03){const sprint=keys.has('ShiftLeft')||keys.has('ShiftRight'),speed=GenesisVillagePlan.movementSpeed(keys),nx=px+vx*speed*dt,nz=pz+vz*speed*dt;if(!wallBlocked(nx,pz))px=nx;if(!wallBlocked(px,nz))pz=nz;const lookYaw=deg(Math.atan2(vx,vz));player.setEulerAngles(0,lookYaw,0);setWalking(true,sprint);if(now-lastPlayerStep>(sprint?240:390)){footstepSound(!!workshopAt(px,pz),.026);lastPlayerStep=now}}else setWalking(false);player.setPosition(px,0,pz);if(playerFillEntity)playerFillEntity.setPosition(px,3.25,pz);const w=workshopAt(px,pz);if(playerFillComp)playerFillComp.intensity=w?(w.profession==='Herrero'?.46:.52):.44;if(inputProfile==='notebook'){const turnSpeed=92*(cameraSensitivity/.20),pitchSpeed=62*(cameraSensitivity/.20),zoomSpeed=2.45*(cameraZoomSensitivity/.004);if(keys.has('KeyJ'))camYaw=(camYaw+turnSpeed*dt)%360;if(keys.has('KeyL'))camYaw=(camYaw-turnSpeed*dt)%360;const pitchDir=(cameraInvertY?-1:1);if(keys.has('KeyI'))camPitch=clamp(camPitch-pitchSpeed*dt*pitchDir,8,54);if(keys.has('KeyK'))camPitch=clamp(camPitch+pitchSpeed*dt*pitchDir,8,54);if(keys.has('KeyU'))camDist=clamp(camDist-zoomSpeed*dt,2.8,6.3);if(keys.has('KeyO'))camDist=clamp(camDist+zoomSpeed*dt,2.8,6.3)}}else setWalking(false);
  const w=workshopAt(px,pz);updateMentorFollow(dt,now,w);updateMercenaryDeparture(dt,now);const inside=!!w,focusY=inside?1.44:1.32;let interiorLimit=3.0;if(inside){if(Math.abs(w.localX)>4.0)interiorLimit=Math.min(interiorLimit,2.32);if(w.localZ<-8.35)interiorLimit=Math.min(interiorLimit,2.24);if(w.localZ>-1.15)interiorLimit=Math.min(interiorLimit,2.50)}const targetDist=inside?Math.min(camDist,interiorLimit):camDist;if(targetDist<cameraSolvedDist)cameraSolvedDist=targetDist;else cameraSolvedDist=lerp(cameraSolvedDist,targetDist,1-Math.exp(-dt*4.2));const effectivePitch=inside?Math.min(camPitch,28):camPitch;tmpTarget.set(px,focusY,pz);const pitch=rad(effectivePitch),yaw=rad(camYaw),h=Math.cos(pitch)*cameraSolvedDist,desiredX=px+Math.sin(yaw)*h;let desiredY=focusY+Math.sin(pitch)*cameraSolvedDist;if(inside)desiredY=Math.min(desiredY,2.48);const desiredZ=pz+Math.cos(yaw)*h;const cameraBlockedSafe=(x,z)=>{const r=inside?.30:.22;return cameraBlocked(x,z)||cameraBlocked(x+r,z)||cameraBlocked(x-r,z)||cameraBlocked(x,z+r)||cameraBlocked(x,z-r)},safeT=inside?.25:.16;let lastGood=[lerp(tmpTarget.x,desiredX,safeT),lerp(tmpTarget.y,desiredY,safeT),lerp(tmpTarget.z,desiredZ,safeT)];for(let t=safeT;t<=1.001;t+=.04){const x=lerp(tmpTarget.x,desiredX,t),y=lerp(tmpTarget.y,desiredY,t),z=lerp(tmpTarget.z,desiredZ,t);if(cameraBlockedSafe(x,z))break;lastGood=[x,y,z]}tmpCam.set(lastGood[0],lastGood[1],lastGood[2]);camera.setPosition(tmpCam);camera.lookAt(tmpTarget);
  if(gameStarted&&activeRoute&&mentorFollowState!=='walking'){const mentor=activeRoute.mentor(),mp=mentor.getPosition(),dist=Math.hypot(px-mp.x,pz-mp.z),desired=dist<7?deg(Math.atan2(px-mp.x,pz-mp.z)):-21,delta=((desired-mentorYaw+540)%360)-180;mentorYaw+=delta*Math.min(1,dt*4.1);mentor.setEulerAngles(0,mentorYaw,0);if(activeRoute.mentorGesture&&now>mentorGestureAt&&!mentorGestureReturn){activeRoute.mentorAnims.forEach(a=>a.transition(activeRoute.mentorGesture,.28));mentorGestureReturn=now+2200}if(mentorGestureReturn&&now>mentorGestureReturn){activeRoute.mentorAnims.forEach(a=>activeRoute.mentorIdle&&a.transition(activeRoute.mentorIdle,.32));mentorGestureReturn=0;mentorGestureAt=now+7800}}
  updateInteractionUI();updateCameraGuide();const camComp=document.querySelector('#cameraRig pc-camera')?.component;if(gameStarted&&activeRoute&&camComp){const p=activeRoute.mentor().getPosition(),screen=new Vec3();camComp.worldToScreen(new Vec3(p.x,2.25,p.z),screen);if(screen.z>0&&screen.x>=0&&screen.x<=innerWidth&&screen.y>=0&&screen.y<=innerHeight){npcTag.style.display='block';npcTag.style.left=screen.x+'px';npcTag.style.top=screen.y+'px'}else npcTag.style.display='none'}else npcTag.style.display='none';

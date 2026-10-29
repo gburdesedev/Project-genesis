@@ -1,7 +1,7 @@
-/* Project Genesis v0.11.016 — approved plaza trees, progressively streamed.
+/* Project Genesis v0.11.017 — approved plaza trees, progressively streamed.
  * Artwork: oak V017, ash V020, linden V022, burgundy maple V021.
  * The art masters are immutable. The v003 LOD1/2 are separate, validated assets.
- * 29 trunks over the 63x63-metre village: 4 in the plaza, 25 along the town and perimeter.
+ * 14 trunks over the 63x63-metre village: 4 in the plaza, 10 along the town and perimeter.
  */
 import { Entity } from 'playcanvas';
 
@@ -15,19 +15,12 @@ const TYPES = Object.freeze({
 const RAW_SITES = [
  ['oak',2.2,11.7,'plaza'],['maple',11.8,11.7,'plaza'],
  ['linden',2.2,20.3,'plaza'],['ash',11.8,20.3,'plaza'],
- ['oak',-19,-8,'sur'],['linden',-12,-9,'sur'],
- ['ash',25,-8,'sur'],['maple',34,-8,'sur'],
+ // Ten perimeter and workshop-edge trees keep the town walkable and sightlines open.
+ ['oak',-19,-8,'sur'],['ash',25,-8,'sur'],
  ['ash',-21,1,'oeste'],['oak',-21,26,'oeste'],
- ['maple',-21,44,'norte'],['linden',-7,6,'sur'],
- ['ash',35,3,'este'],['oak',35,27,'este'],
- ['linden',35,44,'norte'],['maple',22,6,'sur'],
  ['ash',-12,45,'norte'],['maple',-3,45,'norte'],
- ['oak',17,45,'norte'],['linden',29,45,'norte'],
- ['linden',-8,23,'oeste'],['oak',-15,28,'oeste'],
- ['ash',-1,24,'plaza exterior'],['maple',19,24,'este'],
- ['ash',35,36,'este'],['maple',-21,9,'oeste'],
- ['oak',22,44,'norte'],['linden',17,12,'este'],
- ['ash',-7,12,'oeste']
+ ['linden',35,44,'norte'],['maple',22,6,'sur'],
+ ['linden',-8,23,'oeste'],['maple',19,24,'este']
 ];
 export const TREE_SITES = Object.freeze(RAW_SITES.map((item,index)=>Object.freeze({
  id: index+1, species: item[0], x:item[1], z:item[2], region:item[3],
@@ -56,7 +49,7 @@ function boundsOf(entity){
 }
 export function mountVillageTrees(app, villageRoot, options={}){
  const safeMobile = globalThis.GenesisDevice?.safePreviews===true;
- const treeRoot=new Entity('Vegetación aprobada — 29 árboles · LOD 0/1/2');
+ const treeRoot=new Entity('Vegetación aprobada — 14 árboles · LOD 0/1/2');
  villageRoot.addChild(treeRoot);
  const nodes=TREE_SITES.map(site=>{
   const anchor=new Entity('Árbol '+site.id+' · '+TYPES[site.species].label+' · '+site.region);

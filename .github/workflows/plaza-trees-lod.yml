@@ -1,13 +1,15 @@
-name: Plaza trees LOD + loading counter
+name: Village trees 14 + warm light + Arcanist V027
 on:
   push:
-    branches: ['feature/plaza-trees-lod-loading-v011016']
+    branches: ['feature/village-trees-light-arcanist-v011017']
     paths:
       - village_trees.js
       - village_world.js
+      - village_arcanist.js
       - index.html
       - tests/village_trees.cjs
       - tests/village_trees_browser.cjs
+      - tests/village_arcanist_browser.cjs
       - .github/workflows/plaza-trees-lod.yml
   workflow_dispatch:
 permissions:
@@ -28,12 +30,15 @@ jobs:
         run: |
           node --check village_trees.js
           node --check village_world.js
+          node --check village_arcanist.js
           node tests/village_plan.cjs
           node tests/village_trees.cjs
       - name: Install test runner
         run: npm install --prefix /tmp/genesis-tree-test playwright@1.56.1 playcanvas@2.22.1
       - name: Real WebGL scene with tree GLBs
         run: NODE_PATH=/tmp/genesis-tree-test/node_modules node tests/village_trees_browser.cjs
+      - name: Real WebGL Arcanist V027 GLB
+        run: NODE_PATH=/tmp/genesis-tree-test/node_modules node tests/village_arcanist_browser.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
