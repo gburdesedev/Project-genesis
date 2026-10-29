@@ -7,6 +7,7 @@ on:
       - 'village_world.js'
       - 'village_trees.js'
       - 'tests/village_arcanist_browser.cjs'
+      - 'tests/village_trees_browser.cjs'
       - 'index.html'
       - 'tests/v014_arch_browser.cjs'
       - '.github/workflows/v014-arcane-preview.yml'
