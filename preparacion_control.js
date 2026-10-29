@@ -541,17 +541,52 @@
         run=()=>{if(isCraftMaterial(ctx,material))renderWorkspace('Fabricaciones');else renderMenu()};
       }
     } else if(tab==='Fabricaciones') {
-      const needs=shortages(ctx.formula,ctx.inventory);
-      const canCraft=ctx.canCraftNow?.() === true;
-      enabled=ready(ctx.formula,ctx.inventory)&&canCraft;
-      details='<p class="prepSkinKicker">RECETA DISPONIBLE EN LA PARTIDA</p><h3>'+escape(ctx.recipeName)+'</h3>' +
-        '<p class="prepSkinIntro">Se utilizará la fórmula fijada en esta sesión. Los materiales se descontarán al confirmar.</p>' +
-        '<div class="workspaceIngredients">'+needs.map(r=>'<div class="workspaceMetric '+(r.missing?'short':'met')+'"><span>'+escape(r.material)+'</span><b>'+r.available+' / '+r.needed+'</b></div>').join('')+'</div>' +
-        '<p class="workspaceCraftState">'+(!canCraft?'La fabricación se habilita al alcanzar su etapa del tutorial.':enabled?'Materiales preparados: fabricación disponible.':'Faltan materiales. Prepará los lingotes necesarios.')+'</p>' +
-        '<button type="button" class="prepSkinCraft secondary" id="workspaceGoPrep">Ver Preparación</button>' +
-        '<p class="workspaceFootnote">La Preparación controla la temperatura. El cierre de Fabricación resuelve rareza, canales y nombre mediante el motor actual.</p>';
-      viewer='<div class="workspaceHero workspaceRecipeHero">'+(ctx.recipeAsset?ctx.recipeAsset():'')+'<p>'+escape(ctx.recipeName)+'</p></div>';
-      action='Confirmar fabricación';run=craft;
+      // El repertorio es el conocimiento YA generado del personaje: el menú jamás llama a generateSession.
+      const catalog = typeof ctx.getRecipeCatalog === 'function' ? ctx.getRecipeCatalog() : [];
+      const hasCatalog = Array.isArray(catalog) && catalog.length > 0;
+      const recipes = hasCatalog ? catalog.filter(entry => entry && entry.id && entry.family && entry.subfamily && entry.formula) : [];
+      const availableIds = new Set(recipes.map(entry => String(entry.id)));
+      if (!availableIds.has(String(ctx.selectedRecipeId))) ctx.selectedRecipeId =
+        recipes.find(entry => String(entry.id) === String(ctx.activeRecipeId))?.id || recipes[0]?.id || null;
+      const selected = recipes.find(entry => String(entry.id) === String(ctx.selectedRecipeId)) || null;
+      const selectedFormula = selected ? selected.formula : ctx.formula;
+      const selectedName = selected ? selected.subfamily : ctx.recipeName;
+      const selectedId = selected?.id || null;
+      const needs = shortages(selectedFormula, ctx.inventory);
+      const canCraft = selected
+        ? (typeof ctx.canCraftRecipe === 'function' ? ctx.canCraftRecipe(selectedId) === true : false)
+        : (ctx.canCraftNow?.() === true && !hasCatalog);
+      enabled = !!selectedFormula && ready(selectedFormula, ctx.inventory) && canCraft;
+      if (hasCatalog) {
+        const families = [...new Set(recipes.map(entry => entry.family))];
+        details = '<p class="prepSkinKicker">CONOCIMIENTO DEL PERSONAJE</p>' +
+          '<h3>Recetas del herrero</h3>' +
+          '<div class="workspaceRecipeTree" role="group" aria-label="Familias y subfamilias conocidas">' +
+          families.map(family => {
+            const group = recipes.filter(entry => entry.family === family);
+            return '<section class="workspaceRecipeFamily"><h4>' + escape(family) + '</h4>' +
+              group.map(entry => '<button type="button" class="workspaceRecipeChoice" data-recipe-id="' + escape(entry.id) +
+                '" aria-pressed="' + (String(entry.id) === String(selectedId)) + '">' + escape(entry.subfamily) + '</button>').join('') +
+              '</section>';
+          }).join('') + '</div>' +
+          '<p class="workspaceRecipeSubhead">MATERIALES DE LA RECETA SELECCIONADA</p>';
+      } else {
+        details = '<p class="prepSkinKicker">RECETA DE LA PARTIDA</p><h3>' + escape(selectedName || 'Sin receta') + '</h3>' +
+          '<p class="workspaceFootnote">Esta vista sólo consulta la receta guardada.</p>';
+      }
+      details += '<div class="workspaceIngredients">' +
+        (needs.length ? needs.map(row => '<div class="workspaceMetric ' + (row.missing ? 'short' : 'met') + '">' +
+          '<span>' + escape(row.material) + '</span><b>' + row.available + ' / ' + row.needed + '</b></div>').join('')
+          : '<p class="workspaceFootnote">Todavía no hay una fórmula disponible.</p>') + '</div>' +
+        '<p class="workspaceCraftState">' +
+          (!canCraft ? 'Receta conocida. Su fabricación se habilita en la etapa correspondiente del recorrido.'
+          : enabled ? 'Materiales disponibles. Podés fabricar esta receta.'
+          : 'Faltan materiales preparados para esta receta.') + '</p>' +
+        '<button type="button" class="prepSkinCraft secondary" id="workspaceGoPrep">Ver Preparación</button>';
+      viewer = '<div class="workspaceHero workspaceRecipeHero">' +
+        (ctx.recipeAsset ? ctx.recipeAsset(selectedId) : '') + '<p>' + escape(selectedName || 'Seleccioná una receta') + '</p></div>';
+      action = 'Confirmar fabricación';
+      run = craft;
     } else if(tab==='Comparacion') {
       ctx.compareA=Math.min(Math.max(0,ctx.compareA||0),Math.max(0,items.length-1));
       ctx.compareB=Math.min(Math.max(0,ctx.compareB??1),Math.max(0,items.length-1));
@@ -600,6 +635,15 @@
       ctx.selectedMaterial=e.dataset.stockName;ctx.viewItem=false;ctx.inventoryCategory='materials';
       if(isCraftMaterial(ctx,ctx.selectedMaterial))renderWorkspace('Fabricaciones');
       else renderWorkspace('Inventario');
+    });
+    board.querySelectorAll('[data-recipe-id]').forEach(button => {
+      button.onclick = () => {
+        const catalog = typeof ctx.getRecipeCatalog === 'function' ? ctx.getRecipeCatalog() : [];
+        const chosen = catalog.find(entry => String(entry.id) === button.dataset.recipeId);
+        if (!chosen) return;
+        ctx.selectedRecipeId = chosen.id;
+        renderWorkspace('Fabricaciones');
+      };
     });
     board.querySelectorAll('[data-inventory-category]').forEach(e=>e.onclick=()=>{ctx.inventoryCategory=e.dataset.inventoryCategory;ctx.viewItem=ctx.inventoryCategory==='creations';renderWorkspace('Inventario')});
     board.querySelectorAll('[data-material]').forEach(e=>{if(e.tagName==='BUTTON')e.onclick=()=>{ctx.selectedMaterial=e.dataset.material;renderWorkspace(isCraftMaterial(ctx,ctx.selectedMaterial)?'Fabricaciones':'Inventario')}});
@@ -680,7 +724,20 @@
 
   function craft() {
     const ctx = session;
-    if (!ctx || !ready(ctx.formula, ctx.inventory) || (typeof ctx.canCraftNow === 'function' && !ctx.canCraftNow())) return;
+    if (!ctx) return;
+    const catalog = typeof ctx.getRecipeCatalog === 'function' ? ctx.getRecipeCatalog() : [];
+    if (Array.isArray(catalog) && catalog.length) {
+      const selected = catalog.find(entry => String(entry.id) === String(ctx.selectedRecipeId));
+      if (!selected || !ready(selected.formula, ctx.inventory) ||
+          typeof ctx.canCraftRecipe !== 'function' || ctx.canCraftRecipe(selected.id) !== true ||
+          typeof ctx.onCraftRecipe !== 'function') return;
+      halt();
+      session = null;
+      document.removeEventListener('keydown', onKeyDown, true);
+      ctx.onCraftRecipe(selected.id);
+      return;
+    }
+    if (!ready(ctx.formula, ctx.inventory) || (typeof ctx.canCraftNow === 'function' && !ctx.canCraftNow())) return;
     halt();
     session = null;
     document.removeEventListener('keydown', onKeyDown, true);
