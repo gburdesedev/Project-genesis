@@ -61,7 +61,7 @@ const server=http.createServer((req,res)=>{
  });
  console.log('TREE_MATERIAL_AUDIT',JSON.stringify(matAudit));
  const barks=matAudit.filter(m=>/bark/i.test(m.name||''));
- const leaves=matAudit.filter(m=>/leaf|foliage/i.test(m.name||''));
+ const leaves=matAudit.filter(m=>/leaf|leaves|foliage/i.test(m.name||''));
  assert(barks.length>=4&&leaves.length>=4,'No se diferenciaron corteza y hojas');
  assert(barks.every(m=>!m.shaderWind&&m.color?.[1]<.8),'La corteza sigue sin tinte marrón o tiene viento');
  assert(leaves.every(m=>m.shaderWind),'El follaje no recibió viento GPU');
