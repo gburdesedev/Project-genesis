@@ -86,7 +86,7 @@ function stripOversizedWorkshopArch(shell){
  while(stack.length){
   const node=stack.pop();
   for(const child of node.children)stack.push(child);
-  if(/^archstone_\\d+$/.test(node.name||'')||node.name==='fac_header')node.enabled=false;
+  if(/^archstone_\d+$/.test(node.name||'')||node.name==='fac_header')node.enabled=false;
  }
 }
 function arcaneSurround(app,building,cobble,shell){
