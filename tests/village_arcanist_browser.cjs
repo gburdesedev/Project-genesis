@@ -9,11 +9,11 @@ try{
  const app=new Application(document.querySelector('canvas'),{graphicsDeviceOptions:{antialias:true}});
  app.setCanvasFillMode('FILL_WINDOW');app.setCanvasResolution('AUTO');app.scene.ambientLight=new Color(.53,.48,.42);app.start();
  const camera=new Entity('camera');camera.addComponent('camera',{clearColor:new Color(.12,.16,.20),farClip:90,fov:52});app.root.addChild(camera);
- camera.setPosition(-1.1,2,5);camera.lookAt(new Vec3(-1.1,1.18,0));
+ camera.setPosition(0,2,5);camera.lookAt(new Vec3(0,1.18,0));
  const sun=new Entity('sun');sun.addComponent('light',{type:'directional',color:new Color(.95,.88,.81),intensity:1.48,castShadows:true});app.root.addChild(sun);sun.setEulerAngles(48,-35,0);
- const floor=new Entity('floor');const m=new StandardMaterial();m.diffuse=new Color(.31,.30,.28);m.update();floor.addComponent('render',{type:'plane',material:m});floor.setLocalScale(16,1,16);floor.setPosition(-1.1,-.05,0);app.root.addChild(floor);
+ const floor=new Entity('floor');const m=new StandardMaterial();m.diffuse=new Color(.31,.30,.28);m.update();floor.addComponent('render',{type:'plane',material:m});floor.setLocalScale(16,1,16);floor.setPosition(0,-.05,0);app.root.addChild(floor);
  const building=new Entity('arcanista');app.root.addChild(building);
- const fallback=new Entity('placeholder');fallback.addComponent('render',{type:'box',material:m});fallback.setLocalScale(1.24,2.32,.2);fallback.setLocalPosition(-1.1,1.16,.1);building.addChild(fallback);
+ const fallback=new Entity('placeholder');fallback.addComponent('render',{type:'box',material:m});fallback.setLocalScale(1.24,2.32,.2);fallback.setLocalPosition(0,1.16,.1);building.addChild(fallback);
  const portal=mountArcanePortal(app,building,fallback);window.__arcana={portal,fallback,app};window.ready=true;
 }catch(e){window.failure=e.stack||String(e)}
 </script></body></html>`;
@@ -41,8 +41,12 @@ const server=http.createServer((req,res)=>{
  assert.equal(status.status.phase,'ready',JSON.stringify(status)+' | '+errors.join(' | '));
  assert.equal(status.placeholderEnabled,false,'old door not hidden');
  assert(status.renderers>0,'V027 no render components');
+ await page.waitForFunction(()=>window.__genesisArcaneVeinsStatus?.updatedFrames>=3,null,{timeout:15000});
+ const glow=await page.evaluate(()=>window.__genesisArcaneVeinsStatus);
+ assert(glow.textureMasks>0,'La animación emissive V027 no generó texturas activas');
+ assert(glow.phaseA>=0&&glow.phaseB>=0,'corrientes sin avance');
  fs.mkdirSync('/tmp/genesis-trees',{recursive:true});await page.waitForTimeout(500);
- await page.screenshot({path:'/tmp/genesis-trees/arcanista-v027-webgl-v0.11.017.png'});
- console.log('PASS real PlayCanvas Arcanist V027',JSON.stringify(status));
+ await page.screenshot({path:'/tmp/genesis-trees/arcanista-v027-webgl-v0.14.png'});
+ console.log('PASS real PlayCanvas Arcanist V027',JSON.stringify(status),JSON.stringify(glow));
  await browser.close();
 })().catch(async err=>{console.error(err);process.exitCode=1;try{await browser?.close()}catch(_){}}).finally(()=>server.close());

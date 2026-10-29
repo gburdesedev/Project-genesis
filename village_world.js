@@ -1,6 +1,6 @@
-import {Entity,StandardMaterial,Texture,Color,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
-import {mountVillageTrees} from './village_trees.js?v=0.13.1';
-import {mountArcanePortal} from './village_arcanist.js?v=0.13.1';
+import {Entity,StandardMaterial,Texture,Color,Mesh,MeshInstance,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
+import {mountVillageTrees} from './village_trees.js?v=0.14';
+import {mountArcanePortal} from './village_arcanist.js?v=0.14';
 const ROOT='./assets/world/v0.11.004/';
 const MOBILE_TEXTURE_EDGE=1024;
 // Decode one full-resolution source at a time on touch devices, then keep only
@@ -66,25 +66,68 @@ function tintArcaneFacade(shell){
   }
  }
 }
+function archedStoneMesh(app,parent,name,material,quads){
+ // Procedural stonework follows the curved V027 silhouette. No rectangular
+ // frame floating over the original larger doorway.
+ const positions=[],normals=[],uvs=[],indices=[];
+ for(const {corners,normal} of quads){
+  const n=positions.length/3;
+  for(const p of corners){positions.push(...p);normals.push(...normal);uvs.push((p[0]+1.3)/1.6,p[1]/1.6)}
+  indices.push(n,n+1,n+2,n,n+2,n+3);
+ }
+ const geometry=new Mesh(app.graphicsDevice);
+ geometry.setPositions(positions);geometry.setNormals(normals);geometry.setUvs(0,uvs);geometry.setIndices(indices);geometry.update();
+ const e=new Entity(name);parent.addChild(e);
+ e.addComponent('render',{meshInstances:[new MeshInstance(geometry,material)],castShadows:true,receiveShadows:true});
+ return e;
+}
 function arcaneSurround(app,building,cobble){
- // The V027 door is 1.253 m wide and 2.32 m high in Blender's GLB export.
- // Mineral masonry physically frames its sides and lintel without sealing it.
- const frame=new Entity('Arcanista · jambas PBR y dintel ajustados a V027');
+ // Door V027: x[-0.648,+0.605], ymax 2.32. Original opening ~2.50 m
+ // across, hence masonry fills the sides, while an actual curved stone
+ // reveal follows its arch. Keep the wall's approved PBR mineral character.
+ const frame=new Entity('Arcanista · vano de piedra tallada siguiendo arco V027');
  frame.setLocalPosition(0,0,.22);building.addChild(frame);
- const stone=pavedMaterial('Piedra mineral mate · portal arcanista',cobble,1.75,2.50,1.4);
- stone.diffuse.set(.48,.49,.55);stone.bumpiness=.88;stone.gloss=.17;stone.update();
- mesh(frame,'Macizo mineral izquierdo · rellena hueco original','box',-.949,1.16,0,.602,2.32,.26,stone,true);
- mesh(frame,'Macizo mineral derecho · rellena hueco original','box',.928,1.16,0,.644,2.32,.26,stone,true);
- mesh(frame,'Dintel mineral sobre V027 · cierre hasta viga','box',-.02,2.435,0,2.50,.23,.26,stone,true);
- mesh(frame,'Remate pétreo izquierdo','box',-.686,1.16,.138,.075,2.32,.07,stone,true);
- mesh(frame,'Remate pétreo derecho','box',.650,1.16,.138,.075,2.32,.07,stone,true);
+ const wall=pavedMaterial('Mampostería mineral integrada · arco arcanista',cobble,1.8,2.5,1.5);
+ wall.diffuse.set(.48,.49,.53);wall.bumpiness=.82;wall.gloss=.12;wall.update();
+ const rim=pavedMaterial('Piedra tallada rugosa · borde curvo V027',cobble,1.8,2.5,1.25);
+ rim.diffuse.set(.40,.43,.49);rim.bumpiness=.92;rim.gloss=.13;rim.update();
+ const spring=1.64,inner=.675,outer=.815,top=2.55;
+ // These side masses sit behind the door leaf; their front is flush with
+ // the existing facade, not in front of the magical PBR surface.
+ mesh(frame,'Muro izquierdo · unión con fachada','box',-1.055,spring/2,-.045,.39,spring,.18,wall,true);
+ mesh(frame,'Muro derecho · unión con fachada','box',1.035,spring/2,-.045,.43,spring,.18,wall,true);
+ mesh(frame,'Jamba curva izquierda · piedra tallada','box',-.76,spring/2,.075,.15,spring,.20,rim,true);
+ mesh(frame,'Jamba curva derecha · piedra tallada','box',.72,spring/2,.075,.15,spring,.20,rim,true);
+ const band=[],infill=[];
+ const steps=32;
+ const front=.19,back=.01;
+ for(let i=0;i<steps;i++){
+  const a=Math.PI*i/steps,b=Math.PI*(i+1)/steps;
+  const o1=[outer*Math.cos(a),spring+outer*Math.sin(a)],o2=[outer*Math.cos(b),spring+outer*Math.sin(b)];
+  const i1=[inner*Math.cos(a),spring+inner*Math.sin(a)],i2=[inner*Math.cos(b),spring+inner*Math.sin(b)];
+  band.push({corners:[[o1[0],o1[1],front],[o2[0],o2[1],front],[i2[0],i2[1],front],[i1[0],i1[1],front]],normal:[0,0,1]});
+  band.push({corners:[[o2[0],o2[1],back],[o1[0],o1[1],back],[i1[0],i1[1],back],[i2[0],i2[1],back]],normal:[0,0,-1]});
+  band.push({corners:[[o1[0],o1[1],back],[o2[0],o2[1],back],[o2[0],o2[1],front],[o1[0],o1[1],front]],normal:[Math.cos((a+b)/2),Math.sin((a+b)/2),0]});
+ }
+ // A single triangulated, UV-continuous fill hugs the arch from behind.
+ // It replaces the old rectangular upper lintel and the two exposed gaps.
+ const slices=48,left=-1.25,right=1.25;
+ for(let i=0;i<slices;i++){
+  const x0=left+(right-left)*i/slices,x1=left+(right-left)*(i+1)/slices;
+  const archY=x=>spring+(Math.abs(x)<outer?Math.sqrt(Math.max(0,outer*outer-x*x)):0);
+  infill.push({corners:[[x0,archY(x0),-.035],[x1,archY(x1),-.035],[x1,top,-.035],[x0,top,-.035]],normal:[0,0,1]});
+ }
+ archedStoneMesh(app,frame,'Arco continuo · anillo PBR de 32 dovelas',rim,band);
+ archedStoneMesh(app,frame,'Muro superior recortado a la silueta',wall,infill);
  return frame;
 }
-export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{}}){
- const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.13.1');app.root.addChild(root);
+export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{}}){
+ const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14');app.root.addChild(root);
  // Begin tree transfers before road PBR maps: four species are part of the initial scene.
  const trees=mountVillageTrees(app,root,{onResourceLoaded});
+ onPhase('arboles');
  const mobile=globalThis.GenesisDevice?.safePreviews===true;
+ onPhase('suelos');
  const [cobble,traffic]=mobile
   ? [await maps(app,'cobble',true,onResourceLoaded),await maps(app,'traffic',true,onResourceLoaded)]
   : await Promise.all([maps(app,'cobble',false,onResourceLoaded),maps(app,'traffic',false,onResourceLoaded)]);
@@ -115,7 +158,7 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{}}
   if(p.profession==='Arcanista'){
    tintArcaneFacade(shellClone);
    arcaneSurround(app,building,cobble);
-   arcanePortals.push(mountArcanePortal(app,building,doorClone));
+   arcanePortals.push(mountArcanePortal(app,building,doorClone,{onResourceLoaded}));
   }
   proxies.set(p.profession,building);
   sign(app,root,p.label,p.existing?'Taller de oficio':'Taller cerrado',p.x,p.z,p.yaw,2.9,3.2);
@@ -135,6 +178,9 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{}}
  const fixedObstacles=[{x:marketSign.x,z:marketSign.z,r:.2},{x:plazaSign.x,z:plazaSign.z,r:.18}];
  // Do not enable movement until each baseline LOD2 has loaded or explicitly failed.
  // Failed variants have no collision; the scene never contains invisible trunks.
+ onPhase('arboles');
  await trees.initialReady;
+ onPhase('puertas');
+ await Promise.all(arcanePortals.map(portal=>portal.initialReady));
  return Object.freeze({root,plan,trees,arcanePortals,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
 }

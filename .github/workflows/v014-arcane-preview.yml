@@ -1,0 +1,34 @@
+name: Preview v0.14 Arcanist and trees
+on:
+  push:
+    branches: ['feature/v0.14-arcane-loading']
+    paths:
+      - 'village_arcanist.js'
+      - 'village_world.js'
+      - 'village_trees.js'
+      - 'tests/village_arcanist_browser.cjs'
+      - '.github/workflows/v014-arcane-preview.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  visual:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/genesis-v014 playwright@1.56.1 playcanvas@2.22.1
+      - run: NODE_PATH=/tmp/genesis-v014/node_modules node tests/village_arcanist_browser.cjs
+      - run: NODE_PATH=/tmp/genesis-v014/node_modules node tests/village_trees_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v014-arcanist-and-trees
+          path: /tmp/genesis-trees
+          retention-days: 5

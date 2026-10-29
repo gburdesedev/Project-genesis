@@ -5,7 +5,7 @@
 <script src="./village_plan.js?v=0.11.017"></script>
 <script src="./device_policy.js?v=0.11.017"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Project Genesis v0.13 — Camino al Vertical Slice · Powered by NGE Alpha</title>
+<title>Project Genesis v0.14 · Build 20261029.01 — Camino al Vertical Slice · Powered by NGE Alpha</title>
 <link rel="stylesheet" href="./preparacion.css?v=0.11.017">
 
 <script type="importmap">
@@ -69,6 +69,13 @@ button.secondary{background:#0d2b3d;color:#eff5f7;border-color:#63d2e56f}
 
 #loading{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:radial-gradient(circle at 50% 34%,#172b37 0,#07111a 48%,#020609 100%);padding:18px}
 .loadingCard{width:min(560px,100%);text-align:center;padding:24px;background:#071a28e8;border:1px solid #d6a84d70;border-radius:10px;box-shadow:0 28px 90px #000d}
+.loadingCard{max-height:calc(100dvh - 20px);overflow:auto}
+.loadGroups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:8px 0 10px}
+.loadGroups .loadGroup{border:1px solid #b9985c35;background:#0c2130;border-radius:5px;padding:5px 6px;color:#aebbc2;font-size:10px;line-height:1.3}
+.loadGroups .loadGroup strong{display:block;color:#e4d4aa;font-size:11px;font-variant-numeric:tabular-nums}
+.loadGroups .loadGroup[data-state="active"]{border-color:#d6a84d;background:#263020;color:#f6dfad}
+.loadGroups .loadGroup[data-state="ready"]{border-color:#4f8c76;color:#a7d8bc}
+@media(max-width:540px){.loadGroups{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .loadingCard h1{margin:5px 0 8px}.loadingCard p{font-size:11px;color:#bdc9d0;line-height:1.5}.spinner{width:30px;height:30px;margin:13px auto 10px;border-radius:50%;border:3px solid #ffffff1b;border-top-color:var(--gold);animation:spin .8s linear infinite}
 .loadProgress{margin:13px 0 9px;height:10px;border-radius:999px;overflow:hidden;background:#02070b;border:1px solid #ffffff18;box-shadow:inset 0 1px 5px #000}
 #loadBarFill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#8d692d,#d6a84d,#f0ca76);transition:width .22s ease;box-shadow:0 0 16px #d6a84d66}
@@ -188,7 +195,7 @@ html.modalOpen,body.modalOpen{overflow:hidden!important;overscroll-behavior:none
 <script>
 if(!window.GenesisDevice.safePreviews){const script=document.createElement('script');script.type='module';script.src='https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js';document.head.append(script)}
 </script>
-<meta name="genesis-build" content="playcanvas-v0.13-camino-vertical-slice-herrero">
+<meta name="genesis-build" content="playcanvas-v0.14-build-20261029.01-camino-vertical-slice-herrero">
 <link rel="stylesheet" href="./responsive.css?v=0.11.017">
 </head>
 <body>
@@ -682,11 +689,12 @@ window.__genesisAppError=function(event){
 <div id="loading">
  <div class="loadingCard">
    <div style="color:var(--gold);font-size:9px;font-weight:900;letter-spacing:.18em">PROJECT GENESIS · PLAYCANVAS</div>
-   <h1>Project Genesis v0.13 · Camino al Vertical Slice</h1>
+   <h1>Project Genesis v0.14 · Camino al Vertical Slice</h1>
    <p>Herrero · taller de Ordan · fabricación procedural · mercenarios y expedición · Powered by NGE Alpha Build.</p>
    <div class="spinner"></div>
    <div class="loadProgress" aria-label="Progreso de carga"><div id="loadBarFill"></div></div>
    <div id="loadCount" aria-live="polite">Identificando recursos de la partida...</div>
+   <div id="loadGroups" class="loadGroups" aria-label="Grupos de recursos cargados"></div>
    <div class="loadMeta">
      <div id="loadState">Inicializando...</div>
      <div id="loadPercent">0%</div>
@@ -701,7 +709,7 @@ window.__genesisAppError=function(event){
   <div class="protoIntroCard">
     <div class="protoIntroHead">
       <div>
-        <div class="protoKicker">PROJECT GENESIS · v0.13 · CAMINO AL VERTICAL SLICE</div>
+        <div class="protoKicker">PROJECT GENESIS · v0.14 · CAMINO AL VERTICAL SLICE</div>
         <h1>Camino al Vertical Slice</h1>
         <p>En esta demostración jugás como Herrero. Recuperá el taller de Ordan, fabricá piezas únicas y probá el recorrido hacia el Vertical Slice. Los demás oficios volverán en futuras versiones.</p>
       </div>
@@ -724,13 +732,13 @@ window.__genesisAppError=function(event){
       </button>
 
     </div>
-    <div class="protoScope">ALCANCE v0.13 · Camino al Vertical Slice · Herrero: reactivación del taller, alijo e inventario, dos familias de objetos, mercenario, expedición, identificación guiada y fabricación experimental. Refinamiento, Mercado, sistemas online y los demás oficios quedan fuera de esta presentación. La muestra recuperada cuenta como una unidad real del inventario y se utiliza en la fabricación experimental.</div>
+    <div class="protoScope">ALCANCE v0.14 · Camino al Vertical Slice · Herrero: reactivación del taller, alijo e inventario, dos familias de objetos, mercenario, expedición, identificación guiada y fabricación experimental. Refinamiento, Mercado, sistemas online y los demás oficios quedan fuera de esta presentación. La muestra recuperada cuenta como una unidad real del inventario y se utiliza en la fabricación experimental.</div>
   </div>
 </div>
 
 <div id="hud">
- <div id="brand">PROJECT GENESIS · v0.13</div>
- <div id="tech">PLAYCANVAS 2.22.1 · VERTICAL SLICE EN DESARROLLO · v0.13</div>
+ <div id="brand">PROJECT GENESIS · v0.14 · BUILD 20261029.01</div>
+ <div id="tech">PLAYCANVAS 2.22.1 · CAMINO AL VERTICAL SLICE · v0.14 · BUILD 20261029.01</div>
  <div id="buttonsTop"><button id="cameraSettingsBtn" class="uiBtn" type="button" aria-label="Configurar cámara">⚙ CÁMARA</button></div>
  <section id="quest">
    <div class="ey" id="questEy">PROTOTIPO · SELECCIÓN DE PROFESIÓN</div>
@@ -760,7 +768,7 @@ window.__genesisAppError=function(event){
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
 import { Vec3 } from 'playcanvas';
-import { mountVillage } from './village_world.js?v=0.13.1';
+import { mountVillage } from './village_world.js?v=0.14';
 
 /* Preparación v0.11: adaptador local sin modificar el motor procedural ni las
    resoluciones de Fabricación/Cierre. Conserva ambas rutas del tutorial. */
@@ -929,19 +937,50 @@ const bootState=window.__genesisBoot||{loaded:0,total:0,error:null};
 // Contar el archivo descargado, el modelo/clip instanciado y la textura del mundo una sola vez.
 // Los LOD de árboles fuera de vista se transmiten luego y no bloquean esta etapa.
 const bootPrepTotal=[...document.querySelectorAll('pc-model[asset]:not([data-route])'),...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]')).length;
-const bootProgress={downloaded:0,downloadTotal:0,prepared:0,prepareTotal:bootPrepTotal,world:0,worldTotal:12};
+const bootProgress={downloaded:0,downloadTotal:0,prepared:0,prepareTotal:bootPrepTotal,world:0,worldTotal:13};
+const groupSpec=[
+ ['paredes','Paredes'],['puertas','Puertas'],['objetos','Objetos'],
+ ['animaciones','Animaciones'],['arboles','Árboles'],['suelos','Suelos y caminos']
+];
+const bootGroups=Object.fromEntries(groupSpec.map(([id])=>[id,{ready:0,total:0}]));
+bootGroups.arboles.total=4;
+bootGroups.suelos.total=8;
+bootGroups.puertas.total=1; // V027: puerta mágica externa
+const loadGroupsEl=document.getElementById('loadGroups');
+loadGroupsEl.innerHTML=groupSpec.map(([id,label])=>'<div class="loadGroup" data-group="'+id+'" data-state="waiting">'+label+'<strong>0 / —</strong></div>').join('');
+let activeBootGroup='';
+function groupFor(item){
+ if(item.kind==='animación')return 'animaciones';
+ const label=(item.label+' '+(item.el.getAttribute('asset')||'')).toLowerCase();
+ if(/door|puerta|portal|doorframe|doorleaf/.test(label))return 'puertas';
+ if(/wall|pared|shell|roof|masonry|chimney/.test(label))return 'paredes';
+ if(/floor|piso|ground|terrain/.test(label))return 'suelos';
+ return 'objetos';
+}
+function syncGroupRows(){
+ for(const [id] of groupSpec){
+  const row=loadGroupsEl.querySelector('[data-group="'+id+'"]');
+  if(!row)continue;
+  const group=bootGroups[id];
+  row.querySelector('strong').textContent=group.ready+' / '+(group.total||'—');
+  row.dataset.state=group.total>0&&group.ready>=group.total?'ready':activeBootGroup===id?'active':'waiting';
+ }
+}
+function groupStage(id){return 'Cargando '+(groupSpec.find(([key])=>key===id)?.[1].toLowerCase()||'recursos')}
+
 function showBootProgress(stage,detail=''){
  const total=bootProgress.downloadTotal+bootProgress.prepareTotal+bootProgress.worldTotal;
  const loaded=bootProgress.downloaded+bootProgress.prepared+bootProgress.world;
  if(!total)return;
  setLoadUI(100*loaded/total,stage,detail);
  loadCount.textContent=loaded+' de '+total+' recursos listos';
+ syncGroupRows();
 }
 function syncPreloadProgress(loaded,total){
  if(!(total>0))return;
  bootProgress.downloadTotal=Math.max(bootProgress.downloadTotal,total);
  bootProgress.downloaded=Math.max(bootProgress.downloaded,Math.min(loaded,total));
- showBootProgress('Descargando archivos del juego','La barra avanza cuando cada recurso termina realmente de cargar.');
+ showBootProgress(activeBootGroup?groupStage(activeBootGroup):'Descargando archivos del juego','La barra avanza cuando cada recurso termina realmente de cargar.');
 }
 if(bootState.total>0)syncPreloadProgress(bootState.loaded,bootState.total);
 appEl.addEventListener('progress',e=>{bootState.loaded=Number(e.loaded)||0;bootState.total=Number(e.total)||0;syncPreloadProgress(bootState.loaded,bootState.total)});
@@ -957,9 +996,23 @@ try{
  const modelEls=[...document.querySelectorAll('pc-model[asset]:not([data-route])')];
  const clipEls=[...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]'));
  const prepItems=[...modelEls.map(el=>({kind:'modelo',label:el.getAttribute('name')||el.id||el.getAttribute('asset')||'modelo',el})),...clipEls.map(el=>({kind:'animación',label:el.getAttribute('name')||el.getAttribute('asset')||'clip',el}))];
+ for(const item of prepItems){item.group=groupFor(item);bootGroups[item.group].total++}
  let prepared=0;const prepTotal=Math.max(1,prepItems.length);
  const bootWait=(promise,label,timeout=18000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Tiempo agotado preparando '+label)),timeout))]);
- await Promise.all(prepItems.map(async item=>{await bootWait(item.el.ready(),item.label);if(item.kind==='modelo'&&!item.el.contentEntity)throw new Error('No pudo instanciarse: '+item.label);prepared++;bootProgress.prepared=prepared;showBootProgress('Preparando modelos y animaciones',item.kind+': '+item.label)}));
+ // Each group has a truthful, independently counted stage. Resources still
+ // download concurrently; these gates verify they are actually instantiated.
+ for(const group of ['paredes','puertas','suelos','objetos','animaciones']){
+  const tasks=prepItems.filter(item=>item.group===group);
+  if(!tasks.length)continue;
+  activeBootGroup=group;
+  showBootProgress(groupStage(group),bootGroups[group].ready+' de '+bootGroups[group].total+' '+group+' listos');
+  await Promise.all(tasks.map(async item=>{
+   await bootWait(item.el.ready(),item.label);
+   if(item.kind==='modelo'&&!item.el.contentEntity)throw new Error('No pudo instanciarse: '+item.label);
+   prepared++;bootProgress.prepared=prepared;bootGroups[group].ready++;
+   showBootProgress(groupStage(group),item.label+' · '+bootGroups[group].ready+' de '+bootGroups[group].total);
+  }));
+ }
  const [p,o,c]=await Promise.all([bootWait(whenReady('#playerModel'),'Edric cuerpo'),bootWait(whenReady('#ordanModel'),'Ordan'),bootWait(whenReady('#cameraRig'),'cámara')]);
  player=p.entity;ordan=o.entity;tannerMentor=document.getElementById('tannerMentorModel')?.entity||ordan;camera=c.entity;setupGameViewport();
  [playerAnim,playerHeadAnim,playerHairAnim,ordanAnim,ordanHeadAnim,ordanHairAnim]=await bootWait(Promise.all([
@@ -968,7 +1021,21 @@ try{
 }catch(err){failLoading(err?.message||String(err),'La escena no se habilitó; el recurso indicado no terminó de prepararse.');throw err}
 
 let village;
-try{showBootProgress('Armando la aldea','Cargando árboles, caminos y plaza.');village=await mountVillage(appEl.app,{shell:document.getElementById('villageShellSource').entity,roof:document.getElementById('villageRoofSource').entity,door:document.getElementById('villageDoorSource').entity,onResourceLoaded:()=>{bootProgress.world++;showBootProgress('Armando la aldea','Recursos de aldea: '+bootProgress.world+' de '+bootProgress.worldTotal);}});}catch(err){failLoading(err.message,'La aldea no terminó de cargar. Reintentá.');throw err}
+try{
+ activeBootGroup='arboles';showBootProgress(groupStage('arboles'),'Preparando los cuatro árboles aprobados.');
+ village=await mountVillage(appEl.app,{
+  shell:document.getElementById('villageShellSource').entity,
+  roof:document.getElementById('villageRoofSource').entity,
+  door:document.getElementById('villageDoorSource').entity,
+  onPhase:group=>{activeBootGroup=group;showBootProgress(groupStage(group),'Esperando recursos del grupo '+group+'.')},
+  onResourceLoaded:name=>{
+   const group=name.startsWith('tree:')?'arboles':name.startsWith('door:')?'puertas':'suelos';
+   bootProgress.world++;bootGroups[group].ready++;
+   activeBootGroup=group;
+   showBootProgress(groupStage(group),name+' · '+bootGroups[group].ready+' de '+bootGroups[group].total);
+  }
+ });
+}catch(err){failLoading(err.message,'La aldea no terminó de cargar. Reintentá.');throw err}
 window.__genesisVillage=village;
 
 function hideCollisionMeshes(modelEl){const root=modelEl?.contentEntity;if(!root)return;const stack=[root];while(stack.length){const node=stack.pop();const n=(node.name||'').toLowerCase();let collisionLike=n.includes('convcolonly')||n.startsWith('collision_')||n==='collision';const meshes=node.render?.meshInstances||[];if(meshes.length&&meshes.every(mi=>(mi.material?.name||'').toLowerCase().includes('collision')))collisionLike=true;if(collisionLike)node.enabled=false;for(const child of node.children||[])stack.push(child)}}
@@ -1400,7 +1467,7 @@ function startMercenaryDeparture(){if(!mercenaryRoot)return;setTutorialStep(18);
 function updateMercenaryDeparture(dt,now){if(mercenaryState!=='departing'||!mercenaryRoot)return;const target=mercDeparturePath[mercDepartureWaypoint];if(!target){finishMercenaryDeparture();return}const pos=mercenaryRoot.getPosition(),dx=target.x-pos.x,dz=target.z-pos.z,dist=Math.hypot(dx,dz),speed=1.72,step=speed*dt;if(now-lastMentorStep>430){footstepSound(false,.021);lastMentorStep=now}if(dist<=Math.max(.04,step)){mercenaryRoot.setPosition(target.x,0,target.z);mercDepartureWaypoint++;if(mercDepartureWaypoint>=mercDeparturePath.length)finishMercenaryDeparture();return}const nx=dx/dist,nz=dz/dist;mercenaryRoot.setPosition(pos.x+nx*step,0,pos.z+nz*step);mercenaryRoot.setEulerAngles(0,deg(Math.atan2(nx,nz)),0)}
 function demoMaterialCard(prepared=false){if(!expeditionMaterial)return'';const name=prepared?expeditionMaterial.prepared:expeditionMaterial.unknown,qty=expeditionMaterialConsumed?0:Math.max(1,expeditionMaterialQty||0),state=expeditionMaterialConsumed?'INCORPORADA EN LA CREACIÓN':prepared?'IDENTIFICADA · LISTA PARA USAR':'DESCONOCIDA · BLOQUEADA';return `<section class="ngeDemoPanel" style="margin:14px 0;border-color:${expeditionMaterial.color}66"><span class="ngeDemoBadge" style="color:${expeditionMaterial.color}">${state}</span><div style="display:grid;grid-template-columns:72px 1fr;gap:14px;align-items:center;margin-top:12px"><div style="height:68px;border:1px solid ${expeditionMaterial.color}88;border-radius:14px;display:grid;place-items:center;font-size:34px;color:${expeditionMaterial.color};box-shadow:0 0 24px ${expeditionMaterial.color}33 inset,0 0 18px ${expeditionMaterial.color}22">${esc(expeditionMaterial.glyph)}</div><div><h3 style="margin:0 0 6px">${qty}× ${esc(name)}</h3><p style="margin:0;color:#c5cbd0">${expeditionMaterialConsumed?'La única unidad fue consumida e incorporada físicamente en la creación experimental.':prepared?'La misma unidad recuperada en la expedición sigue en el inventario. Está identificada y lista para incorporarse a la próxima fabricación experimental.':'La expedición la recuperó fuera del poblado. El artesano todavía no conoce un procedimiento válido para manipularla.'}</p></div></div></section>`}
 
-function showExpeditionResult(){if(!expeditionMaterial)expeditionMaterial=pickDemoDiscoveryMaterial();setTutorialStep(19);refreshInventorySummary();const tanner=mercGearRoute()==='Curtidor',[a,b]=mercGearPair();modal(`<div class="mercFinal"><div class="ey">PROJECT GENESIS · v0.13 · CAMINO AL VERTICAL SLICE</div><div class="bigState">EXPEDICIÓN RESUELTA</div><h2>El Guerrero regresó a la propiedad</h2><p class="compareLead">La expedición de reconocimiento se resolvió correctamente. ${tanner?`La armadura <strong>${esc(a?.name||'creada')}</strong> y las botas <strong>${esc(b?.name||'creadas')}</strong>`:`La espada <strong>${esc(a?.name||'creada')}</strong> y el escudo <strong>${esc(b?.name||'creado')}</strong>`} formaron parte de la preparación del mercenario.</p><div class="mercIntro"><strong>Nuevo resultado:</strong> además del cierre de la misión, el Guerrero recuperó una muestra que tu artesano no había manipulado durante este recorrido.</div>${demoMaterialCard(false)}<div class="actions" style="justify-content:center"><button id="collectDemoMaterial">Recoger muestra</button></div></div>`,'craftModal');document.getElementById('collectDemoMaterial').onclick=()=>{expeditionMaterialQty=1;expeditionMaterialConsumed=false;closeModal();setTutorialStep(20);refreshInventorySummary();toast('1× muestra añadida al inventario.',1500);setTimeout(showLockedDemoMaterial,120)}}
+function showExpeditionResult(){if(!expeditionMaterial)expeditionMaterial=pickDemoDiscoveryMaterial();setTutorialStep(19);refreshInventorySummary();const tanner=mercGearRoute()==='Curtidor',[a,b]=mercGearPair();modal(`<div class="mercFinal"><div class="ey">PROJECT GENESIS · v0.14 · CAMINO AL VERTICAL SLICE</div><div class="bigState">EXPEDICIÓN RESUELTA</div><h2>El Guerrero regresó a la propiedad</h2><p class="compareLead">La expedición de reconocimiento se resolvió correctamente. ${tanner?`La armadura <strong>${esc(a?.name||'creada')}</strong> y las botas <strong>${esc(b?.name||'creadas')}</strong>`:`La espada <strong>${esc(a?.name||'creada')}</strong> y el escudo <strong>${esc(b?.name||'creado')}</strong>`} formaron parte de la preparación del mercenario.</p><div class="mercIntro"><strong>Nuevo resultado:</strong> además del cierre de la misión, el Guerrero recuperó una muestra que tu artesano no había manipulado durante este recorrido.</div>${demoMaterialCard(false)}<div class="actions" style="justify-content:center"><button id="collectDemoMaterial">Recoger muestra</button></div></div>`,'craftModal');document.getElementById('collectDemoMaterial').onclick=()=>{expeditionMaterialQty=1;expeditionMaterialConsumed=false;closeModal();setTutorialStep(20);refreshInventorySummary();toast('1× muestra añadida al inventario.',1500);setTimeout(showLockedDemoMaterial,120)}}
 function attemptUseDemoMaterial(){if(!expeditionMaterial||expeditionMaterialPrepared)return;inventoryOpen=false;tone(128,.10,.018,'square');toast('No sabés cómo manipular esta muestra todavía.',1900);closeModal();setTutorialStep(21);refreshInventorySummary();setTimeout(()=>{orientCameraToObjective();toast(`Consultá a ${activeRoute.mentorName}.`,1700)},180)}
 function showLockedDemoMaterial(){if(!expeditionMaterial)return;modal(`<div class="ey">EPÍLOGO · MATERIAL DE EXPEDICIÓN</div><h2>La muestra todavía no es utilizable</h2>${demoMaterialCard(false)}<div class="mercIntro">Esta restricción es intencional: obtener un recurso nuevo no equivale a saber procesarlo. En Project Genesis completo, el acceso a materiales especiales depende de conocimiento legítimamente adquirido y de los sistemas correspondientes.</div><div class="actions"><button class="secondary" id="demoMaterialClose">Cerrar</button><button id="demoMaterialTry">Intentar utilizar</button></div>`,'craftModal');document.getElementById('demoMaterialClose').onclick=closeModal;document.getElementById('demoMaterialTry').onclick=attemptUseDemoMaterial}
 function showDemoMaterialMentorDialogue(){if(!expeditionMaterial)return;const h=selectedProfession==='Herrero';const mentor=h?'Ordan':'el mentor del Curtidor';const text=`Esta muestra es nueva para este recorrido. En el juego completo no bastaría con que yo te la explique: tendría que pasar por los sistemas legítimos de Descubrimiento y Conocimiento, la investigación correspondiente y, cuando aplique, Refinamiento. Esos sistemas no están incluidos en esta demostración. <strong>Para mostrar el ciclo completo sin convertir la demo en otro juego entero, ${mentor} te enseñará directamente una preparación experimental básica.</strong>`;mentorCue();modal(`<div class="dialogueHead">${esc(activeRoute.mentorName.toUpperCase())}</div><div class="dialogueBody"><p>${text}</p>${demoMaterialCard(false)}</div><div class="actions" style="padding:0 18px 16px"><button id="demoPrepareMaterial">Preparar muestra · atajo de demo</button></div>`,'dialogue');document.getElementById('demoPrepareMaterial').onclick=()=>{setTutorialStep(22);const btn=document.getElementById('demoPrepareMaterial');btn.disabled=true;btn.textContent='Estabilizando muestra…';tone(244,.12,.018,'triangle');setTimeout(()=>{expeditionMaterialPrepared=true;refreshInventorySummary();itemRevealSound();modal(`<div class="ey">PREPARACIÓN EXPERIMENTAL · DEMO</div><h2>Muestra identificada y estabilizada</h2>${demoMaterialCard(true)}<div class="mercIntro"><strong>La muestra sigue en tu inventario:</strong> identificarla no la consume. Ahora podés usar esa misma unidad en la tercera creación de la familia. <br><br><strong>Regla de demostración:</strong> esta preparación sustituye temporalmente etapas que en el juego completo se resolverían mediante conocimiento, investigación y los sistemas de materiales. No desbloquea una regla canónica.</div><div class="actions"><button id="demoGoCraft">Ir a la estación</button></div>`,'craftModal');document.getElementById('demoGoCraft').onclick=()=>{closeModal();setTutorialStep(23);orientCameraToObjective();toast('Fabricación experimental habilitada.',1700)}},720)}}
@@ -1411,11 +1478,11 @@ function performExperimentalCraft(){const recipeId=activeRoute.recipes[0],engine
 function canEquipDemoFinalToMercenary(){return !!(demoFinalItem&&mercCandidate!=null&&mercGearAttached&&((selectedProfession==='Herrero'&&demoFinalItem.recipe==='espada_hierro')||(selectedProfession==='Curtidor'&&demoFinalItem.recipe==='armadura_cuero')))}
 function equipDemoFinalToMercenary(){if(!canEquipDemoFinalToMercenary())return toast('Primero necesitás tener al Guerrero equipado para esta profesión.',1800);const tanner=mercGearRoute()==='Curtidor',previousPrimary=tanner?mercArmorItem:mercSwordItem,previousSecondary=tanner?mercBootsItem:mercShieldItem;if(tanner)mercArmorItem=demoFinalItem;else mercSwordItem=demoFinalItem;if(!equipMercenaryCreations()){if(tanner)mercArmorItem=previousPrimary;else mercSwordItem=previousPrimary;toast('No se pudo aplicar la creación experimental sobre el Guerrero.',1900);return}refreshInventorySummary();closeModal();showExperimentalMercenaryUpdate(previousPrimary,previousSecondary)}
 function showExperimentalMercenaryUpdate(previousPrimary,previousSecondary){const tanner=mercGearRoute()==='Curtidor',currentPrimary=tanner?mercArmorItem:mercSwordItem,currentSecondary=tanner?mercBootsItem:mercShieldItem,title=tanner?'ARMADURA III EQUIPADA':'ESPADA III EQUIPADA',copy=tanner?'La nueva armadura reemplaza visualmente la pieza anterior. El Guerrero conserva sus botas y ahora muestra el mismo halo experimental de la muestra incorporada sobre el torso.':'La nueva espada reemplaza visualmente el arma anterior. El Guerrero conserva su escudo y ahora muestra el mismo halo experimental de la muestra incorporada sobre el arma.';modal(`<div class="mercFinal"><div class="ey">PROJECT GENESIS · CIERRE DE DEMO</div><div class="bigState">GUERRERO ACTUALIZADO</div><h2>${title}</h2><p class="compareLead">${copy}</p><div class="mercSheetGrid"><section class="mercPanel"><div class="mercPanelTitle"><b>ANTES</b><span>${esc(previousPrimary?.name||'Sin objeto')}</span></div>${renderMercStats(previousPrimary,previousSecondary)}</section><section class="mercPanel"><div class="mercPanelTitle"><b>AHORA</b><span>${esc(currentPrimary?.name||'Sin objeto')}</span></div>${renderMercStats(currentPrimary,currentSecondary)}</section></div><section class="mercPanel" style="margin-top:12px"><div class="mercPanelTitle"><b>EQUIPO ACTUAL DEL GUERRERO</b><span>Con halo experimental aplicado</span></div><div class="mercEquipmentSummary">${mercEquippedSummaryItem(currentPrimary,tanner?'ARMADURA':'ESPADA')}${mercEquippedSummaryItem(currentSecondary,tanner?'BOTAS':'ESCUDO')}</div>${renderMercInventory(currentPrimary,currentSecondary)}</section><div class="actions" style="justify-content:center"><button class="secondary" id="demoEquipOpenSheet">Abrir dossier actualizado</button><button id="demoEquipCloseLoop">Cerrar la demo</button></div></div>`,'mercenaryModal mercDossierModal');document.getElementById('demoEquipOpenSheet').onclick=showMercenarySheet;document.getElementById('demoEquipCloseLoop').onclick=showDemoCycleComplete}
-function showDemoCycleComplete(){const created=demoFinalItem?`${recipeKind(demoFinalItem.recipe)} III · ${demoFinalItem.name}`:'tercera creación experimental',effect=demoFinalItem?.demoMaterial?.effect||'impronta del material',equipCopy=selectedProfession==='Curtidor'?'Equipá la nueva Armadura III al Guerrero para volver a leer su protección y ver la impronta experimental aplicada sobre el torso.':'Equipá la nueva Espada III al Guerrero para volver a leer su daño base y ver la impronta experimental aplicada sobre el arma.';modal(`<div class="mercFinal"><div class="ey">PROJECT GENESIS · v0.13 · CAMINO AL VERTICAL SLICE</div><div class="bigState">CICLO COMPLETADO</div><h2>El resultado de la expedición volvió a convertirse en fabricación</h2><p class="compareLead">Tu artesano fabricó, equipó a un mercenario, obtuvo un resultado fuera del taller, recuperó una muestra desconocida, la identificó sin perderla del inventario y finalmente consumió esa misma unidad para crear <strong>${esc(created)}</strong>.</p><div class="mercIntro"><strong>Resultado observable de la demo:</strong> la pieza conserva sus canales y rareza procedurales, pero muestra <strong>${esc(effect)}</strong> como impronta visual del material incorporado. ${equipCopy} En Project Genesis completo, este retorno se conecta con Descubrimiento, Conocimiento, Investigación y, cuando corresponde, Refinamiento; aquí esas etapas están comprimidas.</div>${demoFinalItem?renderItemCard(demoFinalItem):''}<div class="actions" style="justify-content:center">${canEquipDemoFinalToMercenary()?'<button class=\"secondary\" id=\"demoFinalEquip\">Equipar al Guerrero</button>':''}<button id="demoFinalNge">Explorar NGE</button><button id="demoFinalRestart">Volver a selección</button></div></div>`,'craftModal');const eqBtn=document.getElementById('demoFinalEquip');if(eqBtn)eqBtn.onclick=equipDemoFinalToMercenary;document.getElementById('demoFinalNge').onclick=()=>showNgeShowcase(()=>showDemoCycleComplete());document.getElementById('demoFinalRestart').onclick=()=>location.reload()}
+function showDemoCycleComplete(){const created=demoFinalItem?`${recipeKind(demoFinalItem.recipe)} III · ${demoFinalItem.name}`:'tercera creación experimental',effect=demoFinalItem?.demoMaterial?.effect||'impronta del material',equipCopy=selectedProfession==='Curtidor'?'Equipá la nueva Armadura III al Guerrero para volver a leer su protección y ver la impronta experimental aplicada sobre el torso.':'Equipá la nueva Espada III al Guerrero para volver a leer su daño base y ver la impronta experimental aplicada sobre el arma.';modal(`<div class="mercFinal"><div class="ey">PROJECT GENESIS · v0.14 · CAMINO AL VERTICAL SLICE</div><div class="bigState">CICLO COMPLETADO</div><h2>El resultado de la expedición volvió a convertirse en fabricación</h2><p class="compareLead">Tu artesano fabricó, equipó a un mercenario, obtuvo un resultado fuera del taller, recuperó una muestra desconocida, la identificó sin perderla del inventario y finalmente consumió esa misma unidad para crear <strong>${esc(created)}</strong>.</p><div class="mercIntro"><strong>Resultado observable de la demo:</strong> la pieza conserva sus canales y rareza procedurales, pero muestra <strong>${esc(effect)}</strong> como impronta visual del material incorporado. ${equipCopy} En Project Genesis completo, este retorno se conecta con Descubrimiento, Conocimiento, Investigación y, cuando corresponde, Refinamiento; aquí esas etapas están comprimidas.</div>${demoFinalItem?renderItemCard(demoFinalItem):''}<div class="actions" style="justify-content:center">${canEquipDemoFinalToMercenary()?'<button class=\"secondary\" id=\"demoFinalEquip\">Equipar al Guerrero</button>':''}<button id="demoFinalNge">Explorar NGE</button><button id="demoFinalRestart">Volver a selección</button></div></div>`,'craftModal');const eqBtn=document.getElementById('demoFinalEquip');if(eqBtn)eqBtn.onclick=equipDemoFinalToMercenary;document.getElementById('demoFinalNge').onclick=()=>showNgeShowcase(()=>showDemoCycleComplete());document.getElementById('demoFinalRestart').onclick=()=>location.reload()}
 
 function showMercenaryFinal(){showExpeditionResult()}
 function finishMercenaryDeparture(){if(mercenaryState==='returned'||mercenaryState==='away')return;mercenaryState='returned';setMercAnim(false);const cx=activeRoute?.center||0;setTimeout(()=>{if(mercenaryRoot){mercenaryRoot.setPosition(cx+3.25,0,3.35);mercenaryRoot.setEulerAngles(0,198,0)}showExpeditionResult()},480)}
-function completePrototype(){setTutorialStep(14);const mercButton=['Herrero','Curtidor'].includes(selectedProfession)?'<button id="startMercExtension">Continuar · Mercenarios</button>':'';const mercCopy=selectedProfession==='Curtidor'?'<div class="mercIntro"><strong>Nuevo tramo de demostración:</strong> ahora podés vestir un Guerrero con una armadura y unas botas fabricadas por vos, revisar cómo sus canales defensivos pasan al dossier y enviarlo a una expedición condensada.</div>':'<div class="mercIntro"><strong>Nuevo tramo de demostración:</strong> ahora podés conectar esas creaciones con gameplay real de Genesis: contratar un Guerrero, equiparle una espada y un escudo fabricados por vos y enviarlo a una expedición condensada.</div>';modal(`<div id="routeComplete"><div class="ey">PROJECT GENESIS · v0.13 · CAMINO AL VERTICAL SLICE</div><h2>${esc(selectedProfession)} · taller completado</h2><p>Recuperaste el taller y fabricaste dos veces cada una de sus dos familias iniciales. Cada cierre resolvió Canal Base y, cuando correspondió, continuó con afinidades hasta el techo de Nivel 1. La rareza se obtuvo únicamente por la cantidad final de canales activos: Inútil, Común o Bueno.</p>${mercCopy}<img class="ngeIntroBanner" style="margin:16px auto;max-width:430px" alt="Powered by NGE Alpha Build" src="${NGE_BADGE}"><section class="ngeDemoPanel"><span class="ngeDemoBadge">NGE · DEMOSTRACIÓN DISPONIBLE</span><div class="ngeDemoStats"><div class="ngeStat"><b>139+ M</b><span>CONSTRUCCIONES NOMINALES TEÓRICAS · ESTIMACIÓN CONSERVADORA</span></div><div class="ngeStat"><b>${window.GenesisPrototypeEngines?.ngeStats?.lexicalFragments||0}</b><span>FRAGMENTOS CONTROLADOS</span></div><div class="ngeStat"><b>4</b><span>FAMILIAS EN ESTA MUESTRA</span></div><div class="ngeStat"><b>9</b><span>MATERIALES DEL PROTOTIPO</span></div></div><p class="ngeDemoExplain">El NGE reducido del loop real nombra cada creación desde hechos cerrados y selecciona sus combinaciones desde tablas internas mediante una semilla temporal y pondera los materiales por las cantidades reales de la fórmula. No depende de historial entre ejecuciones. La galería sigue siendo una demostración explicativa separada.</p></section><div class="actions" style="justify-content:center">${mercButton}<button id="completeNgeDemo">Explorar NGE</button><button id="restartProto">Volver a selección</button></div></div>`,'craftModal');const m=document.getElementById('startMercExtension');if(m)m.onclick=showMercenaryCandidates;document.getElementById('completeNgeDemo').onclick=()=>showNgeShowcase(()=>completePrototype());document.getElementById('restartProto').onclick=()=>location.reload()}
+function completePrototype(){setTutorialStep(14);const mercButton=['Herrero','Curtidor'].includes(selectedProfession)?'<button id="startMercExtension">Continuar · Mercenarios</button>':'';const mercCopy=selectedProfession==='Curtidor'?'<div class="mercIntro"><strong>Nuevo tramo de demostración:</strong> ahora podés vestir un Guerrero con una armadura y unas botas fabricadas por vos, revisar cómo sus canales defensivos pasan al dossier y enviarlo a una expedición condensada.</div>':'<div class="mercIntro"><strong>Nuevo tramo de demostración:</strong> ahora podés conectar esas creaciones con gameplay real de Genesis: contratar un Guerrero, equiparle una espada y un escudo fabricados por vos y enviarlo a una expedición condensada.</div>';modal(`<div id="routeComplete"><div class="ey">PROJECT GENESIS · v0.14 · CAMINO AL VERTICAL SLICE</div><h2>${esc(selectedProfession)} · taller completado</h2><p>Recuperaste el taller y fabricaste dos veces cada una de sus dos familias iniciales. Cada cierre resolvió Canal Base y, cuando correspondió, continuó con afinidades hasta el techo de Nivel 1. La rareza se obtuvo únicamente por la cantidad final de canales activos: Inútil, Común o Bueno.</p>${mercCopy}<img class="ngeIntroBanner" style="margin:16px auto;max-width:430px" alt="Powered by NGE Alpha Build" src="${NGE_BADGE}"><section class="ngeDemoPanel"><span class="ngeDemoBadge">NGE · DEMOSTRACIÓN DISPONIBLE</span><div class="ngeDemoStats"><div class="ngeStat"><b>139+ M</b><span>CONSTRUCCIONES NOMINALES TEÓRICAS · ESTIMACIÓN CONSERVADORA</span></div><div class="ngeStat"><b>${window.GenesisPrototypeEngines?.ngeStats?.lexicalFragments||0}</b><span>FRAGMENTOS CONTROLADOS</span></div><div class="ngeStat"><b>4</b><span>FAMILIAS EN ESTA MUESTRA</span></div><div class="ngeStat"><b>9</b><span>MATERIALES DEL PROTOTIPO</span></div></div><p class="ngeDemoExplain">El NGE reducido del loop real nombra cada creación desde hechos cerrados y selecciona sus combinaciones desde tablas internas mediante una semilla temporal y pondera los materiales por las cantidades reales de la fórmula. No depende de historial entre ejecuciones. La galería sigue siendo una demostración explicativa separada.</p></section><div class="actions" style="justify-content:center">${mercButton}<button id="completeNgeDemo">Explorar NGE</button><button id="restartProto">Volver a selección</button></div></div>`,'craftModal');const m=document.getElementById('startMercExtension');if(m)m.onclick=showMercenaryCandidates;document.getElementById('completeNgeDemo').onclick=()=>showNgeShowcase(()=>completePrototype());document.getElementById('restartProto').onclick=()=>location.reload()}
 function mechanicalSignature(item){return JSON.stringify(item.channels)}
 function previousCraftOf(recipe){for(let i=craftedItems.length-1;i>=0;i--)if(craftedItems[i].recipe===recipe)return craftedItems[i];return null}
 function performCraft(){const recipe=currentRecipe();if(!recipe)return;const stepAt=tutorialStep,craft=craftNumber(),engine=window.GenesisPrototypeEngines,formula=formulaFor(recipe);if(!engine||!formula){toast('Motor procedural todavía no está disponible.',1600);return}if(!consumeFormula(formula)){toast('El lote no alcanza la fórmula de sesión.',1600);return}craftWorkSound();const previous=previousCraftOf(recipe);let raw=null;for(let attempt=0;attempt<24;attempt++){const candidate=engine.fabricate(recipe,{craft,artisan:'Artesano del prototipo',formula});if(!previous||mechanicalSignature(candidate)!==mechanicalSignature(previous)){raw=candidate;break}}if(!raw)raw=engine.fabricate(recipe,{craft,artisan:'Artesano del prototipo',formula});const item=engine.present(raw,usedItemNames);usedItemNames.add(item.name.toLocaleLowerCase());craftedItems.push(item);refreshInventorySummary();itemRevealSound();const idx=craftedItems.length;modal(`<div class="craftHeader"><div><div class="questTag">${questNumber()} · CIERRE DE FABRICACIÓN</div><div class="recipe">Resultado certificado</div></div><div class="craftMeta">Fabricación ${idx}/4<br>Powered by NGE · Alpha Build</div></div>${renderItemCard(item)}<div class="actions"><button id="resultContinue">Continuar</button></div>`,'craftModal');{const resultBtn=document.getElementById('resultContinue');let handled=false;resultBtn.onclick=()=>{if(handled)return;handled=true;resultBtn.disabled=true;closeModal();if(stepAt===10){setTutorialStep(11);toast('Repetí la misma fórmula y compará cómo vuelve a resolver la cadena.',1500)}else if(stepAt===11){const pair=craftedItems.slice(0,2);setTutorialStep(12);try{showComparison(pair,false)}catch(err){console.error('Comparison render failed after Q3',err);toast('Q4 habilitada · continuá con la segunda familia.',1600)}}else if(stepAt===12){setTutorialStep(13);toast('Repetí la segunda fórmula y compará su nuevo cierre.',1500)}else if(stepAt===13){const pair=craftedItems.slice(2,4);setTutorialStep(14);try{showComparison(pair,true,()=>DIRECT_MERCENARY_AFTER_CRAFTS?showMercenaryCandidates():completePrototype())}catch(err){console.error('Final comparison render failed',err);DIRECT_MERCENARY_AFTER_CRAFTS?showMercenaryCandidates():completePrototype()}}}}}
