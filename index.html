@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<script src="./village_plan.js?v=0.11.015"></script>
-<script src="./device_policy.js?v=0.11.015"></script>
+<script src="./village_plan.js?v=0.11.016"></script>
+<script src="./device_policy.js?v=0.11.016"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Project Genesis — Prototipo Jugable v0.11.015 · Powered by NGE Alpha</title>
-<link rel="stylesheet" href="./preparacion.css?v=0.11.015">
+<title>Project Genesis — Prototipo Jugable v0.11.016 · Powered by NGE Alpha</title>
+<link rel="stylesheet" href="./preparacion.css?v=0.11.016">
 
 <script type="importmap">
 {
@@ -74,6 +74,7 @@ button.secondary{background:#0d2b3d;color:#eff5f7;border-color:#63d2e56f}
 #loadBarFill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#8d692d,#d6a84d,#f0ca76);transition:width .22s ease;box-shadow:0 0 16px #d6a84d66}
 .loadMeta{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-top:6px;font-size:9px;color:#91a2ad}
 #loadPercent{font-weight:900;color:#e1b75f;min-width:38px;text-align:right}
+#loadCount{font-size:11px;font-weight:900;color:#f4d48d;margin-top:7px;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:.025em}
 #loadState{min-height:15px;text-align:left;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #loadElapsed{font-variant-numeric:tabular-nums;color:#6f838f;min-width:44px;text-align:right}
 #loadDetail{margin-top:8px;min-height:14px;font-size:9px;color:#80929d;text-align:left;line-height:1.45}
@@ -187,8 +188,8 @@ html.modalOpen,body.modalOpen{overflow:hidden!important;overscroll-behavior:none
 <script>
 if(!window.GenesisDevice.safePreviews){const script=document.createElement('script');script.type='module';script.src='https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js';document.head.append(script)}
 </script>
-<meta name="genesis-build" content="playcanvas-v0.11.015-live-workshop-menus">
-<link rel="stylesheet" href="./responsive.css?v=0.11.015">
+<meta name="genesis-build" content="playcanvas-v0.11.016-live-workshop-menus">
+<link rel="stylesheet" href="./responsive.css?v=0.11.016">
 </head>
 <body>
 
@@ -198,12 +199,13 @@ window.__genesisBoot={loaded:0,total:0,error:null};
 window.__genesisPreloadProgress=function(event){
   window.__genesisBoot.loaded=Number(event.loaded)||0;
   window.__genesisBoot.total=Number(event.total)||0;
-  const fill=document.getElementById('loadBarFill'),pct=document.getElementById('loadPercent'),state=document.getElementById('loadState'),detail=document.getElementById('loadDetail');
+  const fill=document.getElementById('loadBarFill'),pct=document.getElementById('loadPercent'),state=document.getElementById('loadState'),detail=document.getElementById('loadDetail'),count=document.getElementById('loadCount');
   const total=window.__genesisBoot.total,loaded=window.__genesisBoot.loaded;
   if(total>0){
     const value=Math.min(85,Math.round((loaded/total)*85));
     if(fill)fill.style.width=value+'%'; if(pct)pct.textContent=value+'%';
-    if(state)state.textContent='Descargando assets · '+loaded+'/'+total;
+    if(state)state.textContent='Descargando los recursos iniciales';
+    if(count)count.textContent=Math.min(loaded,total)+' de '+total+' assets descargados';
     if(detail)detail.textContent='El juego permanecerá bloqueado hasta completar la descarga y preparar la escena.';
   }
 };
@@ -684,6 +686,7 @@ window.__genesisAppError=function(event){
    <p>Dos profesiones · dos talleres · fabricación procedural · extensión de mercenario en Herrero · Powered by NGE Alpha Build.</p>
    <div class="spinner"></div>
    <div class="loadProgress" aria-label="Progreso de carga"><div id="loadBarFill"></div></div>
+   <div id="loadCount" aria-live="polite">Identificando recursos de la partida...</div>
    <div class="loadMeta">
      <div id="loadState">Inicializando...</div>
      <div id="loadPercent">0%</div>
@@ -730,7 +733,7 @@ window.__genesisAppError=function(event){
 </div>
 
 <div id="hud">
- <div id="brand">PROJECT GENESIS · v0.11.015</div>
+ <div id="brand">PROJECT GENESIS · v0.11.016</div>
  <div id="tech">PLAYCANVAS 2.22.1 · PROTOTIPO · v0.11</div>
  <div id="buttonsTop"><button id="cameraSettingsBtn" class="uiBtn" type="button" aria-label="Configurar cámara">⚙ CÁMARA</button></div>
  <section id="quest">
@@ -757,11 +760,11 @@ window.__genesisAppError=function(event){
 
 <script src="./fps_counter.js?v=20261025-1"></script>
 <script src="./camera_mouse.js?v=20261025-1"></script>
-<script src="./preparacion_control.js?v=0.11.015"></script>
+<script src="./preparacion_control.js?v=0.11.016"></script>
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
 import { Vec3 } from 'playcanvas';
-import { mountVillage } from './village_world.js?v=0.11.015';
+import { mountVillage } from './village_world.js?v=0.11.016';
 
 /* Preparación v0.11: adaptador local sin modificar el motor procedural ni las
    resoluciones de Fabricación/Cierre. Conserva ambas rutas del tutorial. */
@@ -877,6 +880,7 @@ const loadingCard=document.querySelector('.loadingCard');
 const loadState=document.getElementById('loadState');
 const loadBarFill=document.getElementById('loadBarFill');
 const loadPercent=document.getElementById('loadPercent');
+const loadCount=document.getElementById('loadCount');
 const loadElapsed=document.getElementById('loadElapsed');
 const loadDetail=document.getElementById('loadDetail');
 const loadRetry=document.getElementById('loadRetry');
@@ -926,7 +930,23 @@ function setupGameViewport(){
 
 // ---------- Boot: wait for every asset/model/animation before allowing play ----------
 const bootState=window.__genesisBoot||{loaded:0,total:0,error:null};
-function syncPreloadProgress(loaded,total){if(!(total>0))return;setLoadUI((loaded/total)*85,'Descargando assets · '+loaded+'/'+total,'La escena permanecerá bloqueada hasta terminar descarga y preparación.');}
+// Contar el archivo descargado, el modelo/clip instanciado y la textura del mundo una sola vez.
+// Los LOD de árboles fuera de vista se transmiten luego y no bloquean esta etapa.
+const bootPrepTotal=[...document.querySelectorAll('pc-model[asset]:not([data-route])'),...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]')).length;
+const bootProgress={downloaded:0,downloadTotal:0,prepared:0,prepareTotal:bootPrepTotal,world:0,worldTotal:8};
+function showBootProgress(stage,detail=''){
+ const total=bootProgress.downloadTotal+bootProgress.prepareTotal+bootProgress.worldTotal;
+ const loaded=bootProgress.downloaded+bootProgress.prepared+bootProgress.world;
+ if(!total)return;
+ setLoadUI(100*loaded/total,stage,detail);
+ loadCount.textContent=loaded+' de '+total+' recursos listos';
+}
+function syncPreloadProgress(loaded,total){
+ if(!(total>0))return;
+ bootProgress.downloadTotal=Math.max(bootProgress.downloadTotal,total);
+ bootProgress.downloaded=Math.max(bootProgress.downloaded,Math.min(loaded,total));
+ showBootProgress('Descargando archivos del juego','La barra avanza cuando cada recurso termina realmente de cargar.');
+}
 if(bootState.total>0)syncPreloadProgress(bootState.loaded,bootState.total);
 appEl.addEventListener('progress',e=>{bootState.loaded=Number(e.loaded)||0;bootState.total=Number(e.total)||0;syncPreloadProgress(bootState.loaded,bootState.total)});
 const routeAssetErrors=[];appEl.addEventListener('error',e=>{const target=e.target;if(target===appEl)return;const id=target?.id||target?.getAttribute?.('name')||target?.getAttribute?.('asset')||target?.tagName||'asset';const message=e?.message||'Error de asset';routeAssetErrors.push({id,message,at:Date.now()});console.warn('Genesis child asset/model error:',id,message)},true);window.__genesisRouteAssetErrors=routeAssetErrors;
@@ -943,7 +963,7 @@ try{
  const prepItems=[...modelEls.map(el=>({kind:'modelo',label:el.getAttribute('name')||el.id||el.getAttribute('asset')||'modelo',el})),...clipEls.map(el=>({kind:'animación',label:el.getAttribute('name')||el.getAttribute('asset')||'clip',el}))];
  let prepared=0;const prepTotal=Math.max(1,prepItems.length);
  const bootWait=(promise,label,timeout=18000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Tiempo agotado preparando '+label)),timeout))]);
- await Promise.all(prepItems.map(async item=>{await bootWait(item.el.ready(),item.label);if(item.kind==='modelo'&&!item.el.contentEntity)throw new Error('No pudo instanciarse: '+item.label);prepared++;setLoadUI(85+(prepared/prepTotal)*15,'Preparando escena · '+prepared+'/'+prepTotal,item.kind+': '+item.label)}));
+ await Promise.all(prepItems.map(async item=>{await bootWait(item.el.ready(),item.label);if(item.kind==='modelo'&&!item.el.contentEntity)throw new Error('No pudo instanciarse: '+item.label);prepared++;bootProgress.prepared=prepared;showBootProgress('Preparando modelos y animaciones',item.kind+': '+item.label)}));
  const [p,o,t,c]=await Promise.all([bootWait(whenReady('#playerModel'),'Edric cuerpo'),bootWait(whenReady('#ordanModel'),'Ordan'),bootWait(whenReady('#tannerMentorModel'),'mentor Curtidor'),bootWait(whenReady('#cameraRig'),'cámara')]);
  player=p.entity;ordan=o.entity;tannerMentor=t.entity;camera=c.entity;setupGameViewport();
  [playerAnim,playerHeadAnim,playerHairAnim,ordanAnim,ordanHeadAnim,ordanHairAnim,tannerMentorAnim,tannerMentorHeadAnim,tannerMentorHairAnim,tannerChestAnim]=await bootWait(Promise.all([
@@ -952,7 +972,7 @@ try{
 }catch(err){failLoading(err?.message||String(err),'La escena no se habilitó; el recurso indicado no terminó de prepararse.');throw err}
 
 let village;
-try{setLoadUI(98,'Armando la aldea','Preparando calles, plaza y talleres.');village=await mountVillage(appEl.app,{shell:document.getElementById('villageShellSource').entity,roof:document.getElementById('villageRoofSource').entity,door:document.getElementById('villageDoorSource').entity});}catch(err){failLoading(err.message,'La aldea no terminó de cargar. Reintentá.');throw err}
+try{showBootProgress('Armando la aldea','Cargando texturas de caminos y plaza.');village=await mountVillage(appEl.app,{shell:document.getElementById('villageShellSource').entity,roof:document.getElementById('villageRoofSource').entity,door:document.getElementById('villageDoorSource').entity,onResourceLoaded:()=>{bootProgress.world++;showBootProgress('Armando la aldea','Texturas del mundo: '+bootProgress.world+' de '+bootProgress.worldTotal);}});}catch(err){failLoading(err.message,'La aldea no terminó de cargar. Reintentá.');throw err}
 window.__genesisVillage=village;
 
 function hideCollisionMeshes(modelEl){const root=modelEl?.contentEntity;if(!root)return;const stack=[root];while(stack.length){const node=stack.pop();const n=(node.name||'').toLowerCase();let collisionLike=n.includes('convcolonly')||n.startsWith('collision_')||n==='collision';const meshes=node.render?.meshInstances||[];if(meshes.length&&meshes.every(mi=>(mi.material?.name||'').toLowerCase().includes('collision')))collisionLike=true;if(collisionLike)node.enabled=false;for(const child of node.children||[])stack.push(child)}}
@@ -1431,9 +1451,9 @@ function routeModels(prof,priority){return[...document.querySelectorAll(`pc-mode
 function groupRouteModels(models){const map=new Map();for(const el of models){const asset=el.dataset.asset;if(!map.has(asset))map.set(asset,[]);map.get(asset).push(el)}return[...map.entries()]}
 function loadDeferredModelAsset(el,asset,timeout=12000){return new Promise((resolve,reject)=>{let done=false;const label=el.getAttribute('name')||el.id||asset;const finish=(ok,msg)=>{if(done)return;done=true;clearTimeout(timer);el.removeEventListener('load',onLoad);el.removeEventListener('error',onError);if(!ok&&!el.contentEntity){try{el.removeAttribute('asset')}catch(_){}}ok?resolve(el):reject(new Error(msg||('No pudo cargarse '+label+' ['+asset+']')))};const onLoad=()=>finish(!!el.contentEntity,el.contentEntity?'':'El modelo terminó sin contenido: '+label+' ['+asset+']');const onError=e=>finish(false,(e?.message||'Falló la carga')+' · '+label+' ['+asset+']');const timer=setTimeout(()=>finish(false,'Tiempo agotado cargando '+label+' ['+asset+']'),timeout);el.addEventListener('load',onLoad,{once:true});el.addEventListener('error',onError,{once:true});if(el.getAttribute('asset')!==asset)el.setAttribute('asset',asset);else if(!el.contentEntity){el.removeAttribute('asset');requestAnimationFrame(()=>el.setAttribute('asset',asset))}if(el.contentEntity)finish(true)})}
 async function activateDeferredModel(el,timeout=12000){if(el.contentEntity)return el;const primary=el.dataset.asset;if(!primary)return el;const fallback=el.dataset.fallbackAsset;try{return await loadDeferredModelAsset(el,primary,timeout)}catch(primaryError){if(!fallback)throw primaryError;console.warn('Genesis asset fallback:',primaryError.message,'→',fallback);try{return await loadDeferredModelAsset(el,fallback,Math.min(timeout,8000))}catch(fallbackError){throw new Error(primaryError.message+' | Fallback '+fallback+' también falló: '+fallbackError.message)}}}
-async function activateRouteGroups(prof,priority,onProgress){const groups=groupRouteModels(routeModels(prof,priority));if(!groups.length){onProgress?.(1,1,'Ruta ya preparada');return{total:0,loaded:0,failed:0,timedOut:false}}let complete=0,loaded=0,failed=0;const jobs=groups.map(([asset,els])=>Promise.allSettled(els.map(el=>activateDeferredModel(el,12000))).then(results=>{const ok=results.some(r=>r.status==='fulfilled'&&r.value?.contentEntity);if(ok)loaded++;else failed++;complete++;onProgress?.(complete,groups.length,(ok?'✓ ':'↻ ')+asset);if(ok){try{refreshRouteBindings(prof)}catch(_){}}return ok}));const all=Promise.allSettled(jobs);const guard=sleep(6500).then(()=>null);const result=await Promise.race([all,guard]);const timedOut=result===null;if(timedOut){onProgress?.(complete,groups.length,'Entrada habilitada · los modelos restantes continúan cargando')}return{total:groups.length,loaded,failed,timedOut}}
+async function activateRouteGroups(prof,priority,onProgress){const groups=groupRouteModels(routeModels(prof,priority));if(!groups.length){onProgress?.(1,1,'Ruta ya preparada');return{total:0,loaded:0,failed:0,timedOut:false}}let complete=0,loaded=0,failed=0;const jobs=groups.map(([asset,els])=>Promise.allSettled(els.map(el=>activateDeferredModel(el,12000))).then(results=>{const ok=results.some(r=>r.status==='fulfilled'&&r.value?.contentEntity);if(ok)loaded++;else failed++;complete++;onProgress?.(loaded,groups.length,(ok?'✓ ':'↻ ')+asset);if(ok){try{refreshRouteBindings(prof)}catch(_){}}return ok}));const all=Promise.allSettled(jobs);const guard=sleep(6500).then(()=>null);const result=await Promise.race([all,guard]);const timedOut=result===null;if(timedOut){onProgress?.(loaded,groups.length,'Entrada habilitada · los modelos restantes continúan cargando')}return{total:groups.length,loaded,failed,timedOut}}
 function refreshRouteBindings(prof){document.querySelectorAll(`pc-model[data-route="${prof}"]`).forEach(el=>el.contentEntity&&hideCollisionMeshes(el));if(prof==='Herrero'){tintModel(document.getElementById('ordanModel'),[.58,.52,.43],0);tintModel(document.getElementById('ordanHairModel'),[.62,.62,.60],0);const root=document.getElementById('chestModel')?.contentEntity;chestLid=root?.findByName?.('Lid')||null;if(chestLid){const e=chestLid.getLocalEulerAngles();chestLidBase={x:e.x,y:e.y,z:e.z}}forgeHotMaterialPatched=false;forgeCoalMaterials=[];igniteForgeVisual()}else{tintModel(document.getElementById('tannerMentorModel'),[.72,.54,.37],0);tintModel(document.getElementById('tannerMentorHairModel'),[.33,.24,.18],0);tannerChestClosed=chooseClip(tannerChestAnim,'Chest_Closed');tannerChestOpen=chooseClip(tannerChestAnim,'Chest_Open');tannerChestOpened=chooseClip(tannerChestAnim,'Chest_Opened');if(tannerChestClosed)tannerChestAnim?.transition?.(tannerChestClosed,.01);applyTannerVisualPass()}}
-async function prepareRoute(prof){if(routeReady.has(prof))return;routeLoading=true;intro.style.display='none';loading.style.display='grid';loadRetry.style.display='none';setLoadUI(4,'Preparando '+prof,'Los modelos se cargan en paralelo. Ningún asset remoto puede bloquear la entrada a la demo.');const report=await activateRouteGroups(prof,'critical',(done,total,label)=>{const pct=Math.min(94,8+Math.round((done/Math.max(1,total))*86));setLoadUI(pct,'Preparando '+prof+' · '+done+'/'+total,label)});try{refreshRouteBindings(prof)}catch(err){console.warn('Bindings parciales de ruta:',err)}routeReady.add(prof);setLoadUI(100,prof+' listo',report?.timedOut?'Entrando al taller; los modelos que falten continúan cargando en segundo plano.':'Ruta preparada. El decorado secundario seguirá entrando sin bloquear el juego.');await sleep(90)}
+async function prepareRoute(prof){if(routeReady.has(prof))return;routeLoading=true;intro.style.display='none';loading.style.display='grid';loadRetry.style.display='none';const planned=groupRouteModels(routeModels(prof,'critical')).length;loadCount.textContent='0 de '+planned+' assets del '+prof;setLoadUI(0,'Preparando '+prof,'Los modelos se cargan en paralelo. Los que falten seguirán en segundo plano.');const report=await activateRouteGroups(prof,'critical',(done,total,label)=>{setLoadUI(100*done/Math.max(1,total),'Preparando '+prof,label);loadCount.textContent=done+' de '+total+' assets del '+prof+' cargados'});try{refreshRouteBindings(prof)}catch(err){console.warn('Bindings parciales de ruta:',err)}routeReady.add(prof);if(!report?.timedOut&&report?.failed===0)setLoadUI(100,prof+' listo','Ruta preparada. El decorado secundario continuará en segundo plano.');else setLoadUI(100*report.loaded/Math.max(1,report.total),prof+' disponible',''+report.loaded+' de '+report.total+' assets listos; los restantes seguirán en segundo plano.');loadCount.textContent=report.loaded+' de '+report.total+' assets del '+prof+' cargados';await sleep(90)}
 function streamRouteDecor(prof){const models=routeModels(prof,'stream');let index=0;const pump=()=>{if(index>=models.length)return;const batch=models.slice(index,index+4);index+=4;for(const el of batch)activateDeferredModel(el,45000).then(()=>{hideCollisionMeshes(el);if(prof==='Curtidor'){applyTannerVisualPass()}}).catch(err=>console.warn('Decoración diferida:',err.message));setTimeout(pump,180)};(window.requestIdleCallback?requestIdleCallback(()=>pump(),{timeout:420}):setTimeout(pump,160))}
 async function chooseProfessionRoute(prof){if(routeLoading||gameStarted)return;const buttons=[...document.querySelectorAll('[data-profession]')];buttons.forEach(b=>b.disabled=true);try{await prepareRoute(prof);startRoute(prof);loading.style.display='none';streamRouteDecor(prof)}catch(err){console.error(err);failLoading(err?.message||String(err),'No se habilitó la ruta. Reintentá; el resto del prototipo no se cargó.');intro.style.display='none'}finally{routeLoading=false;buttons.forEach(b=>b.disabled=false)}}
 
@@ -1442,7 +1462,7 @@ document.querySelectorAll('[data-profession]').forEach(btn=>btn.addEventListener
 
 // ---------- Frame ----------
 const tmpTarget=new Vec3(),tmpCam=new Vec3(),tmp=new Vec3();
-function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-lastT)/1000,.05);lastT=now;forgeImpulse=Math.max(0,forgeImpulse-dt*1.8);
+function frame(now){requestAnimationFrame(frame);village.trees?.update(px,pz);const dt=Math.min((now-lastT)/1000,.05);lastT=now;forgeImpulse=Math.max(0,forgeImpulse-dt*1.8);
  if(forgeHot){const flick=.88+Math.sin(now*.011)*.075+Math.sin(now*.027)*.045,boost=1+forgeImpulse*.55;if(forgeCoreComp)forgeCoreComp.intensity=3.45*flick*boost;if(forgeBounceComp)forgeBounceComp.intensity=.96*(.93+Math.sin(now*.008)*.06)*(1+forgeImpulse*.42)}
  if(chestLid){chestLidAngle=lerp(chestLidAngle,chestLidTarget,1-Math.exp(-dt*6.2));chestLid.setLocalEulerAngles(chestLidBase.x+chestLidAngle,chestLidBase.y,chestLidBase.z)}
  if(doorLeafEntity){doorAngle=lerp(doorAngle,doorTarget,1-Math.exp(-dt*5));doorLeafEntity.setEulerAngles(0,doorAngle,0)}if(tannerDoorLeafEntity){tannerDoorAngle=lerp(tannerDoorAngle,tannerDoorTarget,1-Math.exp(-dt*5));tannerDoorLeafEntity.setEulerAngles(0,tannerDoorAngle,0)}
