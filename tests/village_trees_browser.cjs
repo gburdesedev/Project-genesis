@@ -60,12 +60,19 @@ const server=http.createServer((req,res)=>{
   return result;
  });
  console.log('TREE_MATERIAL_AUDIT',JSON.stringify(matAudit));
+ const barks=matAudit.filter(m=>/bark/i.test(m.name||''));
+ const leaves=matAudit.filter(m=>/leaf|foliage/i.test(m.name||''));
+ assert(barks.length>=4&&leaves.length>=4,'No se diferenciaron corteza y hojas');
+ assert(barks.every(m=>!m.shaderWind&&m.color?.[1]<.8),'La corteza sigue sin tinte marrón o tiene viento');
+ assert(leaves.every(m=>m.shaderWind),'El follaje no recibió viento GPU');
  assert(status.windEnabled&&status.windMaterials>0,'Viento GPU sin materiales');
  await page.waitForTimeout(500);
  const windTime=await page.evaluate(()=>{
   for(const anchor of window.__scene.trees.root.children){
    for(const render of anchor.findComponents('render'))for(const mi of render.meshInstances){
-    const value=mi.material.getParameter?.('uGenesisWindTime');if(typeof value==='number')return value;
+    const param=mi.material.getParameter?.('uGenesisWindTime');
+    const value=typeof param==='number'?param:param?.data;
+    if(typeof value==='number')return value;
    }
   }
   return null;
