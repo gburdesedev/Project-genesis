@@ -1,4 +1,4 @@
-/* Project Genesis v0.14a — approved V027 mineral emission, Blender-matched rise.
+/* Project Genesis v0.14b — approved V027 mineral emission with neutral frontal fill.
  * Visual source and its WebGL LOD are pinned to an immutable public commit.
  * This is decorative scenery: the door remains closed and keeps workshop collision.
  */
@@ -45,16 +45,22 @@ function animateArcaneVeins(app,pivot,visual){
    mi.material=mats.get(original);
   }
  }
- const debug={textureMasks:sources.length,lights:0,updatedFrames:0,phaseA:0,phaseB:0,emissionStrength:5.2,version:'v0.14a'};
+ const debug={textureMasks:sources.length,lights:0,updatedFrames:0,phaseA:0,phaseB:0,emissionStrength:5.2,version:'v0.14b'};
  globalThis.__genesisArcaneVeinsStatus=debug;
  let elapsed=0,acc=0;
+ // Light the actual mineral/metal door surface, not just the animated emissive veins.
+ // World-fixed relative to the doorway, so turning the camera cannot change it.
+ const fill=new Entity('Arcanista · luz frontal mineral suave V027');
+ fill.addComponent('light',{type:'omni',color:new Color(.76,.83,1),range:3.4,intensity:mobile?1.05:1.3,castShadows:false});
+ fill.setLocalPosition(0,1.38,.91);pivot.addChild(fill);
+ debug.fillLight=true;
  const lights=[];
  for(const [index,x] of (mobile?[[-1,-.18]]:[[0,-.20],[1,.23]])){
   const light=new Entity('Corriente arcana ascendente '+index);
   light.addComponent('light',{type:'omni',color:new Color(.18,.62,1),range:1.8,intensity:1.0,castShadows:false});
   light.setLocalPosition(x,.25,.45);pivot.addChild(light);lights.push(light);
  }
- debug.lights=lights.length;
+ debug.lights=lights.length+1;
  const tick=dt=>{
   if(!pivot.enabled||!visual.enabled)return;
   elapsed+=Math.min(Math.max(0,dt||0),.08);
@@ -97,7 +103,7 @@ function animateArcaneVeins(app,pivot,visual){
   }
  };
  app.on('update',tick);
- return {animatedTextures:sources.length,lights:lights.length};
+ return {animatedTextures:sources.length,lights:lights.length+1};
 }
 
 export function mountArcanePortal(app,building,fallbackDoor,options={}){
