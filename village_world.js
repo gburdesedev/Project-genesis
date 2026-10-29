@@ -81,17 +81,27 @@ function archedStoneMesh(app,parent,name,material,quads){
  e.addComponent('render',{meshInstances:[new MeshInstance(geometry,material)],castShadows:true,receiveShadows:true});
  return e;
 }
-function arcaneSurround(app,building,cobble){
+function stripOversizedWorkshopArch(shell){
+ const stack=[shell];
+ while(stack.length){
+  const node=stack.pop();
+  for(const child of node.children)stack.push(child);
+  if(/^archstone_\\d+$/.test(node.name||'')||node.name==='fac_header')node.enabled=false;
+ }
+}
+function arcaneSurround(app,building,cobble,shell){
  // Door V027: x[-0.648,+0.605], ymax 2.32. Original opening ~2.50 m
  // across, hence masonry fills the sides, while an actual curved stone
  // reveal follows its arch. Keep the wall's approved PBR mineral character.
  const frame=new Entity('Arcanista · vano de piedra tallada siguiendo arco V027');
  frame.setLocalPosition(0,0,.22);building.addChild(frame);
- const wall=pavedMaterial('Mampostería mineral integrada · arco arcanista',cobble,1.8,2.5,1.5);
- wall.diffuse.set(.48,.49,.53);wall.bumpiness=.82;wall.gloss=.12;wall.update();
+ const sourceWall=shell.findByName('fac_plaster_-2.45')?.render?.meshInstances?.[0]?.material;
+ const wall=sourceWall?.clone?sourceWall.clone():pavedMaterial('Mampostería mineral integrada',cobble,1.8,2.5,1.5);
+ wall.name='Arcanista · continuidad PBR de la fachada original';
+ wall.gloss=.12;wall.update();
  const rim=pavedMaterial('Piedra tallada rugosa · borde curvo V027',cobble,1.8,2.5,1.25);
  rim.diffuse.set(.40,.43,.49);rim.bumpiness=.92;rim.gloss=.13;rim.update();
- const spring=1.64,inner=.675,outer=.815,top=2.55;
+ const spring=1.64,inner=.675,outer=.815,top=3.18;
  // These side masses sit behind the door leaf; their front is flush with
  // the existing facade, not in front of the magical PBR surface.
  mesh(frame,'Muro izquierdo · unión con fachada','box',-1.055,spring/2,-.045,.39,spring,.18,wall,true);
@@ -157,7 +167,8 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
   }
   if(p.profession==='Arcanista'){
    tintArcaneFacade(shellClone);
-   arcaneSurround(app,building,cobble);
+   stripOversizedWorkshopArch(shellClone);
+   arcaneSurround(app,building,cobble,shellClone);
    arcanePortals.push(mountArcanePortal(app,building,doorClone,{onResourceLoaded}));
   }
   proxies.set(p.profession,building);

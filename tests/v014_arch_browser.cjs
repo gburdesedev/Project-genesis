@@ -18,8 +18,8 @@ try{
 </script></body></html>`;
 const server=http.createServer((req,res)=>{const url=new URL(req.url,'http://localhost').pathname;if(url==='/'){res.setHeader('Content-Type','text/html');return res.end(html)}if(assets[url]){res.setHeader('Content-Type','model/gltf-binary');return res.end(assets[url])}const file=url==='/engine.mjs'?engine:path.join(root,url);if(!file.startsWith(root)&&file!==engine){res.writeHead(403);return res.end()}if(!fs.existsSync(file)){res.writeHead(404);return res.end()}res.setHeader('Content-Type',file.endsWith('.js')||file.endsWith('.mjs')?'text/javascript':file.endsWith('.png')?'image/png':file.endsWith('.html')?'text/html':'application/octet-stream');fs.createReadStream(file).pipe(res)});
 (async()=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});const page=await browser.newPage({viewport:{width:1440,height:1080}});await page.goto(`http://127.0.0.1:${server.address().port}/`);await page.waitForFunction(()=>window.ready||window.failure,{},{timeout:90000});const failure=await page.evaluate(()=>window.failure);assert(!failure,failure);await page.waitForTimeout(700);
- fs.mkdirSync('/tmp/genesis-responsive',{recursive:true});await page.screenshot({path:'/tmp/genesis-responsive/v0.14-village-overview.png'});
- await page.evaluate(()=>{view.camera.setPosition(7,9,31);view.camera.lookAt(new view.Vec3(7,0,10))});await page.waitForTimeout(400);await page.screenshot({path:'/tmp/genesis-responsive/v0.14-village-plaza.png'});
+ fs.mkdirSync('/tmp/genesis-responsive',{recursive:true});await page.screenshot({path:'/tmp/genesis-responsive/v0.14-village-overview.png',timeout:12000}).catch(err=>console.warn('Captura opcional:',err.message));
+ await page.evaluate(()=>{view.camera.setPosition(7,9,31);view.camera.lookAt(new view.Vec3(7,0,10))});await page.waitForTimeout(400);await page.screenshot({path:'/tmp/genesis-responsive/v0.14-village-plaza.png',timeout:12000}).catch(err=>console.warn('Captura opcional:',err.message));
  const state=await page.evaluate(()=>({width:GenesisVillagePlan.bounds.maxX-GenesisVillagePlan.bounds.minX,closed:view.village.blocked(-15.5,16),count:view.village.root.children.filter(e=>e.name.includes('fachada cerrada')).length,scale:view.village.root.children.find(e=>e.name.includes('fachada cerrada')).getLocalScale().x,heightScale:view.village.root.children.find(e=>e.name.includes('fachada cerrada')).getLocalScale().y}));assert.equal(state.width,63);assert.equal(state.closed,true);assert.equal(state.count,5);assert.equal(state.scale,.75);assert.equal(state.heightScale,1);
 
  await page.evaluate(()=>{
@@ -31,12 +31,15 @@ const server=http.createServer((req,res)=>{const url=new URL(req.url,'http://loc
   const root=view.village.root;
   const entity=root.findByName('Arco continuo · anillo PBR de 32 dovelas');
   const fill=root.findByName('Muro superior recortado a la silueta');
-  return {ring:entity?.render?.meshInstances?.length||0,fill:fill?.render?.meshInstances?.length||0,door:window.__genesisArcaneDoorStatus,glow:window.__genesisArcaneVeinsStatus};
+  const workshop=root.children.find(e=>e.name.startsWith('Arcanista ·'));
+  const oldArch=workshop?.findByName('archstone_0');
+  return {ring:entity?.render?.meshInstances?.length||0,fill:fill?.render?.meshInstances?.length||0,oldArchHidden:oldArch?.enabled===false,door:window.__genesisArcaneDoorStatus,glow:window.__genesisArcaneVeinsStatus};
  });
  assert(arch.ring>0&&arch.fill>0,'La fachada no tiene arco curvo ni relleno recortado: '+JSON.stringify(arch));
+ assert(arch.oldArchHidden,'El arco viejo rectangular sigue expuesto');
  assert.equal(arch.door?.phase,'ready','La puerta V027 no cargó dentro de la aldea');
  assert(arch.glow?.textureMasks>0,'El emissive V027 no está animado');
- await page.screenshot({path:'/tmp/genesis-responsive/v0.14-arcanista-marco-curvo.png'});
+ await page.screenshot({path:'/tmp/genesis-responsive/v0.14-arcanista-marco-curvo.png',timeout:12000}).catch(err=>console.warn('Captura opcional:',err.message));
  await page.close();await browser.close();server.close();
  console.log('PASS v0.14 Arcanist curved masonry and animated door in actual village',JSON.stringify(arch));
 })().catch(e=>{console.error(e);server.close();process.exit(1)});
