@@ -47,6 +47,34 @@ const server=http.createServer((req,res)=>{
  const materials=await page.evaluate(()=>{const root=window.__scene.trees.root;let foliage=0,opaque=0,triangles=0,textureReady=0;for(const anchor of root.children){for(const render of anchor.findComponents('render'))for(const mi of render.meshInstances){const m=mi.material;triangles+=mi.mesh?.primitive?.[0]?.count?mi.mesh.primitive[0].count/3:0;if(m?.alphaTest>0||m?.opacityMap){foliage++;if(m.opacityMap||m.diffuseMap)textureReady++}else opaque++}}return {foliage,opaque,triangles,textureReady}});
  assert(materials.foliage>0&&materials.textureReady>0,'No hay hojas transparentes/PBR en la escena: '+JSON.stringify(materials));
  console.log('LEAFY_PBR_CHECK',JSON.stringify(materials));
+ const matAudit=await page.evaluate(()=>{
+  const result=[],sample=window.__scene.trees.root.children.slice(0,4);
+  for(const anchor of sample)for(const render of anchor.findComponents('render'))for(const mi of render.meshInstances){
+   const m=mi.material;
+   result.push({tree:anchor.name,entity:render.entity?.name||'?',name:m?.name,
+    alpha:m?.alphaTest,opacity:!!m?.opacityMap,diffuseMap:!!m?.diffuseMap,
+    shaderWind:!!m?.getShaderChunks?.()?.get?.('transformVS'),
+    color:m?.diffuse?[m.diffuse.r,m.diffuse.g,m.diffuse.b]:null,
+    windTime:m?.getParameter?.('uGenesisWindTime')});
+  }
+  return result;
+ });
+ console.log('TREE_MATERIAL_AUDIT',JSON.stringify(matAudit));
+ assert(status.windEnabled&&status.windMaterials>0,'Viento GPU sin materiales');
+ await page.waitForTimeout(500);
+ const windTime=await page.evaluate(()=>{
+  for(const anchor of window.__scene.trees.root.children){
+   for(const render of anchor.findComponents('render'))for(const mi of render.meshInstances){
+    const value=mi.material.getParameter?.('uGenesisWindTime');if(typeof value==='number')return value;
+   }
+  }
+  return null;
+ });
+ console.log('TREE_WIND_TIME',windTime);
+ assert(typeof windTime==='number'&&windTime>.1,'El reloj GPU del viento no avanza');
+ assert(!errors.some(e=>/shader.*(?:error|fail)|(?:error|fail).*shader|compile.*error/i.test(e)),
+  'Error GLSL en ramas/hojas: '+errors.join(' | '));
+
  try{await page.screenshot({path:'/tmp/genesis-trees/plaza-14-arboles-v0.14a.png',timeout:12000})}
  catch(error){console.warn('Captura opcional de árboles no disponible; render confirmado:',error.message)}
  console.log('PASS real PlayCanvas tree screenshot',JSON.stringify(status));
