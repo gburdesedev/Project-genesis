@@ -1,7 +1,7 @@
-name: Preview v0.14a approved foliage and V027 glow
+name: Preview v0.14b wind, bark and doorway fill
 on:
   push:
-    branches: ['feature/v0.14a-leafy-glow']
+    branches: ['feature/v0.14a-leafy-glow', 'feature/v0.14b-wind-bark-door']
     paths:
       - 'village_arcanist.js'
       - 'village_world.js'
@@ -32,6 +32,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: v014a-arcanist-and-trees
+          name: v014b-arcanist-and-trees
           path: /tmp/genesis-trees
           retention-days: 5
