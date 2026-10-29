@@ -134,14 +134,14 @@ function arcaneSurround(app,building,cobble,shell){
 function stampVersion(){
  const version='v0.14b', build='20261029.03';
  globalThis.__genesisVillageBuild={version,build};
- document.title=document.title.replace(/v0\\.14a?/gi,version);
+ document.title=document.title.replace(/v0\.14a?/gi,version);
  // The existing HUD build label lives in the monolithic demo HTML. Update
  // its text node without rewriting or disturbing its DOM or event handlers.
  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
  let node;
  while((node=walker.nextNode())){
   if(!/PROJECT GENESIS|BUILD 20261029/i.test(node.nodeValue||''))continue;
-  node.nodeValue=node.nodeValue.replace(/v0\\.14a?/gi,version).replace(/20261029\\.0[12]/g,build);
+  node.nodeValue=node.nodeValue.replace(/v0\.14a?/gi,version).replace(/20261029\.0[12]/g,build);
  }
 }
 export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{}}){
