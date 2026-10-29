@@ -78,8 +78,11 @@ function classifyAndTune(prototype,mobile,windMaterials) {
    let m=copies.get(src);
    if(!m){
     const label=(src.name||'')+' '+(e.name||'');
-    const leaf=/leaf|leaves|foliage|hoja|crown|canopy/i.test(label)
-      || !!src.opacityMap || (src.alphaTest||0)>0.01;
+    // GLB import assigns opacity maps even to opaque Bark materials.
+    // Match the actual botanical material names / alpha cutoff, not opacityMap.
+    const barkName=/bark|wood|trunk|corteza|twig|branch/i.test(label);
+    const leaf=!barkName&&(/leaf|leaves|foliage|hoja|crown|canopy/i.test(label)
+      || (src.alphaTest||0)>0.01);
     m=src.clone();
     if(leaf){
      m.getShaderChunks(SHADERLANGUAGE_GLSL).set('transformVS',WIND_TRANSFORM_VS);
