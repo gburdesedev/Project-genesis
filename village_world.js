@@ -1,9 +1,10 @@
 import {Entity,StandardMaterial,Texture,Color,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
+import {mountVillageTrees} from './village_trees.js';
 const ROOT='./assets/world/v0.11.004/';
 const MOBILE_TEXTURE_EDGE=1024;
 // Decode one full-resolution source at a time on touch devices, then keep only
 // a small PBR texture in GPU memory. Desktop retains the approved 4K originals.
-async function loadTexture(app,name,mobile=false){
+async function loadTexture(app,name,mobile=false,onResourceLoaded=()=>{}){
  const image=new Image();image.decoding='async';image.src=ROOT+name;await image.decode();
  let source=image;
  if(mobile&&Math.max(image.naturalWidth,image.naturalHeight)>MOBILE_TEXTURE_EDGE){
@@ -16,13 +17,14 @@ async function loadTexture(app,name,mobile=false){
  }
  const texture=new Texture(app.graphicsDevice,{name,srgb:name.endsWith('_color.png'),mipmaps:true,minFilter:FILTER_LINEAR_MIPMAP_LINEAR,magFilter:FILTER_LINEAR,addressU:ADDRESS_REPEAT,addressV:ADDRESS_REPEAT});
  texture.setSource(source);
+ onResourceLoaded(name);
  if(source!==image)image.src='';
  return texture;
 }
-async function maps(app,name,mobile=false){
+async function maps(app,name,mobile=false,onResourceLoaded=()=>{}){
  const keys=['color','normal','gloss','ao'],values=[];
- if(mobile){for(const key of keys)values.push(await loadTexture(app,`${name}_${key}.png`,true))}
- else values.push(...await Promise.all(keys.map(key=>loadTexture(app,`${name}_${key}.png`))));
+ if(mobile){for(const key of keys)values.push(await loadTexture(app,`${name}_${key}.png`,true,onResourceLoaded))}
+ else values.push(...await Promise.all(keys.map(key=>loadTexture(app,`${name}_${key}.png`,false,onResourceLoaded))));
  return Object.fromEntries(keys.map((key,i)=>[key,values[i]]));
 }
 function material(name,color){const m=new StandardMaterial();m.name=name;m.diffuse=new Color(...color);m.gloss=.15;m.update();return m}
@@ -42,12 +44,12 @@ function textMaterial(app,title,subtitle){
  const texture=new Texture(app.graphicsDevice,{name:title,mipmaps:true});texture.setSource(canvas);const m=material(title,[1,1,1]);m.diffuseMap=texture;m.emissiveMap=texture;m.emissive=new Color(.2,.2,.2);m.update();return m;
 }
 function sign(app,parent,title,subtitle,x,z,yaw,height=2.9,width=3.8){const root=new Entity(title+' cartel');parent.addChild(root);root.setPosition(x,0,z);root.setEulerAngles(0,yaw,0);const e=mesh(root,title,'plane',0,height,.30,width,1,.95,textMaterial(app,title,subtitle));e.setLocalEulerAngles(90,0,0);return root}
-export async function mountVillage(app,{shell,roof,door}){
- const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.11.005');app.root.addChild(root);
+export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{}}){
+ const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.11.016');app.root.addChild(root);
  const mobile=globalThis.GenesisDevice?.safePreviews===true;
  const [cobble,traffic]=mobile
-  ? [await maps(app,'cobble',true),await maps(app,'traffic',true)]
-  : await Promise.all([maps(app,'cobble'),maps(app,'traffic')]);
+  ? [await maps(app,'cobble',true,onResourceLoaded),await maps(app,'traffic',true,onResourceLoaded)]
+  : await Promise.all([maps(app,'cobble',false,onResourceLoaded),maps(app,'traffic',false,onResourceLoaded)]);
  const b=plan.bounds;
  mesh(root,'Pavimento exterior adoquín','plane',7,-.024,17,63,1,63,pavedMaterial('Adoquín · exterior',cobble,63,63));
  mesh(root,'Plaza central','plane',plan.plaza.x,-.010,plan.plaza.z,plan.plaza.w,1,plan.plaza.d,pavedMaterial('Adoquín · plaza',cobble,plan.plaza.w,plan.plaza.d,2.4));
@@ -81,5 +83,6 @@ export async function mountVillage(app,{shell,roof,door}){
  sign(app,root,'PLAZA CENTRAL','Aldea de los artesanos',plazaSign.x,plazaSign.z,0,1.9,4.4);
  mesh(root,'Poste cartel plaza','box',plazaSign.x,.65,plazaSign.z,.14,1.3,.14,marker);
  const fixedObstacles=[{x:marketSign.x,z:marketSign.z,r:.2},{x:plazaSign.x,z:plazaSign.z,r:.18}];
- return Object.freeze({root,plan,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
+ const trees=mountVillageTrees(app,root);
+ return Object.freeze({root,plan,trees,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
 }
