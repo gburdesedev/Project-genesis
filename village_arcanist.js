@@ -8,7 +8,7 @@ export const ARCANE_DOOR_SOURCE = 'https://raw.githubusercontent.com/Projectgene
 
 export function mountArcanePortal(app,building,fallbackDoor){
  const pivot=new Entity('Arcanista · puerta mágica V027 · cerrada');
- pivot.setLocalPosition(-1.1,0,.12);
+ pivot.setLocalPosition(0,0,.12);
  building.addChild(pivot);
  let phase='loading',detail='';
  const report=()=>({version:'V027',phase,detail,url:ARCANE_DOOR_SOURCE});

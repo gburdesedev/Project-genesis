@@ -760,7 +760,7 @@ window.__genesisAppError=function(event){
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
 import { Vec3 } from 'playcanvas';
-import { mountVillage } from './village_world.js?v=0.11.017';
+import { mountVillage } from './village_world.js?v=0.13.1';
 
 /* Preparación v0.11: adaptador local sin modificar el motor procedural ni las
    resoluciones de Fabricación/Cierre. Conserva ambas rutas del tutorial. */
@@ -929,7 +929,7 @@ const bootState=window.__genesisBoot||{loaded:0,total:0,error:null};
 // Contar el archivo descargado, el modelo/clip instanciado y la textura del mundo una sola vez.
 // Los LOD de árboles fuera de vista se transmiten luego y no bloquean esta etapa.
 const bootPrepTotal=[...document.querySelectorAll('pc-model[asset]:not([data-route])'),...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]')).length;
-const bootProgress={downloaded:0,downloadTotal:0,prepared:0,prepareTotal:bootPrepTotal,world:0,worldTotal:8};
+const bootProgress={downloaded:0,downloadTotal:0,prepared:0,prepareTotal:bootPrepTotal,world:0,worldTotal:12};
 function showBootProgress(stage,detail=''){
  const total=bootProgress.downloadTotal+bootProgress.prepareTotal+bootProgress.worldTotal;
  const loaded=bootProgress.downloaded+bootProgress.prepared+bootProgress.world;
@@ -968,7 +968,7 @@ try{
 }catch(err){failLoading(err?.message||String(err),'La escena no se habilitó; el recurso indicado no terminó de prepararse.');throw err}
 
 let village;
-try{showBootProgress('Armando la aldea','Cargando texturas de caminos y plaza.');village=await mountVillage(appEl.app,{shell:document.getElementById('villageShellSource').entity,roof:document.getElementById('villageRoofSource').entity,door:document.getElementById('villageDoorSource').entity,onResourceLoaded:()=>{bootProgress.world++;showBootProgress('Armando la aldea','Texturas del mundo: '+bootProgress.world+' de '+bootProgress.worldTotal);}});}catch(err){failLoading(err.message,'La aldea no terminó de cargar. Reintentá.');throw err}
+try{showBootProgress('Armando la aldea','Cargando árboles, caminos y plaza.');village=await mountVillage(appEl.app,{shell:document.getElementById('villageShellSource').entity,roof:document.getElementById('villageRoofSource').entity,door:document.getElementById('villageDoorSource').entity,onResourceLoaded:()=>{bootProgress.world++;showBootProgress('Armando la aldea','Recursos de aldea: '+bootProgress.world+' de '+bootProgress.worldTotal);}});}catch(err){failLoading(err.message,'La aldea no terminó de cargar. Reintentá.');throw err}
 window.__genesisVillage=village;
 
 function hideCollisionMeshes(modelEl){const root=modelEl?.contentEntity;if(!root)return;const stack=[root];while(stack.length){const node=stack.pop();const n=(node.name||'').toLowerCase();let collisionLike=n.includes('convcolonly')||n.startsWith('collision_')||n==='collision';const meshes=node.render?.meshInstances||[];if(meshes.length&&meshes.every(mi=>(mi.material?.name||'').toLowerCase().includes('collision')))collisionLike=true;if(collisionLike)node.enabled=false;for(const child of node.children||[])stack.push(child)}}

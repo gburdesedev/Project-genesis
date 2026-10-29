@@ -1,11 +1,12 @@
-/* Project Genesis v0.11.017 — approved plaza trees, progressively streamed.
+/* Project Genesis v0.13.1 — approved plaza trees, prioritized safe streaming.
  * Artwork: oak V017, ash V020, linden V022, burgundy maple V021.
  * The art masters are immutable. The v003 LOD1/2 are separate, validated assets.
  * 14 trunks over the 63x63-metre village: 4 in the plaza, 10 along the town and perimeter.
  */
 import { Entity } from 'playcanvas';
 
-const REPO = 'https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/94d2fe3262af163d9cd7277cc4e31e20acf3bcaa/';
+const ORIGINALS = 'https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/94d2fe3262af163d9cd7277cc4e31e20acf3bcaa/';
+const REPO = 'https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/dd8dc0693a0d419373eb3f88db06366ab1df7ea2/';
 const TYPES = Object.freeze({
  oak: { label: 'Roble', height: 9.1, master: 'assets/plaza_trees_v017/oak/oak_easytree_v017.glb' },
  ash: { label: 'Fresno', height: 9.7, master: 'assets/plaza_trees_v020/ash/ash_easytree_v020.glb' },
@@ -27,9 +28,9 @@ export const TREE_SITES = Object.freeze(RAW_SITES.map((item,index)=>Object.freez
  rotation: (index*137.508)%360, size: 0.90+((index*7)%9)*0.025,
  trunkRadius: 0.43
 })));
-const assetPath = (species,lod) => REPO + (lod===0
- ? TYPES[species].master
- : 'assets/tree_webgl_v003/'+species+'/lod'+lod+'.glb');
+const assetPath = (species,lod) => lod===0
+ ? ORIGINALS+TYPES[species].master
+ : REPO+'assets/tree_webgl_v004/'+species+'/lod'+lod+'.glb';
 function boundsOf(entity){
  const stack=[entity];let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
  entity.syncHierarchy();
@@ -49,7 +50,7 @@ function boundsOf(entity){
 }
 export function mountVillageTrees(app, villageRoot, options={}){
  const safeMobile = globalThis.GenesisDevice?.safePreviews===true;
- const treeRoot=new Entity('Vegetación aprobada — 14 árboles · LOD 0/1/2');
+ const treeRoot=new Entity('Vegetación aprobada — 14 árboles · LOD 1/2');
  villageRoot.addChild(treeRoot);
  const nodes=TREE_SITES.map(site=>{
   const anchor=new Entity('Árbol '+site.id+' · '+TYPES[site.species].label+' · '+site.region);
@@ -59,20 +60,29 @@ export function mountVillageTrees(app, villageRoot, options={}){
  });
  const ready=new Map(),requested=new Set(),failed=new Set(),queue=[];
  let active=0,focusX=0,focusZ=0,lastUpdate=0;
- const maxConcurrent=safeMobile?1:2;
+ const maxConcurrent=safeMobile?2:4;
+ const initiallySettled=new Set();
+ let resolveInitial;
+ const initialReady=new Promise(resolve=>{resolveInitial=resolve;});
  const status=()=>({
   planned:nodes.length,plaza:TREE_SITES.filter(p=>p.region==='plaza').length,
   residentVariants:ready.size,failedVariants:failed.size,pendingVariants:queue.length+active,
-  visible:nodes.filter(n=>n.visible).length,rendered:nodes.filter(n=>n.visible&&n.visual).length,
+  visible:nodes.filter(n=>n.visible&&n.visual).length,rendered:nodes.filter(n=>n.visible&&n.visual).length,
   mobile:safeMobile
  });
  function pump(){
   while(active<maxConcurrent&&queue.length){
    const task=queue.shift();active++;
-   const url=assetPath(task.species,task.lod);
+   const url=task.legacy
+    ? ORIGINALS+'assets/tree_webgl_v003/'+task.species+'/lod'+task.lod+'.glb'
+    : assetPath(task.species,task.lod);
    app.assets.loadFromUrl(url,'container',(error,asset)=>{
     active--;
     if(error||!asset?.resource){
+     if(!task.legacy&&task.lod>=1){
+      console.warn('Genesis trees: reintentando GLB de respaldo',task.key,error);
+      queue.unshift({...task,legacy:true});pump();return;
+     }
      failed.add(task.key);
      console.warn('Genesis trees: no se pudo cargar',TYPES[task.species].label,'LOD'+task.lod,error||'sin recurso');
     }else{
@@ -81,9 +91,18 @@ export function mountVillageTrees(app, villageRoot, options={}){
       const dimensions=boundsOf(prototype);
       ready.set(task.key,{prototype,dimensions});
      }catch(err){
+      if(!task.legacy&&task.lod>=1){
+       queue.unshift({...task,legacy:true});pump();return;
+      }
       failed.add(task.key);console.warn('Genesis trees: GLB inválido',task.key,err);
      }
     }
+    if(task.lod===2&&!initiallySettled.has(task.species)){
+     initiallySettled.add(task.species);
+     if(ready.has(task.key))options.onResourceLoaded?.('tree:'+task.species+':lod2');
+     if(initiallySettled.size===Object.keys(TYPES).length)resolveInitial({loaded:Object.keys(TYPES).length-failed.size,failed:failed.size});
+    }
+    update(focusX,focusZ,true);
     globalThis.__genesisTreeStatus=status();
     pump();
    });
@@ -91,6 +110,7 @@ export function mountVillageTrees(app, villageRoot, options={}){
  }
  function request(species,lod){
   if(safeMobile&&lod!==2)return;
+  if(lod===0)return; // Approved master kept offline: no 4K hero GLB in the village runtime.
   const key=species+':'+lod;
   if(ready.has(key)||requested.has(key)||failed.has(key))return;
   requested.add(key);queue.push({key,species,lod});pump();
@@ -124,21 +144,22 @@ export function mountVillageTrees(app, villageRoot, options={}){
    node.visible=d<maximum;
    node.anchor.enabled=node.visible;
    if(!node.visible)continue;
-   const goal=safeMobile?2:d<10?0:d<23?1:2;
+   const goal=safeMobile?2:d<23?1:2;
    request(node.site.species,2);
    if(ready.has(node.site.species+':2')&&goal<=1)request(node.site.species,1);
-   if(ready.has(node.site.species+':1')&&goal===0)request(node.site.species,0);
-   const available=goal===0?[0,1,2]:goal===1?[1,2]:[2];
+   const available=goal===1?[1,2]:[2];
    for(const candidate of available)if(ready.has(node.site.species+':'+candidate)){
     install(node,candidate);break;
    }
   }
   globalThis.__genesisTreeStatus=status();
  }
+ // Fetch one visible baseline per approved species immediately, before navigation.
+ for(const species of Object.keys(TYPES))request(species,2);
  update(0,0,true);
  return Object.freeze({
-  root:treeRoot,sites:TREE_SITES,update,status,
-  blocked(x,z,r=.33){return TREE_SITES.some(site=>Math.hypot(site.x-x,site.z-z)<site.trunkRadius+r)},
+  root:treeRoot,sites:TREE_SITES,update,status,initialReady,
+  blocked(x,z,r=.33){return nodes.some(node=>node.visible&&node.visual&&node.anchor.enabled&&Math.hypot(node.site.x-x,node.site.z-z)<node.site.trunkRadius+r)},
   release(){treeRoot.destroy();queue.length=0}
  });
 }

@@ -1,6 +1,6 @@
 import {Entity,StandardMaterial,Texture,Color,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
-import {mountVillageTrees} from './village_trees.js?v=0.11.017';
-import {mountArcanePortal} from './village_arcanist.js?v=0.11.017';
+import {mountVillageTrees} from './village_trees.js?v=0.13.1';
+import {mountArcanePortal} from './village_arcanist.js?v=0.13.1';
 const ROOT='./assets/world/v0.11.004/';
 const MOBILE_TEXTURE_EDGE=1024;
 // Decode one full-resolution source at a time on touch devices, then keep only
@@ -70,16 +70,20 @@ function arcaneSurround(app,building,cobble){
  // The V027 door is 1.253 m wide and 2.32 m high in Blender's GLB export.
  // Mineral masonry physically frames its sides and lintel without sealing it.
  const frame=new Entity('Arcanista · jambas PBR y dintel ajustados a V027');
- frame.setLocalPosition(-1.1,0,.22);building.addChild(frame);
+ frame.setLocalPosition(0,0,.22);building.addChild(frame);
  const stone=pavedMaterial('Piedra mineral mate · portal arcanista',cobble,1.75,2.50,1.4);
  stone.diffuse.set(.48,.49,.55);stone.bumpiness=.88;stone.gloss=.17;stone.update();
- mesh(frame,'Jamba mineral izquierda','box',-.77,1.20,0,.16,2.40,.25,stone,true);
- mesh(frame,'Jamba mineral derecha','box',.74,1.20,0,.16,2.40,.25,stone,true);
- mesh(frame,'Dintel mineral superior','box',-.015,2.43,0,1.67,.18,.25,stone,true);
+ mesh(frame,'Macizo mineral izquierdo · rellena hueco original','box',-.949,1.16,0,.602,2.32,.26,stone,true);
+ mesh(frame,'Macizo mineral derecho · rellena hueco original','box',.928,1.16,0,.644,2.32,.26,stone,true);
+ mesh(frame,'Dintel mineral sobre V027 · cierre hasta viga','box',-.02,2.435,0,2.50,.23,.26,stone,true);
+ mesh(frame,'Remate pétreo izquierdo','box',-.686,1.16,.138,.075,2.32,.07,stone,true);
+ mesh(frame,'Remate pétreo derecho','box',.650,1.16,.138,.075,2.32,.07,stone,true);
  return frame;
 }
 export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{}}){
- const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.11.017');app.root.addChild(root);
+ const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.13.1');app.root.addChild(root);
+ // Begin tree transfers before road PBR maps: four species are part of the initial scene.
+ const trees=mountVillageTrees(app,root,{onResourceLoaded});
  const mobile=globalThis.GenesisDevice?.safePreviews===true;
  const [cobble,traffic]=mobile
   ? [await maps(app,'cobble',true,onResourceLoaded),await maps(app,'traffic',true,onResourceLoaded)]
@@ -129,6 +133,8 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{}}
  sign(app,root,'PLAZA CENTRAL','Aldea de los artesanos',plazaSign.x,plazaSign.z,0,1.9,4.4);
  mesh(root,'Poste cartel plaza','box',plazaSign.x,.65,plazaSign.z,.14,1.3,.14,marker);
  const fixedObstacles=[{x:marketSign.x,z:marketSign.z,r:.2},{x:plazaSign.x,z:plazaSign.z,r:.18}];
- const trees=mountVillageTrees(app,root);
+ // Do not enable movement until each baseline LOD2 has loaded or explicitly failed.
+ // Failed variants have no collision; the scene never contains invisible trunks.
+ await trees.initialReady;
  return Object.freeze({root,plan,trees,arcanePortals,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
 }
