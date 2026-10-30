@@ -1,0 +1,27 @@
+name: Inspect original forge for isolated V038 preview
+on:
+  push:
+    branches: [feature/forge-v038-playcanvas-preview]
+    paths:
+      - .github/workflows/inspect-forge-v038.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect current version and forge without modifying game
+        run: |
+          python3 scripts/inspect_forge_integration_v038.py
+      - name: Publish controlled excerpts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reports/forge-v038-code-inspection.json
+          git commit -m 'Record V038 preview compatibility inspection [skip ci]'
+          git fetch origin "${{ github.ref_name }}"
+          git rebase "origin/${{ github.ref_name }}"
+          git push origin "HEAD:${{ github.ref_name }}"
