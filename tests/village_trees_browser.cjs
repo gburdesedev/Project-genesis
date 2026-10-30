@@ -132,7 +132,7 @@ const server=http.createServer((req,res)=>{
  assert(collision.every(c=>c.atCenter&&c.nearEdge&&!c.beyondEdge),
    'Collision circles do not follow the visible trunk: '+JSON.stringify(collision));
  for(const physical of trunks){
-  const id=Number(physical.name.match(/Árbol (\\d+)/)?.[1]||0);
+  const id=Number(physical.name.match(/Árbol (\d+)/)?.[1]||0);
   const collider=collision.find(c=>c.id===id);
   assert(collider,'Missing collider for '+physical.name);
   assert(Math.hypot(collider.x-physical.center[0],collider.z-physical.center[1])<.17,
