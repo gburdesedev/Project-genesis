@@ -1,5 +1,5 @@
 import {Entity,StandardMaterial,Texture,Color,Mesh,MeshInstance,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
-import {mountVillageTrees} from './village_trees.js?v=0.14b';
+import {mountVillageTrees} from './village_trees.js?v=0.14c';
 import {mountArcanePortal} from './village_arcanist.js?v=0.14b';
 const ROOT='./assets/world/v0.11.004/';
 const MOBILE_TEXTURE_EDGE=1024;
@@ -132,21 +132,21 @@ function arcaneSurround(app,building,cobble,shell){
  return frame;
 }
 function stampVersion(){
- const version='v0.14b', build='20261029.03';
+ const version='v0.14c', build='20261029.04';
  globalThis.__genesisVillageBuild={version,build};
- document.title=document.title.replace(/v0\.14a?/gi,version);
+ document.title=document.title.replace(/v0\.14[a-c]?/gi,version);
  // The existing HUD build label lives in the monolithic demo HTML. Update
  // its text node without rewriting or disturbing its DOM or event handlers.
  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
  let node;
  while((node=walker.nextNode())){
   if(!/PROJECT GENESIS|BUILD 20261029/i.test(node.nodeValue||''))continue;
-  node.nodeValue=node.nodeValue.replace(/v0\.14a?/gi,version).replace(/20261029\.0[12]/g,build);
+  node.nodeValue=node.nodeValue.replace(/v0\.14[a-c]?/gi,version).replace(/20261029\.0[1-3]/g,build);
  }
 }
 export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{}}){
  stampVersion();
- const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14b');app.root.addChild(root);
+ const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14c');app.root.addChild(root);
  // Begin tree transfers before road PBR maps: four species are part of the initial scene.
  const trees=mountVillageTrees(app,root,{onResourceLoaded});
  onPhase('arboles');
