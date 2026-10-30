@@ -32,7 +32,31 @@ const server=http.createServer((req,res)=>{
   assert.equal(status.models.Herrero,'ready',JSON.stringify(status));
   assert.equal(status.models.Arcanista,'ready',JSON.stringify(status));
   // The village proxies are constructed only after choosing a profession.
-  await frame.locator('[data-profession="Herrero"]').first().click({timeout:30000});
+  const startup=await frame.locator('body').evaluate(()=>{
+    const intro=document.querySelector('#prototypeIntro');
+    return {introStyle:intro?.style.display,loading:document.querySelector('#loading')?.style.display,
+      loadState:document.querySelector('#loadState')?.textContent?.slice(0,200),
+      title:document.title,
+      forgeAnchor:(()=>{const e=document.getElementById('forgeModel')?.entity;if(!e)return null;
+        const p=e.getPosition(),scale=e.getLocalScale();
+        return {name:e.name,parent:e.parent?.name,position:[p.x,p.y,p.z],scale:[scale.x,scale.y,scale.z],children:e.children.map(c=>c.name).slice(0,12)};})()
+    };
+  });
+  console.log('STARTUP',JSON.stringify(startup));
+  // The full playable demo may already be running, with the chooser hidden.
+  // In that case do not click a non-visible button. If it is still loading,
+  // wait for the real intro instead of timing out prematurely.
+  if(startup.introStyle==='grid'){
+    await frame.locator('[data-profession="Herrero"]').first().click({timeout:30000});
+  }else{
+    await Promise.race([
+      frame.locator('[data-profession="Herrero"]').first().waitFor({state:'visible',timeout:120000}).then(async()=>frame.locator('[data-profession="Herrero"]').first().click()),
+      page.waitForFunction(()=>{
+        const f=document.querySelector('#game')?.contentWindow;
+        return !!f?.document?.querySelector('#prototypeIntro') && f?.document?.querySelector('#prototypeIntro')?.style.display==='none' && !!f?.document?.querySelector('#gameUI');
+      },null,{timeout:120000})
+    ]).catch(error=>console.log('INTRO WAIT diagnostic:',String(error)));
+  }
   await page.waitForFunction(()=>document.querySelector('#state')?.textContent?.includes('Arcanista (aldea)'),null,{timeout:180000});
   await page.waitForTimeout(1200);
   const scene=await frame.locator('body').evaluate(()=>{
