@@ -11,3 +11,5 @@ for(const needle of ['village.blocked(', 'village?.blocked(', 'trees.blocked(', 
  if(!count)console.log('SEARCH',JSON.stringify(needle),'NOT_FOUND');
 }
 console.log('DONE COLLISION DIAGNOSTIC');
+
+const idx=html.indexOf('function frame(now)');if(idx>=0){console.log('ACTUAL_FRAME_MOVEMENT_SECTION_BEGIN');console.log(html.slice(idx+1700,idx+5600));console.log('ACTUAL_FRAME_MOVEMENT_SECTION_END')}
