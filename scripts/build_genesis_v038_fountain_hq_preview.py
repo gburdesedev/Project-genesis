@@ -95,7 +95,7 @@ fountain_model = """
     </pc-model>
 """
 source = source.replace("</pc-scene>", fountain_model + "\n  </pc-scene>", 1)
-runtime = '<script type="module" src="./previews/genesis-v038-fuente-hq-runtime.js?v=0.14.005"></script>'
+runtime = '<script type="module" src="./previews/genesis-v038-fuente-hq-runtime.js?v=0.14.006"></script>'
 assert source.count("</body>")==1
 source=source.replace("</body>",runtime+"\n</body>",1)
 
