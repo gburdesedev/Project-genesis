@@ -23,33 +23,58 @@ function materialsFor(root,fn){
 function animateWater(app,root){
   const found=materialsFor(root,n=>n.startsWith('AGUA_')&&(n.includes('Estanque')||n.includes('Fisica')));
   const copy=new Map();
-  let entries=[];
+  const entries=[];
   for(const {mi,src} of found){
-    if(!src.normalMap)continue;
     let info=copy.get(src);
     if(!info){
-      const mat=src.clone();mat.name=src.name+'_v011_hq_motion';
+      const mat=src.clone();
       const pool=src.name.includes('Estanque');
-      mat.normalMapTiling.set(pool?3.1:2.5,pool?3.1:2.5);
-      mat.normalDetailMap=mat.normalMap;
-      mat.normalDetailMapTiling.set(pool?5.3:3.3,pool?5.3:3.3);
+      mat.name=src.name+'_v011_hq_deepwater';
+      // The Blender transmission shader imported as a violet/purple flat water
+      // surface under the village's real lighting. Use a predictable PBR tint
+      // in PlayCanvas; keep the geometrical sculpt and moving normal map.
+      mat.diffuseMap=null;
+      mat.diffuse.set(pool?.048:.105,pool?.16:.32,pool?.20:.39);
+      mat.useMetalness=false;
+      mat.metalness=0;
+      if('useRefraction' in mat)mat.useRefraction=false;
+      if('refraction' in mat)mat.refraction=0;
+      if('transmission' in mat)mat.transmission=0;
+      mat.gloss=pool?.77:.69;
+      mat.specular.set(.32,.37,.39);
+      mat.opacity=pool?.94:.87;
+      // Prevent original transmission/sky-color purple from leaking into water.
+      if(mat.emissiveMap)mat.emissiveMap=null;
+      mat.emissive.set(.006,.019,.022);
+      const hasNormals=!!mat.normalMap;
+      if(hasNormals){
+        mat.normalMapTiling.set(pool?3.1:2.5,pool?3.1:2.5);
+        mat.normalDetailMap=mat.normalMap;
+        mat.normalDetailMapTiling.set(pool?5.3:3.3,pool?5.3:3.3);
+      }
       mat.update();
-      info={mat,pool};copy.set(src,info);entries.push(info);
+      info={mat,pool,hasNormals};copy.set(src,info);entries.push(info);
     }
     mi.material=info.mat;
   }
-  if(!entries.length)return 0;
-  let t=0;
-  const update=dt=>{
-    t=(t+Math.max(0,dt))%8;
-    for(const {mat,pool} of entries){
+  let t=0,acc=0;
+  const tick=dt=>{
+    t=(t+Math.max(0,dt))%8;acc+=Math.max(0,dt);
+    // Slow 8s ripples don't need 60 expensive StandardMaterial rebuilds/second.
+    if(acc<1/30)return;acc=0;
+    for(const {mat,pool,hasNormals} of entries){
+      if(!hasNormals)continue;
       mat.normalMapOffset.set(pool?t*.125:0,pool?-t*.125:t*.25);
       mat.normalDetailMapOffset.set(pool?-t*.1875:t*.125,pool?t*.125:-t*.125);
       mat.update();
     }
   };
-  app.on('update',update);
-  window.addEventListener('pagehide',()=>{app.off('update',update);for(const x of entries)x.mat.destroy()},{once:true});
+  if(entries.length){
+    app.on('update',tick);
+    window.addEventListener('pagehide',()=>{app.off('update',tick);for(const {mat} of entries)mat.destroy()},{once:true});
+  }
+  status.waterHasNormals=entries.filter(e=>e.hasNormals).length;
+  status.waterMaterialTints=entries.map(e=>({name:e.mat.name,pool:e.pool}));
   return entries.length;
 }
 function animateForge(app,root){
@@ -61,9 +86,20 @@ function animateForge(app,root){
     mi.material=mat;
   }
   const materials=[...copy.values()];
+  // This static 109-mesh forge is inside a closed workshop; disabling its
+  // per-mesh shadow-casting removes duplicated depth passes without
+  // disabling shadows received by the geometry or tutorial lighting.
+  let disabledShadowRenderers=0;
+  for(const renderer of root.findComponents('render')){
+    if(renderer.castShadows){renderer.castShadows=false;disabledShadowRenderers++}
+  }
+  status.forgeShadowRenderersDisabled=disabledShadowRenderers;
+  status.forgeMaterialCount=new Set(materialsFor(root,()=>true).map(x=>x.mi.material)).size;
   if(!materials.length)return 0;
-  let time=0;
+  let time=0,acc=0;
   const update=dt=>{
+    acc+=Math.max(0,dt);
+    if(acc<1/30)return;acc=0;
     // The tutorial remains the authority for ignition; unlit coals don't pulse.
     const light=document.getElementById('forgeCoreLight')?.component;
     const lit=Boolean(light&&light.intensity>.30);
@@ -143,7 +179,8 @@ function animateForge(app,root){
     activateForge();
     if(!attached)status.forge='WAITING_FOR_HERRERO_OR_ASSET';
     emit();
-    const onUpdate=()=>{status.frames++};
+    let fpsElapsed=0,fpsFrames=0;
+    const onUpdate=dt=>{status.frames++;fpsFrames++;fpsElapsed+=Math.max(0,dt);if(fpsElapsed>=2){status.fpsObserved=+(fpsFrames/fpsElapsed).toFixed(1);status.drawCalls=app.stats?.drawCalls?.total??null;fpsFrames=0;fpsElapsed=0;emit()}};
     app.on('update',onUpdate);
     window.addEventListener('pagehide',()=>app.off('update',onUpdate),{once:true});
   }catch(err){status.errors.push(String(err?.stack||err));emit()}
