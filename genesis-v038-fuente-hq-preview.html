@@ -420,10 +420,10 @@ window.__genesisAppError=function(event){
     <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="-4.08 0 -3.02" scale="1.333333333333 1 1.333333333333">
 <pc-model id="chestModel" name="Genesis blacksmith material chest" data-asset="genesisChest" data-route="Herrero" data-priority="critical" rotation="0 8 0" scale="1.02 1.02 1.02" position="0 0 0"></pc-model>
 </pc-entity>
-    <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="2.46 0 -5.54" scale="1.333333333333 1 1.333333333333">
+    <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="4.37 0 -2.88" scale="1.333333333333 1 1.333333333333">
 <pc-model name="Quenching bucket" data-asset="bucketReal" data-route="Herrero" data-priority="stream" rotation="0 10 0" position="0 0 0"></pc-model>
 </pc-entity>
-    <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="3.35 0 -5.74" scale="1.333333333333 1 1.333333333333">
+    <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="4.25 0 -4.15" scale="1.333333333333 1 1.333333333333">
 <pc-model name="Quenching barrel" data-asset="barrelReal" data-route="Herrero" data-priority="stream" rotation="0 -12 0" scale=".92 .92 .92" position="0 0 0"></pc-model>
 </pc-entity>
 
@@ -684,7 +684,7 @@ window.__genesisAppError=function(event){
       <pc-entity id="mercBootsGlowB" position="0 .11 .04"><pc-light id="mercBootsLightB" type="omni" color="#b7c2ca" intensity="0" range=".62"></pc-light></pc-entity>
     </pc-entity>
   
-<pc-model id="genesisFountainV011Model" name="Genesis plaza dolphin fountain V011 HQ" asset="genesisFountainV011HQAsset" position="5.25 0 12" scale="1 1 1"><pc-anim id="genesisFountainV011Anim" activate="true"></pc-anim></pc-model>
+<pc-model id="genesisFountainV011Model" name="Genesis plaza dolphin fountain V011 HQ" asset="genesisFountainV011HQAsset" position="7 0 16" scale="1 1 1"><pc-anim id="genesisFountainV011Anim" activate="true"></pc-anim></pc-model>
 </pc-scene>
 </pc-app>
 <script>window.GenesisDevice.configureApp(document.getElementById('genesisApp'));</script>
@@ -1119,12 +1119,12 @@ function workshopWallCollision(x,z,cx,padding){
  if(lz<-10.25+r&&lz>-10.62-r&&Math.abs(lx)<5.95+r)return true;
  return false;
 }
-function wallBlocked(x,z){const r=.33;const b=GenesisVillagePlan.bounds;if(x<b.minX+r||x>b.maxX-r||z<b.minZ+r||z>b.maxZ-r||village.blocked(x,z,r))return true;if(doorwayPortalFree(x,z,0,r)||doorwayPortalFree(x,z,14,r))return false;if(workshopWallCollision(x,z,0,r)||workshopWallCollision(x,z,14,r)||doorCollisionAt(x,z,r+.10))return true;
- const obs=[[3.02,-8.56,1.22],[4.18,-7.22,.90],[-3.74,-8.58,1.05],[-4.08,-3.02,.76],[3.35,-5.74,.56],[10.72,-8.16,1.05],[15.18,-8.88,.72],[17.42,-5.92,.84],[9.98,-3.03,.76]];for(const[ox,oz,rr]of obs){const p=workPoint({x:ox,z:oz},ox>7?14:0);if(Math.hypot(x-p.x,z-p.z)<rr+r)return true;}
+function wallBlocked(x,z){const r=.33;const b=GenesisVillagePlan.bounds;if(x<b.minX+r||x>b.maxX-r||z<b.minZ+r||z>b.maxZ-r||village.blocked(x,z,r)||Math.hypot(x-GenesisVillagePlan.plaza.x,z-GenesisVillagePlan.plaza.z)<2.13+r)return true;if(doorwayPortalFree(x,z,0,r)||doorwayPortalFree(x,z,14,r))return false;if(workshopWallCollision(x,z,0,r)||workshopWallCollision(x,z,14,r)||doorCollisionAt(x,z,r+.10))return true;
+ const obs=[[3.02,-8.56,1.06],[4.18,-7.22,.68],[-3.74,-8.58,1.05],[-4.08,-3.02,.76],[4.25,-4.15,.45],[10.72,-8.16,1.05],[15.18,-8.88,.72],[17.42,-5.92,.84],[9.98,-3.03,.76]];for(const[ox,oz,rr]of obs){const p=workPoint({x:ox,z:oz},ox>7?14:0);if(Math.hypot(x-p.x,z-p.z)<rr+r)return true;}
  if(anvilEntity){const p=anvilEntity.getPosition();if(Math.hypot(x-p.x,z-p.z)<.46+r)return true}return false}
 // Q1 navigation diagnostic: samples the central aisle. Exposed for field debugging.
 window.__genesisQ1CollisionProbe=function(cx=0){const pts=[];for(let z=.8;z>=-9.6;z-=.4){const p=workPoint({x:cx,z},cx);pts.push({x:p.x,z:+p.z.toFixed(2),blocked:wallBlocked(p.x,p.z)});}return pts}
-function cameraBlocked(x,z){if(village.blocked(x,z,.20))return true;for(const cx of [0,14]){const p=GenesisVillagePlan.toLocal(x,z,cx),lx=p.x,lz=p.z;if(doorwayPortalFree(x,z,cx,.16))continue;if(oneDoorCollision(x,z,.16,cx,cx===0?doorAngle:tannerDoorAngle))return true;if(lz>-.40&&lz<.40&&Math.abs(lx)>1.22&&Math.abs(lx)<5.70)return true;if(lz>-10.28&&lz<.40&&((lx<-5.56&&lx>-5.92)||(lx>5.56&&lx<5.92)))return true;if(lz>-10.38&&lz<-9.96&&Math.abs(lx)<5.92)return true}return false}
+function cameraBlocked(x,z){if(village.blocked(x,z,.20)||Math.hypot(x-GenesisVillagePlan.plaza.x,z-GenesisVillagePlan.plaza.z)<2.13+.20)return true;for(const cx of [0,14]){const p=GenesisVillagePlan.toLocal(x,z,cx),lx=p.x,lz=p.z;if(doorwayPortalFree(x,z,cx,.16))continue;if(oneDoorCollision(x,z,.16,cx,cx===0?doorAngle:tannerDoorAngle))return true;if(lz>-.40&&lz<.40&&Math.abs(lx)>1.22&&Math.abs(lx)<5.70)return true;if(lz>-10.28&&lz<.40&&((lx<-5.56&&lx>-5.92)||(lx>5.56&&lx<5.92)))return true;if(lz>-10.38&&lz<-9.96&&Math.abs(lx)<5.92)return true}return false}
 function workshopAt(x,z){const lz=z/WORKSHOP_SCALE;if(lz<.25&&lz>-10.4){for(const[profession,center]of Object.entries(WORKSHOP_CENTERS)){const lx=(x-center)/WORKSHOP_SCALE;if(Math.abs(lx)<5.55)return{profession,center,localX:lx,localZ:lz}}}return null}
 
 window.__GENESIS_RUNTIME_ERRORS=[];addEventListener('error',e=>{window.__GENESIS_RUNTIME_ERRORS.push({type:'error',message:e.message||String(e.error||e),source:e.filename||'',line:e.lineno||0});console.error('GENESIS RUNTIME ERROR',e.error||e.message)});addEventListener('unhandledrejection',e=>{window.__GENESIS_RUNTIME_ERRORS.push({type:'rejection',message:String(e.reason?.message||e.reason||'Unhandled rejection')});console.error('GENESIS UNHANDLED REJECTION',e.reason)});
@@ -1841,6 +1841,6 @@ window.GenesisPrototypeEngines=Object.freeze({recipes:REC,formulaProfiles:FORMUL
 })();
 </script>
 
-<script type="module" src="./previews/genesis-v038-fuente-hq-runtime.js?v=0.14.004"></script>
+<script type="module" src="./previews/genesis-v038-fuente-hq-runtime.js?v=0.14.005"></script>
 </body>
 </html>
