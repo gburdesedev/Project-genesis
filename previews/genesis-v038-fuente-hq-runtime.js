@@ -95,6 +95,24 @@ function animateForge(app,root){
   }
   status.forgeShadowRenderersDisabled=disabledShadowRenderers;
   status.forgeMaterialCount=new Set(materialsFor(root,()=>true).map(x=>x.mi.material)).size;
+  // Static batching reduces draw calls without changing the source model.
+  // Keep animated coal meshes outside: their emissive intensity must update.
+  if(app.batcher?.addGroup){
+    try{
+      const group=app.batcher.addGroup('Genesis V038 static masonry',false,16);
+      const staticRenderers=root.findComponents('render').filter(renderer=>
+        (renderer.meshInstances||[]).every(mi=>
+          !String(mi.material?.name||'').includes('forge_cracked_hot_charcoal_ember_map')));
+      for(const renderer of staticRenderers)renderer.batchGroupId=group.id;
+      if(staticRenderers.length)app.batcher.generate([group.id]);
+      status.forgeStaticBatchedRenderers=staticRenderers.length;
+      status.forgeBatchGroupId=group.id;
+    }catch(error){
+      status.errors.push('No se pudo agrupar la mampostería V038: '+String(error));
+      status.forgeStaticBatchedRenderers=0;
+      // Source components remain installed and visible even if batching failed.
+    }
+  }
   if(!materials.length)return 0;
   let time=0,acc=0;
   const update=dt=>{
@@ -180,7 +198,7 @@ function animateForge(app,root){
     if(!attached)status.forge='WAITING_FOR_HERRERO_OR_ASSET';
     emit();
     let fpsElapsed=0,fpsFrames=0;
-    const onUpdate=dt=>{status.frames++;fpsFrames++;fpsElapsed+=Math.max(0,dt);if(fpsElapsed>=2){status.fpsObserved=+(fpsFrames/fpsElapsed).toFixed(1);status.drawCalls=app.stats?.drawCalls?.total??null;fpsFrames=0;fpsElapsed=0;emit()}};
+    const onUpdate=dt=>{status.frames++;fpsFrames++;fpsElapsed+=Math.max(0,dt);if(fpsElapsed>=2){status.fpsObserved=+(fpsFrames/fpsElapsed).toFixed(1);status.drawCalls=app.stats?.drawCallCount??app.stats?.drawCalls?.total??null;fpsFrames=0;fpsElapsed=0;emit()}};
     app.on('update',onUpdate);
     window.addEventListener('pagehide',()=>app.off('update',onUpdate),{once:true});
   }catch(err){status.errors.push(String(err?.stack||err));emit()}
