@@ -16,7 +16,10 @@ font:12px Georgia,serif;cursor:pointer}
 #busy{position:fixed;left:50%;top:45%;transform:translate(-50%,-50%);
  padding:16px 22px;background:#17140e;border:1px solid #9b7648;border-radius:8px;
  z-index:8;max-width:88vw;text-align:center}
-@media(max-width:720px){#badge{font:11px system-ui;bottom:max(6px,env(safe-area-inset-bottom));padding:6px 8px;max-width:65vw}}\n#badge{cursor:pointer;pointer-events:auto;opacity:.9;max-height:75vh;overflow:auto}\n#badge:not(.expanded){max-width:min(320px,57vw);padding:5px 9px}\n#badge:not(.expanded) #state,#badge:not(.expanded) #fountainState,#badge:not(.expanded) small{display:none}
+@media(max-width:720px){#badge{font:11px system-ui;bottom:max(6px,env(safe-area-inset-bottom));padding:6px 8px;max-width:65vw}}
+#badge{cursor:pointer;pointer-events:auto;opacity:.9;max-height:75vh;overflow:auto}
+#badge:not(.expanded){max-width:min(320px,57vw);padding:5px 9px}
+#badge:not(.expanded) #state,#badge:not(.expanded) #fountainState,#badge:not(.expanded) small{display:none}
 </style>
 </head><body>
 <div id="busy">Cargando el juego real de Project Genesis…</div>
@@ -24,14 +27,16 @@ font:12px Georgia,serif;cursor:pointer}
  src="../index.html" loading="eager" allow="fullscreen" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 <button type="button" id="forgeToggle">Probar fragua V038</button>
 <div id="badge"><b>PRUEBA EN PLAYCANVAS · v0.14.001</b>
- <div id="state">Cargando juego original…</div>\n <div id="fountainState">Fuente del delfín V011: cargando…</div>
+ <div id="state">Cargando juego original…</div>
+ <div id="fountainState">Fuente del delfín V011: cargando…</div>
  <small>Muros V006 Herrero / V005 Arcanista · no aprobados · el juego original no se modifica</small></div>
 <script>
 (()=>{'use strict';
  const frame=document.getElementById('game');
  const status=document.getElementById('state');
  const busy=document.getElementById('busy');
- const toggle=document.getElementById('forgeToggle');\n document.getElementById('badge').addEventListener('click',e=>e.currentTarget.classList.toggle('expanded'));
+ const toggle=document.getElementById('forgeToggle');
+ document.getElementById('badge').addEventListener('click',e=>e.currentTarget.classList.toggle('expanded'));
  let usingForgePreview=false;
  toggle.addEventListener('click',()=>{
    usingForgePreview=!usingForgePreview;
@@ -50,7 +55,10 @@ font:12px Georgia,serif;cursor:pointer}
  }
  window.addEventListener('message',event=>{
   if(event.origin!==location.origin||event.source!==frame.contentWindow)return;
-  if(event.data?.kind==='genesisWorkshopWallPreview')update(event.data.data);\n  if(event.data?.kind==='genesisFountainV011Preview'){\n   const d=event.data;document.getElementById('fountainState').textContent='Fuente V011: '+d.state+(d.message?' · '+d.message:'')+(d.clips?' · '+d.clips.join(', '):'');\n  }
+  if(event.data?.kind==='genesisWorkshopWallPreview')update(event.data.data);
+  if(event.data?.kind==='genesisFountainV011Preview'){
+   const d=event.data;document.getElementById('fountainState').textContent='Fuente V011: '+d.state+(d.message?' · '+d.message:'')+(d.clips?' · '+d.clips.join(', '):'');
+  }
  });
  frame.addEventListener('load',()=>{
   busy.style.display='none';
@@ -61,7 +69,12 @@ font:12px Georgia,serif;cursor:pointer}
    script.type='module';
    script.src=new URL('workshop-wall-live-overlay-v0.14.001.js?v=0.14.002',location.href).href;
    script.onerror=()=>{status.textContent='Error cargando el módulo de muros; juego original intacto.'};
-   doc.body.appendChild(script);\n   const fountainScript=doc.createElement('script');\n   fountainScript.type='module';\n   fountainScript.src=new URL('genesis-fountain-v011-live-overlay.js?v=0.14.002',location.href).href;\n   fountainScript.onerror=()=>{document.getElementById('fountainState').textContent='Error cargando el controlador de la fuente V011'};\n   doc.body.appendChild(fountainScript);
+   doc.body.appendChild(script);
+   const fountainScript=doc.createElement('script');
+   fountainScript.type='module';
+   fountainScript.src=new URL('genesis-fountain-v011-live-overlay.js?v=0.14.002',location.href).href;
+   fountainScript.onerror=()=>{document.getElementById('fountainState').textContent='Error cargando el controlador de la fuente V011'};
+   doc.body.appendChild(fountainScript);
    status.textContent='Escena del juego cargada; preparando geometría y texturas…';
   }catch(error){status.textContent='No se pudo inicializar la prueba: '+error.message}
  });
