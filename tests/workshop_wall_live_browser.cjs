@@ -31,7 +31,10 @@ const server=http.createServer((req,res)=>{
   const status=await frame.locator('body').evaluate(()=>window.__genesisWallWorkshopPreview);
   assert.equal(status.models.Herrero,'ready',JSON.stringify(status));
   assert.equal(status.models.Arcanista,'ready',JSON.stringify(status));
-  await page.waitForTimeout(3000);
+  // The village proxies are constructed only after choosing a profession.
+  await frame.locator('[data-profession="Herrero"]').first().click({timeout:30000});
+  await page.waitForFunction(()=>document.querySelector('#state')?.textContent?.includes('Arcanista (aldea)'),null,{timeout:180000});
+  await page.waitForTimeout(1200);
   const scene=await frame.locator('body').evaluate(()=>{
    const app=document.querySelector('pc-app')?.app;
    const h=app?.root?.findByName('Herrero · fachada cerrada');
@@ -41,6 +44,11 @@ const server=http.createServer((req,res)=>{
     herreroProxy:!!h,arcanistaProxy:!!a,
     herreroWall:!!h?.findByName('WALL_PREVIEW_Herrero'),
     arcanistaWall:!!a?.findByName('WALL_PREVIEW_Arcanista'),
+    forgeAnchor:(()=>{const e=document.getElementById('forgeModel')?.entity;if(!e)return null;
+     const p=e.getPosition(),scale=e.getLocalScale();
+     const renders=e.findComponents('render');
+     return {name:e.name,parent:e.parent?.name,position:[p.x,p.y,p.z],localScale:[scale.x,scale.y,scale.z],renderComponents:renders.length,
+       children:e.children.map(ch=>ch.name).slice(0,12)};})(),
     status:window.__genesisWallWorkshopPreview,
    };
   });
@@ -50,7 +58,6 @@ const server=http.createServer((req,res)=>{
   assert(scene.arcanistaWall,'Actual Arcanista village proxy did not receive the wall');
   fs.mkdirSync(path.join(root,'previews/workshop-wall-test-reports'),{recursive:true});
   await page.screenshot({path:path.join(root,'previews/workshop-wall-test-reports/preview-v0.14.001.png')});
-  await frame.locator('[data-profession="Herrero"]').first().click({timeout:12000}).catch(()=>{});
   await page.waitForTimeout(3000);
   const active=await frame.locator('body').evaluate(()=>({activeWall:!!document.getElementById('compactBlacksmithRoot')?.entity?.findByName('WALL_PREVIEW_Herrero'),status:window.__genesisWallWorkshopPreview}));
   console.log('ACTIVE',JSON.stringify(active));
