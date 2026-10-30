@@ -1074,13 +1074,15 @@ function igniteForgeVisual(){
  const root=forgeModelEl?.contentEntity;
  if(!root)return;
  if(!forgeHotMaterialPatched){
+  const materialClones=new Map();
   root.findComponents('render').forEach(r=>r.meshInstances.forEach(mi=>{
    const src=mi.material;
    if(!src||!src.clone)return;
    const name=(src.name||'').toLowerCase();
    if(!(name.includes('forge_cracked_hot_charcoal_ember_map')||name.includes('hotcoal')))return;
-   const mat=src.clone();
-   mi.material=mat;forgeCoalMaterials.push(mat);
+   let mat=materialClones.get(src);
+   if(!mat){mat=src.clone();materialClones.set(src,mat);forgeCoalMaterials.push(mat)}
+   mi.material=mat;
   }));
   forgeHotMaterialPatched=true;
  }
