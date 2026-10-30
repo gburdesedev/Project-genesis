@@ -1,0 +1,28 @@
+name: v0.14c tree trunk collision validation
+on:
+  push:
+    branches: ['fix/v0.14c-tree-trunk-collision']
+    paths:
+      - 'village_trees.js'
+      - 'village_world.js'
+      - 'tests/tree_collision_diagnostic.cjs'
+      - 'tests/village_trees_browser.cjs'
+      - '.github/workflows/v014c-tree-collision.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  collision:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/tree_collision_diagnostic.cjs
+      - run: npm install --prefix /tmp/genesis-v014c playwright@1.56.1 playcanvas@2.22.1
+      - run: NODE_PATH=/tmp/genesis-v014c/node_modules node tests/village_trees_browser.cjs
