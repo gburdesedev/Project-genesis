@@ -59,7 +59,7 @@ font:12px Georgia,serif;cursor:pointer}
    if(!doc||!doc.body)throw Error('No se puede acceder al juego original');
    const script=doc.createElement('script');
    script.type='module';
-   script.src=new URL('workshop-wall-live-overlay-v0.14.001.js?v=0.14.001',location.href).href;
+   script.src=new URL('workshop-wall-live-overlay-v0.14.001.js?v=0.14.002',location.href).href;
    script.onerror=()=>{status.textContent='Error cargando el módulo de muros; juego original intacto.'};
    doc.body.appendChild(script);
    status.textContent='Escena del juego cargada; preparando geometría y texturas…';
