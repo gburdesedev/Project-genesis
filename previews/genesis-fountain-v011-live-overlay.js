@@ -81,7 +81,7 @@ function attachMovingWater(model,app){
       if(!mat.normalMap)continue;
       mat.normalMapOffset.set(item.pool?t*.125:0,item.pool?-t*.125:t*.25);
       if(mat.normalDetailMap){
-        mat.normalDetailMapOffset.set(item.pool:-t*.1875:t*.125,item.pool?t*.125:-t*.125);
+        mat.normalDetailMapOffset.set(item.pool?-t*.1875:t*.125,item.pool?t*.125:-t*.125);
       }
       mat.update();
     }
