@@ -1,0 +1,20 @@
+{
+  "status": "STATIC_PREVIEW_BUILT",
+  "source": "index.html",
+  "output": "forge-v038-preview.html",
+  "source_bytes": 2505170,
+  "preview_bytes": 2474435,
+  "asset_url": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/production/auto-forge-breathing-coals-v038/public/models/forge-v038-web-hq.glb",
+  "source_forge_glb_bytes": 23352,
+  "source_forge_meshes": 45,
+  "checks": {
+    "source_unchanged": true,
+    "asset_replaced": true,
+    "interaction_id_preserved": true,
+    "rapid_flicker_removed": true,
+    "synchronized_emissive_and_light_cycle": true,
+    "soot_and_bellows_retained": true
+  },
+  "browser_test": "NOT_RUN",
+  "approval": "PENDING_VISUAL_REVIEW"
+}
