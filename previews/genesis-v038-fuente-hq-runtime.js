@@ -114,24 +114,34 @@ function animateForge(app,root){
       status.fountainPosition=(()=>{const p=fountain.entity?.getPosition();return p?[p.x,p.y,p.z]:null})();
     }
     emit();
-    // Forge model is deferred until choosing Herrero; poll without guessing.
-    for(let i=0;i<240;i++){
-      if(forge.contentEntity?.findComponents('render')?.length)break;
-      await sleep(250);
-    }
-    const forgeRoot=forge.contentEntity;
-    if(!forgeRoot?.findComponents('render')?.length){
-      status.forge='WAITING_FOR_HERRERO_OR_ASSET';
-    }else{
+    // Forge is route-deferred: it may load long after the player chooses Herrero.
+    // A one-time polling deadline would falsely report failure; listen for its real load event.
+    let attached=false;
+    const activateForge=()=>{
+      if(attached)return;
+      const modelRoot=forge.contentEntity;
+      const renders=modelRoot?.findComponents('render')||[];
+      if(!renders.length)return;
+      attached=true;
       status.forge='GLB_VISIBLE';
-      status.forgeRenders=forgeRoot.findComponents('render').length;
-      status.forgeEmissiveZones=animateForge(app,forgeRoot);
+      status.forgeRenders=renders.length;
+      status.forgeMeshes=renders.reduce((n,r)=>n+(r.meshInstances?.length||0),0);
+      status.forgeEmissiveZones=animateForge(app,modelRoot);
       if(!status.forgeEmissiveZones){
         status.forge='VISIBLE_NO_EMISSIVE_ZONES';
         status.errors.push('V038 forge has no cracked ember material');
       }
       status.forgePosition=(()=>{const p=forge.entity?.getPosition();return p?[p.x,p.y,p.z]:null})();
-    }
+      emit();
+    };
+    forge.addEventListener('load',activateForge);
+    forge.addEventListener('error',e=>{
+      status.forge='ERROR_LOADING_GLB';
+      status.errors.push('Forge GLB: '+String(e?.message||'no se pudo cargar'));
+      emit();
+    });
+    activateForge();
+    if(!attached)status.forge='WAITING_FOR_HERRERO_OR_ASSET';
     emit();
     const onUpdate=()=>{status.frames++};
     app.on('update',onUpdate);
