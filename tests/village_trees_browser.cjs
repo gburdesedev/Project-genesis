@@ -42,6 +42,10 @@ const server=http.createServer((req,res)=>{
  catch(error){throw new Error('Trees not rendered: '+JSON.stringify(await page.evaluate(()=>window.__genesisTreeStatus))+' | '+errors.join(' | '))}
  fs.mkdirSync('/tmp/genesis-trees',{recursive:true});
  await page.waitForTimeout(700);
+ if(process.env.GENESIS_TEST_DESKTOP==='1'){
+  await page.waitForFunction(()=>window.__genesisTreeStatus?.residentVariants>=8,null,{timeout:150000});
+  await page.evaluate(()=>window.__scene.trees.update(7,16,true));
+ }
  const status=await page.evaluate(()=>window.__genesisTreeStatus);
  assert.equal(status.planned,14);assert.equal(status.failedVariants,0,'Tree GLB load errors');
  const materials=await page.evaluate(()=>{const root=window.__scene.trees.root;let foliage=0,opaque=0,triangles=0,textureReady=0;for(const anchor of root.children){for(const render of anchor.findComponents('render'))for(const mi of render.meshInstances){const m=mi.material;triangles+=mi.mesh?.primitive?.[0]?.count?mi.mesh.primitive[0].count/3:0;if(m?.alphaTest>0||m?.opacityMap){foliage++;if(m.opacityMap||m.diffuseMap)textureReady++}else opaque++}}return {foliage,opaque,triangles,textureReady}});
@@ -127,6 +131,7 @@ const server=http.createServer((req,res)=>{
   }));
  });
  console.log('TREE_COLLISION_V014C',JSON.stringify(collision));
+ if(process.env.GENESIS_TEST_DESKTOP==='1')assert(collision.every(c=>c.lod===1),'Desktop tree colliders must come from close-range LOD1');
  assert.equal(collision.length,4,'Plaza must retain all four tree trunks');
  assert(collision.every(c=>c.measured&&c.visible&&c.loaded),'The collider must follow real loaded bark');
  assert(collision.every(c=>c.atCenter&&c.nearEdge&&!c.beyondEdge),
