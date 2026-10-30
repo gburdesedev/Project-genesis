@@ -6,7 +6,7 @@ const html=`<!doctype html><html><head><style>html,body{margin:0;width:100%;heig
 import {Application,Entity,Color,Vec3,StandardMaterial} from 'playcanvas';
 import {mountVillageTrees} from '/village_trees.js';
 try{
- globalThis.GenesisDevice={safePreviews:true}; // iOS runtime path on Chromium WebGL
+ globalThis.GenesisDevice={safePreviews:${process.env.GENESIS_TEST_DESKTOP==='1'?'false':'true'}}; // GPU tests on mobile and desktop
  const app=new Application(document.querySelector('canvas'),{graphicsDeviceOptions:{antialias:true}});
  app.setCanvasFillMode('FILL_WINDOW');app.setCanvasResolution('AUTO');
  app.scene.ambientLight=new Color(.68,.68,.69);app.start();
