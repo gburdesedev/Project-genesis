@@ -1,4 +1,4 @@
-name: Build isolated PlayCanvas Forge V038 preview
+name: Build isolated PlayCanvas Forge V038 preview QA2
 on:
   push:
     branches: [feature/forge-v038-playcanvas-preview]
