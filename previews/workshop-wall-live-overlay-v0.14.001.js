@@ -73,7 +73,52 @@ function findModelHolder(){
  }
  return null;
 }
-async function inspectForge(app){
+// Only experimental comparison: the V038 GLB has static emissive textures.
+// Its artist-authored 4-second breathing cycle must run in PlayCanvas.
+function startForgeV038Breathing(app,visual){
+  const materialMap=new Map(),materials=[];
+  for(const render of visual.findComponents('render')){
+    for(const meshInstance of render.meshInstances||[]){
+      const source=meshInstance.material;
+      if(!source?.name?.includes('forge_cracked_hot_charcoal_ember_map')||!source.clone)continue;
+      let mat=materialMap.get(source);
+      if(!mat){
+        mat=source.clone();mat.name=source.name+'_v038_breathing';
+        materialMap.set(source,mat);materials.push(mat);
+      }
+      meshInstance.material=mat;
+    }
+  }
+  if(!materials.length){
+    preview.errors.push('V038 no expone zonas de carbón emisivo para animar');
+    emit();return;
+  }
+  let t=0;
+  const light=document.getElementById('forgeCoreLight')?.component;
+  const bounce=document.getElementById('forgeBounceLight')?.component;
+  const update=dt=>{
+    // Tutorial controls when the forge is lit. Do not ignite it by preview.
+    const lit=!!(light&&light.intensity>.3);
+    if(lit)t+=Math.max(0,dt);
+    // 0.68 > 1.32 > 0.68, symmetric 4s cycle, smooth at both ends.
+    const pulse=.68+.64*(.5-.5*Math.cos(t*Math.PI*.5));
+    for(const mat of materials){
+      mat.emissiveIntensity=lit?28*pulse:.06;
+      mat.update();
+    }
+    // Coherent light and emissive in this test, no fast independent strobe.
+    if(lit&&light)light.intensity=3.45*pulse;
+    if(lit&&bounce)bounce.intensity=.96*pulse;
+  };
+  app.on('update',update);
+  preview.forge.breathing={periodSeconds:4,materialZones:materials.length,activation:'tutorial forge light'};
+  emit();
+  window.addEventListener('pagehide',()=>{
+    app.off('update',update);
+    for(const material of materials)material.destroy();
+  },{once:true});
+}
+\nasync function inspectForge(app){
  const comparing=location.pathname.includes('/forge-v038-fixed-preview.html');
  const candidate=findModelHolder();
  preview.forge={phase:comparing?'cargando V038 para montaje':'comprobando V038',
@@ -118,8 +163,7 @@ async function inspectForge(app){
     visual.setLocalPosition(0,0,0);
     visual.setLocalEulerAngles(0,0,0);
     visual.setLocalScale(1,1,1);
-    mounted=true;
-   }
+    mounted=true;\n    startForgeV038Breathing(app,visual);\n   }
    // Disable only duplicate original visual content, never its gameplay
    // host, collision, forge UI, interactive trigger or scripted light.
    const old=modelEl.contentEntity;
