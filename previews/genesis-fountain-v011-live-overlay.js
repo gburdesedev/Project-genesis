@@ -2,15 +2,40 @@
  * PBR marble V007 and V011 water are unchanged. Preview only; never edit index.
  * Plaza center comes from the active village_plan.js rather than guessed X/Z.
  */
-const FOUNTAIN_ORIGINAL='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/feature/plaza-fuente-delfin-marmol-aaa/public/models/PG_Dolphin_Fountain_V011_PlayCanvas_Animated.glb';
-const FOUNTAIN_MERGED='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/feature/plaza-fuente-delfin-marmol-aaa/public/models/PG_Dolphin_Fountain_V011_PlayCanvas_Merged8s.glb';
-async function chooseFountainGLB(){
-  // When the lossless single-clip publication is ready, use it automatically.
-  try{
-    const response=await fetch(FOUNTAIN_MERGED,{method:'HEAD',cache:'no-store'});
-    if(response.ok)return FOUNTAIN_MERGED;
-  }catch(error){console.warn('Fuente V011 merged not published:',error)}
-  return FOUNTAIN_ORIGINAL;
+const FOUNTAIN_HQ='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/feature/plaza-fuente-delfin-marmol-aaa/public/models/PG_Dolphin_Fountain_V011_PlayCanvas_HQ_Optimized.glb';
+const DRACO_GLUE='https://developer.playcanvas.com/assets/modules/draco/draco.wasm.js';
+const DRACO_WASM='https://developer.playcanvas.com/assets/modules/draco/draco.wasm.wasm';
+// This isolated comparison intentionally uses HQ only (16.72 MB, PBR 2K).
+async function readyDraco(appElement){
+  // The HQ GLB requires KHR_draco_mesh_compression. Existing game assets do not.
+  if(!customElements.get('pc-wasm'))throw Error('Versión PlayCanvas sin componente pc-wasm Draco');
+  let decoder=document.getElementById('genesisFountainDracoDecoder');
+  if(decoder?.__genesisLoaded)return;
+  if(!decoder){
+    decoder=document.createElement('pc-wasm');
+    decoder.id='genesisFountainDracoDecoder';
+    decoder.setAttribute('name','DracoDecoderModule');
+    decoder.setAttribute('glue',DRACO_GLUE);
+    decoder.setAttribute('wasm',DRACO_WASM);
+  }
+  await new Promise((resolve,reject)=>{
+    let settled=false;
+    const finish=err=>{
+      if(settled)return;
+      settled=true;
+      clearTimeout(timeout);
+      decoder.removeEventListener('ready',onReady);
+      decoder.removeEventListener('error',onError);
+      if(err)reject(err);else{decoder.__genesisLoaded=true;resolve()}
+    };
+    const onReady=()=>finish(null);
+    const onError=e=>finish(new Error('Draco: '+(e?.message||'no se pudo cargar')));
+    const timeout=setTimeout(()=>finish(new Error('Draco no respondió tras 20 segundos')),20000);
+    decoder.addEventListener('ready',onReady);
+    decoder.addEventListener('error',onError);
+    if(!decoder.isConnected)appElement.insertBefore(decoder,appElement.firstChild);
+    else if(decoder.__genesisLoaded)finish(null);
+  });
 }
 const send = (state, detail={}) => {
   const result={kind:'genesisFountainV011Preview',state,...detail};
@@ -75,8 +100,9 @@ function attachMovingWater(model,app){
     const appElement=document.querySelector('#genesisApp');
     const scene=document.querySelector('#genesisApp > pc-scene');
     if(!appElement||!scene)throw Error('No se encontró pc-scene original de PlayCanvas');
-    const fountainURL=await chooseFountainGLB();
-    send('LOADING',{center:[p.x,p.y,p.z],fountainDiameter:4.26,source:fountainURL});
+    await readyDraco(appElement);
+    const fountainURL=FOUNTAIN_HQ;
+    send('LOADING',{center:[p.x,p.y,p.z],fountainDiameter:4.26,source:fountainURL,quality:'HQ 2K / 16.72 MB',compression:'Draco'});
     // Built-in web components load the GLB and its animations as one container.
     const asset=document.createElement('pc-asset');
     asset.id='genesisFountainV011Asset';
@@ -86,7 +112,7 @@ function attachMovingWater(model,app){
     const model=document.createElement('pc-model');
     model.id='genesisFountainV011Model';
     model.setAttribute('name','Dolphin marble fountain V011 - plaza preview');
-    model.setAttribute('data-asset','genesisFountainV011Asset');
+    model.setAttribute('asset','genesisFountainV011Asset');
     model.setAttribute('position',p.x+' 0 '+p.z);
     model.setAttribute('scale','1 1 1');
     const anim=document.createElement('pc-anim');
@@ -121,7 +147,7 @@ function attachMovingWater(model,app){
       send('PARTIAL',{message:'GLB original con '+clips.length+' clips independientes; esperando unificación para reproducir todo el agua',clips,center:[p.x,p.y,p.z]});
       return;
     }
-    send('ANIMATED',{center:[p.x,p.y,p.z],clips,waterMaterials,diameterMeters:4.26,
-      note:waterMaterials?'GLB 8s + normales del agua en movimiento; PBR mármol V007 intacto':'GLB 8s animado; falta normal map importada para animar la superficie'});
+    send('ANIMATED',{center:[p.x,p.y,p.z],clips,waterMaterials,diameterMeters:4.26,quality:'HQ 2K / 16.72 MB',
+      note:waterMaterials?'GLB HQ Draco 8s + normales del agua en movimiento; PBR mármol V007 intacto':'GLB HQ Draco 8s animado; falta normal map importada para animar la superficie'});
   }catch(err){send('ERROR',{message:String(err?.message||err)})}
 })();
