@@ -2,7 +2,7 @@
  * PBR marble V007 and V011 water are unchanged. Preview only; never edit index.
  * Plaza center comes from the active village_plan.js rather than guessed X/Z.
  */
-const FOUNTAIN_GLTF = 'https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/feature/plaza-fuente-delfin-marmol-aaa/public/models/genesis_dolphin_marble_fountain_v011.glb';
+const FOUNTAIN_GLTF = 'https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/feature/plaza-fuente-delfin-marmol-aaa/public/models/PG_Dolphin_Fountain_V011_PlayCanvas_Animated.glb';
 const send = (state, detail={}) => {
   const result={kind:'genesisFountainV011Preview',state,...detail};
   window.__genesisFountainV011Preview=result;
