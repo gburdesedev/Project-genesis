@@ -1,0 +1,33 @@
+name: Ground PBR v0.14d audit
+on:
+  push:
+    branches: ['fix/v0.14d-pbr-floors']
+    paths:
+      - 'village_world.js'
+      - 'tests/ground_pbr_static.cjs'
+      - 'tests/ground_pbr_browser.cjs'
+      - '.github/workflows/ground-pbr-v014d.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pbr:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/ground_pbr_static.cjs
+      - run: npm install --prefix /tmp/genesis-ground playwright@1.56.1 playcanvas@2.22.1
+      - run: NODE_PATH=/tmp/genesis-ground/node_modules node tests/ground_pbr_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-ground-pbr-v014d
+          path: /tmp/genesis-ground
+          retention-days: 5
