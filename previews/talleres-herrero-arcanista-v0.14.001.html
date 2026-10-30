@@ -12,7 +12,7 @@
 </style>
 </head><body>
 <iframe id="game" loading="eager" allow="fullscreen" title="Project Genesis: fuente V011 HQ y fragua V038" src="../genesis-v038-fuente-hq-preview.html"></iframe>
-<div id="label"><b>PRUEBA V038 + DELFÍN V011 HQ</b><div id="details">Fuente: esperando motor · Fragua: esperando motor<div id="errors"></div></div></div>
+<div id="label"><b>PRUEBA V038 + DELFÍN V011 HQ · FIX 005</b><div id="details">Fuente: esperando motor · Fragua: esperando motor<div id="errors"></div></div></div>
 <button id="toggle" type="button">Comparar con juego principal</button>
 <script>
 (()=>{
@@ -22,7 +22,7 @@ button.addEventListener('click',()=>{alternate=!alternate;frame.src=alternate?'.
 window.addEventListener('message',event=>{
 if(event.source!==frame.contentWindow||event.origin!==location.origin||event.data?.kind!=='genesisHQFountainForgeQA')return;
 const d=event.data.data||{};
-details.textContent='Fuente HQ: '+(d.fountain||'pendiente')+' · Fragua V038: '+(d.forge||'pendiente')+' · Agua: '+(d.waterMaterials||0)+' materiales';
+details.textContent='Fuente HQ: '+(d.fountain||'pendiente')+' · Fragua V038: '+(d.forge||'pendiente')+' · Agua: '+(d.waterMaterials||0)+' materiales · Mallas fragua: '+(d.forgeMeshes??'…')+' · Sombras desactivadas: '+(d.forgeShadowRenderersDisabled??'…')+' · FPS medidos: '+(d.fpsObserved??'…')+' · Draw calls: '+(d.drawCalls??'…');
 if(d.errors?.length)details.textContent+=' · Error: '+String(d.errors[0]).slice(0,160);
 });
 frame.addEventListener('error',()=>details.textContent='Error cargando la prueba: revisar consola de navegador.');
