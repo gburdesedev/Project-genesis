@@ -81,8 +81,10 @@ function animateForge(app,root){
 (async()=>{
   try{
     const appElement=document.querySelector('#genesisApp');
-    const app=appElement?.app||appElement?.application;
-    if(!app)throw Error('PlayCanvas app not ready');
+    let app=appElement?.app||appElement?.application;
+    // Web Components may still be booting after a static module executes.
+    for(let i=0;i<160&&!app;i++){await sleep(250);app=appElement?.app||appElement?.application}
+    if(!app)throw Error('PlayCanvas app did not boot after 40 seconds');
     if(!document.getElementById('genesisHQDracoDecoder'))throw Error('Draco missing before PlayCanvas boot');
     const fountain=document.getElementById('genesisFountainV011Model');
     const forge=document.getElementById('forgeModel');
