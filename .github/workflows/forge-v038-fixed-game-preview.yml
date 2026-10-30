@@ -1,0 +1,37 @@
+name: "Project Genesis forge V038 GLB header repaired game preview"
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/build_forge_v038_fixed_preview.py
+      - .github/workflows/forge-v038-fixed-game-preview.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: genesis-forge-v038-fixed-preview
+  cancel-in-progress: false
+jobs:
+  publish-actual-game-forge-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch only the malformed external GLB URL
+        run: |
+          python3 -m py_compile scripts/build_forge_v038_fixed_preview.py
+          python3 scripts/build_forge_v038_fixed_preview.py
+          test -s forge-v038-fixed-preview.html
+      - name: Publish separated actual PlayCanvas build, not main index
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add forge-v038-fixed-preview.html reports/forge-v038-fixed-preview.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish PlayCanvas V038 GLB-header-fixed separate game preview [skip ci]"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
