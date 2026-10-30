@@ -74,23 +74,74 @@ function findModelHolder(){
  return null;
 }
 async function inspectForge(app){
+ const comparing=location.pathname.includes('/forge-v038-fixed-preview.html');
  const candidate=findModelHolder();
- preview.forge={phase:candidate?'existing-entity-found':'no-entity-found',id:candidate?.id||null,
-                v038Url:FORGE_URL,action:'Keeping gameplay and existing model unchanged'};
+ preview.forge={phase:comparing?'cargando V038 para montaje':'comprobando V038',
+   id:candidate?.id||null,v038Url:FORGE_URL,
+   mode:comparing?'prueba visual aislada':'juego principal conservado'};
  emit();
- // Avoid replacing the functional tutorial's forge until the placement and
- // interactive anchors are confirmed. In this preview the existing forge
- // remains intact; model V038 is preflight-tested separately.
  try{
+  // The previous preview downloaded the V038 GLB but never instantiated it
+  // as visible geometry. Mount the repaired resource only in comparison mode.
   const resource=await loadGLB(app,FORGE_URL);
   preview.forge.v038ResourceReady=!!resource;
-  preview.forge.phase=location.pathname.includes('forge-v038-fixed-preview')?'V038 corregida en juego':'V038 lista para vista comparativa';
+  if(!comparing){
+   preview.forge.phase='GLB verificado; sin modificar juego principal';
+   emit();return;
+  }
+  const visual=prepareVisual(resource,'FORGE_V038_VISUAL_PREVIEW');
+  const components=visual.findComponents('render');
+  const meshes=components.reduce((n,comp)=>n+(comp.meshInstances?.length||0),0);
+  preview.forge.meshes=meshes;
+  preview.forge.renderComponents=components.length;
+  if(!meshes){
+   visual.destroy();
+   throw Error('GLB cargado, pero no tiene mallas renderizables');
+  }
+  let attempts=0,mounted=false;
+  const mount=()=>{
+   const modelEl=document.getElementById('forgeModel');
+   const anchor=modelEl?.entity;
+   if(!anchor||!anchor.parent){
+    if(++attempts>=120){
+     clearInterval(watcher);
+     preview.forge.phase='sin anclaje del taller';
+     preview.errors.push('No apareció la entidad #forgeModel durante 30 segundos');
+     visual.destroy();emit();
+    }
+    return;
+   }
+   if(!mounted){
+    // Use the approved forgeModel anchor: its scene coordinates, local
+    // scale and workshop transforms are inherited without guessing.
+    anchor.addChild(visual);
+    visual.setLocalPosition(0,0,0);
+    visual.setLocalEulerAngles(0,0,0);
+    visual.setLocalScale(1,1,1);
+    mounted=true;
+   }
+   // Disable only duplicate original visual content, never its gameplay
+   // host, collision, forge UI, interactive trigger or scripted light.
+   const old=modelEl.contentEntity;
+   if(old&&old!==anchor&&old!==visual&&old.enabled)old.enabled=false;
+   const enabled=(()=>{for(let p=visual;p;p=p.parent)if(!p.enabled)return false;return true})();
+   preview.forge.phase=enabled?'V038 montada en fragua ('+meshes+' mallas)':'V038 montada, pero su jerarquia está desactivada';
+   preview.forge.anchor={name:anchor.name,worldPosition:(()=>{
+      const p=anchor.getPosition();return [p.x,p.y,p.z].map(n=>+n.toFixed(3))})(),
+      scale:(()=>{const s=anchor.getLocalScale();return [s.x,s.y,s.z].map(n=>+n.toFixed(3))})()};
+   preview.forge.instance=visual.name;
+   emit();
+   if(attempts++>=45)clearInterval(watcher);
+  };
+  const watcher=setInterval(mount,250);
+  mount();
+  window.addEventListener('pagehide',()=>clearInterval(watcher),{once:true});
  }catch(error){
-  preview.forge.phase='V038-download-failed';
+  preview.forge.phase='error V038';
   preview.forge.error=String(error?.message||error);
   preview.errors.push('Fragua V038: '+preview.forge.error);
+  emit();
  }
- emit();
 }
 (async()=>{
  try{
