@@ -28,7 +28,7 @@ font:12px Georgia,serif;cursor:pointer}
 <button type="button" id="forgeToggle">Probar fragua V038</button>
 <div id="badge"><b>PRUEBA EN PLAYCANVAS · v0.14.001</b>
  <div id="state">Cargando juego original…</div>
- <div id="fountainState">Fuente del delfín V011: cargando…</div>
+ <div id="fountainState">Fuente del delfín V011 HQ · Draco · 2K: cargando…</div>
  <small>Muros V006 Herrero / V005 Arcanista · no aprobados · el juego original no se modifica</small></div>
 <script>
 (()=>{'use strict';
@@ -57,7 +57,7 @@ font:12px Georgia,serif;cursor:pointer}
   if(event.origin!==location.origin||event.source!==frame.contentWindow)return;
   if(event.data?.kind==='genesisWorkshopWallPreview')update(event.data.data);
   if(event.data?.kind==='genesisFountainV011Preview'){
-   const d=event.data;document.getElementById('fountainState').textContent='Fuente V011: '+d.state+(d.message?' · '+d.message:'')+(d.clips?' · '+d.clips.join(', '):'');
+   const d=event.data;document.getElementById('fountainState').textContent='Fuente V011 HQ: '+d.state+(d.message?' · '+d.message:'')+(d.clips?' · '+d.clips.join(', '):'');
   }
  });
  frame.addEventListener('load',()=>{
@@ -72,7 +72,7 @@ font:12px Georgia,serif;cursor:pointer}
    doc.body.appendChild(script);
    const fountainScript=doc.createElement('script');
    fountainScript.type='module';
-   fountainScript.src=new URL('genesis-fountain-v011-live-overlay.js?v=0.14.002',location.href).href;
+   fountainScript.src=new URL('genesis-fountain-v011-live-overlay.js?v=0.14.003',location.href).href;
    fountainScript.onerror=()=>{document.getElementById('fountainState').textContent='Error cargando el controlador de la fuente V011'};
    doc.body.appendChild(fountainScript);
    status.textContent='Escena del juego cargada; preparando geometría y texturas…';
