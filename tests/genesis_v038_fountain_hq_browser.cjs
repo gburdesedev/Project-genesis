@@ -30,7 +30,7 @@ const server=http.createServer((req,res)=>{
   const url='http://127.0.0.1:'+server.address().port+'/genesis-v038-fuente-hq-preview.html';
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:120000});
   await page.locator('#genesisApp').waitFor({timeout:120000});
-  await page.waitForFunction(()=>document.querySelector('#genesisApp')?.app?.root,{timeout:180000});
+  await page.waitForFunction(()=>document.querySelector('#genesisApp')?.app?.root,null,{timeout:180000});
   // Pick Herrero only when the profession chooser is actually visible.
   const choice=page.locator('[data-profession="Herrero"]').first();
   for(let attempt=0;attempt<60;attempt++){
@@ -38,7 +38,7 @@ const server=http.createServer((req,res)=>{
     await page.waitForTimeout(1000);
   }
   if(await choice.isVisible().catch(()=>false))await choice.click({timeout:30000});
-  await page.waitForFunction(()=>window.__genesisHQFountainForgeQA?.fountain!=='WAITING',{timeout:180000});
+  await page.waitForFunction(()=>window.__genesisHQFountainForgeQA?.fountain!=='WAITING',null,{timeout:180000});
   const actual=await page.evaluate(()=>{
     const app=document.querySelector('#genesisApp')?.app;
     const f=document.getElementById('genesisFountainV011Model');
@@ -66,7 +66,7 @@ const server=http.createServer((req,res)=>{
   assert.equal(actual.clip.length,1,'Fountain GLB should expose a single 8s animation clip');
   // Wait for actual blacksmith route to finish mounting; not for fixed timer.
   await page.waitForFunction(()=>document.getElementById('forgeModel')?.contentEntity?.findComponents('render')?.length>0,
-    {timeout:90000}).catch(()=>{});
+    null,{timeout:90000}).catch(()=>{});
   const forge=await page.evaluate(()=>{
     const el=document.getElementById('forgeModel'),root=el?.contentEntity;
     const renders=root?.findComponents('render')||[];
