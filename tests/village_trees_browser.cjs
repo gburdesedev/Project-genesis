@@ -84,6 +84,38 @@ const server=http.createServer((req,res)=>{
 
  try{await page.screenshot({path:'/tmp/genesis-trees/plaza-14-arboles-v0.14a.png',timeout:12000})}
  catch(error){console.warn('Captura opcional de árboles no disponible; render confirmado:',error.message)}
+
+ const trunks=await page.evaluate(()=>{
+  const out=[];
+  const anchors=window.__scene.trees.root.children.slice(0,4);
+  for(const anchor of anchors){
+   const pts=[];
+   for(const render of anchor.findComponents('render'))for(const mi of render.meshInstances||[]){
+    if(!/bark/i.test(mi.material?.name||''))continue;
+    const positions=[];let n=0;
+    try{n=mi.mesh?.getPositions(positions)||0;}catch(e){out.push({name:anchor.name,error:String(e)});continue;}
+    const transform=mi.node.getWorldTransform();
+    const Vec=window.__scene.camera.getPosition().constructor;
+    for(let i=0;i<n;i++){
+     const w=transform.transformPoint(new Vec(positions[i*3],positions[i*3+1],positions[i*3+2]));
+     pts.push([w.x,w.y,w.z]);
+    }
+   }
+   if(!pts.length){out.push({name:anchor.name,vertices:0});continue;}
+   const minY=Math.min(...pts.map(x=>x[1]));
+   const lower=pts.filter(p=>p[1]<minY+1.1);
+   const xs=lower.map(p=>p[0]).sort((a,b)=>a-b);
+   const zs=lower.map(p=>p[2]).sort((a,b)=>a-b);
+   const x=xs[Math.floor(xs.length*.5)],z=zs[Math.floor(zs.length*.5)];
+   const rr=lower.map(p=>Math.hypot(p[0]-x,p[2]-z)).sort((a,b)=>a-b);
+   out.push({name:anchor.name,vertices:pts.length,groundVertices:lower.length,
+      center:[+x.toFixed(3),+z.toFixed(3)],site:[anchor.getPosition().x,anchor.getPosition().z],
+      trunkP90:+rr[Math.floor(rr.length*.9)].toFixed(3),trunkP98:+rr[Math.floor(rr.length*.98)].toFixed(3),
+      trunkMax:+rr[rr.length-1].toFixed(3)});
+  }
+  return out;
+ });
+ console.log('TREE_TRUNK_GEOMETRY',JSON.stringify(trunks));
  console.log('PASS real PlayCanvas tree screenshot',JSON.stringify(status));
  await browser.close();
 })().catch(async err=>{console.error(err);process.exitCode=1;try{await browser?.close()}catch(_){}}).finally(()=>server.close());
