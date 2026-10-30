@@ -20,7 +20,7 @@ function attachMovingWater(model,app){
       if(!source?.name?.startsWith('AGUA_')||!source.clone)continue;
       const pool=source.name.includes('Estanque');
       const jet=source.name.includes('Fisica');
-      if(!pool&&!jet)continue;
+      if(!pool&&!jet||!source.normalMap)continue;
       let mat=cloned.get(source);
       if(!mat){
         mat=source.clone();
@@ -101,13 +101,13 @@ function attachMovingWater(model,app){
     }
     if(!app)throw Error('No se pudo enlazar la aplicación de PlayCanvas');
     const waterMaterials=attachMovingWater(model,app);
-    for(let i=0;i<20 && !anim.clips?.length;i++)await pause(200);
+    for(let i=0;i<100 && !anim.clips?.length;i++)await pause(200);
     const clips=[...(anim.clips||[])];
     if(!clips.length){
       send('ERROR',{message:'Fuente visible, pero ningún clip GLB se activó; revisar animación de 8 segundos.',center:[p.x,p.y,p.z],waterMaterials});
       return;
     }
     send('ANIMATED',{center:[p.x,p.y,p.z],clips,waterMaterials,diameterMeters:4.26,
-      note:'GLB 8s + normales del agua en movimiento; PBR mármol V007 intacto'});
+      note:waterMaterials?'GLB 8s + normales del agua en movimiento; PBR mármol V007 intacto':'GLB 8s animado; falta normal map importada para animar la superficie'});
   }catch(err){send('ERROR',{message:String(err?.message||err)})}
 })();
