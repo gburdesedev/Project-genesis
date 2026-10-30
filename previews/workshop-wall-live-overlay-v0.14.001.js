@@ -118,7 +118,8 @@ function startForgeV038Breathing(app,visual){
     for(const material of materials)material.destroy();
   },{once:true});
 }
-\nasync function inspectForge(app){
+
+async function inspectForge(app){
  const comparing=location.pathname.includes('/forge-v038-fixed-preview.html');
  const candidate=findModelHolder();
  preview.forge={phase:comparing?'cargando V038 para montaje':'comprobando V038',
@@ -163,7 +164,9 @@ function startForgeV038Breathing(app,visual){
     visual.setLocalPosition(0,0,0);
     visual.setLocalEulerAngles(0,0,0);
     visual.setLocalScale(1,1,1);
-    mounted=true;\n    startForgeV038Breathing(app,visual);\n   }
+    mounted=true;
+    startForgeV038Breathing(app,visual);
+   }
    // Disable only duplicate original visual content, never its gameplay
    // host, collision, forge UI, interactive trigger or scripted light.
    const old=modelEl.contentEntity;
