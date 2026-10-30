@@ -1,0 +1,42 @@
+name: Build isolated PlayCanvas Forge V038 preview
+on:
+  push:
+    branches: [feature/forge-v038-playcanvas-preview]
+    paths:
+      - .github/workflows/build-forge-v038-preview.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble game preview from original without rewriting index.html
+        run: |
+          python3 scripts/build_forge_v038_preview.py
+          test -s forge-v038-preview.html
+          test -s reports/forge-v038-preview-build.json
+      - name: Verify remote candidate asset exists and contains actual GLB
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request,struct
+          d=json.load(open('reports/forge-v038-preview-build.json'))
+          req=urllib.request.Request(d['asset_url'],headers={'Range':'bytes=0-11','User-Agent':'ProjectGenesis-V038-Smoketest'})
+          with urllib.request.urlopen(req,timeout=35) as resp:
+              r=resp.read(12)
+              assert r[:4]==b'glTF'
+              total=struct.unpack_from('<I',r,8)[0]
+              assert 10000000<total<30000000,total
+              print('REMOTE_GLB_REACHABLE',total)
+          PY
+      - name: Commit only separate preview HTML and review evidence
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add forge-v038-preview.html reports/forge-v038-preview-build.json
+          git commit -m 'Build V038 isolated gameplay preview; original index untouched [skip ci]'
+          git fetch origin "${{ github.ref_name }}"
+          git rebase "origin/${{ github.ref_name }}"
+          git push origin "HEAD:${{ github.ref_name }}"
