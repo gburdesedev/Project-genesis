@@ -298,7 +298,7 @@ export function mountVillageTrees(app, villageRoot, options={}){
  return Object.freeze({
   root:treeRoot,sites:TREE_SITES,update,status,initialReady,
   blocked(x,z,r=.33){return nodes.some(node=>node.visible&&node.visual&&node.anchor.enabled&&node.collider&&Math.hypot(node.collider.x-x,node.collider.z-z)<node.collider.r+r)},
-  collisionSnapshot(){return nodes.filter(node=>node.collider).map(node=>({id:node.site.id,species:node.site.species,region:node.site.region,x:node.collider.x,z:node.collider.z,r:node.collider.r,measured:node.collider.measured,visible:node.visible,loaded:!!node.visual}))},
+  collisionSnapshot(){return nodes.filter(node=>node.collider).map(node=>({id:node.site.id,species:node.site.species,region:node.site.region,lod:node.lod,x:node.collider.x,z:node.collider.z,r:node.collider.r,measured:node.collider.measured,visible:node.visible,loaded:!!node.visual}))},
   release(){app.off('update',windTick);treeRoot.destroy();queue.length=0}
  });
 }
