@@ -1,84 +1,30 @@
 <!doctype html>
 <html lang="es"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#15130f">
-<title>Project Genesis · prueba real de paredes Herrero / Arcanista · v0.14.001</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Project Genesis · prueba real fragua V038 y fuente HQ</title>
 <style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0a0c0d;color:#f3e2b8;font-family:Georgia,serif}
-*{box-sizing:border-box}#game{position:absolute;inset:0;border:0;width:100%;height:100%}
-#badge{position:fixed;left:12px;bottom:12px;max-width:min(490px,calc(100vw - 24px));
- background:rgba(20,16,12,.94);border:1px solid #af844e;border-radius:7px;
- padding:9px 12px;box-shadow:0 3px 15px #0009;font-size:12px;line-height:1.4;
- pointer-events:none;z-index:10}#badge b{color:#f9cd7e}#badge small{color:#d2c1a2}#forgeToggle{position:fixed;right:12px;bottom:12px;z-index:11;max-width:30vw;
-background:#2c2215;color:#f5d69a;border:1px solid #bc8f53;padding:10px 12px;border-radius:7px;
-font:12px Georgia,serif;cursor:pointer}
-#forgeToggle:hover{background:#44301a}
-#busy{position:fixed;left:50%;top:45%;transform:translate(-50%,-50%);
- padding:16px 22px;background:#17140e;border:1px solid #9b7648;border-radius:8px;
- z-index:8;max-width:88vw;text-align:center}
-@media(max-width:720px){#badge{font:11px system-ui;bottom:max(6px,env(safe-area-inset-bottom));padding:6px 8px;max-width:65vw}}
-#badge{cursor:pointer;pointer-events:auto;opacity:.9;max-height:75vh;overflow:auto}
-#badge:not(.expanded){max-width:min(320px,57vw);padding:5px 9px}
-#badge:not(.expanded) #state,#badge:not(.expanded) #fountainState,#badge:not(.expanded) small{display:none}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0d1115;color:#f3e2b8;font:12px system-ui,sans-serif}
+#game{position:absolute;inset:0;width:100%;height:100%;border:0}
+#label{position:fixed;bottom:max(10px,env(safe-area-inset-bottom));left:10px;max-width:58vw;z-index:20;background:#111a1ee8;border:1px solid #b28c50;border-radius:6px;padding:8px 10px;line-height:1.5}
+#label b{color:#efc887}#details{display:none}#label.open #details{display:block}
+#label{cursor:pointer}button{position:fixed;bottom:max(10px,env(safe-area-inset-bottom));right:10px;z-index:20;max-width:35vw;background:#292019;color:#f7dda4;border:1px solid #b18c51;border-radius:5px;padding:10px;cursor:pointer}
 </style>
 </head><body>
-<div id="busy">Cargando el juego real de Project Genesis…</div>
-<iframe id="game" title="Project Genesis · PlayCanvas, talleres y fragua"
- src="../index.html" loading="eager" allow="fullscreen" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-<button type="button" id="forgeToggle">Probar fragua V038</button>
-<div id="badge"><b>PRUEBA EN PLAYCANVAS · v0.14.001</b>
- <div id="state">Cargando juego original…</div>
- <div id="fountainState">Fuente del delfín V011 HQ · Draco · 2K: cargando…</div>
- <small>Muros V006 Herrero / V005 Arcanista · no aprobados · el juego original no se modifica</small></div>
+<iframe id="game" loading="eager" allow="fullscreen" title="Project Genesis: fuente V011 HQ y fragua V038" src="../genesis-v038-fuente-hq-preview.html"></iframe>
+<div id="label"><b>PRUEBA V038 + DELFÍN V011 HQ</b><div id="details">Fuente: esperando motor · Fragua: esperando motor<div id="errors"></div></div></div>
+<button id="toggle" type="button">Comparar con juego principal</button>
 <script>
-(()=>{'use strict';
- const frame=document.getElementById('game');
- const status=document.getElementById('state');
- const busy=document.getElementById('busy');
- const toggle=document.getElementById('forgeToggle');
- document.getElementById('badge').addEventListener('click',e=>e.currentTarget.classList.toggle('expanded'));
- let usingForgePreview=false;
- toggle.addEventListener('click',()=>{
-   usingForgePreview=!usingForgePreview;
-   busy.style.display='block';
-   busy.textContent='Cargando '+(usingForgePreview?'el juego con fragua V038':'la última versión principal')+'…';
-   frame.src=usingForgePreview?'../forge-v038-fixed-preview.html':'../index.html';
-   toggle.textContent=usingForgePreview?'Volver a la versión principal':'Probar fragua V038';
- });
- function update(data){
-  const h=data.models?.Herrero||'…',a=data.models?.Arcanista||'…';
-  const found=data.placed?.map(p=>p.profession+' ('+p.role+')').join(', ')||'cargando escenas';
-  const forge=data.forge?.phase||'pendiente';
-  status.textContent='Muros: Herrero '+h+', Arcanista '+a+' · '+found+' · Fragua: '+forge;
-  if(data.status==='running'||data.status==='error')busy.style.display='none';
-  if(data.errors?.length){status.textContent+=' · Avisos: '+data.errors[0]}
- }
- window.addEventListener('message',event=>{
-  if(event.origin!==location.origin||event.source!==frame.contentWindow)return;
-  if(event.data?.kind==='genesisWorkshopWallPreview')update(event.data.data);
-  if(event.data?.kind==='genesisFountainV011Preview'){
-   const d=event.data;document.getElementById('fountainState').textContent='Fuente V011 HQ: '+d.state+(d.message?' · '+d.message:'')+(d.clips?' · '+d.clips.join(', '):'');
-  }
- });
- frame.addEventListener('load',()=>{
-  busy.style.display='none';
-  try{
-   const doc=frame.contentDocument;
-   if(!doc||!doc.body)throw Error('No se puede acceder al juego original');
-   const script=doc.createElement('script');
-   script.type='module';
-   script.src=new URL('workshop-wall-live-overlay-v0.14.001.js?v=0.14.002',location.href).href;
-   script.onerror=()=>{status.textContent='Error cargando el módulo de muros; juego original intacto.'};
-   doc.body.appendChild(script);
-   const fountainScript=doc.createElement('script');
-   fountainScript.type='module';
-   fountainScript.src=new URL('genesis-fountain-v011-live-overlay.js?v=0.14.003',location.href).href;
-   fountainScript.onerror=()=>{document.getElementById('fountainState').textContent='Error cargando el controlador de la fuente V011'};
-   doc.body.appendChild(fountainScript);
-   status.textContent='Escena del juego cargada; preparando geometría y texturas…';
-  }catch(error){status.textContent='No se pudo inicializar la prueba: '+error.message}
- });
- frame.addEventListener('error',()=>{busy.textContent='Error cargando el juego de PlayCanvas'});
+(()=>{
+const frame=document.getElementById('game'),button=document.getElementById('toggle'),badge=document.getElementById('label'),details=document.getElementById('details'),errors=document.getElementById('errors');
+let alternate=false;badge.addEventListener('click',()=>badge.classList.toggle('open'));
+button.addEventListener('click',()=>{alternate=!alternate;frame.src=alternate?'../index.html':'../genesis-v038-fuente-hq-preview.html';button.textContent=alternate?'Volver a prueba HQ + V038':'Comparar con juego principal';details.textContent=alternate?'Juego original sin cambios':'Prueba cargando';});
+window.addEventListener('message',event=>{
+if(event.source!==frame.contentWindow||event.origin!==location.origin||event.data?.kind!=='genesisHQFountainForgeQA')return;
+const d=event.data.data||{};
+details.textContent='Fuente HQ: '+(d.fountain||'pendiente')+' · Fragua V038: '+(d.forge||'pendiente')+' · Agua: '+(d.waterMaterials||0)+' materiales';
+if(d.errors?.length)details.textContent+=' · Error: '+String(d.errors[0]).slice(0,160);
+});
+frame.addEventListener('error',()=>details.textContent='Error cargando la prueba: revisar consola de navegador.');
 })();
-</script>
-</body></html>
+</script></body></html>
