@@ -1,9 +1,9 @@
-/* Project Genesis v0.14b — approved foliage, warm bark and gentle GPU wind.
+/* Project Genesis v0.14c — approved foliage, warm bark, wind and geometry-accurate trunk collision.
  * Artwork: oak V017, ash V020, linden V022, burgundy maple V021.
  * The art masters are immutable. The v005 derivatives preserve ALL approved master geometry, plus native PNG/JPEG alpha.
  * 14 trunks over the 63x63-metre village: 4 in the plaza, 10 along the town and perimeter.
  */
-import { Entity,SHADERLANGUAGE_GLSL } from 'playcanvas';
+import { Entity,Vec3,SHADERLANGUAGE_GLSL } from 'playcanvas';
 
 const ORIGINALS = 'https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/94d2fe3262af163d9cd7277cc4e31e20acf3bcaa/';
 const REPO = 'https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/1801cf9ac2394ac80bbe3f2d97dc00c8fd49e57d/';
@@ -40,7 +40,7 @@ const RAW_SITES = [
 export const TREE_SITES = Object.freeze(RAW_SITES.map((item,index)=>Object.freeze({
  id: index+1, species: item[0], x:item[1], z:item[2], region:item[3],
  rotation: (index*137.508)%360, size: 0.90+((index*7)%9)*0.025,
- trunkRadius: 0.43
+ trunkRadius: 0.43 // safe fallback only; actual collision is derived from bark geometry
 })));
 // Applied only to the transparent botanical leaf cards. Bark, trunk and lower
 // branches keep their original transforms. Shader motion costs no JS per leaf.
@@ -128,6 +128,42 @@ function boundsOf(entity){
  if(!Number.isFinite(minY)||maxY-minY<0.001)return {minX:0,minY:0,minZ:0,maxX:0,maxY:1,maxZ:0};
  return {minX,minY,minZ,maxX,maxY,maxZ};
 }
+// The GLB's bounding box is dominated by its off-center crown. Collision
+// must come from the real bark at pedestrian height, not from the leaf canopy
+// center or from a species-independent nominal radius.
+function measureTrunk(prototype) {
+ const points=[],local=new Vec3(),world=new Vec3();
+ let minY=Infinity;
+ const stack=[prototype];
+ while(stack.length){
+  const e=stack.pop();
+  for(const child of e.children)stack.push(child);
+  for(const mi of e.render?.meshInstances||[]){
+   if(!/bark|trunk|wood|corteza/i.test(mi.material?.name||'') )continue;
+   const positions=[];
+   let count=0;
+   try{count=mi.mesh?.getPositions(positions)||0;}catch(error){console.warn('Genesis trunk: cannot sample bark',error);continue;}
+   const matrix=mi.node.getWorldTransform();
+   for(let i=0;i<count;i++){
+    local.set(positions[3*i],positions[3*i+1],positions[3*i+2]);
+    matrix.transformPoint(local,world);
+    if(!Number.isFinite(world.x+world.y+world.z))continue;
+    points.push([world.x,world.y,world.z]);
+    if(world.y<minY)minY=world.y;
+   }
+  }
+ }
+ if(!points.length||!Number.isFinite(minY))return null;
+ const band=points.filter(p=>p[1]>=minY-.001 && p[1]<=minY+1.1);
+ if(band.length<10)return null;
+ const sortedX=band.map(p=>p[0]).sort((a,b)=>a-b);
+ const sortedZ=band.map(p=>p[2]).sort((a,b)=>a-b);
+ const cx=sortedX[Math.floor(sortedX.length*.5)];
+ const cz=sortedZ[Math.floor(sortedZ.length*.5)];
+ const radii=band.map(p=>Math.hypot(p[0]-cx,p[2]-cz)).sort((a,b)=>a-b);
+ return {x:cx,z:cz,radius:Math.max(.1,radii[Math.floor(radii.length*.98)])};
+}
+
 export function mountVillageTrees(app, villageRoot, options={}){
  const safeMobile = globalThis.GenesisDevice?.safePreviews===true;
  const treeRoot=new Entity('Vegetación aprobada — 14 árboles · follaje íntegro PBR');
@@ -136,7 +172,7 @@ export function mountVillageTrees(app, villageRoot, options={}){
   const anchor=new Entity('Árbol '+site.id+' · '+TYPES[site.species].label+' · '+site.region);
   anchor.setLocalPosition(site.x,0,site.z);anchor.setLocalEulerAngles(0,site.rotation,0);
   treeRoot.addChild(anchor);
-  return {site,anchor,visual:null,lod:null,visible:false};
+  return {site,anchor,visual:null,lod:null,visible:false,collider:null};
  });
  const ready=new Map(),requested=new Set(),failed=new Set(),queue=[];
  const windMaterials=new Set();let windTime=0,windAccumulator=0;
@@ -178,7 +214,8 @@ export function mountVillageTrees(app, villageRoot, options={}){
       const prototype=asset.resource.instantiateRenderEntity();
       classifyAndTune(prototype,safeMobile,windMaterials);
       const dimensions=boundsOf(prototype);
-      ready.set(task.key,{prototype,dimensions});
+      const trunk=measureTrunk(prototype);
+      ready.set(task.key,{prototype,dimensions,trunk});
      }catch(err){
       if(!task.legacy&&task.lod>=1){
        queue.unshift({...task,legacy:true});pump();return;
@@ -208,7 +245,7 @@ export function mountVillageTrees(app, villageRoot, options={}){
   if(node.lod===lod)return;
   const model=ready.get(node.site.species+':'+lod);
   if(!model)return;
-  const {dimensions,prototype}=model,visual=prototype.clone();
+  const {dimensions,prototype,trunk}=model,visual=prototype.clone();
   const sourceHeight=dimensions.maxY-dimensions.minY;
   const intended=TYPES[node.site.species].height*node.site.size*(node.site.region==='plaza'?.86:1);
   const scale=intended/Math.max(.01,sourceHeight);
@@ -217,6 +254,14 @@ export function mountVillageTrees(app, villageRoot, options={}){
   node.anchor.addChild(visual);
   if(node.visual)node.visual.destroy();
   node.visual=visual;node.lod=lod;
+  // Transform the bark's measured ground center through the same visual
+  // offset, individual tree scale and yaw used for rendering.
+  if(trunk){
+   const center=visual.getWorldTransform().transformPoint(new Vec3(trunk.x,0,trunk.z));
+   node.collider={x:center.x,z:center.z,r:Math.max(.30,trunk.radius*scale+.04),measured:true};
+  }else{
+   node.collider={x:node.site.x,z:node.site.z,r:Math.max(.50,node.site.trunkRadius),measured:false};
+  }
   const stack=[visual];while(stack.length){
    const entity=stack.pop();for(const child of entity.children)stack.push(child);
    if(entity.render){
@@ -252,7 +297,8 @@ export function mountVillageTrees(app, villageRoot, options={}){
  update(0,0,true);
  return Object.freeze({
   root:treeRoot,sites:TREE_SITES,update,status,initialReady,
-  blocked(x,z,r=.33){return nodes.some(node=>node.visible&&node.visual&&node.anchor.enabled&&Math.hypot(node.site.x-x,node.site.z-z)<node.site.trunkRadius+r)},
+  blocked(x,z,r=.33){return nodes.some(node=>node.visible&&node.visual&&node.anchor.enabled&&node.collider&&Math.hypot(node.collider.x-x,node.collider.z-z)<node.collider.r+r)},
+  collisionSnapshot(){return nodes.filter(node=>node.collider).map(node=>({id:node.site.id,species:node.site.species,region:node.site.region,x:node.collider.x,z:node.collider.z,r:node.collider.r,measured:node.collider.measured,visible:node.visible,loaded:!!node.visual}))},
   release(){app.off('update',windTick);treeRoot.destroy();queue.length=0}
  });
 }
