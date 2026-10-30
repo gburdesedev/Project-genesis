@@ -11,14 +11,14 @@
 #label{cursor:pointer}button{position:fixed;bottom:max(10px,env(safe-area-inset-bottom));right:10px;z-index:20;max-width:35vw;background:#292019;color:#f7dda4;border:1px solid #b18c51;border-radius:5px;padding:10px;cursor:pointer}
 </style>
 </head><body>
-<iframe id="game" loading="eager" allow="fullscreen" title="Project Genesis: fuente V011 HQ y fragua V038" src="../genesis-v038-fuente-hq-preview.html"></iframe>
+<iframe id="game" loading="eager" allow="fullscreen" title="Project Genesis: fuente V011 HQ y fragua V038" src="../genesis-v038-fuente-hq-preview.html?v=0.14.005"></iframe>
 <div id="label"><b>PRUEBA V038 + DELFÍN V011 HQ · FIX 005</b><div id="details">Fuente: esperando motor · Fragua: esperando motor<div id="errors"></div></div></div>
 <button id="toggle" type="button">Comparar con juego principal</button>
 <script>
 (()=>{
 const frame=document.getElementById('game'),button=document.getElementById('toggle'),badge=document.getElementById('label'),details=document.getElementById('details'),errors=document.getElementById('errors');
 let alternate=false;badge.addEventListener('click',()=>badge.classList.toggle('open'));
-button.addEventListener('click',()=>{alternate=!alternate;frame.src=alternate?'../index.html':'../genesis-v038-fuente-hq-preview.html';button.textContent=alternate?'Volver a prueba HQ + V038':'Comparar con juego principal';details.textContent=alternate?'Juego original sin cambios':'Prueba cargando';});
+button.addEventListener('click',()=>{alternate=!alternate;frame.src=alternate?'../index.html':'../genesis-v038-fuente-hq-preview.html?v=0.14.005';button.textContent=alternate?'Volver a prueba HQ + V038':'Comparar con juego principal';details.textContent=alternate?'Juego original sin cambios':'Prueba cargando';});
 window.addEventListener('message',event=>{
 if(event.source!==frame.contentWindow||event.origin!==location.origin||event.data?.kind!=='genesisHQFountainForgeQA')return;
 const d=event.data.data||{};
