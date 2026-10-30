@@ -1,0 +1,39 @@
+name: "Project Genesis real PlayCanvas workshop walls smoke"
+on:
+  push:
+    branches: [main]
+    paths:
+      - previews/workshop-wall-live-overlay-v0.14.001.js
+      - previews/talleres-herrero-arcanista-v0.14.001.html
+      - tests/workshop_wall_live_browser.cjs
+      - .github/workflows/workshop-walls-live-smoke.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-game-playcanvas:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax check on preview overlay
+        run: |
+          node --check previews/workshop-wall-live-overlay-v0.14.001.js
+          node --check tests/workshop_wall_live_browser.cjs
+      - name: Install WebGL browser test dependencies
+        run: |
+          npm install --no-save playwright@1.56.1 playcanvas@2.23.0
+          npx playwright install --with-deps chromium
+      - name: Validate the actual game and live wall GLBs in browser
+        run: node tests/workshop_wall_live_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workshop-walls-playcanvas-live-screen-and-audit
+          path: previews/workshop-wall-test-reports/
+          retention-days: 5
