@@ -116,6 +116,31 @@ const server=http.createServer((req,res)=>{
   return out;
  });
  console.log('TREE_TRUNK_GEOMETRY',JSON.stringify(trunks));
+ const collision=await page.evaluate(()=>{
+  const trees=window.__scene.trees;
+  const cs=trees.collisionSnapshot().filter(c=>c.region==='plaza');
+  return cs.map(c=>({
+   ...c,
+   atCenter:trees.blocked(c.x,c.z,.33),
+   nearEdge:trees.blocked(c.x+(c.r+.33)*.94,c.z,.33),
+   beyondEdge:trees.blocked(c.x+(c.r+.33)*1.12,c.z,.33)
+  }));
+ });
+ console.log('TREE_COLLISION_V014C',JSON.stringify(collision));
+ assert.equal(collision.length,4,'Plaza must retain all four tree trunks');
+ assert(collision.every(c=>c.measured&&c.visible&&c.loaded),'The collider must follow real loaded bark');
+ assert(collision.every(c=>c.atCenter&&c.nearEdge&&!c.beyondEdge),
+   'Collision circles do not follow the visible trunk: '+JSON.stringify(collision));
+ for(const physical of trunks){
+  const id=Number(physical.name.match(/Árbol (\\d+)/)?.[1]||0);
+  const collider=collision.find(c=>c.id===id);
+  assert(collider,'Missing collider for '+physical.name);
+  assert(Math.hypot(collider.x-physical.center[0],collider.z-physical.center[1])<.17,
+    'Trunk collider center differs from actual visible geometry: '+JSON.stringify({collider,physical}));
+  assert(collider.r>physical.trunkP98-.14,
+    'Trunk collision radius underestimates the physical root: '+JSON.stringify({collider,physical}));
+ }
+
  console.log('PASS real PlayCanvas tree screenshot',JSON.stringify(status));
  await browser.close();
 })().catch(async err=>{console.error(err);process.exitCode=1;try{await browser?.close()}catch(_){}}).finally(()=>server.close());
