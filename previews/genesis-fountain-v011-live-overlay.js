@@ -2,7 +2,16 @@
  * PBR marble V007 and V011 water are unchanged. Preview only; never edit index.
  * Plaza center comes from the active village_plan.js rather than guessed X/Z.
  */
-const FOUNTAIN_GLTF = 'https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/feature/plaza-fuente-delfin-marmol-aaa/public/models/PG_Dolphin_Fountain_V011_PlayCanvas_Animated.glb';
+const FOUNTAIN_ORIGINAL='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/feature/plaza-fuente-delfin-marmol-aaa/public/models/PG_Dolphin_Fountain_V011_PlayCanvas_Animated.glb';
+const FOUNTAIN_MERGED='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/feature/plaza-fuente-delfin-marmol-aaa/public/models/PG_Dolphin_Fountain_V011_PlayCanvas_Merged8s.glb';
+async function chooseFountainGLB(){
+  // When the lossless single-clip publication is ready, use it automatically.
+  try{
+    const response=await fetch(FOUNTAIN_MERGED,{method:'HEAD',cache:'no-store'});
+    if(response.ok)return FOUNTAIN_MERGED;
+  }catch(error){console.warn('Fuente V011 merged not published:',error)}
+  return FOUNTAIN_ORIGINAL;
+}
 const send = (state, detail={}) => {
   const result={kind:'genesisFountainV011Preview',state,...detail};
   window.__genesisFountainV011Preview=result;
@@ -66,12 +75,13 @@ function attachMovingWater(model,app){
     const appElement=document.querySelector('#genesisApp');
     const scene=document.querySelector('#genesisApp > pc-scene');
     if(!appElement||!scene)throw Error('No se encontró pc-scene original de PlayCanvas');
-    send('LOADING',{center:[p.x,p.y,p.z],fountainDiameter:4.26,source:FOUNTAIN_GLTF});
+    const fountainURL=await chooseFountainGLB();
+    send('LOADING',{center:[p.x,p.y,p.z],fountainDiameter:4.26,source:fountainURL});
     // Built-in web components load the GLB and its animations as one container.
     const asset=document.createElement('pc-asset');
     asset.id='genesisFountainV011Asset';
     asset.setAttribute('type','container');
-    asset.setAttribute('src',FOUNTAIN_GLTF);
+    asset.setAttribute('src',fountainURL);
     appElement.insertBefore(asset,scene);
     const model=document.createElement('pc-model');
     model.id='genesisFountainV011Model';
@@ -105,6 +115,10 @@ function attachMovingWater(model,app){
     const clips=[...(anim.clips||[])];
     if(!clips.length){
       send('ERROR',{message:'Fuente visible, pero ningún clip GLB se activó; revisar animación de 8 segundos.',center:[p.x,p.y,p.z],waterMaterials});
+      return;
+    }
+    if(clips.length>1){
+      send('PARTIAL',{message:'GLB original con '+clips.length+' clips independientes; esperando unificación para reproducir todo el agua',clips,center:[p.x,p.y,p.z]});
       return;
     }
     send('ANIMATED',{center:[p.x,p.y,p.z],clips,waterMaterials,diameterMeters:4.26,
