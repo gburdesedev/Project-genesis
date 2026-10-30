@@ -73,6 +73,14 @@ replace_once(
  'function cameraBlocked(x,z){if(village.blocked(x,z,.20))return true;',
  'function cameraBlocked(x,z){if(village.blocked(x,z,.20)||Math.hypot(x-GenesisVillagePlan.plaza.x,z-GenesisVillagePlan.plaza.z)<2.13+.20)return true;',
  'Fountain camera collision')
+replace_once(
+ "if(tutorialStep===5)return[{id:'aux',radius:2.2,prompt:",
+ "if(tutorialStep===5)return[{id:'aux',radius:selectedProfession==='Herrero'?2.75:2.2,prompt:",
+ "Forge chimney interaction radius")
+replace_once(
+ "if(tutorialStep===6)return[{id:'activate',radius:2.25,prompt:",
+ "if(tutorialStep===6)return[{id:'activate',radius:selectedProfession==='Herrero'?2.65:2.25,prompt:",
+ "Forge activation interaction radius")
 
 # The existing plaza is 13x13 in village-plan units, world scaling .75.
 # Its exact world center is (7, 0, 16). Model geometry is a
