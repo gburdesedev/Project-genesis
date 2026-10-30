@@ -30,7 +30,7 @@ async function maps(app,name,mobile=false,onResourceLoaded=()=>{}){
 }
 function material(name,color){const m=new StandardMaterial();m.name=name;m.diffuse=new Color(...color);m.gloss=.15;m.update();return m}
 function pavedMaterial(name,maps,w,d,meters=2){
- const m=material(name,[1,1,1]);m.diffuseMap=maps.color;m.normalMap=maps.normal;m.bumpiness=.75;m.glossMap=maps.gloss;m.glossMapChannel='r';m.gloss=1;m.aoMap=maps.ao;m.aoMapUv=0;
+ const m=material(name,[1,1,1]);m.diffuseMap=maps.color;m.normalMap=maps.normal;m.bumpiness=.75;m.glossMap=maps.gloss;m.glossMapChannel='r';m.gloss=1;m.glossInvert=true;m.aoMap=maps.ao;m.aoMapUv=0;
  for(const type of ['diffuse','normal','gloss','ao'])m[`${type}MapTiling`].set(w/meters,d/meters);
  m.update();return m;
 }
@@ -132,21 +132,21 @@ function arcaneSurround(app,building,cobble,shell){
  return frame;
 }
 function stampVersion(){
- const version='v0.14c', build='20261029.04';
+ const version='v0.14d', build='20261030.01';
  globalThis.__genesisVillageBuild={version,build};
- document.title=document.title.replace(/v0\.14[a-c]?/gi,version);
+ document.title=document.title.replace(/v0\.14[a-d]?/gi,version);
  // The existing HUD build label lives in the monolithic demo HTML. Update
  // its text node without rewriting or disturbing its DOM or event handlers.
  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
  let node;
  while((node=walker.nextNode())){
   if(!/PROJECT GENESIS|BUILD 20261029/i.test(node.nodeValue||''))continue;
-  node.nodeValue=node.nodeValue.replace(/v0\.14[a-c]?/gi,version).replace(/20261029\.0[1-3]/g,build);
+  node.nodeValue=node.nodeValue.replace(/v0\.14[a-c]?/gi,version).replace(/20261029\.0[1-4]/g,build);
  }
 }
 export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{}}){
  stampVersion();
- const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14c');app.root.addChild(root);
+ const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14d');app.root.addChild(root);
  // Begin tree transfers before road PBR maps: four species are part of the initial scene.
  const trees=mountVillageTrees(app,root,{onResourceLoaded});
  onPhase('arboles');
@@ -155,6 +155,12 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
  const [cobble,traffic]=mobile
   ? [await maps(app,'cobble',true,onResourceLoaded),await maps(app,'traffic',true,onResourceLoaded)]
   : await Promise.all([maps(app,'cobble',false,onResourceLoaded),maps(app,'traffic',false,onResourceLoaded)]);
+ // Runtime audit: report the *actual* WebGL texture resolution and map class,
+ // not the 4K authoring source referenced by the provenance manifest.
+ const describe=maps=>Object.fromEntries(Object.entries(maps).map(([key,t])=>[key,{width:t.width,height:t.height,srgb:!!t.srgb}]));
+ globalThis.__genesisGroundStatus={version:'v0.14d',build:'20261030.01',desktop:!mobile,
+  cobble:describe(cobble),traffic:describe(traffic),roughnessInverted:true};
+
  // Gentle opposing sky bounce prevents near-black backsides without flattening PBR.
  const bounce=new Entity('Rebote celeste cálido · sin sombras');
  bounce.addComponent('light',{type:'directional',color:new Color(.84,.79,.73),intensity:.43,castShadows:false});
