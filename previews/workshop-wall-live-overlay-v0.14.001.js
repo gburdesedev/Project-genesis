@@ -8,7 +8,7 @@ const WALLS={
   Herrero:{name:'Herrero V006',url:SOURCE_ROOT+'Wall_Herrero_V006_PlayCanvas_Preview.glb',x:-1.10,z:.43},
   Arcanista:{name:'Arcanista V005',url:SOURCE_ROOT+'Wall_Arcanista_V005_PlayCanvas_Preview.glb',x:0,z:.43}
 };
-const FORGE_URL='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/production/auto-forge-breathing-coals-v038/public/models/forge-v038-web-hq.glb';
+const FORGE_URL=SOURCE_ROOT+'Forge_V038_HeaderFixed_Preview.glb';
 const preview={version:'v0.14.001',status:'initializing',models:{},placed:[],forge:{phase:'checking'},errors:[]};
 globalThis.__genesisWallWorkshopPreview=preview;
 const emit=()=>{if(parent!==window)parent.postMessage({kind:'genesisWorkshopWallPreview',data:JSON.parse(JSON.stringify(preview))},location.origin)};
@@ -84,7 +84,7 @@ async function inspectForge(app){
  try{
   const resource=await loadGLB(app,FORGE_URL);
   preview.forge.v038ResourceReady=!!resource;
-  preview.forge.phase=candidate?'V038-loaded-needs-scale-calibration':'V038-loaded-no-scene-anchor';
+  preview.forge.phase=location.pathname.includes('forge-v038-fixed-preview')?'V038 corregida en juego':'V038 lista para vista comparativa';
  }catch(error){
   preview.forge.phase='V038-download-failed';
   preview.forge.error=String(error?.message||error);
