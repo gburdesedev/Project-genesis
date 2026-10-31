@@ -1,0 +1,37 @@
+name: "Project Genesis - blacksmith V010 walls + V011 roof live PlayCanvas test"
+on:
+  push:
+    branches: [main]
+    paths:
+      - previews/herreria-v011-playcanvas.html
+      - previews/herreria-v011-playcanvas-overlay.js
+      - tests/herreria_v011_playcanvas_browser.cjs
+      - .github/workflows/herreria-v011-playcanvas-test.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-roof-v011:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check JavaScript syntax
+        run: |
+          node --check previews/herreria-v011-playcanvas-overlay.js
+          node --check tests/herreria_v011_playcanvas_browser.cjs
+      - name: Set up Chromium and Playwright
+        run: |
+          npm install --no-save playwright@1.56.1 playcanvas@2.23.0
+          npx playwright install --with-deps chromium
+      - name: Run actual PlayCanvas test
+        run: node tests/herreria_v011_playcanvas_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: herreria-v011-playcanvas-browser-audit
+          path: previews/herreria-v011-browser-reports/
+          retention-days: 5
