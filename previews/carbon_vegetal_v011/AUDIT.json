@@ -1,0 +1,28 @@
+{
+  "version": "V011_ceniza_sutil",
+  "status": "candidate_review_only_V010_active",
+  "source_approved_v010": "assets/playcanvas/approved/materials/charcoal/v010/carbon_vegetal_v010_tres_piezas_web.glb",
+  "source_sha256": "6e653a6ff93c734c3e0c8fbd7eaf59ee316c710bdc1ea2b73118b4ba9ba018a7",
+  "candidate_path": "previews/carbon_vegetal_v011/carbon_vegetal_v011_ceniza_sutil_candidato.glb",
+  "candidate_bytes": 1361452,
+  "candidate_sha256": "13f295f3c39659e4422feab217dadb3927722553c17414a14c19130d5434c756",
+  "source_triangles": 23312,
+  "candidate_triangles": 23312,
+  "instances": 3,
+  "unique_meshes": 1,
+  "pbr_resolution": [
+    1536,
+    1536
+  ],
+  "normal_map_identical": true,
+  "roughness_map_identical": true,
+  "mesh_uv_identical": true,
+  "original_albedo_mean": 11.79251766204834,
+  "candidate_albedo_mean": 15.114294405336734,
+  "ash_pixel_coverage_over_8pct_opacity": 0.22581100463867188,
+  "max_ash_opacity": 0.34,
+  "mean_ash_opacity": 0.043004970404641636,
+  "exposure_changed_in_material": false,
+  "visual_approval": false,
+  "notes": "Sparsely masked cool-grey ash only on albedo; V010 live inventory remains unchanged"
+}
