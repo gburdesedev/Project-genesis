@@ -3,7 +3,7 @@
   "project": "Project Genesis",
   "platform": "PlayCanvas / WebGL",
   "registry_root": "assets/playcanvas/approved",
-  "updated_on": "2026-10-25",
+  "updated_on": "2026-10-31",
   "policy": {
     "ship_only_approved": true,
     "no_unapproved_candidates": true,
@@ -58,6 +58,34 @@
       "iron_ingot_v175_untouched": true,
       "source_run": "https://github.com/gburdesedev/genesis-blender-render/actions/runs/40225582488",
       "load_policy": "web desktop model-viewer; mobile RGBA poster"
+    },
+    {
+      "id": "material_charcoal_v010_three_pieces",
+      "profession": "Herrero",
+      "category": "material_bruto_model",
+      "name": "Carbón vegetal",
+      "version": "V010_3PIEZAS_PBR1536",
+      "approval": "visual_source_accepted_user_requested_live_playcanvas_integration",
+      "current_status": "integrated_in_live_playcanvas_inventory",
+      "path": "assets/playcanvas/approved/materials/charcoal/v010/carbon_vegetal_v010_tres_piezas_web.glb",
+      "poster": "assets/playcanvas/approved/materials/charcoal/v010/carbon_vegetal_v010_poster.png",
+      "integrity_manifest": "assets/playcanvas/approved/materials/charcoal/v010/asset-lock.json",
+      "format": "GLB",
+      "pieces": 3,
+      "unique_geometry_meshes": 1,
+      "triangles_per_piece": 23312,
+      "rendered_triangles": 69936,
+      "pbr_max_dimension": 1536,
+      "bytes": 1258700,
+      "sha256": "6e653a6ff93c734c3e0c8fbd7eaf59ee316c710bdc1ea2b73118b4ba9ba018a7",
+      "original_v008_source_preserved": true,
+      "original_recipes_unchanged": true,
+      "source_run": "https://github.com/gburdesedev/Project-genesis/actions/runs/41215722563",
+      "hover_degrees_range": [
+        -45,
+        45
+      ],
+      "load_policy": "desktop model-viewer, safePreviews/mobile transparent PNG"
     }
   ],
   "approved_masters_pending_web_conversion": [
