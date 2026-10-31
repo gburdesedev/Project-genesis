@@ -194,3 +194,15 @@
 .genInvFilter{background:#0b0908!important;border-color:#85613e!important}
 .genInvPage{min-height:12%;color:#d8b077}
 .genInvInfoLine{padding:3% 0}
+
+/* V05: keep text BELOW the original 9-slice crown relief; protect all hit zones. */
+.genInvFamilies{padding-top:10%!important;padding-left:6%!important;padding-right:6%!important;}
+.genInvFamilies .genInvHead{margin-top:0!important;margin-bottom:6%!important;padding-bottom:5%!important;font-size:1.55cqw}
+.genInvInfo{padding-top:11%!important;padding-left:6%!important;padding-right:6%!important;}
+.genInvInfo .genInvInfoTitle{margin:0 0 9%!important;padding-bottom:4%!important;font-size:1.55cqw;border-bottom:1px solid #694c2b}
+.genInvViewerTitle{margin-top:3.8%!important;margin-bottom:0!important;}
+.genInvViewLabel{margin-bottom:4.5%!important;}
+.genInvImageWrap{min-height:0;flex:1;}
+.genInvGrid{padding-top:2.65%!important;}
+.genInvGridControls{min-height:15%!important;}
+.genInvFamily{margin:3.4% 0!important;min-height:9%!important;}
