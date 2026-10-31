@@ -1,0 +1,166 @@
+{
+  "status": "INSPECTED_EMBEDDED_TEXTURES",
+  "asset": "V038 forge corrected GLB",
+  "source_url": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/feature/playcanvas-herrero-arcanista-walls-preview/public/models/Forge_V038_HeaderFixed_Preview.glb",
+  "glb_bytes": 19220220,
+  "materials": 7,
+  "meshes": 109,
+  "images": [
+    {
+      "index": 0,
+      "name": "quarry_wall_CC0_normal_2k",
+      "dimensions": [
+        1536,
+        1536
+      ],
+      "format": "JPEG",
+      "channels": "RGB",
+      "encoded_bytes": 1120447
+    },
+    {
+      "index": 1,
+      "name": "quarry_wall_CC0_albedo_2k",
+      "dimensions": [
+        1536,
+        1536
+      ],
+      "format": "JPEG",
+      "channels": "RGB",
+      "encoded_bytes": 851091
+    },
+    {
+      "index": 2,
+      "name": "quarry_wall_CC0_roughness_2k",
+      "dimensions": [
+        1536,
+        1536
+      ],
+      "format": "JPEG",
+      "channels": "RGB",
+      "encoded_bytes": 183303
+    },
+    {
+      "index": 3,
+      "name": "quarry_wall_CC0_soot_heat_albedo",
+      "dimensions": [
+        1536,
+        1536
+      ],
+      "format": "JPEG",
+      "channels": "RGB",
+      "encoded_bytes": 408099
+    },
+    {
+      "index": 4,
+      "name": "forge_hammered_hood_black_iron_normal",
+      "dimensions": [
+        1536,
+        1536
+      ],
+      "format": "JPEG",
+      "channels": "RGB",
+      "encoded_bytes": 1291686
+    },
+    {
+      "index": 5,
+      "name": "forge_hammered_hood_black_iron_albedo",
+      "dimensions": [
+        1536,
+        1536
+      ],
+      "format": "JPEG",
+      "channels": "RGB",
+      "encoded_bytes": 169766
+    },
+    {
+      "index": 6,
+      "name": "forge_hammered_hood_black_iron_roughness",
+      "dimensions": [
+        1536,
+        1536
+      ],
+      "format": "JPEG",
+      "channels": "RGB",
+      "encoded_bytes": 412339
+    },
+    {
+      "index": 7,
+      "name": "forge_cracked_hot_charcoal_ember_map_emissive",
+      "dimensions": [
+        1536,
+        1536
+      ],
+      "format": "PNG",
+      "channels": "RGB",
+      "encoded_bytes": 464523
+    },
+    {
+      "index": 8,
+      "name": "forge_cracked_hot_charcoal_ember_map_normal",
+      "dimensions": [
+        1536,
+        1536
+      ],
+      "format": "JPEG",
+      "channels": "RGB",
+      "encoded_bytes": 1382726
+    },
+    {
+      "index": 9,
+      "name": "forge_cracked_hot_charcoal_ember_map_albedo",
+      "dimensions": [
+        1536,
+        1536
+      ],
+      "format": "JPEG",
+      "channels": "RGB",
+      "encoded_bytes": 121859
+    },
+    {
+      "index": 10,
+      "name": "forge_cracked_hot_charcoal_ember_map_roughness",
+      "dimensions": [
+        1536,
+        1536
+      ],
+      "format": "JPEG",
+      "channels": "RGB",
+      "encoded_bytes": 307549
+    },
+    {
+      "index": 11,
+      "name": "forge_real_charcoal_porous_normal",
+      "dimensions": [
+        1536,
+        1536
+      ],
+      "format": "JPEG",
+      "channels": "RGB",
+      "encoded_bytes": 1354416
+    },
+    {
+      "index": 12,
+      "name": "forge_real_charcoal_porous_albedo",
+      "dimensions": [
+        1536,
+        1536
+      ],
+      "format": "JPEG",
+      "channels": "RGB",
+      "encoded_bytes": 123900
+    },
+    {
+      "index": 13,
+      "name": "forge_real_charcoal_porous_roughness",
+      "dimensions": [
+        1536,
+        1536
+      ],
+      "format": "JPEG",
+      "channels": "RGB",
+      "encoded_bytes": 170302
+    }
+  ],
+  "small_textures": [],
+  "notes": "Higher texture filtering improves sampling, not original PBR detail. No unsupported upscaling claimed."
+}
