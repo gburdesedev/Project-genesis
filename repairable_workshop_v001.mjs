@@ -2,7 +2,8 @@
 // Procedural 14-part reconstruction. No Ammo WASM or new texture downloads.
 import {
   Entity as RepairEntity, Mesh as RepairMesh, MeshInstance as RepairMeshInstance,
-  StandardMaterial as RepairStandardMaterial, Color as RepairColor, calculateNormals
+  StandardMaterial as RepairStandardMaterial, Color as RepairColor,
+  Vec3 as RepairVec3, calculateNormals
 } from 'playcanvas';
 
 const SAVE_KEY='genesis.preview.workshop-wall-repair.v001';
@@ -60,11 +61,9 @@ function makeVariants(source,fallback,wood=false){
 function dustBurst(at,cam,layer){
   const c=cam?.component||document.querySelector('#cameraRig pc-camera')?.component;
   if(!c||!layer)return;
-  const where=new Float32Array(3);
-  const temp={x:at.x,y:at.y,z:at.z};
-  // World-to-screen accepts the same Vec3 class used by the game's camera.
+  // Project the fracture's world position with a real PlayCanvas Vec3.
   try{
-    const position=at.clone();
+    const position=new RepairVec3(at.x,at.y,at.z);
     const screen=c.worldToScreen(position);
     if(!screen||screen.z<=0)return;
     for(let i=0;i<7;i++){
@@ -86,7 +85,7 @@ export function mountRepairableWorkshop({gameApp,root,notify,onDone,onImpact,cam
   const stone=makeVariants(source,[.28,.265,.24]);
   const timberSource=findMaterial(document.getElementById('workshopShellModel'),name=>/timber|wood/i.test(name));
   const timber=makeVariants(timberSource,[.15,.088,.04],true);
-  const group=new RepairEntity('Genesis Repair V001 · left wall masonry reconstruction');
+  const group=new RepairEntity('Genesis Repair V001 · left wall masonry reconstruction',gameApp);
   root.addChild(group);
   const hidden=[];
   const hide=node=>{if(node&&node.enabled){hidden.push(node);node.enabled=false}};
@@ -115,14 +114,14 @@ export function mountRepairableWorkshop({gameApp,root,notify,onDone,onImpact,cam
   layout.push({id:12,z:WALL_Z-1.04,y:1.12,sx:.31,sy:2.16,sz:.19,material:timber[0],wood:true});
   layout.push({id:13,z:WALL_Z+1.04,y:1.12,sx:.31,sy:2.16,sz:.19,material:timber[1],wood:true});
   for(const p of layout){
-    const obj=new RepairEntity((p.wood?'Recovered oak brace ':'Chipped quarry wall stone ')+p.id);
+    const obj=new RepairEntity((p.wood?'Recovered oak brace ':'Chipped quarry wall stone ')+p.id,gameApp);
     const mesh=stoneGeometry(gameApp.graphicsDevice,p.sx,p.sy,p.sz,p.id+79);
     obj.addComponent('render',{meshInstances:[new RepairMeshInstance(mesh,p.material)],
       castShadows:true,receiveShadows:true});
     group.addChild(obj);
     const end={x:WALL_X,y:p.y,z:p.z};
     const start={x:WALL_X+.40+rnd(p.id,9)*.55,
-      y:p.wood?.13+p.id*.015:p.sy*.30,
+      y:p.wood ? .13+p.id*.015 : p.sy*.30,
       z:p.z+(rnd(p.id,10)-.5)*1.35};
     const angles={x:(rnd(p.id,11)-.5)*96,y:(rnd(p.id,12)-.5)*150,z:(rnd(p.id,13)-.5)*88};
     chunks.push({entity:obj,mesh,start,end,angles,
@@ -174,7 +173,7 @@ export function mountRepairableWorkshop({gameApp,root,notify,onDone,onImpact,cam
       state='repaired';applyEnd();setHUD();
       try{localStorage.setItem(SAVE_KEY,'repaired')}catch(_){}
       onDone?.();
-      if(cameraElement)dustBurst({clone:()=>({x:WALL_X,y:1.15,z:WALL_Z})},cameraElement,fxLayer);
+      if(cameraElement)dustBurst({x:WALL_X,y:1.15,z:WALL_Z},cameraElement,fxLayer);
       notify?.('Pared reconstruida. La colisión volvió a su lugar.',2800);
     }
   }
