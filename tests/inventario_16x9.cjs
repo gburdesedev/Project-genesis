@@ -60,6 +60,7 @@ assert(geometries.heroImg.bottom < geometries.heroWrap.bottom+1,'preview image m
 assert(!geometries.viewerBg.includes('FondoVisorHerreria'),'no baked anvil under the inventory item');
 assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),2);
 const out='/tmp/genesis-responsive';fs.mkdirSync(out,{recursive:true});
+await page.waitForFunction(()=>Array.from(document.querySelectorAll('.genInvTab img')).length===4&&Array.from(document.querySelectorAll('.genInvTab img')).every(i=>i.complete&&i.naturalWidth>0));
 await page.screenshot({path:out+'/inventario-16x9-materiales.png',fullPage:false});
 await page.evaluate(()=>{
   items.push({name:'Espada de hierro',recipe:'espada',rarity:'Común',channels:[['Base',18]]});
@@ -71,6 +72,7 @@ await page.locator('[data-family="Espadas"]').click();
 assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),1);
 assert.equal(await page.locator('.genInvInfoTitle').innerText(),'INFORMACIÓN');
 assert.equal(await page.locator('.genInvViewer .genInvViewLabel').innerText(),'Objeto fabricado · visor 360°');
+await page.waitForFunction(()=>Array.from(document.querySelectorAll('.genInvTab img')).length===4&&Array.from(document.querySelectorAll('.genInvTab img')).every(i=>i.complete&&i.naturalWidth>0));
 await page.screenshot({path:out+'/inventario-16x9-espadas.png',fullPage:false});
 await page.locator('#genInvGoCraft').click();
 assert.equal(await page.locator('.prepArtboard[data-active-tab="Fabricaciones"]').count(),1);
