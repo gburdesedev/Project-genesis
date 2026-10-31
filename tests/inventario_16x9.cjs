@@ -24,7 +24,7 @@ await page.evaluate(()=>{window.GenesisDevice={safePreviews:true};for(const id o
 await page.addScriptTag({content:fs.readFileSync(path.join(root,'inventario_genesis_16x9.js'),'utf8')});
 await page.addScriptTag({content:fs.readFileSync(path.join(root,'preparacion_control.js'),'utf8')});
 await page.evaluate(()=>{
-  window.stock={'Mineral de hierro':7,'Lingote de hierro':3};
+  window.stock={'Lingote de hierro':3,'Mineral de hierro':7};
   window.items=[];
   window.openLive=()=>GenesisPreparation.open({
     profession:'Herrero',inventory:stock,requiredStock:{'Lingote de hierro':4},
@@ -42,7 +42,7 @@ await page.evaluate(()=>{
 });
 await page.waitForSelector('#genInv');
 assert.equal(await page.locator('.genInvSlot').count(),20,'20 slots in active family');
-assert.equal(await page.locator('.genInvFamily').count(),1,'only one family until creations exist');
+assert.equal(await page.locator('.genInvFamily').count(),3,'Herrero families stay visible even before crafting');
 assert.equal(await page.locator('.genInvFamily span:last-child').first().innerText(),'Materiales');
 assert.equal(await page.locator('.genInvImageWrap img').count(),1,'known material has a fixed poster');
 const bounds=await page.locator('.genInv').boundingBox();
