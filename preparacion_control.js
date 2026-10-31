@@ -309,9 +309,9 @@
     if (!art) return '';
     const name = escape(material);
     const poster = escape(art.poster);
-    // El carbón aprobado se ve en 3D también en el visor central del inventario.
-    // Los otros recursos conservan su comportamiento aprobado (lingote central: PNG).
-    const render3D = !safePreviews && art.model && (type !== 'featured' || material === CHARCOAL);
+    // Regla aprobada: el visor grande muestra una imagen PNG estática.
+    // Sólo las casillas pequeñas usan GLB y giran cuando reciben hover.
+    const render3D = !safePreviews && art.model && type !== 'featured';
     const exposure = material === CHARCOAL ? '1.16' : '1.45';
     const visual = render3D
       ? `<model-viewer class="prepMaterialModel" src="${escape(art.model)}" poster="${poster}" loading="lazy" reveal="auto" interaction-prompt="none" camera-orbit="0deg 75deg auto" environment-image="neutral" exposure="${exposure}" shadow-intensity="0" alt="${name}"></model-viewer>`
@@ -324,9 +324,9 @@
   // El objeto 3D nunca gira fuera de sus slots; el resultado central es PNG fijo.
   function bindModelHover() {
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-    document.querySelectorAll('.prepSkinModal .prepSkinSlot .prepMaterialVisual, .prepSkinModal .workspaceViewer .prepMaterialVisual.charcoal').forEach(surface => {
+    document.querySelectorAll('.prepSkinModal .prepSkinSlot .prepMaterialVisual').forEach(surface => {
       const viewer = surface.querySelector('model-viewer');
-      const slot = surface.closest('.prepSkinSlot') || surface.closest('.workspaceViewer');
+      const slot = surface.closest('.prepSkinSlot');
       if (!viewer || !slot || viewer.dataset.genesisHoverBound) return;
       viewer.dataset.genesisHoverBound = '1';
       let active = false, heldPointer = null, angle = 0, last = 0, orbitStart = 0, frame = 0;
@@ -636,8 +636,7 @@
       titles.forEach((title,i)=>board.insertAdjacentHTML('beforeend','<div class="workspaceCollectionLabel '+(i?'lower':'upper')+'" aria-hidden="true"><span>✦</span>'+title+'<span>✦</span></div>'));
     }
     const view=document.createElement('div');view.className='workspaceViewer';view.innerHTML=viewer;board.append(view);
-    // Se crea después de skinDisplay: conectar el hover del carbón también en el visor central.
-    bindModelHover();
+    // El visor grande es una imagen fija. El hover ya se conectó sólo a las casillas en skinDisplay().
     const button=document.getElementById('prepStart');button.classList.add('workspaceAction');button.innerHTML='<span class="workspaceActionLabel">'+escape(action)+'</span>';button.disabled=!enabled;button.onclick=run;
     board.querySelectorAll('[data-item-index]').forEach(e=>e.onclick=()=>{
       const index=Number(e.dataset.itemIndex);

@@ -1,0 +1,13 @@
+{
+  "game_version": "v0.14c",
+  "build": "20261031.02",
+  "date": "2026-10-31",
+  "change": "Visor grande de materiales estático; giro ±45 sólo en casillas pequeñas con hover",
+  "material": "Carbón vegetal V011 FINAL de demo",
+  "slot_model_3D": "no cambia; giro ±45 sólo con hover; vuelve a 0 sin hover",
+  "featured_large_image": "PNG fijo, jamás cargar GLB en featured",
+  "approved_art_preserved": true,
+  "geometry_uv_pbr_unchanged": true,
+  "recipe_and_material_stock_unchanged": true,
+  "rollback_game_version": "v0.14b Build 20261031.01"
+}
