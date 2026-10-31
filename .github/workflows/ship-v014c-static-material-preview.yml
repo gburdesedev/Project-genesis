@@ -1,0 +1,55 @@
+name: Project Genesis v0.14c - static large material previews, hover only in slots
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/ship_v014c_static_material_viewer.py
+      - .github/workflows/ship-v014c-static-material-preview.yml
+permissions:
+  contents: write
+jobs:
+  ship:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply targeted slot-hover-only policy and bump game version
+        run: python3 scripts/ship_v014c_static_material_viewer.py
+      - name: Validate JavaScript and image-vs-model-viewer policies
+        run: |
+          node --check preparacion_control.js
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,hashlib
+          js=Path('preparacion_control.js').read_text()
+          index=Path('index.html').read_text()
+          lock=json.loads(Path('assets/playcanvas/approved/materials/charcoal/v011/asset-lock.json').read_text())
+          model=Path(lock['model_path'])
+          assert model.is_file() and hashlib.sha256(model.read_bytes()).hexdigest()==lock['sha256']
+          assert "const render3D = !safePreviews && art.model && type !== 'featured';" in js
+          assert js.count("document.querySelectorAll('.prepSkinModal .prepSkinSlot .prepMaterialVisual').forEach(surface => {")==1
+          assert js.count('bindModelHover();')==1
+          assert "surface.closest('.workspaceViewer')" not in js
+          assert "if (active) angle = 45 * Math.sin(" in js
+          assert "const CHARCOAL = 'Carbón vegetal';" in js
+          assert 'carbon_vegetal_v011_final_3_piezas_web.glb' in js
+          assert 'carbon_vegetal_v011_poster.png' in js
+          assert 'PROJECT GENESIS · v0.14c · BUILD 20261031.02' in index
+          assert 'playcanvas-v0.14c-build-20261031.02' in index
+          assert './preparacion_control.js?v=0.14c.020-static-featured' in index
+          assert 'v0.14b' not in index
+          print('PASS static center + only slot hover + unchanged V011 GLB + live build v0.14c')
+          PY
+      - name: Publish combined UI/build patch
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add preparacion_control.js index.html previews/v014c_static_featured_manifest.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Project Genesis v0.14c Build 20261031.02: static large material, slot hover only [skip ci]'
+            git fetch origin main
+            git rebase origin/main
+            git push origin HEAD:main
+          fi
