@@ -1,0 +1,77 @@
+<!doctype html><html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Project Genesis — Herrería 3D V010 + cubierta V011 · prueba PlayCanvas</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111008;color:#f5e3c3}
+iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+#panel{position:fixed;bottom:max(8px,env(safe-area-inset-bottom));left:8px;max-width:min(560px,90vw);
+background:rgba(19,16,13,.95);border:1px solid #a7834f;padding:10px 12px;border-radius:9px;
+box-shadow:0 6px 20px #0008;z-index:8;line-height:1.38;font-size:12px}
+header{font-weight:750;color:#f0cc82;letter-spacing:.02em;font-size:13px}
+.buttons{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+button{background:#352a20;border:1px solid #96784c;color:#fae5ba;border-radius:5px;padding:7px 10px;
+min-height:36px;cursor:pointer;font-weight:600}
+button[aria-pressed=true]{background:#816132;border-color:#c7a268;color:#fff}
+#status{margin-top:5px;color:#ded5c4;max-height:75px;overflow:auto}
+.note{font-size:11px;color:#aeaa9c;margin-top:6px}
+#progress{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:5;pointer-events:none;
+padding:9px 16px;border-radius:6px;background:#171513ee;border:1px solid #a7834f;color:#fff}
+@media(max-width:640px){#panel{max-width:95vw;padding:7px 8px;font-size:11px}.buttons button{padding:5px 8px;min-height:31px}}
+</style>
+</head><body>
+<iframe id="game" title="Project Genesis, herrería en PlayCanvas" src="../genesis-v038-fuente-hq-preview.html?v=0.15.011" allow="fullscreen" loading="eager"></iframe>
+<div id="progress">Cargando el juego y los modelos GLB reales…</div>
+<div id="panel">
+<header>HERRERÍA V010 + TECHO V011 · PREVIEW CANVAS</header>
+<div id="status">Esperando a PlayCanvas…</div>
+<div class="buttons">
+<button type="button" id="roof" aria-pressed="true">Techo: visible</button>
+<button type="button" id="chimney" aria-pressed="true">Chimenea: visible</button>
+<button type="button" id="original" aria-pressed="false">Comparar taller viejo</button>
+</div>
+<div class="note">Prueba aislada. Puerta y fragua V038 existentes. Colisiones y encaje de chimenea por validar. El juego principal no se modifica.</div>
+</div>
+<script>
+(()=>{
+ const frame=document.getElementById('game'),stat=document.getElementById('status'),
+       loading=document.getElementById('progress'),
+       roofBtn=document.getElementById('roof'),chimBtn=document.getElementById('chimney'),
+       origBtn=document.getElementById('original');
+ const state={roof:true,chimney:true,oldShell:false};
+ function send(){frame.contentWindow?.postMessage({kind:'genesisBlacksmithRoofControl',...state},location.origin)}
+ function redraw(){
+  roofBtn.setAttribute('aria-pressed',String(state.roof));roofBtn.textContent='Techo: '+(state.roof?'visible':'oculto');
+  chimBtn.setAttribute('aria-pressed',String(state.chimney));chimBtn.textContent='Chimenea: '+(state.chimney?'visible':'oculta');
+  origBtn.setAttribute('aria-pressed',String(state.oldShell));origBtn.textContent=state.oldShell?'Volver a V011':'Comparar taller viejo';
+  send();
+ }
+ roofBtn.addEventListener('click',()=>{state.roof=!state.roof;redraw()});
+ chimBtn.addEventListener('click',()=>{state.chimney=!state.chimney;redraw()});
+ origBtn.addEventListener('click',()=>{state.oldShell=!state.oldShell;redraw()});
+ frame.addEventListener('load',()=>{
+  try{
+   const doc=frame.contentDocument;
+   if(!doc?.body)throw Error('El juego no está en el mismo origen');
+   const script=doc.createElement('script');script.type='module';
+   script.src=new URL('./herreria-v011-playcanvas-overlay.js?v=0.15.011b',location.href).href;
+   script.onerror=()=>{stat.textContent='No se pudo cargar el módulo 3D de la herrería';loading.hidden=true};
+   doc.body.appendChild(script);
+   loading.textContent='Montando paredes y techo en la escena real…';
+  }catch(e){stat.textContent='Error: '+e.message;loading.hidden=true}
+ });
+ window.addEventListener('message',event=>{
+  if(event.origin!==location.origin||event.source!==frame.contentWindow||event.data?.kind!=='genesisBlacksmithRoofV011')return;
+  const d=event.data.data;
+  const models=Object.entries(d.models||{}).map(([k,v])=>k+': '+(v.loaded?'GLB cargado ('+v.meshInstances+' mallas)':'pendiente')).join(' · ');
+  const mounted=(d.installations||[]).map(x=>x.scene+(x.active?' activo':' preparado')).join(', ')||'esperando taller';
+  stat.textContent=models+' | Escena: '+mounted+' | '+d.phase+' | FPS: '+(d.fps||'…')+
+    (d.drawCalls!==null?' | Draw calls: '+d.drawCalls:'')+
+    (d.errors?.length?' | Error: '+d.errors[d.errors.length-1]:'');
+  if(d.phase==='scene mounted where available'||d.phase==='failed')loading.hidden=true;
+  if(d.phase==='scene mounted where available')send();
+ });
+})();
+</script>
+</body></html>
