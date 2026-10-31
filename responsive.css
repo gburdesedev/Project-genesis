@@ -185,3 +185,13 @@ html.mobile-device:not(.genesis-landscape-required) #rotate{display:none!importa
   html.mobile-device #professionChip{z-index:6}
   html.mobile-device #cameraGuide{z-index:7}
 }
+
+/* Project Genesis · 16:9: centrar el arte 3:2 original sin estirarlo.
+ * Artboard: 1536x1024. Marco: 1820.444x1024 (16:9).
+ * El traslado ocurre dentro de scale() para conservar proporciones en móviles.
+ * No desplaza capas entre sí ni altera hitboxes relativas al artboard.
+ */
+.prepSkinModal .prepSkinScroll .prepArtboard{
+  transform:scale(var(--prep-scale,1)) translateX(142.222222px) !important;
+  transform-origin:top left;
+}
