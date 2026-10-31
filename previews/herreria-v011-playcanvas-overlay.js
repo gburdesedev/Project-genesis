@@ -40,44 +40,46 @@ function load(app,url,name){
 function cloneNode(src){const cloned=src.clone();cloned.enabled=true;return cloned}
 function chainEnabled(entity){for(let p=entity;p;p=p.parent)if(!p.enabled)return false;return true}
 const mounted=new Map();
-function installAt(scene,kind,models,{replace=true}={}){
+function installAt(scene,kind,models,{replace=true,tutorial=false}={}){
  if(mounted.has(kind)||!scene?.parent)return;
- const [shell,oldRoof,originalDoor]=scene.children;
- PREVIEW.debug[kind+'Children']=(scene.children||[]).map(c=>({name:c.name,hasRender:!!c.render,descendants:c.children.length})).slice(0,22);
- if(!shell||!oldRoof||!originalDoor||shell.render===undefined&&shell.children.length===0){
-   PREVIEW.errors.push(kind+': no se reconoció el cascarón original; no se reemplazó');
-   return;
+ let shell,oldRoof,originalDoor,modular=null;
+ if(tutorial){
+   shell=document.getElementById('workshopShellModel')?.entity;
+   oldRoof=document.getElementById('roofFinalModel')?.entity;
+   originalDoor=document.getElementById('doorLeafModel')?.entity;
+   modular=document.getElementById('modularWalls089')?.entity;
+ }else{
+   [shell,oldRoof,originalDoor]=scene.children;
+ }
+ PREVIEW.debug[kind+'Children']=(scene.children||[]).map(c=>({name:c.name,render:!!c.render,children:c.children.length})).slice(0,25);
+ if(!shell||!oldRoof||!originalDoor){
+   PREVIEW.errors.push(kind+': falta shell/techo/puerta original, no se reemplazó');
+   status();return;
  }
  const group=new scene.constructor('GENESIS_HERRERO_WORKSHOP_V011');
  scene.addChild(group);
- const dimensions=12/7.875;
- // Source GLBs are native Blender dimensions, glTF rotates original
- // Blender (X,Y,Z) to PlayCanvas (X,Z,-Y); Y-up is unchanged.
- // Old PlayCanvas shell footprint: 12 by 10.5, while V010/V011
- // measures 7.875 by 6.890625. Scale only the horizontal plane.
- group.setLocalScale(dimensions,1,dimensions);
+ // Horizontal map conversion: V010/V011 Blender W=7.875, D=6.890625
+ // versus original in-game W=12, D=10.5. Y stays in scene meters.
+ const scale=12/7.875;group.setLocalScale(scale,1,scale);
  const walls=cloneNode(models.walls),roof=cloneNode(models.roof),chimney=cloneNode(models.chimney);
- for(const [entity,tag] of [[walls,'walls'],[roof,'roof'],[chimney,'chimney']]){
-   entity.name='GENESIS_HERRERO_'+tag.toUpperCase()+'_V011';
-   entity.setLocalPosition(0,0,0);
-   group.addChild(entity);
+ for(const [ent,tag] of [[walls,'walls'],[roof,'roof'],[chimney,'chimney']]){
+  ent.name='GENESIS_HERRERO_'+tag.toUpperCase()+'_V011';
+  ent.setLocalPosition(0,0,0);group.addChild(ent);
  }
  roof.enabled=PREVIEW.roofVisible;
  chimney.enabled=PREVIEW.roofVisible&&PREVIEW.chimneyVisible;
- // Hide ONLY old visible shell and roof; the approved physical gameplay
- // host, existing forge interaction, doors and input entities stay live.
  const old={shellEnabled:shell.enabled,roofEnabled:oldRoof.enabled,
-            door:[originalDoor.getLocalPosition().x,originalDoor.getLocalPosition().y,originalDoor.getLocalPosition().z]};
- if(replace){shell.enabled=false;oldRoof.enabled=false}
- // Existing door uses an off-center -1.1 m anchor; new V010 masonry
- // cutout is centered. Shift door OBJECT only in this experimental scene;
- // never edit the door model or permanent collision definitions.
- originalDoor.setLocalPosition(0,old.door[1],old.door[2]);
- const bundle={group,walls,roof,chimney,shell,oldRoof,originalDoor,old};
+   modularEnabled:modular?.enabled};
+ if(replace){shell.enabled=false;oldRoof.enabled=false;if(modular)modular.enabled=false}
+ // The door's -1.1 X is its approved HINGE anchor, not an off-center
+ // doorway! Keep this pivot and all interactive behaviour untouched.
+ const bundle={group,walls,roof,chimney,shell,oldRoof,originalDoor,modular,old};
  mounted.set(kind,bundle);
  PREVIEW.installations.push({scene:kind,active:chainEnabled(scene),
   originalShellHidden:replace,originalRoofHidden:replace,
-  newDoorCenteredInPreview:true,doorGameplayCollision:'NOT_VALIDATED',
+  originalModularHidden:replace&&!!modular,
+  originalDoorPivotPreserved:true,
+  collision:'PENDING_TEST',
   roofEnabled:roof.enabled,chimneyEnabled:chimney.enabled});
  status();
 }
@@ -89,16 +91,11 @@ function refresh(){
  if(village&&!mounted.has('aldea'))installAt(village,'aldea',resources);
  const active=document.getElementById('compactBlacksmithRoot')?.entity;
  PREVIEW.debug.tutorialRoot=active?.name||null;
- PREVIEW.debug.tutorialChildren=active?.children?.map(c=>({name:c.name,hasRender:!!c.render,children:c.children.length})).slice(0,22)||[];
- PREVIEW.debug.villageChildren=village?.children?.map(c=>({name:c.name,hasRender:!!c.render,children:c.children.length})).slice(0,22)||[];
- if(active&&!mounted.has('tutorial')){
-  // Active tutorial may contain child interactables after the original
-  // workshop shell. Do not disable the whole gameplay root.
-  if(active.children.length>=3)installAt(active,'tutorial',resources);
- }
+ PREVIEW.debug.tutorialChildren=active?.children?.map(c=>({name:c.name,children:c.children.length})).slice(0,18)||[];
+ if(active&&!mounted.has('tutorial'))installAt(active,'tutorial',resources,{tutorial:true});
  for(const [kind,b] of mounted){
-  const entry=PREVIEW.installations.find(x=>x.scene===kind);
-  if(entry)entry.active=chainEnabled(b.group);
+  const item=PREVIEW.installations.find(x=>x.scene===kind);
+  if(item)item.active=chainEnabled(b.group);
  }
 }
 function toggle({roof,chimney,oldShell}={}){
@@ -108,7 +105,7 @@ function toggle({roof,chimney,oldShell}={}){
   b.roof.enabled=PREVIEW.roofVisible;
   b.chimney.enabled=PREVIEW.roofVisible&&PREVIEW.chimneyVisible;
   if(typeof oldShell==='boolean'){
-    b.shell.enabled=oldShell;b.oldRoof.enabled=oldShell;
+    b.shell.enabled=oldShell;b.oldRoof.enabled=oldShell;if(b.modular)b.modular.enabled=oldShell;
     b.group.enabled=!oldShell;
   }
   const row=PREVIEW.installations.find(x=>x.scene===kind);
@@ -126,7 +123,7 @@ window.addEventListener('message',ev=>{
 window.addEventListener('pagehide',()=>{
  for(const b of mounted.values()){
   b.shell.enabled=b.old.shellEnabled;b.oldRoof.enabled=b.old.roofEnabled;
-  b.originalDoor.setLocalPosition(...b.old.door);
+  if(b.modular)b.modular.enabled=b.old.modularEnabled;
   b.group.destroy();
  }
  mounted.clear();
