@@ -1,0 +1,50 @@
+name: Project Genesis charcoal V010 runtime QA and safe cache refresh
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/bump_charcoal_v010_cache.py
+      - .github/workflows/carbon-vegetal-v010-runtime-qa.yml
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify inventory JS and charcoal GLB metadata
+        run: |
+          node --check preparacion_control.js
+          python3 -m py_compile scripts/bump_charcoal_v010_cache.py
+          python3 - <<'PY'
+          import pathlib,json,hashlib
+          root=pathlib.Path('assets/playcanvas/approved/materials/charcoal/v010')
+          lock=json.loads((root/'asset-lock.json').read_text())
+          model=root/'carbon_vegetal_v010_tres_piezas_web.glb'
+          assert model.exists() and model.stat().st_size<1600000
+          assert hashlib.sha256(model.read_bytes()).hexdigest()==lock['sha256']
+          assert (root/'carbon_vegetal_v010_poster.png').stat().st_size>12000
+          src=pathlib.Path('preparacion_control.js').read_text()
+          for term in ("const CHARCOAL = 'Carbón vegetal'","carbon_vegetal_v010_tres_piezas_web.glb",
+                       "bindModelHover();","ctx.selectedMaterial===CHARCOAL"):
+            assert term in src, term
+          cat=json.loads(pathlib.Path('assets/playcanvas/approved/catalog.json').read_text())
+          assert any(x.get('id')=='material_charcoal_v010_three_pieces' for x in cat['approved_existing_assets'])
+          print('PASS GLB sha256, real inventory binding, separate approved catalog')
+          PY
+      - name: Cache refresh for latest PlayCanvas UI scripts only
+        run: python3 scripts/bump_charcoal_v010_cache.py
+      - name: Publish safe index signature update
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'Refresh live PlayCanvas charcoal V010 asset loaders [skip ci]'
+            git fetch origin main
+            git rebase origin/main
+            git push origin HEAD:main
+          fi
