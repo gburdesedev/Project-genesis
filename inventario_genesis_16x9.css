@@ -1,0 +1,58 @@
+
+/* Project Genesis Inventario 16:9 — reuse assets/ui/preparacion, no replacement art. */
+.modal.genInvModal{width:min(calc(100vw - 20px),calc((100dvh - 20px)*16/9))!important;max-width:100%!important;height:auto!important;max-height:calc(100dvh - 20px)!important;aspect-ratio:16/9;overflow:hidden!important;padding:0!important;background:#0b0806!important;border:1px solid #a87938!important;box-shadow:0 16px 70px #000e}
+.genInv{width:100%;height:100%;aspect-ratio:16/9;box-sizing:border-box;position:relative;isolation:isolate;display:grid;grid-template-rows:14% minmax(0,1fr) 7%;background:#0b0908 url('assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png') center/auto 100% no-repeat;color:#ecce94;font-family:Georgia,'Times New Roman',serif;container-type:inline-size;font-size:1.2cqw}
+.genInv *{box-sizing:border-box}
+.genInv button,.genInv input{font:inherit}
+.genInv button{cursor:pointer;color:inherit}
+.genInv button:focus-visible,.genInv input:focus-visible{outline:2px solid #e4bc78;outline-offset:-2px}
+.genInvNav{display:flex;align-items:center;justify-content:center;gap:0.6%;padding:0.7% 2.5% 1%}
+.genInvTab{width:24%;height:100%;border:0;position:relative;background:transparent;padding:0}
+.genInvTab img{width:100%;height:100%;display:block;object-fit:fill;filter:brightness(.7)}
+.genInvTab[aria-current=page] img{filter:brightness(1.1) drop-shadow(0 0 5px #bd7c2d)}
+.genInvTab:hover img{filter:brightness(1.24)}
+.genInvMain{display:grid;grid-template-columns:22% 55% 23%;grid-template-rows:minmax(0,55%) minmax(0,45%);gap:0;min-height:0;padding:0 .9%; }
+.genInvFamilies,.genInvViewer,.genInvInfo,.genInvGrid,.genInvActionWrap{min-width:0;min-height:0;position:relative;overflow:hidden;background:linear-gradient(155deg,#15110ddc,#09090aeb);border:1px solid #a3763d;box-shadow:inset 0 0 0 3px #100e0a,inset 0 0 22px #0008}
+.genInvFamilies{grid-row:1/3;padding:4%;margin-right:2%}
+.genInvViewer{display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:1%;margin-right:1%;background:radial-gradient(ellipse at 45% 30%,#49250e88,transparent 65%),linear-gradient(#16100d,#080807ee);border-radius:1%}
+.genInvInfo{padding:4%;overflow-y:auto}
+.genInvGrid{grid-column:2/4;grid-row:2;padding:1%;display:flex;flex-direction:column;gap:1%;margin-top:1%}
+.genInvHead{font-size:1.7cqw;letter-spacing:.09em;margin:0 0 5%;color:#efd4a0;text-align:center;border-bottom:1px solid #7b522d;padding-bottom:6%}
+.genInvFamilies .genInvHead{text-align:left}
+.genInvFamily{display:flex;align-items:center;width:100%;background:linear-gradient(#201914,#0c0b0a);border:1px solid #78542e;min-height:10%;padding:3% 4%;text-align:left;margin:2% 0;gap:5%;font-size:1.38cqw}
+.genInvFamily[aria-pressed=true]{border-color:#e4a255;color:#ffe5b1;background:linear-gradient(#694421,#17110c);box-shadow:inset 0 0 12px #ce94393f}
+.genInvFamily .genInvFamIcon{min-width:1.8cqw;max-width:1.8cqw;text-align:center;color:#d5a560}
+.genInvTreeNote{font-size:0.85cqw;color:#9c876d;padding:2%}
+.genInvViewerTitle{width:100%;font-size:1.45cqw;color:#efcf9e;text-align:center;margin:1% 0}
+.genInvImageWrap{width:100%;height:82%;display:grid;place-items:center;overflow:hidden}
+.genInvImageWrap img{display:block;width:min(75%,100%);height:95%;object-fit:contain;filter:drop-shadow(0 8px 8px #0008)}
+.genInvImageWrap :is(model-viewer,canvas){width:100%;height:100%;object-fit:contain}
+.genInvEmptyPreview{font-size:1.4cqw;color:#927e67;text-align:center}
+.genInvViewLabel{font-size:1cqw;color:#b79d79;padding-bottom:.6%}
+.genInvInfoTitle{font-size:1.65cqw;text-align:center;color:#f4d9ad;margin:0 0 7%}
+.genInvInfoLine{display:flex;justify-content:space-between;gap:2%;padding:3% 0;border-bottom:1px solid #58412b;font-size:1.13cqw}
+.genInvInfoLine b{font-weight:normal;color:#f7dfb0}
+.genInvInfoSmall{font-size:1cqw;line-height:1.5;color:#c2a98b;margin:6% 0}
+.genInvGridControls{display:flex;gap:1.2%;align-items:center;justify-content:space-between;min-height:13%;font-size:1cqw}
+.genInvGridTitle{font-size:1.38cqw;margin:0;color:#e9bf83}
+.genInvFilter{width:34%;border:1px solid #78542e;background:#0c0b0a;color:#f3d3a6;padding:.55% 1%}
+.genInvSlots{min-height:0;flex:1;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:.8%}
+.genInvSlot{min-width:0;min-height:0;position:relative;border:1px solid #967044;background:radial-gradient(#231a1277,#070606);padding:1px;display:grid;place-items:center;overflow:hidden}
+.genInvSlot.selected{border-color:#f8b863;box-shadow:inset 0 0 14px #d69b475c,0 0 5px #d69b4777}
+.genInvSlot:hover:not(:disabled){border-color:#f1bf70}
+.genInvSlot img,.genInvSlot model-viewer{width:93%;height:88%;object-fit:contain}
+.genInvSlot span{position:absolute;right:3%;bottom:0;background:#100d0bc9;color:#ffdfaa;font-size:.9cqw;padding:0 2%}
+.genInvSlot:disabled{cursor:default;opacity:.65}
+.genInvPage{display:flex;align-items:center;justify-content:center;gap:3%;min-height:10%;font-size:1.05cqw}
+.genInvPage button{background:#27190c;border:1px solid #9f794b;min-width:5%;padding:.2% 1%}
+.genInvFooter{display:flex;justify-content:flex-end;align-items:center;padding:0 2% .5%;min-height:0}
+.genInvAction{position:relative;height:92%;width:25%;border:0;background:transparent url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Normal.png') center/100% 100% no-repeat;display:grid;place-items:center;color:#ffe6b4}
+.genInvAction:hover{background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Hover.png')}
+.genInvAction:active{background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Presionado.png')}
+.genInvAction span{z-index:2;text-align:center;font-size:1.25cqw;position:relative;text-shadow:0 1px #000,0 -1px #000,0 0 7px #000;letter-spacing:.03em}
+.genInvAction::before{content:'';position:absolute;top:32%;bottom:30%;left:18%;right:18%;background:#2c1c11f5;box-shadow:0 0 8px 5px #2c1c11a0}
+.genInvNotice{font-size:.8cqw;color:#a38f79}
+.genInvInfoMore{background:#25190f;border:1px solid #9d753c;padding:2% 4%;font-size:1cqw;margin-top:3%}
+.genInvOverlay{position:absolute;inset:6% 6%;background:#100b09f5;border:1px solid #be8850;z-index:5;padding:2%;overflow-y:auto;font-size:1.1cqw}
+.genInvOverlay button{float:right}
+@media(max-width:650px){.genInv{font-size:1.2cqw}}
