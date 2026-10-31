@@ -32,17 +32,19 @@ const server=http.createServer((req,res)=>{
   console.log('INITIAL',JSON.stringify(before));
   assert.equal(before.phase,'scene mounted where available',JSON.stringify(before.errors));
   for(const name of ['walls','roof','chimney'])assert(before.models[name]?.loaded,'Missing real '+name+' GLB');
-  await page.waitForTimeout(8000);
-  const mounted=await page.frameLocator('#game').locator('body').evaluate(()=>{
-    const app=document.querySelector('pc-app')?.app || document.querySelector('pc-app')?.application;
+  await page.waitForTimeout(1200);
+  const mounted=await page.evaluate(()=>{
+    const f=document.querySelector('#game')?.contentWindow;
+    if(!f?.document)return {frameMissing:true,preview:null,villageMounted:false,activeMounted:false};
+    const app=f.document.querySelector('pc-app')?.app || f.document.querySelector('pc-app')?.application;
     const village=app?.root.findByName('Herrero · fachada cerrada');
-    const active=document.getElementById('compactBlacksmithRoot')?.entity;
+    const active=f.document.getElementById('compactBlacksmithRoot')?.entity;
     return {app:!!app,village:!!village,active:!!active,
       villageChildren:village?.children?.map(x=>x.name).slice(0,12),
       activeChildren:active?.children?.map(x=>x.name).slice(0,15),
       villageMounted:!!village?.findByName('GENESIS_HERRERO_WORKSHOP_V011'),
       activeMounted:!!active?.findByName('GENESIS_HERRERO_WORKSHOP_V011'),
-      preview:window.__genesisBlacksmithRoofPreview};
+      preview:f.__genesisBlacksmithRoofPreview};
   });
   console.log('MOUNTED',JSON.stringify(mounted));
   fs.writeFileSync(path.join(out,'status.json'),JSON.stringify(mounted,null,2));
