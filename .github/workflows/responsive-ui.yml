@@ -29,6 +29,7 @@ jobs:
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/mobile_pbr_budget.cjs
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/original_layout.cjs
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/functional_menus.cjs
+      - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/inventario_16x9.cjs
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/approved_mineral.cjs
       - run: NODE_PATH=/tmp/responsive-ui/node_modules node tests/village_render.cjs
       - uses: actions/upload-artifact@v4
