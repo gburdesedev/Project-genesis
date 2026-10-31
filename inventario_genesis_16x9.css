@@ -246,3 +246,9 @@
 .genInvImageWrap img{width:83%!important;height:90%!important}
 .genInvInfo{padding-top:12%!important}
 .genInvInfoTitle{font-size:1.35cqw!important}
+
+/* V09 final alignment pass. Preserve original art; only whitespace changes. */
+.genInvImageWrap img{height:82%!important;max-height:82%!important;}
+.genInvViewLabel{min-height:7%;padding-bottom:2%;white-space:nowrap}
+.genInvFamily:first-of-type{margin-top:3%!important}
+.genInvFamilies .genInvHead{margin-bottom:7%!important}
