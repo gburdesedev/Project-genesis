@@ -56,3 +56,39 @@
 .genInvOverlay{position:absolute;inset:6% 6%;background:#100b09f5;border:1px solid #be8850;z-index:5;padding:2%;overflow-y:auto;font-size:1.1cqw}
 .genInvOverlay button{float:right}
 @media(max-width:650px){.genInv{font-size:1.2cqw}}
+
+/* V02 polish: original 39 source pieces, no substitute materials / gradients for frame art. */
+.genInv{background:#090807 url('assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png') center/auto 100% no-repeat}
+.genInvFamilies,.genInvInfo,.genInvGrid{
+ border:20px solid transparent!important;
+ border-image-source:url('assets/ui/preparacion/01_Capas/Paneles/PanelDatos.png');
+ border-image-slice:58 33 31 33 fill;
+ border-image-width:20px;
+ border-image-repeat:stretch;
+ box-shadow:none!important;
+ background:transparent!important;
+}
+.genInvFamilies{padding:1.2% 1.3%!important}
+.genInvInfo{padding:1.2% 1.4%!important}
+.genInvGrid{padding:.4% .9%!important}
+.genInvViewer{
+ border:20px solid transparent!important;
+ border-image-source:url('assets/ui/preparacion/01_Capas/Paneles/MarcoVisorSuperior.png');
+ border-image-slice:32 25 24 25;
+ border-image-width:20px;
+ border-image-repeat:stretch;
+ background:linear-gradient(#05030466,#09050388),url('assets/ui/preparacion/01_Capas/Paneles/FondoVisorHerreria.png') center/cover no-repeat!important;
+ box-shadow:none!important;
+}
+.genInvTab:not([aria-current=page]) img{filter:brightness(.42) saturate(.7)!important}
+.genInvTab[aria-current=page] img{filter:brightness(1.4) sepia(.22) drop-shadow(0 0 8px #e39b36)!important}
+.genInvSlot{
+ background:#050403 url('assets/ui/preparacion/01_Capas/Casillas/Casilla_Basicos_01.png') center/100% 100% no-repeat!important;
+ border:0!important;
+}
+.genInvSlot.selected{box-shadow:inset 0 0 18px #dbaa57aa,0 0 6px #c38b46!important;outline:1px solid #dca958;outline-offset:-3px}
+.genInvImageWrap img{width:100%!important;height:100%!important;object-fit:contain;transform:scale(1.4);filter:drop-shadow(0 10px 12px #000c)}
+.genInvFamilies .genInvHead,.genInvInfo .genInvInfoTitle{margin-top:1%;margin-bottom:4%}
+.genInvInfoLine{font-size:1.22cqw}
+.genInvNotice{color:#d0a574}
+.genInvAction::before{background:#23150ef8;box-shadow:0 0 11px 5px #24150ec9}
