@@ -46,8 +46,8 @@
       model: 'assets/playcanvas/candidates/materials/iron_ingot/v175/iron_v175_web_candidate.glb'
     }),
     [CHARCOAL]: Object.freeze({
-      poster: 'assets/playcanvas/approved/materials/charcoal/v010/carbon_vegetal_v010_poster.png',
-      model: 'assets/playcanvas/approved/materials/charcoal/v010/carbon_vegetal_v010_tres_piezas_web.glb'
+      poster: 'assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png',
+      model: 'assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_final_3_piezas_web.glb'
     })
   });
   // Perfil térmico por material. Solo el hierro tiene cifras DEMO: aún no
@@ -312,7 +312,7 @@
     // El carbón aprobado se ve en 3D también en el visor central del inventario.
     // Los otros recursos conservan su comportamiento aprobado (lingote central: PNG).
     const render3D = !safePreviews && art.model && (type !== 'featured' || material === CHARCOAL);
-    const exposure = material === CHARCOAL ? '1.10' : '1.45';
+    const exposure = material === CHARCOAL ? '1.16' : '1.45';
     const visual = render3D
       ? `<model-viewer class="prepMaterialModel" src="${escape(art.model)}" poster="${poster}" loading="lazy" reveal="auto" interaction-prompt="none" camera-orbit="0deg 75deg auto" environment-image="neutral" exposure="${exposure}" shadow-intensity="0" alt="${name}"></model-viewer>`
       : `<img class="prepMaterialPoster" src="${poster}" alt="${name}" loading="lazy" draggable="false">`;

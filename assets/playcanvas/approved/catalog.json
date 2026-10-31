@@ -66,7 +66,7 @@
       "name": "Carbón vegetal",
       "version": "V010_3PIEZAS_PBR1536",
       "approval": "visual_source_accepted_user_requested_live_playcanvas_integration",
-      "current_status": "integrated_in_live_playcanvas_inventory",
+      "current_status": "superseded_by_v011_retained_as_rollback",
       "path": "assets/playcanvas/approved/materials/charcoal/v010/carbon_vegetal_v010_tres_piezas_web.glb",
       "poster": "assets/playcanvas/approved/materials/charcoal/v010/carbon_vegetal_v010_poster.png",
       "integrity_manifest": "assets/playcanvas/approved/materials/charcoal/v010/asset-lock.json",
@@ -85,7 +85,40 @@
         -45,
         45
       ],
-      "load_policy": "desktop model-viewer, safePreviews/mobile transparent PNG"
+      "load_policy": "desktop model-viewer, safePreviews/mobile transparent PNG",
+      "superseded_by": "material_charcoal_v011_three_pieces_final"
+    },
+    {
+      "id": "material_charcoal_v011_three_pieces_final",
+      "profession": "Herrero",
+      "category": "material_bruto_model",
+      "name": "Carbón vegetal",
+      "version": "V011_CENIZA_SUTIL_PBR1536",
+      "approval": "final_approved_by_user",
+      "current_status": "integrated_in_live_playcanvas_inventory",
+      "path": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_final_3_piezas_web.glb",
+      "poster": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
+      "integrity_manifest": "assets/playcanvas/approved/materials/charcoal/v011/asset-lock.json",
+      "format": "GLB",
+      "pieces": 3,
+      "unique_geometry_meshes": 1,
+      "triangles_per_piece": 23312,
+      "rendered_triangles": 69936,
+      "pbr_max_dimension": 1536,
+      "bytes": 1361452,
+      "sha256": "13f295f3c39659e4422feab217dadb3927722553c17414a14c19130d5434c756",
+      "pbr_normal_roughness_identical_to_v010": true,
+      "geometry_uv_identical_to_v010": true,
+      "v010_backup_untouched": true,
+      "original_recipes_unchanged": true,
+      "source_audit": "previews/carbon_vegetal_v011/AUDIT.json",
+      "hover_degrees_range": [
+        -45,
+        45
+      ],
+      "load_policy": "desktop model-viewer; mobile/safePreviews transparent PNG",
+      "game_version": "v0.14b",
+      "game_build": "20261031.01"
     }
   ],
   "approved_masters_pending_web_conversion": [
