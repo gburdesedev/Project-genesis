@@ -31,8 +31,10 @@ const server=http.createServer((req,res)=>{
   const before=await page.frameLocator('#game').locator('body').evaluate(()=>window.__genesisBlacksmithRoofPreview);
   console.log('INITIAL',JSON.stringify(before));
   assert.equal(before.phase,'scene mounted where available',JSON.stringify(before.errors));
-  for(const name of ['walls','roof','chimney'])assert(before.models[name]?.loaded,'Missing real '+name+' GLB');
-  assert(before.models[name].meshInstances<=18, 'Expected batched GLB '+name+', got '+before.models[name].meshInstances);
+  for(const name of ['walls','roof','chimney']){
+    assert(before.models[name]?.loaded,'Missing real '+name+' GLB');
+    assert(before.models[name].meshInstances<=18,'Expected batched '+name+' GLB');
+  }
   await page.waitForTimeout(1200);
   const mounted=await page.evaluate(()=>{
     const f=document.querySelector('#game')?.contentWindow;
