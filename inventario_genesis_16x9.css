@@ -252,3 +252,26 @@
 .genInvViewLabel{min-height:7%;padding-bottom:2%;white-space:nowrap}
 .genInvFamily:first-of-type{margin-top:3%!important}
 .genInvFamilies .genInvHead{margin-bottom:7%!important}
+
+/* V10: art/image bbox physically contained. Avoid intrinsic image min-content
+ * forcing the viewer's footer below the artwork frame. */
+.genInvViewer{overflow:hidden!important}
+.genInvImageWrap{
+ position:relative!important;display:block!important;flex:1 1 0!important;
+ min-height:0!important;max-height:100%!important;
+ overflow:hidden!important;
+}
+.genInvImageWrap>img{
+ position:absolute!important;
+ left:10%!important;top:9%!important;
+ width:80%!important;height:82%!important;
+ max-width:80%!important;max-height:82%!important;
+ object-fit:contain!important;object-position:center!important;
+}
+.genInvImageWrap :is(model-viewer,canvas){
+ max-width:100%;max-height:100%;object-fit:contain
+}
+.genInvViewLabel{
+ flex:0 0 auto!important;position:relative;z-index:2;
+ margin-bottom:1%!important;padding:1% 0 0!important;min-height:0!important
+}
