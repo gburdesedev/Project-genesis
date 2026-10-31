@@ -10,5 +10,7 @@
   "inventory": "Carbón vegetal",
   "actual_game_entrypoint": "index.html",
   "ui_art_unchanged": true,
-  "live_integration_pending_commit": true
+  "live_integration_pending_commit": false,
+  "publication_status": "published_to_main",
+  "workflow_run": "https://github.com/gburdesedev/Project-genesis/actions/runs/41236037219"
 }
