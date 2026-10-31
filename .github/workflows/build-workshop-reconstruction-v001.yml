@@ -1,4 +1,4 @@
-name: Build and QA repairable blacksmith wall v0.14d.001
+name: Build and QA repairable blacksmith wall v0.14d.001 (corrected)
 on:
   push:
     branches: [feature/workshop-reconstruction-v001]
@@ -24,7 +24,7 @@ jobs:
           from pathlib import Path
           import re
           s=Path('forge-v038-reconstruction-v001.html').read_text('utf8')
-          scripts=re.findall(r'<script([^>]*)>(.*?)</script>',s,re.I|re.S)
+          scripts=re.findall(r'<script([^>]*)>(.*?)</script>',s,re.I|re.S)
           modules=[code for attr,code in scripts if re.search(r'type=["\x27]module["\x27]',attr,re.I) and code.strip()]
           assert modules,'No embedded module scripts'
           for i,code in enumerate(modules):Path('/tmp/reconstruct_module_%d.mjs'%i).write_text(code,encoding='utf8')
