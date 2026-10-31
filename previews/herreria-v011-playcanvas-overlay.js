@@ -7,7 +7,7 @@ const REPO='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-works
 const WALL_URL=REPO+'feature/blacksmith-workshop-walls-v010/public/models/blacksmith-v010/batched/full_workshop_preview.glb';
 const ROOF_URL=REPO+'feature/blacksmith-workshop-roof-v011/public/models/blacksmith-roof-v011/blacksmith_roof_preview.glb';
 const CHIMNEY_URL=REPO+'feature/blacksmith-workshop-roof-v011/public/models/blacksmith-roof-v011/blacksmith_chimney_candidate_preview.glb';
-const PREVIEW={version:'v0.15-herrero-roof',phase:'starting',models:{},installations:[],
+const PREVIEW={version:'v0.15-herrero-roof',phase:'starting',models:{},installations:[],debug:{},
               roofVisible:true,chimneyVisible:true,errors:[],fps:0,drawCalls:null,
               productionUntouched:true,collisionValidated:false,forgeAligned:false};
 globalThis.__genesisBlacksmithRoofPreview=PREVIEW;
@@ -43,6 +43,7 @@ const mounted=new Map();
 function installAt(scene,kind,models,{replace=true}={}){
  if(mounted.has(kind)||!scene?.parent)return;
  const [shell,oldRoof,originalDoor]=scene.children;
+ PREVIEW.debug[kind+'Children']=(scene.children||[]).map(c=>({name:c.name,hasRender:!!c.render,descendants:c.children.length})).slice(0,22);
  if(!shell||!oldRoof||!originalDoor||shell.render===undefined&&shell.children.length===0){
    PREVIEW.errors.push(kind+': no se reconoció el cascarón original; no se reemplazó');
    return;
@@ -87,6 +88,9 @@ function refresh(){
  const village=app.root.findByName('Herrero · fachada cerrada');
  if(village&&!mounted.has('aldea'))installAt(village,'aldea',resources);
  const active=document.getElementById('compactBlacksmithRoot')?.entity;
+ PREVIEW.debug.tutorialRoot=active?.name||null;
+ PREVIEW.debug.tutorialChildren=active?.children?.map(c=>({name:c.name,hasRender:!!c.render,children:c.children.length})).slice(0,22)||[];
+ PREVIEW.debug.villageChildren=village?.children?.map(c=>({name:c.name,hasRender:!!c.render,children:c.children.length})).slice(0,22)||[];
  if(active&&!mounted.has('tutorial')){
   // Active tutorial may contain child interactables after the original
   // workshop shell. Do not disable the whole gameplay root.
