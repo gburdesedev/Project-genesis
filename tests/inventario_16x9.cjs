@@ -43,7 +43,7 @@ await page.evaluate(()=>{
 await page.waitForSelector('#genInv');
 assert.equal(await page.locator('.genInvSlot').count(),20,'20 slots in active family');
 assert.equal(await page.locator('.genInvFamily').count(),1,'only one family until creations exist');
-assert.equal(await page.locator('.genInvFamily').first().innerText(),'Materiales');
+assert.equal(await page.locator('.genInvFamily span:last-child').first().innerText(),'Materiales');
 assert.equal(await page.locator('.genInvImageWrap img').count(),1,'known material has a fixed poster');
 const bounds=await page.locator('.genInv').boundingBox();
 assert(Math.abs(bounds.width/bounds.height-16/9)<.005,'16:9 interior artboard');
