@@ -77,7 +77,35 @@ function animateWater(app,root){
   status.waterMaterialTints=entries.map(e=>({name:e.mat.name,pool:e.pool}));
   return entries.length;
 }
+// Preserve the PBR texture fidelity while looking at the V038 forge up close.
+// This improves oblique-angle sampling; it DOES NOT pretend that 512px
+// image maps can gain new detail without higher-resolution source scans.
+function tuneForgeTextureSampling(app,root){
+ const seen=new Set(),metrics=[];
+ const supportedAniso=Math.min(16,Math.max(1,app.graphicsDevice?.maxAnisotropy||8));
+ const keys=['diffuseMap','normalMap','emissiveMap','metalnessMap','glossMap','aoMap','bumpMap','specularMap'];
+ for(const {src:material} of materialsFor(root,()=>true)){
+  for(const key of keys){
+   const tex=material[key];
+   if(!tex||seen.has(tex))continue;
+   seen.add(tex);
+   tex.anisotropy=supportedAniso;
+   // For imported textures, 1=linear; 5=trilinear mip selection in
+   // PlayCanvas. Do not use a mipmap filter when mipmaps are absent.
+   tex.magFilter=1;
+   tex.minFilter=tex.mipmaps?5:1;
+   metrics.push({map:key,width:tex.width,height:tex.height,
+                 mipmaps:!!tex.mipmaps,anisotropy:tex.anisotropy});
+  }
+ }
+ status.forgeTextureMetrics=metrics;
+ status.forgeTextureMinimum=metrics.length?Math.min(...metrics.map(t=>Math.min(t.width||0,t.height||0))):null;
+ status.forgeTextureMaximum=metrics.length?Math.max(...metrics.map(t=>Math.max(t.width||0,t.height||0))):null;
+ return metrics.length;
+}
+
 function animateForge(app,root){
+  tuneForgeTextureSampling(app,root);
   const found=materialsFor(root,n=>n.includes('forge_cracked_hot_charcoal_ember_map'));
   const copy=new Map();
   for(const {mi,src} of found){
