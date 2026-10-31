@@ -73,7 +73,7 @@
     const html='<div class="genInv" id="genInv">'+
       '<header class="genInvNav">'+navMarkup+'</header>'+
       '<main class="genInvMain">'+
-        '<aside class="genInvFamilies"><h2 class="genInvHead">INVENTARIO</h2>'+familiesMarkup+
+        '<aside class="genInvFamilies"><h2 class="genInvHead">FAMILIAS</h2>'+familiesMarkup+
           '</aside>'+
         '<section class="genInvViewer"><p class="genInvViewerTitle">'+title+'</p><div class="genInvImageWrap">'+viewer+'</div><p class="genInvViewLabel">'+(materialMode?'Vista fija · material':'Objeto fabricado · visor 360°')+'</p></section>'+
         '<aside class="genInvInfo"><h2 class="genInvInfoTitle">INFORMACIÓN</h2>'+facts+
