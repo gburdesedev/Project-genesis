@@ -39,15 +39,15 @@
     const state=ctx.genInvState || (ctx.genInvState={family:'Materiales',page:0,search:''});
     if(!families.includes(state.family))state.family='Materiales';
     const materialMode=state.family==='Materiales';
-    const source=materialMode?stock.map(function(pair){return {name:pair[0],qty:Number(pair[1]),material:true}}):
-      allItems.filter(function(i){return classify(i)===state.family}).map(function(i){return {name:i.name,rarity:i.rarity,item:i,material:false}});
+    const source=materialMode?stock.map(function(pair){return {key:'material:'+pair[0],name:pair[0],qty:Number(pair[1]),material:true}}):
+      allItems.map(function(i,index){return {key:'creation:'+String(i.id||i.uuid||index)+':'+index,name:i.name,rarity:i.rarity,item:i,material:false}}).filter(function(e){return classify(e.item)===state.family});
     const search=state.search.toLocaleLowerCase();
     const filtered=source.filter(function(e){return String(e.name).toLocaleLowerCase().includes(search)});
     const pages=Math.max(1,Math.ceil(filtered.length/20));
     state.page=Math.max(0,Math.min(state.page,pages-1));
     const visible=filtered.slice(state.page*20,(state.page+1)*20);
-    if(!visible.some(function(v){return v.name===state.selectedName}))state.selectedName=visible[0]?.name||null;
-    const chosen=visible.find(function(e){return e.name===state.selectedName})||visible[0];
+    if(!visible.some(function(v){return v.key===state.selectedKey}))state.selectedKey=visible[0]?.key||null;
+    const chosen=visible.find(function(e){return e.key===state.selectedKey})||visible[0];
     const navMarkup=TABS.map(function(t){
       return '<button class="genInvTab" data-nav="'+esc(t[0])+'" aria-current="'+(t[0]==='Inventario'?'page':'false')+'" aria-label="'+esc(t[0])+'"><img src="'+ROOT+t[1]+'" alt="'+esc(t[0])+'"></button>';
     }).join('');
@@ -66,7 +66,7 @@
     const slots=Array.from({length:20},function(_,i){
       const entry=visible[i];
       if(!entry)return '<button class="genInvSlot" disabled aria-label="Casilla vacía"></button>';
-      const selected=entry.name===state.selectedName;
+      const selected=entry.key===state.selectedKey;
       const content=entry.material?materialArt(entry.name):'<span class="genInvCreationGlyph">'+(state.family==='Escudos'?'◈':'⚔')+'</span>';
       return '<button class="genInvSlot'+(selected?' selected':'')+'" data-select="'+i+'" aria-label="'+esc(entry.name)+'" aria-pressed="'+selected+'">'+content+'<span>'+esc(entry.material?entry.qty:(entry.rarity||''))+'</span></button>';
     }).join('');
@@ -94,15 +94,15 @@
       else if(b.dataset.nav!=='Inventario')nav.renderWorkspace(b.dataset.nav);
     }});
     board.querySelectorAll('[data-family]').forEach(function(b){b.onclick=function(){
-      state.family=b.dataset.family;state.page=0;state.selectedName=null;state.search='';render(ctx,nav);
+      state.family=b.dataset.family;state.page=0;state.selectedKey=null;state.search='';render(ctx,nav);
     }});
     board.querySelectorAll('[data-select]').forEach(function(b){b.onclick=function(){
-      state.selectedName=visible[Number(b.dataset.select)]?.name;render(ctx,nav);
+      state.selectedKey=visible[Number(b.dataset.select)]?.key;render(ctx,nav);
     }});
-    board.querySelector('#genInvPrev').onclick=function(){state.page--;state.selectedName=null;render(ctx,nav)};
-    board.querySelector('#genInvNext').onclick=function(){state.page++;state.selectedName=null;render(ctx,nav)};
+    board.querySelector('#genInvPrev').onclick=function(){state.page--;state.selectedKey=null;render(ctx,nav)};
+    board.querySelector('#genInvNext').onclick=function(){state.page++;state.selectedKey=null;render(ctx,nav)};
     const input=board.querySelector('#genInvFilter');
-    input.onchange=function(){state.search=input.value;state.page=0;state.selectedName=null;render(ctx,nav)};
+    input.onchange=function(){state.search=input.value;state.page=0;state.selectedKey=null;render(ctx,nav)};
     board.querySelector('#genInvGoCraft').onclick=function(){nav.renderWorkspace('Fabricaciones')};
     const details=board.querySelector('#genInvDetails');
     if(details&&item)details.onclick=function(){
