@@ -30,6 +30,13 @@ const server=http.createServer((req,res)=>{
    const s=window.__genesisProductionHerreroV015;
    return !!s&&(s.phase==='running'||s.phase==='error');
   },null,{timeout:180000});
+  // Village trees spawn after all critical preload groups settle.
+  // The Herrero 3D workshop can mount earlier; do not race tree setup.
+  await page.waitForFunction(()=>{
+    const app=document.querySelector('#genesisApp')?.app;
+    return !!app?.root?.findByName('Árbol 1 · Roble · plaza') ||
+           window.__genesisVillageBuild && window.__genesisTreeStatus?.planned===14;
+  },null,{timeout:160000});
   const status=await page.evaluate(()=>{
     const app=document.querySelector('#genesisApp')?.app;
     const s=window.__genesisProductionHerreroV015;
