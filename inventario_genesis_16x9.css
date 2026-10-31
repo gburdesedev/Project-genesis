@@ -206,3 +206,18 @@
 .genInvGrid{padding-top:2.65%!important;}
 .genInvGridControls{min-height:15%!important;}
 .genInvFamily{margin:3.4% 0!important;min-height:9%!important;}
+
+/* V06: font hierarchy and internal clearance without changing glyph/fabric art. */
+.genInvFamilies{padding-top:13%!important}
+.genInvFamilies .genInvHead{font-size:1.45cqw!important;margin-bottom:5%!important}
+.genInvViewerTitle{
+ font-size:1.75cqw!important;
+ font-weight:500;
+ letter-spacing:.02em;
+ color:#f7dda8!important;
+ padding:.35% 2%;
+ background:linear-gradient(90deg,transparent,#090606a6,transparent);
+ text-shadow:0 2px 3px #000,0 0 6px #000;
+}
+.genInvInfo .genInvInfoTitle{font-size:1.65cqw!important}
+.genInvViewLabel{font-size:1cqw!important}
