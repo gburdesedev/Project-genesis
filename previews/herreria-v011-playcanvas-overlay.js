@@ -5,8 +5,8 @@
  */
 const REPO='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/';
 const WALL_URL=REPO+'feature/blacksmith-workshop-walls-v010/public/models/blacksmith-v010/batched/full_workshop_preview.glb';
-const ROOF_URL=REPO+'feature/blacksmith-workshop-roof-v011/public/models/blacksmith-roof-v011/blacksmith_roof_preview.glb';
-const CHIMNEY_URL=REPO+'feature/blacksmith-workshop-roof-v011/public/models/blacksmith-roof-v011/blacksmith_chimney_candidate_preview.glb';
+const ROOF_URL=REPO+'feature/blacksmith-workshop-roof-v011/public/models/blacksmith-roof-v011/batched/blacksmith_roof_preview.glb';
+const CHIMNEY_URL=REPO+'feature/blacksmith-workshop-roof-v011/public/models/blacksmith-roof-v011/batched/blacksmith_chimney_candidate_preview.glb';
 const PREVIEW={version:'v0.15-herrero-roof',phase:'starting',models:{},installations:[],debug:{},
               roofVisible:true,chimneyVisible:true,errors:[],fps:0,drawCalls:null,
               productionUntouched:true,collisionValidated:false,forgeAligned:false};
