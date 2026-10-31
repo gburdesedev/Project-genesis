@@ -210,3 +210,39 @@
  padding:3%;font-size:1cqw
 }
 .genInvOverlay button{float:right}
+
+/* V08: 20 slots restored to near-square. Family hierarchy follows the
+ * approved Fabricaciones narrow-recess row language (not broad new buttons). */
+.genInvMain{grid-template-rows:minmax(0,53%) minmax(0,47%)!important}
+.genInvGrid{padding-top:3.1%!important;padding-bottom:1.1%!important;gap:.3%!important}
+.genInvGridControls{min-height:12%!important}
+.genInvPage{min-height:9%!important}
+.genInvSlots{gap:.7%!important}
+.genInvFamily{
+ width:93%!important;height:6.25%!important;min-height:0!important;
+ margin:1.3% 0 1.3% 7%!important;
+ padding:.3% 3%!important;
+ border:1px solid #3d3024!important;
+ border-top-color:#68533b!important;
+ border-radius:0!important;
+ background:linear-gradient(90deg,#121110,#191716 52%,#0a0909)!important;
+ box-shadow:inset 0 0 0 1px #090807!important;
+ font-size:1.06cqw!important;
+}
+.genInvFamily::before{left:-7.5%!important;width:7.5%!important;background:#716046!important}
+.genInvFamily[aria-pressed=true]{
+ border-color:#a5824e!important;
+ background:linear-gradient(90deg,#312317,#40301f 65%,#1a130e)!important;
+ box-shadow:inset 0 0 1px 1px #d0a45b9a!important;
+}
+.genInvFamilies::after{
+ content:"";position:absolute;left:7.5%;top:22.1%;bottom:57%;
+ border-left:1px solid #53422c;pointer-events:none;z-index:1
+}
+.genInvFamilies .genInvHead{margin-bottom:7%!important;font-size:1.3cqw!important}
+.genInvFamIcon{font-size:.92cqw!important;min-width:1.1cqw!important;max-width:1.1cqw!important}
+.genInvViewer{padding-top:8%!important;padding-bottom:4%!important}
+.genInvViewerTitle{font-size:1.35cqw!important}
+.genInvImageWrap img{width:83%!important;height:90%!important}
+.genInvInfo{padding-top:12%!important}
+.genInvInfoTitle{font-size:1.35cqw!important}
