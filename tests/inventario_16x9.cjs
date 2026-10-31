@@ -35,6 +35,7 @@ await page.evaluate(()=>{
     renderAsset:i=>i?'<div class="testCreation3D">'+i.name+'</div>':'',
     recipeAsset:()=>'<span>Espada de hierro</span>',
     namingReason:item=>'Objeto cerrado: '+item.name,
+    onCraft:()=>{},
     modal(html,extra){const m=document.querySelector('#modal');m.className='modal '+extra;m.innerHTML=html;document.querySelector('#modalLayer').style.display='grid'},
     closeModal(){document.querySelector('#modalLayer').style.display='none'}
   });openLive();
