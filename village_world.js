@@ -177,7 +177,9 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
   const building=new Entity(p.profession+' · fachada cerrada');root.addChild(building);building.setLocalPosition(p.x,0,p.z);building.setLocalScale(plan.workshopScale,1,plan.workshopScale);building.setLocalEulerAngles(0,p.yaw,0);
   const shellClone=shell.clone(),roofClone=roof.clone(),doorClone=door.clone();
   for(const [clone,pos] of [[shellClone,[0,0,0]],[roofClone,[0,3.45,-5.05]],[doorClone,[-1.1,0,.12]]]){
-   clone.setLocalPosition(...pos);clone.setLocalEulerAngles(0,0,0);building.addChild(clone);
+   clone.setLocalPosition(...pos);clone.setLocalEulerAngles(0,0,0);
+   if(clone===roofClone){clone.setLocalScale(1.28,.70,.86);clone.setLocalPosition(0,3.40,-5.05)}
+   building.addChild(clone);
   }
   if(p.profession==='Arcanista'){
    tintArcaneFacade(shellClone);
