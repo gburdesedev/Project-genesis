@@ -24,9 +24,9 @@ const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(35,16/9,.01,80)
 camera.position.set(3.25,2.55,4.4);camera.lookAt(0,.52,0);
 const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
 renderer.setClearColor(0x000000,0);renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;viewport.append(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xe7ebef,0x39312a,2.25));
-for(const [color,intensity,x,y,z] of [[0xffedd6,3.2,2,5,3],[0xcfdcf8,2.1,-3,3,-4],[0xffffff,1,-2,1,2]]){
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.98;viewport.append(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xe7ebef,0x39312a,1.38));
+for(const [color,intensity,x,y,z] of [[0xffedd6,2.15,2,5,3],[0xcfdcf8,1.5,-3,3,-4],[0xffffff,.7,-2,1,2]]){
   const l=new THREE.DirectionalLight(color,intensity);l.position.set(x,y,z);scene.add(l);
 }
 const root=new THREE.Group();root.position.y=-.16;scene.add(root);
