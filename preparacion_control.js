@@ -32,6 +32,7 @@
 
   const RAW = 'Mineral de hierro';
   const PREPARED = 'Lingote de hierro';
+  const CHARCOAL = 'Carbón vegetal';
   // Mineral V008 aprobado: 55.000 triángulos y PBR 1536; PNG RGBA en móvil.
   // El lingote V175 conserva su modelo y render anteriores.
   // Un PNG nunca se anima como si fuese geometría 3D.
@@ -43,6 +44,10 @@
     [PREPARED]: Object.freeze({
       poster: 'assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png',
       model: 'assets/playcanvas/candidates/materials/iron_ingot/v175/iron_v175_web_candidate.glb'
+    }),
+    [CHARCOAL]: Object.freeze({
+      poster: 'assets/playcanvas/approved/materials/charcoal/v010/carbon_vegetal_v010_poster.png',
+      model: 'assets/playcanvas/approved/materials/charcoal/v010/carbon_vegetal_v010_tres_piezas_web.glb'
     })
   });
   // Perfil térmico por material. Solo el hierro tiene cifras DEMO: aún no
@@ -304,10 +309,14 @@
     if (!art) return '';
     const name = escape(material);
     const poster = escape(art.poster);
-    const visual = !safePreviews && art.model && type !== 'featured'
-      ? `<model-viewer class="prepMaterialModel" src="${escape(art.model)}" poster="${poster}" loading="eager" reveal="auto" interaction-prompt="none" camera-orbit="0deg 75deg auto" environment-image="neutral" exposure="1.45" shadow-intensity="0" alt="${name}"></model-viewer>`
+    // El carbón aprobado se ve en 3D también en el visor central del inventario.
+    // Los otros recursos conservan su comportamiento aprobado (lingote central: PNG).
+    const render3D = !safePreviews && art.model && (type !== 'featured' || material === CHARCOAL);
+    const exposure = material === CHARCOAL ? '1.10' : '1.45';
+    const visual = render3D
+      ? `<model-viewer class="prepMaterialModel" src="${escape(art.model)}" poster="${poster}" loading="lazy" reveal="auto" interaction-prompt="none" camera-orbit="0deg 75deg auto" environment-image="neutral" exposure="${exposure}" shadow-intensity="0" alt="${name}"></model-viewer>`
       : `<img class="prepMaterialPoster" src="${poster}" alt="${name}" loading="lazy" draggable="false">`;
-    return `<span class="prepMaterialVisual ${type}" data-material="${name}">${visual}</span>`;
+    return `<span class="prepMaterialVisual ${type}${material === CHARCOAL ? ' charcoal' : ''}" data-material="${name}">${visual}</span>`;
   }
 
   // Solo assets 3D de slots pequenos: oscilacion -45 a +45 en hover o
@@ -315,10 +324,11 @@
   // El objeto 3D nunca gira fuera de sus slots; el resultado central es PNG fijo.
   function bindModelHover() {
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-    document.querySelectorAll('.prepSkinModal .prepSkinSlot .prepMaterialVisual').forEach(surface => {
+    document.querySelectorAll('.prepSkinModal .prepSkinSlot .prepMaterialVisual, .prepSkinModal .workspaceViewer .prepMaterialVisual.charcoal').forEach(surface => {
       const viewer = surface.querySelector('model-viewer');
-      const slot = surface.closest('.prepSkinSlot');
-      if (!viewer || !slot) return;
+      const slot = surface.closest('.prepSkinSlot') || surface.closest('.workspaceViewer');
+      if (!viewer || !slot || viewer.dataset.genesisHoverBound) return;
+      viewer.dataset.genesisHoverBound = '1';
       let active = false, heldPointer = null, angle = 0, last = 0, orbitStart = 0, frame = 0;
       const animate = now => {
         if (!viewer.isConnected) { frame = 0; return; }
@@ -384,7 +394,7 @@
       const label = item ? item.name + ' · ' + item.rarity : entry ? entry[0] + ' · ' + entry[1] : 'Casilla vacía';
       const visual = item
         ? '<span class="workspaceSlotAsset">' + (ctx.renderAsset ? ctx.renderAsset(item) : '') + '</span><small class="workspaceSlotRarity">' + escape(item.rarity) + '</small>'
-        : entry ? materialVisual(entry[0], entry[0] === RAW ? 'ore' : 'ingot') + '<strong>' + entry[1] + '</strong>' : '';
+        : entry ? materialVisual(entry[0], entry[0] === RAW ? 'ore' : entry[0] === CHARCOAL ? 'charcoal' : 'ingot') + '<strong>' + entry[1] + '</strong>' : '';
       const kind = item ? ' data-item-index="' + index + '"' : entry ? ' data-stock-name="' + escape(entry[0]) + '"' : '';
       const compareSide = item && tab === 'Comparacion' ? (ctx.compareA === index ? ' compareA' : ctx.compareB === index ? ' compareB' : '') : '';
       return '<button type="button" class="prepSkinSlot ' + (active ? 'occupied' : 'empty') + (selected ? ' selected' : '') + compareSide +
@@ -447,7 +457,9 @@
       document.querySelectorAll('.prepSkinSlot[data-stock-name]').forEach(slot => {
         slot.onclick = () => {
           ctx.selectedMaterial = slot.dataset.stockName;
-          if (isCraftMaterial(ctx, ctx.selectedMaterial)) renderWorkspace('Fabricaciones');
+          // El carbón es un insumo de receta, pero seleccionar su stock debe abrir su modelo.
+          if (ctx.selectedMaterial === CHARCOAL) { ctx.inventoryCategory = 'materials'; renderWorkspace('Inventario'); }
+          else if (isCraftMaterial(ctx, ctx.selectedMaterial)) renderWorkspace('Fabricaciones');
           else renderMenu();
         };
       });
@@ -624,6 +636,8 @@
       titles.forEach((title,i)=>board.insertAdjacentHTML('beforeend','<div class="workspaceCollectionLabel '+(i?'lower':'upper')+'" aria-hidden="true"><span>✦</span>'+title+'<span>✦</span></div>'));
     }
     const view=document.createElement('div');view.className='workspaceViewer';view.innerHTML=viewer;board.append(view);
+    // Se crea después de skinDisplay: conectar el hover del carbón también en el visor central.
+    bindModelHover();
     const button=document.getElementById('prepStart');button.classList.add('workspaceAction');button.innerHTML='<span class="workspaceActionLabel">'+escape(action)+'</span>';button.disabled=!enabled;button.onclick=run;
     board.querySelectorAll('[data-item-index]').forEach(e=>e.onclick=()=>{
       const index=Number(e.dataset.itemIndex);
@@ -633,7 +647,8 @@
     });
     board.querySelectorAll('[data-stock-name]').forEach(e=>e.onclick=()=>{
       ctx.selectedMaterial=e.dataset.stockName;ctx.viewItem=false;ctx.inventoryCategory='materials';
-      if(isCraftMaterial(ctx,ctx.selectedMaterial))renderWorkspace('Fabricaciones');
+      if(ctx.selectedMaterial===CHARCOAL)renderWorkspace('Inventario');
+      else if(isCraftMaterial(ctx,ctx.selectedMaterial))renderWorkspace('Fabricaciones');
       else renderWorkspace('Inventario');
     });
     board.querySelectorAll('[data-recipe-id]').forEach(button => {
@@ -646,7 +661,7 @@
       };
     });
     board.querySelectorAll('[data-inventory-category]').forEach(e=>e.onclick=()=>{ctx.inventoryCategory=e.dataset.inventoryCategory;ctx.viewItem=ctx.inventoryCategory==='creations';renderWorkspace('Inventario')});
-    board.querySelectorAll('[data-material]').forEach(e=>{if(e.tagName==='BUTTON')e.onclick=()=>{ctx.selectedMaterial=e.dataset.material;renderWorkspace(isCraftMaterial(ctx,ctx.selectedMaterial)?'Fabricaciones':'Inventario')}});
+    board.querySelectorAll('[data-material]').forEach(e=>{if(e.tagName==='BUTTON')e.onclick=()=>{ctx.selectedMaterial=e.dataset.material;renderWorkspace(ctx.selectedMaterial===CHARCOAL?'Inventario':isCraftMaterial(ctx,ctx.selectedMaterial)?'Fabricaciones':'Inventario')}});
     const select=document.getElementById('workspaceItem');if(select)select.onchange=()=>{ctx.selectedItem=Math.max(0,Number(select.value));ctx.inventoryCategory='creations';renderWorkspace('Inventario')};
     for(const [id,key] of [['workspaceA','compareA'],['workspaceB','compareB']]){const el=document.getElementById(id);if(el)el.onchange=()=>{ctx[key]=Number(el.value);ctx.comparePick=key==='compareA'?'B':'A';renderWorkspace('Comparacion')}}
     board.querySelectorAll('[data-sheet-tab]').forEach(e=>e.onclick=()=>{ctx.sheetTab=e.dataset.sheetTab;renderWorkspace('Inventario')});
