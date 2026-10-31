@@ -1,4 +1,4 @@
-name: Inspect workshop rebuild hooks
+name: Inspect workshop rebuild hooks detailed
 on:
   push:
     branches: [feature/workshop-reconstruction-v001]
@@ -14,11 +14,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Inspect current HTML and report bounded snippets
         run: python3 scripts/inspect_workshop_reconstruction.py
+          python3 scripts/inspect_workshop_reconstruction_detail.py
       - name: Save source positions in isolated branch only
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add reports/workshop-reconstruction-inspection.json
+          git add reports/workshop-reconstruction-inspection.json reports/workshop-reconstruction-detail.json
           git commit -m 'Capture workshop repair integration source positions [skip ci]'
           git fetch origin "${{ github.ref_name }}"
           git rebase "origin/${{ github.ref_name }}"
