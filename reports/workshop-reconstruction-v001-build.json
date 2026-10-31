@@ -1,0 +1,23 @@
+{
+  "status": "ISOLATED_CANDIDATE",
+  "source": "forge-v038-preview.html",
+  "output": "forge-v038-reconstruction-v001.html",
+  "source_bytes": 2474536,
+  "candidate_bytes": 2475971,
+  "repair_geometry": "12 rough stone blocks + 2 recycled timber braces",
+  "animation_duration_seconds": 3.15,
+  "storage_key": "genesis.preview.workshop-wall-repair.v001",
+  "playcanvas_physics": "existing lightweight deterministic collision, no Ammo WASM",
+  "browser_visual_test": "NOT_YET_VERIFIED",
+  "checks": {
+    "source_preview_unchanged": true,
+    "normal_game_unchanged": true,
+    "same_forge_v038": true,
+    "fourteen_procedural_pieces": true,
+    "interaction_preserved": true,
+    "camera_and_player_collision_breach": true,
+    "restore_on_completion": true,
+    "mobile_reset_available": true,
+    "version_visible": true
+  }
+}
