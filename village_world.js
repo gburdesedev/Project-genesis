@@ -1,5 +1,5 @@
 import {Entity,StandardMaterial,Texture,Color,Mesh,MeshInstance,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
-import {mountVillageTrees} from './village_trees.js?v=0.14c';
+import {mountVillageTrees} from './village_trees.js?v=0.15.001';
 import {mountArcanePortal} from './village_arcanist.js?v=0.14b';
 const ROOT='./assets/world/v0.11.004/';
 const MOBILE_TEXTURE_EDGE=1024;
