@@ -1,0 +1,62 @@
+name: Project Genesis v0.14b Build 20261031.01 - ship final V011 charcoal
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/ship_carbon_v011_demo_v014b.py
+      - .github/workflows/ship-carbon-v011-demo-v014b.yml
+permissions:
+  contents: write
+jobs:
+  ship:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install validation tools
+        run: python3 -m pip install --user trimesh pillow numpy
+      - name: Copy validated V011 real GLB/poster and update game UI, registry and version
+        run: python3 scripts/ship_carbon_v011_demo_v014b.py
+      - name: Validate live inventory code and versioning of index.html
+        run: |
+          node --check preparacion_control.js
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import hashlib,json,trimesh
+          folder=Path('assets/playcanvas/approved/materials/charcoal/v011')
+          m=folder/'carbon_vegetal_v011_final_3_piezas_web.glb'
+          spec=json.loads((folder/'asset-lock.json').read_text())
+          scene=trimesh.load(m,force='scene',file_type='glb')
+          assert len(scene.geometry)==1 and len(scene.graph.nodes_geometry)==3
+          assert m.stat().st_size<1700000
+          assert hashlib.sha256(m.read_bytes()).hexdigest()==spec['sha256']
+          assert Image.open(folder/'carbon_vegetal_v011_poster.png').convert('RGBA').getchannel('A').getextrema()==(0,255)
+          js=Path('preparacion_control.js').read_text()
+          for term in ["const CHARCOAL = 'Carbón vegetal'","carbon_vegetal_v011_final_3_piezas_web.glb","carbon_vegetal_v011_poster.png",'bindModelHover();']:
+              assert term in js,term
+          assert 'carbon_vegetal_v010_tres_piezas_web.glb' not in js
+          index=Path('index.html').read_text()
+          assert '<title>Project Genesis v0.14b · Build 20261031.01' in index
+          assert 'PROJECT GENESIS · v0.14b · BUILD 20261031.01' in index
+          assert './preparacion_control.js?v=0.14b.019-carbon-v011-final' in index
+          assert 'playcanvas-v0.14b-build-20261031.01' in index
+          assert index.count('v0.14a')==0
+          assert Path('assets/playcanvas/approved/materials/charcoal/v010/carbon_vegetal_v010_tres_piezas_web.glb').is_file()
+          print('PASS V011 final material, game inventory, shader maps, alpha poster, new visible game version/build')
+          PY
+      - name: Publish one atomic release commit to main for GitHub Pages
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html preparacion_control.js assets/playcanvas/approved/catalog.json assets/playcanvas/approved/materials/charcoal/v011 previews/carbon_vegetal_v011/FINAL_DEMO_SHIP.json
+          if git diff --cached --quiet; then
+            echo 'No changes to publish'; exit 0
+          fi
+          git commit -m 'Project Genesis v0.14b Build 20261031.01: final charcoal V011 live [skip ci]'
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
+          echo 'RELEASE_OK: v0.14b Build 20261031.01 with V011 charcoal'
