@@ -1,0 +1,87 @@
+name: Project Genesis V011 charcoal subtle ash - isolated shader-safe QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/carbon_vegetal_v011_ash_candidate.py
+      - scripts/carbon_vegetal_v011_render_compare.py
+      - .github/workflows/carbon-vegetal-v011-ash-qa.yml
+permissions:
+  contents: write
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Python PBR and image tools
+        run: python3 -m pip install --user pillow numpy trimesh
+      - name: Build V011 from the exact live V010 asset without touching it
+        run: python3 scripts/carbon_vegetal_v011_ash_candidate.py
+      - name: Install Blender 4.5.13 LTS
+        run: |
+          curl -fSL --retry 3 https://download.blender.org/release/Blender4.5/blender-4.5.13-linux-x64.tar.xz -o /tmp/blender.tar.xz
+          mkdir -p /tmp/blender-lts
+          tar -xJf /tmp/blender.tar.xz -C /tmp/blender-lts --strip-components=1
+      - name: Render V010 and V011 using the same soft light and camera
+        run: /tmp/blender-lts/blender -b -t 4 --python-exit-code 1 --python scripts/carbon_vegetal_v011_render_compare.py
+      - name: Create PNG side-by-side comparison from actual Blender renders
+        run: |
+          python3 - <<'PY'
+          from PIL import Image,ImageDraw,ImageFont
+          from pathlib import Path
+          out=Path('previews/carbon_vegetal_v011')
+          modes=['three_quarter','side','upper']
+          margin=18;head=64;cellw=760;cellh=608
+          canvas=Image.new('RGB',(cellw*2+margin*3,head+3*(cellh+margin)+margin),(21,23,27))
+          d=ImageDraw.Draw(canvas)
+          d.text((24,21),'V010  ·  MAS LUZ, SIN CENIZA',fill=(232,231,226))
+          d.text((cellw+margin*2+24,21),'V011  ·  MISMA LUZ + CENIZA SUTIL',fill=(232,231,226))
+          for row,view in enumerate(modes):
+              for col,name in enumerate(('v010','v011')):
+                  im=Image.open(out/(name+'_'+view+'.png')).convert('RGB')
+                  im=im.resize((cellw,cellh),Image.Resampling.LANCZOS)
+                  canvas.paste(im,(margin+(cellw+margin)*col,head+margin+(cellh+margin)*row))
+          canvas.save(out/'V010_V011_same_light_comparison.jpg',quality=94,optimize=True)
+          print('SAME_LIGHT_COMPARE_READY',canvas.size)
+          PY
+      - name: Verify candidate resources; V010 remains untouched
+        run: |
+          test -s previews/carbon_vegetal_v011/V010_V011_same_light_comparison.jpg
+          test -s previews/carbon_vegetal_v011/v011_poster_candidate.png
+          test -s previews/carbon_vegetal_v011/AUDIT.json
+          test -s previews/carbon_vegetal_v011/carbon_vegetal_v011_ceniza_sutil_candidato.glb
+          python3 - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          import json,hashlib
+          root=Path('previews/carbon_vegetal_v011')
+          a=json.loads((root/'AUDIT.json').read_text())
+          assert a['normal_map_identical'] and a['roughness_map_identical'] and a['mesh_uv_identical']
+          assert a['instances']==3 and a['unique_meshes']==1
+          assert a['max_ash_opacity']<=.34
+          assert a['candidate_bytes']<1700000
+          assert a['status']=='candidate_review_only_V010_active'
+          im=Image.open(root/'v011_poster_candidate.png').convert('RGBA')
+          assert im.getchannel('A').getextrema()==(0,255)
+          print('PBR CHECK PASSED',a)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: charcoal-v011-ash-candidate-side-by-side
+          path: previews/carbon_vegetal_v011/
+          retention-days: 7
+      - name: Publish isolated candidate reviews and web model, NOT approved game files
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add previews/carbon_vegetal_v011/
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish charcoal V011 subtle ash same-light QA candidate [skip ci]'
+            git fetch origin main
+            git rebase origin/main
+            git push origin HEAD:main
+          fi
