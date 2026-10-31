@@ -47,6 +47,17 @@ assert.equal(await page.locator('.genInvFamily span:last-child').first().innerTe
 assert.equal(await page.locator('.genInvImageWrap img').count(),1,'known material has a fixed poster');
 const bounds=await page.locator('.genInv').boundingBox();
 assert(Math.abs(bounds.width/bounds.height-16/9)<.005,'16:9 interior artboard');
+const geometries=await page.evaluate(()=>{
+ const box=s=>{const r=document.querySelector(s).getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};
+ return {left:box('.genInvFamilies'),hero:box('.genInvViewer'),info:box('.genInvInfo'),grid:box('.genInvGrid'),slot:box('.genInvSlot'),heroImg:box('.genInvImageWrap img'),heroWrap:box('.genInvImageWrap'),
+ viewerBg:getComputedStyle(document.querySelector('.genInvViewer')).backgroundImage};
+});
+assert(geometries.left.right<=geometries.hero.left+2,'family tree must not overlap the viewer');
+assert(geometries.hero.right<=geometries.info.left+2,'viewer must not overlap information');
+assert(geometries.hero.bottom<=geometries.grid.top+2,'viewer must not overlap 20-slot grid');
+assert(geometries.slot.width/geometries.slot.height>=.8&&geometries.slot.width/geometries.slot.height<=1.32,'slots need nearly square proportions');
+assert(geometries.heroImg.bottom < geometries.heroWrap.bottom+1,'preview image must remain inside its viewer');
+assert(!geometries.viewerBg.includes('FondoVisorHerreria'),'no baked anvil under the inventory item');
 assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),2);
 const out='/tmp/genesis-responsive';fs.mkdirSync(out,{recursive:true});
 await page.screenshot({path:out+'/inventario-16x9-materiales.png',fullPage:false});
