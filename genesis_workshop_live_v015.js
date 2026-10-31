@@ -1,16 +1,17 @@
-/* Project Genesis — production Herrero V010 wall + V011 roof integration
+/* Project Genesis — production Herrero V012 four bonded masonry walls, roof and corrected chimney integration
  * Load only approved-candidate GLBs as visuals, do not mutate physics, door
  * hinge, collision envelopes, procedural tutorials, forge or economy.
  * Existing HTML, UI and controls remain the source of authority.
  */
 const ASSETS='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/';
 const GLBS={
- walls:ASSETS+'feature/blacksmith-workshop-walls-v010/public/models/blacksmith-v010/batched/full_workshop_preview.glb',
- roof:ASSETS+'feature/blacksmith-workshop-roof-v011/public/models/blacksmith-roof-v011/batched/blacksmith_roof_preview.glb',
- chimney:ASSETS+'feature/blacksmith-workshop-roof-v011/public/models/blacksmith-roof-v011/batched/blacksmith_chimney_candidate_preview.glb'
+ walls:ASSETS+'feature/blacksmith-workshop-structural-v012/public/models/blacksmith-structural-v012/batched/blacksmith_four_walls_preview.glb',
+ roof:ASSETS+'feature/blacksmith-workshop-structural-v012/public/models/blacksmith-structural-v012/batched/blacksmith_roof_preview.glb',
+ chimney:ASSETS+'feature/blacksmith-workshop-structural-v012/public/models/blacksmith-structural-v012/batched/blacksmith_chimney_candidate_preview.glb'
 };
-const status={version:'v0.15.001',phase:'waiting',assets:{},installed:[],
+const status={version:'v0.16.012',phase:'waiting',assets:{},installed:[],
  roofPitchMultiplier:1.30,oldRoofPreserved:true,doorUnchanged:true,forgeUnchanged:true,
+ geometryVisualReview:'PENDING_PLAYER',chimneyCapConnected:true,cornerInterlockingCourses:32,
  chimneyConnectedToForge:false,collisionRetestRequired:true,errors:[],fps:null};
 globalThis.__genesisProductionHerreroV015=status;
 const report=()=>{globalThis.__genesisProductionHerreroV015=status;};
@@ -44,7 +45,7 @@ function install(app,root,kind,sources,{tutorial=false}={}){
   oldRoof=root.children[1];door=root.children[2];
  }
  if(!oldShell||!oldRoof||!door){status.errors.push(kind+': original anchors unavailable');report();return;}
- const modelRoot=new root.constructor('Genesis production Herrero V010/V011 · detachable');
+ const modelRoot=new root.constructor('Genesis production Herrero V012 · stone-bond corners');
  root.addChild(modelRoot);
  modelRoot.setLocalPosition(0,0,0);
  // Blender: W=7.875, D=6.890625. Original PlayCanvas local shell:
@@ -53,7 +54,7 @@ function install(app,root,kind,sources,{tutorial=false}={}){
  modelRoot.setLocalScale(horizontal,1,horizontal);
  const walls=sources.walls.clone(),roof=sources.roof.clone(),chimney=sources.chimney.clone();
  const parts=[walls,roof,chimney];
- const tags=['WallsV010','RoofV011','ChimneyCandidateV011'];
+ const tags=['WallsV012','RoofV012','ChimneyV012'];
  parts.forEach((part,i)=>{
   part.name='Genesis '+tags[i];
   part.setLocalPosition(0,0,0);
