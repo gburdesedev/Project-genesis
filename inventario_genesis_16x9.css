@@ -129,3 +129,68 @@
   width:100%;height:100%;
   background:transparent!important;
 }
+
+/* V04: 9-slice ornament layers, genuine Preparación artwork.
+   Corners do not scale. The center stretches only the dark texture zone. */
+.genInv{border:0!important;background:#080605!important;}
+.genInv::before{
+ content:"";position:absolute;inset:0;pointer-events:none;z-index:10;
+ border:17px solid transparent;
+ border-image-source:url('assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png');
+ border-image-slice:18 18 18 18;
+ border-image-width:17px;
+ border-image-repeat:stretch;
+}
+.genInvFamilies,.genInvInfo,.genInvGrid,.genInvViewer{
+ border:0!important;
+ border-image:none!important;
+ box-shadow:none!important;
+ background:none!important;
+ isolation:isolate;
+}
+.genInvFamilies::before,.genInvInfo::before,.genInvGrid::before{
+ content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+ background:#0c0806;
+ border:32px solid transparent;
+ border-image-source:url('assets/ui/preparacion/01_Capas/Paneles/PanelDatos.png');
+ border-image-slice:58 33 31 33 fill;
+ border-image-width:32px;
+ border-image-repeat:stretch;
+}
+.genInvFamilies>* ,.genInvInfo>* ,.genInvGrid>*{position:relative;z-index:1}
+.genInvViewer{
+ background:linear-gradient(90deg,#05030475,transparent 40%,#05030475),url('assets/ui/preparacion/01_Capas/Paneles/FondoVisorHerreria.png') center center / cover no-repeat!important;
+}
+.genInvViewer::after{
+ content:"";pointer-events:none;position:absolute;inset:0;z-index:3;
+ border:32px solid transparent;
+ border-image-source:url('assets/ui/preparacion/01_Capas/Paneles/MarcoVisorSuperior.png');
+ border-image-slice:38 32 31 32;
+ border-image-width:32px;
+ border-image-repeat:stretch;
+}
+.genInvFamilies{padding:2.8% 4.5%!important;}
+.genInvInfo{padding:3.5% 6%!important;}
+.genInvGrid{padding:2% 2.2%!important;}
+.genInvViewerTitle{z-index:4;position:relative;text-shadow:1px 2px 3px #000;font-size:1.35cqw;}
+.genInvViewLabel{z-index:4;position:relative;text-shadow:0 2px 3px #000;}
+.genInvFamily{
+ background:linear-gradient(90deg,#251b14,#0b0b0b 80%)!important;
+ border:1px solid #4e3926!important;
+ border-top-color:#7f5d36!important;
+ border-radius:0!important;
+ padding:2.8% 5%!important;
+ min-height:8.8%!important;
+ font-size:1.32cqw!important;
+}
+.genInvFamily[aria-pressed=true]{
+ background:linear-gradient(100deg,#6e4420a8,#21150b 70%,#120e09)!important;
+ box-shadow:inset 0 0 2px 1px #bd8650,0 0 10px #ba7e394a!important;
+ border-color:#b3894c!important;
+}
+.genInvFamily .genInvFamIcon{min-width:1.6cqw;max-width:1.6cqw;font-size:1.3cqw}
+.genInvGridTitle{font-size:1.2cqw}
+.genInvGridControls{min-height:17%;padding:0 1%}
+.genInvFilter{background:#0b0908!important;border-color:#85613e!important}
+.genInvPage{min-height:12%;color:#d8b077}
+.genInvInfoLine{padding:3% 0}
