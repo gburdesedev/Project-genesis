@@ -33,7 +33,8 @@ function exteriorSpecies() {
 }
 const EXTERIOR_SPECIES=exteriorSpecies();
 const RAW_SITES = [
- ['oak',2.2,11.7,'plaza'],['maple',11.8,11.7,'plaza'],
+ // Shift southwest oak away from the fountain's light path, preserving trunk collision and shadows.
+ ['oak',0.4,10.7,'plaza'],['maple',11.8,11.7,'plaza'],
  ['linden',2.2,20.3,'plaza'],['ash',11.8,20.3,'plaza'],
  ...EXTERIOR_SPOTS.map(([x,z,region],i)=>[EXTERIOR_SPECIES[i],x,z,region])
 ];
