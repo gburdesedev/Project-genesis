@@ -13,7 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Inspect current HTML and report bounded snippets
-        run: python3 scripts/inspect_workshop_reconstruction.py
+        run: |
+          python3 scripts/inspect_workshop_reconstruction.py
           python3 scripts/inspect_workshop_reconstruction_detail.py
       - name: Save source positions in isolated branch only
         run: |
