@@ -1,7 +1,6 @@
 # Render mobile fallback image from the final three-piece GLB with genuine transparency.
 from pathlib import Path
 from mathutils import Vector
-from PIL import Image
 import bpy
 out=Path('assets/playcanvas/approved/materials/charcoal/v010').resolve()
 src=out/'carbon_vegetal_v010_tres_piezas_web.glb'
@@ -41,9 +40,12 @@ scene.view_settings.exposure=.05
 poster=out/'carbon_vegetal_v010_poster.png'
 scene.render.filepath=str(poster)
 bpy.ops.render.render(write_still=True)
-im=Image.open(poster).convert('RGBA')
-alpha=im.getchannel('A')
-if not alpha.getbbox() or alpha.getextrema()!=(0,255):
-    raise RuntimeError('Poster should have genuine nontrivial transparent alpha')
+import numpy as np
+pixels=bpy.data.images.load(str(poster),check_existing=False)
+rgba=np.empty(pixels.size[0]*pixels.size[1]*4,dtype=np.float32)
+pixels.pixels.foreach_get(rgba)
+alpha=rgba[3::4]
+if not (alpha.min()<.01 and alpha.max()>.99 and (alpha>.2).sum()>1000):
+    raise RuntimeError('Poster must have real transparent background and nonempty subject')
 if poster.stat().st_size<12000:raise RuntimeError('Poster implausibly small')
-print('GENESIS_CARBON_V010_POSTER',poster,poster.stat().st_size,'alpha_bbox',alpha.getbbox())
+print('GENESIS_CARBON_V010_POSTER',poster,poster.stat().st_size,'alpha_minmax',float(alpha.min()),float(alpha.max()))
