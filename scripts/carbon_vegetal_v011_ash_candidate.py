@@ -93,7 +93,7 @@ temp=io.BytesIO()
 new_color.save(temp,format='JPEG',quality=93,subsampling=0,optimize=True)
 encoded=temp.getvalue()
 assert encoded[:3]==bytes((255,216,255))
-padded=encoded+b'\\x00'*((-len(encoded))%4)
+padded=encoded+bytes((-len(encoded))%4)
 delta=len(padded)-(end-start)
 new_bin=raw[:start]+padded+raw[end:]
 bv['byteLength']=len(encoded)
