@@ -92,3 +92,40 @@
 .genInvInfoLine{font-size:1.22cqw}
 .genInvNotice{color:#d0a574}
 .genInvAction::before{background:#23150ef8;box-shadow:0 0 11px 5px #24150ec9}
+
+/* V03: true empty frame interior. The original 3:2 FondoEstructural must NOT
+ * sit as a full picture behind responsive 16:9 panels: it contains baked UI.
+ * Use only the outer decorative edge of that approved original, no panel ghosts. */
+.genInv{
+  background:#080605!important;
+  border:12px solid transparent!important;
+  border-image-source:url('assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png');
+  border-image-slice:19 19 19 19;
+  border-image-width:12px;
+  border-image-repeat:stretch;
+}
+.genInvFamilies,.genInvInfo,.genInvGrid{
+  background:radial-gradient(ellipse at 45% 5%,#20150dbb,#0a0807 65%)!important;
+}
+.genInvViewer{
+  background:linear-gradient(90deg,#07050380,transparent 30%,transparent 70%,#07050380),
+             url('assets/ui/preparacion/01_Capas/Paneles/FondoVisorHerreria.png') center/cover no-repeat!important;
+}
+.genInvImageWrap{height:76%;place-items:center;}
+.genInvImageWrap img{
+  width:66%!important;
+  height:78%!important;
+  transform:none!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+.genInvInfoTitle,.genInvHead{font-size:1.6cqw}
+.genInvSlot .genInvCreationGlyph{
+  position:static!important;
+  display:grid;
+  place-items:center;
+  font-size:2.1cqw;
+  color:#c9a677;
+  width:100%;height:100%;
+  background:transparent!important;
+}
