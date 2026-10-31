@@ -509,6 +509,26 @@
   function renderWorkspace(tab) {
     const ctx=session;
     if(!ctx) return;
+    // Inventario panorámico aislado: no altera Preparación, Fabricación ni Comparación.
+    // Conserva datos de la sesión real, nunca resultados incrustados en el arte.
+    if(tab==='Inventario') {
+      if(window.GenesisInventory16?.render) {
+        halt();ctx.mode='workspace';ctx.tab=tab;
+        window.GenesisInventory16.render(ctx,{renderMenu,renderWorkspace,sheetForItem});
+        return;
+      }
+      if(!window.__GenesisInv16Loading){
+        window.__GenesisInv16Loading=true;
+        const style=document.createElement('link');
+        style.rel='stylesheet';style.href='inventario_genesis_16x9.css?v=0.1.001';
+        document.head.append(style);
+        const loader=document.createElement('script');
+        loader.src='inventario_genesis_16x9.js?v=0.1.001';
+        loader.onload=()=>renderWorkspace('Inventario');
+        loader.onerror=()=>{window.__GenesisInv16Loading=false;style.remove();};
+        document.head.append(loader);
+      }
+    }
     halt();
     ctx.mode='workspace';ctx.tab=tab;
     const items=ctx.getItems ? ctx.getItems() : [];
