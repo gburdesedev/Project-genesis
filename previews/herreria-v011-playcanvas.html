@@ -55,7 +55,7 @@ padding:9px 16px;border-radius:6px;background:#171513ee;border:1px solid #a7834f
    const doc=frame.contentDocument;
    if(!doc?.body)throw Error('El juego no está en el mismo origen');
    const script=doc.createElement('script');script.type='module';
-   script.src=new URL('./herreria-v011-playcanvas-overlay.js?v=0.15.011b',location.href).href;
+   script.src=new URL('./herreria-v011-playcanvas-overlay.js?v=0.15.011c',location.href).href;
    script.onerror=()=>{stat.textContent='No se pudo cargar el módulo 3D de la herrería';loading.hidden=true};
    doc.body.appendChild(script);
    loading.textContent='Montando paredes y techo en la escena real…';
