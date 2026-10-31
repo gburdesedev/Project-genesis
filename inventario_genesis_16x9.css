@@ -1,223 +1,212 @@
-
-/* Project Genesis Inventario 16:9 — reuse assets/ui/preparacion, no replacement art. */
-.modal.genInvModal{width:min(calc(100vw - 20px),calc((100dvh - 20px)*16/9))!important;max-width:100%!important;height:auto!important;max-height:calc(100dvh - 20px)!important;aspect-ratio:16/9;overflow:hidden!important;padding:0!important;background:#0b0806!important;border:1px solid #a87938!important;box-shadow:0 16px 70px #000e}
-.genInv{width:100%;height:100%;aspect-ratio:16/9;box-sizing:border-box;position:relative;isolation:isolate;display:grid;grid-template-rows:14% minmax(0,1fr) 7%;background:#0b0908 url('assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png') center/auto 100% no-repeat;color:#ecce94;font-family:Georgia,'Times New Roman',serif;container-type:inline-size;font-size:1.2cqw}
-.genInv *{box-sizing:border-box}
-.genInv button,.genInv input{font:inherit}
-.genInv button{cursor:pointer;color:inherit}
-.genInv button:focus-visible,.genInv input:focus-visible{outline:2px solid #e4bc78;outline-offset:-2px}
-.genInvNav{display:flex;align-items:center;justify-content:center;gap:0.6%;padding:0.7% 2.5% 1%}
-.genInvTab{width:24%;height:100%;border:0;position:relative;background:transparent;padding:0}
-.genInvTab img{width:100%;height:100%;display:block;object-fit:fill;filter:brightness(.7)}
-.genInvTab[aria-current=page] img{filter:brightness(1.1) drop-shadow(0 0 5px #bd7c2d)}
-.genInvTab:hover img{filter:brightness(1.24)}
-.genInvMain{display:grid;grid-template-columns:22% 55% 23%;grid-template-rows:minmax(0,55%) minmax(0,45%);gap:0;min-height:0;padding:0 .9%; }
-.genInvFamilies,.genInvViewer,.genInvInfo,.genInvGrid,.genInvActionWrap{min-width:0;min-height:0;position:relative;overflow:hidden;background:linear-gradient(155deg,#15110ddc,#09090aeb);border:1px solid #a3763d;box-shadow:inset 0 0 0 3px #100e0a,inset 0 0 22px #0008}
-.genInvFamilies{grid-row:1/3;padding:4%;margin-right:2%}
-.genInvViewer{display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:1%;margin-right:1%;background:radial-gradient(ellipse at 45% 30%,#49250e88,transparent 65%),linear-gradient(#16100d,#080807ee);border-radius:1%}
-.genInvInfo{padding:4%;overflow-y:auto}
-.genInvGrid{grid-column:2/4;grid-row:2;padding:1%;display:flex;flex-direction:column;gap:1%;margin-top:1%}
-.genInvHead{font-size:1.7cqw;letter-spacing:.09em;margin:0 0 5%;color:#efd4a0;text-align:center;border-bottom:1px solid #7b522d;padding-bottom:6%}
-.genInvFamilies .genInvHead{text-align:left}
-.genInvFamily{display:flex;align-items:center;width:100%;background:linear-gradient(#201914,#0c0b0a);border:1px solid #78542e;min-height:10%;padding:3% 4%;text-align:left;margin:2% 0;gap:5%;font-size:1.38cqw}
-.genInvFamily[aria-pressed=true]{border-color:#e4a255;color:#ffe5b1;background:linear-gradient(#694421,#17110c);box-shadow:inset 0 0 12px #ce94393f}
-.genInvFamily .genInvFamIcon{min-width:1.8cqw;max-width:1.8cqw;text-align:center;color:#d5a560}
-.genInvTreeNote{font-size:0.85cqw;color:#9c876d;padding:2%}
-.genInvViewerTitle{width:100%;font-size:1.45cqw;color:#efcf9e;text-align:center;margin:1% 0}
-.genInvImageWrap{width:100%;height:82%;display:grid;place-items:center;overflow:hidden}
-.genInvImageWrap img{display:block;width:min(75%,100%);height:95%;object-fit:contain;filter:drop-shadow(0 8px 8px #0008)}
-.genInvImageWrap :is(model-viewer,canvas){width:100%;height:100%;object-fit:contain}
-.genInvEmptyPreview{font-size:1.4cqw;color:#927e67;text-align:center}
-.genInvViewLabel{font-size:1cqw;color:#b79d79;padding-bottom:.6%}
-.genInvInfoTitle{font-size:1.65cqw;text-align:center;color:#f4d9ad;margin:0 0 7%}
-.genInvInfoLine{display:flex;justify-content:space-between;gap:2%;padding:3% 0;border-bottom:1px solid #58412b;font-size:1.13cqw}
-.genInvInfoLine b{font-weight:normal;color:#f7dfb0}
-.genInvInfoSmall{font-size:1cqw;line-height:1.5;color:#c2a98b;margin:6% 0}
-.genInvGridControls{display:flex;gap:1.2%;align-items:center;justify-content:space-between;min-height:13%;font-size:1cqw}
-.genInvGridTitle{font-size:1.38cqw;margin:0;color:#e9bf83}
-.genInvFilter{width:34%;border:1px solid #78542e;background:#0c0b0a;color:#f3d3a6;padding:.55% 1%}
-.genInvSlots{min-height:0;flex:1;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:.8%}
-.genInvSlot{min-width:0;min-height:0;position:relative;border:1px solid #967044;background:radial-gradient(#231a1277,#070606);padding:1px;display:grid;place-items:center;overflow:hidden}
-.genInvSlot.selected{border-color:#f8b863;box-shadow:inset 0 0 14px #d69b475c,0 0 5px #d69b4777}
-.genInvSlot:hover:not(:disabled){border-color:#f1bf70}
-.genInvSlot img,.genInvSlot model-viewer{width:93%;height:88%;object-fit:contain}
-.genInvSlot span{position:absolute;right:3%;bottom:0;background:#100d0bc9;color:#ffdfaa;font-size:.9cqw;padding:0 2%}
-.genInvSlot:disabled{cursor:default;opacity:.65}
-.genInvPage{display:flex;align-items:center;justify-content:center;gap:3%;min-height:10%;font-size:1.05cqw}
-.genInvPage button{background:#27190c;border:1px solid #9f794b;min-width:5%;padding:.2% 1%}
-.genInvFooter{display:flex;justify-content:flex-end;align-items:center;padding:0 2% .5%;min-height:0}
-.genInvAction{position:relative;height:92%;width:25%;border:0;background:transparent url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Normal.png') center/100% 100% no-repeat;display:grid;place-items:center;color:#ffe6b4}
-.genInvAction:hover{background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Hover.png')}
-.genInvAction:active{background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Presionado.png')}
-.genInvAction span{z-index:2;text-align:center;font-size:1.25cqw;position:relative;text-shadow:0 1px #000,0 -1px #000,0 0 7px #000;letter-spacing:.03em}
-.genInvAction::before{content:'';position:absolute;top:32%;bottom:30%;left:18%;right:18%;background:#2c1c11f5;box-shadow:0 0 8px 5px #2c1c11a0}
-.genInvNotice{font-size:.8cqw;color:#a38f79}
-.genInvInfoMore{background:#25190f;border:1px solid #9d753c;padding:2% 4%;font-size:1cqw;margin-top:3%}
-.genInvOverlay{position:absolute;inset:6% 6%;background:#100b09f5;border:1px solid #be8850;z-index:5;padding:2%;overflow-y:auto;font-size:1.1cqw}
-.genInvOverlay button{float:right}
-@media(max-width:650px){.genInv{font-size:1.2cqw}}
-
-/* V02 polish: original 39 source pieces, no substitute materials / gradients for frame art. */
-.genInv{background:#090807 url('assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png') center/auto 100% no-repeat}
-.genInvFamilies,.genInvInfo,.genInvGrid{
- border:20px solid transparent!important;
- border-image-source:url('assets/ui/preparacion/01_Capas/Paneles/PanelDatos.png');
- border-image-slice:58 33 31 33 fill;
- border-image-width:20px;
- border-image-repeat:stretch;
- box-shadow:none!important;
- background:transparent!important;
+/* Project Genesis · INVENTARIO V07 · 16:9 native
+ * Art exclusively reused from approved Preparación skin:
+ * PanelDatos / FondoEstructural / original tabs and button states / Casilla_Basicos.
+ * No anvil background in the object viewer: it was baked into the art.
+ * The 20-slot grid is rendered with dynamic live game data. */
+.modal.genInvModal{
+ width:min(calc(100vw - 16px),calc((100dvh - 16px)*16/9))!important;
+ max-width:100%!important; max-height:calc(100dvh - 16px)!important;
+ height:auto!important;aspect-ratio:16/9;overflow:hidden!important;
+ padding:0!important;border:0!important;background:#090706!important;
+ box-shadow:0 15px 65px #000e
 }
-.genInvFamilies{padding:1.2% 1.3%!important}
-.genInvInfo{padding:1.2% 1.4%!important}
-.genInvGrid{padding:.4% .9%!important}
-.genInvViewer{
- border:20px solid transparent!important;
- border-image-source:url('assets/ui/preparacion/01_Capas/Paneles/MarcoVisorSuperior.png');
- border-image-slice:32 25 24 25;
- border-image-width:20px;
- border-image-repeat:stretch;
- background:linear-gradient(#05030466,#09050388),url('assets/ui/preparacion/01_Capas/Paneles/FondoVisorHerreria.png') center/cover no-repeat!important;
- box-shadow:none!important;
-}
-.genInvTab:not([aria-current=page]) img{filter:brightness(.42) saturate(.7)!important}
-.genInvTab[aria-current=page] img{filter:brightness(1.4) sepia(.22) drop-shadow(0 0 8px #e39b36)!important}
-.genInvSlot{
- background:#050403 url('assets/ui/preparacion/01_Capas/Casillas/Casilla_Basicos_01.png') center/100% 100% no-repeat!important;
- border:0!important;
-}
-.genInvSlot.selected{box-shadow:inset 0 0 18px #dbaa57aa,0 0 6px #c38b46!important;outline:1px solid #dca958;outline-offset:-3px}
-.genInvImageWrap img{width:100%!important;height:100%!important;object-fit:contain;transform:scale(1.4);filter:drop-shadow(0 10px 12px #000c)}
-.genInvFamilies .genInvHead,.genInvInfo .genInvInfoTitle{margin-top:1%;margin-bottom:4%}
-.genInvInfoLine{font-size:1.22cqw}
-.genInvNotice{color:#d0a574}
-.genInvAction::before{background:#23150ef8;box-shadow:0 0 11px 5px #24150ec9}
-
-/* V03: true empty frame interior. The original 3:2 FondoEstructural must NOT
- * sit as a full picture behind responsive 16:9 panels: it contains baked UI.
- * Use only the outer decorative edge of that approved original, no panel ghosts. */
 .genInv{
-  background:#080605!important;
-  border:12px solid transparent!important;
-  border-image-source:url('assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png');
-  border-image-slice:19 19 19 19;
-  border-image-width:12px;
-  border-image-repeat:stretch;
+ position:relative;isolation:isolate;box-sizing:border-box;
+ width:100%;height:100%;aspect-ratio:16/9;
+ display:grid;grid-template-rows:14% 78% 8%;
+ font-family:Georgia,'Times New Roman',serif;
+ font-size:1cqw;container-type:inline-size;
+ color:#e4c89b;background:#080606
 }
-.genInvFamilies,.genInvInfo,.genInvGrid{
-  background:radial-gradient(ellipse at 45% 5%,#20150dbb,#0a0807 65%)!important;
-}
-.genInvViewer{
-  background:linear-gradient(90deg,#07050380,transparent 30%,transparent 70%,#07050380),
-             url('assets/ui/preparacion/01_Capas/Paneles/FondoVisorHerreria.png') center/cover no-repeat!important;
-}
-.genInvImageWrap{height:76%;place-items:center;}
-.genInvImageWrap img{
-  width:66%!important;
-  height:78%!important;
-  transform:none!important;
-  object-fit:contain!important;
-  object-position:center!important;
-}
-.genInvInfoTitle,.genInvHead{font-size:1.6cqw}
-.genInvSlot .genInvCreationGlyph{
-  position:static!important;
-  display:grid;
-  place-items:center;
-  font-size:2.1cqw;
-  color:#c9a677;
-  width:100%;height:100%;
-  background:transparent!important;
-}
-
-/* V04: 9-slice ornament layers, genuine Preparación artwork.
-   Corners do not scale. The center stretches only the dark texture zone. */
-.genInv{border:0!important;background:#080605!important;}
+.genInv *, .genInv *::before, .genInv *::after{box-sizing:border-box}
+.genInv button,.genInv input{font:inherit;color:inherit}
+.genInv button{cursor:pointer}
+.genInv button:focus-visible,.genInv input:focus-visible{outline:2px solid #ffd389;outline-offset:2px}
 .genInv::before{
- content:"";position:absolute;inset:0;pointer-events:none;z-index:10;
- border:17px solid transparent;
+ content:"";position:absolute;inset:0;z-index:30;pointer-events:none;
+ border:15px solid transparent;
  border-image-source:url('assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png');
- border-image-slice:18 18 18 18;
- border-image-width:17px;
- border-image-repeat:stretch;
+ border-image-slice:18 18 18 18;border-image-width:15px;border-image-repeat:stretch
 }
-.genInvFamilies,.genInvInfo,.genInvGrid,.genInvViewer{
- border:0!important;
- border-image:none!important;
- box-shadow:none!important;
- background:none!important;
- isolation:isolate;
+.genInvNav{
+ min-height:0;display:flex;align-items:center;justify-content:center;
+ gap:0.4%;padding:.55% 3% 1.3%;border-bottom:1px solid #6f4c29
 }
-.genInvFamilies::before,.genInvInfo::before,.genInvGrid::before{
- content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
- background:#0c0806;
- border:32px solid transparent;
+.genInvTab{
+ min-width:0;width:24%;height:98%;display:grid;place-items:center;
+ background:transparent;border:0;padding:0
+}
+.genInvTab img{
+ width:100%;height:100%;max-height:100%;
+ display:block;object-fit:contain;filter:brightness(.42) saturate(.72)
+}
+.genInvTab[aria-current=page] img{
+ filter:brightness(1.18) drop-shadow(0 0 6px #b57933)
+}
+.genInvTab:hover img{filter:brightness(1.35)}
+.genInvMain{
+ display:grid;min-height:0;min-width:0;
+ grid-template-columns:22.5% 44.5% 33%;
+ grid-template-rows:minmax(0,59%) minmax(0,41%);
+ gap:0;padding:0 1.1%
+}
+.genInvFamilies,.genInvViewer,.genInvInfo,.genInvGrid{
+ position:relative;isolation:isolate;
+ min-height:0;min-width:0;overflow:hidden;
+ border:0;background:transparent;box-shadow:none
+}
+/* Original empty texture/frames; using 9-slice preserves ornamented corners. */
+.genInvFamilies::before,.genInvViewer::before,.genInvInfo::before,.genInvGrid::before{
+ content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+ background:#0b0908;border:28px solid transparent;
  border-image-source:url('assets/ui/preparacion/01_Capas/Paneles/PanelDatos.png');
- border-image-slice:58 33 31 33 fill;
- border-image-width:32px;
- border-image-repeat:stretch;
+ border-image-slice:58 33 31 33 fill;border-image-width:28px;
+ border-image-repeat:stretch
 }
-.genInvFamilies>* ,.genInvInfo>* ,.genInvGrid>*{position:relative;z-index:1}
-.genInvViewer{
- background:linear-gradient(90deg,#05030475,transparent 40%,#05030475),url('assets/ui/preparacion/01_Capas/Paneles/FondoVisorHerreria.png') center center / cover no-repeat!important;
+.genInvFamilies>*,.genInvViewer>*,.genInvInfo>*,.genInvGrid>*{
+ position:relative;z-index:1
 }
-.genInvViewer::after{
- content:"";pointer-events:none;position:absolute;inset:0;z-index:3;
- border:32px solid transparent;
- border-image-source:url('assets/ui/preparacion/01_Capas/Paneles/MarcoVisorSuperior.png');
- border-image-slice:38 32 31 32;
- border-image-width:32px;
- border-image-repeat:stretch;
+.genInvFamilies{grid-column:1;grid-row:1/3;margin:0 .6% 0 0;padding:14% 6% 4%}
+.genInvViewer{grid-column:2;grid-row:1;margin-right:.8%;padding:7% 5% 5%;
+ display:flex;flex-direction:column;align-items:center;justify-content:space-between
 }
-.genInvFamilies{padding:2.8% 4.5%!important;}
-.genInvInfo{padding:3.5% 6%!important;}
-.genInvGrid{padding:2% 2.2%!important;}
-.genInvViewerTitle{z-index:4;position:relative;text-shadow:1px 2px 3px #000;font-size:1.35cqw;}
-.genInvViewLabel{z-index:4;position:relative;text-shadow:0 2px 3px #000;}
+.genInvInfo{grid-column:3;grid-row:1;padding:10% 6% 5%;overflow-y:auto}
+.genInvGrid{grid-column:2/4;grid-row:2;margin-top:.4%;padding:4% 2% 1.5%;
+ display:flex;flex-direction:column;gap:.7%}
+.genInvHead,.genInvInfoTitle{
+ margin:0;padding-bottom:6%;text-align:center;color:#eacf9d;
+ border-bottom:1px solid #6f512e;font-size:1.5cqw;letter-spacing:.07em;
+ font-weight:normal
+}
+.genInvFamilies .genInvHead{text-align:left;padding-left:2%;margin:0 0 10%}
 .genInvFamily{
- background:linear-gradient(90deg,#251b14,#0b0b0b 80%)!important;
- border:1px solid #4e3926!important;
- border-top-color:#7f5d36!important;
- border-radius:0!important;
- padding:2.8% 5%!important;
- min-height:8.8%!important;
- font-size:1.32cqw!important;
+ position:relative;display:flex;align-items:center;gap:5%;
+ width:96%;margin:2% 0 2% 4%;height:9.2%;min-height:0;
+ padding:1% 4%;text-align:left;border:1px solid #4c3a2b;
+ border-top-color:#84623f;background:linear-gradient(#1c1714,#0c0b0a);
+ color:#d2b899;font-size:1.25cqw;
+}
+.genInvFamily::before{
+ content:"";position:absolute;left:-4.5%;top:50%;height:1px;
+ width:4.5%;background:#816341
 }
 .genInvFamily[aria-pressed=true]{
- background:linear-gradient(100deg,#6e4420a8,#21150b 70%,#120e09)!important;
- box-shadow:inset 0 0 2px 1px #bd8650,0 0 10px #ba7e394a!important;
- border-color:#b3894c!important;
+ border-color:#ae8650;color:#f5dba6;
+ background:linear-gradient(90deg,#4d321c,#1b1410 65%,#0e0c0a);
+ box-shadow:inset 0 0 0 1px #c5995866,inset 0 0 12px #a5672140
 }
-.genInvFamily .genInvFamIcon{min-width:1.6cqw;max-width:1.6cqw;font-size:1.3cqw}
-.genInvGridTitle{font-size:1.2cqw}
-.genInvGridControls{min-height:17%;padding:0 1%}
-.genInvFilter{background:#0b0908!important;border-color:#85613e!important}
-.genInvPage{min-height:12%;color:#d8b077}
-.genInvInfoLine{padding:3% 0}
-
-/* V05: keep text BELOW the original 9-slice crown relief; protect all hit zones. */
-.genInvFamilies{padding-top:10%!important;padding-left:6%!important;padding-right:6%!important;}
-.genInvFamilies .genInvHead{margin-top:0!important;margin-bottom:6%!important;padding-bottom:5%!important;font-size:1.55cqw}
-.genInvInfo{padding-top:11%!important;padding-left:6%!important;padding-right:6%!important;}
-.genInvInfo .genInvInfoTitle{margin:0 0 9%!important;padding-bottom:4%!important;font-size:1.55cqw;border-bottom:1px solid #694c2b}
-.genInvViewerTitle{margin-top:3.8%!important;margin-bottom:0!important;}
-.genInvViewLabel{margin-bottom:4.5%!important;}
-.genInvImageWrap{min-height:0;flex:1;}
-.genInvGrid{padding-top:2.65%!important;}
-.genInvGridControls{min-height:15%!important;}
-.genInvFamily{margin:3.4% 0!important;min-height:9%!important;}
-
-/* V06: font hierarchy and internal clearance without changing glyph/fabric art. */
-.genInvFamilies{padding-top:13%!important}
-.genInvFamilies .genInvHead{font-size:1.45cqw!important;margin-bottom:5%!important}
+.genInvFamily:hover{border-color:#c3995b}
+.genInvFamIcon{display:inline-grid;place-items:center;font-size:1.1cqw;
+ min-width:1.4cqw;max-width:1.4cqw;color:#cfb07b}
+.genInvTreeNote{display:none}
 .genInvViewerTitle{
- font-size:1.75cqw!important;
- font-weight:500;
- letter-spacing:.02em;
- color:#f7dda8!important;
- padding:.35% 2%;
- background:linear-gradient(90deg,transparent,#090606a6,transparent);
- text-shadow:0 2px 3px #000,0 0 6px #000;
+ width:100%;margin:0;text-align:center;color:#f0d4a7;
+ letter-spacing:.02em;font-size:1.35cqw;
+ text-shadow:0 1px 5px #000
 }
-.genInvInfo .genInvInfoTitle{font-size:1.65cqw!important}
-.genInvViewLabel{font-size:1cqw!important}
+.genInvImageWrap{
+ flex:1;min-height:0;width:100%;display:grid;place-items:center;
+ overflow:hidden;margin:1% 0
+}
+/* No other baked object under the displayed item. */
+.genInvImageWrap img{
+ display:block;width:82%;height:92%;
+ max-width:82%;max-height:92%;
+ transform:none;object-fit:contain;object-position:center;
+ filter:drop-shadow(0 8px 15px #000b)
+}
+.genInvImageWrap :is(model-viewer,canvas){width:100%;height:100%;max-height:100%;object-fit:contain}
+.genInvViewLabel{
+ font-size:.9cqw;color:#c6ae8b;margin:0;padding-bottom:1%;
+ text-align:center
+}
+.genInvEmptyPreview{font-size:1.1cqw;text-align:center;color:#9a8264}
+.genInvInfoTitle{margin-bottom:9%;font-size:1.4cqw}
+.genInvInfoLine{
+ display:flex;align-items:start;justify-content:space-between;
+ gap:3%;font-size:1.03cqw;padding:4% 1%;border-bottom:1px solid #493927
+}
+.genInvInfoLine b{font-weight:normal;color:#f2d4a8;text-align:right}
+.genInvInfoSmall{display:none}
+.genInvInfoMore{
+ display:block;width:100%;margin-top:8%;padding:3% 2%;
+ color:#e2bb80;border:1px solid #957040;
+ background:linear-gradient(#362316,#120e09);
+ font-size:.94cqw
+}
+.genInvGridControls{
+ display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) auto;
+ gap:1.5%;align-items:center;min-height:15%;padding:0 1%;
+ font-size:1cqw
+}
+.genInvGridTitle{font-size:1.24cqw;color:#e9c68c;margin:0;font-weight:normal}
+.genInvFilter{
+ display:block;width:100%;min-width:0;outline:0;
+ background:#0c0a08;border:1px solid #745637;color:#e6c89c;
+ padding:2.2% 3%;font-size:.98cqw
+}
+.genInvNotice{font-size:.83cqw;color:#aa936e;white-space:nowrap}
+.genInvSlots{
+ flex:1;min-height:0;display:grid;
+ grid-template-columns:repeat(10,minmax(0,1fr));
+ grid-template-rows:repeat(2,minmax(0,1fr));
+ gap:.7%
+}
+.genInvSlot{
+ min-width:0;min-height:0;position:relative;overflow:hidden;
+ border:0!important;background:#060504
+ url('assets/ui/preparacion/01_Capas/Casillas/Casilla_Basicos_01.png')
+ center/100% 100% no-repeat;
+ padding:1%;display:grid;place-items:center;isolation:isolate
+}
+.genInvSlot.selected{
+ outline:1px solid #c9a166;outline-offset:-3px;
+ box-shadow:inset 0 0 15px #f2b65e6b
+}
+.genInvSlot:not(:disabled):hover{filter:brightness(1.17)}
+.genInvSlot:disabled{cursor:default}
+.genInvSlot img,.genInvSlot model-viewer{max-width:92%;max-height:88%;width:100%;height:100%;object-fit:contain}
+.genInvSlot>span:not(.genInvCreationGlyph){
+ position:absolute;right:3%;bottom:2%;
+ width:auto;max-width:98%;padding:0 2%;font-size:.78cqw;
+ background:#100d0bcc;color:#e7c996;text-shadow:0 1px 1px #000
+}
+.genInvCreationGlyph{
+ position:static!important;display:grid;place-items:center;
+ width:100%;height:100%;font-size:2.0cqw;color:#d9b278;background:none!important
+}
+.genInvPage{
+ display:flex;align-items:center;justify-content:center;
+ gap:3%;min-height:11%;font-size:.9cqw;color:#c8aa82
+}
+.genInvPage button{
+ min-width:4%;border:1px solid #80613b;background:#20160c;
+ padding:0 .8%;font-size:.9cqw
+}
+.genInvFooter{
+ display:flex;align-items:center;justify-content:flex-end;
+ padding:.2% 2% .4%;min-height:0
+}
+.genInvAction{
+ width:26%;height:100%;position:relative;display:grid;place-items:center;
+ border:0;background:transparent
+ url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Normal.png')
+ center/100% 100% no-repeat
+}
+.genInvAction:hover{background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Hover.png')}
+.genInvAction:active{background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Presionado.png')}
+.genInvAction::before{
+ content:"";position:absolute;inset:28% 14% 26%;
+ background:#25170df2;box-shadow:0 0 9px 4px #25170db9
+}
+.genInvAction span{
+ position:relative;z-index:2;
+ text-shadow:0 2px 2px #000,0 0 3px #000;
+ font-size:1.14cqw;color:#edce98;letter-spacing:.03em;text-align:center
+}
+.genInvOverlay{
+ position:absolute;inset:5%;z-index:8;overflow-y:auto;
+ background:#0b0909f4;border:1px solid #aa7e46;
+ padding:3%;font-size:1cqw
+}
+.genInvOverlay button{float:right}
