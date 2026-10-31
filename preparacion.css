@@ -503,3 +503,23 @@
   font:600 11px/1.35 system-ui,sans-serif!important;
   letter-spacing:.06em;margin-top:11px!important;
 }
+
+
+/* Carbón vegetal V010: PBR de 3 fragmentos reales; conserva marcos, conteos y 16:9. */
+.prepSkinSlot .prepMaterialVisual.charcoal .prepMaterialModel{
+  transform:scale(1.17);--poster-color:transparent;background:transparent!important;
+}
+.prepSkinSlot .prepMaterialVisual.charcoal .prepMaterialPoster{
+  object-fit:contain;transform:scale(1.17);mask-image:none;
+}
+.workspaceViewer .prepMaterialVisual.charcoal{
+  display:block;position:relative;width:100%;height:100%;overflow:hidden;
+}
+.workspaceViewer .prepMaterialVisual.charcoal .prepMaterialModel,
+.workspaceViewer .prepMaterialVisual.charcoal .prepMaterialPoster{
+  display:block;position:absolute;inset:0;width:100%;height:100%;
+  object-fit:contain;--poster-color:transparent;background:transparent!important;
+  pointer-events:none;
+}
+.workspaceViewer .prepMaterialVisual.charcoal .prepMaterialModel{transform:scale(1.13)}
+.workspaceViewer .prepMaterialVisual.charcoal .prepMaterialPoster{transform:scale(1.06);mask-image:none}
