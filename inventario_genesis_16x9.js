@@ -35,7 +35,7 @@
     const inventory=ctx.inventory || {};
     const allItems=familyItems(ctx);
     const stock=Object.entries(inventory).filter(function(pair){return Number(pair[1])>0});
-    const families=['Materiales',...['Espadas','Escudos','Otras creaciones'].filter(function(f){return allItems.some(function(i){return classify(i)===f})})];
+    const families=['Materiales',...(ctx.profession==='Herrero'?['Espadas','Escudos']:[]),...['Espadas','Escudos','Otras creaciones'].filter(function(f){return allItems.some(function(i){return classify(i)===f}) && (ctx.profession!=='Herrero'||f==='Otras creaciones')})];
     const state=ctx.genInvState || (ctx.genInvState={family:'Materiales',page:0,search:''});
     if(!families.includes(state.family))state.family='Materiales';
     const materialMode=state.family==='Materiales';
@@ -67,18 +67,18 @@
       const entry=visible[i];
       if(!entry)return '<button class="genInvSlot" disabled aria-label="Casilla vacía"></button>';
       const selected=entry.name===state.selectedName;
-      const content=entry.material?materialArt(entry.name):typeof ctx.renderAsset==='function'?ctx.renderAsset(entry.item):esc(entry.name);
+      const content=entry.material?materialArt(entry.name):'<span class="genInvCreationGlyph">'+(state.family==='Escudos'?'◈':'⚔')+'</span>';
       return '<button class="genInvSlot'+(selected?' selected':'')+'" data-select="'+i+'" aria-label="'+esc(entry.name)+'" aria-pressed="'+selected+'">'+content+'<span>'+esc(entry.material?entry.qty:(entry.rarity||''))+'</span></button>';
     }).join('');
     const html='<div class="genInv" id="genInv">'+
       '<header class="genInvNav">'+navMarkup+'</header>'+
       '<main class="genInvMain">'+
         '<aside class="genInvFamilies"><h2 class="genInvHead">INVENTARIO</h2>'+familiesMarkup+
-          '<p class="genInvTreeNote">Materiales es una familia única, sin subramas.</p></aside>'+
+          '</aside>'+
         '<section class="genInvViewer"><p class="genInvViewerTitle">'+title+'</p><div class="genInvImageWrap">'+viewer+'</div><p class="genInvViewLabel">'+(materialMode?'Vista fija · material':'Objeto fabricado · visor 360°')+'</p></section>'+
         '<aside class="genInvInfo"><h2 class="genInvInfoTitle">INFORMACIÓN</h2>'+facts+
           (chosen&&!materialMode?'<button class="genInvInfoMore" id="genInvDetails">INFORMACIÓN COMPLETA</button>':'')+
-          '<p class="genInvInfoSmall">Los datos pertenecen al inventario real de esta partida.</p></aside>'+
+          '</aside>'+
         '<section class="genInvGrid"><div class="genInvGridControls"><h2 class="genInvGridTitle">'+esc(state.family)+'</h2>'+
           '<input class="genInvFilter" id="genInvFilter" aria-label="Filtrar objetos" placeholder="Filtrar '+(materialMode?'materiales':'creaciones')+'..." value="'+esc(state.search)+'">'+
           '<span class="genInvNotice">'+filtered.length+' tipos registrados</span></div>'+
