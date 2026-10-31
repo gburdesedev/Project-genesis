@@ -1,0 +1,2472 @@
+{
+  "interactables": [
+    {
+      "key": "function getInteractables",
+      "pos": 2450869,
+      "text": " final de acuerdo a sus materiales y canales.</p></div></div></section></div><div class=\"formulaBox\"><div class=\"ft\">FÓRMULA PROCEDURAL DEL ARTESANO · SESIÓN ${esc(craftSession.id)}</div>${formulaCards(recipeId,formula,craft)}<div class=\"formulaNote\">Esta fórmula queda fijada para la sesión. Cada fabricación vuelve a resolver la cadena de canales y puede cerrar en un punto distinto dentro de la ventana de Nivel 1.</div><div class=\"stockMini\">${stock}</div><div class=\"craftActionNote\"><strong>LECTURA RÁPIDA</strong>Los recuadros superiores muestran qué materiales consume esta receta y cuánto usa de cada uno. Al confirmar, se consume exactamente esa combinación y recién después se resuelve el resultado procedural.</div></div><div class=\"actions\"><button class=\"secondary\" id=\"cancelCraft\">Cancelar</button><button id=\"confirmCraft\">Fabricar</button></div>`,'craftModal');document.getElementById('cancelCraft').onclick=closeModal;document.getElementById('confirmCraft').onclick=performCraft}\n\nfunction getInteractables(){if(!gameStarted||!activeRoute||tutorialStep<0)return[];const center=activeRoute.center,mentorPos=()=>{const p=activeRoute.mentor().getPosition();return{x:p.x,y:2.30,z:p.z}};if(tutorialStep===0||tutorialStep===7||tutorialStep===21)return[{id:'mentor',radius:2.2,prompt:()=>`Hablar con ${activeRoute.mentorName}`,position:mentorPos,interact:showMentorDialogue}];if(tutorialStep===1)return[{id:'door',radius:2.25,prompt:()=>`Abrir taller de ${selectedProfession}`,position:()=>workPoint({x:center,y:1.28,z:.12}),interact:openActiveDoor}];if(tutorialStep===2)return[{id:'debris',radius:2.1,prompt:()=> 'Retirar escombros',position:()=>workPoint({x:center-1.55,y:.48,z:-1.90}),interact:clearActiveDebris}];if(tutorialStep===3)return[{id:'central',radius:1.95,prompt:()=>selectedProfession==='Herrero'?'Comprobar yunque':'Asegurar mesa de corte',position:()=>selectedProfession==='Herrero'?activeRoute.stationPos():activeRoute.stationPos(),interact:actionCentral}];if(tutorialStep===4)return[{id:'mechanism',radius:2.0,prompt:()=>selectedProfession==='Herrero'?'Revisar fuelle':'Reparar bastidor',position:()=>selectedProfession==='Herrero'?(()=>{const p=bellowsEntity?.getPosition?.()||{x:4.18,y:0,z:-7.22};return{x:p.x,y:1.2,z:p.z}})():(()=>{const p=tannerRackEntity?.getPosition?.()||{x:15.18,y:0,z:-8.88};return{x:p.x,y:1.55,z:p.z}})(),interact:actionMechanism}];if(tutorialStep===5)return[{id:'aux',radius:2.2,prompt:()=>selectedProfession==='Herrero'?'Limpiar tiro':'Retirar obstrucción junto a la tina',position:()=>selectedProfession==='Herrero'?workPoint({x:3.02,y:2.05,z:-9.20},0):(()=>{const p=tannerTubEntity?.getPosition?.()||{x:17.42,y:0,z:-5.92};return{x:p.x,y:1.1,z:p.z}})(),interact:actionAux}];if(tutorialStep===6)return[{id:'activate',radius:2.25,prompt:()=>selectedProfession==='Herrero'?'Encender fragua':'Tensar piel de prueba',position:()=>selectedProfession==='Herrero'?workPoint({x:3.02,y:1.35,z:-8.45},0):(()=>{const p=tannerRackEntity?.getPosition?.()||{x:15.18,y:0,z:-8.88};return{x:p.x,y:1.5,z:p.z}})(),interact:activateStation}];if(tutorialStep===8)return[{id:'chest',radius:1.95,prompt:()=> 'Abrir baúl con la llave',position:()=>{const p=(selectedProfession==='Herrero'?chestEntity:tannerChestEntity)?.getPosition?.()||{x:center-4.02,y:0,z:-3.03};return{x:p.x,y:1.05,z:p.z}},interact:openActiveChest}];if(tutorialStep>=10&&tutorialStep<=13)return[{id:'craft',radius:2.0,prompt:()=>activeRoute.craftPrompt,position:activeRoute.stationPos,interact:showCraftConfirm}];if(tutorialStep===23)return[{id:'demoFinalCraft',radius:2.0,prompt:()=>selectedProfession==='Herrero'?'Fabricar Espada III con la muestra':'Fabricar Armadura III con la muestra',position:activeRoute.stationPos,interact:showExperimentalCraftConfirm}];if(['Herrero','Curtidor'].includes(selectedProfession)&&tutorialStep===17&&mercenaryRoot)return[{id:'mercenary',radius:2.5,prompt:()=> 'Abrir dossier del Guerrero',position:()=>{const p=mercenaryRoot.getPosition();return{x:p.x,y:1.25,z:p.z}},interact:showMercenarySheet}];if(tutorialStep===19&&mercenaryRoot)return[{id:'mercenaryReturn',radius:2.6,prompt:()=> 'Revisar resultado de la expedición',position:()=>{const p=mercenaryRoot.getPosition();return{x:p.x,y:1.25,z:p.z}},interact:showExpeditionResult}];if(tutorialStep===24)return[{id:'demoFinalReview',radius:2.1,prompt:()=> 'Revisar cierre del ciclo',position:activeRoute.stationPos,interact:showDemoCycleComplete}];return[]}\nfunction lineClearTo(pos,ignoreDoor=false){const dx=pos.x-px,dz=pos.z-pz;for(let t=.14;t<.90;t+=.10){const x=px+dx*t,z=pz+dz*t,doorHit=doorCollisionAt(x,z,.16);if(cameraBlocked(x,z)&&!(ignoreDoor&&doorHit))return false}return true}\nfunction objectiveTarget(){if(!gameStarted||!activeRoute)return null;const c=activeRoute.center,h=selectedProfession==='Herrero';const pos=(entity,offY,fallback)=>{const p=entity?.getPosition?.();if(p)return{x:p.x,y:p.y+offY,z:p.z};if(fallback)return workPoint({x:fallback.x,y:(fallback.y||0)+offY,z:fallback.z},c);return null};switch(tutorialStep){case 0:return{label:activeRoute.mentorName,pos:pos(activeRoute.mentor(),1.74,{x:c+1.72,y:0,z:1.90})};case 1:return{label:'Puerta',pos:workPoint({x:c-1.10,y:1.14,z:.12},c)};case 2:return{label:'Escombros',pos:h?workPoint({x:c-1.52,y:.88,z:-1.92},c):workPoint({x:c-1.20,y:.88,z:-1.86},c)};case 3:return h?{label:'Yunque',pos:pos(anvilEntity,1.18,{x:c+1.08,y:0,z:-6.55})}:{label:'Mesa de corte',pos:pos(tannerTableEntity,1.05,{x:c-3.72,y:0,z:-8.42})};case 4:return h?{label:'Fuelle',pos:pos(bellowsEntity,1.05,{x:c-3.74,y:0,z:-8.58})}:{label:'Bastidor',pos:pos(tannerRackEntity,1.18,{x:c+1.18,y:0,z:-8.88})};case 5:return h?{label:'Tiro',pos:workPoint({x:c+3.02,y:2.10,z:-9.05},c)}:{label:'Zona de la tina',pos:pos(tannerTubEntity,1.05,{x:c+3.42,y:0,z:-5.92})};case 6:return h?{label:'Fragua',pos:workPoint({x:c+3.02,y:1.36,z:-7.88},c)}:{label:'Piel de prueba',pos:pos(tannerRackEntity,1.18,{x:c+1.18,y:0,z:-8.88})};case 7:return{label:activeRoute.mentorName,pos:pos(activeRoute.mentor(),1.74,{x:c+1.72,y:0,z:-.92})};case 8:return h?{label:'Baúl de materiales',pos:pos(chestEntity,1.02,{x:c-4.02,y:0,z:-3.03})}:{label:'Baúl de materiales',pos:pos(tannerChestEntity,1.02,{x:c-4.02,y:0,z:-3.03})};case 10:case 11:case 12:case 13:return{label:activeRoute.stationName,pos:activeRoute.stationPos()};case 16:case 17:case 18:case 19:if(mercenaryRoot){const p=mercenaryRoot.getPosition();return{label:tutorialStep===18?'Guerrero saliendo':tutorialStep===19?'Guerrero de regreso':'Guerrero contratado',pos:{x:p.x,y:p.y+1.35,z:p.z}}}return null;case 21:return{label:activeRoute.mentorName,pos:pos(activeRoute.mentor(),1.74,{x:c+1.72,y:0,z:-.92})};case 23:case 24:return{label:activeRoute.stationName,pos:activeRoute.stationPos()};default:return null}}\nfunction orientCameraToObjective(){const target=objectiveTarget();if(!target?.pos)return false;const dx=target.pos.x-px,dz=target.pos.z-pz,dy=(target.pos.y||1.2)-1.15;camYaw=deg(Math.atan2(-dx,-dz));camPitch=clamp(22+dy*8,12,44);toast('Cámara orientada al objetivo.',900);return true}\nfunction updateCameraGuide(){if(!cameraGuide||!gameStarted||!activeRoute){if(cameraGuide)cameraGuide.style.display='none';return}const target=objectiveTarget();if(!target?.pos){cameraGuide.style.display='none';return}const dist=Math.hypot(target.pos.x-px,target.pos.z-pz);const camComp=document.querySelector('#cameraRig pc-camera')?.component;let msg='';if(camComp){const screen=new Vec3();camComp.worldToScreen(new Vec3(target.pos.x,target.pos.y,target.pos.z),screen)"
+    },
+    {
+      "key": "function objectiveTarget",
+      "pos": 2454552,
+      "text": "n la muestra',position:activeRoute.stationPos,interact:showExperimentalCraftConfirm}];if(['Herrero','Curtidor'].includes(selectedProfession)&&tutorialStep===17&&mercenaryRoot)return[{id:'mercenary',radius:2.5,prompt:()=> 'Abrir dossier del Guerrero',position:()=>{const p=mercenaryRoot.getPosition();return{x:p.x,y:1.25,z:p.z}},interact:showMercenarySheet}];if(tutorialStep===19&&mercenaryRoot)return[{id:'mercenaryReturn',radius:2.6,prompt:()=> 'Revisar resultado de la expedición',position:()=>{const p=mercenaryRoot.getPosition();return{x:p.x,y:1.25,z:p.z}},interact:showExpeditionResult}];if(tutorialStep===24)return[{id:'demoFinalReview',radius:2.1,prompt:()=> 'Revisar cierre del ciclo',position:activeRoute.stationPos,interact:showDemoCycleComplete}];return[]}\nfunction lineClearTo(pos,ignoreDoor=false){const dx=pos.x-px,dz=pos.z-pz;for(let t=.14;t<.90;t+=.10){const x=px+dx*t,z=pz+dz*t,doorHit=doorCollisionAt(x,z,.16);if(cameraBlocked(x,z)&&!(ignoreDoor&&doorHit))return false}return true}\nfunction objectiveTarget(){if(!gameStarted||!activeRoute)return null;const c=activeRoute.center,h=selectedProfession==='Herrero';const pos=(entity,offY,fallback)=>{const p=entity?.getPosition?.();if(p)return{x:p.x,y:p.y+offY,z:p.z};if(fallback)return workPoint({x:fallback.x,y:(fallback.y||0)+offY,z:fallback.z},c);return null};switch(tutorialStep){case 0:return{label:activeRoute.mentorName,pos:pos(activeRoute.mentor(),1.74,{x:c+1.72,y:0,z:1.90})};case 1:return{label:'Puerta',pos:workPoint({x:c-1.10,y:1.14,z:.12},c)};case 2:return{label:'Escombros',pos:h?workPoint({x:c-1.52,y:.88,z:-1.92},c):workPoint({x:c-1.20,y:.88,z:-1.86},c)};case 3:return h?{label:'Yunque',pos:pos(anvilEntity,1.18,{x:c+1.08,y:0,z:-6.55})}:{label:'Mesa de corte',pos:pos(tannerTableEntity,1.05,{x:c-3.72,y:0,z:-8.42})};case 4:return h?{label:'Fuelle',pos:pos(bellowsEntity,1.05,{x:c-3.74,y:0,z:-8.58})}:{label:'Bastidor',pos:pos(tannerRackEntity,1.18,{x:c+1.18,y:0,z:-8.88})};case 5:return h?{label:'Tiro',pos:workPoint({x:c+3.02,y:2.10,z:-9.05},c)}:{label:'Zona de la tina',pos:pos(tannerTubEntity,1.05,{x:c+3.42,y:0,z:-5.92})};case 6:return h?{label:'Fragua',pos:workPoint({x:c+3.02,y:1.36,z:-7.88},c)}:{label:'Piel de prueba',pos:pos(tannerRackEntity,1.18,{x:c+1.18,y:0,z:-8.88})};case 7:return{label:activeRoute.mentorName,pos:pos(activeRoute.mentor(),1.74,{x:c+1.72,y:0,z:-.92})};case 8:return h?{label:'Baúl de materiales',pos:pos(chestEntity,1.02,{x:c-4.02,y:0,z:-3.03})}:{label:'Baúl de materiales',pos:pos(tannerChestEntity,1.02,{x:c-4.02,y:0,z:-3.03})};case 10:case 11:case 12:case 13:return{label:activeRoute.stationName,pos:activeRoute.stationPos()};case 16:case 17:case 18:case 19:if(mercenaryRoot){const p=mercenaryRoot.getPosition();return{label:tutorialStep===18?'Guerrero saliendo':tutorialStep===19?'Guerrero de regreso':'Guerrero contratado',pos:{x:p.x,y:p.y+1.35,z:p.z}}}return null;case 21:return{label:activeRoute.mentorName,pos:pos(activeRoute.mentor(),1.74,{x:c+1.72,y:0,z:-.92})};case 23:case 24:return{label:activeRoute.stationName,pos:activeRoute.stationPos()};default:return null}}\nfunction orientCameraToObjective(){const target=objectiveTarget();if(!target?.pos)return false;const dx=target.pos.x-px,dz=target.pos.z-pz,dy=(target.pos.y||1.2)-1.15;camYaw=deg(Math.atan2(-dx,-dz));camPitch=clamp(22+dy*8,12,44);toast('Cámara orientada al objetivo.',900);return true}\nfunction updateCameraGuide(){if(!cameraGuide||!gameStarted||!activeRoute){if(cameraGuide)cameraGuide.style.display='none';return}const target=objectiveTarget();if(!target?.pos){cameraGuide.style.display='none';return}const dist=Math.hypot(target.pos.x-px,target.pos.z-pz);const camComp=document.querySelector('#cameraRig pc-camera')?.component;let msg='';if(camComp){const screen=new Vec3();camComp.worldToScreen(new Vec3(target.pos.x,target.pos.y,target.pos.z),screen);const visible=screen.z>0&&screen.x>=0&&screen.x<=innerWidth&&screen.y>=0&&screen.y<=innerHeight;if(visible)msg=`<strong>OBJETIVO</strong> · ${target.label} a la vista · ${dist.toFixed(1)} m`;else{let dir='girá la cámara';if(screen.z>0){if(screen.x<0)dir='girá a la izquierda';else if(screen.x>innerWidth)dir='girá a la derecha';else if(screen.y<0)dir='bajá la cámara';else dir='subí la cámara'}else{const goal=deg(Math.atan2(-(target.pos.x-px),-(target.pos.z-pz)));const delta=((goal-camYaw+540)%360)-180;dir=delta>0?'girá a la izquierda':'girá a la derecha'}msg=`<strong>OBJETIVO</strong> · ${target.label} · ${dir} · Q centrar cámara`}}else msg=`<strong>OBJETIVO</strong> · ${target.label} · Q centrar cámara`;cameraGuide.innerHTML=msg;cameraGuide.style.display='block'}\nfunction chooseInteractable(){if(modalLayer.style.display==='grid'||intro.style.display==='grid')return null;const yaw=rad(camYaw),fx=-Math.sin(yaw),fz=-Math.cos(yaw);let best=null,bestScore=Infinity;for(const it of getInteractables()){const pos=it.position(),dx=pos.x-px,dz=pos.z-pz,dist=Math.hypot(dx,dz);if(dist>it.radius||dist<.001||!lineClearTo(pos,it.id==='door'))continue;const dot=(dx/dist)*fx+(dz/dist)*fz;if(dot<-.30)continue;const score=dist+(1-dot)*.72;if(score<bestScore){best=it;bestScore=score}}return best}\nfunction interact(){const target=currentInteractable||chooseInteractable();if(!target){const msg=tutorialStep>=19?(routeCopy(tutorialStep)?.[1]||'Seguí el objetivo del epílogo.'):tutorialStep===14?'Recorrido de taller completado.':'Seguí la indicación actual.';toast(msg,1500);return}target.interact()}\nfunction updateInteractionUI(){currentInteractable=chooseInteractable();const camComp=document.querySelector('#cameraRig pc-camera')?.component;if(!currentInteractable){promptEl.style.display='none';const target=objectiveTarget();if(!camComp||!target?.pos){interactMarker.style.display='none';return}const screen=new Vec3();camComp.worldToScreen(new Vec3(target.pos.x,target.pos.y,target.pos.z),screen);if(screen.z>0&&screen.x>=0&&screen.x<=innerWidth&&screen.y>=0&&screen.y<=innerHeight){interactMarker.style.display='block';interactMarker.classList.add('active');interactMarker.style.left=screen.x+'px';interactMarker.style.top=(screen.y-(innerWidth<720?34:26))+'px'}else interactMarker.style.display='none';return}promptEl.textContent='E · '+currentInteractable.prompt();promptEl.style.display='block';if(!camComp){interactMarker.style.display='none';return}const p=currentInteractable.position(),screen=new Vec3();camComp.worldToScreen(new Vec3(p.x,p.y,p.z),screen);if(screen.z>0&&screen.x>=0&&screen.x<=innerWidth&&screen.y>=0&&screen.y<=innerHeight){interactMarker.style.display='block';interactMarker.classList.add('active');interactMarker.style.left=screen.x+'px';interactMarker.style.top=(screen.y-(innerWidth<720?34:26))+'px'}else interactMarker.style.display='none'}\n\nfunction applyTannerVisualPass(){\n // v0.9e: visual parity with Herrero. Primary Curtidor props are loaded as\n // critical assets and keep their authored local transforms. No tutorial step,\n // NPC dialogue or delayed stream is allowed to reposition/reveal the sign or\n // the main work stations.\n const primary=['tannerTableModel','tannerRackModel','tannerTubModel','tannerBucketModel','tannerShelfModel','tannerBagA','tannerCrateA','tannerBottleA','tannerSideBench','tannerStorageBarrel','tannerRopeModel','tannerExteriorHide'];\n primary.forEach(id=>{const e=E(id);if(e)e.enabled=selectedProfession==='Curtidor'});\n}\n\n// ---------- v0.9a.4 · Q1 collision/state fix ----------\nconst routeReady=new Set();\nlet routeLoading=false;\nconst sleep=ms=>new Promise(r=>setTimeout(r,ms));\nfunction routeModels(pr"
+    },
+    {
+      "key": "function lineClearTo",
+      "pos": 2454320,
+      "text": "tPrompt,position:activeRoute.stationPos,interact:showCraftConfirm}];if(tutorialStep===23)return[{id:'demoFinalCraft',radius:2.0,prompt:()=>selectedProfession==='Herrero'?'Fabricar Espada III con la muestra':'Fabricar Armadura III con la muestra',position:activeRoute.stationPos,interact:showExperimentalCraftConfirm}];if(['Herrero','Curtidor'].includes(selectedProfession)&&tutorialStep===17&&mercenaryRoot)return[{id:'mercenary',radius:2.5,prompt:()=> 'Abrir dossier del Guerrero',position:()=>{const p=mercenaryRoot.getPosition();return{x:p.x,y:1.25,z:p.z}},interact:showMercenarySheet}];if(tutorialStep===19&&mercenaryRoot)return[{id:'mercenaryReturn',radius:2.6,prompt:()=> 'Revisar resultado de la expedición',position:()=>{const p=mercenaryRoot.getPosition();return{x:p.x,y:1.25,z:p.z}},interact:showExpeditionResult}];if(tutorialStep===24)return[{id:'demoFinalReview',radius:2.1,prompt:()=> 'Revisar cierre del ciclo',position:activeRoute.stationPos,interact:showDemoCycleComplete}];return[]}\nfunction lineClearTo(pos,ignoreDoor=false){const dx=pos.x-px,dz=pos.z-pz;for(let t=.14;t<.90;t+=.10){const x=px+dx*t,z=pz+dz*t,doorHit=doorCollisionAt(x,z,.16);if(cameraBlocked(x,z)&&!(ignoreDoor&&doorHit))return false}return true}\nfunction objectiveTarget(){if(!gameStarted||!activeRoute)return null;const c=activeRoute.center,h=selectedProfession==='Herrero';const pos=(entity,offY,fallback)=>{const p=entity?.getPosition?.();if(p)return{x:p.x,y:p.y+offY,z:p.z};if(fallback)return workPoint({x:fallback.x,y:(fallback.y||0)+offY,z:fallback.z},c);return null};switch(tutorialStep){case 0:return{label:activeRoute.mentorName,pos:pos(activeRoute.mentor(),1.74,{x:c+1.72,y:0,z:1.90})};case 1:return{label:'Puerta',pos:workPoint({x:c-1.10,y:1.14,z:.12},c)};case 2:return{label:'Escombros',pos:h?workPoint({x:c-1.52,y:.88,z:-1.92},c):workPoint({x:c-1.20,y:.88,z:-1.86},c)};case 3:return h?{label:'Yunque',pos:pos(anvilEntity,1.18,{x:c+1.08,y:0,z:-6.55})}:{label:'Mesa de corte',pos:pos(tannerTableEntity,1.05,{x:c-3.72,y:0,z:-8.42})};case 4:return h?{label:'Fuelle',pos:pos(bellowsEntity,1.05,{x:c-3.74,y:0,z:-8.58})}:{label:'Bastidor',pos:pos(tannerRackEntity,1.18,{x:c+1.18,y:0,z:-8.88})};case 5:return h?{label:'Tiro',pos:workPoint({x:c+3.02,y:2.10,z:-9.05},c)}:{label:'Zona de la tina',pos:pos(tannerTubEntity,1.05,{x:c+3.42,y:0,z:-5.92})};case 6:return h?{label:'Fragua',pos:workPoint({x:c+3.02,y:1.36,z:-7.88},c)}:{label:'Piel de prueba',pos:pos(tannerRackEntity,1.18,{x:c+1.18,y:0,z:-8.88})};case 7:return{label:activeRoute.mentorName,pos:pos(activeRoute.mentor(),1.74,{x:c+1.72,y:0,z:-.92})};case 8:return h?{label:'Baúl de materiales',pos:pos(chestEntity,1.02,{x:c-4.02,y:0,z:-3.03})}:{label:'Baúl de materiales',pos:pos(tannerChestEntity,1.02,{x:c-4.02,y:0,z:-3.03})};case 10:case 11:case 12:case 13:return{label:activeRoute.stationName,pos:activeRoute.stationPos()};case 16:case 17:case 18:case 19:if(mercenaryRoot){const p=mercenaryRoot.getPosition();return{label:tutorialStep===18?'Guerrero saliendo':tutorialStep===19?'Guerrero de regreso':'Guerrero contratado',pos:{x:p.x,y:p.y+1.35,z:p.z}}}return null;case 21:return{label:activeRoute.mentorName,pos:pos(activeRoute.mentor(),1.74,{x:c+1.72,y:0,z:-.92})};case 23:case 24:return{label:activeRoute.stationName,pos:activeRoute.stationPos()};default:return null}}\nfunction orientCameraToObjective(){const target=objectiveTarget();if(!target?.pos)return false;const dx=target.pos.x-px,dz=target.pos.z-pz,dy=(target.pos.y||1.2)-1.15;camYaw=deg(Math.atan2(-dx,-dz));camPitch=clamp(22+dy*8,12,44);toast('Cámara orientada al objetivo.',900);return true}\nfunction updateCameraGuide(){if(!cameraGuide||!gameStarted||!activeRoute){if(cameraGuide)cameraGuide.style.display='none';return}const target=objectiveTarget();if(!target?.pos){cameraGuide.style.display='none';return}const dist=Math.hypot(target.pos.x-px,target.pos.z-pz);const camComp=document.querySelector('#cameraRig pc-camera')?.component;let msg='';if(camComp){const screen=new Vec3();camComp.worldToScreen(new Vec3(target.pos.x,target.pos.y,target.pos.z),screen);const visible=screen.z>0&&screen.x>=0&&screen.x<=innerWidth&&screen.y>=0&&screen.y<=innerHeight;if(visible)msg=`<strong>OBJETIVO</strong> · ${target.label} a la vista · ${dist.toFixed(1)} m`;else{let dir='girá la cámara';if(screen.z>0){if(screen.x<0)dir='girá a la izquierda';else if(screen.x>innerWidth)dir='girá a la derecha';else if(screen.y<0)dir='bajá la cámara';else dir='subí la cámara'}else{const goal=deg(Math.atan2(-(target.pos.x-px),-(target.pos.z-pz)));const delta=((goal-camYaw+540)%360)-180;dir=delta>0?'girá a la izquierda':'girá a la derecha'}msg=`<strong>OBJETIVO</strong> · ${target.label} · ${dir} · Q centrar cámara`}}else msg=`<strong>OBJETIVO</strong> · ${target.label} · Q centrar cámara`;cameraGuide.innerHTML=msg;cameraGuide.style.display='block'}\nfunction chooseInteractable(){if(modalLayer.style.display==='grid'||intro.style.display==='grid')return null;const yaw=rad(camYaw),fx=-Math.sin(yaw),fz=-Math.cos(yaw);let best=null,bestScore=Infinity;for(const it of getInteractables()){const pos=it.position(),dx=pos.x-px,dz=pos.z-pz,dist=Math.hypot(dx,dz);if(dist>it.radius||dist<.001||!lineClearTo(pos,it.id==='door'))continue;const dot=(dx/dist)*fx+(dz/dist)*fz;if(dot<-.30)continue;const score=dist+(1-dot)*.72;if(score<bestScore){best=it;bestScore=score}}return best}\nfunction interact(){const target=currentInteractable||chooseInteractable();if(!target){const msg=tutorialStep>=19?(routeCopy(tutorialStep)?.[1]||'Seguí el objetivo del epílogo.'):tutorialStep===14?'Recorrido de taller completado.':'Seguí la indicación actual.';toast(msg,1500);return}target.interact()}\nfunction updateInteractionUI(){currentInteractable=chooseInteractable();const camComp=document.querySelector('#cameraRig pc-camera')?.component;if(!currentInteractable){promptEl.style.display='none';const target=objectiveTarget();if(!camComp||!target?.pos){interactMarker.style.display='none';return}const screen=new Vec3();camComp.worldToScreen(new Vec3(target.pos.x,target.pos.y,target.pos.z),screen);if(screen.z>0&&screen.x>=0&&screen.x<=innerWidth&&screen.y>=0&&screen.y<=innerHeight){interactMarker.style.display='block';interactMarker.classList.add('active');interactMarker.style.left=screen.x+'px';interactMarker.style.top=(screen.y-(innerWidth<720?34:26))+'px'}else interactMarker.style.display='none';return}promptEl.textContent='E · '+currentInteractable.prompt();promptEl.style.display='block';if(!camComp){interactMarker.style.display='none';return}const p=currentInteractable.position(),screen=new Vec3();camComp.worldToScreen(new Vec3(p.x,p.y,p.z),screen);if(screen.z>0&&screen.x>=0&&screen.x<=innerWidth&&screen.y>=0&&screen.y<=innerHeight){interactMarker.style.display='block';interactMarker.classList.add('active');interactMarker.style.left=screen.x+'px';interactMarker.style.top=(screen.y-(innerWidth<720?34:26))+'px'}else interactMarker.style.display='none'}\n\nfunction applyTannerVisualPass(){\n // v0.9e: visual parity with Herrero. Primary Curtidor props are loaded as\n // critical assets and keep their authored local transforms. No tutorial step,\n // NPC dialogue or delayed stream is allowed to reposition/reveal the sign or\n // the main work stations.\n const primary=['tannerTableModel','tannerRackModel','tannerTubModel','tannerBucketModel','tannerShelfModel','tannerBagA','tannerCrateA','tannerBottleA','tannerSideBench','tannerStorageBarrel','tannerRopeModel','tannerExteriorHide'];\n primary.forEach(id=>{const e=E(id);"
+    },
+    {
+      "key": "function interact(){",
+      "pos": 2458691,
+      "text": "erWidth)dir='girá a la derecha';else if(screen.y<0)dir='bajá la cámara';else dir='subí la cámara'}else{const goal=deg(Math.atan2(-(target.pos.x-px),-(target.pos.z-pz)));const delta=((goal-camYaw+540)%360)-180;dir=delta>0?'girá a la izquierda':'girá a la derecha'}msg=`<strong>OBJETIVO</strong> · ${target.label} · ${dir} · Q centrar cámara`}}else msg=`<strong>OBJETIVO</strong> · ${target.label} · Q centrar cámara`;cameraGuide.innerHTML=msg;cameraGuide.style.display='block'}\nfunction chooseInteractable(){if(modalLayer.style.display==='grid'||intro.style.display==='grid')return null;const yaw=rad(camYaw),fx=-Math.sin(yaw),fz=-Math.cos(yaw);let best=null,bestScore=Infinity;for(const it of getInteractables()){const pos=it.position(),dx=pos.x-px,dz=pos.z-pz,dist=Math.hypot(dx,dz);if(dist>it.radius||dist<.001||!lineClearTo(pos,it.id==='door'))continue;const dot=(dx/dist)*fx+(dz/dist)*fz;if(dot<-.30)continue;const score=dist+(1-dot)*.72;if(score<bestScore){best=it;bestScore=score}}return best}\nfunction interact(){const target=currentInteractable||chooseInteractable();if(!target){const msg=tutorialStep>=19?(routeCopy(tutorialStep)?.[1]||'Seguí el objetivo del epílogo.'):tutorialStep===14?'Recorrido de taller completado.':'Seguí la indicación actual.';toast(msg,1500);return}target.interact()}\nfunction updateInteractionUI(){currentInteractable=chooseInteractable();const camComp=document.querySelector('#cameraRig pc-camera')?.component;if(!currentInteractable){promptEl.style.display='none';const target=objectiveTarget();if(!camComp||!target?.pos){interactMarker.style.display='none';return}const screen=new Vec3();camComp.worldToScreen(new Vec3(target.pos.x,target.pos.y,target.pos.z),screen);if(screen.z>0&&screen.x>=0&&screen.x<=innerWidth&&screen.y>=0&&screen.y<=innerHeight){interactMarker.style.display='block';interactMarker.classList.add('active');interactMarker.style.left=screen.x+'px';interactMarker.style.top=(screen.y-(innerWidth<720?34:26))+'px'}else interactMarker.style.display='none';return}promptEl.textContent='E · '+currentInteractable.prompt();promptEl.style.display='block';if(!camComp){interactMarker.style.display='none';return}const p=currentInteractable.position(),screen=new Vec3();camComp.worldToScreen(new Vec3(p.x,p.y,p.z),screen);if(screen.z>0&&screen.x>=0&&screen.x<=innerWidth&&screen.y>=0&&screen.y<=innerHeight){interactMarker.style.display='block';interactMarker.classList.add('active');interactMarker.style.left=screen.x+'px';interactMarker.style.top=(screen.y-(innerWidth<720?34:26))+'px'}else interactMarker.style.display='none'}\n\nfunction applyTannerVisualPass(){\n // v0.9e: visual parity with Herrero. Primary Curtidor props are loaded as\n // critical assets and keep their authored local transforms. No tutorial step,\n // NPC dialogue or delayed stream is allowed to reposition/reveal the sign or\n // the main work stations.\n const primary=['tannerTableModel','tannerRackModel','tannerTubModel','tannerBucketModel','tannerShelfModel','tannerBagA','tannerCrateA','tannerBottleA','tannerSideBench','tannerStorageBarrel','tannerRopeModel','tannerExteriorHide'];\n primary.forEach(id=>{const e=E(id);if(e)e.enabled=selectedProfession==='Curtidor'});\n}\n\n// ---------- v0.9a.4 · Q1 collision/state fix ----------\nconst routeReady=new Set();\nlet routeLoading=false;\nconst sleep=ms=>new Promise(r=>setTimeout(r,ms));\nfunction routeModels(prof,priority){return[...document.que"
+    },
+    {
+      "key": "debrisCleared",
+      "pos": 2347953,
+      "text": "d('inventoryTouch');inventoryTouch.onclick=()=>{if(!gameStarted)return;toggleInventory()};\n\n// ---------- Prototype route data ----------\nconst ROUTES={\n Herrero:{profession:'Herrero',center:0,mentorName:'Maese Ordan',mentor:()=>ordan,mentorAnims:ordanAnimGroup,mentorIdle:ordanIdle,mentorWalk:ordanWalk,mentorGesture:ordanGesture,recipes:['espada_hierro','escudo_hierro'],stationName:'Yunque de fabricación',stationPos:()=>{const p=anvilEntity?.getPosition?.()||{x:1.08,y:0,z:-6.55};return{x:p.x,y:1.42,z:p.z}},craftPrompt:'Fabricar en el yunque'},\n Curtidor:{profession:'Curtidor',center:14,mentorName:'Mentor Curtidor',mentor:()=>tannerMentor,mentorAnims:tannerMentorAnimGroup,mentorIdle:tannerIdle,mentorWalk:tannerWalk,mentorGesture:tannerGesture,recipes:['armadura_cuero','botas_cuero'],stationName:'Mesa de corte',stationPos:()=>{const p=tannerTableEntity?.getPosition?.()||{x:10.28,y:0,z:-8.42};return{x:p.x,y:1.15,z:p.z}},craftPrompt:'Trabajar en la mesa de corte'}\n};\nlet workshopKey=false,debrisCleared=false,auxCleared=false,chestOpen=false,craftedItems=[],usedItemNames=new Set(),craftSession=null,playerInventory={},inventoryOpen=false,inventoryTutorialOpened=false,mentorYaw=-21,mentorGestureAt=0,mentorGestureReturn=0,mentorFollowState='outside',mentorFollowDelay=0,mentorPath=[],mentorWaypoint=0;\n// v0.11 · Epílogo de demo. Estas muestras NO son materiales canonizados ni otorgan propiedades mecánicas.\nconst DEMO_DISCOVERY_MATERIALS=Object.freeze([\n {id:'ferruginosa',unknown:'Muestra ferruginosa desconocida',prepared:'Muestra ferruginosa estabilizada',color:'#d88756',glyph:'◆',effect:'Resplandor ferruginoso'},\n {id:'cristalina',unknown:'Fragmento cristalino desconocido',prepared:'Fragmento cristalino estabilizado',color:'#70d7ff',glyph:'◇',effect:'Refracción cristalina'},\n {id:'fibrosa',unknown:'Fibra mineral desconocida',prepared:'Fibra mineral estabilizada',color:'#8bd17b',glyph:'≋',effect:'Veta mineral luminosa'},\n {id:'nodulo',unknown:'Nódulo oscuro desconocido',prepared:'Nódulo oscuro estabilizado',color:'#a98ae8',glyph:'●',effect:'Resonancia oscura'}\n]);\nlet expeditionMaterial=null,expeditionMaterialPrepared=false,expeditionMaterialQty=0,expeditionMaterialConsumed=false,demoFinalItem=null;\nfunction resetDemoEpilogue(){expeditionMaterial=null;expeditionMaterialPrepared=false;expeditionMaterialQty=0;expeditionMaterialConsumed=false;demoFinalItem=null}\nfunction pickDemoDiscoveryMaterial(){const seed=((Date.now()>>>0)^(Math.floor(performance.now()*1000)>>>0)^((craftedItems.length+1)*2654435761))>>>0;return DEMO_DISCOVERY_MATERIALS[seed%DEMO_DISCOVERY_MATERIALS.length]}\nfunction demoMaterialStateLabel(){if(!expeditionMaterial)return'';if(expeditionMaterialConsumed)return'INCORPORADA';return expeditionMaterialPrepared?'IDENTIFICADA · LISTA':'BLOQUEADA'}\nfunction demoMaterialInventoryBlock(){if(!expeditionMaterial||(!expeditionMaterialQty&&!expeditionMaterialConsumed))return'';const name=expeditionMaterialPrepared?expeditionMaterial.prepared:expeditionMaterial.unknown,qty=expeditionMaterialQty||0;const status=expeditionMaterialConsumed?`Estado: consumida e incorporada en ${esc(demoFinalItem?.name||'la creación experimental')}.`:expeditionMaterialPrepared?'Estado: identificada y disponible. Esta misma unidad se usará como componente en la próxima fabricación experimental.':'Estado: no identificada / no utilizable. Requiere hablar con '+esc(activeRoute?.mento"
+    },
+    {
+      "key": "debrisCleared",
+      "pos": 2363574,
+      "text": "ainBlock');if(e)e.enabled=false;waterPour();toast('Zona de la tina despejada.',1200)}setTutorialStep(6);setTimeout(()=>mentorModal(selectedProfession==='Herrero'?'Ahora sí: encendé la fragua y comprobá el fuego.':'Ahora tensá la piel de prueba en el bastidor. Si queda firme, la estación está lista.','Entendido',()=>setTimeout(()=>orientCameraToObjective(),80)),220)}\nfunction activateStation(){if(tutorialStep!==6)return;if(selectedProfession==='Herrero'){forgeHot=true;igniteForgeVisual();pulseForge(1);forgeIgniteSound();toast('Fragua encendida.',1300)}else{tannerOperational=true;if(tannerWorkLight)tannerWorkLight.intensity=1.18;leatherPull();toast('Piel de prueba tensada · estación lista.',1300)}setTutorialStep(7);setTimeout(()=>mentorModal('Eso era lo que necesitaba ver. Volvé conmigo antes de abrir el baúl.','Entendido'),220)}\nfunction applyDevFastTestState(){\n if(HERRERO_WORKSHOP_SETUP_REQUIRED||selectedProfession!=='Herrero'||!activeRoute)return false;\n const c=activeRoute.center;\n debrisCleared=true;auxCleared=true;forgeHot=true;tannerOperational=false;\n ['debrisA','debrisB'].forEach(id=>{const e=E(id);if(e)e.enabled=false});\n const soot=E('chimneySootModel');if(soot)soot.enabled=false;\n doorAngle=doorTarget=-92;if(doorLeafEntity)doorLeafEntity.setEulerAngles(0,-92,0);\n igniteForgeVisual();pulseForge(.35);\n px=c+.10*WORKSHOP_SCALE;pz=-.22*WORKSHOP_SCALE;player.setPosition(px,0,pz);\n camera.setPosition(c+.1,2.9,4.0);camYaw=-158;camPitch=22;camDist=cameraSolvedDist=4.35;\n const mentor=activeRoute.mentor();mentor.setPosition(c+1.72*WORKSHOP_SCALE,0,-1.42*WORKSHOP_SCALE);mentorYaw=-18;mentor.setEulerAngles(0,mentorYaw,0);\n mentorFollowState='inside';mentorFollowDelay=0;mentorPath=[];mentorWaypoint=0;setMentorAnim(activeRoute.mentorIdle,.01);\n setTutorialStep(7);mentorGestureAt=performance.now()+2600;mentorGestureReturn=0;\n setTimeout(()=>orientCameraToObjective(),100);\n toast('BUILD DE PRUEBA · taller del Herrero ya operativo · pedí la llave a Ordan.',1900);\n return true\n}\n\nfunction formulaFor(recipeId){return craftSession?.formulas?.[recipeId]||null}\nfunction knownHerreroRecipes() {\n  // El catálogo procede exclusivamente de la sesión generada al iniciar esta partida.\n  const engine = window.GenesisPrototypeEngines;\n  if (selectedProfession !== 'Herrero' || !craftSession?.formulas || !engine?.recipes) return [];\n  return Object.entries(craftSession.formulas).flatMap(([id, formula]) => {\n    const recipe = engine.recipes[id];\n    const family = recipeKind(id);\n    if (!recipe || recipe.profession !== 'Herrero' || !['Espada', 'Escudo'].includes(family) ||\n        !Array.isArray(formula?.materials)) return [];\n    return [{ id, family, subfamily: recipe.name, formula }];\n  });\n}\nfunction fabricationMenuOptions(readOnly = false) {\n  return {\n    getRecipeCatalog: knownHerreroRecipes,\n    activeRecipeId: currentRecipe(),\n    canCraftRecipe: id => !readOnly && id === currentRecipe() && tutorialStep >= 10 && tutorialStep <= 13,\n    onCraftRecipe: id => {\n      if (readOnly || id !== currentRecipe() || tutorialStep < 10 || tutorialStep > 13) return;\n      const formula = formulaFor(id);\n      if (!formula || !window.GenesisPreparation.ready(formula, playerInventory)) return;\n      performCraft();\n    },\n    recipeAsset: id => {\n      const key = id || currentRecipe();\n      const recipe = key && window.GenesisPrototypeEngines?.recipes?.[key];\n      return re"
+    },
+    {
+      "key": "debrisCleared",
+      "pos": 2467571,
+      "text": ").catch(err=>console.warn('Decoración diferida:',err.message));setTimeout(pump,180)};(window.requestIdleCallback?requestIdleCallback(()=>pump(),{timeout:420}):setTimeout(pump,160))}\nasync function chooseProfessionRoute(prof){if(routeLoading||gameStarted)return;const buttons=[...document.querySelectorAll('[data-profession]')];buttons.forEach(b=>b.disabled=true);try{await prepareRoute(prof);startRoute(prof);loading.style.display='none';streamRouteDecor(prof)}catch(err){console.error(err);failLoading(err?.message||String(err),'No se habilitó la ruta. Reintentá; el resto del prototipo no se cargó.');intro.style.display='none'}finally{routeLoading=false;buttons.forEach(b=>b.disabled=false)}}\n\nfunction startRoute(prof){village.setProfession(prof);selectedProfession=prof;activeRoute=ROUTES[prof];const engine=window.GenesisPrototypeEngines;if(!engine){toast('Motor NGE Alpha no disponible.',1600);return}craftSession=engine.generateSession(prof);gameStarted=true;tutorialStep=0;workshopKey=false;debrisCleared=false;auxCleared=false;chestOpen=false;playerInventory={};inventoryOpen=false;inventoryTutorialOpened=false;craftedItems=[];usedItemNames=new Set();resetMercenaryExtension();forgeHot=false;tannerOperational=false;igniteForgeVisual();if(tannerWorkLight)tannerWorkLight.intensity=.72;doorAngle=doorTarget=tannerDoorAngle=tannerDoorTarget=0;if(doorLeafEntity)doorLeafEntity.setEulerAngles(0,0,0);if(tannerDoorLeafEntity)tannerDoorLeafEntity.setEulerAngles(0,0,0);const center=activeRoute.center;px=center;pz=6.3;player.setPosition(px,0,pz);camera.setPosition(center,3,10);camYaw=0;camPitch=24;camDist=cameraSolvedDist=4.7;const mentor=activeRoute.mentor();mentor.setPosition(center+1.72*WORKSHOP_SCALE,0,1.90*WORKSHOP_SCALE);mentorYaw=-21;mentor.setEulerAngles(0,mentorYaw,0);mentorFollowState='outside';mentorFollowDelay=0;mentorPath=[];mentorWaypoint=0;setMentorAnim(activeRoute.mentorIdle,.01);npcTag.textContent=activeRoute.mentorName.toUpperCase();professionChip.textContent=`PROFESIÓN · ${prof.toUpperCase()} · 2 FAMILIAS · 4 FABRICACIONES`;professionChip.style.display='block';materialsPanel.style.display='none';if(inventoryTouch){inventoryTouch.classList.add('locked');inventoryTouch.classList.remove('ready')}intro.style.display='none';mouseCapture.refresh();const fastSetup=applyDevFastTestState();restoreKnownLightingProfile();if(forgeHot){igniteForgeVisual();pulseForge(.10)}if(!fastSetup){setTutorialStep(0);toast(`Recorrido ${prof} iniciado.`,1500);mentorGestureAt=performance.now()+4800;mentorGestureReturn=0}}\ndocument.querySelectorAll('[data-profession]').forEach(btn=>btn.addEventListener('click',()=>{getAudio();uiTick();chooseProfessionRoute(btn.dataset.profession)}));\n\n// ---------- Frame ----------\nconst tmpTarget=new Vec3(),tmpCam=new Vec3(),tmp=new Vec3();\nfunction frame(now){requestAnimationFrame(frame);village.trees?.update(px,pz);const dt=Math.min((now-lastT)/1000,.05);lastT=now;forgeImpulse=Math.max(0,forgeImpulse-dt*1.8);\n if(forgeHot){const flick=.88+Math.sin(now*.011)*.075+Math.sin(now*.027)*.045,boost=1+forgeImpulse*.55;if(forgeCoreComp)forgeCoreComp.intensity=3.45*flick*boost;if(forgeBounceComp)forgeBounceComp.intensity=.96*(.93+Math.sin(now*.008)*.06)*(1+forgeImpulse*.42)}\n if(chestLid){chestLidAngle=lerp(chestLidAngle,chestLidTarget,1-Math.exp(-dt*6.2));chestLid.setLocalEulerAngles(chestLidBase.x+chestLidAngle,chestLidBase.y,chestLidBase.z)}\n if(doorLe"
+    },
+    {
+      "key": "auxCleared",
+      "pos": 2347973,
+      "text": "inventoryTouch.onclick=()=>{if(!gameStarted)return;toggleInventory()};\n\n// ---------- Prototype route data ----------\nconst ROUTES={\n Herrero:{profession:'Herrero',center:0,mentorName:'Maese Ordan',mentor:()=>ordan,mentorAnims:ordanAnimGroup,mentorIdle:ordanIdle,mentorWalk:ordanWalk,mentorGesture:ordanGesture,recipes:['espada_hierro','escudo_hierro'],stationName:'Yunque de fabricación',stationPos:()=>{const p=anvilEntity?.getPosition?.()||{x:1.08,y:0,z:-6.55};return{x:p.x,y:1.42,z:p.z}},craftPrompt:'Fabricar en el yunque'},\n Curtidor:{profession:'Curtidor',center:14,mentorName:'Mentor Curtidor',mentor:()=>tannerMentor,mentorAnims:tannerMentorAnimGroup,mentorIdle:tannerIdle,mentorWalk:tannerWalk,mentorGesture:tannerGesture,recipes:['armadura_cuero','botas_cuero'],stationName:'Mesa de corte',stationPos:()=>{const p=tannerTableEntity?.getPosition?.()||{x:10.28,y:0,z:-8.42};return{x:p.x,y:1.15,z:p.z}},craftPrompt:'Trabajar en la mesa de corte'}\n};\nlet workshopKey=false,debrisCleared=false,auxCleared=false,chestOpen=false,craftedItems=[],usedItemNames=new Set(),craftSession=null,playerInventory={},inventoryOpen=false,inventoryTutorialOpened=false,mentorYaw=-21,mentorGestureAt=0,mentorGestureReturn=0,mentorFollowState='outside',mentorFollowDelay=0,mentorPath=[],mentorWaypoint=0;\n// v0.11 · Epílogo de demo. Estas muestras NO son materiales canonizados ni otorgan propiedades mecánicas.\nconst DEMO_DISCOVERY_MATERIALS=Object.freeze([\n {id:'ferruginosa',unknown:'Muestra ferruginosa desconocida',prepared:'Muestra ferruginosa estabilizada',color:'#d88756',glyph:'◆',effect:'Resplandor ferruginoso'},\n {id:'cristalina',unknown:'Fragmento cristalino desconocido',prepared:'Fragmento cristalino estabilizado',color:'#70d7ff',glyph:'◇',effect:'Refracción cristalina'},\n {id:'fibrosa',unknown:'Fibra mineral desconocida',prepared:'Fibra mineral estabilizada',color:'#8bd17b',glyph:'≋',effect:'Veta mineral luminosa'},\n {id:'nodulo',unknown:'Nódulo oscuro desconocido',prepared:'Nódulo oscuro estabilizado',color:'#a98ae8',glyph:'●',effect:'Resonancia oscura'}\n]);\nlet expeditionMaterial=null,expeditionMaterialPrepared=false,expeditionMaterialQty=0,expeditionMaterialConsumed=false,demoFinalItem=null;\nfunction resetDemoEpilogue(){expeditionMaterial=null;expeditionMaterialPrepared=false;expeditionMaterialQty=0;expeditionMaterialConsumed=false;demoFinalItem=null}\nfunction pickDemoDiscoveryMaterial(){const seed=((Date.now()>>>0)^(Math.floor(performance.now()*1000)>>>0)^((craftedItems.length+1)*2654435761))>>>0;return DEMO_DISCOVERY_MATERIALS[seed%DEMO_DISCOVERY_MATERIALS.length]}\nfunction demoMaterialStateLabel(){if(!expeditionMaterial)return'';if(expeditionMaterialConsumed)return'INCORPORADA';return expeditionMaterialPrepared?'IDENTIFICADA · LISTA':'BLOQUEADA'}\nfunction demoMaterialInventoryBlock(){if(!expeditionMaterial||(!expeditionMaterialQty&&!expeditionMaterialConsumed))return'';const name=expeditionMaterialPrepared?expeditionMaterial.prepared:expeditionMaterial.unknown,qty=expeditionMaterialQty||0;const status=expeditionMaterialConsumed?`Estado: consumida e incorporada en ${esc(demoFinalItem?.name||'la creación experimental')}.`:expeditionMaterialPrepared?'Estado: identificada y disponible. Esta misma unidad se usará como componente en la próxima fabricación experimental.':'Estado: no identificada / no utilizable. Requiere hablar con '+esc(activeRoute?.mentorName||'el mentor"
+    },
+    {
+      "key": "auxCleared",
+      "pos": 2363593,
+      "text": "nabled=false;waterPour();toast('Zona de la tina despejada.',1200)}setTutorialStep(6);setTimeout(()=>mentorModal(selectedProfession==='Herrero'?'Ahora sí: encendé la fragua y comprobá el fuego.':'Ahora tensá la piel de prueba en el bastidor. Si queda firme, la estación está lista.','Entendido',()=>setTimeout(()=>orientCameraToObjective(),80)),220)}\nfunction activateStation(){if(tutorialStep!==6)return;if(selectedProfession==='Herrero'){forgeHot=true;igniteForgeVisual();pulseForge(1);forgeIgniteSound();toast('Fragua encendida.',1300)}else{tannerOperational=true;if(tannerWorkLight)tannerWorkLight.intensity=1.18;leatherPull();toast('Piel de prueba tensada · estación lista.',1300)}setTutorialStep(7);setTimeout(()=>mentorModal('Eso era lo que necesitaba ver. Volvé conmigo antes de abrir el baúl.','Entendido'),220)}\nfunction applyDevFastTestState(){\n if(HERRERO_WORKSHOP_SETUP_REQUIRED||selectedProfession!=='Herrero'||!activeRoute)return false;\n const c=activeRoute.center;\n debrisCleared=true;auxCleared=true;forgeHot=true;tannerOperational=false;\n ['debrisA','debrisB'].forEach(id=>{const e=E(id);if(e)e.enabled=false});\n const soot=E('chimneySootModel');if(soot)soot.enabled=false;\n doorAngle=doorTarget=-92;if(doorLeafEntity)doorLeafEntity.setEulerAngles(0,-92,0);\n igniteForgeVisual();pulseForge(.35);\n px=c+.10*WORKSHOP_SCALE;pz=-.22*WORKSHOP_SCALE;player.setPosition(px,0,pz);\n camera.setPosition(c+.1,2.9,4.0);camYaw=-158;camPitch=22;camDist=cameraSolvedDist=4.35;\n const mentor=activeRoute.mentor();mentor.setPosition(c+1.72*WORKSHOP_SCALE,0,-1.42*WORKSHOP_SCALE);mentorYaw=-18;mentor.setEulerAngles(0,mentorYaw,0);\n mentorFollowState='inside';mentorFollowDelay=0;mentorPath=[];mentorWaypoint=0;setMentorAnim(activeRoute.mentorIdle,.01);\n setTutorialStep(7);mentorGestureAt=performance.now()+2600;mentorGestureReturn=0;\n setTimeout(()=>orientCameraToObjective(),100);\n toast('BUILD DE PRUEBA · taller del Herrero ya operativo · pedí la llave a Ordan.',1900);\n return true\n}\n\nfunction formulaFor(recipeId){return craftSession?.formulas?.[recipeId]||null}\nfunction knownHerreroRecipes() {\n  // El catálogo procede exclusivamente de la sesión generada al iniciar esta partida.\n  const engine = window.GenesisPrototypeEngines;\n  if (selectedProfession !== 'Herrero' || !craftSession?.formulas || !engine?.recipes) return [];\n  return Object.entries(craftSession.formulas).flatMap(([id, formula]) => {\n    const recipe = engine.recipes[id];\n    const family = recipeKind(id);\n    if (!recipe || recipe.profession !== 'Herrero' || !['Espada', 'Escudo'].includes(family) ||\n        !Array.isArray(formula?.materials)) return [];\n    return [{ id, family, subfamily: recipe.name, formula }];\n  });\n}\nfunction fabricationMenuOptions(readOnly = false) {\n  return {\n    getRecipeCatalog: knownHerreroRecipes,\n    activeRecipeId: currentRecipe(),\n    canCraftRecipe: id => !readOnly && id === currentRecipe() && tutorialStep >= 10 && tutorialStep <= 13,\n    onCraftRecipe: id => {\n      if (readOnly || id !== currentRecipe() || tutorialStep < 10 || tutorialStep > 13) return;\n      const formula = formulaFor(id);\n      if (!formula || !window.GenesisPreparation.ready(formula, playerInventory)) return;\n      performCraft();\n    },\n    recipeAsset: id => {\n      const key = id || currentRecipe();\n      const recipe = key && window.GenesisPrototypeEngines?.recipes?.[key];\n      return recipe ? '<img alt"
+    },
+    {
+      "key": "auxCleared",
+      "pos": 2467591,
+      "text": ".warn('Decoración diferida:',err.message));setTimeout(pump,180)};(window.requestIdleCallback?requestIdleCallback(()=>pump(),{timeout:420}):setTimeout(pump,160))}\nasync function chooseProfessionRoute(prof){if(routeLoading||gameStarted)return;const buttons=[...document.querySelectorAll('[data-profession]')];buttons.forEach(b=>b.disabled=true);try{await prepareRoute(prof);startRoute(prof);loading.style.display='none';streamRouteDecor(prof)}catch(err){console.error(err);failLoading(err?.message||String(err),'No se habilitó la ruta. Reintentá; el resto del prototipo no se cargó.');intro.style.display='none'}finally{routeLoading=false;buttons.forEach(b=>b.disabled=false)}}\n\nfunction startRoute(prof){village.setProfession(prof);selectedProfession=prof;activeRoute=ROUTES[prof];const engine=window.GenesisPrototypeEngines;if(!engine){toast('Motor NGE Alpha no disponible.',1600);return}craftSession=engine.generateSession(prof);gameStarted=true;tutorialStep=0;workshopKey=false;debrisCleared=false;auxCleared=false;chestOpen=false;playerInventory={};inventoryOpen=false;inventoryTutorialOpened=false;craftedItems=[];usedItemNames=new Set();resetMercenaryExtension();forgeHot=false;tannerOperational=false;igniteForgeVisual();if(tannerWorkLight)tannerWorkLight.intensity=.72;doorAngle=doorTarget=tannerDoorAngle=tannerDoorTarget=0;if(doorLeafEntity)doorLeafEntity.setEulerAngles(0,0,0);if(tannerDoorLeafEntity)tannerDoorLeafEntity.setEulerAngles(0,0,0);const center=activeRoute.center;px=center;pz=6.3;player.setPosition(px,0,pz);camera.setPosition(center,3,10);camYaw=0;camPitch=24;camDist=cameraSolvedDist=4.7;const mentor=activeRoute.mentor();mentor.setPosition(center+1.72*WORKSHOP_SCALE,0,1.90*WORKSHOP_SCALE);mentorYaw=-21;mentor.setEulerAngles(0,mentorYaw,0);mentorFollowState='outside';mentorFollowDelay=0;mentorPath=[];mentorWaypoint=0;setMentorAnim(activeRoute.mentorIdle,.01);npcTag.textContent=activeRoute.mentorName.toUpperCase();professionChip.textContent=`PROFESIÓN · ${prof.toUpperCase()} · 2 FAMILIAS · 4 FABRICACIONES`;professionChip.style.display='block';materialsPanel.style.display='none';if(inventoryTouch){inventoryTouch.classList.add('locked');inventoryTouch.classList.remove('ready')}intro.style.display='none';mouseCapture.refresh();const fastSetup=applyDevFastTestState();restoreKnownLightingProfile();if(forgeHot){igniteForgeVisual();pulseForge(.10)}if(!fastSetup){setTutorialStep(0);toast(`Recorrido ${prof} iniciado.`,1500);mentorGestureAt=performance.now()+4800;mentorGestureReturn=0}}\ndocument.querySelectorAll('[data-profession]').forEach(btn=>btn.addEventListener('click',()=>{getAudio();uiTick();chooseProfessionRoute(btn.dataset.profession)}));\n\n// ---------- Frame ----------\nconst tmpTarget=new Vec3(),tmpCam=new Vec3(),tmp=new Vec3();\nfunction frame(now){requestAnimationFrame(frame);village.trees?.update(px,pz);const dt=Math.min((now-lastT)/1000,.05);lastT=now;forgeImpulse=Math.max(0,forgeImpulse-dt*1.8);\n if(forgeHot){const flick=.88+Math.sin(now*.011)*.075+Math.sin(now*.027)*.045,boost=1+forgeImpulse*.55;if(forgeCoreComp)forgeCoreComp.intensity=3.45*flick*boost;if(forgeBounceComp)forgeBounceComp.intensity=.96*(.93+Math.sin(now*.008)*.06)*(1+forgeImpulse*.42)}\n if(chestLid){chestLidAngle=lerp(chestLidAngle,chestLidTarget,1-Math.exp(-dt*6.2));chestLid.setLocalEulerAngles(chestLidBase.x+chestLidAngle,chestLidBase.y,chestLidBase.z)}\n if(doorLeafEntity){doorAng"
+    }
+  ],
+  "geom": [
+    {
+      "key": "function wallBlocked",
+      "pos": 2331763,
+      "text": "n routeEntranceUnlocked(cx){if(activeRoute&&activeRoute.center===cx&&tutorialStep>=2)return true;return doorIsOpen(cx)}\nfunction doorwayPortalFree(x,z,cx,padding=.33){const p=GenesisVillagePlan.toLocal(x,z,cx),r=padding/WORKSHOP_SCALE;return routeEntranceUnlocked(cx)&&p.z>-2.45-r&&p.z<2.20+r&&Math.abs(p.x)<1.08-r}\nfunction doorCollisionAt(x,z,padding=.38){if(doorwayPortalFree(x,z,0,padding)||doorwayPortalFree(x,z,14,padding))return false;return oneDoorCollision(x,z,padding,0,doorAngle)||oneDoorCollision(x,z,padding,14,tannerDoorAngle)}\nfunction workshopWallCollision(x,z,cx,padding){\n if(doorwayPortalFree(x,z,cx,padding))return false;\n const p=GenesisVillagePlan.toLocal(x,z,cx),lx=p.x,lz=p.z,r=padding/WORKSHOP_SCALE;\n if(lz<.35+r&&lz>-.35-r&&Math.abs(lx)>1.18-r&&Math.abs(lx)<5.95+r)return true;\n const inDepth=lz<.15+r&&lz>-10.55-r;\n if(inDepth&&((lx<-5.48+r&&lx>-5.95-r)||(lx>5.48-r&&lx<5.95+r)))return true;\n if(lz<-10.25+r&&lz>-10.62-r&&Math.abs(lx)<5.95+r)return true;\n return false;\n}\nfunction wallBlocked(x,z){const r=.33;const b=GenesisVillagePlan.bounds;if(x<b.minX+r||x>b.maxX-r||z<b.minZ+r||z>b.maxZ-r||village.blocked(x,z,r))return true;if(doorwayPortalFree(x,z,0,r)||doorwayPortalFree(x,z,14,r))return false;if(workshopWallCollision(x,z,0,r)||workshopWallCollision(x,z,14,r)||doorCollisionAt(x,z,r+.10))return true;\n const obs=[[3.02,-8.56,1.22],[4.18,-7.22,.90],[-3.74,-8.58,1.05],[-4.08,-3.02,.76],[3.35,-5.74,.56],[10.72,-8.16,1.05],[15.18,-8.88,.72],[17.42,-5.92,.84],[9.98,-3.03,.76]];for(const[ox,oz,rr]of obs){const p=workPoint({x:ox,z:oz},ox>7?14:0);if(Math.hypot(x-p.x,z-p.z)<rr+r)return true;}\n if(anvilEntity){const p=anvilEntity.getPosition();if(Math.hypot(x-p.x,z-p.z)<.46+r)return true}return false}\n// Q1 navigation diagnostic: samples the central aisle. Exposed for field debugging.\nwindow.__genesisQ1CollisionProbe=function(cx=0){const pts=[];for(let z=.8;z>=-9.6;z-=.4){const p=workPoint({x:cx,z},cx);pts.push({x:p.x,z:+p.z.toFixed(2),blocked:wallBlocked(p.x,p.z)});}return pts}\nfunction cameraBlocked(x,z){if(village.blocked(x,z,.20))return true;for(const cx of [0,14]){const p=GenesisVillagePlan.toLocal(x,z,cx),lx=p.x,lz=p.z;if(doorwayPortalFree(x,z,cx,.16))continue;if(oneDoorCollision(x,z,.16,cx,cx===0?doorAngle:tannerDoorAngle))return true;if(lz>-.40&&lz<.40&&Math.abs(lx)>1.22&&Math.abs(lx)<5.70)return true;if(lz>-10.28&&lz<.40&&((lx<-5.56&&lx>-5.92)||(lx>5.56&&lx<5.92)))return true;if(lz>-10.38&&lz<-9.96&&Math.abs(lx)<5.92)return true}return false}\nfunction workshopAt(x,z){const lz=z/WORKSHOP_SCALE;if(lz<.25&&lz>-10.4){for(const[profession,center]of Object.entries(WORKSHOP_CENTERS)){const lx=(x-center)/WORKSHOP_SCALE;if(Math.abs(lx)<5.55)return{profession,center,localX:lx,localZ:lz}}}return null}\n\nwindow.__GENESIS_RUNTIME_ERRORS=[];addEventListener('error',e=>{window.__GENESIS_RUNTIME_ERRORS.push({type:'error',message:e.message||String(e.error||e),source:e.filename||'',line:e.lineno||0});console.error('GENESIS RUNTIME ERROR',e.error||e.message)});addEventListener('unhandledrejection',e=>{window.__GENESIS_RUNTIME_ERRORS.push({type:'rejection',message:String(e.reason?.message||e.reason||'Unhandled rejection')});console.error('GENESIS UNHANDLED REJECTION',e.reason)});\n// ---------- Controls ----------\nconst HERRERO_WORKSHOP_SETUP_REQUIRED=false; // Build de prueba: false = taller del Herrero ya operativo para validar crafting → mercenarios.\nconst DIRECT_MERCENARY_AFTER_CRAFTS=true; // Build de prueba: tras la segunda familia salta directo a mercenarios.\nlet gameStarted=false,selectedProfession=null,activeRoute=null,tutorialStep=-1,currentInteractable=null;\nlet px=0,pz=6.3,camYaw=0,camPitch=24,camDist=4.7,cameraSolvedDist=4.7,moveX=0,moveY=0,walking=false,running=false,lastT=performance.now();const keys=new Set();\nconst MOVEMENT_KEYS=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowLeft','ArrowDown','ArrowRight','ShiftLeft','ShiftRight']);const NOTEBOOK_CAMERA_KEYS=new Set(['KeyI','KeyJ','KeyK','KeyL','KeyU','KeyO']);\nfunction setWalking(on,sprint=false){sprint=on&&sprint;if(on===walking&&sprint===running)return;walking=on;running=sprint;const clip=on?(sprint?runClip:walkClip):idleClip;if(clip)playerAnimGroup.forEach(a=>a.transition(clip,.18))}\nfunction clearMovementInput(){for(const code of MOVEMENT_KEYS)keys.delete(code);for(const code of NOTEBOOK_CAMERA_KEYS)keys.delete(code);moveX=0;moveY=0;setWalking(false)}\naddEventListener('keydown',e=>{if(e.code==='Escape'){if(inventoryOpen){clearMovementInput();closeInventory(false);e.preventDefault();return}if(modalLayer.style.display==='grid'){clearMovementInput();closeModal();e.preventDefault();return}keys.delete(e.code);return}if(!gameStarted)return;if(e.code==='Tab'){e.preventDefault();if(modalLayer.style.display==='grid'&&!inventoryOpen)return;clearMovementInput();toggleInventory();return}if(e.code==='KeyQ'){e.preventDefault();orientCameraToObjective();return}keys.add(e.code);if(e.code==='KeyE'||e.code==='Enter'){e.preventDefault();interact()}});addEventListener('keyup',e=>keys.delete(e.code));\nlet inputProfile='mouse',cameraControlMode='free',cameraSensitivity=.20,cameraInvertY=false,cameraZoomSensitivity=.004,mx=0,my=0,mousePositionKnown=false,mouseLookHeld=false;\ntry{const saved=JSON.parse(localStorage.getItem('genesisCameraSettings')||'{}');if(saved.profile==='mouse'||saved.profile==='notebook')inputProfile=saved.profile;if(saved.mode==='free'||saved.mode==='drag')cameraControlMode=saved.mode;if(Number.isFinite(saved.sensitivity))cameraSensitivity=clamp(saved.sensitivity,.08,.40);if(typeof saved.invertY==='boolean')cameraInvertY=saved.invertY;if(Number.isFinite(saved.zoomSensitivity))cameraZoomSensitivity=clamp(saved.zoomSensitivity,.002,.008)}catch(_){}\nconst cameraInputBlocked=e=>{if(!gameStarted||modalLayer.style.display==='grid'||intro.style.display==='grid'||inventoryOpen)return true;const t=e?.target;return !!(t?.closest?.('button,[role=\"button\"],select,input,#modalLayer,#prototypeIntro'))};\nfunction saveCameraSettings(){try{localStorage.setItem('genesisCameraSettings',JSON.stringify({profile:inputProfile,mode:cameraControlMode,sensitivity:cameraSensitivity,invertY:cameraInvertY,zoomSensitivity:cameraZoomSensitivity}))}catch(_){}}\nfunction updateDesktopHelp(){const help=document.getElementById('desktopHelp');if(!help)return;if(inputProfile==='notebook'){help.textContent='WASD mover · Shift correr · I/J/K/L cámara · U/O zoom · touchpad también gira · Q centrar objetivo · E interactuar · TAB inventario · ⚙ cámara';return}help.textContent=cameraControlMode==='drag'?'WASD mover · Shift correr · botón derecho + mouse: cámara · rueda: zoom · Q centrar objetivo · E interactuar · TAB inventario · ⚙ cámara':'WASD mover · Shift correr · clic: capturar mouse · Esc: liberar · rueda: zoom · Q centrar objetivo · E interactuar · TAB inventario · ⚙ cámara'}\nfunction applyInputProfile(profile,{persist=true}={}){inputProfile=profile==='notebook'?'notebook':'mouse';if(inputProfile==='notebook'&&cameraControlMode==='drag')cameraControlMode='free';if(persist)saveCameraSettings();updateDesktopHelp();updateInputProfileUI()}\nfunction updateInputProfileUI(){const cards=[...document.querySelectorAll('[data-input-profile]')],status=document.getElementById('controlProfileStatus'),required=document.getElementById('controlRequired');cards.forEach(b=>b.classList.toggle('selected',b.dataset.inputProfile===inputProfile));if(status){if(inputProfile==='notebook'){status.textContent='Notebook seleccionado · teclado/touchpad sin rueda.';status.clas"
+    },
+    {
+      "key": "function workshopWallCollision",
+      "pos": 2331305,
+      "text": "hx,hz,ex,ez)<padding/WORKSHOP_SCALE}\nfunction doorIsOpen(cx){return cx===0?(Math.abs(doorAngle)>=58||Math.abs(doorTarget)>=80):(Math.abs(tannerDoorAngle)>=58||Math.abs(tannerDoorTarget)>=80)}\n// Gameplay must never depend on the visual door animation finishing. Once the active\n// route opens its door (or Q1 has advanced beyond it), the full entrance corridor is\n// explicitly traversable for player and camera. The inactive workshop remains closed.\nfunction routeEntranceUnlocked(cx){if(activeRoute&&activeRoute.center===cx&&tutorialStep>=2)return true;return doorIsOpen(cx)}\nfunction doorwayPortalFree(x,z,cx,padding=.33){const p=GenesisVillagePlan.toLocal(x,z,cx),r=padding/WORKSHOP_SCALE;return routeEntranceUnlocked(cx)&&p.z>-2.45-r&&p.z<2.20+r&&Math.abs(p.x)<1.08-r}\nfunction doorCollisionAt(x,z,padding=.38){if(doorwayPortalFree(x,z,0,padding)||doorwayPortalFree(x,z,14,padding))return false;return oneDoorCollision(x,z,padding,0,doorAngle)||oneDoorCollision(x,z,padding,14,tannerDoorAngle)}\nfunction workshopWallCollision(x,z,cx,padding){\n if(doorwayPortalFree(x,z,cx,padding))return false;\n const p=GenesisVillagePlan.toLocal(x,z,cx),lx=p.x,lz=p.z,r=padding/WORKSHOP_SCALE;\n if(lz<.35+r&&lz>-.35-r&&Math.abs(lx)>1.18-r&&Math.abs(lx)<5.95+r)return true;\n const inDepth=lz<.15+r&&lz>-10.55-r;\n if(inDepth&&((lx<-5.48+r&&lx>-5.95-r)||(lx>5.48-r&&lx<5.95+r)))return true;\n if(lz<-10.25+r&&lz>-10.62-r&&Math.abs(lx)<5.95+r)return true;\n return false;\n}\nfunction wallBlocked(x,z){const r=.33;const b=GenesisVillagePlan.bounds;if(x<b.minX+r||x>b.maxX-r||z<b.minZ+r||z>b.maxZ-r||village.blocked(x,z,r))return true;if(doorwayPortalFree(x,z,0,r)||doorwayPortalFree(x,z,14,r))return false;if(workshopWallCollision(x,z,0,r)||workshopWallCollision(x,z,14,r)||doorCollisionAt(x,z,r+.10))return true;\n const obs=[[3.02,-8.56,1.22],[4.18,-7.22,.90],[-3.74,-8.58,1.05],[-4.08,-3.02,.76],[3.35,-5.74,.56],[10.72,-8.16,1.05],[15.18,-8.88,.72],[17.42,-5.92,.84],[9.98,-3.03,.76]];for(const[ox,oz,rr]of obs){const p=workPoint({x:ox,z:oz},ox>7?14:0);if(Math.hypot(x-p.x,z-p.z)<rr+r)return true;}\n if(anvilEntity){const p=anvilEntity.getPosition();if(Math.hypot(x-p.x,z-p.z)<.46+r)return true}return false}\n// Q1 navigation diagnostic: samples the central aisle. Exposed for field debugging.\nwindow.__genesisQ1CollisionProbe=function(cx=0){const pts=[];for(let z=.8;z>=-9.6;z-=.4){const p=workPoint({x:cx,z},cx);pts.push({x:p.x,z:+p.z.toFixed(2),blocked:wallBlocked(p.x,p.z)});}return pts}\nfunction cameraBlocked(x,z){if(village.blocked(x,z,.20))return true;for(const cx of [0,14]){const p=GenesisVillagePlan.toLocal(x,z,cx),lx=p.x,lz=p.z;if(doorwayPortalFree(x,z,cx,.16))continue;if(oneDoorCollision(x,z,.16,cx,cx===0?doorAngle:tannerDoorAngle))return true;if(lz>-.40&&lz<.40&&Math.abs(lx)>1.22&&Math.abs(lx)<5.70)return true;if(lz>-10.28&&lz<.40&&((lx<-5.56&&lx>-5.92)||(lx>5.56&&lx<5.92)))return true;if(lz>-10.38&&lz<-9.96&&Math.abs(lx)<5.92)return true}return false}\nfunction workshopAt(x,z){const lz=z/WORKSHOP_SCALE;if(lz<.25&&lz>-10.4){for(const[profession,center]of Object.entries(WORKSHOP_CENTERS)){const lx=(x-center)/WORKSHOP_SCALE;if(Math.abs(lx)<5.55)return{profession,center,localX:lx,localZ:lz}}}return null}\n\nwindow.__GENESIS_RUNTIME_ERRORS=[];addEventListener('error',e=>{window.__GENESIS_RUNTIME_ERRORS.push({type:'error',message:e.message||String(e.error||e),source:e.filename||'',line:e.lineno||0});console.error('GENESIS RUNTIME ERROR',e.error||e.message)});addEventListener('unhandledrejection',e=>{window.__GENESIS_RUNTIME_ERRORS.push({type:'rejection',message:String(e.reason?.message||e.reason||'Unhandled rejection')});console.error('GENESIS UNHANDLED REJECTION',e.reason)});\n// ---------- Controls ----------\nconst HERRERO_WORKSHOP_SETUP_REQUIRED=false; // Build de prueba: false = taller del Herrero ya operativo para validar crafting → mercenarios.\nconst DIRECT_MERCENARY_AFTER_CRAFTS=true; // Build de prueba: tras la segunda familia salta directo a mercenarios.\nlet gameStarted=false,selectedProfession=null,activeRoute=null,tutorialStep=-1,currentInteractable=null;\nlet px=0,pz=6.3,camYaw=0,camPitch=24,camDist=4.7,cameraSolvedDist=4.7,moveX=0,moveY=0,walking=false,running=false,lastT=performance.now();const keys=new Set();\nconst MOVEMENT_KEYS=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowLeft','ArrowDown','ArrowRight','ShiftLeft','ShiftRight']);const NOTEBOOK_CAMERA_KEYS=new Set(['KeyI','KeyJ','KeyK','KeyL','KeyU','KeyO']);\nfunction setWalking(on,sprint=false){sprint=on&&sprint;if(on===walking&&sprint===running)return;walking=on;running=sprint;const clip=on?(sprint?runClip:walkClip):idleClip;if(clip)playerAnimGroup.forEach(a=>a.transition(clip,.18))}\nfunction clearMovementInput(){for(const code of MOVEMENT_KEYS)keys.delete(code);for(const code of NOTEBOOK_CAMERA_KEYS)keys.delete(code);moveX=0;moveY=0;setWalking(false)}\naddEventListener('keydown',e=>{if(e.code==='Escape'){if(inventoryOpen){clearMovementInput();closeInventory(false);e.preventDefault();return}if(modalLayer.style.display==='grid'){clearMovementInput();closeModal();e.preventDefault();return}keys.delete(e.code);return}if(!gameStarted)return;if(e.code==='Tab'){e.preventDefault();if(modalLayer.style.display==='grid'&&!inventoryOpen)return;clearMovementInput();toggleInventory();return}if(e.code==='KeyQ'){e.preventDefault();orientCameraToObjective();return}keys.add(e.code);if(e.code==='KeyE'||e.code==='Enter'){e.preventDefault();interact()}});addEventListener('keyup',e=>keys.delete(e.code));\nlet inputProfile='mouse',cameraControlMode='free',cameraSensitivity=.20,cameraInvertY=false,cameraZoomSensitivity=.004,mx=0,my=0,mousePositionKnown=false,mouseLookHeld=false;\ntry{const saved=JSON.parse(localStorage.getItem('genesisCameraSettings')||'{}');if(saved.profile==='mouse'||saved.profile==='notebook')inputProfile=saved.profile;if(saved.mode==='free'||saved.mode==='drag')cameraControlMode=saved.mode;if(Number.isFinite(saved.sensitivity))cameraSensitivity=clamp(saved.sensitivity,.08,.40);if(typeof saved.invertY==='boolean')cameraInvertY=saved.invertY;if(Number.isFinite(saved.zoomSensitivity))cameraZoomSensitivity=clamp(saved.zoomSensitivity,.002,.008)}catch(_){}\nconst cameraInputBlocked=e=>{if(!gameStarted||modalLayer.style.display==='grid'||intro.style.display==='grid'||inventoryOpen)return true;const t=e?.target;return !!(t?.closest?.('button,[role=\"button\"],select,input,#modalLayer,#prototypeIntro'))};\nfunction saveCameraSettings(){try{localStorage.setItem('genesisCameraSettings',JSON.stringify({profile:inputProfile,mode:cameraControlMode,sensitivity:cameraSensitivity,invertY:cameraInvertY,zoomSensitivity:cameraZoomSensitivity}))}catch(_){}}\nfunction updateDesktopHelp(){const help=document.getElementById('desktopHelp');if(!help)return;if(inputProfile==='notebook'){help.textContent='WASD mover · Shift correr · I/J/K/L cámara · U/O zoom · touchpad también gira · Q centrar objetivo · E interactuar · TAB inventario · ⚙ cámara';return}help.textContent=cameraControlMode==='drag'?'WASD mover · Shift correr · botón derecho + mouse: cámara · rueda: zoom · Q centrar objetivo · E interactuar · TAB inventario · ⚙ cámara':'WASD mover · Shift correr · clic: capturar mouse · Esc: liberar · rueda: zoom · Q centrar objetivo · E interactuar · TAB inventario · ⚙ cámara'}\nfunction applyInputProfile(profile,{persist=true}={}){inputProfile=profile==='notebook'?'notebook':'mouse';if(inputProfile==='notebook'&&cameraControlMode==='drag')cameraControlMode='free';if(persist)saveCameraSettings();updateDesktopH"
+    },
+    {
+      "key": "id=\"workshopShellModel\"",
+      "pos": 1977710,
+      "text": "errero\" data-priority=\"critical\" position=\"-4.25 0 -.12\" rotation=\"0 180 0\" scale=\"1.06 1 1\"></pc-model>\n      <pc-model name=\"Front wall left\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"-2.13 0 -.12\" rotation=\"0 180 0\" scale=\"1.06 1 1\"></pc-model>\n      <pc-model name=\"Front doorway wall\" data-asset=\"wallDoor2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"0 0 -.12\" rotation=\"0 180 0\" scale=\"1.10 1 1\"></pc-model>\n      <pc-model name=\"Front wall right\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"2.13 0 -.12\" rotation=\"0 180 0\" scale=\"1.06 1 1\"></pc-model>\n      <pc-model name=\"Front wall far right\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"4.25 0 -.12\" rotation=\"0 180 0\" scale=\"1.06 1 1\"></pc-model>\n    </pc-entity>\n\n    <!-- Detailed workshop shell: stone courses, aged plaster, timber frame, eaves, rafters and actual doorway opening. -->\n    <pc-model id=\"workshopShellModel\" name=\"Blacksmith workshop shell\" data-asset=\"workshopShell\" data-route=\"Herrero\" data-priority=\"critical\" position=\"0 0 0\"></pc-model>\n    <!-- Prototipo v0.9a.2: techo modular authored. -->\n    <pc-model id=\"roofFinalModel\" name=\"Complete tiled workshop roof\" data-asset=\"roofReal086\" data-route=\"Herrero\" data-priority=\"critical\" position=\"0 3.45 -5.05\" rotation=\"0 0 0\" scale=\"1.28 .55 .86\"></pc-model>\n\n    <!-- v0.8.3: door and frame are a matched solid Genesis assembly. The door pivots around its real hinge. -->\n    <pc-model id=\"doorFrameModel\" name=\"Genesis workshop door frame\" data-asset=\"doorFrame083\" data-route=\"Herrero\" data-priority=\"critical\" position=\"0 0 .10\" scale=\"1 1 1\"></pc-model>\n    <pc-model id=\"doorLeafModel\" name=\"Genesis solid plank door\" data-asset=\"doorLeaf083\" data-route=\"Herrero\" data-priority=\"critical\" position=\"-1.10 0 .12\" rotation=\"0 0 0\" scale=\"1 1 1\"></pc-model>\n\n    <!-- Blacksmith work zone: masonry hearth, coals, extraction hood and chimney. -->\n    <pc-entity name=\"Original prop proportions\" data-preserve-proportions=\"true\" position=\"3.02 0 -8.56\" scale=\"1.333333333333 1 1.333333333333\">\n<pc-model id=\"forgeModel\" name=\"Blacksmith forge\" data-asset=\"forgeStation\" data-route=\"Herrero\" data-priority=\"critical\" rotation=\"0 180 0\" scale=\".92 .92 .92\" position=\"0 0 0\"></pc-model>\n</pc-entity>\n    <pc-entity name=\"Original prop proportions\" data-preserve-proportions=\"true\" position=\"3.02 1.72 -9.89\" scale=\"1.333333333333 1 1.333333333333\">\n<pc-model id=\"chimneySootModel\" name=\"Blocked chimney soot\" data-asset=\"chimneySoot\" data-route=\"Herrero\" data-priority=\"critical\" rotation=\"0 0 0\" scale=\"1.25 1.25 1.25\" position=\"0 0 0\"></pc-model>\n</pc-entity>\n    <pc-entity name=\"Original prop proportions\" data-preserve-proportions=\"true\" position=\"4.18 0 -7.22\" scale=\"1.333333333333 1 1.333333333333\">\n<pc-model id=\"bellowsModel\" name=\"Blacksmith bellows · authored prop\" data-asset=\"bellowsReal086\" data-route=\"Herrero\" data-priority=\"critical\" rotation=\"0 90 0\" scale=\"1.04 1.04 1.04\" position=\"0 0 0\"></pc-model>\n</pc-entity>\n    <pc-entity name=\"Original prop proportions\" data-preserve-proportions=\"true\" position=\"4.27 .02 -9.18\" scale=\"1.333333333333 1 1.333333333333\">\n<pc-model name=\"Coal pile\" data-asset=\"coalPile\" data-route=\"Herrero\" data-priority=\"stream\" rotation=\"0 18 0\" position=\"0 0 0\"></pc-model>\n</pc-entity>\n\n    <!-- Curated "
+    },
+    {
+      "key": "id=\"modularWalls089\"",
+      "pos": 1974692,
+      "text": "  <pc-model id=\"villageDoorSource\" asset=\"doorLeaf083\" position=\"0 -1000 0\"></pc-model>\n    <!-- Navigation ground + real modular paving/floor. -->\n    <!-- v0.9a.2 · acceso del Curtidor desde la misma pequeña plaza. -->\n\n    <pc-entity id=\"compactBlacksmithRoot\" scale=\".75 1 .75\">\n    <!-- v0.8.2 interior finish: irregular flagstones, visible mortar, lower stonework, aged lime plaster and oak framing. -->\n    <pc-model id=\"interiorFinishModel\" name=\"Legacy workshop interior finish hidden\" data-asset=\"interiorFinish\" data-route=\"Herrero\" data-priority=\"stream\" position=\"0 0 0\" scale=\".001 .001 .001\"></pc-model>\n    <pc-entity id=\"floor085\" name=\"Worn stone workshop floor\" position=\"0 .012 -5.0\" scale=\"10.55 1 9.95\"><pc-render type=\"plane\" material=\"stoneFloorMat085\" receive-shadows></pc-render></pc-entity>\n\n    <!-- Prototipo v0.9a.2: paredes modulares authored del Medieval Village MegaKit.\n         These replace the flat plaster boxes that looked like placeholders. -->\n    <pc-entity id=\"modularWalls089\" name=\"Authored modular workshop walls\">\n      <!-- back wall: plaster/timber, with masonry around the forge -->\n      <pc-model name=\"Back wall west\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"-3.56 0 -10.02\" scale=\"1.78 1 1\"></pc-model>\n      <pc-model name=\"Back wall center\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"0 0 -10.02\" scale=\"1.78 1 1\"></pc-model>\n      <pc-model name=\"Back wall forge masonry\" data-asset=\"wallBrick2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"3.56 0 -10.02\" scale=\"1.78 1 1\"></pc-model>\n\n      <!-- left wall -->\n      <pc-model name=\"Left wall rear\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"-5.34 0 -8.35\" rotation=\"0 90 0\" scale=\"1.67 1 1\"></pc-model>\n      <pc-model name=\"Left wall middle\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"-5.34 0 -5.05\" rotation=\"0 90 0\" scale=\"1.67 1 1\"></pc-model>\n      <pc-model name=\"Left wall front\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"-5.34 0 -1.75\" rotation=\"0 90 0\" scale=\"1.67 1 1\"></pc-model>\n\n      <!-- right wall: masonry near the hot work zone, timber/plaster toward the entrance -->\n      <pc-model name=\"Right wall forge masonry\" data-asset=\"wallBrick2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"5.34 0 -8.35\" rotation=\"0 -90 0\" scale=\"1.67 1 1\"></pc-model>\n      <pc-model name=\"Right wall middle\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"5.34 0 -5.05\" rotation=\"0 -90 0\" scale=\"1.67 1 1\"></pc-model>\n      <pc-model name=\"Right wall front\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"5.34 0 -1.75\" rotation=\"0 -90 0\" scale=\"1.67 1 1\"></pc-model>\n\n      <!-- front facade with a real modular doorway -->\n      <pc-model name=\"Front wall far left\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"-4.25 0 -.12\" rotation=\"0 180 0\" scale=\"1.06 1 1\"></pc-model>\n      <pc-model name=\"Front wall left\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"-2.13 0 -.12\" rotation=\"0 180 0\" scale=\"1.06 1 1\"></pc-model>\n      <pc-model name=\"Front doorway wall\" data-asset=\"wallDoor2A\" data-route=\"Herrero\" data-priority=\"critical\" "
+    },
+    {
+      "key": "window.__genesisVillage",
+      "pos": 2319047,
+      "text": "ilLoading(err?.message||String(err),'La escena no se habilitó; el recurso indicado no terminó de prepararse.');throw err}\n\nlet village;\ntry{\n activeBootGroup='arboles';showBootProgress(groupStage('arboles'),'Preparando los cuatro árboles aprobados.');\n village=await mountVillage(appEl.app,{\n  shell:document.getElementById('villageShellSource').entity,\n  roof:document.getElementById('villageRoofSource').entity,\n  door:document.getElementById('villageDoorSource').entity,\n  onPhase:group=>{activeBootGroup=group;showBootProgress(groupStage(group),'Esperando recursos del grupo '+group+'.')},\n  onResourceLoaded:name=>{\n   const group=name.startsWith('tree:')?'arboles':name.startsWith('door:')?'puertas':'suelos';\n   bootProgress.world++;bootGroups[group].ready++;\n   activeBootGroup=group;\n   showBootProgress(groupStage(group),name+' · '+bootGroups[group].ready+' de '+bootGroups[group].total);\n  }\n });\n}catch(err){failLoading(err.message,'La aldea no terminó de cargar. Reintentá.');throw err}\nwindow.__genesisVillage=village;\n\nfunction hideCollisionMeshes(modelEl){const root=modelEl?.contentEntity;if(!root)return;const stack=[root];while(stack.length){const node=stack.pop();const n=(node.name||'').toLowerCase();let collisionLike=n.includes('convcolonly')||n.startsWith('collision_')||n==='collision';const meshes=node.render?.meshInstances||[];if(meshes.length&&meshes.every(mi=>(mi.material?.name||'').toLowerCase().includes('collision')))collisionLike=true;if(collisionLike)node.enabled=false;for(const child of node.children||[])stack.push(child)}}\ndocument.querySelectorAll('pc-model').forEach(hideCollisionMeshes);\n\nconst tintedModelRoots=new WeakSet();function tintModel(modelEl,tint,metalBias=0){const root=modelEl?.contentEntity;if(!root||tintedModelRoots.has(root))return;tintedModelRoots.add(root);root.findComponents('render').forEach(r=>r.meshInstances.forEach(mi=>{const src=mi.material;if(!src?.clone)return;const m=src.clone();if(m.diffuse){m.diffuse.r*=tint[0];m.diffuse.g*=tint[1];m.diffuse.b*=tint[2]}if('metalness'in m)m.metalness=Math.max(m.metalness||0,metalBias);m.update?.();mi.material=m}))}\ntintModel(document.getElementById('playerModel'),[.76,.66,.50],0);tintModel(document.getElementById('playerHairModel'),[.38,.28,.20],0);\ntintModel(document.getElementById('ordanModel'),[.58,.52,.43],0);tintModel(document.getElementById('ordanHairModel'),[.62,.62,.60],0);\ntintModel(document.getElementById('tannerMentorModel'),[.72,.54,.37],0);tintModel(document.getElementById('tannerMentorHairModel'),[.33,.24,.18],0);\n\n\nfunction chooseClip(animEl,wanted){if(!animEl?.clips?.length)return null;return animEl.clips.find(x=>x.toLowerCase()===wanted.toLowerCase())||animEl.clips.find(x=>x.toLowerCase().includes(wanted.toLowerCase()))||null}\nconst playerAnimGroup=[playerAnim,playerHeadAnim,playerHairAnim].filter(Boolean),ordanAnimGroup=[ordanAnim,ordanHeadAnim,ordanHairAnim].filter(Boolean),tannerMentorAnimGroup=[tannerMentorAnim,tannerMentorHeadAnim,tannerMentorHairAnim].filter(Boolean);\nconst idleClip=chooseClip(playerAnim,'Idle_Loop')||chooseClip(playerAnim,'idle')||playerAnim?.clips?.[0],walkClip=chooseClip(playerAnim,'Walk_Loop')||chooseClip(playerAnim,'walk'),runClip=chooseClip(playerAnim,'Sprint_Loop')||walkClip;\nconst ordanIdle=chooseClip(ordanAnim,'Idle_Loop')||chooseClip(ordanAnim,'idle')||ordanAnim?.clips?.[0],ordanWalk=chooseClip(ordanAnim,'Walk_Loop')||chooseClip(ordanAni"
+    }
+  ],
+  "init": [
+    {
+      "key": "const app",
+      "pos": 2258961,
+      "text": "     formula,\n      recipeName: rec.name,\n      modal,\n      closeModal,\n      getItems: () => craftedItems,\n      renderItem: renderItemCard,\n      renderAsset: itemAssetMarkup,\n      metricForChannel, namingReason,\n      recipeAsset: () => `<img alt=\"${esc(rec.name)}\" src=\"${itemIcon(recipeId)}\">`,\n      canCraftNow: () => tutorialStep>=10&&tutorialStep<=13,\n      onInventoryChanged: refreshInventorySummary,\n      onCraft: () => {\n        if (!prep.ready(formula, playerInventory)) {\n          toast('Necesitás preparar los materiales de la fórmula.', 1700);\n          return;\n        }\n        if(tutorialStep>=10&&tutorialStep<=13)performCraft();\n      },\n      ...fabricationMenuOptions()\n    });\n  };\n});\n\nconst clamp=(v,a,b)=>Math.max(a,Math.min(b,v));\nconst lerp=(a,b,t)=>a+(b-a)*t;\nconst rad=d=>d*Math.PI/180;\nconst deg=r=>r*180/Math.PI;\nconst esc=s=>String(s).replace(/[&<>\"']/g,c=>({\"&\":\"&amp;\",\"<\":\"&lt;\",\">\":\"&gt;\",\"\\\"\":\"&quot;\",\"'\":\"&#39;\"}[c]));\n\n// ---------- DOM / UI ----------\nconst appEl=document.getElementById('genesisApp');\nconst loading=document.getElementById('loading');\nconst loadingCard=document.querySelector('.loadingCard');\nconst loadState=document.getElementById('loadState');\nconst loadBarFill=document.getElementById('loadBarFill');\nconst loadPercent=document.getElementById('loadPercent');\nconst loadCount=document.getElementById('loadCount');\nconst loadElapsed=document.getElementById('loadElapsed');\nconst loadDetail=document.getElementById('loadDetail');\nconst loadRetry=document.getElementById('loadRetry');\nconst intro=document.getElementById('prototypeIntro');\nconst questEy=document.getElementById('questEy');\nconst questTitle=document.querySelector('#quest h2');\nconst questText=document.querySelector('#quest p');\nconst professionChip=document.getElementById('professionChip');\nconst materialsPanel=document.getElementById('materialsPanel');\nconst materialsText=document.getElementById('materialsText');\nconst toastEl=document.getElementById('toast');\nconst promptEl=document.getElementById('prompt');\nconst npcTag=document.getElementById('npcTag');\nconst interactMarker=document.getElementById('interactMarker');\nconst fxLayer=document.getElementById('fxLayer');\nconst modalLayer=document.getElementById('modalLayer');\nconst modalBox=document.getElementById('modal');\nconst cameraGuide=document.getElementById('cameraGuide');\nconst loadStarted=performance.now();\nconst NGE_BADGE='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPYAAABOCAYAAAATi+vQAACPGUlEQVR4nGS9d9wsRZX//z5V1T0zT7qJe8kgEhREWLOuq1/XvKY1r2vOOWBcc86ga0IM65pzxASsAcOqmJWMIKBkbr5PmJnuqjq/P051z8P+ri980kxPd9WJn/M5p2Tr/jdr6f8JzgmawXkBBHT2xTmP/VZAlKzgnUPLu1UVsdeKKgoqIk6zqoiIJs2AoKooihP6n8tXFQGc4JxDsyLiQKS/rhdPzgpOFFUBUBTBgSopJxRFs92T944Uc3k6e23Kin2MoA67MEIu94/a53X/NGdbBhEQyKr2HkGdc5KzAqLO2btV7bUighPIWe2qgqiqZlUp78c5Z88joDkhIqpq95azrZOiOJzdb3liETe7P1t8pNu/8vkK5HLv3fM7see0vbLXatkfe0RByz4hs+sAiPYfiROHaiZ1C62CPRRlHe3+nC/y5DyqGc0ZEbVrZkWco2w/UtYUyp6jIoJmVVG19QO19S1Prt06iuvlytbSfi+U/RIBXXd/5XnUVhMnJj84u+ZMIzrZLvs/22A0K84JKSeEIqOabW3LonRXK/dny6uzpTSRoHvYTkTtPnNidXWVp7/w5Zz3+9/o7mv+xmg41JQiCKSUVcQRU1ZENXhhbXl5svFWd1oOKStudjXJGXUipGhXDz6QU0aCI6ck4px6FM1qC2abI1lVURXnnJrgmB6Jz6IKKWXECVkzOWW7Mc1Iv3pCziZgIhARvHciDnJSFFHvHTgUJwIqMSacd0hZBFVFnEBRCBBizOs2x37rBEQcOecikLbZphRaNme2kSZkpiT0v3KgSI5qRlBE1BRUclYVcaajIkgxHikroJJztmsrpJTKtbW7f1FVcs72mIKSERXVrOuFTHFOREG1XM+MFv21O8XMKdlXNVEzgyN2PzIT1JlEF/nKdNpkhr"
+    },
+    {
+      "key": "function startRoute",
+      "pos": 2467268,
+      "text": "eamRouteDecor(prof){const models=routeModels(prof,'stream');let index=0;const pump=()=>{if(index>=models.length)return;const batch=models.slice(index,index+4);index+=4;for(const el of batch)activateDeferredModel(el,45000).then(()=>{hideCollisionMeshes(el);if(prof==='Curtidor'){applyTannerVisualPass()}}).catch(err=>console.warn('Decoración diferida:',err.message));setTimeout(pump,180)};(window.requestIdleCallback?requestIdleCallback(()=>pump(),{timeout:420}):setTimeout(pump,160))}\nasync function chooseProfessionRoute(prof){if(routeLoading||gameStarted)return;const buttons=[...document.querySelectorAll('[data-profession]')];buttons.forEach(b=>b.disabled=true);try{await prepareRoute(prof);startRoute(prof);loading.style.display='none';streamRouteDecor(prof)}catch(err){console.error(err);failLoading(err?.message||String(err),'No se habilitó la ruta. Reintentá; el resto del prototipo no se cargó.');intro.style.display='none'}finally{routeLoading=false;buttons.forEach(b=>b.disabled=false)}}\n\nfunction startRoute(prof){village.setProfession(prof);selectedProfession=prof;activeRoute=ROUTES[prof];const engine=window.GenesisPrototypeEngines;if(!engine){toast('Motor NGE Alpha no disponible.',1600);return}craftSession=engine.generateSession(prof);gameStarted=true;tutorialStep=0;workshopKey=false;debrisCleared=false;auxCleared=false;chestOpen=false;playerInventory={};inventoryOpen=false;inventoryTutorialOpened=false;craftedItems=[];usedItemNames=new Set();resetMercenaryExtension();forgeHot=false;tannerOperational=false;igniteForgeVisual();if(tannerWorkLight)tannerWorkLight.intensity=.72;doorAngle=doorTarget=tannerDoorAngle=tannerDoorTarget=0;if(doorLeafEntity)doorLeafEntity.setEulerAngles(0,0,0);if(tannerDoorLeafEntity)tannerDoorLeafEntity.setEulerAngles(0,0,0);const center=activeRoute.center;px=center;pz=6.3;player.setPosition(px,0,pz);camera.setPosition(center,3,10);camYaw=0;camPitch=24;camDist=cameraSolvedDist=4.7;const mentor=activeRoute.mentor();mentor.setPosition(center+1.72*WORKSHOP_SCALE,0,1.90*WORKSHOP_SCALE);mentorYaw=-21;mentor.setEulerAngles(0,mentorYaw,0);mentorFollowState='outside';mentorFollowDelay=0;mentorPath=[];mentorWaypoint=0;setMentorAnim(activeRoute.mentorIdle,.01);npcTag.textContent=activeRoute.mentorName.toUpperCase();professionChip.textContent=`PROFESIÓN · ${prof.toUpperCase()} · 2 FAMILIAS · 4 FABRICACIONES`;professionChip.style.display='block';materialsPanel.style.display='none';if(inventoryTouch){inventoryTouch.classList.add('locked');inventoryTouch.classList.remove('ready')}intro.style.display='none';mouseCapture.refresh();const fastSetup=applyDevFastTestState();restoreKnownLightingProfile();if(forgeHot){igniteForgeVisual();pulseForge(.10)}if(!fastSetup){setTutorialStep(0);toast(`Recorrido ${prof} iniciado.`,1500);mentorGestureAt=performance.now()+4800;mentorGestureReturn=0}}\ndocument.querySelectorAll('[data-profession]').forEach(btn=>btn.addEventListener('click',()=>{getAudio();uiTick();chooseProfessionRoute(btn.dataset.profession)}));\n\n// ---------- Frame ----------\nconst tmpTarget=new Vec3(),tmpCam=new Vec3(),tmp=new Vec3();\nfunction frame(now){requestAnimationFrame(frame);village.trees?.update(px,pz);const dt=Math.min((now-lastT)/1000,.05);lastT=now;forgeImpulse=Math.max(0,forgeImpulse-dt*1.8);\n if(forgeHot){const flick=.88+Math.sin(now*.011)*.075+Math.sin(now*.027)*.045,boost=1+forgeImpulse*.55;if(forgeCoreComp)forgeCoreComp.intensity=3.45*flick*boost;if(forgeBounceComp)forgeBounceComp.intensity=.96*(.93+Math.sin(now*.008)*.06)*(1+forgeImpulse*.42)}\n if(chestLid){chestLidAngle=lerp(chestLidAngle,chestLidTarget,1-Math.exp(-dt*6.2));chestLid.setLocalEulerAngles(chestLidBase.x+chestLidAngle,chestLidBase.y,chestLidBase.z)}\n if(doorLeafEntity){doorAngle=lerp(doorAngle,doorTarget,1-Math.exp(-dt*5));doorLeafEntity.setEulerAngles(0,doorAngle,0)}if(tannerDoorLeafEntity){tannerDoorAngle=lerp(tannerDoorAngle,tannerDoorTarget,1-Math.exp(-dt*5));tannerDoorLeafEntity.setEulerAngles(0,tannerDoorAngle,0)}\n const canMove=gameStarted&&modalLayer.style.display!=='grid'&&intro.style.display!=='grid';if(canMove){let sx=moveX,sy=moveY;if(keys.has('KeyA')||keys.has('ArrowLeft'))sx-=1;if(keys.has('KeyD')||keys.has('ArrowRight'))sx+=1;if(keys.has('KeyW')||keys.has('ArrowUp'))sy+=1;if(keys.has('KeyS')||keys.has('ArrowDown'))sy-=1;let m=Math.hypot(sx,sy);if(m>1){sx/=m;sy/=m;m=1}const yaw=rad(camYaw),fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw),vx=fx*sy+rx*sx,vz=fz*sy+rz*sx;if(m>.03){const sprint=keys.has('ShiftLeft')||keys.has('ShiftRight'),speed=GenesisVillagePlan.movementSpeed(keys),nx=px+vx*speed*dt,nz=pz+vz*speed*dt;if(!wallBlocked(nx,pz))px=nx;if(!wallBlocked(px,nz))pz=nz;const lookYaw=deg(Math.atan2(vx,vz));player.setEulerAngles(0,lookYaw,0);setWalking(true,sprint);if(now-lastPlayerStep>(sprint?240:390)){footstepSound(!!workshopAt(px,pz),.026);lastPlayerStep=now}}else setWalking(false);player.setPosition(px,0,pz);if(playerFillEntity)playerFillEntity.setPosition(px,3.25,pz);const w=workshopAt(px,pz);if(playerFillComp)playerFillComp.intensity=w?(w.profession==='Herrero'?.46:.52):.44;if(inputProfile==='notebook'){const turnSpeed=92*(cameraSensitivity/.20),pitchSpeed=62*(cameraSensitivity/.20),zoomSpeed=2.45*(cameraZoomSensitivity/.004);if(keys.has('KeyJ'))camYaw=(camYaw+turnSpeed*dt)%360;if(keys.has('KeyL'))camYaw=(camYaw-turnSpeed*dt)%360;const pitchDir=(cameraInvertY?-1:1);if(keys.has('KeyI'))camPitch=clamp(camPitch-pitchSpeed*dt*pitchDir,8,54);if(keys.has('KeyK'))camPitch=clamp(camPitch+pitchSpeed*dt*pitchDir,8,54);if(keys.has('KeyU'))camDist=clamp(camDist-zoomSpeed*dt,2.8,6.3);if(keys.has('KeyO'))camDist=clamp(camDist+zoomSpeed*dt,2.8,6.3)}}else setWalking(false);\n const w=workshopAt(px,pz);updateMentorFollow(dt,now,w);updateMercenaryDeparture(dt,now);const inside=!!w,focusY=inside?1.44:1.32;let interiorLimit=3.0;if(inside){if(Math.abs(w.localX)>4.0)interiorLimit=Math.min(interiorLimit,2.32);if(w.localZ<-8.35)interiorLimit=Math.min(interiorLimit,2.24);if(w.localZ>-1.15)interiorLimit=Math.min(interiorLimit,2.50)}const targetDist=inside?Math.min(camDist,interiorLimit):camDist;if(targetDist<cameraSolvedDist)cameraSolvedDist=targetDist;else cameraSolvedDist=lerp(cameraSolvedDist,targetDist,1-Math.exp(-dt*4.2));const effectivePitch=inside?Math.min(camPitch,28):camPitch;tmpTarget.set(px,focusY,pz);const pitch=rad(effectivePitch),yaw=rad(camYaw),h=Math.cos(pitch)*cameraSolvedDist,desiredX=px+Math.sin(yaw)*h;let desiredY=focusY+Math.sin(pitch)*cameraSolvedDist;if(inside)desiredY=Math.min(desiredY,2.48);const desiredZ=pz+Math.cos(yaw)*h;const cameraBlockedSafe=(x,z)=>{const r=inside?.30:.22;return cameraBlocked(x,z)||cameraBlocked(x+r,z)||cameraBlocked(x-r,z)||cameraBlocked(x,z+r)||cameraBlocked(x,z-r)},safeT=inside?.25:.16;let lastGood=[lerp(tmpTarget.x,desiredX,safeT),lerp(tmpTarget.y,desiredY,safeT),lerp(tmpTarget.z,desiredZ,safeT)];for(let t=safeT;t<=1.001;t+=.04){const x=lerp(tmpTarget.x,desiredX,t),y=lerp(tmpTarget.y,desiredY,t),z=lerp(tmpTarget.z,desiredZ,t);if(cameraBlockedSafe(x,z))break;lastGood=[x,y,z]}tmpCam.set(lastGood[0],lastGood[1],lastGood[2]);camera.setPosition(tmpCam);camera.lookAt(tmpTarget);\n if(gameStarted&&activeRoute&&mentorFollowState!=='walking'){const mentor=activeRoute.mentor(),mp=mentor.getPosition(),dist=Math.hypot(px-mp.x,pz-mp.z),desired=dist<7?deg(Math.atan2(px-mp.x,pz-mp.z)):-21,delta=((desired-mentorYaw+540)%360)-180;mentorYaw+=delta*Math.min(1,dt*4.1);mentor.setEulerAngles(0,mentorYaw,0);if(activeRoute.mentorGesture&&now>ment"
+    },
+    {
+      "key": "function setTutorialStep",
+      "pos": 2356861,
+      "text": "gua.'],5:['Limpia el tiro','Desobstruí el conducto de aire y tiro.'],6:['Enciende la fragua','Activá la estación y comprobá su funcionamiento.']}[step];return{3:['Recoloca la mesa de corte','Asegurá la superficie central de trabajo del Curtidor.'],4:['Repara el bastidor','Comprobá el sistema de tensado antes de trabajar cuero.'],5:['Despeja la zona de la tina','Retirá la obstrucción junto a la tina antes de continuar.'],6:['Tensa la piel de prueba','Usá el bastidor reparado para comprobar que la piel queda firme y lista para trabajar.']}[step]}\nfunction phaseLabel(step){if(step<=8)return'Q1 · REACTIVACIÓN DEL TALLER';if(step===9)return'Q1 · INVENTARIO Y ALIJO';if(step===10)return'Q2 · PRIMERA FABRICACIÓN';if(step===11)return'Q3 · SEGUNDA FABRICACIÓN';if(step===12)return'Q4 · SEGUNDA FAMILIA';if(step===13)return'Q5 · SEGUNDA FABRICACIÓN';if(step>=19)return'EPÍLOGO · DESCUBRIMIENTO Y RETORNO';if(step>=15)return'EXTENSIÓN DE GAMEPLAY · MERCENARIOS';return'PROTOTIPO · RECORRIDO COMPLETO'}\nfunction setTutorialStep(step){tutorialStep=step;currentInteractable=null;promptEl.style.display='none';interactMarker.style.display='none';const c=routeCopy(step);questEy.textContent=phaseLabel(step)+' · '+(selectedProfession||'');questTitle.textContent=c[0];questText.textContent=c[1]}\nfunction mentorModal(text,button='Continuar',onContinue=null){mentorCue();modal(`<div class=\"dialogueHead\">${esc(activeRoute.mentorName.toUpperCase())}</div><div class=\"dialogueBody\"><p>${text}</p></div><div class=\"actions\" style=\"padding:0 18px 16px\"><button id=\"dialogNext\">${button}</button></div>`,'dialogue');document.getElementById('dialogNext').onclick=()=>{closeModal();onContinue?.()}}\nfunction setMentorAnim(clip,blend=.2){if(!clip||!activeRoute)return;activeRoute.mentorAnims.forEach(a=>a.transition(clip,blend))}\nfunction armMentorFollow(){mentorFollowState='waiting';mentorFollowDelay=0;mentorPath=[];mentorWaypoint=0}\nfunction startMentorFollow(now=performance.now()){\n if(!activeRoute||mentorFollowState==='walking'||mentorFollowState==='inside')return;\n const c=activeRoute.center;\n // La trayectoria converge primero al centro útil de la puerta, cruza el umbral y recién después se abre hacia el lateral interior.\n mentorPath=[{x:c+.62,z:.78},{x:c+.62,z:-1.12},{x:c+1.72,z:-1.42}].map(p=>workPoint(p,c));\n mentorWaypoint=0;mentorFollowState='walking';mentorGestureReturn=0;mentorGestureAt=Infinity;setMentorAnim(activeRoute.mentorWalk||activeRoute.mentorIdle,.16);\n}\nfunction updateMentorFollow(dt,now,currentWorkshop){\n if(!activeRoute)return;\n const crossedActiveThreshold=currentWorkshop?.profession===selectedProfession&&pz<-.48*WORKSHOP_SCALE;\n const recoveryInside=tutorialStep>=3&&tutorialStep<=7&&currentWorkshop?.profession===selectedProfession;\n if(mentorFollowState==='waiting'&&tutorialStep>=2&&tutorialStep<=7&&(crossedActiveThreshold||recoveryInside)){mentorFollowState='pending';mentorFollowDelay=now+420}\n if(mentorFollowState==='pending'&&now>=mentorFollowDelay)startMentorFollow(now);\n if(mentorFollowState!=='walking')return;\n if(now-lastMentorStep>455){footstepSound(!!currentWorkshop,.020);lastMentorStep=now}\n const m=activeRoute.mentor(),target=mentorPath[mentorWaypoint];if(!target){mentorFollowState='inside';setMentorAnim(activeRoute.mentorIdle,.22);mentorGestureAt=now+3200;return}\n const pos=m.getPosition(),dx=target.x-pos.x,dz=target.z-pos.z,dist=Math.hypot(dx,dz),speed=1.45,step=speed*dt"
+    },
+    {
+      "key": "function updateInteractionUI",
+      "pos": 2458994,
+      "text": "t.label} · ${dir} · Q centrar cámara`}}else msg=`<strong>OBJETIVO</strong> · ${target.label} · Q centrar cámara`;cameraGuide.innerHTML=msg;cameraGuide.style.display='block'}\nfunction chooseInteractable(){if(modalLayer.style.display==='grid'||intro.style.display==='grid')return null;const yaw=rad(camYaw),fx=-Math.sin(yaw),fz=-Math.cos(yaw);let best=null,bestScore=Infinity;for(const it of getInteractables()){const pos=it.position(),dx=pos.x-px,dz=pos.z-pz,dist=Math.hypot(dx,dz);if(dist>it.radius||dist<.001||!lineClearTo(pos,it.id==='door'))continue;const dot=(dx/dist)*fx+(dz/dist)*fz;if(dot<-.30)continue;const score=dist+(1-dot)*.72;if(score<bestScore){best=it;bestScore=score}}return best}\nfunction interact(){const target=currentInteractable||chooseInteractable();if(!target){const msg=tutorialStep>=19?(routeCopy(tutorialStep)?.[1]||'Seguí el objetivo del epílogo.'):tutorialStep===14?'Recorrido de taller completado.':'Seguí la indicación actual.';toast(msg,1500);return}target.interact()}\nfunction updateInteractionUI(){currentInteractable=chooseInteractable();const camComp=document.querySelector('#cameraRig pc-camera')?.component;if(!currentInteractable){promptEl.style.display='none';const target=objectiveTarget();if(!camComp||!target?.pos){interactMarker.style.display='none';return}const screen=new Vec3();camComp.worldToScreen(new Vec3(target.pos.x,target.pos.y,target.pos.z),screen);if(screen.z>0&&screen.x>=0&&screen.x<=innerWidth&&screen.y>=0&&screen.y<=innerHeight){interactMarker.style.display='block';interactMarker.classList.add('active');interactMarker.style.left=screen.x+'px';interactMarker.style.top=(screen.y-(innerWidth<720?34:26))+'px'}else interactMarker.style.display='none';return}promptEl.textContent='E · '+currentInteractable.prompt();promptEl.style.display='block';if(!camComp){interactMarker.style.display='none';return}const p=currentInteractable.position(),screen=new Vec3();camComp.worldToScreen(new Vec3(p.x,p.y,p.z),screen);if(screen.z>0&&screen.x>=0&&screen.x<=innerWidth&&screen.y>=0&&screen.y<=innerHeight){interactMarker.style.display='block';interactMarker.classList.add('active');interactMarker.style.left=screen.x+'px';interactMarker.style.top=(screen.y-(innerWidth<720?34:26))+'px'}else interactMarker.style.display='none'}\n\nfunction applyTannerVisualPass(){\n // v0.9e: visual parity with Herrero. Primary Curtidor props are loaded as\n // critical assets and keep their authored local transforms. No tutorial step,\n // NPC dialogue or delayed stream is allowed to reposition/reveal the sign or\n // the main work stations.\n const primary=['tannerTableModel','tannerRackModel','tannerTubModel','tannerBucketModel','tannerShelfModel','tannerBagA','tannerCrateA','tannerBottleA','tannerSideBench','tannerStorageBarrel','tannerRopeModel','tannerExteriorHide'];\n primary.forEach(id=>{const e=E(id);if(e)e.enabled=selectedProfession==='Curtidor'});\n}\n\n// ---------- v0.9a.4 · Q1 collision/state fix ----------\nconst routeReady=new Set();\nlet routeLoading=false;\nconst sleep=ms=>new Promise(r=>setTimeout(r,ms));\nfunction routeModels(prof,priority){return[...document.querySelectorAll(`pc-model[data-route=\"${prof}\"][data-priority=\"${priority}\"]`)].filter(el=>el.dataset.asset&&!el.contentEntity)}\nfunction groupRouteModels(models){const map=new Map();for(const el of models){const asset=el.dataset.asset;if(!map.has(asset))map.set(asset,[]);map.get(asset).push(el)}return[...map.en"
+    }
+  ],
+  "inputs": [
+    {
+      "key": "addEventListener('keydown'",
+      "pos": 2335166,
+      "text": "ios.\nconst DIRECT_MERCENARY_AFTER_CRAFTS=true; // Build de prueba: tras la segunda familia salta directo a mercenarios.\nlet gameStarted=false,selectedProfession=null,activeRoute=null,tutorialStep=-1,currentInteractable=null;\nlet px=0,pz=6.3,camYaw=0,camPitch=24,camDist=4.7,cameraSolvedDist=4.7,moveX=0,moveY=0,walking=false,running=false,lastT=performance.now();const keys=new Set();\nconst MOVEMENT_KEYS=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowLeft','ArrowDown','ArrowRight','ShiftLeft','ShiftRight']);const NOTEBOOK_CAMERA_KEYS=new Set(['KeyI','KeyJ','KeyK','KeyL','KeyU','KeyO']);\nfunction setWalking(on,sprint=false){sprint=on&&sprint;if(on===walking&&sprint===running)return;walking=on;running=sprint;const clip=on?(sprint?runClip:walkClip):idleClip;if(clip)playerAnimGroup.forEach(a=>a.transition(clip,.18))}\nfunction clearMovementInput(){for(const code of MOVEMENT_KEYS)keys.delete(code);for(const code of NOTEBOOK_CAMERA_KEYS)keys.delete(code);moveX=0;moveY=0;setWalking(false)}\naddEventListener('keydown',e=>{if(e.code==='Escape'){if(inventoryOpen){clearMovementInput();closeInventory(false);e.preventDefault();return}if(modalLayer.style.display==='grid'){clearMovementInput();closeModal();e.preventDefault();return}keys.delete(e.code);return}if(!gameStarted)return;if(e.code==='Tab'){e.preventDefault();if(modalLayer.style.display==='grid'&&!inventoryOpen)return;clearMovementInput();toggleInventory();return}if(e.code==='KeyQ'){e.preventDefault();orientCameraToObjective();return}keys.add(e.code);if(e.code==='KeyE'||e.code==='Enter'){e.preventDefault();interact()}});addEventListener('keyup',e=>keys.delete(e.code));\nlet inputProfile='mouse',cameraControlMode='free',cameraSensitivity=.20,cameraInvertY=false,cameraZoomSensitivity=.004,mx=0,my=0,mousePositionKnown=false,mouseLookHeld=false;\ntry{const saved=JSON.parse(localStorage.getItem('genesisCameraSettings')||'{}');if(saved.profile==='mouse'||saved.profile==='notebook')inputProfile=saved.profile;if(saved.mode==='free'||saved.mode==='drag')cameraControlMode=saved.mode;if(Number.isFinite(saved.sensitivity))cameraSensitivity=clamp(saved.sensitivity,.08,.40);if(typeof saved.invertY==='boolean')cameraInvertY=saved.invertY;if(Number.isFinite(saved.zoomSensitivity))cameraZoomSensitivity=clamp(saved.zoomSensitivity,.002,.008)}catch(_){}\nconst cameraInputBlocked=e=>{if(!gameStarted||modalLayer.style.display==='grid'||intro.style.display==='grid'||inventoryOpen)return true;const t=e?.target;return !!(t?.closest?.('button,[role=\"button\"],select,input,#modalLayer,#prototypeIntro'))};\nfunction saveCameraSettings(){try{localStorage.setItem('genesisCameraSettings',JSON.stringify({profile:inputProfile,mode:cameraControlMode,sensitivity:cameraSensitivity,invertY:cameraInvertY,zoomSensitivity:cameraZoomSensitivity}))}catch(_){}}\nfunction updateDesktopHelp(){const help=document.getElementById('desktopHelp');if(!help)return;if(inputProfile==='notebook'){help.textContent='WASD mover · Shift correr · I/J/K/L cámara · U/O zoom · touchpad también gira · Q centrar objetivo · E interactuar · TAB inventario · ⚙ cámara';return}help.textContent=cameraControlMode==='drag'?'WASD mover · Shift correr · botón derecho + mouse: cámara · rueda: zoom · Q centrar objetivo · E interactuar · TAB inventario · ⚙ cámara':'WASD mover · Shift correr · clic: capturar mouse · Esc: liberar · rueda: zoom · Q centrar objetivo · E interactuar · TAB inventario · ⚙ c"
+    },
+    {
+      "key": "function frame(now)",
+      "pos": 2469366,
+      "text": "llowState='outside';mentorFollowDelay=0;mentorPath=[];mentorWaypoint=0;setMentorAnim(activeRoute.mentorIdle,.01);npcTag.textContent=activeRoute.mentorName.toUpperCase();professionChip.textContent=`PROFESIÓN · ${prof.toUpperCase()} · 2 FAMILIAS · 4 FABRICACIONES`;professionChip.style.display='block';materialsPanel.style.display='none';if(inventoryTouch){inventoryTouch.classList.add('locked');inventoryTouch.classList.remove('ready')}intro.style.display='none';mouseCapture.refresh();const fastSetup=applyDevFastTestState();restoreKnownLightingProfile();if(forgeHot){igniteForgeVisual();pulseForge(.10)}if(!fastSetup){setTutorialStep(0);toast(`Recorrido ${prof} iniciado.`,1500);mentorGestureAt=performance.now()+4800;mentorGestureReturn=0}}\ndocument.querySelectorAll('[data-profession]').forEach(btn=>btn.addEventListener('click',()=>{getAudio();uiTick();chooseProfessionRoute(btn.dataset.profession)}));\n\n// ---------- Frame ----------\nconst tmpTarget=new Vec3(),tmpCam=new Vec3(),tmp=new Vec3();\nfunction frame(now){requestAnimationFrame(frame);village.trees?.update(px,pz);const dt=Math.min((now-lastT)/1000,.05);lastT=now;forgeImpulse=Math.max(0,forgeImpulse-dt*1.8);\n if(forgeHot){const flick=.88+Math.sin(now*.011)*.075+Math.sin(now*.027)*.045,boost=1+forgeImpulse*.55;if(forgeCoreComp)forgeCoreComp.intensity=3.45*flick*boost;if(forgeBounceComp)forgeBounceComp.intensity=.96*(.93+Math.sin(now*.008)*.06)*(1+forgeImpulse*.42)}\n if(chestLid){chestLidAngle=lerp(chestLidAngle,chestLidTarget,1-Math.exp(-dt*6.2));chestLid.setLocalEulerAngles(chestLidBase.x+chestLidAngle,chestLidBase.y,chestLidBase.z)}\n if(doorLeafEntity){doorAngle=lerp(doorAngle,doorTarget,1-Math.exp(-dt*5));doorLeafEntity.setEulerAngles(0,doorAngle,0)}if(tannerDoorLeafEntity){tannerDoorAngle=lerp(tannerDoorAngle,tannerDoorTarget,1-Math.exp(-dt*5));tannerDoorLeafEntity.setEulerAngles(0,tannerDoorAngle,0)}\n const canMove=gameStarted&&modalLayer.style.display!=='grid'&&intro.style.display!=='grid';if(canMove){let sx=moveX,sy=moveY;if(keys.has('KeyA')||keys.has('ArrowLeft'))sx-=1;if(keys.has('KeyD')||keys.has('ArrowRight'))sx+=1;if(keys.has('KeyW')||keys.has('ArrowUp'))sy+=1;if(keys.has('KeyS')||keys.has('ArrowDown'))sy-=1;let m=Math.hypot(sx,sy);if(m>1){sx/=m;sy/=m;m=1}const yaw=rad(camYaw),fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw),vx=fx*sy+rx*sx,vz=fz*sy+rz*sx;if(m>.03){const sprint=keys.has('ShiftLeft')||keys.has('ShiftRight'),speed=GenesisVillagePlan.movementSpeed(keys),nx=px+vx*speed*dt,nz=pz+vz*speed*dt;if(!wallBlocked(nx,pz))px=nx;if(!wallBlocked(px,nz))pz=nz;const lookYaw=deg(Math.atan2(vx,vz));player.setEulerAngles(0,lookYaw,0);setWalking(true,sprint);if(now-lastPlayerStep>(sprint?240:390)){footstepSound(!!workshopAt(px,pz),.026);lastPlayerStep=now}}else setWalking(false);player.setPosition(px,0,pz);if(playerFillEntity)playerFillEntity.setPosition(px,3.25,pz);const w=workshopAt(px,pz);if(playerFillComp)playerFillComp.intensity=w?(w.profession==='Herrero'?.46:.52):.44;if(inputProfile==='notebook'){const turnSpeed=92*(cameraSensitivity/.20),pitchSpeed=62*(cameraSensitivity/.20),zoomSpeed=2.45*(cameraZoomSensitivity/.004);if(keys.has('KeyJ'))camYaw=(camYaw+turnSpeed*dt)%360;if(keys.has('KeyL'))camYaw=(camYaw-turnSpeed*dt)%360;const pitchDir=(cameraInvertY?-1:1);if(keys.has('KeyI'))camPitch=clamp(camPitch-pitchSpeed*dt*pitchDir,8,54);if(keys.has('KeyK'))camPitch=clamp(camPitch+pit"
+    },
+    {
+      "key": "function toast",
+      "pos": 2309966,
+      "text": "RHObEukUH24j/++RvXHJiubH2PgfsasAKuOXBPxz0kc/zq319OMAP3IL4uf3vunjqhR3skUVMy0pcYYY4qc+zIyp0kWHTD2qlLLXoaACB2lBkZGaVOJ7tGNlhJa752VuxF6wg8TUKe59kKOu1+q200px0qJJXV2K1RRNtYQeg9CsydRRSve9TRKnBIXLR2l9Ug4ufpyQvx7CiDWrpz6Zz8w5A00FJL4guAlbhveyvz2hRWo2mRYQ722Epii70VHB+qpUDzwgWeaXwqIfFBDYU/RmabExK5NmwMVD6YUxtX1+esKz6a895g0slen93hhQhD0j22MmStnRaRGFX4/63dUWm6oZ7nAAAAAElFTkSuQmCC';\n\nlet loadTimer=setInterval(()=>loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s',100);\nfunction setLoadUI(pct,state,detail=''){\n const value=clamp(Math.round(pct),0,100);loadBarFill.style.width=value+'%';loadPercent.textContent=value+'%';\n if(state)loadState.textContent=state;if(detail)loadDetail.textContent=detail;\n}\nfunction failLoading(message,detail=''){\n loadingCard.classList.add('failed');loadState.textContent='ERROR DE CARGA';loadDetail.textContent=detail||message;\n loadRetry.style.display='inline-block';loadRetry.onclick=()=>location.reload();console.error('Genesis loading:',message);\n}\nfunction toast(msg,ms=1700){toastEl.textContent=msg;toastEl.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(()=>toastEl.style.display='none',ms)}\nfunction modal(html,extraClass=''){modalBox.className='modal'+(extraClass?' '+extraClass:'');modalBox.innerHTML=html;modalLayer.style.display='grid';document.documentElement.classList.add('modalOpen');document.body.classList.add('modalOpen');clearMovementInput();if(document.pointerLockElement)document.exitPointerLock?.()}\nfunction closeModal(){modalLayer.style.display='none';mouseCapture?.refresh();modalBox.className='modal';document.documentElement.classList.remove('modalOpen');document.body.classList.remove('modalOpen')}\n\n// Preserve useful horizontal framing on narrow screens. pc-app already observes\n// its CSS box and resizes the canvas; camera FOV is independent of pixel density.\nfunction setupGameViewport(){\n const cameraElement=document.querySelector('#cameraRig pc-camera');\n let scheduled=0;\n const sync=()=>{scheduled=0;const rect=appEl.getBoundingClientRect(),component=cameraElement?.component;if(!component||rect.width<=0||rect.height<=0)return;const aspect=rect.width/rect.height;component.fov=Math.min(78,Math.max(52,2*Math.atan(Math.tan(26*Math.PI/180)*1.2/aspect)*180/Math.PI));};\n const requestSync=()=>{if(!scheduled)scheduled=requestAnimationFrame(sync)};\n new ResizeObserver(requestSync).observe(appEl);\n addEventListener('resize',requestSync,{passive:true});\n window.visualViewport?.addEventListener('resize',requestSync,{passive:true});\n requestSync();\n}\n\n// ---------- Boot: wait for every asset/model/animation before allowing play ----------\nconst bootState=window.__genesisBoot||{loaded:0,total:0,error:null};\n// Contar el archivo descargado, el modelo/clip instanciado y la textura del mundo una sola vez.\n// Los LOD de árboles fuera de vista se transmiten luego y no bloquean esta etapa.\nconst bootPrepTotal=[...document.querySelectorAll('pc-model[asset]:not([data-route])'),...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]')).length;\nconst bootProgress={downloaded:0,downloadTotal:0,prepared:0,prepareTotal:bootPrepTotal,world:0,worldTotal:13};\nconst groupSpec=[\n ['paredes','Paredes'],['puertas','Puertas'],['objetos','Objetos'],\n ['animaciones','Animaciones'],['arboles','Árboles'],['suelos','Suelos y caminos']\n];\nconst bootGroups=Object.fromEntries(groupSpec.map((["
+    },
+    {
+      "key": "function workPoint",
+      "pos": 2329607,
+      "text": "ngle',.085);tone(860,.12,.011,'sine',.17)};\nfunction spawnSparks(pos,count=10){const camComp=document.querySelector('#cameraRig pc-camera')?.component;if(!camComp)return;const screen=new Vec3();camComp.worldToScreen(new Vec3(pos.x,pos.y,pos.z),screen);if(screen.z<=0)return;for(let i=0;i<count;i++){const el=document.createElement('i');el.className='fxSpark';el.style.left=screen.x+'px';el.style.top=screen.y+'px';el.style.setProperty('--dx',((Math.random()-.5)*70).toFixed(1)+'px');el.style.setProperty('--dy',(-35-Math.random()*85).toFixed(1)+'px');el.style.setProperty('--rot',((Math.random()-.5)*160).toFixed(1)+'deg');el.style.setProperty('--dur',(.48+Math.random()*.55).toFixed(2)+'s');fxLayer.appendChild(el);setTimeout(()=>el.remove(),1200)}}\nfunction pulseForge(amount=.75){forgeImpulse=Math.max(forgeImpulse,amount);spawnSparks({x:3.02,y:1.12,z:-8.42},8+Math.round(amount*6))}\n\n// ---------- Two workshop geometry/collision ----------\nconst WORKSHOP_SCALE=GenesisVillagePlan.workshopScale;\nfunction workPoint(point,center=activeRoute?.center||0){return GenesisVillagePlan.toWorld(point,center)}\nconst WORKSHOP_CENTERS={Herrero:0,Curtidor:14};\nconst DOOR_WIDTH=2.18;let doorAngle=0,doorTarget=0,tannerDoorAngle=0,tannerDoorTarget=0;\nfunction pointSegmentDistance(px0,pz0,ax,az,bx,bz){const vx=bx-ax,vz=bz-az,wx=px0-ax,wz=pz0-az,vv=vx*vx+vz*vz,t=vv>1e-6?clamp((wx*vx+wz*vz)/vv,0,1):0,qx=ax+vx*t,qz=az+vz*t;return Math.hypot(px0-qx,pz0-qz)}\nfunction oneDoorCollision(x,z,padding,cx,angle){if(Math.abs(angle)>=58)return false;const p=GenesisVillagePlan.toLocal(x,z,cx),a=rad(angle),hx=-1.10,hz=.12,ex=hx+Math.cos(a)*DOOR_WIDTH,ez=hz-Math.sin(a)*DOOR_WIDTH;return pointSegmentDistance(p.x,p.z,hx,hz,ex,ez)<padding/WORKSHOP_SCALE}\nfunction doorIsOpen(cx){return cx===0?(Math.abs(doorAngle)>=58||Math.abs(doorTarget)>=80):(Math.abs(tannerDoorAngle)>=58||Math.abs(tannerDoorTarget)>=80)}\n// Gameplay must never depend on the visual door animation finishing. Once the active\n// route opens its door (or Q1 has advanced beyond it), the full entrance corridor is\n// explicitly traversable for player and camera. The inactive workshop remains closed.\nfunction routeEntranceUnlocked(cx){if(activeRoute&&activeRoute.center===cx&&tutorialStep>=2)return true;return doorIsOpen(cx)}\nfunction doorwayPortalFree(x,z,cx,padding=.33){const p=GenesisVillagePlan.toLocal(x,z,cx),r=padding/WORKSHOP_SCALE;return routeEntranceUnlocked(cx)&&p.z>-2.45-r&&p.z<2.20+r&&Math.abs(p.x)<1.08-r}\nfunction doorCollisionAt(x,z,padding=.38){if(doorwayPortalFree(x,z,0,padding)||doorwayPortalFree(x,z,14,padding))return false;return oneDoorCollision(x,z,padding,0,doorAngle)||oneDoorCollision(x,z,padding,14,tannerDoorAngle)}\nfunction workshopWallCollision(x,z,cx,padding){\n if(doorwayPortalFree(x,z,cx,padding))return false;\n const p=GenesisVillagePlan.toLocal(x,z,cx),lx=p.x,lz=p.z,r=padding/WORKSHOP_SCALE;\n if(lz<.35+r&&lz>-.35-r&&Math.abs(lx)>1.18-r&&Math.abs(lx)<5.95+r)return true;\n const inDepth=lz<.15+r&&lz>-10.55-r;\n if(inDepth&&((lx<-5.48+r&&lx>-5.95-r)||(lx>5.48-r&&lx<5.95+r)))return true;\n if(lz<-10.25+r&&lz>-10.62-r&&Math.abs(lx)<5.95+r)return true;\n return false;\n}\nfunction wallBlocked(x,z){const r=.33;const b=GenesisVillagePlan.bounds;if(x<b.minX+r||x>b.maxX-r||z<b.minZ+r||z>b.maxZ-r||village.blocked(x,z,r))return true;if(doorwayPortalFree(x,z,0,r)||doorwayPortalFree(x,z,14,r))return false;if(workshopWallCollision(x,z,0,r"
+    },
+    {
+      "key": "const E=id",
+      "pos": 2322095,
+      "text": "ayerAnim,'Idle_Loop')||chooseClip(playerAnim,'idle')||playerAnim?.clips?.[0],walkClip=chooseClip(playerAnim,'Walk_Loop')||chooseClip(playerAnim,'walk'),runClip=chooseClip(playerAnim,'Sprint_Loop')||walkClip;\nconst ordanIdle=chooseClip(ordanAnim,'Idle_Loop')||chooseClip(ordanAnim,'idle')||ordanAnim?.clips?.[0],ordanWalk=chooseClip(ordanAnim,'Walk_Loop')||chooseClip(ordanAnim,'walk'),ordanGesture=chooseClip(ordanAnim,'Idle_Talking_Loop')||chooseClip(ordanAnim,'talking');\nconst tannerIdle=chooseClip(tannerMentorAnim,'Idle_Loop')||chooseClip(tannerMentorAnim,'idle')||tannerMentorAnim?.clips?.[0],tannerWalk=chooseClip(tannerMentorAnim,'Walk_Loop')||chooseClip(tannerMentorAnim,'walk'),tannerGesture=chooseClip(tannerMentorAnim,'Idle_Talking_Loop')||chooseClip(tannerMentorAnim,'talking');\nplayerAnimGroup.forEach(a=>idleClip&&a.transition(idleClip,.01));ordanAnimGroup.forEach(a=>ordanIdle&&a.transition(ordanIdle,.01));tannerMentorAnimGroup.forEach(a=>tannerIdle&&a.transition(tannerIdle,.01));\n\nconst E=id=>document.getElementById(id)?.entity||null;\nconst C=id=>document.getElementById(id)?.component||null;\nlet anvilEntity=E('anvilModel'),bellowsEntity=E('bellowsModel'),benchEntity=E('benchModel'),chestEntity=E('chestModel'),doorLeafEntity=E('doorLeafModel');\nlet tannerTableEntity=E('tannerTableModel'),tannerRackEntity=E('tannerRackModel'),tannerTubEntity=E('tannerTubModel'),tannerChestEntity=E('tannerChestModel'),tannerDoorLeafEntity=E('tannerDoorLeafModel');\nlet forgeCoreComp=C('forgeCoreLight'),forgeBounceComp=C('forgeBounceLight'),playerFillComp=C('playerFillLight'),playerFillEntity=E('playerFillEntity'),tannerWorkLight=C('tannerWorkLight');\nconst KNOWN_LIGHTING_PROFILE=Object.freeze({worldSunLight:{color:'#f3e3d0',intensity:1.48},doorCoolFillLight:{color:'#bdd8e5',intensity:.78,range:8.8},workshopFillALight:{color:'#aac4d1',intensity:.64,range:7.8},workshopFillBLight:{color:'#93b2c2',intensity:.52,range:7},tannerDoorFillLight:{color:'#c8d9d4',intensity:.70,range:8.2},tannerBackFill:{color:'#b98658',intensity:.38,range:5.2},playerFillLight:{color:'#e2dacd',intensity:.44,range:5.6}});\nfunction restoreKnownLightingProfile(){const sceneEl=document.querySelector('pc-scene');if(sceneEl){sceneEl.setAttribute('ambient-light','#887a6c');sceneEl.setAttribute('exposure','1.18')}for(const[id,p]of Object.entries(KNOWN_LIGHTING_PROFILE)){const c=C(id),ent=document.getElementById(id)?.entity;if(ent)ent.enabled=true;if(!c)continue;c.enabled=true;if(p.color){const[r,g,b]=hexRgb(p.color);c.color?.set?.(r,g,b)}c.intensity=p.intensity;if(p.range!=null)c.range=p.range;c.update?.()}if(playerFillEntity)playerFillEntity.enabled=true;if(tannerWorkLight){tannerWorkLight.enabled=true;tannerWorkLight.intensity=tannerOperational?1.18:.72;tannerWorkLight.range=8.4;tannerWorkLight.update?.()}}\n\nlet chestLid=null,chestLidBase={x:0,y:0,z:0},chestLidAngle=0,chestLidTarget=0;\nconst chestRoot=document.getElementById('chestModel')?.contentEntity;chestLid=chestRoot?.findByName?.('Lid')||null;if(chestLid){const e=chestLid.getLocalEulerAngles();chestLidBase={x:e.x,y:e.y,z:e.z}}\nlet tannerChestClosed=chooseClip(tannerChestAnim,'Chest_Closed'),tannerChestOpen=chooseClip(tannerChestAnim,'Chest_Open'),tannerChestOpened=chooseClip(tannerChestAnim,'Chest_Opened');if(tannerChestClosed)tannerChestAnim.transition(tannerChestClosed,.01);\n\n// ---------- Forge visuals / lightweight audio ----------\nlet for"
+    }
+  ],
+  "visual": [
+    {
+      "key": "id=\"workshopShell\"",
+      "pos": 391854,
+      "text": "6CtejOz0K1z1vEoO6Cteju4/C9b1vEoO6Cteju4/C9T1vEoO6CtejO4/C9b1vEoO6CtejO4/C9T1vEoM6Cteju4/C9b1vEoM6Cteju4/C9T1vEoM6CtejO4/C9b1vEoM6CtejO4/C9T1vEoO6Cteju3E9Cr5vEoO6Cteju3E9Cj5vEoO6CtejO3E9Cr5vEoO6CtejO3E9Cj5vEoM6Cteju3E9Cr5vEoM6Cteju3E9Cj5vEoM6CtejO3E9Cr5vEoM6CtejO3E9Cj5vEoO6Cteju5qZGb5vEoO6Cteju5qZGT5vEoO6CtejO5qZGb5vEoO6CtejO5qZGT5vEoM6Cteju5qZGb5vEoM6Cteju5qZGT5vEoM6CtejO5qZGb5vEoM6CtejO5qZGT4=\" lazy></pc-asset>\n  <pc-asset id=\"benchReal\" type=\"container\" src=\"https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Fantasy%20Props%20MegaKit%5BStandard%5D/Exports/glTF/Workbench.gltf\" lazy></pc-asset>\n  <pc-asset id=\"barrelReal\" type=\"container\" src=\"https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Fantasy%20Props%20MegaKit%5BStandard%5D/Exports/glTF/Barrel.gltf\" lazy></pc-asset>\n  <pc-asset id=\"bucketReal\" type=\"container\" src=\"https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Fantasy%20Props%20MegaKit%5BStandard%5D/Exports/glTF/Bucket_Metal.gltf\" lazy></pc-asset>\n  <pc-asset id=\"workshopShell\" type=\"container\" src=\"data:model/gltf-binary;base64,Z2xURgIAAAC4ygEADMEBAEpTT057InNjZW5lIjowLCJzY2VuZXMiOlt7Im5vZGVzIjpbMF19XSwiYXNzZXQiOnsidmVyc2lvbiI6IjIuMCIsImdlbmVyYXRvciI6Imh0dHBzOi8vZ2l0aHViLmNvbS9taWtlZGgvdHJpbWVzaCJ9LCJhY2Nlc3NvcnMiOlt7ImNvbXBvbmVudFR5cGUiOjUxMjUsInR5cGUiOiJTQ0FMQVIiLCJidWZmZXJWaWV3IjowLCJjb3VudCI6MzYsIm1heCI6WzddLCJtaW4iOlswXX0seyJjb21wb25lbnRUeXBlIjo1MTI2LCJ0eXBlIjoiVkVDMyIsImJ5dGVPZmZzZXQiOjAsImJ1ZmZlclZpZXciOjEsImNvdW50Ijo4LCJtYXgiOlswLjMxOTk5OTk5Mjg0NzQ0MjYsMC4xNTAwMDAwMDU5NjA0NjQ0OCwwLjE4OTk5OTk5NzYxNTgxNDJdLCJtaW4iOlstMC4zMTk5OTk5OTI4NDc0NDI2LC0wLjE1MDAwMDAwNTk2MDQ2NDQ4LC0wLjE4OTk5OTk5NzYxNTgxNDJdfSx7ImNvbXBvbmVudFR5cGUiOjUxMjYsInR5cGUiOiJWRUMzIiwiYnl0ZU9mZnNldCI6MCwiYnVmZmVyVmlldyI6MiwiY291bnQiOjgsIm1heCI6WzAuMjg5OTk5OTkxNjU1MzQ5NzMsMC4xNTAwMDAwMDU5NjA0NjQ0OCwwLjE4OTk5OTk5NzYxNTgxNDJdLCJtaW4iOlstMC4yODk5OTk5OTE2NTUzNDk3MywtMC4xNTAwMDAwMDU5NjA0NjQ0OCwtMC4xODk5OTk5OTc2MTU4MTQyXX0seyJjb21wb25lbnRUeXBlIjo1MTI2LCJ0eXBlIjoiVkVDMyIsImJ5dGVPZmZzZXQiOjAsImJ1ZmZlclZpZXciOjMsImNvdW50Ijo4LCJtYXgiOlswLjE4OTk5OTk5NzYxNTgxNDIsMC4xNTAwMDAwMDU5NjA0NjQ0OCwwLjMxOTk5OTk5Mjg0NzQ0MjZdLCJtaW4iOlstMC4xODk5OTk5OTc2MTU4MTQyLC0wLjE1MDAwMDAwNTk2MDQ2NDQ4LC0wLjMxOTk5OTk5Mjg0NzQ0MjZdfSx7ImNvbXBvbmVudFR5cGUiOjUxMjYsInR5cGUiOiJWRUMzIiwiYnl0ZU9mZnNldCI6MCwiYnVmZmVyVmlldyI6NCwiY291bnQiOjgsIm1heCI6WzAuMTg5OTk5OTk3NjE1ODE0MiwwLjE1MDAwMDAwNTk2MDQ2NDQ4LDAuMjg5OTk5OTkxNjU1MzQ5NzNdLCJtaW4iOlstMC4xODk5OTk5OTc2MTU4MTQyLC0wLjE1MDAwMDAwNTk2MDQ2NDQ4LC0wLjI4OTk5OTk5MTY1NTM0OTczXX0seyJjb21wb25lbnRUeXBlIjo1MTI2LCJ0eXBlIjoiVkVDMyIsImJ5dGVPZmZzZXQiOjAsImJ1ZmZlclZpZXciOjUsImNvdW50Ijo4LCJtYXgiOlswLjYzOTk5OTk4NTY5NDg4NTMsMC43NzQ5OTk5NzYxNTgxNDIxLDAuMTAwMDAwMDAxNDkwMTE2MTJdLCJtaW4iOlstMC42Mzk5OTk5ODU2OTQ4ODUzLC0wLjc3NDk5OTk3NjE1ODE0MjEsLTAuMTAwMDAwMDAxNDkwMTE2MTJdfSx7ImNvbXBvbmVudFR5cGUiOjUxMjYsInR5cGUiOiJWRUMzIiwiYnl0ZU9mZnNldCI6MCwiYnVmZmVyVmlldyI6NiwiY291bnQiOjgsIm1heCI6WzAuMTAwMDAwMDAxNDkwMTE2MTIsMC43MDk5OTk5Nzg1NDIzMjc5LDAuNzI1MDAwMDIzODQxODU3OV0sIm1pbiI6Wy0wLjEwMDAwMDAwMTQ5MDExNjEyLC0wLjcwOTk5OTk3ODU0MjMyNzksLTAuNzI1MDAwMDIzODQxODU3OV19LHsiY29tcG9uZW50VHlwZSI6NTEyNiwidHlwZSI6IlZFQzMiLCJieXRlT2Zmc2V0IjowLCJidWZmZXJWaWV3Ijo3LCJjb3VudCI6OCwibWF4IjpbMC42ODk5OTk5OTc2MTU4MTQyLDAuNzI1MDAwMDIzODQxODU3OSwwLjEwMDAwMDAwMTQ5MDExNjEyXSwibWluIjpbLTAuNjg5OTk5OTk3NjE1ODE0MiwtMC43MjUwMDAwMjM4NDE4NTc5LC0wLjEwMDAwMDAwMTQ5MDExNjEyXX0seyJjb21wb25lbnRUeXBlIjo1MTI2LCJ0eXBlIjoiVkVDMyIsImJ5dGVPZmZ"
+    },
+    {
+      "key": "id=\"wallBrick2A\"",
+      "pos": 298535,
+      "text": "/xG3vPs3MTLycuSu+zdGsPs3MTLyzVye+iRusPm8SA7yzVye+iRusPm8SAzycuSu+zdGsPs3MTDytbhG/xG3vPs3MTDwnhxK/CCTwPm8SAzwnhxK/CCTwPm8SA7xuf/K+tCRCP83MTLy1VZG9daAiP83MTLxhrIe9np0iP28SA7wYuIW9Fl4jP28SAzxjEJe9NmwgP83MTDyK5vC+65lEP83MTDwDSfS+6h5DP28SAzz5l/S+aKVCP28SA7wAUYu+tYkyPwAAAAAUXby+yR/OPgAAAABaExW9nagzP83MTLwgVJ8+CCpAP83MTLw1nKE+FFNAP28SA7w1nKE+FFNAP28SAzwgVJ8+CCpAP83MTDxaExW9nagzP83MTDwGVCe9kn8zP28SAzwGVCe9kn8zP28SA7w2spC9GQ9yP83MTLwH3o0+OEl+P83MTLwhb48+on6AP28SA7wxT5A+H+B9P28SAzwZZo0+5/N/P83MTDz4AZK9ujlzP83MTDyD4Jm9efJxP28SAzygRJq9hEtyP28SA7y2IdI94El5PwAAAAC0sQw+U+k5PwAAAAA=\" lazy></pc-asset>\n  <pc-asset id=\"floorBrick\" type=\"container\" src=\"https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Floor_UnevenBrick.gltf\" lazy></pc-asset>\n  <pc-asset id=\"wallWoodGrid2A\" type=\"container\" src=\"https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Wall_Plaster_WoodGrid.gltf\" lazy></pc-asset>\n  <pc-asset id=\"wallBrick2A\" type=\"container\" src=\"https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Wall_UnevenBrick_Straight.gltf\" lazy></pc-asset>\n  <pc-asset id=\"wallDoor2A\" type=\"container\" src=\"https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Wall_Plaster_Door_Round.gltf\" lazy></pc-asset>\n  <pc-asset id=\"doorFrame083\" type=\"container\" src=\"data:model/gltf-binary;base64,Z2xURgIAAAAwEAAApA0AAEpTT057InNjZW5lIjowLCJzY2VuZXMiOlt7Im5vZGVzIjpbMF19XSwiYXNzZXQiOnsidmVyc2lvbiI6IjIuMCIsImdlbmVyYXRvciI6Imh0dHBzOi8vZ2l0aHViLmNvbS9taWtlZGgvdHJpbWVzaCJ9LCJhY2Nlc3NvcnMiOlt7ImNvbXBvbmVudFR5cGUiOjUxMjUsInR5cGUiOiJTQ0FMQVIiLCJidWZmZXJWaWV3IjowLCJjb3VudCI6MzYsIm1heCI6WzddLCJtaW4iOlswXX0seyJjb21wb25lbnRUeXBlIjo1MTI2LCJ0eXBlIjoiVkVDMyIsImJ5dGVPZmZzZXQiOjAsImJ1ZmZlclZpZXciOjEsImNvdW50Ijo4LCJtYXgiOlswLjE0MDAwMDAwMDU5NjA0NjQ1LDEuNjI1LDAuMTcwMDAwMDAxNzg4MTM5MzRdLCJtaW4iOlstMC4xNDAwMDAwMDA1OTYwNDY0NSwtMS42MjUsLTAuMTcwMDAwMDAxNzg4MTM5MzRdfSx7ImNvbXBvbmVudFR5cGUiOjUxMjEsIm5vcm1hbGl6ZWQiOnRydWUsInR5cGUiOiJWRUM0IiwiYnl0ZU9mZnNldCI6MCwiYnVmZmVyVmlldyI6MiwiY291bnQiOjgsIm1heCI6WzY4LDQ0LDI4LDI1NV0sIm1pbiI6WzY4LDQ0LDI4LDI1NV19LHsiY29tcG9uZW50VHlwZSI6NTEyNiwidHlwZSI6IlZFQzMiLCJieXRlT2Zmc2V0IjowLCJidWZmZXJWaWV3IjozLCJjb3VudCI6OCwibWF4IjpbMS4zOTk5OTk5NzYxNTgxNDIsMC4xNTAwMDAwMDU5NjA0NjQ0OCwwLjE4MDAwMDAwNzE1MjU1NzM3XSwibWluIjpbLTEuMzk5OTk5OTc2MTU4MTQyLC0wLjE1MDAwMDAwNTk2MDQ2NDQ4LC0wLjE4MDAwMDAwNzE1MjU1NzM3XX0seyJjb21wb25lbnRUeXBlIjo1MTI2LCJ0eXBlIjoiVkVDMyIsImJ5dGVPZmZzZXQiOjAsImJ1ZmZlclZpZXciOjQsImNvdW50Ijo4LCJtYXgiOlsxLjI3NDk5OTk3NjE1ODE0MiwwLjA3OTk5OTk5ODIxMTg2MDY2LDAuMjI0OTk5OTk0MDM5NTM1NTJdLCJtaW4iOlstMS4yNzQ5OTk5NzYxNTgxNDIsLTAuMDc5OTk5OTk4MjExODYwNjYsLTAuMjI0OTk5OTk0MDM5NTM1NTJdfSx7ImNvbXBvbmVudFR5cGUiOjUxMjEsIm5vcm1hbGl6ZWQiOnRydWUsInR5cGUiOiJWRUM0IiwiYnl0ZU9mZnNldCI6MCwiYnVmZmVyVmlldyI6NSwiY291bnQiOjgsIm1heCI6Wzk2LDk0LDg4LDI1NV0sIm1pbiI6Wzk2LDk0LDg4LDI1NV19LHsiY29tcG9uZW50VHlwZSI6NTEyNiwidHlwZSI6IlZFQzMiLCJieXRlT2Zmc2V0IjowLCJidWZmZXJWaWV3Ijo2LCJjb3VudCI6OCwibWF4IjpbMC4wNzk5OTk5OTgyMTE4NjA2NiwwLjA1OTk5OTk5ODY1ODg5NTQ5LDAuMDM5OTk5OTk5MTA1OTMwMzNdLCJtaW4iOlstMC4wNzk5OTk5OTgyMTE4NjA2NiwtMC4wNTk5OTk5OTg2NTg4OTU0OSwtMC4wMzk5OTk5OTkxMDU5MzAzM119LHsiY29tcG9uZW50VHlwZSI6NTEyMSwibm9ybWFsaXplZCI6dHJ1ZSwidHlwZSI6IlZFQzQiLCJieXRlT2Zmc2V0IjowLCJidWZmZXJWaWV3Ijo3LCJjb3VudCI6OCwibWF4IjpbNDgsNTAsNTIsMjU1XSwibWluIjpbNDgsNTA"
+    },
+    {
+      "key": "Left wall middle",
+      "pos": 1975561,
+      "text": "ored del Medieval Village MegaKit.\n         These replace the flat plaster boxes that looked like placeholders. -->\n    <pc-entity id=\"modularWalls089\" name=\"Authored modular workshop walls\">\n      <!-- back wall: plaster/timber, with masonry around the forge -->\n      <pc-model name=\"Back wall west\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"-3.56 0 -10.02\" scale=\"1.78 1 1\"></pc-model>\n      <pc-model name=\"Back wall center\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"0 0 -10.02\" scale=\"1.78 1 1\"></pc-model>\n      <pc-model name=\"Back wall forge masonry\" data-asset=\"wallBrick2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"3.56 0 -10.02\" scale=\"1.78 1 1\"></pc-model>\n\n      <!-- left wall -->\n      <pc-model name=\"Left wall rear\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"-5.34 0 -8.35\" rotation=\"0 90 0\" scale=\"1.67 1 1\"></pc-model>\n      <pc-model name=\"Left wall middle\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"-5.34 0 -5.05\" rotation=\"0 90 0\" scale=\"1.67 1 1\"></pc-model>\n      <pc-model name=\"Left wall front\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"-5.34 0 -1.75\" rotation=\"0 90 0\" scale=\"1.67 1 1\"></pc-model>\n\n      <!-- right wall: masonry near the hot work zone, timber/plaster toward the entrance -->\n      <pc-model name=\"Right wall forge masonry\" data-asset=\"wallBrick2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"5.34 0 -8.35\" rotation=\"0 -90 0\" scale=\"1.67 1 1\"></pc-model>\n      <pc-model name=\"Right wall middle\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"5.34 0 -5.05\" rotation=\"0 -90 0\" scale=\"1.67 1 1\"></pc-model>\n      <pc-model name=\"Right wall front\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"5.34 0 -1.75\" rotation=\"0 -90 0\" scale=\"1.67 1 1\"></pc-model>\n\n      <!-- front facade with a real modular doorway -->\n      <pc-model name=\"Front wall far left\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"-4.25 0 -.12\" rotation=\"0 180 0\" scale=\"1.06 1 1\"></pc-model>\n      <pc-model name=\"Front wall left\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"-2.13 0 -.12\" rotation=\"0 180 0\" scale=\"1.06 1 1\"></pc-model>\n      <pc-model name=\"Front doorway wall\" data-asset=\"wallDoor2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"0 0 -.12\" rotation=\"0 180 0\" scale=\"1.10 1 1\"></pc-model>\n      <pc-model name=\"Front wall right\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"2.13 0 -.12\" rotation=\"0 180 0\" scale=\"1.06 1 1\"></pc-model>\n      <pc-model name=\"Front wall far right\" data-asset=\"wallWoodGrid2A\" data-route=\"Herrero\" data-priority=\"critical\" position=\"4.25 0 -.12\" rotation=\"0 180 0\" scale=\"1.06 1 1\"></pc-model>\n    </pc-entity>\n\n    <!-- Detailed workshop shell: stone courses, aged plaster, timber frame, eaves, rafters and actual doorway opening. -->\n    <pc-model id=\"workshopShellModel\" name=\"Blacksmith workshop shell\" data-asset=\"workshopShell\" data-route=\"Herrero\" data-priority=\"critical\" position=\"0 0 0\"></pc-model>\n    <!-- Prototipo v0.9a.2: techo modular authored. -->\n    <pc-model id=\"roofFinalModel\" name=\"Complete til"
+    }
+  ],
+  "workshopShell": {
+    "bytes": 117432,
+    "meshes": 378,
+    "nodes": [
+      {
+        "name": "world",
+        "mesh": null,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL0_0",
+        "mesh": 0,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL0_1",
+        "mesh": 1,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL0_2",
+        "mesh": 2,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL0_3",
+        "mesh": 3,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL0_4",
+        "mesh": 4,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL0_5",
+        "mesh": 5,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR0_0",
+        "mesh": 6,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR0_1",
+        "mesh": 7,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR0_2",
+        "mesh": 8,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR0_3",
+        "mesh": 9,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR0_4",
+        "mesh": 10,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR0_5",
+        "mesh": 11,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL1_0",
+        "mesh": 12,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL1_1",
+        "mesh": 13,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL1_2",
+        "mesh": 14,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL1_3",
+        "mesh": 15,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL1_4",
+        "mesh": 16,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL1_5",
+        "mesh": 17,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR1_0",
+        "mesh": 18,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR1_1",
+        "mesh": 19,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR1_2",
+        "mesh": 20,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR1_3",
+        "mesh": 21,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR1_4",
+        "mesh": 22,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR1_5",
+        "mesh": 23,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL2_0",
+        "mesh": 24,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL2_1",
+        "mesh": 25,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL2_2",
+        "mesh": 26,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL2_3",
+        "mesh": 27,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL2_4",
+        "mesh": 28,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL2_5",
+        "mesh": 29,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR2_0",
+        "mesh": 30,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR2_1",
+        "mesh": 31,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR2_2",
+        "mesh": 32,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR2_3",
+        "mesh": 33,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR2_4",
+        "mesh": 34,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR2_5",
+        "mesh": 35,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL3_0",
+        "mesh": 36,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL3_1",
+        "mesh": 37,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL3_2",
+        "mesh": 38,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL3_3",
+        "mesh": 39,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL3_4",
+        "mesh": 40,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facL3_5",
+        "mesh": 41,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR3_0",
+        "mesh": 42,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR3_1",
+        "mesh": 43,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR3_2",
+        "mesh": 44,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR3_3",
+        "mesh": 45,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR3_4",
+        "mesh": 46,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "facR3_5",
+        "mesh": 47,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left0_0",
+        "mesh": 48,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left0_1",
+        "mesh": 49,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left0_2",
+        "mesh": 50,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left0_3",
+        "mesh": 51,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left0_4",
+        "mesh": 52,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left0_5",
+        "mesh": 53,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left0_6",
+        "mesh": 54,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left0_7",
+        "mesh": 55,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left0_8",
+        "mesh": 56,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left0_9",
+        "mesh": 57,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left0_10",
+        "mesh": 58,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left0_11",
+        "mesh": 59,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left0_12",
+        "mesh": 60,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left0_13",
+        "mesh": 61,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left0_14",
+        "mesh": 62,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right0_0",
+        "mesh": 63,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right0_1",
+        "mesh": 64,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right0_2",
+        "mesh": 65,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right0_3",
+        "mesh": 66,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right0_4",
+        "mesh": 67,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right0_5",
+        "mesh": 68,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right0_6",
+        "mesh": 69,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right0_7",
+        "mesh": 70,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right0_8",
+        "mesh": 71,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right0_9",
+        "mesh": 72,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right0_10",
+        "mesh": 73,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right0_11",
+        "mesh": 74,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right0_12",
+        "mesh": 75,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right0_13",
+        "mesh": 76,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right0_14",
+        "mesh": 77,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left1_0",
+        "mesh": 78,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left1_1",
+        "mesh": 79,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left1_2",
+        "mesh": 80,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left1_3",
+        "mesh": 81,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left1_4",
+        "mesh": 82,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left1_5",
+        "mesh": 83,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left1_6",
+        "mesh": 84,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left1_7",
+        "mesh": 85,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left1_8",
+        "mesh": 86,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left1_9",
+        "mesh": 87,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left1_10",
+        "mesh": 88,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left1_11",
+        "mesh": 89,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left1_12",
+        "mesh": 90,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left1_13",
+        "mesh": 91,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left1_14",
+        "mesh": 92,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right1_0",
+        "mesh": 93,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right1_1",
+        "mesh": 94,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right1_2",
+        "mesh": 95,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right1_3",
+        "mesh": 96,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right1_4",
+        "mesh": 97,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right1_5",
+        "mesh": 98,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right1_6",
+        "mesh": 99,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right1_7",
+        "mesh": 100,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right1_8",
+        "mesh": 101,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right1_9",
+        "mesh": 102,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right1_10",
+        "mesh": 103,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right1_11",
+        "mesh": 104,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right1_12",
+        "mesh": 105,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right1_13",
+        "mesh": 106,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right1_14",
+        "mesh": 107,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left2_0",
+        "mesh": 108,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left2_1",
+        "mesh": 109,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left2_2",
+        "mesh": 110,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left2_3",
+        "mesh": 111,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left2_4",
+        "mesh": 112,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left2_5",
+        "mesh": 113,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left2_6",
+        "mesh": 114,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left2_7",
+        "mesh": 115,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left2_8",
+        "mesh": 116,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left2_9",
+        "mesh": 117,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left2_10",
+        "mesh": 118,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left2_11",
+        "mesh": 119,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left2_12",
+        "mesh": 120,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left2_13",
+        "mesh": 121,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left2_14",
+        "mesh": 122,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right2_0",
+        "mesh": 123,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right2_1",
+        "mesh": 124,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right2_2",
+        "mesh": 125,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right2_3",
+        "mesh": 126,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right2_4",
+        "mesh": 127,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right2_5",
+        "mesh": 128,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right2_6",
+        "mesh": 129,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right2_7",
+        "mesh": 130,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right2_8",
+        "mesh": 131,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right2_9",
+        "mesh": 132,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right2_10",
+        "mesh": 133,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right2_11",
+        "mesh": 134,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right2_12",
+        "mesh": 135,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right2_13",
+        "mesh": 136,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right2_14",
+        "mesh": 137,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left3_0",
+        "mesh": 138,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left3_1",
+        "mesh": 139,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left3_2",
+        "mesh": 140,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left3_3",
+        "mesh": 141,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left3_4",
+        "mesh": 142,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left3_5",
+        "mesh": 143,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left3_6",
+        "mesh": 144,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left3_7",
+        "mesh": 145,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left3_8",
+        "mesh": 146,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left3_9",
+        "mesh": 147,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left3_10",
+        "mesh": 148,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left3_11",
+        "mesh": 149,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left3_12",
+        "mesh": 150,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left3_13",
+        "mesh": 151,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left3_14",
+        "mesh": 152,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right3_0",
+        "mesh": 153,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right3_1",
+        "mesh": 154,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right3_2",
+        "mesh": 155,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right3_3",
+        "mesh": 156,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right3_4",
+        "mesh": 157,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right3_5",
+        "mesh": 158,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right3_6",
+        "mesh": 159,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right3_7",
+        "mesh": 160,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right3_8",
+        "mesh": 161,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right3_9",
+        "mesh": 162,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right3_10",
+        "mesh": 163,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right3_11",
+        "mesh": 164,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right3_12",
+        "mesh": 165,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right3_13",
+        "mesh": 166,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right3_14",
+        "mesh": 167,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left4_0",
+        "mesh": 168,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left4_1",
+        "mesh": 169,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left4_2",
+        "mesh": 170,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left4_3",
+        "mesh": 171,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left4_4",
+        "mesh": 172,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left4_5",
+        "mesh": 173,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left4_6",
+        "mesh": 174,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left4_7",
+        "mesh": 175,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left4_8",
+        "mesh": 176,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left4_9",
+        "mesh": 177,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left4_10",
+        "mesh": 178,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left4_11",
+        "mesh": 179,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left4_12",
+        "mesh": 180,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left4_13",
+        "mesh": 181,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "left4_14",
+        "mesh": 182,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right4_0",
+        "mesh": 183,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right4_1",
+        "mesh": 184,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right4_2",
+        "mesh": 185,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right4_3",
+        "mesh": 186,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right4_4",
+        "mesh": 187,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right4_5",
+        "mesh": 188,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right4_6",
+        "mesh": 189,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right4_7",
+        "mesh": 190,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right4_8",
+        "mesh": 191,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right4_9",
+        "mesh": 192,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right4_10",
+        "mesh": 193,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right4_11",
+        "mesh": 194,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right4_12",
+        "mesh": 195,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right4_13",
+        "mesh": 196,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "right4_14",
+        "mesh": 197,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_0",
+        "mesh": 198,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_1",
+        "mesh": 199,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_2",
+        "mesh": 200,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_3",
+        "mesh": 201,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_4",
+        "mesh": 202,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_5",
+        "mesh": 203,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_6",
+        "mesh": 204,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_7",
+        "mesh": 205,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_8",
+        "mesh": 206,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_9",
+        "mesh": 207,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_10",
+        "mesh": 208,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_11",
+        "mesh": 209,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_12",
+        "mesh": 210,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_13",
+        "mesh": 211,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_14",
+        "mesh": 212,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear0_15",
+        "mesh": 213,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_0",
+        "mesh": 214,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_1",
+        "mesh": 215,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_2",
+        "mesh": 216,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_3",
+        "mesh": 217,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_4",
+        "mesh": 218,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_5",
+        "mesh": 219,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_6",
+        "mesh": 220,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_7",
+        "mesh": 221,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_8",
+        "mesh": 222,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_9",
+        "mesh": 223,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_10",
+        "mesh": 224,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_11",
+        "mesh": 225,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_12",
+        "mesh": 226,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_13",
+        "mesh": 227,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_14",
+        "mesh": 228,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear1_15",
+        "mesh": 229,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_0",
+        "mesh": 230,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_1",
+        "mesh": 231,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_2",
+        "mesh": 232,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_3",
+        "mesh": 233,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_4",
+        "mesh": 234,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_5",
+        "mesh": 235,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_6",
+        "mesh": 236,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_7",
+        "mesh": 237,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_8",
+        "mesh": 238,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_9",
+        "mesh": 239,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_10",
+        "mesh": 240,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_11",
+        "mesh": 241,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_12",
+        "mesh": 242,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_13",
+        "mesh": 243,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_14",
+        "mesh": 244,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear2_15",
+        "mesh": 245,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_0",
+        "mesh": 246,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_1",
+        "mesh": 247,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_2",
+        "mesh": 248,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_3",
+        "mesh": 249,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_4",
+        "mesh": 250,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_5",
+        "mesh": 251,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_6",
+        "mesh": 252,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_7",
+        "mesh": 253,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_8",
+        "mesh": 254,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_9",
+        "mesh": 255,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_10",
+        "mesh": 256,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_11",
+        "mesh": 257,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_12",
+        "mesh": 258,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_13",
+        "mesh": 259,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_14",
+        "mesh": 260,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear3_15",
+        "mesh": 261,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_0",
+        "mesh": 262,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_1",
+        "mesh": 263,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_2",
+        "mesh": 264,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_3",
+        "mesh": 265,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_4",
+        "mesh": 266,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_5",
+        "mesh": 267,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_6",
+        "mesh": 268,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_7",
+        "mesh": 269,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_8",
+        "mesh": 270,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_9",
+        "mesh": 271,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_10",
+        "mesh": 272,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_11",
+        "mesh": 273,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_12",
+        "mesh": 274,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_13",
+        "mesh": 275,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_14",
+        "mesh": 276,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear4_15",
+        "mesh": 277,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_0",
+        "mesh": 278,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_1",
+        "mesh": 279,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_2",
+        "mesh": 280,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_3",
+        "mesh": 281,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_4",
+        "mesh": 282,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_5",
+        "mesh": 283,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_6",
+        "mesh": 284,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_7",
+        "mesh": 285,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_8",
+        "mesh": 286,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_9",
+        "mesh": 287,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_10",
+        "mesh": 288,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_11",
+        "mesh": 289,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_12",
+        "mesh": 290,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_13",
+        "mesh": 291,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_14",
+        "mesh": 292,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear5_15",
+        "mesh": 293,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "fac_plaster_-4.0",
+        "mesh": 294,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "fac_plaster_-2.45",
+        "mesh": 295,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "fac_plaster_2.45",
+        "mesh": 296,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "fac_plaster_4.0",
+        "mesh": 297,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_panel_-1_-1.55",
+        "mesh": 298,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_panel_-1_-3.25",
+        "mesh": 299,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_panel_-1_-4.95",
+        "mesh": 300,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_panel_-1_-6.65",
+        "mesh": 301,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_panel_-1_-8.35",
+        "mesh": 302,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_panel_1_-1.55",
+        "mesh": 303,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_panel_1_-3.25",
+        "mesh": 304,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_panel_1_-4.95",
+        "mesh": 305,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_panel_1_-6.65",
+        "mesh": 306,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_panel_1_-8.35",
+        "mesh": 307,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear_panel_-4.15",
+        "mesh": 308,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear_panel_-2.45",
+        "mesh": 309,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear_panel_-0.75",
+        "mesh": 310,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear_panel_0.95",
+        "mesh": 311,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear_panel_2.65",
+        "mesh": 312,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "rear_panel_4.2",
+        "mesh": 313,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "fac_post_-5.28",
+        "mesh": 314,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "fac_post_-1.35",
+        "mesh": 315,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "fac_post_1.35",
+        "mesh": 316,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "fac_post_5.28",
+        "mesh": 317,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_post_-1_-0.25",
+        "mesh": 318,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_post_-1_-2.0",
+        "mesh": 319,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_post_-1_-3.7",
+        "mesh": 320,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_post_-1_-5.4",
+        "mesh": 321,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_post_-1_-7.1",
+        "mesh": 322,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_post_-1_-8.8",
+        "mesh": 323,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_post_-1_-10.15",
+        "mesh": 324,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_post_1_-0.25",
+        "mesh": 325,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_post_1_-2.0",
+        "mesh": 326,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_post_1_-3.7",
+        "mesh": 327,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      },
+      {
+        "name": "side_post_1_-5.4",
+        "mesh": 328,
+        "translation": null,
+        "rotation": null,
+        "scale": null
+      }
+    ],
+    "materials": [
+      "DarkStone",
+      "ColdGreyStone",
+      "AgedPlaster",
+      "DarkTimber",
+      "WornTimber",
+      "CharredRoofWood",
+      "BlackIron"
+    ]
+  }
+}
