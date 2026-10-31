@@ -51,14 +51,19 @@ const server=http.createServer((req,res)=>{
   });
   console.log('MOUNTED',JSON.stringify(mounted));
   fs.writeFileSync(path.join(out,'status.json'),JSON.stringify(mounted,null,2));
-  await page.screenshot({path:path.join(out,'preview.png')});
   assert(mounted.villageMounted||mounted.activeMounted,
-    'No V010/V012 walls and roof were mounted in any real PlayCanvas workshop');
+    'V012 walls and roof not mounted in the real blacksmith');
+  // Test roof control BEFORE the optional GPU-heavy screenshot.
   await page.locator('#roof').click();
-  await page.waitForTimeout(2000);
-  const toggled=await page.frameLocator('#game').locator('body').evaluate(()=>window.__genesisBlacksmithRoofPreview);
-  assert.equal(toggled.roofVisible,false,'Roof toggle does not affect game scene');
+  await page.waitForFunction(()=>
+    document.querySelector('#game')?.contentWindow?.__genesisBlacksmithRoofPreview?.roofVisible===false,
+    null,{timeout:12000});
   await page.locator('#roof').click();
+  await page.waitForFunction(()=>
+    document.querySelector('#game')?.contentWindow?.__genesisBlacksmithRoofPreview?.roofVisible===true,
+    null,{timeout:12000});
+  await page.screenshot({path:path.join(out,'preview.png'),timeout:10000}).catch(err=>
+     console.log('SCREENSHOT_NOT_CRITICAL: '+String(err)));
   console.log('PASS PlayCanvas structural V012',JSON.stringify({mounted:mounted.preview.installations,errors:mounted.preview.errors,consoleErrors:problems.slice(0,15)}));
  }finally{await browser.close()}
 })().catch(e=>{console.error('FAILED',e);process.exitCode=1}).finally(()=>server.close());
