@@ -1,0 +1,71 @@
+name: Project Genesis charcoal V010 optimized three-piece asset to PlayCanvas
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/integrate_carbon_vegetal_v010.py
+      - scripts/render_carbon_vegetal_v010_poster.py
+      - .github/workflows/carbon-vegetal-v010-integration.yml
+permissions:
+  contents: write
+jobs:
+  asset:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install open-source geometry tools
+        run: python3 -m pip install --user numpy pillow trimesh requests
+      - name: Compile and validate source
+        run: |
+          python3 -m py_compile scripts/integrate_carbon_vegetal_v010.py
+          python3 -m py_compile scripts/render_carbon_vegetal_v010_poster.py
+      - name: Build V010 three charcoal pieces from V008 with shared mesh and 1536 PBR
+        run: python3 scripts/integrate_carbon_vegetal_v010.py
+      - name: Install Blender 4.5.13 LTS
+        run: |
+          curl -fSL --retry 3 https://download.blender.org/release/Blender4.5/blender-4.5.13-linux-x64.tar.xz -o /tmp/blender.tar.xz
+          mkdir -p /tmp/blender-lts
+          tar -xJf /tmp/blender.tar.xz -C /tmp/blender-lts --strip-components=1
+      - name: Render three charcoal pieces as transparent mobile fallback
+        run: /tmp/blender-lts/blender -b -t 4 --python-exit-code 1 --python scripts/render_carbon_vegetal_v010_poster.py
+      - name: Verify actual GLB and PNG alpha
+        run: |
+          test -s assets/playcanvas/approved/materials/charcoal/v010/carbon_vegetal_v010_tres_piezas_web.glb
+          test -s assets/playcanvas/approved/materials/charcoal/v010/carbon_vegetal_v010_poster.png
+          test -s assets/playcanvas/approved/materials/charcoal/v010/asset-lock.json
+          python3 - <<'PY'
+          import json,pathlib,hashlib
+          import trimesh
+          from PIL import Image
+          folder=pathlib.Path('assets/playcanvas/approved/materials/charcoal/v010')
+          spec=json.loads((folder/'asset-lock.json').read_text())
+          f=folder/'carbon_vegetal_v010_tres_piezas_web.glb'
+          t=trimesh.load(f,force='scene')
+          assert len(t.geometry)==1 and len(t.graph.nodes_geometry)==3
+          assert len(next(iter(t.geometry.values())).faces)>=20000
+          assert f.stat().st_size<1600000
+          assert hashlib.sha256(f.read_bytes()).hexdigest()==spec['sha256']
+          im=Image.open(folder/'carbon_vegetal_v010_poster.png').convert('RGBA')
+          assert im.getchannel('A').getextrema()==(0,255)
+          print('PASS: 3 real pieces, shared scan, preserved UV, PBR, RGBA poster')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-charcoal-v010-three-pieces-production
+          path: assets/playcanvas/approved/materials/charcoal/v010/
+          retention-days: 7
+      - name: Publish WEB model and transparent poster into the game repo
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/playcanvas/approved/materials/charcoal/v010/
+          if ! git diff --cached --quiet; then
+            git commit -m 'Integrate approved-look three-piece charcoal V010 PlayCanvas GLB and PNG [skip ci]'
+            git fetch origin main
+            git rebase origin/main
+            git push origin HEAD:main
+          fi
