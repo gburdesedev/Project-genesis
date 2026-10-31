@@ -1,0 +1,54 @@
+name: Build and QA repairable blacksmith wall v0.14d.001
+on:
+  push:
+    branches: [feature/workshop-reconstruction-v001]
+    paths: [.github/workflows/build-workshop-reconstruction-v001.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate repair component syntax
+        run: |
+          node --check repairable_workshop_v001.mjs
+          python3 -m py_compile scripts/build_workshop_reconstruction_v001.py
+      - name: Generate candidate from preserved V038 preview
+        run: python3 scripts/build_workshop_reconstruction_v001.py
+      - name: Verify generated inline JS parses and imports remain valid
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('forge-v038-reconstruction-v001.html').read_text('utf8')
+          scripts=re.findall(r'<script([^>]*)>(.*?)</script>',s,re.I|re.S)
+          modules=[code for attr,code in scripts if re.search(r'type=["\x27]module["\x27]',attr,re.I) and code.strip()]
+          assert modules,'No embedded module scripts'
+          for i,code in enumerate(modules):Path('/tmp/reconstruct_module_%d.mjs'%i).write_text(code,encoding='utf8')
+          print('PARSE_INLINE_MODULES',len(modules))
+          PY
+          for file in /tmp/reconstruct_module_*.mjs; do node --check "$file"; done
+          python3 - <<'PY'
+          from pathlib import Path
+          d=Path('forge-v038-reconstruction-v001.html').read_text('utf8')
+          assert d.count('id="forgeModel"')==1
+          assert d.count('id="forgeStation"')==1
+          assert d.count('getStoryInteractables')>=2
+          assert d.count('repairWall?.update(dt)')==1
+          assert d.count("function cameraBlocked(x,z)") == 1
+          assert d.count('repairResetV001')>=1
+          assert Path('repairable_workshop_v001.css').stat().st_size>600
+          print('PREVIEW_ASSERTIONS_OK')
+          PY
+      - name: Commit isolated test page and QA receipt
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add forge-v038-reconstruction-v001.html reports/workshop-reconstruction-v001-build.json
+          git commit -m 'Build test page with real V038 forge and 14-part wall reconstruction [skip ci]'
+          git fetch origin "${{ github.ref_name }}"
+          git rebase "origin/${{ github.ref_name }}"
+          git push origin "HEAD:${{ github.ref_name }}"
