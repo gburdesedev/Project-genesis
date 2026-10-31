@@ -1,0 +1,80 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project Genesis · Carbón V010 / V011 · Comparación PBR</title>
+<style>
+*{box-sizing:border-box}body{background:#17191d;color:#eee7dd;margin:0;padding:18px;font:14px system-ui,Segoe UI,sans-serif}
+main{margin:auto;max-width:1120px}h1{font-size:clamp(17px,2.4vw,26px);margin:0 0 12px}
+.stage{aspect-ratio:16/9;position:relative;overflow:hidden;border:1px solid #62584e;border-radius:10px;background:radial-gradient(ellipse at 50% 40%,#42464a,#25292e 70%,#16191e)}
+#viewport{position:absolute;inset:0}canvas{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+#loading{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;background:#1a1b1ddd;z-index:3}
+#loading.hidden{display:none}.stamp{position:absolute;top:12px;left:12px;background:#1a1b1cd9;padding:8px 12px;border-radius:6px;font-size:12px}
+#angle{position:absolute;bottom:12px;right:12px;background:#16181dcc;padding:8px 12px;border-radius:6px;font-size:12px;font-variant-numeric:tabular-nums}
+.bar{display:flex;align-items:center;flex-wrap:wrap;gap:11px;margin:14px 0}
+button{border:1px solid #877253;color:#eee0c6;background:#393128;border-radius:7px;padding:11px 14px;cursor:pointer}
+button[aria-pressed=true]{background:#7a5b34;border-color:#e9c38e;color:white}
+label{display:flex;align-items:center;gap:8px;color:#d4c5ae}
+input[type=range]{accent-color:#d2a767;width:160px}
+p{line-height:1.6;color:#bdb3a8}small{color:#bca88c}
+</style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"}}</script>
+</head><body><main><h1>Project Genesis · Carbón vegetal · V010 vs V011</h1>
+<div class="stage"><div id="viewport"></div><div class="stamp" id="status">V011 · ceniza sutil · GLB candidato</div>
+<div id="angle">Hover ±45°</div><div id="loading">Cargando modelos PBR comparativos…</div></div>
+<div class="bar">
+<button id="orig" aria-pressed="false">V010 · original</button>
+<button id="ash" aria-pressed="true">V011 · ceniza sutil</button>
+<label>Iluminación <input type="range" id="lighting" min="0.80" max="1.35" step="0.01" value="1.11"><span id="lightval">1.11</span></label>
+<button id="front">Centrar</button>
+</div>
+<p><strong>Mismo shader PBR:</strong> mismas tres piezas, geometría, normales y rugosidad. La V011 cambia exclusivamente el mapa de color con una máscara gris de ceniza. El control de luz afecta solo este visor: no modifica el GLB ni el juego.</p>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+const viewport=document.getElementById('viewport'),loading=document.getElementById('loading'),stamp=document.getElementById('status'),angleDisplay=document.getElementById('angle');
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(35,16/9,.01,80);
+camera.position.set(3.25,2.55,4.4);camera.lookAt(0,.52,0);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setClearColor(0,0);
+renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.11;
+viewport.append(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xe7ebef,0x39312a,1.38));
+for(const [color,intensity,x,y,z] of [[0xffedd6,2.15,2,5,3],[0xcfdcf8,1.5,-3,3,-4],[0xffffff,.7,-2,1,2]]){
+  const light=new THREE.DirectionalLight(color,intensity);light.position.set(x,y,z);scene.add(light);
+}
+const root=new THREE.Group();root.position.y=-.16;scene.add(root);
+const models=new Map();
+const urls={
+  orig:'../assets/playcanvas/approved/materials/charcoal/v010/carbon_vegetal_v010_tres_piezas_web.glb',
+  ash:'./carbon_vegetal_v011/carbon_vegetal_v011_ceniza_sutil_candidato.glb'
+};
+let current='ash',hover=false,theta=0,phase=0,last=performance.now(),paused=false;
+function resize(){let r=viewport.getBoundingClientRect();if(!r.width||!r.height)return;camera.aspect=r.width/r.height;camera.updateProjectionMatrix();renderer.setSize(r.width,r.height,false)}
+addEventListener('resize',resize);resize();
+function show(which){
+  if(!models.has(which))return;
+  current=which;
+  for(const [name,model] of models)model.visible=name===which;
+  document.getElementById('orig').setAttribute('aria-pressed',String(which==='orig'));
+  document.getElementById('ash').setAttribute('aria-pressed',String(which==='ash'));
+  stamp.textContent=which==='ash'?'V011 · ceniza sutil · GLB candidato':'V010 · carbón original · juego actual';
+}
+const loader=new GLTFLoader();
+Promise.all(Object.entries(urls).map(([name,url])=>new Promise((ok,bad)=>loader.load(url,g=>{
+  const ob=g.scene;ob.visible=false;models.set(name,ob);root.add(ob);ok();
+},undefined,bad)))).then(()=>{show('ash');loading.classList.add('hidden')}).catch(e=>{loading.textContent='Error cargando GLB: '+(e.message||'comprueba conexión');console.error(e)});
+document.getElementById('orig').onclick=()=>show('orig');
+document.getElementById('ash').onclick=()=>show('ash');
+document.getElementById('lighting').oninput=event=>{renderer.toneMappingExposure=Number(event.target.value);document.getElementById('lightval').textContent=event.target.value};
+document.getElementById('front').onclick=()=>{hover=false;phase=0;paused=true;setTimeout(()=>{paused=false},700)};
+const canvas=renderer.domElement;
+canvas.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&models.size===2&&!paused)hover=true});
+canvas.addEventListener('pointerleave',()=>{hover=false;phase=0});
+canvas.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'&&models.size===2&&!paused)hover=true});
+canvas.addEventListener('pointerup',()=>{hover=false});canvas.addEventListener('pointercancel',()=>{hover=false});
+addEventListener('blur',()=>{hover=false});
+function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.06);last=now;
+  if(hover)phase+=dt*1.15;const goal=hover?Math.PI/4*Math.sin(phase):0;
+  theta+=(goal-theta)*(1-Math.exp(-5.3*dt));root.rotation.y=theta;
+  angleDisplay.textContent='Giro '+(theta*180/Math.PI).toFixed(1)+'° · '+(hover?'Hover':'Reposo');
+  renderer.render(scene,camera)
+}
+requestAnimationFrame(frame);
+</script></main></body></html>
