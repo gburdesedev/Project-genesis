@@ -70,7 +70,44 @@ for i,name in enumerate(names):
     transform,geom=src.graph[name]
     if i==0:out.add_geometry(updated,geom_name='Carbon_V008_AnatomicalMesh',node_name=name,transform=transform)
     else:out.graph.update(frame_to=name,frame_from=out.graph.base_frame,matrix=transform,geometry='Carbon_V008_AnatomicalMesh')
-OUT.write_bytes(out.export(file_type='glb'))
+# Patch only original GLB image 0. Preserve encoded normal+roughness,
+# buffer geometry, instancing, shader nodes and every original texture byte.
+import struct
+source_bytes=BASE.read_bytes()
+magic,version,total=struct.unpack_from('<4sII',source_bytes,0)
+assert magic==b'glTF' and version==2 and total==len(source_bytes)
+jlen,jtype=struct.unpack_from('<II',source_bytes,12)
+assert jtype==0x4E4F534A
+doc=json.loads(source_bytes[20:20+jlen])
+boff=20+jlen
+blen,btype=struct.unpack_from('<II',source_bytes,boff)
+assert btype==0x004E4942 and len(doc['images'])==3
+raw=source_bytes[boff+8:boff+8+blen]
+# The original V010 model has its basecolor as the first embedded JPEG.
+img0=doc['images'][0]
+assert img0['mimeType']=='image/jpeg'
+idx=img0['bufferView']
+bv=doc['bufferViews'][idx]
+start=bv.get('byteOffset',0);end=start+bv['byteLength']
+temp=io.BytesIO()
+new_color.save(temp,format='JPEG',quality=93,subsampling=0,optimize=True)
+encoded=temp.getvalue()
+assert encoded[:3]==bytes((255,216,255))
+padded=encoded+b'\\x00'*((-len(encoded))%4)
+delta=len(padded)-(end-start)
+new_bin=raw[:start]+padded+raw[end:]
+bv['byteLength']=len(encoded)
+for i,other in enumerate(doc['bufferViews']):
+    if i!=idx and other.get('byteOffset',0)>=end:
+        other['byteOffset']=other.get('byteOffset',0)+delta
+doc['buffers'][0]['byteLength']=len(new_bin)
+jb=json.dumps(doc,ensure_ascii=False,separators=(',',':')).encode('utf-8')
+jb+=b' ' * ((-len(jb))%4)
+assert len(new_bin)%4==0
+packed=(struct.pack('<II',len(jb),0x4E4F534A)+jb+
+        struct.pack('<II',len(new_bin),0x004E4942)+new_bin)
+OUT.write_bytes(struct.pack('<4sII',b'glTF',2,len(packed)+12)+packed)
+
 chk=trimesh.load(OUT,file_type='glb',force='scene')
 assert len(chk.geometry)==1 and set(chk.graph.nodes_geometry)==set(names)
 chm=next(iter(chk.geometry.values()))
