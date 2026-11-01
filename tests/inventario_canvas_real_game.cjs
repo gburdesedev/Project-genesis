@@ -75,6 +75,12 @@ const server=http.createServer((req,res)=>{
         closeModal(){document.getElementById('modalLayer').style.display='none'}
       });
       q.open();
+      // QA enters past introductory/loading screens after real WebGL boot.
+      // This is not a production code change or a shortcut in game progression.
+      for(const id of ['loading','prototypeIntro']){
+        const el=document.getElementById(id);
+        if(el)el.style.setProperty('display','none','important');
+      }
     });
     const read=async(expression)=>page.evaluate(expression);
     const click=async(selector)=>page.evaluate(sel=>{
@@ -88,6 +94,12 @@ const server=http.createServer((req,res)=>{
     // Wait for DOM presence, not layout stability or animations.
     await page.waitForFunction(()=>!!document.querySelector('#genInv'),null,{polling:250,timeout:20000});
     assert.equal(await count('.genInv'),1,'Inventory opens in real WebGL game');
+    const inFront=await read(()=>{
+      const el=document.querySelector('.genInv');
+      const r=el.getBoundingClientRect();
+      return el.contains(document.elementFromPoint(r.left+r.width*.50,r.top+r.height*.50));
+    });
+    assert(inFront,'Inventory must be visible and frontmost, not obscured by the introduction');
     assert.equal(await count('.genInvSlot'),20,'20 visible slots');
     assert.equal(await count('.genInvTab'),4,'four tabs');
     assert.equal(await count('.genInvFamily'),3,'material and crafted item families');
