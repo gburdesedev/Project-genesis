@@ -38,13 +38,18 @@ const server=http.createServer((req,res)=>{
   try{
     await page.goto('http://127.0.0.1:'+server.address().port+'/index.html',{waitUntil:'domcontentloaded',timeout:120000});
     await page.waitForFunction(()=>typeof window.GenesisPreparation?.open==='function' && document.querySelector('#modal') && document.querySelector('#genesisApp'),null,{timeout:100000});
-    await page.waitForTimeout(6500);
+    await page.waitForTimeout(2000);
     const game=await page.evaluate(()=>{
       const app=document.querySelector('#genesisApp')?.app;
       return {app:!!app, canvas:!!document.querySelector('#genesisApp canvas'), phase:window.__genesisProductionHerreroV015?.phase||'unknown', title:document.title, modal:!!document.querySelector('#modal')};
     });
     console.log('REAL_GAME',JSON.stringify(game));
     console.log('WEBGL_SCENE_ACTIVE_BEFORE_MODAL',game.canvas);
+    // Preserve last rendered 3D frame while pausing GPU work for UI interaction screenshots.
+    await page.evaluate(()=>{
+      const app=document.querySelector('#genesisApp')?.app;
+      if(app){app.autoRender=false;app.renderNextFrame=false;app.timeScale=0;}
+    });
     // Reuse the production GenesisPreparation modal and inventory controller
     // with a QA session, not with modifications to persisted game data.
     await page.evaluate(()=>{
@@ -71,39 +76,47 @@ const server=http.createServer((req,res)=>{
       });
       q.open();
     });
-    await page.waitForSelector('.genInv');
-    assert.equal(await page.locator('.genInvSlot').count(),20);
-    assert.equal(await page.locator('.genInvTab').count(),4);
-    assert.equal(await page.locator('.genInvFamily').count(),3);
-    const geom=await page.locator('.genInv').boundingBox();
-    assert(Math.abs(geom.width/geom.height-16/9)<.006,'approved widescreen artboard');
+    const read=async(expression)=>page.evaluate(expression);
+    const click=async(selector)=>page.evaluate(sel=>{
+      const el=document.querySelector(sel);
+      if(!el)throw Error('No control: '+sel);
+      if(el.disabled)throw Error('Disabled control: '+sel);
+      el.click();
+    },selector);
+    const count=async(sel)=>page.evaluate(s=>document.querySelectorAll(s).length,sel);
+    assert.equal(await count('.genInv'),1,'Inventory opens in real WebGL game');
+    assert.equal(await count('.genInvSlot'),20,'20 visible slots');
+    assert.equal(await count('.genInvTab'),4,'four tabs');
+    assert.equal(await count('.genInvFamily'),3,'material and crafted item families');
+    const ratio=await read(()=>{const r=document.querySelector('.genInv').getBoundingClientRect();return r.width/r.height});
+    assert(Math.abs(ratio-16/9)<.006,'16:9 artboard');
     await capture('02-inventario-materiales');
-    await page.locator('.genInvSlot[data-select="1"]').click();
+    await click('.genInvSlot[data-select="1"]');
     await capture('03-seleccion-otro-material');
-    await page.locator('[data-family="Espadas"]').click();
-    assert.deepEqual(await page.locator('.genInvChannel span').allTextContents(),['Canal base','Fuego','Luz']);
-    assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),1);
+    await click('[data-family="Espadas"]');
+    assert.deepEqual(await read(()=>[...document.querySelectorAll('.genInvChannel span')].map(e=>e.textContent)),['Canal base','Fuego','Luz']);
+    assert.equal(await count('.genInvSlot:not(:disabled)'),1);
     await capture('04-inventario-espadas');
-    await page.locator('#genInvDetails').click();
-    assert.equal(await page.locator('.genInvOverlay').count(),1,'Ficha opens');
+    await click('#genInvDetails');
+    assert.equal(await count('.genInvOverlay'),1);
     await capture('05-ficha-abierta');
-    await page.locator('#genInvCloseDetails').click();
-    assert.equal(await page.locator('.genInvOverlay').count(),0,'Ficha closes');
-    await page.locator('[data-family="Escudos"]').click();
+    await click('#genInvCloseDetails');
+    assert.equal(await count('.genInvOverlay'),0);
+    await click('[data-family="Escudos"]');
     await capture('06-inventario-escudos');
-    await page.locator('.genInvTab[data-nav="Fabricaciones"]').click();
-    assert.equal(await page.locator('.prepArtboard[data-active-tab="Fabricaciones"]').count(),1,'Fabricaciones navigates');
+    await click('.genInvTab[data-nav="Fabricaciones"]');
+    assert.equal(await read(()=>document.querySelector('.prepArtboard')?.getAttribute('data-active-tab')),'Fabricaciones');
     await capture('07-fabricaciones');
-    await page.locator('[data-tab="Inventario"]').click();
-    assert.equal(await page.locator('.genInv').count(),1,'Back to inventory navigates');
-    await page.locator('.genInvTab[data-nav="Comparacion"]').click();
-    assert.equal(await page.locator('.prepArtboard[data-active-tab="Comparacion"]').count(),1,'Comparison navigates');
+    await click('[data-tab="Inventario"]');
+    assert.equal(await count('.genInv'),1);
+    await click('.genInvTab[data-nav="Comparacion"]');
+    assert.equal(await read(()=>document.querySelector('.prepArtboard')?.getAttribute('data-active-tab')),'Comparacion');
     await capture('08-comparacion');
-    await page.locator('[data-tab="Preparacion"]').click();
-    assert.equal(await page.locator('.prepArtboard[data-active-tab="Preparacion"]').count(),1,'Preparation navigates');
+    await click('[data-tab="Preparacion"]');
+    assert.equal(await read(()=>document.querySelector('.prepArtboard')?.getAttribute('data-active-tab')),'Preparacion');
     await capture('09-preparacion');
-    await page.keyboard.press('Escape');
-    const closed=await page.locator('#modalLayer').evaluate(e=>e.style.display==='none');
+    await page.evaluate(()=>{document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}))});
+    const closed=await read(()=>document.querySelector('#modalLayer')?.style.display==='none');
     console.log('CLOSED_AFTER_ESCAPE',closed);
     const findings={run:'REAL_WEBGL_GAME_WITH_QA_SESSION',game,screenNames:screens.map(f=>path.basename(f)),checks:['family switching','20 slots','selection','Base-first','full sheet open/close','Inventario/Fabricaciones/Comparacion/Preparacion tabs','Escape'],glb360:'NOT_VERIFIED_FIXTURE_RENDERER',playErrors:errors.slice(0,20)};
     fs.writeFileSync(path.join(dest,'report.json'),JSON.stringify(findings,null,2));
