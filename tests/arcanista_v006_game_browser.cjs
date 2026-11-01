@@ -24,12 +24,12 @@ const server=http.createServer((req,res)=>{
   let blacksmith=await page.evaluate(()=>{
     const s=window.__genesisProductionHerreroV015;
     const root=document.getElementById('compactBlacksmithRoot')?.entity;
-    return {s,mounted:!!root?.findByName('Genesis production Herrero V012 · stone-bond corners')};
+    return {s,mounted:!!root?.findByName('Genesis production Herrero V013 · real open windows and forge flue')};
   });
   assert.equal(blacksmith.s.phase,'running',JSON.stringify(blacksmith.s.errors));
-  assert(blacksmith.mounted,'Herrero V012 must have all four real PBR walls');
-  assert.equal(blacksmith.s.assets.walls.renderers,9);
-  console.log('HERRERO_FOUR_WALLS_V012_VALIDATED');
+  assert(blacksmith.mounted,'Herrero V013 must have all four real PBR walls');
+  assert.equal(blacksmith.s.assets.walls.renderers,8);
+  console.log('HERRERO_FOUR_WALLS_V013_VALIDATED');
   await page.waitForFunction(()=>{
     const a=window.__genesisArcanistaFourWallsV006;
     return a?.installed||a?.phase==='error'||a?.phase==='village-unavailable';
