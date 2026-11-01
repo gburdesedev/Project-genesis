@@ -81,6 +81,17 @@ assert.equal(await page.locator('.genInvInfoTitle').innerText(),'INFORMACIÓN');
 assert.equal(await page.locator('.genInvChannel').count(),1,'Actual channel entries only');
 assert.equal(await page.locator('.genInvTechnique').count(),1,'Only techniques carried by this crafted item are shown');
 assert.equal(await page.locator('.genInvTechniqueMissing').count(),1,'Without approved icon, neutral placeholder replaces invented technique art');
+assert.equal(await page.locator('.genInvTechnique').first().innerText(),'◇ Sangrado','Technique label must be visible in the browser');
+const visibleGeometry=await page.evaluate(()=>{
+ const info=document.querySelector('.genInvInfo').getBoundingClientRect();
+ const row=document.querySelector('.genInvTechnique').getBoundingClientRect();
+ const story=document.querySelector('.genInvNgeText').getBoundingClientRect();
+ const button=document.querySelector('#genInvDetails').getBoundingClientRect();
+ return {infoBottom:info.bottom,techniqueHeight:row.height,techniqueBottom:row.bottom,storyHeight:story.height,storyBottom:story.bottom,buttonBottom:button.bottom};
+});
+assert(visibleGeometry.techniqueHeight>=19 && visibleGeometry.storyHeight>=18,'Technique and NGE need legible line height');
+assert(visibleGeometry.techniqueBottom<visibleGeometry.storyBottom && visibleGeometry.storyBottom<=visibleGeometry.buttonBottom && visibleGeometry.buttonBottom<=visibleGeometry.infoBottom+1,'Technique, NGE and action must be ordered and fully visible');
+
 assert((await page.locator('.genInvChannel').first().innerText()).includes('18'),'Channel intensity comes from item snapshot');
 assert((await page.locator('.genInvNgeText').innerText()).includes('Relato original'),'NGE narrative comes from saved object');
 assert.equal(await page.locator('#genInvDetails span').innerText(),'CONSULTAR FICHA DEL OBJETO');
