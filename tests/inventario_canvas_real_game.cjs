@@ -24,6 +24,16 @@ const server=http.createServer((req,res)=>{
   page.on('pageerror',e=>errors.push(String(e).slice(0,400)));
   async function capture(name){
     const file=path.join(dest,name+'.png');
+    // The real game can show the intro asynchronously after first runtime
+    // readiness. The QA controller is open past that intro by design.
+    await page.evaluate(()=>{
+      for(const id of ['loading','prototypeIntro']){
+        const el=document.getElementById(id);
+        if(el)el.style.setProperty('display','none','important');
+      }
+      const modal=document.getElementById('modalLayer');
+      if(modal)modal.style.setProperty('z-index','2147483000','important');
+    });
     const cdp=await page.context().newCDPSession(page);
     try{
       const snap=await Promise.race([
