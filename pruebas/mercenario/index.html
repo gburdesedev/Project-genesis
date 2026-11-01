@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Project Genesis | Prueba experimental del mercenario</title><style>html,body{margin:0;background:#100e0b;color:#e8d9b2;font:16px Georgia,serif;height:100%}#status{position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center}iframe{border:0;width:100%;height:100%;display:none}</style></head>
+<body><div id="status">Cargando la rama experimental del mercenario desde GitHub...</div><iframe id="game" title="Project Genesis experimental" allow="fullscreen;autoplay;pointer-lock"></iframe>
+<script>
+(async()=>{
+const status=document.getElementById('status'),game=document.getElementById('game');
+const branch='feature/mercenary-equipment-runtime-v001';
+const commit='97f8948575471f6f76afb5b63082125b3d2eb855';
+try{
+ const api='https://api.github.com/repos/gburdesedev/Project-genesis/contents/index.html?ref='+encodeURIComponent(branch);
+ const response=await fetch(api,{headers:{Accept:'application/vnd.github+json'}});
+ if(!response.ok)throw Error('GitHub API HTTP '+response.status);
+ const data=await response.json();if(!data.content)throw Error('No se recibió index.html');
+ const binary=atob(data.content.replace(/\s/g,''));const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+ let html=new TextDecoder('utf-8').decode(bytes);
+ const base='<base href="https://cdn.jsdelivr.net/gh/gburdesedev/Project-genesis@'+commit+'/">';
+ html=html.replace(/<head([^>]*)>/i,'<head$1>'+base);
+ // The parent URL supplies mercenary-qa=1 to the srcdoc frame.
+ game.srcdoc=html; game.style.display='block';status.remove();
+}catch(error){status.textContent='Error al abrir la versión experimental desde GitHub: '+error.message;}
+})();
+</script></body></html>
