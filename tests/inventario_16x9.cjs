@@ -46,6 +46,8 @@ assert.equal(await page.locator('.genInvSlot').count(),20,'20 slots in active fa
 assert.equal(await page.locator('#genInvGoCraft').count(),0,'approved inventory has no redundant Ir a Fabricaciones button');
 assert.equal(await page.locator('.genInvTab').count(),4,'only four original navigation tabs');
 assert.equal(await page.locator('.genInvFamily').count(),1,'Only material family appears before any creation exists');
+assert.equal(await page.locator('.genInv .workspaceRecipeTree > .workspaceRecipeFamily').count(),1,'Inventory reuses Fabricaciones hierarchy blocks');
+assert.equal(await page.locator('.genInv .workspaceRecipeFamily .workspaceRecipeChoice.genInvFamily').count(),1,'Family button reuses Fabricaciones choice component');
 assert.equal(await page.locator('.genInvFamily span:last-child').first().innerText(),'Materiales');
 assert.equal(await page.locator('.genInvImageWrap img').count(),1,'known material has a fixed poster');
 const bounds=await page.locator('.genInv').boundingBox();
@@ -94,7 +96,17 @@ assert(visibleGeometry.techniqueBottom<visibleGeometry.storyBottom && visibleGeo
 
 assert((await page.locator('.genInvChannel').first().innerText()).includes('18'),'Channel intensity comes from item snapshot');
 assert((await page.locator('.genInvNgeText').innerText()).includes('Relato original'),'NGE narrative comes from saved object');
-assert.equal(await page.locator('#genInvDetails span').innerText(),'CONSULTAR FICHA DEL OBJETO');
+assert.equal(await page.locator('#genInvDetails').getAttribute('aria-label'),'Consultar ficha del objeto');
+assert.equal(await page.locator('#genInvDetails span').textContent(),'CONSULTAR FICHA DEL OBJETO');
+const btnArt=await page.evaluate(async()=>{
+ const style=getComputedStyle(document.querySelector('#genInvDetails'));
+ const imageUrl=style.backgroundImage.match(/url\(["']?(.*?)["']?\)/)?.[1];
+ if(!imageUrl)return {ok:false,url:''};
+ const im=new Image();im.src=imageUrl;
+ try{await im.decode();return {ok:im.naturalWidth>0,url:imageUrl,width:im.naturalWidth};}
+ catch(e){return {ok:false,url:imageUrl};}
+});
+assert(btnArt.ok && btnArt.url.includes('assets/ui/inventario/Boton_ConsultarFicha_Aprobado.webp'),'Original approved button image must load, rather than PREPARAR sprite');
 await page.locator('#genInvDetails').click();
 assert.equal(await page.locator('.genInvOverlay').count(),1,'Consulting a creation opens its full-sheet overlay');
 assert.equal(await page.locator('.genInvOverlay [data-sheet-tab="craft"]').count(),0,'internal fabrication formula tab is never public');
