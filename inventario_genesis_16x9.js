@@ -84,8 +84,8 @@
       '<p class="genInvEmptyPreview">La familia seleccionada no contiene objetos</p>';
     const title=chosen?esc(chosen.name):'Seleccioná un objeto';
     const facts=chosen?(materialMode?
-      '<div class="genInvInfoLine"><span>Familia</span><b>Materiales</b></div><div class="genInvInfoLine"><span>Cantidad</span><b>'+chosen.qty+'</b></div>':
-      '<div class="genInvInfoLine"><span>Familia</span><b>'+esc(state.family)+'</b></div><div class="genInvInfoLine"><span>Rareza</span><b>'+esc(item.rarity||'')+'</b></div>'+
+      '<div class="genInvInfoLine"><span>Nombre</span><b>'+esc(chosen.name)+'</b></div><div class="genInvInfoLine"><span>Familia</span><b>Materiales</b></div><div class="genInvInfoLine"><span>Cantidad</span><b>'+chosen.qty+'</b></div>':
+      '<div class="genInvInfoLine"><span>Nombre</span><b>'+esc(item.name||chosen.name)+'</b></div><div class="genInvInfoLine"><span>Familia</span><b>'+esc(state.family)+'</b></div><div class="genInvInfoLine"><span>Rareza</span><b>'+esc(item.rarity||'')+'</b></div>'+
       '<h3 class="genInvSubhead">CANALES DEL OBJETO</h3>'+
       '<div class="genInvChannels" role="list">'+channelSummary(item)+'</div>'+
       '<h3 class="genInvSubhead">RELATO NGE</h3>'+storySummary(item)) : '';
