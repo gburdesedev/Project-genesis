@@ -14,7 +14,23 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
  page.on('console',e=>{if(e.type()==='error')errors.push(e.text().slice(0,600))});
  try{
   await page.goto('http://127.0.0.1:'+server.address().port+'/index.html?mercenary-qa=1',{waitUntil:'domcontentloaded',timeout:120000});
-  await page.waitForFunction(()=>['ready','error'].includes(window.GenesisMercenaryQA?.phase),null,{timeout:240000});
+  try {
+    await page.waitForFunction(()=>['ready','error'].includes(window.GenesisMercenaryQA?.phase),null,{timeout:75000});
+  } catch(err) {
+    const state=await page.evaluate(()=>({
+      url:location.href,title:document.title,readyState:document.readyState,
+      boot:window.__genesisBoot,qa:window.GenesisMercenaryQA,
+      intro:document.getElementById('intro')?.style.display,
+      loading:document.getElementById('loading')?.style.display,
+      canvas:document.querySelector('canvas')?.getBoundingClientRect().toJSON(),
+      scripts:[...document.scripts].map(x=>x.src).filter(Boolean).slice(-14),
+      performance:performance.getEntriesByType('resource').filter(x=>/jsdelivr|playcanvas|github|cdn/.test(x.name)).slice(-12).map(x=>({name:x.name,duration:x.duration,transferSize:x.transferSize}))
+    }));
+    fs.writeFileSync(path.join(out,'boot-failure.json'),JSON.stringify({state,errors},null,2));
+    await page.screenshot({path:path.join(out,'boot-failure.png'),timeout:15000}).catch(()=>{});
+    console.error('BOOT DIAGNOSTICS',JSON.stringify({state,errors:errors.slice(-20)}).slice(0,12000));
+    throw err;
+  }
   const qa=await page.evaluate(()=>{const x=window.GenesisMercenaryQA;return {phase:x.phase,steps:x.steps,items:x.items,errors:x.errors,emissive:x.emissive,remainingMaterialUnits:x.remainingMaterialUnits}});
   fs.writeFileSync(path.join(out,'qa.json'),JSON.stringify({qa,errors},null,2));
   assert.equal(qa.phase,'ready',JSON.stringify(qa.errors));
