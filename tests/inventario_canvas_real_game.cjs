@@ -124,6 +124,11 @@ const server=http.createServer((req,res)=>{
     await capture('04-inventario-espadas');
     await click('#genInvDetails');
     assert.equal(await count('.genInvOverlay'),1);
+    const sheetRows=await read(()=>[...document.querySelectorAll('.genInvOverlay .workspaceMetric')].map(el=>({label:el.querySelector('span')?.textContent||'',value:el.querySelector('b')?.textContent||''})));
+    assert(sheetRows.some(x=>/Daño base/i.test(x.label)&&x.value==='18'),
+      'Full sheet must show the true Base channel 18, not stored Fuego channel 8');
+    assert(sheetRows.some(x=>/Daño de Fuego/i.test(x.label)&&x.value.includes('8')),
+      'Fuego must keep its real generated intensity');
     await capture('05-ficha-abierta');
     await click('#genInvCloseDetails');
     assert.equal(await count('.genInvOverlay'),0);
