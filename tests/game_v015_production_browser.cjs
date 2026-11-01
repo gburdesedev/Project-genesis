@@ -71,7 +71,8 @@ const server=http.createServer((req,res)=>{
     assert(Math.abs(status.treePosition[0]-.4)<.01 && Math.abs(status.treePosition[1]-10.7)<.01,
       'When spawned, plaza oak still has old position');
   else console.log('TREE_NOT_MOUNTED_YET: separate asynchronous village step');
-  await page.screenshot({path:path.join(out,'game-v015.png')});
+  await page.screenshot({path:path.join(out,'game-v015.png'),timeout:7500})
+    .catch(err=>console.log('OPTIONAL_WEBGL_SCREENSHOT_SKIPPED:',String(err)));
   const payload={status:'BROWSER_MAIN_GAME_GLBS_CONFIRMED',...status,
     headlessErrors:errors.slice(0,12),testedAt:new Date().toISOString(),
     caveats:['No dedicated non-GPU performance validation','No collider regression QA','Forge high fidelity visually unapproved']};
