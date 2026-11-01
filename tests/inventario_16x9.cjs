@@ -97,6 +97,11 @@ assert(fit.every(r=>r.top>=0&&r.bottom<=r.limit+1),'NGE, channels and button mus
 assert.equal(await page.locator('.genInvViewer .genInvViewLabel').innerText(),'Objeto fabricado · visor 360°');
 await page.waitForFunction(()=>Array.from(document.querySelectorAll('.genInvTab img')).length===4&&Array.from(document.querySelectorAll('.genInvTab img')).every(i=>i.complete&&i.naturalWidth>0));
 await page.screenshot({path:out+'/inventario-16x9-espadas.png',fullPage:false});
+// Base is always presented first, while all other real channels keep crafting order.
+await page.evaluate(()=>{items[0].channels=[['Fuego',8],['Base',18],['Luz',2]];openLive()});
+await page.locator('[data-family="Espadas"]').click();
+assert.deepEqual(await page.locator('.genInvChannel span').allTextContents(),
+  ['Canal base','Fuego','Luz'],'Base first; remaining channels preserve incoming order');
 await page.locator('.genInvTab[data-nav="Fabricaciones"]').click();
 assert.equal(await page.locator('.prepArtboard[data-active-tab="Fabricaciones"]').count(),1);
 assert.equal(errors.length,0,errors.join('\n'));
