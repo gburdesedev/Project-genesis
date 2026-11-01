@@ -110,7 +110,7 @@
           '<div class="genInvSlots">'+slots+'</div>'+
           '<div class="genInvPage"><button id="genInvPrev" '+(state.page===0?'disabled':'')+'>◀</button>'+
           '<span>Página '+(state.page+1)+' / '+pages+'</span><button id="genInvNext" '+(state.page===pages-1?'disabled':'')+'>▶</button></div></section>'+
-      '</main><footer class="genInvFooter"><button class="genInvAction" id="genInvGoCraft"><span>IR A FABRICACIONES</span></button></footer></div>';
+      '</main></div>';
     ctx.modal(html,'preparationModal genInvModal');
     const board=document.querySelector('#genInv');
     if(!board)return;
@@ -128,7 +128,7 @@
     board.querySelector('#genInvNext').onclick=function(){state.page++;state.selectedKey=null;render(ctx,nav)};
     const input=board.querySelector('#genInvFilter');
     input.onchange=function(){state.search=input.value;state.page=0;state.selectedKey=null;render(ctx,nav)};
-    board.querySelector('#genInvGoCraft').onclick=function(){nav.renderWorkspace('Fabricaciones')};
+
     const details=board.querySelector('#genInvDetails');
     if(details&&item)details.onclick=function(){
       const pane=document.createElement('section');pane.className='genInvOverlay';
@@ -137,5 +137,5 @@
       pane.querySelector('#genInvCloseDetails').onclick=function(){pane.remove()};
     };
   }
-  window.GenesisInventory16={render:render,version:'V01',dataSource:'session.inventory + session.getItems'};
+  window.GenesisInventory16={render:render,version:'INVENTARIO_FINAL_APROBADO_16x9_V1',dataSource:'session.inventory + session.getItems'};
 })();
