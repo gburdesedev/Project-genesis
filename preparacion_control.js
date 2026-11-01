@@ -520,13 +520,20 @@
       if(!window.__GenesisInv16Loading){
         window.__GenesisInv16Loading=true;
         const style=document.createElement('link');
-        style.rel='stylesheet';style.href='inventario_genesis_16x9.css?v=0.1.001';
+        style.rel='stylesheet';style.href='inventario_genesis_16x9.css?v=0.2.001';
         document.head.append(style);
-        const loader=document.createElement('script');
-        loader.src='inventario_genesis_16x9.js?v=0.1.001';
-        loader.onload=()=>renderWorkspace('Inventario');
-        loader.onerror=()=>{window.__GenesisInv16Loading=false;style.remove();};
-        document.head.append(loader);
+        const loadInventory=()=>{
+          const loader=document.createElement('script');
+          loader.src='inventario_genesis_16x9.js?v=0.2.001';
+          loader.onload=()=>renderWorkspace('Inventario');
+          loader.onerror=()=>{window.__GenesisInv16Loading=false;style.remove();};
+          document.head.append(loader);
+        };
+        const art=document.createElement('script');
+        art.src='art_registry_genesis_inventory.js?v=0.2.001';
+        art.onload=loadInventory;
+        art.onerror=loadInventory; // No invented icon on missing art registry.
+        document.head.append(art);
       }
     }
     halt();
