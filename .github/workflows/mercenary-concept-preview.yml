@@ -1,0 +1,33 @@
+name: Mercenary equipment 16x9 preview
+on:
+  push:
+    branches: ['feature/mercenary-equipment-runtime-v001']
+    paths:
+      - 'mercenary_equipment_canvas_v001.js'
+      - 'mercenary_equipment_canvas_v001.css'
+      - 'tests/mercenary_canvas_integration.cjs'
+      - '.github/workflows/mercenary-concept-preview.yml'
+      - 'index.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mercenary-ui:
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/mercenary-preview playwright@1.56.1
+      - run: NODE_PATH=/tmp/mercenary-preview/node_modules node tests/mercenary_canvas_integration.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mercenary-concept-16x9-screenshot
+          path: /tmp/mercenary-concept-16x9.png
+          retention-days: 7
