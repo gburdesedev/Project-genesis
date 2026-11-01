@@ -21,6 +21,7 @@ await page.route('**/*',async route=>{
 await page.goto('http://genesis.local/index.html');
 for(const f of ['preparacion.css','responsive.css','inventario_genesis_16x9.css'])await page.addStyleTag({content:fs.readFileSync(path.join(root,f),'utf8')});
 await page.evaluate(()=>{window.GenesisDevice={safePreviews:true};for(const id of ['loading','prototypeIntro']){const el=document.getElementById(id);if(el)el.style.display='none'}});
+await page.addScriptTag({content:fs.readFileSync(path.join(root,'genesis_technique_icons.js'),'utf8')});
 await page.addScriptTag({content:fs.readFileSync(path.join(root,'inventario_genesis_16x9.js'),'utf8')});
 await page.addScriptTag({content:fs.readFileSync(path.join(root,'preparacion_control.js'),'utf8')});
 await page.evaluate(()=>{
@@ -69,7 +70,7 @@ const out='/tmp/genesis-responsive';fs.mkdirSync(out,{recursive:true});
 await page.waitForFunction(()=>Array.from(document.querySelectorAll('.genInvTab img')).length===4&&Array.from(document.querySelectorAll('.genInvTab img')).every(i=>i.complete&&i.naturalWidth>0));
 await page.screenshot({path:out+'/inventario-16x9-materiales.png',fullPage:false});
 await page.evaluate(()=>{
-  items.push({name:'Espada de hierro',recipe:'espada',rarity:'Común',channels:[['Base',18]],ngeStory:'Relato original de la espada registrado al cierre.'});
+  items.push({name:'Espada de hierro',recipe:'espada',rarity:'Común',channels:[['Base',18,[{id:'sangrado',name:'Sangrado',applied:true}]]],ngeStory:'Relato original de la espada registrado al cierre.'});
   items.push({name:'Escudo de hierro',recipe:'escudo',rarity:'Bueno',channels:[['Base',30]]});
   openLive();
 });
@@ -78,6 +79,8 @@ await page.locator('[data-family="Espadas"]').click();
 assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),1);
 assert.equal(await page.locator('.genInvInfoTitle').innerText(),'INFORMACIÓN');
 assert.equal(await page.locator('.genInvChannel').count(),1,'Actual channel entries only');
+assert.equal(await page.locator('.genInvTechnique').count(),1,'Only techniques carried by this crafted item are shown');
+assert.equal(await page.locator('.genInvTechniqueMissing').count(),1,'Without approved icon, neutral placeholder replaces invented technique art');
 assert((await page.locator('.genInvChannel').first().innerText()).includes('18'),'Channel intensity comes from item snapshot');
 assert((await page.locator('.genInvNgeText').innerText()).includes('Relato original'),'NGE narrative comes from saved object');
 assert.equal(await page.locator('#genInvDetails span').innerText(),'CONSULTAR FICHA DEL OBJETO');
