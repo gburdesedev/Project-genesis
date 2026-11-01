@@ -5,13 +5,18 @@
  */
 const ASSETS='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/';
 const GLBS={
- walls:ASSETS+'feature/blacksmith-workshop-structural-v012/public/models/blacksmith-structural-v012/batched/blacksmith_four_walls_preview.glb',
- roof:ASSETS+'feature/blacksmith-workshop-structural-v012/public/models/blacksmith-structural-v012/batched/blacksmith_roof_preview.glb',
- chimney:ASSETS+'feature/blacksmith-workshop-structural-v012/public/models/blacksmith-structural-v012/batched/blacksmith_chimney_candidate_preview.glb'
+ walls:ASSETS+'feature/blacksmith-workshop-windows-flue-v013/public/models/blacksmith-structural-v013/batched/blacksmith_four_walls_preview.glb',
+ roof:ASSETS+'feature/blacksmith-workshop-windows-flue-v013/public/models/blacksmith-structural-v013/batched/blacksmith_roof_preview.glb',
+ chimney:ASSETS+'feature/blacksmith-workshop-windows-flue-v013/public/models/blacksmith-structural-v013/batched/blacksmith_chimney_candidate_preview.glb'
 };
-const status={version:'v0.16.012',phase:'waiting',assets:{},installed:[],
+const status={version:'v0.17.013',phase:'waiting',assets:{},installed:[],
  roofPitchMultiplier:1.30,oldRoofPreserved:true,doorUnchanged:true,forgeUnchanged:true,
  geometryVisualReview:'PENDING_PLAYER',chimneyCapConnected:true,cornerInterlockingCourses:32,
+ windows:{openAir:true,glass:false,blockedFill:false,count:5},
+ chimneyAlignedToForge:true,
+ forgeAnchorLocal:[3.02,0,-8.56],
+ chimneyBlender:[1.981875,5.6175],
+ roofRaiseRelativeToV012:1.35,
  chimneyConnectedToForge:false,collisionRetestRequired:true,errors:[],fps:null};
 globalThis.__genesisProductionHerreroV015=status;
 const report=()=>{globalThis.__genesisProductionHerreroV015=status;};
@@ -28,7 +33,7 @@ function acquire(app,url,name){
  }));
 }
 const installed=new Map();
-const ROOF_BOOST=1.30;
+const ROOF_BOOST=1.30*1.35; // 35% higher roof rise than the CURRENT V012, eave pivot at 3.20m
 function install(app,root,kind,sources,{tutorial=false}={}){
  if(!root||!root.parent||installed.has(kind))return;
  let oldWalls,oldRoof,oldShell,door;
@@ -45,7 +50,7 @@ function install(app,root,kind,sources,{tutorial=false}={}){
   oldRoof=root.children[1];door=root.children[2];
  }
  if(!oldShell||!oldRoof||!door){status.errors.push(kind+': original anchors unavailable');report();return;}
- const modelRoot=new root.constructor('Genesis production Herrero V012 · stone-bond corners');
+ const modelRoot=new root.constructor('Genesis production Herrero V013 · real open windows and forge flue');
  root.addChild(modelRoot);
  modelRoot.setLocalPosition(0,0,0);
  // Blender: W=7.875, D=6.890625. Original PlayCanvas local shell:
@@ -54,7 +59,7 @@ function install(app,root,kind,sources,{tutorial=false}={}){
  modelRoot.setLocalScale(horizontal,1,horizontal);
  const walls=sources.walls.clone(),roof=sources.roof.clone(),chimney=sources.chimney.clone();
  const parts=[walls,roof,chimney];
- const tags=['WallsV012','RoofV012','ChimneyV012'];
+ const tags=['WallsV013','RoofV013','ChimneyV013'];
  parts.forEach((part,i)=>{
   part.name='Genesis '+tags[i];
   part.setLocalPosition(0,0,0);
@@ -73,7 +78,7 @@ function install(app,root,kind,sources,{tutorial=false}={}){
  // Door is not centered or reoriented: the door's -1.10 position is
  // its hinge pivot; functionality must remain untouched.
  installed.set(kind,{root,modelRoot,oldShell,oldRoof,oldWalls,old,parts});
- status.installed.push({kind,roofRaise:ROOF_BOOST,
+ status.installed.push({kind,roofRaise:ROOF_BOOST,roofBoostRelativeToPrior:1.35,
   wallLoaded:true,roofLoaded:true,chimneyLoaded:true,
   doorUntouched:true,originalVisualsHidden:true});
  report();
