@@ -6,6 +6,9 @@ on:
       - 'inventario_genesis_16x9.js'
       - 'inventario_genesis_16x9.css'
       - 'tests/inventario_16x9.cjs'
+      - 'tests/inventario_arte_aprobado.cjs'
+      - 'assets/ui/inventario_v2/**'
+      - 'art_registry_genesis_inventory.js'
       - '.github/workflows/inventory-preview.yml'
   workflow_dispatch:
 permissions:
@@ -23,10 +26,10 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --prefix /tmp/genesis-inventory-preview playwright@1.56.1
-      - run: NODE_PATH=/tmp/genesis-inventory-preview/node_modules node tests/inventario_16x9.cjs
+      - run: NODE_PATH=/tmp/genesis-inventory-preview/node_modules node tests/inventario_arte_aprobado.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: inventory-16x9-browser-captures
-          path: /tmp/genesis-responsive/inventario-16x9-*.png
+          name: inventory-approved-v2-browser-captures
+          path: /tmp/genesis-approved-inventory/*.png
           retention-days: 7

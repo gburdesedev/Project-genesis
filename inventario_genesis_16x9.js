@@ -1,149 +1,70 @@
-
-/* Genesis Inventory v01 — art source: original preparation 39 PNG, data: live game session. */
-(function () {
-  'use strict';
-  const ROOT = 'assets/ui/preparacion/01_Capas/';
-  const TABS = [
-    ['Inventario','Pestanas/Pestana_Inventario.png'],
-    ['Preparacion','Pestanas/Pestana_Preparacion.png'],
-    ['Fabricaciones','Pestanas/Pestana_Fabricaciones.png'],
-    ['Comparacion','Pestanas/Pestana_Comparacion.png']
-  ];
-  const posters = {
-    'Mineral de hierro':'assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png',
-    'Lingote de hierro':'assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png'
-  };
-  function esc(x) {
-    return String(x == null ? '' : x).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]});
-  }
-  function classify(item) {
-    // The object owns its actual family. Fallback is the existing recipe name,
-    // never a fixed per-profession menu list.
-    const raw=String(item.family || item.recipeFamily || item.recipe || item.category || 'Creaciones').trim();
-    if (/^espada(s)?\b/i.test(raw)) return 'Espadas';
-    if (/^escudo(s)?\b/i.test(raw)) return 'Escudos';
-    return raw;
-  }
-  function channelSummary(item) {
-    const channels=Array.isArray(item.channels)?item.channels:[];
-    if(!channels.length)return '<p class="genInvEmptyChannels">Este objeto todavía no tiene canales registrados.</p>';
-    return channels.map(function(c,index){
-      const name=Array.isArray(c)?c[0]:(c.name||c.channel||'');
-      const intensity=Array.isArray(c)?c[1]:c.intensity;
-      const text=Number.isFinite(Number(intensity))?String(intensity):'';
-      return '<div class="genInvChannel"><span>'+esc(index===0 && String(name).toLowerCase()==='base'?'Canal base':name)+'</span><b>'+esc(text)+'</b></div>';
-    }).join('');
-  }
-  function storySummary(item) {
-    const candidates=[item.nge?.story,item.nge?.description,item.ngeStory,item.narrative,item.description,item.history];
-    const found=candidates.find(function(v){return typeof v==='string' && v.trim()});
-    return found?'<p class="genInvNgeText">'+esc(found)+'</p>':
-      '<p class="genInvNgeText genInvNoStory">Sin relato NGE disponible en este objeto.</p>';
-  }
-  function familyItems(ctx) {
-    const all=typeof ctx.getItems==='function' ? (ctx.getItems() || []) : [];
-    return all.filter(Boolean);
-  }
-  function materialArt(name) {
-    const poster=posters[name];
-    return poster ? '<img src="'+esc(poster)+'" alt="'+esc(name)+'" draggable="false">' :
-      '<span class="genInvEmptyPreview">'+esc(name)+'</span>';
-  }
-  function render(ctx, nav) {
-    const inventory=ctx.inventory || {};
-    const allItems=familyItems(ctx);
-    const stock=Object.entries(inventory).filter(function(pair){return Number(pair[1])>0});
-    const families=[...(stock.length?['Materiales']:[]),...new Set(allItems.map(classify).filter(Boolean))];
-    const state=ctx.genInvState || (ctx.genInvState={family:'Materiales',page:0,search:''});
-    if(!families.includes(state.family))state.family=families[0]||'Materiales';
-    const materialMode=state.family==='Materiales';
-    const source=materialMode?stock.map(function(pair){return {key:'material:'+pair[0],name:pair[0],qty:Number(pair[1]),material:true}}):
-      allItems.map(function(i,index){return {key:'creation:'+String(i.id||i.uuid||index)+':'+index,name:i.name,rarity:i.rarity,item:i,material:false}}).filter(function(e){return classify(e.item)===state.family});
-    const search=state.search.toLocaleLowerCase();
-    const filtered=source.filter(function(e){return String(e.name).toLocaleLowerCase().includes(search)});
-    const pages=Math.max(1,Math.ceil(filtered.length/20));
-    state.page=Math.max(0,Math.min(state.page,pages-1));
-    const visible=filtered.slice(state.page*20,(state.page+1)*20);
-    if(!visible.some(function(v){return v.key===state.selectedKey}))state.selectedKey=visible[0]?.key||null;
-    const chosen=visible.find(function(e){return e.key===state.selectedKey})||visible[0];
-    const navMarkup=TABS.map(function(t){
-      return '<button class="genInvTab" data-nav="'+esc(t[0])+'" aria-current="'+(t[0]==='Inventario'?'page':'false')+'" aria-label="'+esc(t[0])+'"><img src="'+ROOT+t[1]+'" alt="'+esc(t[0])+'"></button>';
-    }).join('');
-    const familiesMarkup=families.map(function(f){
-      const icon=f==='Materiales'?'◆':f==='Espadas'?'⚔':f==='Escudos'?'◈':'✦';
-      return '<button class="genInvFamily" data-family="'+esc(f)+'" aria-pressed="'+(f===state.family)+'"><span class="genInvFamIcon">'+icon+'</span><span>'+esc(f)+'</span></button>';
-    }).join('');
-    const item=chosen?.item;
-    const viewer=chosen?(materialMode?materialArt(chosen.name):
-      (typeof ctx.renderAsset==='function'?ctx.renderAsset(item):'<span class="genInvEmptyPreview">'+esc(chosen.name)+'</span>')) :
-      '<p class="genInvEmptyPreview">La familia seleccionada no contiene objetos</p>';
-    const title=chosen?esc(chosen.name):'Seleccioná un objeto';
-    const facts=chosen?(materialMode?
-      '<div class="genInvInfoLine"><span>Familia</span><b>Materiales</b></div><div class="genInvInfoLine"><span>Cantidad</span><b>'+chosen.qty+'</b></div>':
-      '<div class="genInvInfoLine"><span>Familia</span><b>'+esc(state.family)+'</b></div><div class="genInvInfoLine"><span>Rareza</span><b>'+esc(item.rarity||'')+'</b></div>'+
-      '<h3 class="genInvSubhead">CANALES DEL OBJETO</h3>'+
-      '<div class="genInvChannels" role="list">'+channelSummary(item)+'</div>'+
-      '<h3 class="genInvSubhead">RELATO NGE</h3>'+storySummary(item)) : '';
-
-    const slots=Array.from({length:20},function(_,i){
-      const entry=visible[i];
-      if(!entry)return '<button class="genInvSlot" disabled aria-label="Casilla vacía"></button>';
-      const selected=entry.key===state.selectedKey;
-      const content=entry.material?materialArt(entry.name):
-        (entry.item.thumbnail || entry.item.poster
-          ? '<img src="'+esc(entry.item.thumbnail||entry.item.poster)+'" alt="" loading="lazy" draggable="false">'
-          : '<span class="genInvCreationGlyph" aria-hidden="true"></span>');
-      return '<button class="genInvSlot'+(selected?' selected':'')+'" data-select="'+i+'" aria-label="'+esc(entry.name)+'" aria-pressed="'+selected+'">'+content+'<span>'+esc(entry.material?entry.qty:(entry.rarity||''))+'</span></button>';
-    }).join('');
-    const html='<div class="genInv" id="genInv">'+
-      '<header class="genInvNav">'+navMarkup+'</header>'+
-      '<main class="genInvMain">'+
-        '<aside class="genInvFamilies"><h2 class="genInvHead">FAMILIAS</h2>'+familiesMarkup+
-          '</aside>'+
-        '<section class="genInvViewer"><p class="genInvViewerTitle">'+title+'</p><div class="genInvImageWrap">'+viewer+'</div><p class="genInvViewLabel">'+(materialMode?'Vista fija · material':'Objeto fabricado · visor 360°')+'</p></section>'+
-        '<aside class="genInvInfo"><h2 class="genInvInfoTitle">INFORMACIÓN</h2>'+facts+
-          (chosen&&!materialMode?'<button class="genInvInfoMore" id="genInvDetails"><span>CONSULTAR FICHA DEL OBJETO</span></button>':'')+
-          '</aside>'+
-        '<section class="genInvGrid"><div class="genInvGridControls"><h2 class="genInvGridTitle">'+esc(state.family)+'</h2>'+
-          '<input class="genInvFilter" id="genInvFilter" aria-label="Filtrar objetos" placeholder="Filtrar '+(materialMode?'materiales':'creaciones')+'..." value="'+esc(state.search)+'">'+
-          '<span class="genInvNotice">'+filtered.length+' tipos registrados</span></div>'+
-          '<div class="genInvSlots">'+slots+'</div>'+
-          '<div class="genInvPage"><button id="genInvPrev" '+(state.page===0?'disabled':'')+'>◀</button>'+
-          '<span>Página '+(state.page+1)+' / '+pages+'</span><button id="genInvNext" '+(state.page===pages-1?'disabled':'')+'>▶</button></div></section>'+
-      '</main></div>';
-    ctx.modal(html,'preparationModal genInvModal');
-    const board=document.querySelector('#genInv');
-    if(!board)return;
-    board.querySelectorAll('[data-nav]').forEach(function(b){b.onclick=function(){
-      if(b.dataset.nav==='Preparacion')nav.renderMenu();
-      else if(b.dataset.nav!=='Inventario')nav.renderWorkspace(b.dataset.nav);
-    }});
-    board.querySelectorAll('[data-family]').forEach(function(b){b.onclick=function(){
-      state.family=b.dataset.family;state.page=0;state.selectedKey=null;state.search='';render(ctx,nav);
-    }});
-    board.querySelectorAll('[data-select]').forEach(function(b){b.onclick=function(){
-      state.selectedKey=visible[Number(b.dataset.select)]?.key;render(ctx,nav);
-    }});
-    board.querySelector('#genInvPrev').onclick=function(){state.page--;state.selectedKey=null;render(ctx,nav)};
-    board.querySelector('#genInvNext').onclick=function(){state.page++;state.selectedKey=null;render(ctx,nav)};
-    const input=board.querySelector('#genInvFilter');
-    input.onchange=function(){state.search=input.value;state.page=0;state.selectedKey=null;render(ctx,nav)};
-
-    const details=board.querySelector('#genInvDetails');
-    if(details&&item)details.onclick=function(){
-      const pane=document.createElement('section');pane.className='genInvOverlay';
-      ctx.sheetTab='channels';
-      pane.innerHTML='<button id="genInvCloseDetails" aria-label="Cerrar ficha">✕ CERRAR</button>'+
-        nav.sheetForItem(ctx,item);
-      // Public object info never exposes crafting formulas, internal traces, or MU stats.
-      pane.querySelector('.workspaceSheetTabs')?.remove();
-      const story = [item.nge?.story,item.nge?.description,item.ngeStory,item.narrative,item.description,item.history]
-        .find(function(v){return typeof v==='string' && v.trim()});
-      const storyBox=pane.querySelector('.workspaceNgeScroll');
-      if(storyBox && story) storyBox.textContent=story;
-      board.appendChild(pane);
-      pane.querySelector('#genInvCloseDetails').onclick=function(){pane.remove()};
-    };
-  }
-  window.GenesisInventory16={render:render,version:'INVENTARIO_FINAL_APROBADO_16x9_V1',dataSource:'session.inventory + session.getItems'};
-})();
+(function(global){
+'use strict';
+const esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function familyOf(item){
+ const raw=String(item.family||item.recipeFamily||item.recipe||item.category||'').trim();
+ if(/espada/i.test(raw))return 'Espadas';if(/escudo/i.test(raw))return 'Escudos';return raw||'Creaciones';
+}
+function channelList(item){return Array.isArray(item?.channels)?item.channels.map((c,i)=>({name:String(Array.isArray(c)?c[0]:c.name||c.channel||''),val:Array.isArray(c)?c[1]:c.intensity,index:i})):[]}
+function nge(item){return [item.nge?.story,item.nge?.description,item.ngeStory,item.narrative,item.description,item.history].find(v=>typeof v==='string'&&v.trim())||''}
+const positions=Array.from({length:20},(_,i)=>({left:405+121*(i%10),top:i<10?581:710,width:108,height:115}));
+function cssBox(p){return `left:${p.left/1672*100}%;top:${p.top/941*100}%;width:${p.width/1672*100}%;height:${p.height/941*100}%`}
+const POSTERS={'Lingote de hierro':'assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png','Mineral de hierro':'assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png'};
+function render(ctx,nav){
+ const state=ctx.genesisInvFinal || (ctx.genesisInvFinal={family:null,page:0,selected:null});
+ const stock=Object.entries(ctx.inventory||{}).filter(([,q])=>Number(q)>0).map(([name,q])=>({key:'m:'+name,name:String(name),qty:Number(q),material:true}));
+ const items=(typeof ctx.getItems==='function' ?ctx.getItems():[]).filter(Boolean).map((item,i)=>({key:'c:'+String(item.id||item.uuid||i)+':'+i,name:item.name||'Objeto',item,material:false,rarity:item.rarity||'',family:familyOf(item)}));
+ const families=[...(stock.length?['Materiales']:[]),...new Set(items.map(it=>it.family))];
+ if(!families.includes(state.family))state.family=families[0]||null;
+ const material=state.family==='Materiales';
+ const all=material?stock:items.filter(it=>it.family===state.family);
+ const pages=Math.max(1,Math.ceil(all.length/20));state.page=Math.max(0,Math.min(state.page,pages-1));
+ const shown=all.slice(state.page*20,(state.page+1)*20);
+ if(!shown.some(x=>x.key===state.selected))state.selected=shown[0]?.key||null;
+ const selected=shown.find(x=>x.key===state.selected)||null;
+ const item=selected?.item;
+ const poster=(selected&&selected.material)?ctx.materialPoster?.(selected.name)||POSTERS[selected.name]||null:item?.poster||item?.thumbnail||null;
+ const registry=global.GenesisInventoryArt;
+ const safePoster=typeof poster==='string'&&/^(assets\/|\.\/assets\/)/.test(poster)?poster:null;
+ const viewer=item&&typeof ctx.renderAsset==='function'?ctx.renderAsset(item):safePoster?`<img src="${esc(safePoster)}" draggable="false" alt="${esc(selected.name)}">`:
+   '<span class="noArt">'+(selected?'Modelo visual no disponible':'')+'</span>';
+ const familiars=families.map(f=>{const icon=['Materiales','Espadas','Escudos'].includes(f)?`<img src="assets/icono_${f}.png" alt="">`:'';
+  return `<button class="fam ${f===state.family?'selected':''}" type="button" data-family="${esc(f)}" aria-pressed="${f===state.family}">${icon}<span>${esc(f)}</span></button>`;}).join('');
+ const chan=item?channelList(item):[];
+ const channels=chan.map(c=>{const art=registry?.channel(c.name);return `<div class="channel">${art?`<img class="channelIcon" src="${esc(art.iconUrl)}" alt="">`:''}<span class="channelName">${esc(c.name==='Base'?'Canal base':c.name)}</span><span class="channelVal">${esc(c.val)}</span></div>`;}).join('');
+ const facts=selected?(item?[["Nombre",selected.name],["Familia",state.family],["Rareza",item.rarity||'—']]:[["Material",selected.name],["Cantidad",selected.qty]]):[];
+ const rows=facts.map(([k,v])=>`<div class="infoRow"><span>${esc(k)}</span><strong>${esc(v)}</strong></div>`).join('');
+ const slots=positions.map((p,i)=>{
+  const e=shown[i];const thumb=e?(e.material?(ctx.materialPoster?.(e.name)||POSTERS[e.name]):e.item?.thumbnail||e.item?.poster):null;
+  const url=typeof thumb==='string'&&/^(assets\/|\.\/assets\/)/.test(thumb)?thumb:null;
+  return `<button type="button" class="invSlot ${e?.key===state.selected?'selected':''}" data-slot="${i}" style="${cssBox(p)}" ${e?'':'disabled'} aria-label="${esc(e?.name||'Casilla vacía')}">${url?`<img src="${esc(url)}" alt="">`:''}${e?.material?`<span class="quantity">${e.qty}</span>`:''}</button>`;
+ }).join('');
+ const html=`<div class="pgInv" id="genesisInvApproved" role="region" aria-label="Inventario Project Genesis">
+  <button class="nav nav-inventario" data-tab="Inventario" aria-label="Inventario" type="button"></button>
+  <button class="nav nav-preparacion" data-tab="Preparacion" aria-label="Preparación" type="button"></button>
+  <button class="nav nav-fabricaciones" data-tab="Fabricaciones" aria-label="Fabricaciones" type="button"></button>
+  <button class="nav nav-comparacion" data-tab="Comparacion" aria-label="Comparación" type="button"></button>
+  <div class="familyScroll">${familiars}</div>
+  <div class="objTitle">${esc(selected?.name||'')}</div><div class="hero">${viewer}</div>
+  ${item?'<div class="rotation" aria-hidden="true">↶　360°　↷</div>':''}
+  <div class="infoRows">${rows}</div>
+  ${item?`<div class="infoChannelsLabel">CANALES DEL OBJETO</div><div class="channels">${channels}</div><div class="infoNgeLabel">RELATO NGE</div><div class="nge">${esc(nge(item))}</div><button id="genesisFullSheet" class="sheet" type="button" aria-label="Consultar ficha del objeto">Consultar ficha del objeto</button>`:''}
+  ${slots}<div class="pageControls">${pages>1?`<button data-page="prev" type="button">◀</button><span>${state.page+1}/${pages}</span><button data-page="next" type="button">▶</button>`:''}</div>
+  </div>`;
+ ctx.modal(html,'preparationModal genInvModal');const root=document.getElementById('genesisInvApproved');if(!root)return;
+ root.querySelectorAll('[data-family]').forEach(b=>b.onclick=()=>{state.family=b.dataset.family;state.page=0;state.selected=null;render(ctx,nav)});
+ root.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{state.selected=shown[Number(b.dataset.slot)]?.key||null;render(ctx,nav)});
+ root.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{state.page+=b.dataset.page==='next'?1:-1;state.selected=null;render(ctx,nav)});
+ root.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{if(b.dataset.tab==='Preparacion')nav.renderMenu();else if(b.dataset.tab!=='Inventario')nav.renderWorkspace(b.dataset.tab)});
+ const sheet=root.querySelector('#genesisFullSheet');if(sheet&&item)sheet.onclick=()=>{
+  const p=document.createElement('div');p.className='panelOverlay';
+  const fullRows=channelList(item).map(c=>`<div class="fullRow"><span>${esc(c.name)}</span><strong>${esc(c.val)}</strong></div>`).join('');
+  const techs=registry?.resolveTechniques(item)||[];
+  const techniques=techs.map(t=>`<p>${esc(t.id)}　${t.iconUrl?`<img style="height:1.7cqw" src="${esc(t.iconUrl)}" alt="">`:''}</p>`).join('');
+  p.innerHTML=`<button type="button" class="close" aria-label="Cerrar ficha">CERRAR ✕</button><div class="fullInfo"><h2>${esc(item.name)}</h2><p>Rareza: ${esc(item.rarity||'—')}</p><h3>Canales</h3>${fullRows}<h3>Técnicas</h3>${techniques||'<p>Sin técnicas adicionales registradas</p>'}<h3>Historia NGE</h3><p>${esc(nge(item)||'Sin relato registrado')}</p></div>`;
+  root.appendChild(p);p.querySelector('button').onclick=()=>p.remove();
+ };
+}
+global.GenesisInventoryApproved=Object.freeze({render,version:'2.0-approval',getDataContract(){return ['ctx.inventory','ctx.getItems','ctx.renderAsset','ctx.materialPoster']}});
+global.GenesisInventory16=global.GenesisInventoryApproved;
+})(window);
