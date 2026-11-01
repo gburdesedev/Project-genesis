@@ -17,7 +17,7 @@ function comparisons(equipped,chosen){
  return order.map(n=>({name:n,a:a.find(x=>x.name===n),b:b.find(x=>x.name===n)}));
 }
 function render(opts){
- const state={family:'first',selection:null,details:false,inventory:false,sheet:false,techOpen:new Set()};
+ const state={family:'first',selection:null,details:false,inventory:false,sheet:false,page:0,techOpen:new Set()};
  let a=opts.selectedFirst||null,b=opts.selectedSecond||null;
  let lastClick=null,lastClickAt=0;
  const poolA=opts.poolFirst||[],poolB=opts.poolSecond||[];
@@ -48,9 +48,9 @@ function render(opts){
   return '<section class="mcPanel mcLeft"><div class="mcHeading">EQUIPAMIENTO COMPATIBLE</div><div class="mcSubhead">FAMILIAS</div>'+
   '<div class="mcFamilies"><button type="button" data-family="first" class="'+(state.family==='first'?'active':'')+'">⚔ '+esc(familyA)+'</button><button type="button" data-family="second" class="'+(state.family==='second'?'active':'')+'">⬡ '+esc(familyB)+'</button></div>'+
   '<div class="mcSubhead">OBJETOS DISPONIBLES · '+esc(starts)+'</div><div class="mcInventoryGrid">'+
-  Array.from({length:20},(_,i)=>{const item=pool[i];if(!item)return '<span class="mcEmptySlot" aria-label="Casilla vacía">✧</span>'; const selected=item===currentItem(),active=item===current();
-    return '<button type="button" data-item="'+i+'" class="mcInventorySlot '+(selected?'selected ':'')+(active?'equipped':'')+'" title="'+esc(item.name)+'">'+image(item)+'</button>';}).join('')+
-  '</div><div class="mcInvFooter">Objetos fabricados disponibles · '+pool.length+' · 20 por página</div></section>';
+  Array.from({length:20},(_,i)=>{const item=pool[state.page*20+i];if(!item)return '<span class="mcEmptySlot" aria-label="Casilla vacía">✧</span>'; const selected=item===currentItem(),active=item===current();
+    return '<button type="button" data-item="'+(state.page*20+i)+'" class="mcInventorySlot '+(selected?'selected ':'')+(active?'equipped':'')+'" title="'+esc(item.name)+'">'+image(item)+'</button>';}).join('')+
+  '</div><div class="mcInvFooter"><button data-page="prev" '+(state.page===0?'disabled':'')+'>◂</button> '+(state.page+1)+' / '+Math.max(1,Math.ceil(pool.length/20))+' <button data-page="next" '+((state.page+1)*20>=pool.length?'disabled':'')+'>▸</button></div></section>';
  }
  function right(){
  const equippedItem=equipped(),selected=currentItem(),c=comparisons(equippedItem,selected);
@@ -75,9 +75,10 @@ function render(opts){
   return '';
  }
  function update(){
-  opts.modal('<div class="mcBoard" aria-label="Equipamiento de mercenario"><header class="mcTitle"><div>PROJECT GENESIS</div><h1>INVENTARIO DEL MERCENARIO</h1></header><div class="mcColumns">'+left()+central()+right()+'</div>'+overlay()+'</div>','mercenaryModal mercConceptModal');
+  opts.modal('<div class="mercConcept"><div class="mcBoard" aria-label="Equipamiento de mercenario"><header class="mcTitle"><div>PROJECT GENESIS</div><h1>INVENTARIO DEL MERCENARIO</h1></header><div class="mcColumns">'+left()+central()+right()+'</div>'+overlay()+'</div></div>','mercenaryModal mercConceptModal');
   const board=document.querySelector('.mcBoard');if(!board)return;
-  board.querySelectorAll('[data-family]').forEach(el=>el.addEventListener('click',()=>{state.family=el.dataset.family;state.selection=null;update()}));
+  board.querySelectorAll('[data-family]').forEach(el=>el.addEventListener('click',()=>{state.family=el.dataset.family;state.selection=null;state.page=0;update()}));
+  board.querySelectorAll('[data-page]').forEach(el=>el.addEventListener('click',()=>{state.page=Math.max(0,state.page+(el.dataset.page==='next'?1:-1));state.selection=null;update()}));
   board.querySelectorAll('[data-item]').forEach(el=>{el.addEventListener('click',()=>{const item=currentPool()[+el.dataset.item];if(!item)return;const now=Date.now(),again=lastClick===item&&now-lastClickAt<360;setCurrent(item);state.selection=item;if(again)state.details=true;lastClick=item;lastClickAt=now;update()})});
   board.querySelectorAll('.mcEquipSlot').forEach((el,i)=>el.addEventListener('click',()=>{state.family=i===0?'first':'second';state.selection=current();update()}));
   board.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>{
