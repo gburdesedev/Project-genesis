@@ -82,9 +82,11 @@
     const navMarkup=TABS.map(function(t){
       return '<button class="genInvTab" data-nav="'+esc(t[0])+'" aria-current="'+(t[0]==='Inventario'?'page':'false')+'" aria-label="'+esc(t[0])+'"><img src="'+ROOT+t[1]+'" alt="'+esc(t[0])+'"></button>';
     }).join('');
+    // Exact family-tree components from the approved Fabricaciones menu.
+    // Only labels and actual families come from the player session.
     const familiesMarkup=families.map(function(f){
-      const icon=f==='Materiales'?'◆':f==='Espadas'?'⚔':f==='Escudos'?'◈':'✦';
-      return '<button class="genInvFamily" data-family="'+esc(f)+'" aria-pressed="'+(f===state.family)+'"><span class="genInvFamIcon">'+icon+'</span><span>'+esc(f)+'</span></button>';
+      return '<button type="button" class="workspaceRecipeChoice genInvFamily" data-family="'+esc(f)+
+        '" aria-pressed="'+(f===state.family)+'"><span>'+esc(f)+'</span></button>';
     }).join('');
     const item=chosen?.item;
     const viewer=chosen?(materialMode?materialArt(chosen.name):
@@ -111,11 +113,11 @@
     const html='<div class="genInv" id="genInv">'+
       '<header class="genInvNav">'+navMarkup+'</header>'+
       '<main class="genInvMain">'+
-        '<aside class="genInvFamilies"><h2 class="genInvHead">FAMILIAS</h2>'+familiesMarkup+
-          '</aside>'+
+        '<aside class="genInvFamilies"><div class="workspaceRecipeTree genInvFamilyTree" role="group" aria-label="Familias del inventario">'+
+          '<section class="workspaceRecipeFamily genInvRecipeFamily"><h4>FAMILIAS</h4>'+familiesMarkup+'</section></div></aside>'+
         '<section class="genInvViewer"><p class="genInvViewerTitle">'+title+'</p><div class="genInvImageWrap">'+viewer+'</div><p class="genInvViewLabel">'+(materialMode?'Vista fija · material':'Objeto fabricado · visor 360°')+'</p></section>'+
         '<aside class="genInvInfo"><h2 class="genInvInfoTitle">INFORMACIÓN</h2>'+facts+
-          (chosen&&!materialMode?'<button class="genInvInfoMore" id="genInvDetails"><span>CONSULTAR FICHA DEL OBJETO</span></button>':'')+
+          (chosen&&!materialMode?'<button type="button" class="genInvInfoMore" id="genInvDetails" aria-label="Consultar ficha del objeto"><span class="genInvButtonAccessible">CONSULTAR FICHA DEL OBJETO</span></button>':'')+
           '</aside>'+
         '<section class="genInvGrid"><div class="genInvGridControls"><h2 class="genInvGridTitle">'+esc(state.family)+'</h2>'+
           '<input class="genInvFilter" id="genInvFilter" aria-label="Filtrar objetos" placeholder="Filtrar '+(materialMode?'materiales':'creaciones')+'..." value="'+esc(state.search)+'">'+
