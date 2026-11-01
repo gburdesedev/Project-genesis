@@ -24,12 +24,12 @@ const server=http.createServer((req,res)=>{
  page.on('pageerror',e=>errors.push(String(e)));
  try{
   await page.goto('http://127.0.0.1:'+server.address().port+'/index.html',{waitUntil:'domcontentloaded',timeout:120000});
-  await page.waitForFunction(()=>!!window.__genesisMarket?.catalog,{timeout:180000});
+  await page.waitForFunction(()=>!!window.__genesisMarket?.catalog,null,{timeout:180000});
   const npc=await page.evaluate(()=>({status:window.__genesisMarket,
     model:!!document.getElementById('genesisApp')?.app?.root.findByName('Mercader de suministros · NPC interactivo V001')}));
   assert(npc.model,'NPC not present in actual PlayCanvas scene');
   await page.locator('[data-profession="Herrero"]').click({timeout:180000});
-  await page.waitForFunction(()=>window.__genesisMarket?.catalog()?.length>0,{timeout:180000});
+  await page.waitForFunction(()=>window.__genesisMarket?.catalog()?.length>0,null,{timeout:180000});
   const items=await page.evaluate(()=>window.__genesisMarket.catalog());
   assert(items.length>=2,'Generated seed contained no known items');
   assert(!items.includes('Lingote de hierro'),'Market leaked prepared ingot');
@@ -48,5 +48,16 @@ const server=http.createServer((req,res)=>{
   const summary={ok:true,npc:npc.status,catalog:items,before,after,errors:errors.slice(0,12)};
   fs.writeFileSync(path.join(out,'status.json'),JSON.stringify(summary,null,2));
   console.log('PASS in-game seeded marketplace',JSON.stringify(summary));
+ }catch(error){
+  const diag=await page.evaluate(()=>({
+    state:document.querySelector('#loadState')?.textContent,
+    detail:document.querySelector('#loadDetail')?.textContent,
+    retry:document.querySelector('#loadRetry')?.style.display,
+    market:window.__genesisMarket||null,
+    app:!!document.querySelector('#genesisApp')?.app
+  })).catch(e=>({diagnosticError:String(e)}));
+  fs.writeFileSync(path.join(out,'browser-error.json'),JSON.stringify({error:String(error),diag,errors:errors.slice(0,50)},null,2));
+  await page.screenshot({path:path.join(out,'market-browser-error.png'),timeout:10000}).catch(()=>{});
+  throw error;
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1}).finally(()=>server.close());
