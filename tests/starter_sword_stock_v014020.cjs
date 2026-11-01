@@ -67,10 +67,6 @@ test('the market can still sell initial seeded materials for the shield',()=>{
  const market=require('../genesis_market_domain_v001.js');
  const session=engine.generateSession('Herrero',{seed:31415926});
  const offers=market.catalog(session,prep.rawStock);
- const expected=new Set(Object.keys(prep.rawStock({
-   ...expectedFor(session.formulas.espada_hierro,1),
-   ...expectedFor(session.formulas.escudo_hierro,1)
- })));
  // Markets may share materials between recipes: compare the union of known seed names.
  const known=new Set([...session.formulas.espada_hierro.materials,
    ...session.formulas.escudo_hierro.materials].map(m=>m.material));
@@ -95,6 +91,6 @@ test('existing pre-chest market purchases remain additive and navigation explain
  assert.match(source,/playerInventory\[material\] = \(playerInventory\[material\] \|\| 0\) \+ quantity/);
  assert.match(source,/El baúl contiene únicamente el lote para tus dos primeras espadas/);
  assert.match(source,/los materiales del escudo se obtienen gratis en el mercado/);
- assert.match(source,/version='v0\.14\.020'/);
+ assert.match(fs.readFileSync(path.join(root,'village_world.js'),'utf8'),/version='v0\.14\.020'/);
  assert.match(source,/<title>Project Genesis v0\.14\.020 · Build 20261101\.02/);
 });
