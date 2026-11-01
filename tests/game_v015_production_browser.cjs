@@ -43,9 +43,9 @@ const server=http.createServer((req,res)=>{
     const tree=app?.root.findByName('Árbol 1 · Roble · plaza');
     const active=document.querySelector('#compactBlacksmithRoot')?.entity;
     const p=tree?.getLocalPosition();
-    const rood=active?.findByName('Genesis RoofV012');
+    const rood=active?.findByName('Genesis RoofV013');
     const roofScale=rood?.getLocalScale();
-    return {s,activeMounted:!!active?.findByName('Genesis production Herrero V012 · stone-bond corners'),
+    return {s,activeMounted:!!active?.findByName('Genesis production Herrero V013 · real open windows and forge flue'),
       fountainAnchor:!!f,forgeSource:document.querySelector('#forgeStation')?.getAttribute('src'),
       forgeRotation:forge?.getAttribute('rotation'),
       originalDoorPosition:d?.getAttribute('position'),treePosition:p?[p.x,p.z]:null,
@@ -56,15 +56,18 @@ const server=http.createServer((req,res)=>{
   console.log('PRODUCTION_V015',JSON.stringify(status));
   assert.equal(status.s.phase,'running',JSON.stringify(status.s.errors));
   assert(status.app,'No PlayCanvas application');
-  assert(status.activeMounted,'V012 not installed in actual tutorial');
+  assert(status.activeMounted,'V013 not installed in actual tutorial');
   assert(status.s.installed.some(x=>x.kind==='tutorial'),'Active Herrero not mounted');
   assert(status.fountainAnchor,'HQ fountain missing from scene');
   assert(status.forgeSource?.endsWith('Forge_V038_HeaderFixed_Preview.glb'),'Game still uses obsolete forge asset');
   assert.equal(status.originalDoorPosition,'-1.10 0 .12','The original door hinge moved');
-  assert(status.roofScale?.[1]>1.2,'Roof pitch was not increased');
-  assert(status.s.assets.walls.renderers<=12,'V012 walls unbatched');
-  assert(status.s.assets.roof.renderers<=8,'V012 roof unbatched');
-  assert(status.s.assets.chimney.renderers<=8,'V012 chimney unbatched');
+  assert(status.roofScale?.[1]>1.75,'New roof raise was not applied');
+  assert(status.s.windows?.openAir===true,'Ventilated blacksmith windows missing');
+  assert(status.s.chimneyAlignedToForge===true,'Flue geometry is not aligned to forge');
+  assert(status.s.roofRaiseRelativeToV012===1.35,'Roof ridge height change missing');
+  assert(status.s.assets.walls.renderers<=12,'V013 walls unbatched');
+  assert(status.s.assets.roof.renderers<=8,'V013 roof unbatched');
+  assert(status.s.assets.chimney.renderers<=8,'V013 chimney unbatched');
   assert(status.s.cornerInterlockingCourses===32,'V012 corner geometry not active');
   assert(status.s.chimneyCapConnected===true,'V012 continuous flue is not active');
   if(status.treePosition)
