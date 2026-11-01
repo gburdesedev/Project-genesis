@@ -1,0 +1,56 @@
+name: "Project Genesis Herrero V013 - playable game test"
+on:
+  push:
+    branches: [feature/herreria-v013-open-windows-roof]
+    paths:
+      - genesis_workshop_live_v015.js
+      - index.html
+      - tests/herreria_v013_production_browser.cjs
+      - .github/workflows/herreria-v013-browser-qa.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-game-herrero-v013:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check JS syntax
+        run: |
+          node --check genesis_workshop_live_v015.js
+          node --check tests/herreria_v013_production_browser.cjs
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.56.1 playcanvas@2.23.0
+          npx playwright install --with-deps chromium
+      - name: Wait for and verify REAL Blender V013 GLBs
+        run: |
+          python3 - <<'PY'
+          import urllib.request,time
+          base="https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/feature/blacksmith-workshop-windows-flue-v013/public/models/blacksmith-structural-v013/batched/"
+          for attempt in range(90):
+            pending=[]
+            for name in ["blacksmith_four_walls_preview.glb","blacksmith_roof_preview.glb","blacksmith_chimney_candidate_preview.glb"]:
+              req=urllib.request.Request(base+name,headers={"User-Agent":"ProjectGenesis-V013-BrowserQA"})
+              try:
+                with urllib.request.urlopen(req,timeout=25) as r:
+                  sig=r.read(4)
+                  if sig!=b"glTF":raise ValueError(name+" bad GLB magic")
+              except Exception as e:pending.append((name,str(e)))
+            if not pending:break
+            print("V013 pending",attempt,pending,flush=True)
+            time.sleep(12)
+          assert not pending,"Blender web assets not yet published: "+str(pending)
+          PY
+      - name: Test actual playable PlayCanvas scene with forge and windows
+        run: node tests/herreria_v013_production_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: herreria-v013-playcanvas-real-browser-audit
+          path: previews/v013-production-audit/
+          retention-days: 5
