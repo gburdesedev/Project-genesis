@@ -14,6 +14,7 @@ test('merchant attached to real PlayCanvas village and original E interaction pi
   assert.match(market,/x:25\.5,y:0,z:36\.3/);
   assert.match(world,/x:25\.5,z:36\.3,r:\.34/);
   assert.match(world,/x:28\.35,z:37\.6,r:1\.02/);
+  assert.match(html,/!lineClearTo\(pos,it\.id==='door',it\.id==='marketMerchant'\)/);
 });
 test('existing inventory, chest tutorial and approved menus retained',()=>{
   assert.match(html,/getSession:\(\)=>craftSession/);
@@ -21,7 +22,8 @@ test('existing inventory, chest tutorial and approved menus retained',()=>{
   assert.match(html,/marketStockBefore = \{\.\.\.playerInventory\}/);
   assert.match(html,/playerInventory\[material\] = \(playerInventory\[material\] \|\| 0\) \+ quantity/);
   assert.match(html,/preparacion_control\.js/);
-  assert.match(html,/inventario_genesis_16x9\.js/);
+  assert(fs.existsSync(path.join(root,'inventario_genesis_16x9.js')));
+  assert.match(html,/const legacyInventory = openInventory;/);
   assert.doesNotMatch(market,/(\bprice\s*:\s*[1-9]|\bprice\s*=\s*[1-9])/);
 });
 test('published version and cache keys aligned',()=>{
