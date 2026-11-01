@@ -17,10 +17,28 @@
     return String(x == null ? '' : x).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]});
   }
   function classify(item) {
-    const type=String(item.family || item.category || item.recipe || '').toLowerCase();
-    if (/espada/.test(type)) return 'Espadas';
-    if (/escudo/.test(type)) return 'Escudos';
-    return 'Otras creaciones';
+    // The object owns its actual family. Fallback is the existing recipe name,
+    // never a fixed per-profession menu list.
+    const raw=String(item.family || item.recipeFamily || item.recipe || item.category || 'Creaciones').trim();
+    if (/^espada(s)?\b/i.test(raw)) return 'Espadas';
+    if (/^escudo(s)?\b/i.test(raw)) return 'Escudos';
+    return raw;
+  }
+  function channelSummary(item) {
+    const channels=Array.isArray(item.channels)?item.channels:[];
+    if(!channels.length)return '<p class="genInvEmptyChannels">Este objeto todavía no tiene canales registrados.</p>';
+    return channels.map(function(c,index){
+      const name=Array.isArray(c)?c[0]:(c.name||c.channel||'');
+      const intensity=Array.isArray(c)?c[1]:c.intensity;
+      const text=Number.isFinite(Number(intensity))?String(intensity):'';
+      return '<div class="genInvChannel"><span>'+esc(index===0 && String(name).toLowerCase()==='base'?'Canal base':name)+'</span><b>'+esc(text)+'</b></div>';
+    }).join('');
+  }
+  function storySummary(item) {
+    const candidates=[item.nge?.story,item.nge?.description,item.ngeStory,item.narrative,item.description,item.history];
+    const found=candidates.find(function(v){return typeof v==='string' && v.trim()});
+    return found?'<p class="genInvNgeText">'+esc(found)+'</p>':
+      '<p class="genInvNgeText genInvNoStory">Sin relato NGE disponible en este objeto.</p>';
   }
   function familyItems(ctx) {
     const all=typeof ctx.getItems==='function' ? (ctx.getItems() || []) : [];
@@ -35,9 +53,9 @@
     const inventory=ctx.inventory || {};
     const allItems=familyItems(ctx);
     const stock=Object.entries(inventory).filter(function(pair){return Number(pair[1])>0});
-    const families=['Materiales',...(ctx.profession==='Herrero'?['Espadas','Escudos']:[]),...['Espadas','Escudos','Otras creaciones'].filter(function(f){return allItems.some(function(i){return classify(i)===f}) && (ctx.profession!=='Herrero'||f==='Otras creaciones')})];
+    const families=[...(stock.length?['Materiales']:[]),...new Set(allItems.map(classify).filter(Boolean))];
     const state=ctx.genInvState || (ctx.genInvState={family:'Materiales',page:0,search:''});
-    if(!families.includes(state.family))state.family='Materiales';
+    if(!families.includes(state.family))state.family=families[0]||'Materiales';
     const materialMode=state.family==='Materiales';
     const source=materialMode?stock.map(function(pair){return {key:'material:'+pair[0],name:pair[0],qty:Number(pair[1]),material:true}}):
       allItems.map(function(i,index){return {key:'creation:'+String(i.id||i.uuid||index)+':'+index,name:i.name,rarity:i.rarity,item:i,material:false}}).filter(function(e){return classify(e.item)===state.family});
@@ -59,15 +77,22 @@
     const viewer=chosen?(materialMode?materialArt(chosen.name):
       (typeof ctx.renderAsset==='function'?ctx.renderAsset(item):'<span class="genInvEmptyPreview">'+esc(chosen.name)+'</span>')) :
       '<p class="genInvEmptyPreview">La familia seleccionada no contiene objetos</p>';
-    const title=chosen?esc(chosen.name):'Sin selección';
+    const title=chosen?esc(chosen.name):'Seleccioná un objeto';
     const facts=chosen?(materialMode?
       '<div class="genInvInfoLine"><span>Familia</span><b>Materiales</b></div><div class="genInvInfoLine"><span>Cantidad</span><b>'+chosen.qty+'</b></div>':
-      '<div class="genInvInfoLine"><span>Familia</span><b>'+esc(state.family)+'</b></div><div class="genInvInfoLine"><span>Rareza</span><b>'+esc(item.rarity||'')+'</b></div><div class="genInvInfoLine"><span>Canales</span><b>'+(Array.isArray(item.channels)?item.channels.length:0)+'</b></div>'):'';
+      '<div class="genInvInfoLine"><span>Familia</span><b>'+esc(state.family)+'</b></div><div class="genInvInfoLine"><span>Rareza</span><b>'+esc(item.rarity||'')+'</b></div>'+
+      '<h3 class="genInvSubhead">CANALES DEL OBJETO</h3>'+
+      '<div class="genInvChannels" role="list">'+channelSummary(item)+'</div>'+
+      '<h3 class="genInvSubhead">RELATO NGE</h3>'+storySummary(item)) : '';
+
     const slots=Array.from({length:20},function(_,i){
       const entry=visible[i];
       if(!entry)return '<button class="genInvSlot" disabled aria-label="Casilla vacía"></button>';
       const selected=entry.key===state.selectedKey;
-      const content=entry.material?materialArt(entry.name):'<span class="genInvCreationGlyph">'+(state.family==='Escudos'?'◈':'⚔')+'</span>';
+      const content=entry.material?materialArt(entry.name):
+        (entry.item.thumbnail || entry.item.poster
+          ? '<img src="'+esc(entry.item.thumbnail||entry.item.poster)+'" alt="" loading="lazy" draggable="false">'
+          : '<span class="genInvCreationGlyph" aria-hidden="true"></span>');
       return '<button class="genInvSlot'+(selected?' selected':'')+'" data-select="'+i+'" aria-label="'+esc(entry.name)+'" aria-pressed="'+selected+'">'+content+'<span>'+esc(entry.material?entry.qty:(entry.rarity||''))+'</span></button>';
     }).join('');
     const html='<div class="genInv" id="genInv">'+
@@ -77,7 +102,7 @@
           '</aside>'+
         '<section class="genInvViewer"><p class="genInvViewerTitle">'+title+'</p><div class="genInvImageWrap">'+viewer+'</div><p class="genInvViewLabel">'+(materialMode?'Vista fija · material':'Objeto fabricado · visor 360°')+'</p></section>'+
         '<aside class="genInvInfo"><h2 class="genInvInfoTitle">INFORMACIÓN</h2>'+facts+
-          (chosen&&!materialMode?'<button class="genInvInfoMore" id="genInvDetails">INFORMACIÓN COMPLETA</button>':'')+
+          (chosen&&!materialMode?'<button class="genInvInfoMore" id="genInvDetails"><span>CONSULTAR FICHA DEL OBJETO</span></button>':'')+
           '</aside>'+
         '<section class="genInvGrid"><div class="genInvGridControls"><h2 class="genInvGridTitle">'+esc(state.family)+'</h2>'+
           '<input class="genInvFilter" id="genInvFilter" aria-label="Filtrar objetos" placeholder="Filtrar '+(materialMode?'materiales':'creaciones')+'..." value="'+esc(state.search)+'">'+
