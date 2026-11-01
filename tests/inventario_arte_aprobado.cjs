@@ -15,6 +15,7 @@ try{
   return route.fulfill({status:200,contentType:MIME[path.extname(filename)]||'application/octet-stream',body:fs.readFileSync(filename)});
  });
  await page.goto('http://genesis.local/index.html');
+ await page.evaluate(()=>{for(const id of ['loading','prototypeIntro']){const el=document.getElementById(id);if(el)el.style.display='none'};window.GenesisDevice={safePreviews:true}});
  for(const p of ['preparacion.css','responsive.css','inventario_genesis_16x9.css'])await page.addStyleTag({content:fs.readFileSync(path.join(root,p),'utf8')});
  for(const p of ['art_registry_genesis_inventory.js','inventario_genesis_16x9.js','preparacion_control.js'])await page.addScriptTag({content:fs.readFileSync(path.join(root,p),'utf8')});
  await page.evaluate(()=>{
