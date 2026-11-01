@@ -2,11 +2,14 @@ import {Entity,StandardMaterial,Texture,Color,Mesh,MeshInstance,ADDRESS_REPEAT,B
 import {mountVillageTrees} from './village_trees.js?v=0.15.001';
 import {mountArcanePortal} from './village_arcanist.js?v=0.14b';
 const ROOT='./assets/world/v0.11.004/';
+const GITHUB_ASSET_ROOT='https://raw.githubusercontent.com/gburdesedev/Project-genesis/feature/mercenary-equipment-runtime-v001/assets/world/v0.11.004/';
 const MOBILE_TEXTURE_EDGE=1024;
 // Decode one full-resolution source at a time on touch devices, then keep only
 // a small PBR texture in GPU memory. Desktop retains the approved 4K originals.
 async function loadTexture(app,name,mobile=false,onResourceLoaded=()=>{}){
- const image=new Image();image.decoding='async';image.src=ROOT+name;await image.decode();
+ const image=new Image();image.decoding='async';image.crossOrigin='anonymous';
+ try { image.src=ROOT+name; await image.decode(); }
+ catch(localError) { image.src=GITHUB_ASSET_ROOT+name; await image.decode(); }
  let source=image;
  if(mobile&&Math.max(image.naturalWidth,image.naturalHeight)>MOBILE_TEXTURE_EDGE){
   const factor=MOBILE_TEXTURE_EDGE/Math.max(image.naturalWidth,image.naturalHeight);
