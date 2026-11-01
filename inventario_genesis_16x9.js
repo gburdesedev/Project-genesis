@@ -34,6 +34,19 @@
       return '<div class="genInvChannel"><span>'+esc(index===0 && String(name).toLowerCase()==='base'?'Canal base':name)+'</span><b>'+esc(text)+'</b></div>';
     }).join('');
   }
+  function techniqueSummary(item) {
+    const registry=window.GenesisTechniqueIcons;
+    if(!registry)return '';
+    const actual=registry.actual(item);
+    if(!actual.length)return '';
+    return '<h3 class="genInvSubhead">TÉCNICAS DEL OBJETO</h3><div class="genInvTechniqueList">'+actual.map(function(t){
+      const url=registry.get(t.id);
+      return '<div class="genInvTechnique" data-technique="'+esc(t.id)+'">'+
+        (url?'<img class="genInvTechniqueIcon" src="'+esc(url)+'" alt="" loading="lazy">':
+        '<span class="genInvTechniqueMissing" aria-label="Icono pendiente">◇</span>')+
+        '<span>'+esc(t.name)+'</span></div>';
+    }).join('')+'</div>';
+  }
   function storySummary(item) {
     const candidates=[item.nge?.story,item.nge?.description,item.ngeStory,item.narrative,item.description,item.history];
     const found=candidates.find(function(v){return typeof v==='string' && v.trim()});
@@ -83,7 +96,7 @@
       '<div class="genInvInfoLine"><span>Familia</span><b>'+esc(state.family)+'</b></div><div class="genInvInfoLine"><span>Rareza</span><b>'+esc(item.rarity||'')+'</b></div>'+
       '<h3 class="genInvSubhead">CANALES DEL OBJETO</h3>'+
       '<div class="genInvChannels" role="list">'+channelSummary(item)+'</div>'+
-      '<h3 class="genInvSubhead">RELATO NGE</h3>'+storySummary(item)) : '';
+      techniqueSummary(item)+'<h3 class="genInvSubhead">RELATO NGE</h3>'+storySummary(item)) : '';
 
     const slots=Array.from({length:20},function(_,i){
       const entry=visible[i];
