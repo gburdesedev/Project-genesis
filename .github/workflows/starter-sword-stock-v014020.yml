@@ -1,0 +1,38 @@
+name: "Genesis starter stock · two seeded swords"
+on:
+  push:
+    branches: [fix/starter-sword-stock-v014020]
+    paths:
+      - index.html
+      - village_world.js
+      - preparacion_control.js
+      - genesis_market_domain_v001.js
+      - tests/starter_sword_stock_v014020.cjs
+      - .github/workflows/starter-sword-stock-v014020.yml
+  pull_request:
+    paths:
+      - index.html
+      - village_world.js
+      - preparacion_control.js
+      - genesis_market_domain_v001.js
+      - tests/starter_sword_stock_v014020.cjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  starter-inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate published module syntax
+        run: |
+          node --check village_world.js
+          node --check genesis_market_domain_v001.js
+          node --check preparacion_control.js
+          node --check tests/starter_sword_stock_v014020.cjs
+      - name: Run seeded stock and market integration assertions
+        run: node --test tests/starter_sword_stock_v014020.cjs tests/genesis_market_domain_v001.cjs tests/genesis_market_integration_v001.cjs
