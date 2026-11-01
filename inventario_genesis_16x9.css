@@ -404,3 +404,20 @@
 .genInvTechnique{display:flex;align-items:center;gap:6px;color:#e5c89d;font-size:.82cqw;min-height:1.75cqw}
 .genInvTechniqueIcon,.genInvTechniqueMissing{display:grid;place-items:center;flex:none;height:1.48cqw;width:1.48cqw;object-fit:contain}
 .genInvTechniqueMissing{color:#9b825f;border:1px solid #685032;background:#130e0b}
+
+
+/* PR20 · 2026-11-01. Legible item-applied techniques, no fictitious graphics.
+   Compress vertical whitespace rather than clipping NGE and the fiche button.
+   All images and frames above remain unchanged. */
+.genInvInfo{padding:3.8% 5% 2.2%!important}
+.genInvInfo .genInvInfoTitle{font-size:1.25cqw!important;margin:0 0 .9%!important;padding-bottom:1%!important}
+.genInvInfo .genInvInfoLine{font-size:.91cqw!important;padding:.6% .5%!important;line-height:1.2!important}
+.genInvInfo .genInvSubhead{font-size:.92cqw!important;margin:1.15% 0 .35%!important;padding:0 0 .35%!important;line-height:1.15!important}
+.genInvInfo .genInvChannels{min-height:0!important;max-height:18%!important;flex:1 1 20%!important}
+.genInvInfo .genInvChannel{font-size:.84cqw!important;min-height:1.5cqw!important;padding:.3% 2%!important}
+.genInvInfo .genInvTechniqueList{flex:0 0 auto!important;min-height:1.85cqw!important;max-height:19%!important;overflow:auto!important}
+.genInvInfo .genInvTechnique{min-height:1.85cqw!important;padding:0 1.4%;font-size:.93cqw!important;line-height:1.1!important;background:#16100cb5;border-bottom:1px solid #514027}
+.genInvInfo .genInvTechniqueIcon,.genInvInfo .genInvTechniqueMissing{height:1.4cqw!important;width:1.4cqw!important;font-size:1.0cqw!important}
+.genInvInfo .genInvNgeText{max-height:2.5cqw!important;min-height:1.9cqw!important;flex:0 1 auto!important;font-size:.85cqw!important;margin:0 0 .5%!important;line-height:1.14!important;overflow:auto!important}
+.genInvInfo .genInvInfoMore{height:2.25cqw!important;min-height:2.25cqw!important;padding:0!important;margin:.5% 0 0!important}
+.genInvInfo .genInvInfoMore span{font-size:.82cqw!important}
