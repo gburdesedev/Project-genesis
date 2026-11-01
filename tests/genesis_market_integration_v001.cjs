@@ -27,9 +27,11 @@ test('existing inventory, chest tutorial and approved menus retained',()=>{
   assert.doesNotMatch(market,/(\bprice\s*:\s*[1-9]|\bprice\s*=\s*[1-9])/);
 });
 test('published version and cache keys aligned',()=>{
-  assert.match(html,/<title>Project Genesis v0\.14\.019 · Build 20261101\.01/);
-  assert.match(html,/PROJECT GENESIS · v0\.14\.019 · BUILD 20261101\.01/);
-  assert.match(html,/village_world\.js\?v=0\.14\.019/);
-  assert.match(html,/genesis_market_v001\.js\?v=0\.14\.019/);
-  assert.match(world,/version='v0\.14\.019', build='20261101\.01'/);
+  const match=html.match(/<title>Project Genesis (v0\.\d+\.\d+) · Build (\d{8}\.\d+)/);
+  assert(match,'Game version and build missing from title');
+  const [,version,build]=match;
+  assert.match(html,new RegExp('PROJECT GENESIS · '+version.replace(/\./g,'\\.')+' · BUILD '+build.replace(/\./g,'\\.')));
+  assert(html.includes('village_world.js?v='+version));
+  assert(html.includes('genesis_market_v001.js?v='+version));
+  assert(world.includes("version='"+version+"', build='"+build+"'"));
 });
