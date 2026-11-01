@@ -1484,6 +1484,8 @@ function showMercenaryEquipment(editing=false,reuseDraft=false){
       poolFirst,poolSecond,selectedFirst:chosenFirst,selectedSecond:chosenSecond,
       equippedFirst:mercGearAttached?activeFirst:null,equippedSecond:mercGearAttached?activeSecond:null,
       itemIcon,defensive:tanner,statsHTML:renderMercStats(chosenFirst,chosenSecond),
+      getStatsHTML:(a,b)=>renderMercStats(a,b),
+      getMercInventoryHTML:(a,b)=>renderMercInventory(a,b),
       onDraft:(which,item)=>{
         if(tanner){if(which==='first'){if(editing)mercEditArmorItem=item;else mercArmorItem=item}
           else{if(editing)mercEditBootsItem=item;else mercBootsItem=item}}
