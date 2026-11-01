@@ -42,6 +42,8 @@ await page.evaluate(()=>{
 });
 await page.waitForSelector('#genInv');
 assert.equal(await page.locator('.genInvSlot').count(),20,'20 slots in active family');
+assert.equal(await page.locator('#genInvGoCraft').count(),0,'approved inventory has no redundant Ir a Fabricaciones button');
+assert.equal(await page.locator('.genInvTab').count(),4,'only four original navigation tabs');
 assert.equal(await page.locator('.genInvFamily').count(),1,'Only material family appears before any creation exists');
 assert.equal(await page.locator('.genInvFamily span:last-child').first().innerText(),'Materiales');
 assert.equal(await page.locator('.genInvImageWrap img').count(),1,'known material has a fixed poster');
@@ -59,6 +61,10 @@ assert(geometries.slot.width/geometries.slot.height>=.8&&geometries.slot.width/g
 assert(geometries.heroImg.bottom < geometries.heroWrap.bottom+1,'preview image must remain inside its viewer');
 assert(!geometries.viewerBg.includes('FondoVisorHerreria'),'no baked anvil under the inventory item');
 assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),2);
+await page.evaluate(()=>{stock={};items=[];openLive()});
+assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),0,'empty live inventory must show twenty empty slots');
+assert.equal(await page.locator('[data-family="Espadas"]').count(),0,'no invented family without actual creations');
+await page.evaluate(()=>{stock={'Lingote de hierro':3,'Mineral de hierro':7};openLive()});
 const out='/tmp/genesis-responsive';fs.mkdirSync(out,{recursive:true});
 await page.waitForFunction(()=>Array.from(document.querySelectorAll('.genInvTab img')).length===4&&Array.from(document.querySelectorAll('.genInvTab img')).every(i=>i.complete&&i.naturalWidth>0));
 await page.screenshot({path:out+'/inventario-16x9-materiales.png',fullPage:false});
