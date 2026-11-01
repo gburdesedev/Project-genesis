@@ -522,11 +522,18 @@
         const style=document.createElement('link');
         style.rel='stylesheet';style.href='inventario_genesis_16x9.css?v=0.1.001';
         document.head.append(style);
-        const loader=document.createElement('script');
-        loader.src='inventario_genesis_16x9.js?v=0.1.001';
-        loader.onload=()=>renderWorkspace('Inventario');
-        loader.onerror=()=>{window.__GenesisInv16Loading=false;style.remove();};
-        document.head.append(loader);
+        const registryLoader=document.createElement('script');
+        registryLoader.src='genesis_technique_icons.js?v=0.1.001';
+        registryLoader.onload=()=>loadInventory();
+        registryLoader.onerror=()=>loadInventory();
+        function loadInventory(){
+          const loader=document.createElement('script');
+          loader.src='inventario_genesis_16x9.js?v=0.1.002';
+          loader.onload=()=>renderWorkspace('Inventario');
+          loader.onerror=()=>{window.__GenesisInv16Loading=false;style.remove();};
+          document.head.append(loader);
+        }
+        document.head.append(registryLoader);
       }
     }
     halt();
