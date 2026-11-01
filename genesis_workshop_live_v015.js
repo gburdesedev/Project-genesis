@@ -10,7 +10,7 @@ const GLBS={
  chimney:ASSETS+'feature/blacksmith-workshop-windows-flue-v013/public/models/blacksmith-structural-v013/batched/blacksmith_chimney_candidate_preview.glb'
 };
 const status={version:'v0.17.013',phase:'waiting',assets:{},installed:[],
- roofPitchMultiplier:1.30,oldRoofPreserved:true,doorUnchanged:true,forgeUnchanged:true,
+ roofPitchMultiplier:1.755,oldRoofPreserved:true,doorUnchanged:true,forgeUnchanged:true,
  geometryVisualReview:'PENDING_PLAYER',chimneyCapConnected:true,cornerInterlockingCourses:32,
  windows:{openAir:true,glass:false,blockedFill:false,count:5},
  chimneyAlignedToForge:true,
