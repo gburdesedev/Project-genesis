@@ -84,6 +84,9 @@ const server=http.createServer((req,res)=>{
       el.click();
     },selector);
     const count=async(sel)=>page.evaluate(s=>document.querySelectorAll(s).length,sel);
+    // The production navigation lazy-loads inventario_genesis_16x9.js.
+    // Wait for DOM presence, not layout stability or animations.
+    await page.waitForFunction(()=>!!document.querySelector('#genInv'),null,{polling:250,timeout:20000});
     assert.equal(await count('.genInv'),1,'Inventory opens in real WebGL game');
     assert.equal(await count('.genInvSlot'),20,'20 visible slots');
     assert.equal(await count('.genInvTab'),4,'four tabs');
