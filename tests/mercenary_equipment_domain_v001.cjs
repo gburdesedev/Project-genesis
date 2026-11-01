@@ -1,0 +1,20 @@
+/* Headless regression smoke test; run with node. */
+const assert=require('node:assert/strict');
+require('../mercenary_equipment_domain_v001.js');
+const mod=globalThis.GenesisMercenaryEquipment;
+const items=[{id:'a',family:'Espadas',channels:[{name:'Base',intensity:85},{name:'Luz',intensity:42}]},{id:'b',family:'Espadas',channels:[{name:'Base',intensity:92},{name:'Fuego',intensity:78}]},{id:'s',family:'Escudos',channels:[{name:'Base',intensity:18}]}];
+let roster=[{id:'m1',name:'Mercenario',equipment:{weapon:'a',shield:null}}];
+const model=mod.create({getItems:()=>items,getMercenaries:()=>roster,saveMercenaries:r=>(roster=r,true)});
+assert.equal(model.snapshot().mercenary.id,'m1');
+assert.equal(model.select('a'),false);
+assert.equal(model.select('b'),true);
+assert.deepEqual(model.snapshot().comparison.map(r=>r.channel),['Base','Luz','Fuego']);
+assert.equal(model.snapshot().comparison[2].presentEquipped,false);
+assert.equal(model.equip().ok,true);
+assert.equal(roster[0].equipment.weapon,'b');
+assert.equal(model.select('b'),false);
+assert.equal(model.chooseFamily('Escudos'),true);
+assert.equal(model.select('s'),true);
+assert.equal(model.equip().ok,true);
+assert.equal(roster[0].equipment.shield,'s');
+console.log('Mercenary equipment domain V001 smoke tests passed');
