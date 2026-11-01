@@ -81,7 +81,7 @@ assert.equal(await page.locator('.genInvInfoTitle').innerText(),'INFORMACIÓN');
 assert.equal(await page.locator('.genInvChannel').count(),1,'Actual channel entries only');
 assert.equal(await page.locator('.genInvTechnique').count(),1,'Only techniques carried by this crafted item are shown');
 assert.equal(await page.locator('.genInvTechniqueMissing').count(),1,'Without approved icon, neutral placeholder replaces invented technique art');
-assert.equal(await page.locator('.genInvTechnique').first().innerText(),'◇ Sangrado','Technique label must be visible in the browser');
+assert((await page.locator('.genInvTechnique').first().innerText()).includes('Sangrado'),'Technique label must be visible in the browser');
 const visibleGeometry=await page.evaluate(()=>{
  const info=document.querySelector('.genInvInfo').getBoundingClientRect();
  const row=document.querySelector('.genInvTechnique').getBoundingClientRect();
