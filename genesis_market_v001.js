@@ -190,6 +190,7 @@ export function mountGenesisMarket(options){
   });
   const status={version:'v0.14.019',npc:npc.fullCharacter?'rig_reused':'visible_fallback',
     center:POS,stall:STALL,seedBound:true,freePurchase:true};
-  window.__genesisMarket=status;
+  // Diagnóstico público de solo lectura: el test usa el mismo catálogo y ventana del juego.
+  window.__genesisMarket=Object.freeze({...status,catalog,open});
   return Object.freeze({interactable,open,catalog,stall,npc:npc.entity,status});
 }
