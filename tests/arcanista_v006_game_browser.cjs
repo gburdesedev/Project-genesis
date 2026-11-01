@@ -28,7 +28,10 @@ const server=http.createServer((req,res)=>{
   });
   assert.equal(blacksmith.s.phase,'running',JSON.stringify(blacksmith.s.errors));
   assert(blacksmith.mounted,'Herrero V013 must have all four real PBR walls');
-  assert.equal(blacksmith.s.assets.walls.renderers,8);
+  // V082 adds two deliberate arch-fitting masonry meshes to the 8 approved V013 renderers.
+  assert.equal(blacksmith.s.assets.walls.renderers,10,'V082 arch stones must preserve the original eight wall meshes');
+  assert.equal(blacksmith.s.doorVisual,'V082-B','Herrero approved iron door missing');
+  assert.equal(blacksmith.s.doorProfile,'arched','Facade opening no longer matches V082 door silhouette');
   console.log('HERRERO_FOUR_WALLS_V013_VALIDATED');
   await page.waitForFunction(()=>{
     const a=window.__genesisArcanistaFourWallsV006;
