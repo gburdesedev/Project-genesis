@@ -25,7 +25,7 @@ const server=http.createServer((req,res)=>{
  try{
   await page.goto('http://127.0.0.1:'+server.address().port+'/index.html',{waitUntil:'domcontentloaded',timeout:120000});
   await page.waitForFunction(()=>!!window.__genesisMarket?.catalog,null,{timeout:180000});
-  const npc=await page.evaluate(()=>({status:window.__genesisMarket,
+  const npc=await page.evaluate(()=>({status:{version:window.__genesisMarket?.version,npc:window.__genesisMarket?.npc,center:window.__genesisMarket?.center},
     model:!!document.getElementById('genesisApp')?.app?.root.findByName('Mercader de suministros · NPC interactivo V001')}));
   assert(npc.model,'NPC not present in actual PlayCanvas scene');
   await page.locator('[data-profession="Herrero"]').click({timeout:180000});
@@ -53,7 +53,7 @@ const server=http.createServer((req,res)=>{
     state:document.querySelector('#loadState')?.textContent,
     detail:document.querySelector('#loadDetail')?.textContent,
     retry:document.querySelector('#loadRetry')?.style.display,
-    market:window.__genesisMarket||null,
+    market:window.__genesisMarket?{version:window.__genesisMarket.version,npc:window.__genesisMarket.npc,center:window.__genesisMarket.center}:null,
     app:!!document.querySelector('#genesisApp')?.app
   })).catch(e=>({diagnosticError:String(e)}));
   fs.writeFileSync(path.join(out,'browser-error.json'),JSON.stringify({error:String(error),diag,errors:errors.slice(0,50)},null,2));
