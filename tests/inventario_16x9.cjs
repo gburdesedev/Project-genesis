@@ -21,6 +21,7 @@ await page.route('**/*',async route=>{
 await page.goto('http://genesis.local/index.html');
 for(const f of ['preparacion.css','responsive.css','inventario_genesis_16x9.css'])await page.addStyleTag({content:fs.readFileSync(path.join(root,f),'utf8')});
 await page.evaluate(()=>{window.GenesisDevice={safePreviews:true};for(const id of ['loading','prototypeIntro']){const el=document.getElementById(id);if(el)el.style.display='none'}});
+await page.addScriptTag({content:fs.readFileSync(path.join(root,'genesis_technique_icons.js'),'utf8')});
 await page.addScriptTag({content:fs.readFileSync(path.join(root,'inventario_genesis_16x9.js'),'utf8')});
 await page.addScriptTag({content:fs.readFileSync(path.join(root,'preparacion_control.js'),'utf8')});
 await page.evaluate(()=>{
@@ -45,6 +46,8 @@ assert.equal(await page.locator('.genInvSlot').count(),20,'20 slots in active fa
 assert.equal(await page.locator('#genInvGoCraft').count(),0,'approved inventory has no redundant Ir a Fabricaciones button');
 assert.equal(await page.locator('.genInvTab').count(),4,'only four original navigation tabs');
 assert.equal(await page.locator('.genInvFamily').count(),1,'Only material family appears before any creation exists');
+assert.equal(await page.locator('.genInv .workspaceRecipeTree > .workspaceRecipeFamily').count(),1,'Inventory reuses Fabricaciones hierarchy blocks');
+assert.equal(await page.locator('.genInv .workspaceRecipeFamily .workspaceRecipeChoice.genInvFamily').count(),1,'Family button reuses Fabricaciones choice component');
 assert.equal(await page.locator('.genInvFamily span:last-child').first().innerText(),'Materiales');
 assert.equal(await page.locator('.genInvImageWrap img').count(),1,'known material has a fixed poster');
 const bounds=await page.locator('.genInv').boundingBox();
@@ -69,7 +72,7 @@ const out='/tmp/genesis-responsive';fs.mkdirSync(out,{recursive:true});
 await page.waitForFunction(()=>Array.from(document.querySelectorAll('.genInvTab img')).length===4&&Array.from(document.querySelectorAll('.genInvTab img')).every(i=>i.complete&&i.naturalWidth>0));
 await page.screenshot({path:out+'/inventario-16x9-materiales.png',fullPage:false});
 await page.evaluate(()=>{
-  items.push({name:'Espada de hierro',recipe:'espada',rarity:'Común',channels:[['Base',18]],ngeStory:'Relato original de la espada registrado al cierre.'});
+  items.push({name:'Espada de hierro',recipe:'espada',rarity:'Común',channels:[['Base',18,[{id:'sangrado',name:'Sangrado',applied:true}]]],ngeStory:'Relato original de la espada registrado al cierre.'});
   items.push({name:'Escudo de hierro',recipe:'escudo',rarity:'Bueno',channels:[['Base',30]]});
   openLive();
 });
@@ -78,9 +81,32 @@ await page.locator('[data-family="Espadas"]').click();
 assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),1);
 assert.equal(await page.locator('.genInvInfoTitle').innerText(),'INFORMACIÓN');
 assert.equal(await page.locator('.genInvChannel').count(),1,'Actual channel entries only');
+assert.equal(await page.locator('.genInvTechnique').count(),1,'Only techniques carried by this crafted item are shown');
+assert.equal(await page.locator('.genInvTechniqueMissing').count(),1,'Without approved icon, neutral placeholder replaces invented technique art');
+assert((await page.locator('.genInvTechnique').first().innerText()).includes('Sangrado'),'Technique label must be visible in the browser');
+const visibleGeometry=await page.evaluate(()=>{
+ const info=document.querySelector('.genInvInfo').getBoundingClientRect();
+ const row=document.querySelector('.genInvTechnique').getBoundingClientRect();
+ const story=document.querySelector('.genInvNgeText').getBoundingClientRect();
+ const button=document.querySelector('#genInvDetails').getBoundingClientRect();
+ return {infoBottom:info.bottom,techniqueHeight:row.height,techniqueBottom:row.bottom,storyHeight:story.height,storyBottom:story.bottom,buttonBottom:button.bottom};
+});
+assert(visibleGeometry.techniqueHeight>=19 && visibleGeometry.storyHeight>=18,'Technique and NGE need legible line height');
+assert(visibleGeometry.techniqueBottom<visibleGeometry.storyBottom && visibleGeometry.storyBottom<=visibleGeometry.buttonBottom && visibleGeometry.buttonBottom<=visibleGeometry.infoBottom+1,'Technique, NGE and action must be ordered and fully visible');
+
 assert((await page.locator('.genInvChannel').first().innerText()).includes('18'),'Channel intensity comes from item snapshot');
 assert((await page.locator('.genInvNgeText').innerText()).includes('Relato original'),'NGE narrative comes from saved object');
-assert.equal(await page.locator('#genInvDetails span').innerText(),'CONSULTAR FICHA DEL OBJETO');
+assert.equal(await page.locator('#genInvDetails').getAttribute('aria-label'),'Consultar ficha del objeto');
+assert.equal(await page.locator('#genInvDetails span').textContent(),'CONSULTAR FICHA DEL OBJETO');
+const btnArt=await page.evaluate(async()=>{
+ const style=getComputedStyle(document.querySelector('#genInvDetails'));
+ const imageUrl=style.backgroundImage.match(/url\(["']?(.*?)["']?\)/)?.[1];
+ if(!imageUrl)return {ok:false,url:''};
+ const im=new Image();im.src=imageUrl;
+ try{await im.decode();return {ok:im.naturalWidth>0,url:imageUrl,width:im.naturalWidth};}
+ catch(e){return {ok:false,url:imageUrl};}
+});
+assert(btnArt.ok && btnArt.url.includes('assets/ui/inventario/Boton_ConsultarFicha_Aprobado.webp'),'Original approved button image must load, rather than PREPARAR sprite');
 await page.locator('#genInvDetails').click();
 assert.equal(await page.locator('.genInvOverlay').count(),1,'Consulting a creation opens its full-sheet overlay');
 assert.equal(await page.locator('.genInvOverlay [data-sheet-tab="craft"]').count(),0,'internal fabrication formula tab is never public');

@@ -398,3 +398,105 @@
 .genInvFamilies .genInvHead{font-weight:normal!important;letter-spacing:.05em}
 .genInvFamily{height:6.25%!important;min-height:0!important;font-size:1.05cqw!important}
 .genInvInfo .genInvInfoMore{background-size:100% 100%!important;}
+
+/* Modular technique presentation: only shown for techniques saved on this item. */
+.genInvTechniqueList{flex:0 1 auto;min-height:0;max-height:17%;overflow-y:auto;display:flex;flex-direction:column;gap:2px;scrollbar-width:thin;scrollbar-color:#87623b transparent}
+.genInvTechnique{display:flex;align-items:center;gap:6px;color:#e5c89d;font-size:.82cqw;min-height:1.75cqw}
+.genInvTechniqueIcon,.genInvTechniqueMissing{display:grid;place-items:center;flex:none;height:1.48cqw;width:1.48cqw;object-fit:contain}
+.genInvTechniqueMissing{color:#9b825f;border:1px solid #685032;background:#130e0b}
+
+
+/* PR20 · 2026-11-01. Legible item-applied techniques, no fictitious graphics.
+   Compress vertical whitespace rather than clipping NGE and the fiche button.
+   All images and frames above remain unchanged. */
+.genInvInfo{padding:3.8% 5% 2.2%!important}
+.genInvInfo .genInvInfoTitle{font-size:1.25cqw!important;margin:0 0 .9%!important;padding-bottom:1%!important}
+.genInvInfo .genInvInfoLine{font-size:.91cqw!important;padding:.6% .5%!important;line-height:1.2!important}
+.genInvInfo .genInvSubhead{font-size:.92cqw!important;margin:1.15% 0 .35%!important;padding:0 0 .35%!important;line-height:1.15!important}
+.genInvInfo .genInvChannels{min-height:0!important;max-height:18%!important;flex:1 1 20%!important}
+.genInvInfo .genInvChannel{font-size:.84cqw!important;min-height:1.5cqw!important;padding:.3% 2%!important}
+.genInvInfo .genInvTechniqueList{flex:0 0 auto!important;min-height:1.85cqw!important;max-height:19%!important;overflow:auto!important}
+.genInvInfo .genInvTechnique{min-height:1.85cqw!important;padding:0 1.4%;font-size:.93cqw!important;line-height:1.1!important;background:#16100cb5;border-bottom:1px solid #514027}
+.genInvInfo .genInvTechniqueIcon,.genInvInfo .genInvTechniqueMissing{height:1.4cqw!important;width:1.4cqw!important;font-size:1.0cqw!important}
+.genInvInfo .genInvNgeText{max-height:2.5cqw!important;min-height:1.9cqw!important;flex:0 1 auto!important;font-size:.85cqw!important;margin:0 0 .5%!important;line-height:1.14!important;overflow:auto!important}
+.genInvInfo .genInvInfoMore{height:2.25cqw!important;min-height:2.25cqw!important;padding:0!important;margin:.5% 0 0!important}
+.genInvInfo .genInvInfoMore span{font-size:.82cqw!important}
+
+
+/* V18 · ALINEACIÓN CON FABRICACIONES APROBADO
+ * Usamos el mismo patrón .workspaceRecipeTree > .workspaceRecipeFamily
+ * > .workspaceRecipeChoice de preparacion.css (Familias -> opciones de partida).
+ * Sin iconos ni botones alternativos inventados. */
+.genInv .genInvFamilies{
+  display:flex!important;flex-direction:column!important;
+  padding:11.5% 6% 4%!important;
+}
+.genInv .genInvFamilyTree.workspaceRecipeTree{
+  display:grid!important;align-content:start!important;
+  gap:9px!important;overflow-y:auto!important;
+  height:auto!important;max-height:100%!important;min-height:0!important;
+  width:100%!important;margin:2% 0!important;
+  padding:3px 3px 8px!important;scrollbar-width:thin;
+  scrollbar-color:#aa7844 #1b130c;
+}
+.genInv .genInvRecipeFamily.workspaceRecipeFamily{
+  border:1px solid #795632!important;
+  background:linear-gradient(180deg,#362416d9,#1a120df0)!important;
+  padding:8px!important;box-shadow:none!important;margin:0!important;
+}
+.genInv .genInvRecipeFamily h4{
+  margin:0 0 7px!important;text-align:left!important;
+  color:#f2cc91!important;
+  font:600 clamp(15px,1.05cqw,21px)/1.2 Georgia,serif!important;
+  letter-spacing:.025em!important;
+}
+.genInv .genInvRecipeFamily .workspaceRecipeChoice.genInvFamily{
+  display:block!important;
+  position:relative!important;
+  width:100%!important;height:auto!important;min-height:2.25cqw!important;
+  margin:5px 0 0!important;padding:9px 10px!important;
+  border:1px solid #6b4a2c!important;
+  background:#130f0c!important;
+  color:#d7c0a0!important;
+  font:normal clamp(12px,.97cqw,18px)/1.35 Georgia,serif!important;
+  text-align:left!important;overflow-wrap:anywhere!important;
+  box-shadow:none!important;transform:none!important;
+}
+.genInv .genInvRecipeFamily .workspaceRecipeChoice.genInvFamily:hover,
+.genInv .genInvRecipeFamily .workspaceRecipeChoice.genInvFamily:focus-visible{
+  border-color:#d9a765!important;color:#fff0c4!important;
+  outline:1px solid #d9a765!important;
+}
+.genInv .genInvRecipeFamily .workspaceRecipeChoice.genInvFamily[aria-pressed="true"]{
+  border-color:#d9a765!important;color:#ffe4ae!important;
+  background:linear-gradient(100deg,#65401f,#2c1b0f)!important;
+  box-shadow:inset 3px 0 #edba71!important;
+}
+.genInv .genInvRecipeFamily .genInvFamily::before,
+.genInv .genInvFamilies::after{display:none!important;content:none!important}
+
+/* Exact approved bitmap with its own lettering, extracted from the V11 accepted
+ * 16:9 concept. Never cover up "PREPARAR" and substitute CSS text on the sprite. */
+.genInv .genInvInfo .genInvInfoMore#genInvDetails{
+  display:block!important;flex:0 0 auto!important;
+  position:relative!important;
+  width:100%!important;height:3cqw!important;min-height:3cqw!important;
+  max-height:3cqw!important;margin:.6% auto 0!important;padding:0!important;
+  border:0!important;border-radius:0!important;
+  background:transparent
+    url("assets/ui/inventario/Boton_ConsultarFicha_Aprobado.webp")
+    center center/contain no-repeat!important;
+  box-shadow:none!important;text-shadow:none!important;
+  cursor:pointer!important;
+}
+.genInv .genInvInfo .genInvInfoMore#genInvDetails::before{display:none!important;content:none!important}
+.genInv .genInvInfo .genInvInfoMore#genInvDetails:hover{filter:brightness(1.16)!important}
+.genInv .genInvInfo .genInvInfoMore#genInvDetails:active{filter:brightness(.9)!important}
+.genInv .genInvInfo .genInvInfoMore#genInvDetails:focus-visible{
+  outline:2px solid #f3cb83!important;outline-offset:-3px!important;
+}
+.genInv .genInvInfoMore .genInvButtonAccessible{
+  position:absolute!important;width:1px!important;height:1px!important;
+  overflow:hidden!important;clip-path:inset(50%)!important;
+  white-space:nowrap!important;left:0!important;top:0!important;
+}
