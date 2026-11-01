@@ -1692,8 +1692,11 @@ async function runMercenaryQABoot(){
   };
   appEl.app.on('update',updateEmission);
   QA.stopEmission=()=>appEl.app.off('update',updateEmission);
+  // The comparison starts against the newly fabricated Good/Common candidates.
+  // These are draft picks only; the old real items remain physically equipped.
+  mercEditSwordItem=craftedItems[1];mercEditShieldItem=craftedItems[3];
   // Directly enter interaction with the mercenary already available.
-  showMercenaryEquipment(true);
+  showMercenaryEquipment(true,true);
   QA.phase='ready';QA.mercenaryName=MERC_CANDIDATES[mercCandidate].label;
   QA.remainingMaterialUnits=Object.values(playerInventory).reduce((a,b)=>a+Math.max(0,Number(b)||0),0);
   console.info('[MERCENARY QA] READY',QA.items);
