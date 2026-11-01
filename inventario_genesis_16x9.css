@@ -275,3 +275,47 @@
  flex:0 0 auto!important;position:relative;z-index:2;
  margin-bottom:1%!important;padding:1% 0 0!important;min-height:0!important
 }
+
+/* LIVE crafted-object panel — same aged-gold/black art as approved Preparación.
+ * All rows are data-driven, no baked affinities, intensities, or narrative. */
+.genInvInfo{display:flex;flex-direction:column}
+.genInvInfoLine{flex:0 0 auto}
+.genInvSubhead{
+ flex:0 0 auto;text-align:center;font-family:Georgia,'Times New Roman',serif;
+ margin:4% 0 1%!important; padding:0 0 2%!important;
+ border-bottom:1px solid #6f502e;color:#e1c08d;
+ font-size:1.05cqw;font-weight:normal;letter-spacing:.03em
+}
+.genInvChannels{
+ display:flex;flex-direction:column;gap:3px;min-height:0;
+ overflow-y:auto;flex:1 1 auto;scrollbar-width:thin;
+ scrollbar-color:#937044 #15110e;
+}
+.genInvChannel{
+ display:flex;align-items:center;justify-content:space-between;gap:3%;
+ border:1px solid #79572c;border-top-color:#977044;
+ background:#0d0907;color:#e6c494;
+ padding:1.3% 3%;font-size:.91cqw;min-height:2.3cqw
+}
+.genInvChannel b{font-weight:normal;color:#f1d7a5}
+.genInvEmptyChannels{font-size:.9cqw;color:#a89171}
+.genInvNgeText{
+ flex:0 0 auto;max-height:4.1cqw;overflow:hidden;
+ font-family:Georgia,'Times New Roman',serif;
+ font-style:italic;line-height:1.4;color:#d1bba0;font-size:.91cqw;
+ margin:.8% 0 1.5%
+}
+.genInvNoStory{color:#a18c73}
+.genInvInfoMore{
+ flex:0 0 auto;position:relative;width:100%;
+ padding:4.4% 0!important;background:transparent
+ url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Normal.png')
+ center/100% 100% no-repeat!important;border:0!important;
+ display:grid;place-items:center;isolation:isolate;min-height:3.0cqw
+}
+.genInvInfoMore:hover{background-image:url('assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Hover.png')!important}
+.genInvInfoMore::before{
+ content:"";position:absolute;inset:25% 13% 22%;
+ background:#26180ced;box-shadow:0 0 5px 2px #26180ca5;z-index:0
+}
+.genInvInfoMore span{position:relative;z-index:1;text-shadow:0 1px 3px #000;font-size:.91cqw;color:#f4d8a7}
