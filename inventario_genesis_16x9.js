@@ -132,8 +132,16 @@
     const details=board.querySelector('#genInvDetails');
     if(details&&item)details.onclick=function(){
       const pane=document.createElement('section');pane.className='genInvOverlay';
+      ctx.sheetTab='channels';
       pane.innerHTML='<button id="genInvCloseDetails" aria-label="Cerrar ficha">✕ CERRAR</button>'+
-        nav.sheetForItem(ctx,item);board.appendChild(pane);
+        nav.sheetForItem(ctx,item);
+      // Public object info never exposes crafting formulas, internal traces, or MU stats.
+      pane.querySelector('.workspaceSheetTabs')?.remove();
+      const story = [item.nge?.story,item.nge?.description,item.ngeStory,item.narrative,item.description,item.history]
+        .find(function(v){return typeof v==='string' && v.trim()});
+      const storyBox=pane.querySelector('.workspaceNgeScroll');
+      if(storyBox && story) storyBox.textContent=story;
+      board.appendChild(pane);
       pane.querySelector('#genInvCloseDetails').onclick=function(){pane.remove()};
     };
   }
