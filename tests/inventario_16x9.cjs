@@ -81,6 +81,12 @@ assert.equal(await page.locator('.genInvChannel').count(),1,'Actual channel entr
 assert((await page.locator('.genInvChannel').first().innerText()).includes('18'),'Channel intensity comes from item snapshot');
 assert((await page.locator('.genInvNgeText').innerText()).includes('Relato original'),'NGE narrative comes from saved object');
 assert.equal(await page.locator('#genInvDetails span').innerText(),'CONSULTAR FICHA DEL OBJETO');
+await page.locator('#genInvDetails').click();
+assert.equal(await page.locator('.genInvOverlay').count(),1,'Consulting a creation opens its full-sheet overlay');
+assert.equal(await page.locator('.genInvOverlay [data-sheet-tab="craft"]').count(),0,'internal fabrication formula tab is never public');
+assert((await page.locator('.genInvOverlay .workspaceNgeScroll').innerText()).includes('Relato original'),'full-sheet uses actual NGE snapshot');
+await page.locator('#genInvCloseDetails').click();
+assert.equal(await page.locator('.genInvOverlay').count(),0,'sheet closes without leaving inventory');
 assert(await page.locator('#genInvDetails').isVisible(),'full item sheet button must remain visible');
 const fit=await page.evaluate(()=>{
  const parent=document.querySelector('.genInvInfo').getBoundingClientRect();
