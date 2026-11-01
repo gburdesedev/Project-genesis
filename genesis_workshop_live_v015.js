@@ -1,16 +1,19 @@
-/* Project Genesis — production Herrero V012 four bonded masonry walls, roof and corrected chimney integration
- * Load only approved-candidate GLBs as visuals, do not mutate physics, door
- * hinge, collision envelopes, procedural tutorials, forge or economy.
- * Existing HTML, UI and controls remain the source of authority.
+/* Project Genesis — production V015 masonry, arched V082-B Herrero door integration.
+ * Preserve approved V013 walls/window layout, raised roof, chimney, gameplay
+ * and original hinge/collision logic. Only the exported door VISUAL changes.
+ * The door swings OUTWARD toward plaza, around the original LEFT hinge pivot.
  */
 const ASSETS='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/';
 const GLBS={
- walls:ASSETS+'feature/blacksmith-workshop-windows-flue-v013/public/models/blacksmith-structural-v013/batched/blacksmith_four_walls_preview.glb',
+ walls:ASSETS+'integration/herrero-v082-arched-doorway/public/models/blacksmith-v082-arched-portal/blacksmith_four_walls_arched_v082.glb',
  roof:ASSETS+'feature/blacksmith-workshop-windows-flue-v013/public/models/blacksmith-structural-v013/batched/blacksmith_roof_preview.glb',
- chimney:ASSETS+'feature/blacksmith-workshop-windows-flue-v013/public/models/blacksmith-structural-v013/batched/blacksmith_chimney_candidate_preview.glb'
+ chimney:ASSETS+'feature/blacksmith-workshop-windows-flue-v013/public/models/blacksmith-structural-v013/batched/blacksmith_chimney_candidate_preview.glb',
+ door:ASSETS+'production/door-herrero-v082-subtle-forging/public/models/door-herrero-v082-b/door-herrero-v082-b.glb'
 };
-const status={version:'v0.17.013',phase:'waiting',assets:{},installed:[],
- roofPitchMultiplier:1.755,oldRoofPreserved:true,doorUnchanged:true,forgeUnchanged:true,
+const status={version:'v0.17.014-herrero-v082b',phase:'waiting',assets:{},installed:[],
+ doorVisual:'V082-B',doorProfile:'arched',doorHinge:'left',doorHandle:'right',
+ doorSwing:'outward',doorAngleDegrees:-92,doorMechanismUnchanged:true,
+ roofPitchMultiplier:1.755,oldRoofPreserved:true,doorUnchanged:false,forgeUnchanged:true,
  geometryVisualReview:'PENDING_PLAYER',chimneyCapConnected:true,cornerInterlockingCourses:32,
  windows:{openAir:true,glass:false,blockedFill:false,count:5},
  chimneyAlignedToForge:true,
@@ -27,7 +30,7 @@ function acquire(app,url,name){
   const visual=asset.resource.instantiateRenderEntity();
   const renderers=visual.findComponents('render');
   if(!renderers.length){visual.destroy();reject(Error(name+': no geometry'));return;}
-  for(const r of renderers){r.receiveShadows=true;r.castShadows=name==='walls';}
+  for(const r of renderers){r.receiveShadows=true;r.castShadows=name==='walls'||name==='door';}
   status.assets[name]={ready:true,renderers:renderers.length};
   resolve(visual);
  }));
@@ -73,14 +76,44 @@ function install(app,root,kind,sources,{tutorial=false}={}){
  chimney.setLocalPosition(0,-3.2*(ROOF_BOOST-1),0);
  const old={shell:oldShell.enabled,roof:oldRoof.enabled,
    modular:oldWalls?.enabled??null};
+ // The only changes to the active workshop structure are a precisely carved
+ // stone arch above the 1.48m portal and its approved V082-B forged leaf.
  oldShell.enabled=false;oldRoof.enabled=false;
  if(oldWalls)oldWalls.enabled=false;
- // Door is not centered or reoriented: the door's -1.10 position is
- // its hinge pivot; functionality must remain untouched.
- installed.set(kind,{root,modelRoot,oldShell,oldRoof,oldWalls,old,parts});
+ // IMPORTANT: door itself remains the gameplay hinge at -1.10 0 0.12.
+ // Parent the new artwork INSIDE that existing entity, not modelRoot.
+ // Its glTF native left hinge has been rebased to the origin by Blender.
+ const upgraded=sources.door.clone();
+ upgraded.name='Genesis Herrero V082-B · hierro forjado · hoja arqueada';
+ upgraded.setLocalPosition(0,0,0);
+ upgraded.setLocalEulerAngles(0,0,0);
+ const scale=2.18/1.20;
+ upgraded.setLocalScale(scale,1,scale);
+ door.addChild(upgraded);
+ const v082Renderers=new Set(upgraded.findComponents('render'));
+ const hiddenRenderers=new Set();
+ const ensureDoorVisual=()=>{
+   const all=door.findComponents('render');
+   for(const render of all){
+     if(!v082Renderers.has(render)){
+       if(render.enabled)render.enabled=false;
+       hiddenRenderers.add(render);
+     }
+   }
+   // The pc-model source may stream after first mount. Disable its content,
+   // not its hinge entity; the rotation/interaction code continues unchanged.
+   if(tutorial){
+     const src=document.getElementById('doorLeafModel');
+     if(src?.contentEntity && src.contentEntity!==upgraded)src.contentEntity.enabled=false;
+   }
+ };
+ ensureDoorVisual();
+ installed.set(kind,{root,modelRoot,oldShell,oldRoof,oldWalls,old,parts,
+   upgraded,hiddenRenderers,ensureDoorVisual});
  status.installed.push({kind,roofRaise:ROOF_BOOST,roofBoostRelativeToPrior:1.35,
   wallLoaded:true,roofLoaded:true,chimneyLoaded:true,
-  doorUntouched:true,originalVisualsHidden:true});
+  doorVisual:'V082-B',doorProfile:'arched',hingePositionUntouched:true,
+  openingDirection:'outward to plaza',sourceDoorVisualHidden:true,originalVisualsHidden:true});
  report();
 }
 function attemptMount(app,sources){
@@ -93,6 +126,8 @@ function restore(){
  for(const e of installed.values()){
   e.oldShell.enabled=e.old.shell;e.oldRoof.enabled=e.old.roof;
   if(e.oldWalls)e.oldWalls.enabled=e.old.modular;
+  e.upgraded?.destroy();
+  for(const r of e.hiddenRenderers||[])r.enabled=true;
   e.modelRoot.destroy();
  }
  installed.clear();
@@ -109,7 +144,10 @@ async function init(){
  await Promise.all(Object.entries(GLBS).map(async ([key,url])=>{src[key]=await acquire(app,url,key);}));
  status.phase='installing';report();
  attemptMount(app,src);
- const check=setInterval(()=>attemptMount(app,src),1800);
+ const check=setInterval(()=>{
+   attemptMount(app,src);
+   for(const item of installed.values())item.ensureDoorVisual?.();
+ },1800);
  let t=0,n=0;
  const update=dt=>{
   if(dt>0&&dt<.2){t+=dt;n++}
