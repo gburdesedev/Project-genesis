@@ -30,7 +30,7 @@ function render(opts){
  function slot(label,glyph,locked,item,extra){
   return '<button type="button" class="mcSlot '+(locked?'isLocked':'isActive')+' '+(extra||'')+'" '+(locked?'disabled':'')+' aria-label="'+esc(label)+'"><span class="mcGlyph">'+(item?image(item):esc(glyph))+'</span><span class="mcSlotLabel">'+esc(label)+'</span></button>';
  }
- function currentItem(){return state.selection||currentPool()[0]||null;}
+ function currentItem(){return state.selection||current()||currentPool()[0]||null;}
  function fmtValue(r,side){const c=r[side];return c?(c.name==='Base'?String(c.value):'+'+c.value+'%'):'—';}
  function central(){
   const bodyUrl=opts.body==='ranger'?'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_ranger.glb':'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_peasant.glb';
@@ -64,13 +64,13 @@ function render(opts){
  '<div class="mcRightActions"><button data-action="inspect" '+(!selected?'disabled':'')+'>INSPECCIONAR</button><button class="mcPrimary" data-action="equip" '+(!a||!b?'disabled':'')+'>'+esc(opts.editing?'APLICAR CAMBIOS':'EQUIPAR AL MERCENARIO')+'</button></div></section>';
  }
  function overlay(){
-  if(state.sheet){return '<div class="mcOverlay"><section><h2>FICHA DEL MERCENARIO</h2>'+ (opts.statsHTML||'<p>No hay estadísticas registradas.</p>') +'<button data-action="dismiss">VOLVER</button></section></div>';}
+  if(state.sheet){return '<div class="mcOverlay"><section><h2>FICHA DEL MERCENARIO</h2>'+ (typeof opts.getStatsHTML==='function'?opts.getStatsHTML(a,b):opts.statsHTML||'<p>No hay estadísticas registradas.</p>') +'<button data-action="dismiss">VOLVER</button></section></div>';}
   if(state.details&&currentItem()){
    const item=currentItem();
    return '<div class="mcOverlay"><section><h2>'+esc(item.name)+'</h2><p>'+esc(item.rarity||'')+'</p><div class="mcSheetRows">'+rows(item).map(c=>'<div><span>'+esc(c.name==='Base'?'Canal Base':c.name)+'</span><b>'+esc(c.name==='Base'?c.value:'+'+c.value+'%')+'</b></div>').join('')+'</div><button data-action="dismiss">VOLVER</button></section></div>';
   }
   if(state.inventory){
-   return '<div class="mcOverlay"><section><h2>INVENTARIO DEL MERCENARIO</h2><div class="mcSheetRows"><div><span>'+esc(opts.labelFirst)+'</span><b>'+esc(a?.name||'Vacío')+'</b></div><div><span>'+esc(opts.labelSecond)+'</span><b>'+esc(b?.name||'Vacío')+'</b></div></div><p>Equipo asignado al personaje. Las otras casillas de la demo permanecen fijas.</p><button data-action="dismiss">VOLVER</button></section></div>';
+   return '<div class="mcOverlay"><section><h2>INVENTARIO DEL MERCENARIO</h2>'+(typeof opts.getMercInventoryHTML==='function'?opts.getMercInventoryHTML(a,b):'<div class="mcSheetRows"><div><span>'+esc(opts.labelFirst)+'</span><b>'+esc(a?.name||'Vacío')+'</b></div><div><span>'+esc(opts.labelSecond)+'</span><b>'+esc(b?.name||'Vacío')+'</b></div></div>')+'<p>Equipo asignado al personaje. Las otras casillas de la demo permanecen fijas.</p><button data-action="dismiss">VOLVER</button></section></div>';
   }
   return '';
  }
