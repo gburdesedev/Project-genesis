@@ -121,6 +121,19 @@ const server=http.createServer((req,res)=>{
     await click('[data-family="Espadas"]');
     assert.deepEqual(await read(()=>[...document.querySelectorAll('.genInvChannel span')].map(e=>e.textContent)),['Canal base','Fuego','Luz']);
     assert.equal(await count('.genInvSlot:not(:disabled)'),1);
+    const infoFit=await read(()=>{
+      const parent=document.querySelector('.genInvInfo').getBoundingClientRect();
+      const list=document.querySelector('.genInvChannels').getBoundingClientRect();
+      const last=[...document.querySelectorAll('.genInvChannel')].at(-1)?.getBoundingClientRect();
+      const nge=document.querySelector('.genInvNgeText').getBoundingClientRect();
+      const action=document.querySelector('.genInvInfoMore').getBoundingClientRect();
+      return {lastChannelVisible:!!last&&last.bottom<=list.bottom+2,
+        narrativeVisible:nge.bottom<=action.top+2&&nge.height>=16,
+        buttonVisible:action.bottom<=parent.bottom+2};
+    });
+    assert(infoFit.lastChannelVisible,'3 real channels should be visible without scrolling');
+    assert(infoFit.narrativeVisible,'NGE preview should remain legible above button');
+    assert(infoFit.buttonVisible,'Full sheet button must remain inside original panel');
     await capture('04-inventario-espadas');
     await click('#genInvDetails');
     assert.equal(await count('.genInvOverlay'),1);
