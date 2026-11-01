@@ -17,11 +17,11 @@ function comparisons(equipped,chosen){
  return order.map(n=>({name:n,a:a.find(x=>x.name===n),b:b.find(x=>x.name===n)}));
 }
 function render(opts){
- const state={family:'first',selection:null,details:false,inventory:false,techOpen:new Set()};
+ const state={family:'first',selection:null,details:false,inventory:false,sheet:false,techOpen:new Set()};
  let a=opts.selectedFirst||null,b=opts.selectedSecond||null;
+ let lastClick=null,lastClickAt=0;
  const poolA=opts.poolFirst||[],poolB=opts.poolSecond||[];
- const root=document.createElement('div');
- root.className='mercConcept';
+ 
  function currentPool(){return state.family==='first'?poolA:poolB;}
  function current(){return state.family==='first'?a:b;}
  function setCurrent(item){if(state.family==='first')a=item;else b=item;opts.onDraft?.(state.family,item);}
@@ -64,6 +64,7 @@ function render(opts){
  '<div class="mcRightActions"><button data-action="inspect" '+(!selected?'disabled':'')+'>INSPECCIONAR</button><button class="mcPrimary" data-action="equip" '+(!a||!b?'disabled':'')+'>'+esc(opts.editing?'APLICAR CAMBIOS':'EQUIPAR AL MERCENARIO')+'</button></div></section>';
  }
  function overlay(){
+  if(state.sheet){return '<div class="mcOverlay"><section><h2>FICHA DEL MERCENARIO</h2>'+ (opts.statsHTML||'<p>No hay estadísticas registradas.</p>') +'<button data-action="dismiss">VOLVER</button></section></div>';}
   if(state.details&&currentItem()){
    const item=currentItem();
    return '<div class="mcOverlay"><section><h2>'+esc(item.name)+'</h2><p>'+esc(item.rarity||'')+'</p><div class="mcSheetRows">'+rows(item).map(c=>'<div><span>'+esc(c.name==='Base'?'Canal Base':c.name)+'</span><b>'+esc(c.name==='Base'?c.value:'+'+c.value+'%')+'</b></div>').join('')+'</div><button data-action="dismiss">VOLVER</button></section></div>';
@@ -77,13 +78,13 @@ function render(opts){
   opts.modal('<div class="mcBoard" aria-label="Equipamiento de mercenario"><header class="mcTitle"><div>PROJECT GENESIS</div><h1>INVENTARIO DEL MERCENARIO</h1></header><div class="mcColumns">'+left()+central()+right()+'</div>'+overlay()+'</div>','mercenaryModal mercConceptModal');
   const board=document.querySelector('.mcBoard');if(!board)return;
   board.querySelectorAll('[data-family]').forEach(el=>el.addEventListener('click',()=>{state.family=el.dataset.family;state.selection=null;update()}));
-  board.querySelectorAll('[data-item]').forEach(el=>{el.addEventListener('click',()=>{const item=currentPool()[+el.dataset.item];if(!item)return;if(state.selection===item&&el._clicked&&Date.now()-el._clicked<360){state.details=true;} else {state.selection=item;}el._clicked=Date.now();update()})});
+  board.querySelectorAll('[data-item]').forEach(el=>{el.addEventListener('click',()=>{const item=currentPool()[+el.dataset.item];if(!item)return;const now=Date.now(),again=lastClick===item&&now-lastClickAt<360;setCurrent(item);state.selection=item;if(again)state.details=true;lastClick=item;lastClickAt=now;update()})});
   board.querySelectorAll('.mcEquipSlot').forEach((el,i)=>el.addEventListener('click',()=>{state.family=i===0?'first':'second';state.selection=current();update()}));
   board.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>{
    switch(el.dataset.action){
-    case 'sheet':return opts.onSheet?.();
+    case 'sheet':state.sheet=true;return update();
     case 'inventory':state.inventory=true;return update();
-    case 'dismiss':state.inventory=false;state.details=false;return update();
+    case 'dismiss':state.inventory=false;state.details=false;state.sheet=false;return update();
     case 'inspect':state.details=true;return update();
     case 'back':return opts.onBack?.();
     case 'equip':if(!a||!b)return;return opts.onConfirm?.(a,b);
