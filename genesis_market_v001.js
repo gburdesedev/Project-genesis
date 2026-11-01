@@ -78,7 +78,8 @@ function buildStall(world){
 function buildMerchant(world,source){
   const merchantRoot=new Entity('Mercader de suministros · NPC interactivo V001');
   world.addChild(merchantRoot);merchantRoot.setPosition(POS.x,POS.y,POS.z);
-  merchantRoot.setLocalEulerAngles(0,-90,0);
+  // Orientado hacia el acceso oeste del mercado, sin bloquear el corredor.
+  merchantRoot.setLocalEulerAngles(0,90,0);
   let hasModel=false;
   if(source && typeof source.clone==='function'){
     const character=source.clone();
