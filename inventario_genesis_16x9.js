@@ -11,7 +11,8 @@
   ];
   const posters = {
     'Mineral de hierro':'assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png',
-    'Lingote de hierro':'assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png'
+    'Lingote de hierro':'assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png',
+    'Carbón vegetal':'assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png'
   };
   function esc(x) {
     return String(x == null ? '' : x).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]});
@@ -27,11 +28,16 @@
   function channelSummary(item) {
     const channels=Array.isArray(item.channels)?item.channels:[];
     if(!channels.length)return '<p class="genInvEmptyChannels">Este objeto todavía no tiene canales registrados.</p>';
-    return channels.map(function(c,index){
-      const name=Array.isArray(c)?c[0]:(c.name||c.channel||'');
+    // Base must be displayed first. Other channels retain the actual crafting order.
+    // Do not synthesize missing channels or intensities.
+    const channelName=function(c){return Array.isArray(c)?c[0]:(c?.name||c?.channel||'')};
+    const isBase=function(c){return /^(?:canal\s+)?base$/i.test(String(channelName(c)).trim())};
+    const ordered=channels.filter(isBase).concat(channels.filter(function(c){return !isBase(c)}));
+    return ordered.map(function(c){
+      const name=channelName(c);
       const intensity=Array.isArray(c)?c[1]:c.intensity;
       const text=Number.isFinite(Number(intensity))?String(intensity):'';
-      return '<div class="genInvChannel"><span>'+esc(index===0 && String(name).toLowerCase()==='base'?'Canal base':name)+'</span><b>'+esc(text)+'</b></div>';
+      return '<div class="genInvChannel"><span>'+esc(isBase(c)?'Canal base':name)+'</span><b>'+esc(text)+'</b></div>';
     }).join('');
   }
   function storySummary(item) {
@@ -79,8 +85,8 @@
       '<p class="genInvEmptyPreview">La familia seleccionada no contiene objetos</p>';
     const title=chosen?esc(chosen.name):'Seleccioná un objeto';
     const facts=chosen?(materialMode?
-      '<div class="genInvInfoLine"><span>Familia</span><b>Materiales</b></div><div class="genInvInfoLine"><span>Cantidad</span><b>'+chosen.qty+'</b></div>':
-      '<div class="genInvInfoLine"><span>Familia</span><b>'+esc(state.family)+'</b></div><div class="genInvInfoLine"><span>Rareza</span><b>'+esc(item.rarity||'')+'</b></div>'+
+      '<div class="genInvInfoLine"><span>Nombre</span><b>'+esc(chosen.name)+'</b></div><div class="genInvInfoLine"><span>Familia</span><b>Materiales</b></div><div class="genInvInfoLine"><span>Cantidad</span><b>'+chosen.qty+'</b></div>':
+      '<div class="genInvInfoLine"><span>Nombre</span><b>'+esc(item.name||chosen.name)+'</b></div><div class="genInvInfoLine"><span>Familia</span><b>'+esc(state.family)+'</b></div><div class="genInvInfoLine"><span>Rareza</span><b>'+esc(item.rarity||'')+'</b></div>'+
       '<h3 class="genInvSubhead">CANALES DEL OBJETO</h3>'+
       '<div class="genInvChannels" role="list">'+channelSummary(item)+'</div>'+
       '<h3 class="genInvSubhead">RELATO NGE</h3>'+storySummary(item)) : '';
