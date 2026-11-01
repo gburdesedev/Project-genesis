@@ -27,11 +27,16 @@
   function channelSummary(item) {
     const channels=Array.isArray(item.channels)?item.channels:[];
     if(!channels.length)return '<p class="genInvEmptyChannels">Este objeto todavía no tiene canales registrados.</p>';
-    return channels.map(function(c,index){
-      const name=Array.isArray(c)?c[0]:(c.name||c.channel||'');
+    // Base must be displayed first. Other channels retain the actual crafting order.
+    // Do not synthesize missing channels or intensities.
+    const channelName=function(c){return Array.isArray(c)?c[0]:(c?.name||c?.channel||'')};
+    const isBase=function(c){return /^(?:canal\s+)?base$/i.test(String(channelName(c)).trim())};
+    const ordered=channels.filter(isBase).concat(channels.filter(function(c){return !isBase(c)}));
+    return ordered.map(function(c){
+      const name=channelName(c);
       const intensity=Array.isArray(c)?c[1]:c.intensity;
       const text=Number.isFinite(Number(intensity))?String(intensity):'';
-      return '<div class="genInvChannel"><span>'+esc(index===0 && String(name).toLowerCase()==='base'?'Canal base':name)+'</span><b>'+esc(text)+'</b></div>';
+      return '<div class="genInvChannel"><span>'+esc(isBase(c)?'Canal base':name)+'</span><b>'+esc(text)+'</b></div>';
     }).join('');
   }
   function storySummary(item) {
