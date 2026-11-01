@@ -8,6 +8,10 @@ assert.ok(match,'embedded item engine present');
 const scope={window:{},Date,Math,JSON,Set,Map,Object,Array,String,Number};
 vm.runInNewContext(match[1],scope,{timeout:10000});
 const engine=scope.window.GenesisPrototypeEngines,session=engine.generateSession('Herrero',{seed:0x47454e31});
+const glyphStart=html.indexOf('function svgUri(svg)'),glyphEnd=html.indexOf('const EQUIP_MODEL_URLS=',glyphStart);
+assert.ok(glyphStart>=0&&glyphEnd>glyphStart,'original object icons present');
+const glyphs=new Function(html.slice(glyphStart,glyphEnd)+';return ITEM_GLYPHS;')();
+const inventoryIcons={espada_hierro:glyphs.Espada,escudo_hierro:glyphs.Escudo};
 const fabricated=[],used=new Set();
 for(const [id,craft,wanted] of [['espada_hierro',1,'Inútil'],['espada_hierro',2,'Bueno'],['escudo_hierro',1,'Inútil'],['escudo_hierro',2,'Común']]){
  let item;
@@ -25,18 +29,20 @@ for(const [id,craft,wanted] of [['espada_hierro',1,'Inútil'],['espada_hierro',2
  try{
  const page=await browser.newPage({viewport:{width:1600,height:900}});
  await page.setContent('<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:#080705"><div id="modalLayer" style="position:fixed;inset:0;display:grid;place-items:center"><div id="modal"></div></div></body></html>');
+ try{await page.addScriptTag({url:'https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/model-viewer.min.js',type:'module'});}catch(e){console.warn('Model viewer CDN unavailable:',e.message)}
  await page.addStyleTag({path:path.join(root,'mercenary_equipment_canvas_v001.css')});
  await page.addScriptTag({path:path.join(root,'mercenary_equipment_canvas_v001.js')});
- const data={first:fabricated.slice(0,2),second:fabricated.slice(2)};
+ const data={first:fabricated.slice(0,2),second:fabricated.slice(2),icons:inventoryIcons};
  await page.evaluate(d=>window.GenesisMercenaryConcept.open({
   modal:(markup,extra)=>{const node=document.getElementById('modal');node.className='modal '+extra;node.innerHTML=markup},
   mercName:'Guerrero 01',candidate:0,body:'peasant',editing:true,
   labelFirst:'Arma',labelSecond:'Escudo',familyFirst:'Espadas',familySecond:'Escudos',
   poolFirst:d.first,poolSecond:d.second,selectedFirst:d.first[1],selectedSecond:d.second[1],
   equippedFirst:d.first[0],equippedSecond:d.second[0],
-  itemIcon:(id)=>id==='espada_hierro'?'':'',statsHTML:'',getMercInventoryHTML:()=>'<p>Inventario</p>',
+  itemIcon:(id)=>d.icons[id]||'',statsHTML:'',getMercInventoryHTML:()=>'<p>Inventario</p>',
   onConfirm:()=>{}
  }),data);
+ try{await page.locator('.mcHero model-viewer').evaluate(async x=>{if(typeof x.updateComplete==='object')await x.updateComplete;});await page.waitForTimeout(2400);}catch(e){console.warn('Mercenary GLB preview:',e.message)}
  await page.screenshot({path:path.join(out,'concept-espada-buena-real.png')});
  assert.equal(await page.locator('.mcChannel').count(),3);
  await page.locator('[data-family="second"]').click();
