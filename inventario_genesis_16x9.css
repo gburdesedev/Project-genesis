@@ -398,3 +398,33 @@
 .genInvFamilies .genInvHead{font-weight:normal!important;letter-spacing:.05em}
 .genInvFamily{height:6.25%!important;min-height:0!important;font-size:1.05cqw!important}
 .genInvInfo .genInvInfoMore{background-size:100% 100%!important;}
+
+
+/* QA V11: right-pane reading room. Preserve original panel/frame sprites.
+ * Compact metadata so the 3-channel test object and short NGE are readable.
+ * More real channels and longer narratives use independent vertical scroll. */
+.genInvInfo{padding:4.3% 4.9% 2%!important}
+.genInvInfo .genInvInfoTitle{margin:0 0 1%!important;padding:0 0 1%!important}
+.genInvInfo .genInvInfoLine{padding:.7% .5%!important;font-size:.94cqw!important}
+.genInvInfo .genInvSubhead{margin:1.2% 0 .4%!important;padding:0 0 .4%!important}
+.genInvInfo .genInvChannels{
+  flex:1 1 auto!important;
+  min-height:4.8cqw!important;
+  max-height:33%!important;
+  overflow-y:auto!important;
+  scrollbar-width:thin;
+}
+.genInvInfo .genInvChannel{min-height:1.65cqw!important;padding:.3% 2%!important}
+.genInvInfo .genInvNgeText{
+  flex:0 1 auto!important;
+  min-height:1.5cqw!important;
+  max-height:3.2cqw!important;
+  overflow-y:auto!important;
+  line-height:1.25!important;
+  margin:0 0 .4%!important;
+}
+.genInvInfo .genInvInfoMore{
+  height:2.55cqw!important;min-height:2.55cqw!important;
+  margin:.8% 0 0!important;
+}
+.genInvOverlay{background:#0b0909fc}
