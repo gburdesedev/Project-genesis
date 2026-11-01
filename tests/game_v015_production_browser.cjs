@@ -45,7 +45,18 @@ const server=http.createServer((req,res)=>{
     const p=tree?.getLocalPosition();
     const rood=active?.findByName('Genesis RoofV013');
     const roofScale=rood?.getLocalScale();
-    return {s,activeMounted:!!active?.findByName('Genesis production Herrero V013 · real open windows and forge flue'),
+    const chimney=active?.findByName('Genesis ChimneyV013');
+    const instances=chimney?.findComponents('render')?.flatMap(r=>r.meshInstances||[])||[];
+    const boxes=instances.map(inst=>inst.aabb).filter(Boolean);
+    const chimneyBounds=boxes.length?{
+      minX:Math.min(...boxes.map(b=>b.getMin().x)), maxX:Math.max(...boxes.map(b=>b.getMax().x)),
+      minZ:Math.min(...boxes.map(b=>b.getMin().z)), maxZ:Math.max(...boxes.map(b=>b.getMax().z))
+    }:null;
+    const chimneyWorldCenter=chimneyBounds?
+      [(chimneyBounds.minX+chimneyBounds.maxX)/2,(chimneyBounds.minZ+chimneyBounds.maxZ)/2]:null;
+    const forgePos=forge?.entity?.getPosition?.();
+    const forgeWorldCenter=forgePos?[forgePos.x,forgePos.z]:null;
+    return {chimneyWorldCenter,forgeWorldCenter,s,activeMounted:!!active?.findByName('Genesis production Herrero V013 · real open windows and forge flue'),
       fountainAnchor:!!f,forgeSource:document.querySelector('#forgeStation')?.getAttribute('src'),
       forgeRotation:forge?.getAttribute('rotation'),
       originalDoorPosition:d?.getAttribute('position'),treePosition:p?[p.x,p.z]:null,
@@ -64,6 +75,11 @@ const server=http.createServer((req,res)=>{
   assert(status.roofScale?.[1]>1.75,'New roof raise was not applied');
   assert(status.s.windows?.openAir===true,'Ventilated blacksmith windows missing');
   assert(status.s.chimneyAlignedToForge===true,'Flue geometry is not aligned to forge');
+  assert(status.chimneyWorldCenter&&status.forgeWorldCenter,
+    'Forge/chimney world-space geometry unavailable');
+  assert(Math.hypot(status.chimneyWorldCenter[0]-status.forgeWorldCenter[0],
+    status.chimneyWorldCenter[1]-status.forgeWorldCenter[1])<0.32,
+    'Chimney still not physically above forge center: '+JSON.stringify([status.chimneyWorldCenter,status.forgeWorldCenter]));
   assert(status.s.roofRaiseRelativeToV012===1.35,'Roof ridge height change missing');
   assert(status.s.assets.walls.renderers<=12,'V013 walls unbatched');
   assert(status.s.assets.roof.renderers<=8,'V013 roof unbatched');
