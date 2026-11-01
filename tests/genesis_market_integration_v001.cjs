@@ -7,7 +7,7 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const world=fs.readFileSync(path.join(root,'village_world.js'),'utf8');
 const market=fs.readFileSync(path.join(root,'genesis_market_v001.js'),'utf8');
 test('merchant attached to real PlayCanvas village and original E interaction pipeline',()=>{
-  assert.match(html,/import \{ mountGenesisMarket \} from '\.\/genesis_market_v001\.js\?v=0\.14\.019'/);
+  assert.match(html,/import \{ mountGenesisMarket \} from '\.\/genesis_market_v001\.js\?v=0\.14\.\d{3}'/);
   assert.match(html,/genesisMarket=mountGenesisMarket\(\{/);
   assert.match(html,/\.\.\.\(genesisMarket\?\[genesisMarket\.interactable\]:\[\]\)/);
   assert.match(market,/id:'marketMerchant',radius:2\.85/);
