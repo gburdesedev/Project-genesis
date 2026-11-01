@@ -44,6 +44,8 @@ const server=http.createServer((req,res)=>{
       originalRoofEnabled:building?.children[1]?.enabled,
       originalDoorEnabled:building?.children[2]?.enabled,
       originalDoorName:building?.children[2]?.name,
+      realMagicDoorPresent:!!building?.findByName('Arcanista · puerta mágica V027 · cerrada'),
+      realMagicDoorEnabled:building?.findByName('Arcanista · puerta mágica V027 · cerrada')?.enabled,
       installedChildren:building?.children?.map(x=>x.name).slice(0,12)};
   });
   console.log('ARCANISTA_V006',JSON.stringify(arcane));
@@ -51,7 +53,9 @@ const server=http.createServer((req,res)=>{
   assert(arcane.newWalls,'New slate full-wall GLB not present');
   assert.equal(arcane.originalFacadeEnabled,false,'Old facade was not replaced');
   assert.equal(arcane.originalRoofEnabled,true,'Existing roof was modified');
-  assert.equal(arcane.originalDoorEnabled,true,'Approved portal door was hidden');
+  assert.equal(arcane.realMagicDoorPresent,true,'Approved V027 magic door missing');
+  assert.equal(arcane.realMagicDoorEnabled,true,'Approved V027 animated magic door was hidden');
+  assert.equal(arcane.s.magicDoorEnabled,true,'Arcanista module did not verify the actual V027 door');
   assert(arcane.s.modelMeshes<=16,'Unbatched arcanist GLB');
   fs.writeFileSync(path.join(dest,'results.json'),JSON.stringify({
     status:'PASS_TWO_FULL_GAME_WORKSHOPS',
