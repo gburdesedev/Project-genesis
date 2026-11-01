@@ -66,7 +66,12 @@ async function mount(){
   // roof pitch, interaction interfaces, character logic, or economic code.
   state.originalShellHidden=true;
   state.roofReused=oldRoof.enabled;
-  state.doorEntityName=oldDoor.name;
+  // The generic oldDoor child is intentionally disabled by the V027
+  // portal system. Verify the ACTUAL animated magical door instead.
+  const magicDoor=village.findByName('Arcanista · puerta mágica V027 · cerrada');
+  state.doorEntityName=magicDoor?.name||'MISSING_V027_MAGIC_DOOR';
+  state.magicDoorExists=!!magicDoor;
+  state.magicDoorEnabled=magicDoor?.enabled===true;
   state.installed=true;state.phase='mounted-four-rock-walls';
   state.villageTransform={
    x:village.getPosition().x,z:village.getPosition().z,
