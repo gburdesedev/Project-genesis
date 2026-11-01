@@ -40,7 +40,15 @@ const server=http.createServer((req,res)=>{
   assert.equal(await rows.count(),items.length,'UI did not match actual seed list');
   const first=rows.first();
   const before=await first.locator('small').textContent();
-  await first.locator('button[data-buy]').click();
+  const dom=await page.evaluate(()=>({
+    card:document.querySelector('.genesisMarketCard[data-slot]')?.outerHTML?.slice(0,1800)||null,
+    buyCount:document.querySelectorAll('[data-buy]').length,
+    marketCards:document.querySelectorAll('.genesisMarketCard[data-slot]').length,
+    modalDisplay:document.querySelector('#modalLayer')?.style.display
+  }));
+  console.log('MARKET_CARD_DOM',JSON.stringify(dom));
+  assert(dom.buyCount>0,'No DOM purchase buttons: '+JSON.stringify(dom));
+  await page.locator('[data-buy="0"]').click({timeout:12000});
   const after=await page.locator('.genesisMarketCard[data-slot="0"] small').textContent();
   assert.notEqual(before,after,'Buy did not change live inventory count');
   assert.match(after,/Tenés 1 · Precio: 0 oro/);
@@ -54,7 +62,11 @@ const server=http.createServer((req,res)=>{
     detail:document.querySelector('#loadDetail')?.textContent,
     retry:document.querySelector('#loadRetry')?.style.display,
     market:window.__genesisMarket?{version:window.__genesisMarket.version,npc:window.__genesisMarket.npc,center:window.__genesisMarket.center}:null,
-    app:!!document.querySelector('#genesisApp')?.app
+    app:!!document.querySelector('#genesisApp')?.app,
+    modalDisplay:document.querySelector('#modalLayer')?.style.display,
+    modalHtml:document.querySelector('#modal')?.innerHTML?.slice(0,3000),
+    buyButtons:document.querySelectorAll('[data-buy]').length,
+    cards:document.querySelectorAll('.genesisMarketCard[data-slot]').length
   })).catch(e=>({diagnosticError:String(e)}));
   fs.writeFileSync(path.join(out,'browser-error.json'),JSON.stringify({error:String(error),diag,errors:errors.slice(0,50)},null,2));
   await page.screenshot({path:path.join(out,'market-browser-error.png'),timeout:10000}).catch(()=>{});
