@@ -36,7 +36,7 @@ function loadGlb(app){
  });
 }
 async function mount(){
- for(let step=0;step<240;step++){
+ for(let step=0;step<1200;step++){
   const app=findApp();
   const village=findArcane(app);
   if(!app||!village){await pause(750);continue}
@@ -75,7 +75,7 @@ async function mount(){
   window.addEventListener('pagehide',restore,{once:true});
   return;
  }
- state.phase='village-unavailable';
+ state.phase='village-unavailable-after-15min';
 }
 mount().catch(error=>{state.phase='error';state.error=String(error?.stack||error);
  console.error('[GENESIS_ARCANISTA_V006]',error)});
