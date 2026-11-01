@@ -132,16 +132,16 @@ function arcaneSurround(app,building,cobble,shell){
  return frame;
 }
 function stampVersion(){
- const version='v0.14c', build='20261029.04';
+ const version='v0.14.019', build='20261101.01';
  globalThis.__genesisVillageBuild={version,build};
- document.title=document.title.replace(/v0\.14[a-c]?/gi,version);
+ document.title=document.title.replace(/v0\.14(?:[a-c]|\.\d{3})?/gi,version);
  // The existing HUD build label lives in the monolithic demo HTML. Update
  // its text node without rewriting or disturbing its DOM or event handlers.
  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
  let node;
  while((node=walker.nextNode())){
-  if(!/PROJECT GENESIS|BUILD 20261029/i.test(node.nodeValue||''))continue;
-  node.nodeValue=node.nodeValue.replace(/v0\.14[a-c]?/gi,version).replace(/20261029\.0[1-3]/g,build);
+  if(!/PROJECT GENESIS|BUILD 20261029|BUILD 20261031/i.test(node.nodeValue||''))continue;
+  node.nodeValue=node.nodeValue.replace(/v0\.14(?:[a-c]|\.\d{3})?/gi,version).replace(/202610(?:29|31)\.0[1-9]/g,build);
  }
 }
 export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{}}){
@@ -202,7 +202,9 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
  const plazaSign={x:square.x-square.w/2-1,z:square.z-square.d/2};
  sign(app,root,'PLAZA CENTRAL','Aldea de los artesanos',plazaSign.x,plazaSign.z,0,1.9,4.4);
  mesh(root,'Poste cartel plaza','box',plazaSign.x,.65,plazaSign.z,.14,1.3,.14,marker);
- const fixedObstacles=[{x:marketSign.x,z:marketSign.z,r:.2},{x:plazaSign.x,z:plazaSign.z,r:.18}];
+ const fixedObstacles=[{x:marketSign.x,z:marketSign.z,r:.2},{x:plazaSign.x,z:plazaSign.z,r:.18},
+  // v0.14.019: comerciante y mesa. Son obstáculos físicos, no hitboxes gigantes.
+  {x:25.5,z:36.3,r:.34},{x:28.35,z:37.6,r:1.02}];
  // Do not enable movement until each baseline LOD2 has loaded or explicitly failed.
  // Failed variants have no collision; the scene never contains invisible trunks.
  onPhase('arboles');
