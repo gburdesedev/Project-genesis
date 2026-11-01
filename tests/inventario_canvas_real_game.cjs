@@ -48,12 +48,16 @@ const server=http.createServer((req,res)=>{
   try{
     await page.goto('http://127.0.0.1:'+server.address().port+'/index.html',{waitUntil:'domcontentloaded',timeout:120000});
     await page.waitForFunction(()=>typeof window.GenesisPreparation?.open==='function' && document.querySelector('#modal') && document.querySelector('#genesisApp'),null,{timeout:100000});
-    await page.waitForTimeout(2000);
+    await page.waitForFunction(()=>{
+      const p=window.__genesisProductionHerreroV015?.phase;
+      return p==='running'||p==='error';
+    },null,{timeout:160000,polling:500});
     const game=await page.evaluate(()=>{
       const app=document.querySelector('#genesisApp')?.app;
       return {app:!!app, canvas:!!document.querySelector('#genesisApp canvas'), phase:window.__genesisProductionHerreroV015?.phase||'unknown', title:document.title, modal:!!document.querySelector('#modal')};
     });
     console.log('REAL_GAME',JSON.stringify(game));
+    assert.equal(game.phase,'running','Real PlayCanvas world must be ready, not merely loading');
     console.log('WEBGL_SCENE_ACTIVE_BEFORE_MODAL',game.canvas);
     // Preserve last rendered 3D frame while pausing GPU work for UI interaction screenshots.
     await page.evaluate(()=>{
