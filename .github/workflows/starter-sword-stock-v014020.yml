@@ -8,6 +8,7 @@ on:
       - preparacion_control.js
       - genesis_market_domain_v001.js
       - tests/starter_sword_stock_v014020.cjs
+      - tests/genesis_market_integration_v001.cjs
       - .github/workflows/starter-sword-stock-v014020.yml
   pull_request:
     paths:
@@ -16,6 +17,7 @@ on:
       - preparacion_control.js
       - genesis_market_domain_v001.js
       - tests/starter_sword_stock_v014020.cjs
+      - tests/genesis_market_integration_v001.cjs
   workflow_dispatch:
 permissions:
   contents: read
