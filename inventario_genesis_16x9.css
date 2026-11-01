@@ -398,3 +398,9 @@
 .genInvFamilies .genInvHead{font-weight:normal!important;letter-spacing:.05em}
 .genInvFamily{height:6.25%!important;min-height:0!important;font-size:1.05cqw!important}
 .genInvInfo .genInvInfoMore{background-size:100% 100%!important;}
+
+/* Modular technique presentation: only shown for techniques saved on this item. */
+.genInvTechniqueList{flex:0 1 auto;min-height:0;max-height:17%;overflow-y:auto;display:flex;flex-direction:column;gap:2px;scrollbar-width:thin;scrollbar-color:#87623b transparent}
+.genInvTechnique{display:flex;align-items:center;gap:6px;color:#e5c89d;font-size:.82cqw;min-height:1.75cqw}
+.genInvTechniqueIcon,.genInvTechniqueMissing{display:grid;place-items:center;flex:none;height:1.48cqw;width:1.48cqw;object-fit:contain}
+.genInvTechniqueMissing{color:#9b825f;border:1px solid #685032;background:#130e0b}
