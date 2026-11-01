@@ -31,7 +31,7 @@ test('published version and cache keys aligned',()=>{
   assert(match,'Game version and build missing from title');
   const [,version,build]=match;
   assert.match(html,new RegExp('PROJECT GENESIS · '+version.replace(/\./g,'\\.')+' · BUILD '+build.replace(/\./g,'\\.')));
-  assert(html.includes('village_world.js?v='+version));
-  assert(html.includes('genesis_market_v001.js?v='+version));
+  assert(html.includes('village_world.js?v='+version.slice(1)));
+  assert(html.includes('genesis_market_v001.js?v='+version.slice(1)));
   assert(world.includes("version='"+version+"', build='"+build+"'"));
 });
