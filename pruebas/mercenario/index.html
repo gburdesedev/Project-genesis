@@ -15,7 +15,7 @@ try{
  const base='<base href="https://raw.githubusercontent.com/gburdesedev/Project-genesis/'+commit+'/">';
  html=html.replace(/<head([^>]*)>/i,'<head$1>'+base);
  // srcdoc has no query string, so enable the existing explicit mercenary QA hook.
- html=html.replace(/location\\.search/g,location.search||'?mercenary-qa=1');
+ html=html.replace(/location\.search/g,location.search||'?mercenary-qa=1');
  game.srcdoc=html; game.style.display='block';status.remove();
 }catch(error){status.textContent='Error al abrir la versión experimental desde GitHub: '+error.message;}
 })();
