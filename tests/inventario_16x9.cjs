@@ -91,7 +91,7 @@ assert(fit.every(r=>r.top>=0&&r.bottom<=r.limit+1),'NGE, channels and button mus
 assert.equal(await page.locator('.genInvViewer .genInvViewLabel').innerText(),'Objeto fabricado · visor 360°');
 await page.waitForFunction(()=>Array.from(document.querySelectorAll('.genInvTab img')).length===4&&Array.from(document.querySelectorAll('.genInvTab img')).every(i=>i.complete&&i.naturalWidth>0));
 await page.screenshot({path:out+'/inventario-16x9-espadas.png',fullPage:false});
-await page.locator('#genInvGoCraft').click();
+await page.locator('.genInvTab[data-nav="Fabricaciones"]').click();
 assert.equal(await page.locator('.prepArtboard[data-active-tab="Fabricaciones"]').count(),1);
 assert.equal(errors.length,0,errors.join('\n'));
 console.log('PASS Inventory V01: live stock source, 20 slots, dyn families, static material poster, 16:9, navigation.');
