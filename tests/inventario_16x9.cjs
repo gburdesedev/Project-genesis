@@ -75,6 +75,13 @@ assert.equal(await page.locator('.genInvChannel').count(),1,'Actual channel entr
 assert((await page.locator('.genInvChannel').first().innerText()).includes('18'),'Channel intensity comes from item snapshot');
 assert((await page.locator('.genInvNgeText').innerText()).includes('Relato original'),'NGE narrative comes from saved object');
 assert.equal(await page.locator('#genInvDetails span').innerText(),'CONSULTAR FICHA DEL OBJETO');
+assert(await page.locator('#genInvDetails').isVisible(),'full item sheet button must remain visible');
+const fit=await page.evaluate(()=>{
+ const parent=document.querySelector('.genInvInfo').getBoundingClientRect();
+ const rows=[...document.querySelectorAll('.genInvInfo .genInvChannel,.genInvInfo .genInvNgeText,.genInvInfoMore')];
+ return rows.map(el=>({name:el.className,top:el.getBoundingClientRect().top,bottom:el.getBoundingClientRect().bottom,limit:parent.bottom}));
+});
+assert(fit.every(r=>r.top>=0&&r.bottom<=r.limit+1),'NGE, channels and button must fit entirely inside info panel');
 assert.equal(await page.locator('.genInvViewer .genInvViewLabel').innerText(),'Objeto fabricado · visor 360°');
 await page.waitForFunction(()=>Array.from(document.querySelectorAll('.genInvTab img')).length===4&&Array.from(document.querySelectorAll('.genInvTab img')).every(i=>i.complete&&i.naturalWidth>0));
 await page.screenshot({path:out+'/inventario-16x9-espadas.png',fullPage:false});
