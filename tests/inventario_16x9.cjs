@@ -42,7 +42,7 @@ await page.evaluate(()=>{
 });
 await page.waitForSelector('#genInv');
 assert.equal(await page.locator('.genInvSlot').count(),20,'20 slots in active family');
-assert.equal(await page.locator('.genInvFamily').count(),3,'Herrero families stay visible even before crafting');
+assert.equal(await page.locator('.genInvFamily').count(),1,'Only material family appears before any creation exists');
 assert.equal(await page.locator('.genInvFamily span:last-child').first().innerText(),'Materiales');
 assert.equal(await page.locator('.genInvImageWrap img').count(),1,'known material has a fixed poster');
 const bounds=await page.locator('.genInv').boundingBox();
@@ -63,7 +63,7 @@ const out='/tmp/genesis-responsive';fs.mkdirSync(out,{recursive:true});
 await page.waitForFunction(()=>Array.from(document.querySelectorAll('.genInvTab img')).length===4&&Array.from(document.querySelectorAll('.genInvTab img')).every(i=>i.complete&&i.naturalWidth>0));
 await page.screenshot({path:out+'/inventario-16x9-materiales.png',fullPage:false});
 await page.evaluate(()=>{
-  items.push({name:'Espada de hierro',recipe:'espada',rarity:'Común',channels:[['Base',18]]});
+  items.push({name:'Espada de hierro',recipe:'espada',rarity:'Común',channels:[['Base',18]],ngeStory:'Relato original de la espada registrado al cierre.'});
   items.push({name:'Escudo de hierro',recipe:'escudo',rarity:'Bueno',channels:[['Base',30]]});
   openLive();
 });
@@ -71,6 +71,10 @@ assert.equal(await page.locator('.genInvFamily').count(),3);
 await page.locator('[data-family="Espadas"]').click();
 assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),1);
 assert.equal(await page.locator('.genInvInfoTitle').innerText(),'INFORMACIÓN');
+assert.equal(await page.locator('.genInvChannel').count(),1,'Actual channel entries only');
+assert((await page.locator('.genInvChannel').first().innerText()).includes('18'),'Channel intensity comes from item snapshot');
+assert((await page.locator('.genInvNgeText').innerText()).includes('Relato original'),'NGE narrative comes from saved object');
+assert.equal(await page.locator('#genInvDetails span').innerText(),'CONSULTAR FICHA DEL OBJETO');
 assert.equal(await page.locator('.genInvViewer .genInvViewLabel').innerText(),'Objeto fabricado · visor 360°');
 await page.waitForFunction(()=>Array.from(document.querySelectorAll('.genInvTab img')).length===4&&Array.from(document.querySelectorAll('.genInvTab img')).every(i=>i.complete&&i.naturalWidth>0));
 await page.screenshot({path:out+'/inventario-16x9-espadas.png',fullPage:false});
