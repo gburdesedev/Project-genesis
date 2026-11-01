@@ -1,0 +1,39 @@
+name: Genesis Herrero V082-B arched door real PlayCanvas browser QA
+on:
+  push:
+    branches: [integration/herrero-v082b-arched-door-main]
+    paths:
+      - genesis_workshop_live_v015.js
+      - index.html
+      - tests/herrero_v082_door_browser.cjs
+      - .github/workflows/herrero-v082-door-game-qa.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  v082-door:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check integrated runtime and preserve movement tests
+        run: |
+          node --check genesis_workshop_live_v015.js
+          node --check tests/herrero_v082_door_browser.cjs
+          node tests/workshop_geometry.cjs
+          node tests/village_plan.cjs
+      - name: Setup actual WebGL browser
+        run: |
+          npm install --no-save playwright@1.56.1 playcanvas@2.23.0
+          npx playwright install --with-deps chromium
+      - name: Test V082-B actual PlayCanvas game
+        run: node tests/herrero_v082_door_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-herrero-v082-door-game-browser-screenshot
+          path: previews/herrero-v082-game-audit/
+          retention-days: 7
