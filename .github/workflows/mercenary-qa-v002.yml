@@ -1,0 +1,34 @@
+name: Mercenary QA V002 · Real procedural tutorial
+on:
+  push:
+    branches: ['feature/mercenary-equipment-runtime-v001']
+    paths:
+      - 'index.html'
+      - 'mercenary_equipment_canvas_v001.js'
+      - 'mercenary_qa_boot_v002.template.js'
+      - 'tests/mercenary_qa_v002_browser.cjs'
+      - '.github/workflows/mercenary-qa-v002.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-engine-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium test dependencies
+        run: |
+          npm install --prefix /tmp/mercenary-qa playwright@1.56.1
+          /tmp/mercenary-qa/node_modules/.bin/playwright install --with-deps chromium
+      - name: Execute full live game preview
+        run: NODE_PATH=/tmp/mercenary-qa/node_modules node tests/mercenary_qa_v002_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mercenary-qa-v002-real-fabrications
+          path: /tmp/mercenary-qa-v002
+          retention-days: 7
