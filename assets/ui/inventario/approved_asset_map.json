@@ -1,0 +1,60 @@
+{
+  "name": "GenesisInventoryApprovedArtMap",
+  "status": "AUDIT_ONLY_NOT_READY_AS_SPRITES",
+  "master": {
+    "library": "/Project Genesis/Art/03_UI/Inventario/00_INVENTARIO_MAESTRO_APROBADO_16x9.png",
+    "size": [
+      1672,
+      941
+    ],
+    "inmutable": true
+  },
+  "layoutManifest": "/Project Genesis/Art/03_UI/Inventario/Genesis_Inventario_Aprobado_Manifest.json",
+  "sourceOra": "/Project Genesis/Art/03_UI/Inventario/Genesis_Inventario_APROBADO_Editable.ora",
+  "originalsAvailableInRepo": {
+    "frame": "assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png",
+    "tabs": [
+      "assets/ui/preparacion/01_Capas/Pestanas/Pestana_Inventario.png",
+      "assets/ui/preparacion/01_Capas/Pestanas/Pestana_Preparacion.png",
+      "assets/ui/preparacion/01_Capas/Pestanas/Pestana_Fabricaciones.png",
+      "assets/ui/preparacion/01_Capas/Pestanas/Pestana_Comparacion.png"
+    ],
+    "panels": [
+      "assets/ui/preparacion/01_Capas/Paneles/PanelDatos.png",
+      "assets/ui/preparacion/01_Capas/Paneles/PanelBasicos.png",
+      "assets/ui/preparacion/01_Capas/Paneles/PanelPreparados.png",
+      "assets/ui/preparacion/01_Capas/Paneles/MarcoVisorSuperior.png",
+      "assets/ui/preparacion/01_Capas/Paneles/PanelAccionSinBoton.png"
+    ],
+    "slots": [
+      "assets/ui/preparacion/01_Capas/Casillas/Casilla_Basicos_01.png",
+      "assets/ui/preparacion/01_Capas/Casillas/Casilla_Basicos_02.png",
+      "assets/ui/preparacion/01_Capas/Casillas/Casilla_Basicos_03.png",
+      "assets/ui/preparacion/01_Capas/Casillas/Casilla_Basicos_04.png",
+      "assets/ui/preparacion/01_Capas/Casillas/Casilla_Basicos_05.png",
+      "assets/ui/preparacion/01_Capas/Casillas/Casilla_Basicos_06.png",
+      "assets/ui/preparacion/01_Capas/Casillas/Casilla_Basicos_07.png",
+      "assets/ui/preparacion/01_Capas/Casillas/Casilla_Basicos_08.png",
+      "assets/ui/preparacion/01_Capas/Casillas/Casilla_Basicos_09.png",
+      "assets/ui/preparacion/01_Capas/Casillas/Casilla_Basicos_10.png"
+    ],
+    "button": [
+      "assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Normal.png",
+      "assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Hover.png",
+      "assets/ui/preparacion/01_Capas/BotonPreparar/BotonPreparar_Presionado.png"
+    ]
+  },
+  "referencesNotProductionSprites": {
+    "extractedOrnaments": 45,
+    "withAlphaFullyOpaque": 45,
+    "approvedLogoLibrary": "/Project Genesis/Art/03_UI/Inventario/Logo_Cabecera_Project_Genesis.png"
+  },
+  "pending": [
+    "logo integration",
+    "exact decorative bars and channel icons",
+    "true production 360 GLB verification",
+    "complete object sheet artwork",
+    "pixel and alpha QA",
+    "real user-browser screenshots"
+  ]
+}
