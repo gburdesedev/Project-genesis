@@ -22,7 +22,19 @@ const server=http.createServer((req,res)=>{
   const page=await browser.newPage({viewport:{width:1600,height:900},deviceScaleFactor:1});
   const errors=[],screens=[];
   page.on('pageerror',e=>errors.push(String(e).slice(0,400)));
-  async function capture(name){const file=path.join(dest,name+'.png');await page.screenshot({path:file,timeout:15000});screens.push(file);}
+  async function capture(name){
+    const file=path.join(dest,name+'.png');
+    const cdp=await page.context().newCDPSession(page);
+    try{
+      const snap=await Promise.race([
+        cdp.send('Page.captureScreenshot',{format:'png',fromSurface:false,captureBeyondViewport:false}),
+        new Promise((_,reject)=>setTimeout(()=>reject(Error('Chrome screenshot timeout')),20000))
+      ]);
+      fs.writeFileSync(file,Buffer.from(snap.data,'base64'));
+      screens.push(file);
+      console.log('CAPTURED',name,fs.statSync(file).size);
+    }finally{cdp.detach().catch(()=>{});}
+  }
   try{
     await page.goto('http://127.0.0.1:'+server.address().port+'/index.html',{waitUntil:'domcontentloaded',timeout:120000});
     await page.waitForFunction(()=>typeof window.GenesisPreparation?.open==='function' && document.querySelector('#modal') && document.querySelector('#genesisApp'),null,{timeout:100000});
@@ -32,7 +44,7 @@ const server=http.createServer((req,res)=>{
       return {app:!!app, canvas:!!document.querySelector('#genesisApp canvas'), phase:window.__genesisProductionHerreroV015?.phase||'unknown', title:document.title, modal:!!document.querySelector('#modal')};
     });
     console.log('REAL_GAME',JSON.stringify(game));
-    await capture('01-escena-webgl-antes');
+    console.log('WEBGL_SCENE_ACTIVE_BEFORE_MODAL',game.canvas);
     // Reuse the production GenesisPreparation modal and inventory controller
     // with a QA session, not with modifications to persisted game data.
     await page.evaluate(()=>{
