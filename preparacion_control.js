@@ -482,7 +482,7 @@
     const channels = Array.isArray(item.channels) ? item.channels : [];
     // Display the saved Base channel before other saved channels.
     // Do not mutate the closed object or alter the generated non-Base order.
-    const isBaseChannel = channel => /^(?:canal\\s+)?base$/i.test(
+    const isBaseChannel = channel => /^(?:canal\s+)?base$/i.test(
       String(Array.isArray(channel) ? channel[0] : (channel?.name || channel?.channel || '')).trim()
     );
     const orderedChannels = channels.filter(isBaseChannel).concat(channels.filter(channel => !isBaseChannel(channel)));
