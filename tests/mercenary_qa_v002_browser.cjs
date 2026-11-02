@@ -31,6 +31,14 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
     console.error('BOOT DIAGNOSTICS',JSON.stringify({state,errors:errors.slice(-20)}).slice(0,12000));
     throw err;
   }
+  // A busy external WebGL render must never prevent gameplay validation.
+  const safeScreenshot=async(name)=>{
+    const dest=path.join(out,name);
+    try{
+      await page.locator('.mercV04').screenshot({path:dest,timeout:8500,animations:'disabled'});
+      console.log('SCREENSHOT_SAVED',name);
+    }catch(err){console.warn('SCREENSHOT_SKIPPED',name,String(err.message).slice(0,200));}
+  };
   const qa=await page.evaluate(()=>{const x=window.GenesisMercenaryQA;return {phase:x.phase,steps:x.steps,items:x.items,errors:x.errors,emissive:x.emissive,remainingMaterialUnits:x.remainingMaterialUnits}});
   fs.writeFileSync(path.join(out,'qa.json'),JSON.stringify({qa,errors},null,2));
   assert.equal(qa.phase,'ready',JSON.stringify(qa.errors));
@@ -39,7 +47,7 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
   assert.equal(await page.locator('.mcItemSlot').count(),2);
   assert.equal(await page.locator('.mcV4Row').count(),3); // Base only versus Buena Base+2
   assert.equal(await page.locator('.mercV04').count(),1);
-  await page.screenshot({path:path.join(out,'equipamiento-espadas-16x9.png')});
+  await safeScreenshot('equipamiento-espadas-16x9.png');
   const layout=await page.evaluate(()=>{
     const fields=['#modalLayer','#modal','.mercV04','[data-action="family-second"]'];
     return fields.map(sel=>{const el=document.querySelector(sel);if(!el)return {sel,missing:true};const style=getComputedStyle(el),rect=el.getBoundingClientRect();return {sel,display:style.display,visibility:style.visibility,opacity:style.opacity,width:rect.width,height:rect.height,top:rect.top,left:rect.left,inlineDisplay:el.style.display};});
@@ -58,7 +66,7 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
   assert.ok(clickTargets.every(t=>t.hitVisible&&t.width>20&&t.height>15),'Approved art hotspots must have physical pointer targets');
   await page.locator('[data-action="family-second"]').click();
   assert.equal(await page.locator('.mcV4Row').count(),2); // Base+1 from Common
-  await page.screenshot({path:path.join(out,'equipamiento-escudos-16x9.png')});
+  await safeScreenshot('equipamiento-escudos-16x9.png');
   await page.locator('[data-action="family-first"]').click();
   // Choose Buena sword from artisan's family: click index 1.
   await page.locator('[data-item="1"]').click();
@@ -75,7 +83,7 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
   }));
   assert.ok(applied.mercOverlay,'Mercenary dossier should open on equip');
   assert.ok(applied.swordEnabled&&applied.shieldEnabled,'3D objects should remain attached');
-  await page.screenshot({path:path.join(out,'mercenario-equipado.png')});
+  await safeScreenshot('mercenario-equipado.png');
   console.log('PASS MERCENARY FULL GAME',JSON.stringify({rarities:qa.items.map(x=>x.rarity),count:qa.items.length,steps:qa.steps.length,emissive:qa.emissive,applied,errors:errors.slice(0,5)}));
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1}).finally(()=>server.close());
