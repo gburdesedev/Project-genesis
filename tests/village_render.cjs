@@ -36,7 +36,11 @@ const server=http.createServer((req,res)=>{const url=new URL(req.url,'http://loc
  console.log('BOOT_FINAL_STATE',JSON.stringify(await readBoot()));
  assert.equal(await actual.locator('.loadingCard.failed').count(),0,await actual.locator('#loadState').textContent());
  await actual.locator('[data-profession="Herrero"]').click();
- await actual.waitForFunction(()=>document.querySelector('#loading')?.style.display==='none'||document.querySelector('.loadingCard.failed'),{},{timeout:120000});
+ const routeProbe=setInterval(()=>{readBoot().then(v=>console.log('ROUTE_DIAGNOSTIC',JSON.stringify(v))).catch(()=>{})},12000);
+ try{await actual.waitForFunction(()=>document.querySelector('#loading')?.style.display==='none'||document.querySelector('.loadingCard.failed'),{},{timeout:125000});}
+ catch(error){console.error('ROUTE_TIMEOUT',JSON.stringify(await readBoot()),'requests',JSON.stringify(requestErrors.slice(-15)),'pageErrors',JSON.stringify(errors));fs.mkdirSync('/tmp/genesis-responsive',{recursive:true});await actual.screenshot({path:'/tmp/genesis-responsive/route-stalled-diagnostic.png'}).catch(()=>{});throw error}
+ finally{clearInterval(routeProbe)}
+ console.log('ROUTE_FINAL_STATE',JSON.stringify(await readBoot()));
  assert.equal(await actual.locator('.loadingCard.failed').count(),0,await actual.locator('#loadState').textContent());
  const scales=await actual.evaluate(()=>{const scale=id=>document.getElementById(id).entity.getWorldTransform().getScale();return {anvil:scale('anvilModel'),player:scale('playerModel'),shell:scale('workshopShellModel')}});
  assert(Math.abs(scales.anvil.x-scales.anvil.y)<.001&&Math.abs(scales.anvil.z-scales.anvil.y)<.001,'anvil proportions changed');
