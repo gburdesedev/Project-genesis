@@ -147,7 +147,7 @@ function stampVersion(){
   node.nodeValue=node.nodeValue.replace(/v0\.14[a-c]?/gi,version).replace(/20261029\.0[1-3]/g,build);
  }
 }
-export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{}}){
+export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{},qaFastStart=false}){
  stampVersion();
  const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14c');app.root.addChild(root);
  // Begin tree transfers before road PBR maps: four species are part of the initial scene.
@@ -209,8 +209,15 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
  // Do not enable movement until each baseline LOD2 has loaded or explicitly failed.
  // Failed variants have no collision; the scene never contains invisible trunks.
  onPhase('arboles');
- await trees.initialReady;
- onPhase('puertas');
- await Promise.all(arcanePortals.map(portal=>portal.initialReady));
+ if(qaFastStart){
+  // QA shows equipment once genuine world floors and game systems exist.
+  // Optional tree/portal transfers continue, with collisions only for loaded trees.
+  Promise.allSettled([trees.initialReady,...arcanePortals.map(portal=>portal.initialReady)])
+    .then(results=>console.info('[MERCENARY QA] Deferred village decoration',results.map(r=>r.status)));
+ }else{
+  await trees.initialReady;
+  onPhase('puertas');
+  await Promise.all(arcanePortals.map(portal=>portal.initialReady));
+ }
  return Object.freeze({root,plan,trees,arcanePortals,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
 }
