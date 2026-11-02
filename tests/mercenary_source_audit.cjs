@@ -22,5 +22,5 @@ console.log('CHECK_SRC',JSON.stringify({
   inlineProceduralEngine:s.includes('id="genesis-prototype-engines"'),
   mercenaryUITemplate:s.includes('mercenary_equipment_canvas_v001.js'),
   QAHook:s.includes('mercenary-qa=1'),
-  version:s.match(/<title[^>]*>[^<]+<\\/title>/)?.[0]||null
+  version:s.match(/<title[^>]*>[^<]+<[/]title>/)?.[0]||null
 }));
