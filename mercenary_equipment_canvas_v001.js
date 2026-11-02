@@ -92,7 +92,7 @@ function render(opts){
    result+=`<div class="mcV4Row" title="${esc(c.key)}"><div class="mcV4RowArt" style="background-image:url('${BASE}channels.png');background-position:0 ${(idx/7)*100}%"></div><span class="mcV4Numbers"><span>${format(a)}</span><span>»</span><span class="${direction}">${format(b)}</span></span></div>`;
   }
   result+='</div>';
-  if(opts.mercName)result+=`<div class="mcV4Name" style="${pct(552,156,204,35)}">${esc(opts.mercName)}</div>`;
+  // Approved template already owns the navigator label; avoid drawing a second name on top.
   result+=controls.join('');
   if(overlay){
    let html='';if(overlay==='sheet')html=typeof opts.getStatsHTML==='function'?opts.getStatsHTML(weapon,shield):opts.statsHTML||'Sin datos de ficha registrados.';
