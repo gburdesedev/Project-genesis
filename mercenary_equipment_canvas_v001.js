@@ -106,12 +106,12 @@ function render(opts){
   opts.modal(content(),'mercenaryModal mercConceptModal');const board=document.querySelector('.mercV04');if(!board)return;
   board.querySelectorAll('[data-action]').forEach(button=>button.addEventListener('click',()=>{
    const action=button.dataset.action;
-   if(action==='family-first'||action==='family-second'){family=action==='family-first'?'first':'second';candidate=null;page=0;return update()}
+   if(action==='family-first'||action==='family-second'){family=action==='family-first'?'first':'second';candidate=family==='first'?weapon:shield;page=0;return update()}
    if(action==='page-prev'||action==='page-next'){page=Math.max(0,Math.min(Math.max(0,Math.ceil(currentPool().length/20)-1),page+(action==='page-next'?1:-1)));return update()}
    if(action==='sheet'||action==='inventory'||action==='inspect')return openOverlay(action);
    if(action==='dismiss'){overlay='';return update()}
    if(action==='back')return opts.onBack?.();
-   if(action==='slot-first'||action==='slot-second'){family=action==='slot-first'?'first':'second';candidate=null;return update()}
+   if(action==='slot-first'||action==='slot-second'){family=action==='slot-first'?'first':'second';candidate=family==='first'?weapon:shield;return update()}
    if(action==='equip'){if(!weapon||!shield)return;return opts.onConfirm?.(weapon,shield)}
    if(action==='merc-prev'||action==='merc-next'||action.startsWith('merc-')){if(typeof opts.onMercenaryChange==='function')return opts.onMercenaryChange(action);return}
   }));
