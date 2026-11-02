@@ -922,7 +922,11 @@ const NGE_BADGE='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPYAAABOCAYAAAATi
 
 let loadTimer=setInterval(()=>loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s',100);
 function setLoadUI(pct,state,detail=''){
- const value=clamp(Math.round(pct),0,100);loadBarFill.style.width=value+'%';loadPercent.textContent=value+'%';
+ // Never move backwards when PlayCanvas updates its initially unknown total.
+ const previous=Number.parseFloat(loadBarFill.style.width)||0;
+ const value=Math.max(previous,clamp(Math.round(pct),0,100));
+ loadBarFill.style.width=value+'%';loadPercent.textContent=value+'%';
+ loadBarFill.setAttribute('aria-valuenow',String(value));
  if(state)loadState.textContent=state;if(detail)loadDetail.textContent=detail;
 }
 function failLoading(message,detail=''){
