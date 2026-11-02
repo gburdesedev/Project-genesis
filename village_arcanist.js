@@ -113,7 +113,22 @@ export function mountArcanePortal(app,building,fallbackDoor,options={}){
  let phase='loading',detail='';
  let resolveInitial;
  const initialReady=new Promise(resolve=>{resolveInitial=resolve;});
- const settle=()=>{globalThis.__genesisArcaneDoorStatus=report();if(phase==='ready')options.onResourceLoaded?.('door:arcane:V027');resolveInitial(report());};
+ // El evento visual de progreso jamás debe impedir resolver initialReady.
+ // Si falla la UI de carga, el asset 3D debe terminar de asentarse igualmente.
+ let settled=false;
+ const settle=()=>{
+  if(settled)return;
+  settled=true;
+  const result=report();
+  globalThis.__genesisArcaneDoorStatus=result;
+  try{
+   if(phase==='ready')options.onResourceLoaded?.('door:arcane:V027');
+  }catch(error){
+   console.warn('Progreso de puerta V027 no disponible:',error);
+  }finally{
+   resolveInitial(result);
+  }
+ };
  const report=()=>({version:'V027',phase,detail,url:ARCANE_DOOR_SOURCE});
  globalThis.__genesisArcaneDoorStatus=report();
  app.assets.loadFromUrl(ARCANE_DOOR_SOURCE,'container',(error,asset)=>{

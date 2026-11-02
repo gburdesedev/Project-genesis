@@ -207,9 +207,24 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
   {x:25.5,z:36.3,r:.34},{x:28.35,z:37.6,r:1.02}];
  // Do not enable movement until each baseline LOD2 has loaded or explicitly failed.
  // Failed variants have no collision; the scene never contains invisible trunks.
+ // Las promesas que dependen de assets remotos no pueden dejar el
+ // inicio bloqueado indefinidamente. No abrimos el juego al vencer el plazo:
+ // reportamos el recurso que falta y dejamos visible Reintentar.
+ async function bootGate(promise,label,timeout=90000){
+  let timer;
+  try{
+   return await Promise.race([
+    promise,
+    new Promise((_,reject)=>{
+     timer=setTimeout(()=>reject(new Error('Carga incompleta: '+label+' (90 s)')),timeout);
+    })
+   ]);
+  }finally{clearTimeout(timer)}
+ }
  onPhase('arboles');
- await trees.fullReady; // Completa LOD1 y LOD2 en PC; sólo LOD2 en móvil. Sin solicitudes al caminar.
+ await bootGate(trees.fullReady,'árboles LOD1 y LOD2'); // Nunca descargar LOD mientras se juega.
  onPhase('puertas');
- await Promise.all(arcanePortals.map(portal=>portal.initialReady));
+ await bootGate(Promise.all(arcanePortals.map(portal=>portal.initialReady)),
+   'puerta mágica Arcanista V027');
  return Object.freeze({root,plan,trees,arcanePortals,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
 }
