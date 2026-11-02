@@ -1,0 +1,32 @@
+name: Inventory inside real PlayCanvas — screenshot QA
+on:
+  pull_request:
+    paths:
+      - 'inventario_genesis_16x9.js'
+      - 'inventario_genesis_16x9.css'
+      - 'preparacion_control.js'
+      - 'tests/inventario_canvas_real_game.cjs'
+      - '.github/workflows/inventory-canvas-real-game.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-canvas:
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/genesis-live-inventory playwright@1.56.1
+      - run: NODE_PATH=/tmp/genesis-live-inventory/node_modules node tests/inventario_canvas_real_game.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-inventory-in-real-canvas
+          path: /tmp/genesis-inventory-canvas-live/*
+          retention-days: 7

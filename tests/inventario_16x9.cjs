@@ -47,8 +47,12 @@ assert.equal(await page.locator('.genInvTab').count(),4,'only four original navi
 assert.equal(await page.locator('.genInvFamily').count(),1,'Only material family appears before any creation exists');
 assert.equal(await page.locator('.genInvFamily span:last-child').first().innerText(),'Materiales');
 assert.equal(await page.locator('.genInvImageWrap img').count(),1,'known material has a fixed poster');
-const bounds=await page.locator('.genInv').boundingBox();
-assert(Math.abs(bounds.width/bounds.height-16/9)<.005,'16:9 interior artboard');
+const bounds=await page.locator('.genInvPanorama').boundingBox();
+const core=await page.locator('.genInv').boundingBox();
+assert(Math.abs(bounds.width/bounds.height-16/9)<.005,'16:9 Preparation panorama');
+assert(Math.abs(core.width/core.height-1536/1024)<.005,'same 1536x1024 central work area as Preparation');
+assert(Math.abs(core.width/bounds.width-1536/1820.4444444444443)<.005,'same Preparation side margins');
+assert(Math.abs((core.x-bounds.x)-(bounds.width-core.width)/2)<2,'central pane is horizontally centered');
 const geometries=await page.evaluate(()=>{
  const box=s=>{const r=document.querySelector(s).getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};
  return {left:box('.genInvFamilies'),hero:box('.genInvViewer'),info:box('.genInvInfo'),grid:box('.genInvGrid'),slot:box('.genInvSlot'),heroImg:box('.genInvImageWrap img'),heroWrap:box('.genInvImageWrap'),

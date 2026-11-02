@@ -480,6 +480,11 @@
   function sheetForItem(ctx, item) {
     const isProtection = /escudo|armadura|botas/i.test(item.recipe || '');
     const channels = Array.isArray(item.channels) ? item.channels : [];
+    // Preserve saved channel values. Only normalize presentation order.
+    const isBaseChannel = channel => /^(?:canal\s+)?base$/i.test(
+      String(Array.isArray(channel) ? channel[0] : (channel?.name || channel?.channel || '')).trim()
+    );
+    const orderedChannels = channels.filter(isBaseChannel).concat(channels.filter(channel => !isBaseChannel(channel)));
     const formula = item.formula?.materials || [];
     const tab = ctx.sheetTab || 'channels';
     const heading = '<p class="prepSkinKicker">FICHA DE CREACIÓN · ' + escape(item.rarity || '—') + '</p><h3 class="workspaceObjectTitle">' + escape(item.name) + '</h3>' +
@@ -488,7 +493,7 @@
       '<button type="button" data-sheet-tab="craft" role="tab" aria-selected="' + (tab === 'craft') + '">FABRICACIÓN</button></div>';
     let body;
     if (tab === 'channels') {
-      body = channels.length ? channels.map((channel, index) => {
+      body = orderedChannels.length ? orderedChannels.map((channel, index) => {
         const metric = ctx.metricForChannel ? ctx.metricForChannel(item, channel, index) :
           {label:index === 0 ? (isProtection ? 'Protección base' : 'Daño base') : (isProtection ? 'Protección de ' : 'Daño de ') + channel[0],
            display:(index === 0 ? '' : '+') + String(channel[1]) + (index === 0 ? '' : '%')};
