@@ -1,4 +1,4 @@
-name: Ship Project Genesis merchant V02 to official main - QA retry 2
+name: Ship Project Genesis merchant V02 to official main - QA retry 3
 on:
   push:
     branches: [main]
