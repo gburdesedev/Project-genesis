@@ -40,6 +40,11 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
   assert.equal(await page.locator('.mcV4Row').count(),3); // Base only versus Buena Base+2
   assert.equal(await page.locator('.mercV04').count(),1);
   await page.screenshot({path:path.join(out,'equipamiento-espadas-16x9.png')});
+  const layout=await page.evaluate(()=>{
+    const fields=['#modalLayer','#modal','.mercV04','[data-action="family-second"]'];
+    return fields.map(sel=>{const el=document.querySelector(sel);if(!el)return {sel,missing:true};const style=getComputedStyle(el),rect=el.getBoundingClientRect();return {sel,display:style.display,visibility:style.visibility,opacity:style.opacity,width:rect.width,height:rect.height,top:rect.top,left:rect.left,inlineDisplay:el.style.display};});
+  });
+  console.log('MERCENARY_QA_LAYOUT',JSON.stringify(layout));
   await page.locator('[data-action="family-second"]').click();
   assert.equal(await page.locator('.mcV4Row').count(),2); // Base+1 from Common
   await page.screenshot({path:path.join(out,'equipamiento-escudos-16x9.png')});
