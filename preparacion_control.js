@@ -311,10 +311,11 @@
     const poster = escape(art.poster);
     // Regla aprobada: el visor grande muestra una imagen PNG estática.
     // Sólo las casillas pequeñas usan GLB y giran cuando reciben hover.
-    const render3D = !safePreviews && art.model && type !== 'featured';
+    const preparedGLB = art.model && window.GenesisAssetPreflight?.urlFor(art.model);
+    const render3D = !safePreviews && !!preparedGLB && type !== 'featured';
     const exposure = material === CHARCOAL ? '1.16' : '1.45';
     const visual = render3D
-      ? `<model-viewer class="prepMaterialModel" src="${escape(art.model)}" poster="${poster}" loading="lazy" reveal="auto" interaction-prompt="none" camera-orbit="0deg 75deg auto" environment-image="neutral" exposure="${exposure}" shadow-intensity="0" alt="${name}"></model-viewer>`
+      ? `<model-viewer class="prepMaterialModel" src="${escape(preparedGLB)}" poster="${poster}" loading="lazy" reveal="auto" interaction-prompt="none" camera-orbit="0deg 75deg auto" environment-image="neutral" exposure="${exposure}" shadow-intensity="0" alt="${name}"></model-viewer>`
       : `<img class="prepMaterialPoster" src="${poster}" alt="${name}" loading="lazy" draggable="false">`;
     return `<span class="prepMaterialVisual ${type}${material === CHARCOAL ? ' charcoal' : ''}" data-material="${name}">${visual}</span>`;
   }
