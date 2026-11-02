@@ -189,6 +189,17 @@ export function mountVillageTrees(app, villageRoot, options={}){
  const initiallySettled=new Set();
  let resolveInitial;
  const initialReady=new Promise(resolve=>{resolveInitial=resolve;});
+ let resolveAll,rejectAll;
+ const allReady=new Promise((resolve,reject)=>{resolveAll=resolve;rejectAll=reject;});
+ const expectedVariants=Object.keys(TYPES).length*(safeMobile?1:2);
+ function completeAll(){
+  if(ready.size+failed.size<expectedVariants)return;
+  if(failed.size){
+   rejectAll(new Error('Árboles incompletos: '+[...failed].join(', ')));
+   return;
+  }
+  resolveAll({loaded:ready.size,failed:0});
+ }
  const status=()=>({
   planned:nodes.length,plaza:TREE_SITES.filter(p=>p.region==='plaza').length,
   residentVariants:ready.size,failedVariants:failed.size,pendingVariants:queue.length+active,
@@ -226,9 +237,10 @@ export function mountVillageTrees(app, villageRoot, options={}){
     }
     if(task.lod===2&&!initiallySettled.has(task.species)){
      initiallySettled.add(task.species);
-     if(ready.has(task.key))options.onResourceLoaded?.('tree:'+task.species+':lod2');
      if(initiallySettled.size===Object.keys(TYPES).length)resolveInitial({loaded:Object.keys(TYPES).length-failed.size,failed:failed.size});
     }
+    if(ready.has(task.key))options.onResourceLoaded?.('tree:'+task.species+':lod'+task.lod);
+    completeAll();
     update(focusX,focusZ,true);
     globalThis.__genesisTreeStatus=status();
     pump();
@@ -295,9 +307,11 @@ export function mountVillageTrees(app, villageRoot, options={}){
  }
  // Fetch one visible baseline with full-approved master leaves per species before navigation.
  for(const species of Object.keys(TYPES))request(species,2);
+ // No runtime streaming: preload all model variants used while moving.
+ if(!safeMobile)for(const species of Object.keys(TYPES))request(species,1);
  update(0,0,true);
  return Object.freeze({
-  root:treeRoot,sites:TREE_SITES,update,status,initialReady,
+  root:treeRoot,sites:TREE_SITES,update,status,initialReady,allReady,
   blocked(x,z,r=.33){return nodes.some(node=>node.visible&&node.visual&&node.anchor.enabled&&node.collider&&Math.hypot(node.collider.x-x,node.collider.z-z)<node.collider.r+r)},
   collisionSnapshot(){return nodes.filter(node=>node.collider).map(node=>({id:node.site.id,species:node.site.species,region:node.site.region,lod:node.lod,x:node.collider.x,z:node.collider.z,r:node.collider.r,measured:node.collider.measured,visible:node.visible,loaded:!!node.visual}))},
   release(){app.off('update',windTick);treeRoot.destroy();queue.length=0}

@@ -3,6 +3,9 @@ on:
   pull_request:
     paths:
       - 'preparacion_control.js'
+      - 'genesis_boot_assets_v001.js'
+      - 'tests/boot_preload.cjs'
+      - 'index.html'
       - 'inventario_genesis_16x9.js'
       - 'inventario_genesis_16x9.css'
       - 'tests/inventario_16x9.cjs'
@@ -22,6 +25,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node --check genesis_boot_assets_v001.js
+      - run: node tests/boot_preload.cjs
       - run: npm install --prefix /tmp/genesis-inventory-preview playwright@1.56.1
       - run: NODE_PATH=/tmp/genesis-inventory-preview/node_modules node tests/inventario_16x9.cjs
       - uses: actions/upload-artifact@v4
