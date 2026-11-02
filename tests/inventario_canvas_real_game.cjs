@@ -128,8 +128,8 @@ const server=http.createServer((req,res)=>{
     assert.equal(await count('.genInvSlot'),20,'20 visible slots');
     assert.equal(await count('.genInvTab'),4,'four tabs');
     assert.equal(await count('.genInvFamily'),3,'material and crafted item families');
-    const ratio=await read(()=>{const r=document.querySelector('.genInv').getBoundingClientRect();return r.width/r.height});
-    assert(Math.abs(ratio-16/9)<.006,'16:9 artboard');
+    const ratio=await read(()=>{const r=document.querySelector('.genInvPanorama').getBoundingClientRect();return r.width/r.height});
+    assert(Math.abs(ratio-16/9)<.006,'16:9 panoramic frame');
     assert.equal(await count('.genInvSlot:not(:disabled)'),3,'Three materials from QA stock');
     const charcoalPoster=await read(()=>[...document.querySelectorAll('.genInvSlot img')].some(el=>el.getAttribute('src')?.includes('carbon_vegetal_v011_poster.png')));
     console.log('CHARCOAL_POSTER_IN_MAIN',charcoalPoster);
