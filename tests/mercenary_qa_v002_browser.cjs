@@ -122,7 +122,20 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
     shieldEnabled:!!document.querySelector('#mercShieldModel')?.entity?.enabled
   }));
   assert.ok(applied.mercOverlay,'Mercenary dossier should open on equip');
+  assert.ok(applied.text,'Equipping must confirm the actual equipment update');
   assert.ok(applied.swordEnabled&&applied.shieldEnabled,'3D objects should remain attached');
+  // Verify that the player actually replaced both original creations, not merely
+  // clicked decorative buttons or left the old mesh active.
+  const actualSwap=await page.evaluate(()=>{
+    const sword=typeof mercSwordItem!=='undefined'?mercSwordItem:null;
+    const shield=typeof mercShieldItem!=='undefined'?mercShieldItem:null;
+    const items=window.GenesisMercenaryQA?.items||[];
+    return {swordId:sword?.id,shieldId:shield?.id,wantedSwordId:items[1]?.id,wantedShieldId:items[3]?.id,
+      swordRarity:sword?.rarity,shieldRarity:shield?.rarity};
+  });
+  assert.equal(actualSwap.swordId,actualSwap.wantedSwordId,'Mercenary must wield the second, Bueno crafted sword');
+  assert.equal(actualSwap.shieldId,actualSwap.wantedShieldId,'Mercenary must carry the second, Comun crafted shield');
+  console.log('MERCENARY_REAL_EQUIPMENT_SWAP',JSON.stringify(actualSwap));
   await safeScreenshot('mercenario-equipado.png');
   console.log('PASS MERCENARY FULL GAME',JSON.stringify({rarities:qa.items.map(x=>x.rarity),count:qa.items.length,steps:qa.steps.length,emissive:qa.emissive,applied,errors:errors.slice(0,5)}));
  }finally{await browser.close();}
