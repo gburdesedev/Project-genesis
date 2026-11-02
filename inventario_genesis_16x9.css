@@ -398,3 +398,76 @@
 .genInvFamilies .genInvHead{font-weight:normal!important;letter-spacing:.05em}
 .genInvFamily{height:6.25%!important;min-height:0!important;font-size:1.05cqw!important}
 .genInvInfo .genInvInfoMore{background-size:100% 100%!important;}
+
+
+/* CABECERA CANONICA - INVENTARIO (2026-11-02)
+ * Igualar la geometria de las cuatro pestanas a Preparacion V002:
+ * 294x94, 320x94, 328x94, 298x94 dentro del artboard de 1536x1024.
+ * Preparacion usa panorama 1820.444x1024 centrado. El Inventario
+ * conserva su cuerpo aprobado 16:9; solo cambia la franja superior.
+ * Se utilizan los mismos PNG originales y no se estiran sus pixeles.
+ */
+.genInv .genInvNav{
+  display:grid!important;
+  grid-template-columns:294fr 320fr 328fr 298fr!important;
+  /* 1240 / 1820.444... = 68.115%; primer x=(142.222+164)/1820.444=16.824%. */
+  width:68.115%!important;
+  margin-left:16.824%!important;
+  aspect-ratio:1240 / 94!important;
+  height:auto!important;
+  min-height:0!important;
+  padding:0!important;
+  gap:0!important;
+  border:0!important;
+  justify-self:start!important;
+  align-self:center!important;
+}
+.genInv .genInvTab{
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  padding:0!important;
+  margin:0!important;
+  display:grid!important;
+  place-items:center!important;
+}
+.genInv .genInvTab img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  filter:none!important;
+}
+.genInv .genInvTab[aria-current=page] img,
+.genInv .genInvTab:hover img{
+  filter:none!important;
+}
+
+/* Estado activo sin pintar arte nuevo: el PNG de Preparacion tiene brillo
+ * horneado; al estar en Inventario se atenúa y se aplica el overlay original
+ * de Inventario procedente de las mismas 39 capas de Preparacion. */
+.genInv .genInvTab{position:relative!important;isolation:isolate}
+.genInv .genInvTab:not([aria-current=page]) img{
+  filter:brightness(.56) saturate(.72)!important;
+}
+.genInv .genInvTab[aria-current=page] img{
+  filter:brightness(1.22) saturate(1.06)!important;
+}
+.genInv .genInvTab[data-nav="Inventario"]{
+  --gen-tab-hover:url('assets/ui/preparacion/01_Capas/Efectos/Pestana_Inventario_HoverBrillo.png');
+}
+.genInv .genInvTab[data-nav="Preparacion"]{
+  --gen-tab-hover:url('assets/ui/preparacion/01_Capas/Efectos/Pestana_Preparacion_HoverBrillo.png');
+}
+.genInv .genInvTab[data-nav="Fabricaciones"]{
+  --gen-tab-hover:url('assets/ui/preparacion/01_Capas/Efectos/Pestana_Fabricaciones_HoverBrillo.png');
+}
+.genInv .genInvTab[data-nav="Comparacion"]{
+  --gen-tab-hover:url('assets/ui/preparacion/01_Capas/Efectos/Pestana_Comparacion_HoverBrillo.png');
+}
+.genInv .genInvTab[aria-current=page]::after,
+.genInv .genInvTab:hover::after{
+  content:"";position:absolute;inset:0;
+  background:var(--gen-tab-hover) center/100% 100% no-repeat;
+  pointer-events:none;opacity:.85;
+}
