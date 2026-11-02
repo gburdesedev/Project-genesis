@@ -3,11 +3,12 @@
    Values and item identities are always supplied by the game's existing adapter. */
 (function(root){
 'use strict';
-const BASE='https://raw.githubusercontent.com/gburdesedev/Project-genesis/feature/mercenary-equipment-runtime-v001/assets/ui/mercenary/v04/';
+const BASE='assets/ui/mercenary/v04/';
 const CHANNELS=['Base','Luz','Sombra','Fuego','Hielo','Naturaleza','Tierra','Rayo'];
 const CH_INDEX={Base:0,Luz:1,Sombra:2,Fuego:3,Hielo:4,Naturaleza:5,Tierra:6,Rayo:7};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const pct=(x,y,w,h)=>`left:${x/16.7}% !important;top:${y/9.42}% !important;width:${w/16.7}% !important;height:${h/9.42}% !important;`;
+/* Use the approved artboard's definite inline-size for both axes: percentage heights of an aspect-ratio-only parent may resolve to zero. */
+const pct=(x,y,w,h)=>`left:${x/16.7}cqw !important;top:${y/16.7}cqw !important;width:${w/16.7}cqw !important;height:${h/16.7}cqw !important;`;
 function insertStyle(){
  if(document.getElementById('mercV04Style'))return;
  const node=document.createElement('style');node.id='mercV04Style';node.textContent=`
