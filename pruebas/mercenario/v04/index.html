@@ -1,0 +1,487 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Project Genesis V04 · QA de mercenario con motor real</title><script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/model-viewer.min.js"></script><style>html,body{margin:0;height:100%;background:#090605;color:#efd3a1;font-family:Georgia}#qa{position:fixed;left:0;right:0;top:0;z-index:8;background:#1b120bec;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;padding:7px 14px;font-size:12px}#qa button{background:#75471c;border:1px solid #bb8a4b;color:#ffe0a3;padding:5px;cursor:pointer}#modalLayer{position:fixed;inset:36px 0 0;display:grid;place-items:center}#modal{width:100%}.modal{max-height:100%;max-width:100%}/* Mercenary concept V001 · isolated from the approved main inventory */
+#modalLayer:has(.mercConceptModal){padding:1.2vh 1.2vw}
+#modalLayer .mercConceptModal{width:min(97vw,1600px,173vh);max-width:unset;max-height:97vh;padding:0!important;background:transparent;border:0;border-radius:0;overflow:hidden}
+.mercConcept{width:100%;aspect-ratio:16/9;background:linear-gradient(#11100ed9,#0a0908e9),radial-gradient(circle at 50% 50%,#5a3b1e,#090908);font-family:Georgia,"Times New Roman",serif;color:#f3dfb8;overflow:hidden;container-type:inline-size;border:2px ridge #bd8540;box-shadow:inset 0 0 0 3px #281708,0 12px 55px #000c;position:relative}
+.mercConcept *{box-sizing:border-box}
+.mercConcept button{font-family:inherit;border-radius:2px;font-weight:500;letter-spacing:normal;cursor:pointer}
+.mercConcept button:disabled{opacity:.47;cursor:default}
+.mcBoard{width:100%;height:100%}
+.mcTitle{height:13%;display:flex;flex-direction:column;align-items:center;justify-content:center;border-bottom:2px solid #7d592c;background:linear-gradient(90deg,#0c0a08,#26180f,#0c0a08)}
+.mcTitle div{font-size:1.2cqw;letter-spacing:.4em;color:#d3b17a}.mcTitle h1{font-weight:400;font-size:2.9cqw;line-height:1.2;letter-spacing:.1em;margin:0!important;color:#f4d9a7;text-shadow:0 1px 6px #b9813b}
+.mcColumns{height:87%;display:grid;grid-template-columns:27% 40% 31%;gap:1%;padding:1%}
+.mcPanel{min-width:0;height:100%;display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(145deg,#24180fac,#0d0b09ed);border:2px ridge #ac7a3d;box-shadow:inset 0 0 0 2px #30210e,inset 0 0 18px #000a}
+.mcLeft,.mcRight{padding:2.2%}
+.mcHeading{height:6%;font-size:1.58cqw;text-align:center;color:#e9c996;border-bottom:1px solid #9c6e3a;white-space:nowrap;line-height:1.7}
+.mcSubhead{text-align:center;margin:.8cqw 0;font-size:1.35cqw;color:#dfbd85;border-bottom:1px solid #6b4927;padding:.28cqw}
+.mcFamilies{display:grid;gap:.5cqw}
+.mcFamilies button{background:linear-gradient(#342315,#14100c);border:1px solid #8a5c30;color:#d1b28b;text-align:left;font-size:1.35cqw;padding:.7cqw 1.2cqw}
+.mcFamilies button.active{background:linear-gradient(#a8793e,#4d2c16);border-color:#f2be66;box-shadow:inset 0 0 15px #ffb65c52;color:#fff1c9}
+.mcInventoryGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(5,minmax(0,1fr));gap:.55cqw;flex:1;min-height:0;padding:.2cqw;overflow:hidden}
+.mcInventorySlot,.mcEmptySlot{min-width:0;min-height:0;padding:.2cqw!important;background:linear-gradient(145deg,#332519,#0b0a08)!important;border:1px solid #91602f!important;box-shadow:inset 0 0 4px #0a0604;display:grid;place-items:center;color:#866137}
+.mcInventorySlot.selected{border:2px solid #e4b164!important;box-shadow:0 0 12px #eeb75c81,inset 0 0 8px #f5bd5073}.mcInventorySlot img{width:80%;height:80%;object-fit:contain}
+.mcInvFooter{padding:.6cqw 0;text-align:center;font-size:1cqw;color:#a78b63;white-space:nowrap}
+.mcCenter{padding:.8cqw;position:relative;background:radial-gradient(ellipse at 50% 50%,#55412c50,transparent 72%),#0b0a08}
+.mcMercNav{height:8%;display:flex;align-items:center;justify-content:space-between;padding:0 .8cqw;border-bottom:1px solid #76522b}
+.mcMercName{font-size:1.7cqw}.mcMercIDs{display:flex;gap:.5cqw}.mcMercIDs button{background:#2e2115;border:1px solid #8c6237;color:#c2a57b;padding:.45cqw .85cqw;font-size:1.35cqw}.mcMercIDs button.on{background:linear-gradient(#9e713d,#4c301b);color:#ffe0a2;border-color:#ecb569}
+.mcMercField{display:grid;grid-template-columns:21% 58% 21%;gap:0;min-height:0;flex:1}
+.mcSlotsLeft,.mcSlotsRight{display:flex;flex-direction:column;justify-content:space-around;gap:.1cqw;align-items:center;min-height:0}
+.mcSlot{aspect-ratio:1;width:78%;padding:.1cqw!important;border:1px ridge #b18549!important;background:radial-gradient(circle,#32291d,#090807)!important;box-shadow:inset 0 0 3px #000,0 0 6px #0009;position:relative;display:grid;place-items:center}
+.mcSlot.isActive{border:2px solid #e2b367!important;box-shadow:0 0 9px #c99b446d}
+.mcSlot.isLocked{opacity:.65}
+.mcGlyph{font-size:2.2cqw;color:#d1b080}.mcGlyph img{width:70%;height:70%;object-fit:contain}
+.mcSlotLabel{position:absolute;bottom:0;width:100%;background:#130e0aba;color:#d3ba91;font: .77cqw system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mcHero{min-height:0;position:relative}.mcHero model-viewer{width:100%;height:100%;background:transparent;--progress-bar-color:transparent}.mcNeck{position:absolute;top:1%;left:35%;width:30%;z-index:2;pointer-events:none}.mcNeck .mcSlot{width:64%;margin:auto}
+.mcModelNote{position:absolute;bottom:1%;left:0;right:0;text-align:center;color:#9a8565;font: .87cqw system-ui;pointer-events:none}
+.mcFooterButtons{display:grid;grid-template-columns:1fr 1fr;gap:.4cqw;min-height:12%;align-content:center}
+.mcFooterButtons button,.mcRightActions button{background:linear-gradient(#604024,#24160d);border:1px solid #b7864c;color:#f0c992;padding:.6cqw .3cqw;font-size:1.08cqw;min-width:0}
+.mcFooterButtons button:last-child{grid-column:1/-1}
+.mcDuel{height:23%;display:grid;grid-template-columns:1fr .14fr 1fr;gap:.4cqw;align-items:stretch}
+.mcDuel>div{display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #6d4c2a;padding:.2cqw;min-width:0;background:#130f0b}
+.mcDuel>div span{font-size:1.12cqw;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mcDuel>div small{font:.9cqw system-ui;color:#b9a07e}.mcDuel>b{align-self:center;font-size:2.3cqw;color:#e0b16b}
+.mcItemImg{height:4cqw;width:4cqw;border:1px solid #946c3f;background:#25170d;display:grid;place-items:center}.mcItemImg img{width:95%;height:95%;object-fit:contain}
+.mcCompareHead{display:grid;grid-template-columns:56% 21% 23%;font:1.05cqw system-ui;color:#d3b482;align-items:center;text-align:center;border-bottom:1px solid #946a38}
+.mcChannels{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#bc8e48 #20160f;padding:.5cqw 0}
+.mcChannel{display:grid;grid-template-columns:9% 49% 20% 22%;align-items:center;gap:0;margin-bottom:.35cqw;min-height:4cqw;background:linear-gradient(#18120c,#0c0907);border-bottom:1px solid #5f4529}
+.mcChannelIcon{border:2px ridge #ba904c;color:var(--cc);display:grid;place-items:center;border-radius:50%;aspect-ratio:1;font-size:1.75cqw;text-shadow:0 0 6px var(--cc)}
+.mcChannelArt{height:2.9cqw;border:1px solid #916e43;background:linear-gradient(120deg,#16100d,var(--cc),#21150f);box-shadow:inset 0 0 5px #000a;display:flex;align-items:center;padding:0 .35cqw;overflow:hidden;position:relative}
+.mcChannelArt::before{content:"";inset:3px;position:absolute;background:repeating-linear-gradient(135deg,#ffffff12 0 2px,transparent 2px 10px);pointer-events:none}
+.mcChannelArt em{z-index:1;font-style:normal;text-shadow:0 1px 4px #000;color:#f8e9c8;font-size:1.05cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mcChannelNum{text-align:center;font-size:1.34cqw;color:#ecddbc;white-space:nowrap}.mcChannelNum.increase{color:#91d876}.mcChannelNum.decrease{color:#e67c6d}.mcChannelNum.same{color:#e3c37c}
+.mcEmptyMessage{font-size:1.12cqw!important;color:#b9a184!important}
+.mcRightActions{display:grid;grid-template-columns:1fr 1.2fr;gap:.5cqw;padding:.5cqw 0}.mcRightActions .mcPrimary{background:linear-gradient(#ae7a3f,#6c3d1b);box-shadow:inset 0 0 12px #e6a14344;border-color:#f1c077;color:#ffe7b5}
+.mcOverlay{position:absolute;inset:0;background:#000c;display:grid;place-items:center;z-index:5}
+.mcOverlay section{width:65%;max-height:80%;overflow:auto;border:2px ridge #c39751;background:linear-gradient(#2c1c0e,#100c09);padding:3cqw;box-shadow:0 0 40px #000}
+.mcOverlay h2{color:#f0ce93;font-weight:400;font-size:2.1cqw}.mcOverlay p{color:#cdb58e;font-size:1.2cqw}.mcOverlay button{background:#604022;color:#ffe2a9;border:1px solid #b68745;padding:.8cqw 2cqw}
+.mcSheetRows>div{display:flex;justify-content:space-between;border-bottom:1px solid #61492c;padding:.5cqw;font-size:1.2cqw}
+@media(max-aspect-ratio:13/9){#modalLayer:has(.mercConceptModal){padding:0}.mercConceptModal{max-height:100vh!important}}
+</style></head><body><div id="qa"><b>QA MERCENARIO · Motor NGE original</b><span id="summary">Fabricando...</span><button id="open">Abrir menú</button><span id="status"></span></div><div id="modalLayer"><div id="modal"></div></div><script>
+/* Project Genesis · Items + NGE Alpha reducido para el PROTOTIPO v0.11.
+   v0.11: naming por tablas internas con semilla derivada de timestamp; sin historial NGE persistente entre ejecuciones.
+   Conserva criterios canónicos de Daño/Protección, rareza por canales y pool Nivel 1 auditados.
+   Pipeline: fórmula procedural de sesión -> fabricación mecánica -> cierre -> NGE.
+   Materiales: subconjunto del catálogo canónico de Materiales Básicos de Nivel 1.
+   Cantidades: perfil controlado del prototipo; NO balance canónico definitivo.
+   VT: fallback neutro 1:1 sólo para demostrar la arquitectura; NO tabla canónica. */
+(()=>{"use strict";
+const AFF=["Luz","Sombra","Fuego","Hielo","Naturaleza","Tierra","Rayo"];
+const RAR={1:"Inútil",2:"Común",3:"Bueno",4:"Excelente",5:"Raro",6:"Épico",7:"Legendario",8:"Mítico"};
+const REC={
+ espada_hierro:{name:"Espada de hierro",profession:"Herrero",type:"Espada",base:"Daño",mechanic:"damage",elementalMode:"percent_of_base",family:1},
+ escudo_hierro:{name:"Escudo de hierro",profession:"Herrero",type:"Escudo",base:"Protección",mechanic:"protection",elementalMode:"elemental_percent",family:2},
+ armadura_cuero:{name:"Armadura de cuero",profession:"Curtidor",type:"Armadura",base:"Protección",mechanic:"protection",elementalMode:"elemental_percent",family:1},
+ botas_cuero:{name:"Botas de cuero",profession:"Curtidor",type:"Botas",base:"Protección",mechanic:"protection",elementalMode:"elemental_percent",family:2}
+};
+const FAMILY_BY_PROF={Herrero:["espada_hierro","escudo_hierro"],Curtidor:["armadura_cuero","botas_cuero"]};
+/* Fórmulas de demostración: sólo usan el pool canónico de Materiales Básicos de Nivel 1.
+   Las cantidades/selección concreta siguen siendo perfil de prototipo y NO receta/balance canónico. */
+const FORMULA_PROFILE={
+ espada_hierro:{slots:[{role:"principal",pool:["Lingote de hierro"],min:2,max:3},{role:"proceso",pool:["Carbón vegetal"],min:1,max:2},{role:"secundario",pool:["Cuero bovino curtido","Cuero caprino curtido","Cordel de cáñamo","Hilo de lino"],min:1,max:2},{role:"secundario",pool:["Madera seca de fresno","Madera seca de roble"],min:1,max:1}]},
+ escudo_hierro:{slots:[{role:"principal",pool:["Lingote de hierro"],min:2,max:4},{role:"secundario",pool:["Madera seca de roble","Madera seca de fresno"],min:2,max:3},{role:"secundario",pool:["Cuero bovino curtido","Cuero caprino curtido","Cordel de cáñamo","Hilo de lino"],min:1,max:2}]},
+ armadura_cuero:{slots:[{role:"principal",pool:["Cuero bovino curtido","Cuero caprino curtido"],min:3,max:5},{role:"secundario",pool:["Hilo de lino","Cordel de cáñamo"],min:1,max:2},{role:"secundario",pool:["Tela de lino"],min:1,max:2}]},
+ botas_cuero:{slots:[{role:"principal",pool:["Cuero bovino curtido","Cuero caprino curtido"],min:2,max:3},{role:"secundario",pool:["Hilo de lino","Cordel de cáñamo"],min:1,max:2},{role:"secundario",pool:["Tela de lino"],min:1,max:1}]}
+};
+// VT canónico de Nivel 1 sigue pendiente. El 1:1 preserva arquitectura sin afirmar balance.
+const VT_PROTOTYPE=Object.freeze({
+ "Lingote de hierro":1,"Carbón vegetal":1,"Cuero bovino curtido":1,"Cuero caprino curtido":1,
+ "Hilo de lino":1,"Cordel de cáñamo":1,"Tela de lino":1,"Madera seca de fresno":1,"Madera seca de roble":1
+});
+const VT_PROFILE_MODE="PROTOTYPE_NEUTRAL_FALLBACK";
+const FORMS={
+ Espada:["Espada","Hoja","Filo"],
+ Escudo:["Escudo","Baluarte","Égida"],
+ Armadura:["Armadura","Coraza","Vestidura"],
+ Botas:["Botas","Calzado"]
+};
+/* NGE reducido de la demo: recupera las 9 bandas lingüísticas del NGE de ítems.
+   Estas bandas interpretan intensidades YA RESUELTAS; nunca deciden mecánicas. */
+const NARRATIVE_BANDS=Object.freeze([
+ {min:1,max:5,label:"Traza"},{min:6,max:10,label:"Débil"},{min:11,max:20,label:"Presente"},
+ {min:21,max:35,label:"Marcada"},{min:36,max:50,label:"Intensa"},{min:51,max:65,label:"Potente"},
+ {min:66,max:80,label:"Extrema"},{min:81,max:99.99,label:"Extraordinaria"},{min:100,max:100,label:"Absoluta"}
+]);
+function narrativeLevel(v){v=Number(v)||1;for(let i=0;i<NARRATIVE_BANDS.length;i++)if(v>=NARRATIVE_BANDS[i].min&&v<=NARRATIVE_BANDS[i].max)return i;return v>=100?8:0}
+function narrativeBand(v){return NARRATIVE_BANDS[narrativeLevel(v)]}
+const BASE_LEX={
+ "Daño":[
+  ["del Temple Frágil","del Temple Vacilante","de la Marca Leve"],
+  ["del Corte Modesto","del Temple Irregular","del Filo Inseguro"],
+  ["del Hierro Firme","del Golpe Mesurado","del Corte Honesto"],
+  ["del Corte Seguro","del Temple Robusto","de la Mano Firme"],
+  ["del Golpe Profundo","del Temple Tenaz","de la Fuerza Forjada"],
+  ["del Impacto Poderoso","del Golpe Dominante","del Hierro Implacable"],
+  ["del Golpe Colosal","de la Ruptura","del Corte Devastador"],
+  ["de la Fuerza Titánica","del Golpe Inquebrantable","del Temple Soberano"],
+  ["del Golpe Perfecto","de la Fuerza Absoluta","del Temple Primordial"]
+ ],
+ "Protección":[
+  ["del Resguardo Frágil","de la Cobertura Leve","del Amparo Escaso"],
+  ["del Resguardo Modesto","de la Guarda Irregular","del Amparo Débil"],
+  ["de la Guarda Firme","del Resguardo Honesto","de la Cobertura Segura"],
+  ["del Amparo Robusto","de la Guarda Estable","del Resguardo Marcado"],
+  ["de la Protección Profunda","del Amparo Tenaz","de la Guarda Intensa"],
+  ["del Baluarte Poderoso","de la Guarda Dominante","del Amparo Implacable"],
+  ["de la Protección Colosal","del Baluarte Extremo","de la Guarda Inamovible"],
+  ["del Resguardo Titánico","del Baluarte Soberano","de la Guarda Inquebrantable"],
+  ["de la Protección Absoluta","del Amparo Perfecto","del Baluarte Primordial"]
+ ]
+};
+const LEX={
+ Luz:[
+  ["de Luz Tenue","del Primer Destello","del Brillo Pálido"],["de la Claridad Suave","del Alba Leve","del Resplandor Naciente"],["del Alba Radiante","del Resplandor","de la Luz Serena"],
+  ["de la Luz Centelleante","del Día Áureo","del Halo Radiante"],["del Fulgor","de la Luz Refulgente","del Esplendor"],["del Fulgor Intenso","del Sol Ascendente","de la Claridad Ardiente"],
+  ["del Sol Implacable","del Mediodía","de la Luz Fulgurante"],["del Sol Eterno","de la Luz Celestial","del Alba Soberana"],["de la Luz Absoluta","del Primer Sol","del Fulgor Primordial"]
+ ],
+ Sombra:[
+  ["de Sombra Tenue","de la Penumbra Leve","del Ocaso Pálido"],["de la Penumbra","del Velo Sombrío","de la Noche Joven"],["de la Sombra","del Ocaso","del Velo Umbrío"],
+  ["de la Noche Cerrada","de la Sombra Profunda","del Eclipse Parcial"],["del Eclipse","de la Oscuridad","del Manto Tenebroso"],["de la Noche Profunda","del Vacío Umbrío","del Eclipse Negro"],
+  ["del Abismo","de la Noche Sin Luna","de la Sombra Devastadora"],["de la Noche Eterna","del Abismo Soberano","del Eclipse Final"],["de la Sombra Absoluta","de la Noche Primordial","del Vacío Primero"]
+ ],
+ Fuego:[
+  ["del Ascua Tenue","de la Brasa Pálida","del Primer Calor"],["de la Brasa","de la Llama Joven","del Rescoldo"],["de la Llama","del Fuego Vivo","del Calor Ardiente"],
+  ["de la Llama Voraz","del Fuego Ígneo","de la Brasa Roja"],["del Fuego Incandescente","de la Forja Ardiente","de la Llama Intensa"],["del Incendio","de la Llama Abrasadora","del Crisol Rojo"],
+  ["del Fuego Devastador","de la Pira","de la Llama Implacable"],["del Fuego Eterno","del Sol Incendiado","de la Llama Soberana"],["del Fuego Absoluto","de la Primera Llama","del Incendio Primordial"]
+ ],
+ Hielo:[
+  ["de la Escarcha","del Frío Tenue","del Primer Hielo"],["de la Helada","del Invierno Leve","del Cristal Frío"],["de la Ventisca","del Hielo","del Invierno"],
+  ["del Témpano","del Frío Gélido","de la Escarcha Profunda"],["del Hielo Glacial","de la Ventisca Blanca","del Frío Intenso"],["del Corazón Glaciar","de la Tormenta Blanca","del Invierno Profundo"],
+  ["de la Gran Ventisca","del Glaciar","del Frío Implacable"],["del Invierno Eterno","del Glaciar Soberano","de la Nieve Sin Fin"],["del Hielo Absoluto","del Primer Invierno","del Frío Primordial"]
+ ],
+ Naturaleza:[
+  ["del Brote","de la Savia Tenue","de la Espina Joven"],["de la Raíz","de la Hoja Verde","de la Savia"],["de la Espina","del Bosque Joven","de la Rama Viva"],
+  ["de la Raíz Profunda","de la Savia Viva","del Ramaje Verde"],["del Bosque","de la Espina Firme","de la Vida Salvaje"],["del Roble Ancestral","de la Raíz Dominante","de la Savia Intensa"],
+  ["de la Selva Implacable","de las Mil Espinas","del Ramaje Indómito"],["del Bosque Eterno","de la Vida Ancestral","de la Raíz Soberana"],["de la Naturaleza Absoluta","de la Primera Raíz","de la Vida Primordial"]
+ ],
+ Tierra:[
+  ["del Polvo","de la Piedra Leve","del Primer Guijarro"],["de la Piedra","del Suelo Firme","del Mineral Pálido"],["de la Roca","del Mineral","de la Tierra Firme"],
+  ["del Granito","de la Piedra Profunda","del Suelo Inmóvil"],["de la Montaña","de la Roca Intensa","del Mineral Pesado"],["del Corazón de Piedra","de la Roca Dominante","de la Montaña Profunda"],
+  ["del Monolito","de la Montaña Implacable","de la Tierra Devastadora"],["de la Cordillera Eterna","del Monolito Soberano","de la Roca Ancestral"],["de la Tierra Absoluta","de la Primera Montaña","del Mundo Primordial"]
+ ],
+ Rayo:[
+  ["de la Chispa","de la Carga Tenue","del Primer Destello"],["de la Centella Leve","de la Estática","del Chisporroteo"],["de la Centella","del Relámpago","de la Carga Viva"],
+  ["del Trueno","del Rayo Azul","de la Descarga"],["de la Tormenta","del Relámpago Intenso","del Trueno Profundo"],["de la Tempestad","del Rayo Dominante","de la Tormenta Eléctrica"],
+  ["del Cielo Partido","de la Tempestad Implacable","del Gran Trueno"],["de la Tormenta Eterna","del Rayo Soberano","del Cielo Furioso"],["del Rayo Absoluto","de la Primera Tormenta","del Trueno Primordial"]
+ ]
+};
+/* Cada material posee 4 lecturas de peso relativo x 4 variantes lingüísticas.
+   El texto describe presencia/peso en la fórmula, no añade propiedades mecánicas. */
+const MAT={
+ "Lingote de hierro":[["del Hierro","del Metal Gris","de la Forja de Hierro","del Hierro Simple"],["del Hierro Forjado","del Hierro Templado","del Hierro Batido","de la Forja Firme"],["del Hierro Denso","del Metal Forjado","del Hierro Reforzado","de la Forja Cerrada"],["del Hierro Dominante","del Hierro Pesado","del Metal Macizo","de la Forja Profunda"]],
+ "Carbón vegetal":[["de la Brasa Negra","del Carbón Vegetal","de la Forja Negra","del Rescoldo de Forja"],["del Carbón de Forja","de la Brasa Viva","del Rescoldo Firme","de la Forja al Carbón"],["de la Forja Oscura","del Carbón Intenso","de la Brasa Profunda","del Temple al Carbón"],["de la Forja Profunda","de la Brasa Dominante","del Carbón Pesado","del Crisol Oscuro"]],
+ "Cuero bovino curtido":[["del Cuero Bovino","de la Piel Bovina","del Curtido Bovino","de la Piel Tratada"],["del Cuero Bovino Firme","de la Piel Bovina Curtida","del Curtido Firme","de la Piel Bovina Tensada"],["del Cuero Bovino Denso","de la Piel Bovina Reforzada","del Curtido Denso","de la Piel Bovina Cerrada"],["del Cuero Bovino Robusto","de la Piel Bovina Dominante","del Curtido Profundo","de la Piel Bovina Pesada"]],
+ "Cuero caprino curtido":[["del Cuero Caprino","de la Piel Caprina","del Curtido Caprino","de la Piel Tratada"],["del Cuero Caprino Firme","de la Piel Caprina Curtida","del Curtido Firme","de la Piel Caprina Tensada"],["del Cuero Caprino Denso","de la Piel Caprina Reforzada","del Curtido Denso","de la Piel Caprina Cerrada"],["del Cuero Caprino Robusto","de la Piel Caprina Dominante","del Curtido Profundo","de la Piel Caprina Pesada"]],
+ "Hilo de lino":[["del Hilo de Lino","del Lino Trenzado","de la Hebra de Lino","del Lino Simple"],["del Lino Firme","del Hilo de Lino Tensado","de la Hebra Firme","del Trenzado de Lino"],["del Lino Reforzado","del Hilo de Lino Denso","de la Hebra Reforzada","del Trenzado Cerrado"],["del Lino Dominante","del Hilo de Lino Cerrado","de la Hebra Profunda","del Trenzado Pesado"]],
+ "Cordel de cáñamo":[["del Cordel de Cáñamo","del Cáñamo Trenzado","de la Fibra de Cáñamo","del Cáñamo Simple"],["del Cáñamo Firme","del Cordel Tensado","de la Fibra Firme","del Trenzado de Cáñamo"],["del Cáñamo Reforzado","del Cordel Denso","de la Fibra Reforzada","del Trenzado Cerrado"],["del Cáñamo Dominante","del Cordel Cerrado","de la Fibra Profunda","del Trenzado Pesado"]],
+ "Tela de lino":[["de la Tela de Lino","del Tejido de Lino","de la Trama de Lino","del Lino Tejido"],["de la Tela Firme","del Tejido Tensado","de la Trama Firme","del Lino Cerrado"],["de la Tela Reforzada","del Tejido Denso","de la Trama Reforzada","del Lino Compacto"],["de la Tela Dominante","del Tejido Cerrado","de la Trama Profunda","del Lino Pesado"]],
+ "Madera seca de fresno":[["del Fresno Seco","de la Madera de Fresno","de la Veta de Fresno","del Fresno Preparado"],["del Fresno Firme","del Fresno Secado","de la Veta Firme","de la Madera de Fresno Tensada"],["del Fresno Reforzado","de la Veta de Fresno","de la Madera de Fresno Densa","del Fresno Cerrado"],["del Fresno Dominante","de la Madera de Fresno Densa","de la Veta Profunda","del Fresno Pesado"]],
+ "Madera seca de roble":[["del Roble Seco","de la Madera de Roble","de la Veta de Roble","del Roble Preparado"],["del Roble Firme","del Roble Secado","de la Veta Firme","de la Madera de Roble Tensada"],["del Roble Reforzado","de la Veta de Roble","de la Madera de Roble Densa","del Roble Cerrado"],["del Roble Dominante","de la Madera de Roble Densa","de la Veta Profunda","del Roble Pesado"]]
+};
+const MAT_SECOND={
+ "Lingote de hierro":["con Hierro","con refuerzo de Hierro","con nervio de Hierro","con estructura de Hierro"],"Carbón vegetal":["con Brasa de Forja","con temple al Carbón","con Carbón de Forja","con Rescoldo"],
+ "Cuero bovino curtido":["con Cuero Bovino","con refuerzo Bovino","con Piel Bovina","con curtido Bovino"],"Cuero caprino curtido":["con Cuero Caprino","con refuerzo Caprino","con Piel Caprina","con curtido Caprino"],
+ "Hilo de lino":["con Hilo de Lino","con trama de Lino","con hebra de Lino","con costura de Lino"],"Cordel de cáñamo":["con Cordel de Cáñamo","con trama de Cáñamo","con fibra de Cáñamo","con amarre de Cáñamo"],"Tela de lino":["con Tela de Lino","con tejido de Lino","con trama de Lino","con paño de Lino"],
+ "Madera seca de fresno":["con Fresno","con núcleo de Fresno","con veta de Fresno","con refuerzo de Fresno"],"Madera seca de roble":["con Roble","con núcleo de Roble","con veta de Roble","con refuerzo de Roble"]
+};
+
+/* NGE DEMO: no usa firmas inventadas. La diversidad nominal debe surgir de hechos reales del objeto:
+   forma, intensidad base, materiales elegidos por la fórmula y cantidades de esos materiales. */
+const NGE_TEMPLATE_COUNT=Object.freeze({Inútil:8,Común:8,Bueno:8});
+function normalizeNgeName(name){return String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim().toLocaleLowerCase()}
+/* DEMO STANDALONE: el timestamp es la raíz de entropía. No existe registro global entre ejecuciones.
+   Un contador monotónico evita que dos operaciones del mismo milisegundo compartan la misma raíz. */
+const NGE_DEMO_BOOT_TIMESTAMP=Date.now();
+let NGE_DEMO_SEED_COUNTER=0;
+function ngeLexicalStats(){
+ const forms=Object.values(FORMS).reduce((s,a)=>s+a.length,0),base=Object.values(BASE_LEX).reduce((s,levels)=>s+levels.reduce((x,a)=>x+a.length,0),0),aff=Object.values(LEX).reduce((s,levels)=>s+levels.reduce((x,a)=>x+a.length,0),0),mat=Object.values(MAT).reduce((s,levels)=>s+levels.reduce((x,a)=>x+a.length,0),0),mat2=Object.values(MAT_SECOND).reduce((s,a)=>s+a.length,0);
+ return{forms,base,aff,mat,mat2,total:forms+base+aff+mat+mat2}
+}
+function ngeTheoreticalNames(){
+ const affPer=LEX[AFF[0]].reduce((s,a)=>s+a.length,0),basePer=BASE_LEX.Daño.reduce((s,a)=>s+a.length,0);let total=0;
+ for(const [id,rec] of Object.entries(REC)){
+  const formCount=FORMS[rec.type].length,materials=new Set(FORMULA_PROFILE[id].slots.flatMap(s=>s.pool)),materialVariants=[...materials].reduce((s,m)=>s+(MAT[m]?.reduce((x,a)=>x+a.length,0)||0),0);
+  const inutil=formCount*basePer*materialVariants*NGE_TEMPLATE_COUNT.Inútil;
+  const comun=formCount*AFF.length*affPer*materialVariants*NGE_TEMPLATE_COUNT.Común;
+  const bueno=formCount*((AFF.length*(AFF.length-1))/2)*affPer*affPer*materialVariants*NGE_TEMPLATE_COUNT.Bueno;
+  total+=inutil+comun+bueno
+ }
+ return Math.round(total)
+}
+function hash(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function rng(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)|0;let t=Math.imul(a^a>>>15,1|a);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296}}
+function randomSeed(){
+ const now=Date.now(),perf=(typeof performance!=="undefined"&&performance.now)?Math.floor(performance.now()*1000):0;
+ NGE_DEMO_SEED_COUNTER=(NGE_DEMO_SEED_COUNTER+1)>>>0;
+ return hash(`${NGE_DEMO_BOOT_TIMESTAMP}|${now}|${perf}|${NGE_DEMO_SEED_COUNTER}`)>>>0
+}
+function ri(r,a,b){return a+Math.floor(r()*(b-a+1))}
+function round2(v){return Math.round((Number(v)+Number.EPSILON)*100)/100}
+function intensity(r){return round2(1+r()*99)}
+function pick(r,a){return a[Math.floor(r()*a.length)]}
+function cloneFormula(f){return{id:f.id,sessionSeed:f.sessionSeed,materials:f.materials.map(x=>({...x})),signature:f.signature}}
+function buildFormula(id,sessionSeed){const profile=FORMULA_PROFILE[id];if(!profile)throw Error("formula profile");const r=rng(hash(`${sessionSeed}|formula|${id}`)),materials=profile.slots.map(slot=>({role:slot.role,material:pick(r,slot.pool),qty:ri(r,slot.min,slot.max)})),signature=materials.map(m=>`${m.role}:${m.material}:${m.qty}`).join("|");return{id,sessionSeed,materials,signature}}
+function generateSession(profession,{seed=randomSeed()}={}){const ids=FAMILY_BY_PROF[profession];if(!ids)throw Error("profession");const formulas={};for(const id of ids)formulas[id]=buildFormula(id,seed);const requiredStock={};for(const id of ids)for(const m of formulas[id].materials)requiredStock[m.material]=(requiredStock[m.material]||0)+m.qty*2;const stock={...requiredStock};return{id:`${profession.slice(0,3).toUpperCase()}-${seed.toString(16).padStart(8,"0").toUpperCase()}`,profession,seed,formulas,requiredStock,stock}}
+const PROTOTYPE_LEVEL_GLOBAL=1;
+const PROTOTYPE_LEVEL1_MAX_CHANNELS=3;
+/* DS-007 deja pendiente la curva exacta de umbrales. Estos enteros son SOLO perfil de demostración
+   para poder recorrer la cadena Base -> afinidad -> afinidad sin canonizar probabilidades. */
+const DEMO_CHANNEL_THRESHOLDS=Object.freeze([56,72]);
+/* BLOQUEO PEDAGÓGICO DE ESTA DEMO (NO REGLA CANÓNICA DEL JUEGO FINAL):
+   - fabricación 1: Inútil obligatoria, para presentar Canal Base aislado;
+   - fabricación 2: Común o Bueno obligatoria, para hacer visible la proceduralidad/afinidades.
+   El bloqueo NO salta la cadena DS-007: condiciona las intensidades de esta muestra para que
+   los umbrales conduzcan legítimamente al número de canales que la demo necesita enseñar. */
+const DEMO_PEDAGOGICAL_LOCK=Object.freeze({first:'Inútil',second:Object.freeze(['Común','Bueno'])});
+function intensityBetween(r,min,max){return round2(min+r()*(max-min))}
+function resolvePrototypeChannels(rec,r,craft){
+ const pool=[...AFF],channels=[];
+ if(craft===1){
+  // Debe fallar el primer umbral: sólo Canal Base => Inútil.
+  channels.push([rec.base,intensityBetween(r,1,DEMO_CHANNEL_THRESHOLDS[0]-.01)]);
+  return channels
+ }
+ // Segunda fabricación: el Canal Base debe habilitar al menos una afinidad.
+ channels.push([rec.base,intensityBetween(r,DEMO_CHANNEL_THRESHOLDS[0],100)]);
+ const firstName=pool.splice(Math.floor(r()*pool.length),1)[0];
+ const makeGood=r()>=.5;
+ const firstAffinity=makeGood
+  ? intensityBetween(r,DEMO_CHANNEL_THRESHOLDS[1],100)
+  : intensityBetween(r,1,DEMO_CHANNEL_THRESHOLDS[1]-.01);
+ channels.push([firstName,firstAffinity]);
+ if(makeGood&&channels.length<PROTOTYPE_LEVEL1_MAX_CHANNELS){
+  const secondName=pool.splice(Math.floor(r()*pool.length),1)[0];
+  channels.push([secondName,intensity(r)])
+ }
+ return channels
+}
+function fabricate(id,{craft=1,seed=randomSeed(),artisan="artesano",formula=null}={}){const rec=REC[id];if(!rec)throw Error("recipe");if(craft!==1&&craft!==2)throw Error("craft");if(!formula||formula.id!==id)throw Error("session formula required");const r=rng(hash(`${seed}|${id}`)),channels=resolvePrototypeChannels(rec,r,craft),base=channels[0],aff=channels.slice(1);return{id:`proto-${id}-${seed.toString(16)}`,recipe:id,artisan,seed,craft,family:rec.family,profession:rec.profession,levelGlobal:PROTOTYPE_LEVEL_GLOBAL,formula:cloneFormula(formula),base:[...base],affinities:aff.map(x=>[...x]),channels:channels.map(x=>[...x]),rarity:RAR[channels.length]}}
+function materialLevel(effectiveWeight,share){if(effectiveWeight>=5||share>=.72)return 3;if(effectiveWeight>=3||share>=.54)return 2;if(effectiveWeight>=2||share>=.34)return 1;return 0}
+function materialQuantityLevel(qty,share){
+ qty=Number(qty)||1;share=Number(share)||0;
+ if(qty>=4||share>=.55)return 3;
+ if(qty>=3||share>=.40)return 2;
+ if(qty>=2||share>=.25)return 1;
+ return 0
+}
+/* Ruleta ponderada por CANTIDAD REAL de la fórmula. Sin reemplazo:
+   - más unidades => más posibilidades de salir antes;
+   - cantidades iguales => exactamente el mismo peso; la semilla desempata;
+   - una vez elegido un material, sale del pool y no puede repetirse en esa lectura. */
+function weightedMaterialOrder(item,r){
+ const pool=(item.formula?.materials||[]).filter(m=>MAT[m.material]).map(m=>({...m,weight:Math.max(1,Number(m.qty)||1)})),order=[];
+ while(pool.length){
+  const total=pool.reduce((sum,m)=>sum+m.weight,0);let roll=r()*total,index=pool.length-1;
+  for(let i=0;i<pool.length;i++){roll-=pool[i].weight;if(roll<0){index=i;break}}
+  order.push(pool.splice(index,1)[0])
+ }
+ return order
+}
+function secondaryMaterialFragment(material,r){
+ const list=MAT_SECOND[material.material]||[];
+ return list.length?pick(r,list):''
+}
+function materialFragments(item,r){
+ const order=weightedMaterialOrder(item,r),totalQty=order.reduce((sum,m)=>sum+(Number(m.qty)||0),0);
+ if(!order.length)return{primary:'',secondary:'',tertiary:'',quaternary:'',order:[],totalQty:0};
+ const first=order[0],firstShare=(Number(first.qty)||1)/Math.max(1,totalQty),level=materialQuantityLevel(first.qty,firstShare);
+ const primary=pick(r,MAT[first.material][level]);
+ const secondary=order[1]?secondaryMaterialFragment(order[1],r):'';
+ const tertiary=order[2]?secondaryMaterialFragment(order[2],r):'';
+ return{primary,secondary,tertiary,order,totalQty}
+}
+function joinSecondaryMaterials(...parts){
+ const clean=parts.filter(Boolean).map(x=>String(x).replace(/^con\s+/i,''));
+ if(!clean.length)return'';
+ if(clean.length===1)return`con ${clean[0]}`;
+ return`con ${clean.slice(0,-1).join(', ')} y ${clean[clean.length-1]}`
+}
+function channelFragments(item,r){const entries=[{name:item.base[0],value:item.base[1],kind:"base",fragment:pick(r,BASE_LEX[item.base[0]][narrativeLevel(item.base[1])])},...item.affinities.map(([name,value])=>({name,value,kind:"affinity",fragment:pick(r,LEX[name][narrativeLevel(value)])}))];entries.sort((a,b)=>b.value-a.value||(a.kind==="affinity"?-1:1)||a.name.localeCompare(b.name));return entries}
+function _nameCandidates(item,r){
+ const rec=REC[item.recipe],form=pick(r,FORMS[rec.type]),mf=materialFragments(item,r),baseFrag=pick(r,BASE_LEX[item.base[0]][narrativeLevel(item.base[1])]),sortedAff=[...item.affinities].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+ if(sortedAff.length===0){
+  /* Inútil: tres lecturas materiales REALES. El orden sale de una ruleta por cantidad sin reemplazo.
+     Si dos materiales tienen la misma cantidad, ambos poseen exactamente la misma probabilidad de ocupar cada posición. */
+  const materialTail=joinSecondaryMaterials(mf.secondary,mf.tertiary);
+  const materialTailAlt=joinSecondaryMaterials(mf.tertiary,mf.secondary);
+  const options=[
+   `${form} ${baseFrag} ${mf.primary} ${materialTail}`,
+   `${form} ${mf.primary} ${baseFrag} ${materialTail}`,
+   `${form} ${mf.primary} ${materialTail} ${baseFrag}`,
+   `${form} ${baseFrag} ${materialTail} ${mf.primary}`,
+   `${form} ${materialTailAlt} ${baseFrag} ${mf.primary}`,
+   `${form} ${materialTail} ${mf.primary} ${baseFrag}`,
+   `${form} ${baseFrag} ${mf.primary} ${materialTailAlt}`,
+   `${form} ${materialTailAlt} ${mf.primary} ${baseFrag}`
+  ];
+  return [...new Set(options.map(x=>x.replace(/\s+/g,' ').trim()))]
+ }
+ const a1=_fragmentForPrototypeAffinity(sortedAff[0][0],sortedAff[0][1],r),materialTail=joinSecondaryMaterials(mf.secondary,mf.tertiary);
+ if(sortedAff.length===1){
+  const options=[`${form} ${a1} ${mf.primary}`,`${form} ${a1} ${mf.primary} ${materialTail}`,`${form} ${mf.primary} ${a1} ${materialTail}`,`${form} ${a1} ${baseFrag} ${mf.primary}`,`${form} ${mf.primary} ${a1} ${baseFrag}`,`${form} ${baseFrag} ${a1} ${mf.primary}`,`${form} ${a1} ${materialTail} ${mf.primary}`,`${form} ${materialTail} ${a1} ${mf.primary}`];
+  return [...new Set(options.map(x=>x.replace(/\s+/g,' ').trim()))]
+ }
+ const a2=_fragmentForPrototypeAffinity(sortedAff[1][0],sortedAff[1][1],r);
+ const options=[`${form} ${a1} ${a2} ${mf.primary}`,`${form} ${a1} ${mf.primary} ${a2} ${materialTail}`,`${form} ${mf.primary} ${a1} ${a2}`,`${form} ${a1} ${a2} ${baseFrag}`,`${form} ${baseFrag} ${a1} ${a2} ${mf.primary}`,`${form} ${a1} ${materialTail} ${a2}`,`${form} ${mf.primary} ${a1} ${a2} ${materialTail}`,`${form} ${a1} ${a2} ${mf.primary} ${materialTail}`];
+ return [...new Set(options.map(x=>x.replace(/\s+/g,' ').trim()))]
+}
+function present(item,used=new Set()){
+ const formulaSig=item.formula?.signature||"",occupied=new Set();
+ for(const n of used||[])occupied.add(normalizeNgeName(n));
+ /* La semilla mecánica del objeto deriva del timestamp/counter de esta ejecución.
+    NGE sólo la usa para recorrer tablas lingüísticas; no decide ninguna mecánica. */
+ for(let attempt=0;attempt<8192;attempt++){
+  const r=rng(hash(`${item.seed}|${item.recipe}|${formulaSig}|${JSON.stringify(item.channels)}|nge-v4-qty|${attempt}`)),candidates=_nameCandidates(item,r),start=Math.floor(r()*candidates.length);
+  for(let offset=0;offset<candidates.length;offset++){
+   const name=candidates[(start+offset)%candidates.length],norm=normalizeNgeName(name);
+   if(!norm||occupied.has(norm))continue;
+   const shortChannels=item.channels.map(([n,v],i)=>i===0?`${n} ${v}`:`${n} +${v}%`).join(" · "),bands=item.channels.map(([n,v])=>`${n}: ${narrativeBand(v).label}`).join(" · ");
+   return{...item,name,description:`Resultado certificado · ${item.rarity} · ${shortChannels}`,naming:{engine:"NGE_DEMO_REDUCED_V4",bands,seedMode:"timestamp+counter+object",antiRepeat:"sesión"}}
+  }
+ }
+ throw Error("NGE name space exhausted for this item signature")
+}
+function _fragmentForPrototypeAffinity(name,value,r){return pick(r,LEX[name][narrativeLevel(value)])}
+function selfTest(N=10000){
+ let invalid=0,dupeAffinity=0,badRarity=0,badRange=0,overLevel1=0,badDemoFirst=0,badDemoSecond=0;
+ const sessions={Herrero:generateSession("Herrero",{seed:123456}),Curtidor:generateSession("Curtidor",{seed:654321})},ids=[...FAMILY_BY_PROF.Herrero,...FAMILY_BY_PROF.Curtidor];
+ for(let i=1;i<=N;i++)for(const id of ids){const prof=REC[id].profession,f=generateSession(prof,{seed:(i*2654435761)>>>0}).formulas[id],it=fabricate(id,{craft:(i&1)+1,seed:(i*104729+hash(id))>>>0,formula:f}),names=it.affinities.map(a=>a[0]);if(it.channels.length<1||it.channels.length>3)invalid++;if(new Set(names).size!==names.length)dupeAffinity++;if(it.rarity!==RAR[it.channels.length])badRarity++;if(it.channels.some(c=>c[1]<1||c[1]>100||Math.abs(c[1]-round2(c[1]))>1e-9))badRange++;if(it.levelGlobal<=9&&it.channels.length>3)overLevel1++;if(it.craft===1&&it.rarity!=='Inútil')badDemoFirst++;if(it.craft===2&&!['Común','Bueno'].includes(it.rarity))badDemoSecond++}
+ const stable=JSON.stringify(sessions.Herrero.formulas)===JSON.stringify(generateSession("Herrero",{seed:123456}).formulas)&&JSON.stringify(sessions.Curtidor.formulas)===JSON.stringify(generateSession("Curtidor",{seed:654321}).formulas);
+ return{invalidChannelCounts:invalid,duplicateAffinityWithinItem:dupeAffinity,rarityMismatch:badRarity,intensityRangeOrPrecisionErrors:badRange,level1CeilingViolations:overLevel1,demoFirstMustBeUselessErrors:badDemoFirst,demoSecondMustBeCommonOrGoodErrors:badDemoSecond,formulaStableForSeed:stable,ok:invalid===0&&dupeAffinity===0&&badRarity===0&&badRange===0&&overLevel1===0&&badDemoFirst===0&&badDemoSecond===0&&stable}
+}
+const _ngeLex=ngeLexicalStats();const _ngeStats=Object.freeze({theoreticalNames:ngeTheoreticalNames(),lexicalFragments:_ngeLex.total,families:Object.keys(REC).length,materials:Object.keys(MAT).length,affinities:AFF.length,seedMode:"TIMESTAMP_DERIVED",mode:"REDUCED_TABLE_WEIGHTED_QTY_V4"});
+window.GenesisPrototypeEngines=Object.freeze({recipes:REC,formulaProfiles:FORMULA_PROFILE,vtPrototype:VT_PROTOTYPE,vtProfileMode:VT_PROFILE_MODE,materialCount:Object.keys(VT_PROTOTYPE).length,levelGlobal:PROTOTYPE_LEVEL_GLOBAL,maxChannels:PROTOTYPE_LEVEL1_MAX_CHANNELS,demoThresholds:DEMO_CHANNEL_THRESHOLDS,demoPedagogicalLock:DEMO_PEDAGOGICAL_LOCK,ngeStats:_ngeStats,generateSession,fabricate,present,selfTest});
+})();
+</script><script>/* Project Genesis · Mercenary concept layout, v0.1.001.
+   Uses the existing PlayCanvas mission/equipment callbacks; never generates item statistics.
+   Only visual components. Future jewelry and clothing remain disabled. */
+(function(global){
+'use strict';
+const ICONS={Base:'⚔',Luz:'☼',Sombra:'☾',Fuego:'♨',Hielo:'❄',Naturaleza:'❧',Tierra:'◆',Rayo:'ϟ'};
+const COLORS={Base:'#b44634',Luz:'#d6ac53',Sombra:'#9362c3',Fuego:'#e56b27',Hielo:'#6ebacb',Naturaleza:'#669e51',Tierra:'#ac8650',Rayo:'#4389d6'};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function rows(item){
+ const channels=Array.isArray(item&&item.channels)?item.channels:[];
+ return channels.map((c,index)=>({name:String(Array.isArray(c)?c[0]:(c.name||c.channel||'')),value:Number(Array.isArray(c)?c[1]:c.intensity),index})).filter(c=>c.name&&Number.isFinite(c.value)).map(c=>({...c,name:c.index===0?'Base':c.name}));
+}
+function comparisons(equipped,chosen){
+ const a=rows(equipped),b=rows(chosen),order=[];
+ a.concat(b).forEach(c=>{if(!order.includes(c.name))order.push(c.name);});
+ order.sort((x,y)=>x==='Base'?-1:y==='Base'?1:0);
+ return order.map(n=>({name:n,a:a.find(x=>x.name===n),b:b.find(x=>x.name===n)}));
+}
+function render(opts){
+ const state={family:'first',selection:null,details:false,inventory:false,sheet:false,page:0,techOpen:new Set()};
+ let a=opts.selectedFirst||null,b=opts.selectedSecond||null;
+ let lastClick=null,lastClickAt=0;
+ const poolA=opts.poolFirst||[],poolB=opts.poolSecond||[];
+ 
+ function currentPool(){return state.family==='first'?poolA:poolB;}
+ function current(){return state.family==='first'?a:b;}
+ function setCurrent(item){if(state.family==='first')a=item;else b=item;opts.onDraft?.(state.family,item);}
+ function equipped(){return state.family==='first'?opts.equippedFirst:opts.equippedSecond;}
+ function image(item){return item&&typeof opts.itemIcon==='function'?'<img src="'+esc(opts.itemIcon(item.recipe))+'" alt="">':'<span>✧</span>';}
+ function slot(label,glyph,locked,item,extra){
+  return '<button type="button" class="mcSlot '+(locked?'isLocked':'isActive')+' '+(extra||'')+'" '+(locked?'disabled':'')+' aria-label="'+esc(label)+'"><span class="mcGlyph">'+(item?image(item):esc(glyph))+'</span><span class="mcSlotLabel">'+esc(label)+'</span></button>';
+ }
+ function currentItem(){return state.selection||current()||currentPool()[0]||null;}
+ function fmtValue(r,side){const c=r[side];return c?(c.name==='Base'?String(c.value):'+'+c.value+'%'):'—';}
+ function central(){
+  const bodyUrl=opts.body==='ranger'?'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_ranger.glb':'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_peasant.glb';
+  return '<section class="mcPanel mcCenter">'+
+   '<div class="mcMercNav"><span class="mcMercName">'+esc(opts.mercName)+'</span><span class="mcMercIDs">'+[0,1,2].map(i=>'<button type="button" '+(i===opts.candidate?'class="on"':'disabled')+' aria-label="Mercenario '+(i+1)+'">'+(i+1)+'</button>').join('')+'</span></div>'+
+   '<div class="mcMercField">'+
+    '<div class="mcSlotsLeft">'+slot('Casco','♜',true)+slot('Brazales','✥',true)+slot('Anillo izquierdo','◈',true)+slot(opts.labelFirst,'⚔',false,a,'mcEquipSlot')+slot('Piernas','♟',true)+'</div>'+
+    '<div class="mcHero"><div class="mcNeck">'+slot('Collar','♢',true)+'</div><model-viewer src="'+esc(bodyUrl)+'" camera-controls auto-rotate rotation-per-second="6deg" camera-orbit="15deg 80deg 3.8m" shadow-intensity=".7" exposure="1.1" interaction-prompt="none" alt="Modelo base GLB real del mercenario de PlayCanvas"></model-viewer><span class="mcModelNote">GLB base del juego · equipo visible en el mundo</span></div>'+
+    '<div class="mcSlotsRight">'+slot('Pechera','♜',true)+slot('Guantes','✥',true)+slot('Anillo derecho','◈',true)+slot(opts.labelSecond,'⬡',false,b,'mcEquipSlot')+slot('Botas','♟',true)+'</div></div>'+
+   '<div class="mcFooterButtons"><button data-action="sheet">FICHA DEL MERCENARIO</button><button data-action="inventory">INVENTARIO DEL MERCENARIO</button><button data-action="back">CERRAR / VOLVER</button></div></section>';
+ }
+ function left(){
+  let familyA=opts.familyFirst||'Espadas',familyB=opts.familySecond||'Escudos',pool=currentPool();
+  const starts=state.family==='first'?familyA:familyB;
+  return '<section class="mcPanel mcLeft"><div class="mcHeading">EQUIPAMIENTO COMPATIBLE</div><div class="mcSubhead">FAMILIAS</div>'+
+  '<div class="mcFamilies"><button type="button" data-family="first" class="'+(state.family==='first'?'active':'')+'">⚔ '+esc(familyA)+'</button><button type="button" data-family="second" class="'+(state.family==='second'?'active':'')+'">⬡ '+esc(familyB)+'</button></div>'+
+  '<div class="mcSubhead">OBJETOS DISPONIBLES · '+esc(starts)+'</div><div class="mcInventoryGrid">'+
+  Array.from({length:20},(_,i)=>{const item=pool[state.page*20+i];if(!item)return '<span class="mcEmptySlot" aria-label="Casilla vacía">✧</span>'; const selected=item===currentItem(),active=item===current();
+    return '<button type="button" data-item="'+(state.page*20+i)+'" class="mcInventorySlot '+(selected?'selected ':'')+(active?'equipped':'')+'" title="'+esc(item.name)+'">'+image(item)+'</button>';}).join('')+
+  '</div><div class="mcInvFooter"><button data-page="prev" '+(state.page===0?'disabled':'')+'>◂</button> '+(state.page+1)+' / '+Math.max(1,Math.ceil(pool.length/20))+' <button data-page="next" '+((state.page+1)*20>=pool.length?'disabled':'')+'>▸</button></div></section>';
+ }
+ function right(){
+ const equippedItem=equipped(),selected=currentItem(),c=comparisons(equippedItem,selected);
+ return '<section class="mcPanel mcRight"><div class="mcHeading">COMPARACIÓN DE EQUIPO</div>'+
+ '<div class="mcDuel"><div><small>EQUIPADO</small><div class="mcItemImg">'+image(equippedItem)+'</div><span>'+esc(equippedItem?.name||'Sin equipar')+'</span><small>'+esc(equippedItem?.rarity||'')+'</small></div><b>»</b><div><small>SELECCIONADO</small><div class="mcItemImg">'+image(selected)+'</div><span>'+esc(selected?.name||'Sin objetos')+'</span><small>'+esc(selected?.rarity||'')+'</small></div></div>'+
+ '<div class="mcSubhead">CANALES DE LA CREACIÓN</div><div class="mcCompareHead"><span>CANAL</span><span>ACTUAL</span><span>NUEVO</span></div>'+
+ '<div class="mcChannels" role="region" aria-label="Comparación desplazable de canales">'+
+ (c.length?c.map(row=>{let key=COLORS[row.name]?row.name:'Base',x=row.a&&row.b?row.b.value-row.a.value:null,defensive=!!opts.defensive||state.family==='second';
+  return '<div class="mcChannel" style="--cc:'+COLORS[key]+'"><span class="mcChannelIcon">'+ICONS[key]+'</span><span class="mcChannelArt"><em>'+esc(row.name==='Base'?(defensive?'Protección · Base':'Daño · Base'):row.name)+'</em></span><span class="mcChannelNum">'+fmtValue(row,'a')+'</span><span class="mcChannelNum '+(x===null?'':x>0?'increase':x<0?'decrease':'same')+'">'+fmtValue(row,'b')+'</span></div>';
+ }).join(''):'<p class="mcEmptyMessage">Seleccioná un objeto. Los valores se leerán de la fabricación, sin estadísticas inventadas.</p>')+'</div>'+
+ '<div class="mcRightActions"><button data-action="inspect" '+(!selected?'disabled':'')+'>INSPECCIONAR</button><button class="mcPrimary" data-action="equip" '+(!a||!b?'disabled':'')+'>'+esc(opts.editing?'APLICAR CAMBIOS':'EQUIPAR AL MERCENARIO')+'</button></div></section>';
+ }
+ function overlay(){
+  if(state.sheet){return '<div class="mcOverlay"><section><h2>FICHA DEL MERCENARIO</h2>'+ (typeof opts.getStatsHTML==='function'?opts.getStatsHTML(a,b):opts.statsHTML||'<p>No hay estadísticas registradas.</p>') +'<button data-action="dismiss">VOLVER</button></section></div>';}
+  if(state.details&&currentItem()){
+   const item=currentItem();
+   return '<div class="mcOverlay"><section><h2>'+esc(item.name)+'</h2><p>'+esc(item.rarity||'')+'</p><div class="mcSheetRows">'+rows(item).map(c=>'<div><span>'+esc(c.name==='Base'?'Canal Base':c.name)+'</span><b>'+esc(c.name==='Base'?c.value:'+'+c.value+'%')+'</b></div>').join('')+'</div><button data-action="dismiss">VOLVER</button></section></div>';
+  }
+  if(state.inventory){
+   return '<div class="mcOverlay"><section><h2>INVENTARIO DEL MERCENARIO</h2>'+(typeof opts.getMercInventoryHTML==='function'?opts.getMercInventoryHTML(a,b):'<div class="mcSheetRows"><div><span>'+esc(opts.labelFirst)+'</span><b>'+esc(a?.name||'Vacío')+'</b></div><div><span>'+esc(opts.labelSecond)+'</span><b>'+esc(b?.name||'Vacío')+'</b></div></div>')+'<p>Equipo asignado al personaje. Las otras casillas de la demo permanecen fijas.</p><button data-action="dismiss">VOLVER</button></section></div>';
+  }
+  return '';
+ }
+ function update(){
+  opts.modal('<div class="mercConcept"><div class="mcBoard" aria-label="Equipamiento de mercenario"><header class="mcTitle"><div>PROJECT GENESIS</div><h1>INVENTARIO DEL MERCENARIO</h1></header><div class="mcColumns">'+left()+central()+right()+'</div>'+overlay()+'</div></div>','mercenaryModal mercConceptModal');
+  const board=document.querySelector('.mcBoard');if(!board)return;
+  board.querySelectorAll('[data-family]').forEach(el=>el.addEventListener('click',()=>{state.family=el.dataset.family;state.selection=null;state.page=0;update()}));
+  board.querySelectorAll('[data-page]').forEach(el=>el.addEventListener('click',()=>{state.page=Math.max(0,state.page+(el.dataset.page==='next'?1:-1));state.selection=null;update()}));
+  board.querySelectorAll('[data-item]').forEach(el=>{el.addEventListener('click',()=>{const item=currentPool()[+el.dataset.item];if(!item)return;const now=Date.now(),again=lastClick===item&&now-lastClickAt<360;setCurrent(item);state.selection=item;if(again)state.details=true;lastClick=item;lastClickAt=now;update()})});
+  board.querySelectorAll('.mcEquipSlot').forEach((el,i)=>el.addEventListener('click',()=>{state.family=i===0?'first':'second';state.selection=current();update()}));
+  board.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>{
+   switch(el.dataset.action){
+    case 'sheet':state.sheet=true;return update();
+    case 'inventory':state.inventory=true;return update();
+    case 'dismiss':state.inventory=false;state.details=false;state.sheet=false;return update();
+    case 'inspect':state.details=true;return update();
+    case 'back':return opts.onBack?.();
+    case 'equip':if(!a||!b)return;return opts.onConfirm?.(a,b);
+   }
+  }));
+ }
+ update();
+ return {refresh:update};
+}
+global.GenesisMercenaryConcept={open:render,version:'PLAYCANVAS_MERCENARY_CONCEPT_V001'};
+})(window);
+</script><script src="https://cdn.jsdelivr.net/gh/gburdesedev/Project-genesis@aa143bc5ff6343280d6822d73665e521c5c388a7/mercenary_equipment_canvas_v001.js"></script><script>
+const e=window.GenesisPrototypeEngines,session=e.generateSession('Herrero',{seed:0x45a11e00}),stock={...session.requiredStock},names=new Set();
+const goals=[['espada_hierro',1,'Inútil'],['espada_hierro',2,'Bueno'],['escudo_hierro',1,'Inútil'],['escudo_hierro',2,'Común']];
+const made=[],audit=[];
+for(const [recipe,craft,rarity] of goals){
+ const formula=session.formulas[recipe];if(!formula)throw Error('Sin fórmula '+recipe);
+ for(const m of formula.materials){if((stock[m.material]||0)<m.qty)throw Error('Falta material '+m.material);stock[m.material]-=m.qty;}
+ let raw=null,seed=0;
+ for(let i=0;i<2500;i++){seed=(Number(session.seed)+craft*1000003+(recipe==='espada_hierro'?0x10000000:0x20000000)+i*7919)>>>0;const item=e.fabricate(recipe,{craft,seed,artisan:'Artesano del prototipo',formula});if(item.rarity===rarity){raw=item;break;}}
+ if(!raw)throw Error('Rareza no generada '+rarity+' '+recipe);
+ const item=e.present(raw,names);names.add(item.name.toLocaleLowerCase());made.push(item);
+ audit.push({recipe,craft,rarity:item.rarity,seed,channels:item.channels,formula:formula.signature});
+}
+if(made.length!==4||made[1].rarity!=='Bueno'||made[3].rarity!=='Común')throw Error('QA incorrecta');
+window.GenesisStandaloneQA={seed:session.seed,stock,audit};
+const swords=made.slice(0,2),shields=made.slice(2,4);let a=swords[0],b=shields[0],draftA=swords[1],draftB=shields[1];
+const swordIcon='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><path d="M40 4L47 15 44 52 36 52 33 15Z" fill="#c9d5db" stroke="#ad8851"/><path d="M18 52h44v7H18Z" fill="#ce9d51"/><path d="M36 59h8v17h-8Z" fill="#78562c"/></svg>');
+const shieldIcon='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><path d="M40 5L67 18V43Q67 61 40 76Q13 61 13 43V18Z" fill="#b8c3ca" stroke="#bf914a" stroke-width="3"/><path d="M40 14v50M18 35h44" stroke="#d1b17a" stroke-width="5"/></svg>');
+const icon=recipe=>recipe==='escudo_hierro'?shieldIcon:swordIcon;
+const modal=(html,cls)=>{const n=document.getElementById('modal');n.className='modal '+cls;n.innerHTML=html;};
+function open(){
+ window.GenesisMercenaryConcept.open({
+ modal,mercName:'Guerrero 01',candidate:0,body:'peasant',editing:true,
+ labelFirst:'Arma',labelSecond:'Escudo',familyFirst:'Espadas',familySecond:'Escudos',
+ poolFirst:swords,poolSecond:shields,selectedFirst:draftA,selectedSecond:draftB,
+ equippedFirst:a,equippedSecond:b,itemIcon:icon,
+ getStatsHTML:()=>'<p>Estadísticas del personaje: no reemplazan los canales propios de cada creación.</p>',
+ getMercInventoryHTML:()=>'<p>Equipo del mercenario: '+a.name+' / '+b.name+'</p>',
+ onDraft:(f,item)=>{if(f==='first')draftA=item;else draftB=item;},
+ onBack:()=>{document.querySelector('#modal').innerHTML='';document.querySelector('#status').textContent='Menú cerrado.';},
+ onConfirm:(x,y)=>{a=x;b=y;draftA=x;draftB=y;document.querySelector('#status').textContent='Equipamiento cambiado en esta prueba.';open();}
+ });
+}
+document.getElementById('open').onclick=open;
+document.getElementById('summary').textContent=audit.map(x=>x.recipe.replace('_hierro','')+' '+x.rarity).join(' · ');
+open();
+</script></body></html>
