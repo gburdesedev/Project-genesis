@@ -57,12 +57,17 @@
   "https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/sword.glb",
   "https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/shield_round.glb"
 ];
+  const MERCENARY_PREVIEWS=[
+    'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_ranger.glb',
+    'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_peasant.glb'
+  ];
   const URLS=Object.freeze([
     ...REQUIRED_UI.map(url=>({url,kind:'image',mandatory:true,group:'interfaz'})),
     ...OPTIONAL_POSTERS.map(url=>({url,kind:'image',mandatory:false,group:'materiales'})),
-    ...OPTIONAL_PREVIEWS.map(url=>({url,kind:'model',mandatory:false,group:'visores'}))
+    ...OPTIONAL_PREVIEWS.map(url=>({url,kind:'model',mandatory:false,group:'visores'})),
+    ...MERCENARY_PREVIEWS.map(url=>({url,kind:'model',mandatory:false,group:'mercenarioVisor'}))
   ]);
-  function planned(){return g.GenesisDevice?.safePreviews?URLS.filter(x=>x.kind!=='model'):URLS;}
+  function planned(){return g.GenesisDevice?.safePreviews?URLS.filter(x=>x.kind!=='model'||x.group==='mercenarioVisor'):URLS;}
   const records=new Map();
   let inflight=null;
   let done=false;
