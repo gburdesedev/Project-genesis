@@ -9,7 +9,7 @@ const patterns=[
   'function showMercenarySheet(', 'mercenary-qa', 'GenesisMercenaryConcept.open(',
   'function mercNode(', 'const MERC_CANDIDATES=', 'MERC_CANDIDATES=',
   'function mountMerc', 'function refreshInventorySummary(', 'function startRoute(',
-  'mercSwordModel', 'mercBodyModel', 'mercNode(id)', '#modal button'
+  'mercSwordModel', 'mercBodyModel', 'mercNode(id)', '#modal button', 'content-visibility:', 'contain:', 'contain-intrinsic-size:', '#modalLayer{', '#modal{', '.mercConceptModal'
 ];
 console.log('SOURCE_BYTES',s.length,'LINES',s.split('\\n').length);
 for(const pattern of patterns){
