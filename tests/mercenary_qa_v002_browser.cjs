@@ -44,6 +44,15 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
   assert.equal(qa.phase,'ready',JSON.stringify(qa.errors));
   assert.deepEqual(qa.items.map(i=>i.rarity),['Inútil','Bueno','Inútil','Común']);
   assert.equal(qa.remainingMaterialUnits,0);
+  // The game's actual WebGL world has initialized and attached the real rig.
+  // Freeze rendering only for DOM/UI interaction QA in CPU-only CI: SwiftShader
+  // can starve Chromium's style/layout compositor while still running gameplay.
+  const renderSuspended=await page.evaluate(()=>{
+    const app=document.querySelector('#genesisApp')?.app;
+    if(typeof app?.stop==='function'){app.stop();return true;}
+    return false;
+  });
+  console.log('MERCENARY_QA_RENDER_SUSPENDED_FOR_DOM_TEST',renderSuspended);
   assert.equal(await page.locator('.mcItemSlot').count(),2);
   assert.equal(await page.locator('.mcV4Row').count(),3); // Base only versus Buena Base+2
   assert.equal(await page.locator('.mercV04').count(),1);
