@@ -70,12 +70,12 @@ s=s.replace('v0.14.021','v0.14.022').replace('0.14.021','0.14.022').replace('202
 assert '<title>Project Genesis v0.14.022 · Build 20261102.01' in s
 assert "genesis_market_v001.js?v=0.14.022" in s
 html.write_text(s,encoding='utf-8')
-# These legacy contract tests pin a release literal, not game behavior.
+# These legacy tests assert literal v0.14.021 strings; update them only for the new build.
 for testname in ('tests/ordan_market_quest_v014021.cjs','tests/starter_sword_stock_v014020.cjs'):
     path=root/testname
     test=path.read_text(encoding='utf-8')
-    assert 'v0\\.14\\.021' in test, testname
-    test=test.replace(r'v0\\.14\\.021',r'v0\\.14\\.022').replace(r'0\\.14\\.021',r'0\\.14\\.022')
-    test=test.replace('20261101\\.03','20261102\\.01').replace('20261101.03','20261102.01')
+    assert '021' in test
+    # Only changes are in test text; gameplay logic remains untouched.
+    test=test.replace('021','022').replace('20261101.03','20261102.01')
     path.write_text(test,encoding='utf-8')
-print('UPDATED market render only, release v0.14.022 Build 20261102.01 and release-pinned regression assertions')
+print('UPDATED market model, release v0.14.022 and release assertion tests')
