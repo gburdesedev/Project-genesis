@@ -1,9 +1,9 @@
-/* Project Genesis · V0.14.019 · comerciante en el mercado.
+/* Project Genesis · V0.14.021 · comerciante en el mercado.
    Reutiliza un personaje del propio juego; ninguna descarga externa ni arte de menús aprobado.
    Catálogo y compras provienen de genesis_market_domain_v001.js.
 */
 import { Entity, StandardMaterial, Color } from 'playcanvas';
-import './genesis_market_domain_v001.js?v=0.14.019';
+import './genesis_market_domain_v001.js?v=0.14.021';
 
 const POS = Object.freeze({x:25.5,y:0,z:36.3});
 const STALL = Object.freeze({x:28.35,y:0,z:37.6});
@@ -121,7 +121,7 @@ function buildMerchant(world,source){
   return {entity:merchantRoot,fullCharacter:hasModel};
 }
 export function mountGenesisMarket(options){
-  const {app,village,character,getSession,getInventory,modal,closeModal,onInventoryChanged,toast}=options||{};
+  const {app,village,character,getSession,getInventory,modal,closeModal,onInventoryChanged,toast,canTrade,getMarketNeeds,onPurchase}=options||{};
   if(!app||!village?.root||typeof getSession!=='function'||typeof getInventory!=='function')
     throw Error('Mercado: falta el entorno de PlayCanvas o adaptadores de juego');
   const domain=window.GenesisMarketDomain;
@@ -137,10 +137,13 @@ export function mountGenesisMarket(options){
     const current=getSession();
     const names=catalog();
     const inv=getInventory();
+    const needs=typeof getMarketNeeds==='function'?getMarketNeeds():[];
+    const needByName=new Map(needs.map(n=>[n.material,n]));
     const cards=names.map((name,index)=>{
-      const quantity=chosen[name]||1,now=Number(inv?.[name]||0);
+      const missing=needByName.get(name)?.missing||0;
+      const quantity=chosen[name]||Math.min(99,Math.max(1,missing)),now=Number(inv?.[name]||0);
       return '<article class="genesisMarketCard" data-slot="'+index+'">'+
-       '<div><strong>'+escapeText(name)+'</strong><div><small>Tenés '+now+' · Precio: 0 oro</small></div></div>'+
+       '<div><strong>'+escapeText(name)+'</strong><div><small>Tenés '+now+' · Precio: 0 oro</small></div>'+(needByName.has(name)?'<div><small>Para 2 escudos faltan '+missing+'</small></div>':'')+'</div>'+
        '<div><div class="genesisMarketQty"><button data-dec="'+index+'" aria-label="Restar una unidad">−</button>'+
        '<b>'+quantity+'</b><button data-inc="'+index+'" aria-label="Sumar una unidad">+</button></div>'+
        '<button class="genesisMarketBuy" data-buy="'+index+'">Obtener '+quantity+' · GRATIS</button></div></article>';
@@ -149,7 +152,7 @@ export function mountGenesisMarket(options){
       '<div class="genesisMarketTop"><div><small>MERCADO · DEMOSTRACIÓN DE COMPRA</small>'+
       '<h2>Comerciante de materiales</h2></div>'+
       '<button class="genesisMarketClose" id="genesisMarketClose">Cerrar ✕</button></div>'+
-      '<p>Solo materiales necesarios y conocidos al generarse la semilla de <b>'+
+      '<p>Solo materiales de las recetas conocidas y necesarias para la demo de <b>'+
         escapeText(current?.profession||'la partida')+'</b>. Por ahora, todas las compras cuestan <b>0 oro</b>.</p>'+
       '<div class="genesisMarketGrid">'+(cards||'<div class="genesisMarketCard">Esta partida todavía no tiene materiales conocidos.</div>')+
       '</div><div class="genesisMarketFoot" aria-live="polite">'+escapeText(lastMessage)+'</div></section>',
@@ -158,19 +161,21 @@ export function mountGenesisMarket(options){
     root?.querySelector('#genesisMarketClose')?.addEventListener('click',()=>closeModal());
     root?.querySelectorAll('[data-inc]').forEach(btn=>btn.addEventListener('click',()=>{
       const name=names[Number(btn.dataset.inc)];
-      if(!name)return;chosen[name]=Math.min(99,(chosen[name]||1)+1);draw();
+      if(!name)return;const required=needByName.get(name)?.missing||0;chosen[name]=Math.min(99,(chosen[name]||Math.min(99,Math.max(1,required)))+1);draw();
     }));
     root?.querySelectorAll('[data-dec]').forEach(btn=>btn.addEventListener('click',()=>{
       const name=names[Number(btn.dataset.dec)];
-      if(!name)return;chosen[name]=Math.max(1,(chosen[name]||1)-1);draw();
+      if(!name)return;const required=needByName.get(name)?.missing||0;chosen[name]=Math.max(1,(chosen[name]||Math.min(99,Math.max(1,required)))-1);draw();
     }));
     root?.querySelectorAll('[data-buy]').forEach(btn=>btn.addEventListener('click',()=>{
       const name=names[Number(btn.dataset.buy)];
       const result=domain.buy({session:getSession(),inventory:getInventory(),material:name,
-        quantity:chosen[name]||1,toRawStock:toRawStock});
+        quantity:chosen[name]||Math.min(99,Math.max(1,needByName.get(name)?.missing||0)),toRawStock:toRawStock});
       if(!result.ok){lastMessage='Compra rechazada: material o cantidad no disponible.';}
       else{
         lastMessage='Añadiste '+result.quantity+' × '+result.material+' al inventario.';
+        delete chosen[name];
+        if(typeof onPurchase==='function')onPurchase(result);
         if(typeof onInventoryChanged==='function')onInventoryChanged();
         if(typeof toast==='function')toast(lastMessage,1250);
       }
@@ -180,6 +185,7 @@ export function mountGenesisMarket(options){
   function open(){
     if(typeof modal!=='function'||typeof closeModal!=='function')return false;
     if(!getSession()){toast?.('Elegí primero una profesión para crear la semilla.',1500);return false;}
+    if(typeof canTrade==='function'&&!canTrade()){toast?.('Primero hablá con Ordan. Él te enseñará a reabastecerte en el mercado.',2100);return false;}
     lastMessage='';draw();return true;
   }
   const interactable=Object.freeze({
@@ -188,7 +194,7 @@ export function mountGenesisMarket(options){
     prompt:()=> 'Hablar con el comerciante',
     interact:open
   });
-  const status={version:'v0.14.019',npc:npc.fullCharacter?'rig_reused':'visible_fallback',
+  const status={version:'v0.14.021',npc:npc.fullCharacter?'rig_reused':'visible_fallback',
     center:POS,stall:STALL,seedBound:true,freePurchase:true};
   // Diagnóstico público de solo lectura: el test usa el mismo catálogo y ventana del juego.
   window.__genesisMarket=Object.freeze({...status,catalog,open});
