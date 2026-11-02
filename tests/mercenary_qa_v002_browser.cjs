@@ -63,6 +63,19 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
     });
   });
   console.log('MERCENARY_QA_CLICK_TARGETS',JSON.stringify(clickTargets));
+  const geometry=await page.evaluate(()=>{
+    const names=['family-second','equip'];
+    return names.map(name=>{
+      const el=document.querySelector('.mercV04 [data-action="'+name+'"]');
+      const cs=getComputedStyle(el),box=el.getBoundingClientRect(),par=el.parentElement;
+      return {name,style:el.getAttribute('style'),offsetWidth:el.offsetWidth,offsetHeight:el.offsetHeight,
+        bounding:box.toJSON(),position:cs.position,transform:cs.transform,scale:cs.scale,width:cs.width,height:cs.height,
+        display:cs.display,visibility:cs.visibility,contentVisibility:cs.contentVisibility,
+        parent:par?.className,parentSize:par?.getBoundingClientRect().toJSON(),
+        html:el.outerHTML.slice(0,300)};
+    });
+  });
+  console.log('MERCENARY_QA_GEOMETRY',JSON.stringify(geometry));
   console.log('MERCENARY_QA_HOTSPOT_DEBUG',JSON.stringify(await page.evaluate(()=>{
     const e=document.querySelector('.mercV04 [data-action="family-second"]'),b=e?.getBoundingClientRect(),s=e?getComputedStyle(e):null;
     const parent=e?.offsetParent,p=parent?.getBoundingClientRect();
