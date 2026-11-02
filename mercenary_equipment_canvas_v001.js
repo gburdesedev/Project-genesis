@@ -7,7 +7,7 @@ const BASE='https://raw.githubusercontent.com/gburdesedev/Project-genesis/featur
 const CHANNELS=['Base','Luz','Sombra','Fuego','Hielo','Naturaleza','Tierra','Rayo'];
 const CH_INDEX={Base:0,Luz:1,Sombra:2,Fuego:3,Hielo:4,Naturaleza:5,Tierra:6,Rayo:7};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const pct=(x,y,w,h)=>`left:${x/16.7}%;top:${y/9.42}%;width:${w/16.7}%;height:${h/9.42}%;`;
+const pct=(x,y,w,h)=>`left:${x/16.7}% !important;top:${y/9.42}% !important;width:${w/16.7}% !important;height:${h/9.42}% !important;`;
 function insertStyle(){
  if(document.getElementById('mercV04Style'))return;
  const node=document.createElement('style');node.id='mercV04Style';node.textContent=`
@@ -19,6 +19,9 @@ function insertStyle(){
  .mercV04 button{position:absolute;appearance:none;border:0;background:transparent;padding:0;margin:0;color:inherit;cursor:pointer;outline-offset:-2px;font:inherit}
  .mercV04 button:focus-visible,.mercV04 button:hover{outline:2px solid #f6ce69;outline-offset:-3px;background:rgba(234,170,70,.11)}
  .mercV04 button:disabled{cursor:default;opacity:1;outline:none;background:none}
+ /* The full-game modal CSS must not collapse transparent art-aligned hit targets. */
+ .mercV04 button[data-action][style]{display:block!important;position:absolute!important;pointer-events:auto!important;z-index:4!important}
+ .mercV04 button.mcItemSlot[style]{display:flex!important;position:absolute!important;pointer-events:auto!important;z-index:4!important}
  .mercV04 .mcItemSlot{display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden}
  .mercV04 .mcItemSlot img{max-width:78%;max-height:78%;object-fit:contain;filter:drop-shadow(0 1px 4px #000);pointer-events:none}
  .mercV04 .mcItemSlot.selected{box-shadow:inset 0 0 0 2px rgba(255,215,100,.85);background:rgba(255,190,54,.11)}
