@@ -442,3 +442,32 @@
 .genInv .genInvTab:hover img{
   filter:none!important;
 }
+
+/* Estado activo sin pintar arte nuevo: el PNG de Preparacion tiene brillo
+ * horneado; al estar en Inventario se atenúa y se aplica el overlay original
+ * de Inventario procedente de las mismas 39 capas de Preparacion. */
+.genInv .genInvTab{position:relative!important;isolation:isolate}
+.genInv .genInvTab:not([aria-current=page]) img{
+  filter:brightness(.56) saturate(.72)!important;
+}
+.genInv .genInvTab[aria-current=page] img{
+  filter:brightness(1.22) saturate(1.06)!important;
+}
+.genInv .genInvTab[data-nav="Inventario"]{
+  --gen-tab-hover:url('assets/ui/preparacion/01_Capas/Efectos/Pestana_Inventario_HoverBrillo.png');
+}
+.genInv .genInvTab[data-nav="Preparacion"]{
+  --gen-tab-hover:url('assets/ui/preparacion/01_Capas/Efectos/Pestana_Preparacion_HoverBrillo.png');
+}
+.genInv .genInvTab[data-nav="Fabricaciones"]{
+  --gen-tab-hover:url('assets/ui/preparacion/01_Capas/Efectos/Pestana_Fabricaciones_HoverBrillo.png');
+}
+.genInv .genInvTab[data-nav="Comparacion"]{
+  --gen-tab-hover:url('assets/ui/preparacion/01_Capas/Efectos/Pestana_Comparacion_HoverBrillo.png');
+}
+.genInv .genInvTab[aria-current=page]::after,
+.genInv .genInvTab:hover::after{
+  content:"";position:absolute;inset:0;
+  background:var(--gen-tab-hover) center/100% 100% no-repeat;
+  pointer-events:none;opacity:.85;
+}
