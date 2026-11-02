@@ -157,4 +157,4 @@ async function init(){
  window.addEventListener('pagehide',()=>{clearInterval(check);app.off('update',update);restore()}, {once:true});
  status.phase='running';report();
 }
-init().catch(e=>{status.phase='error';status.errors.push(String(e?.stack||e));report();console.error('Genesis blacksmith install',e)});
+globalThis.__genesisProductionHerreroReady=init().then(()=>true).catch(e=>{status.phase='error';status.errors.push(String(e?.stack||e));report();console.error('Genesis blacksmith install',e);return false});
