@@ -62,6 +62,7 @@
     ...OPTIONAL_POSTERS.map(url=>({url,kind:'image',mandatory:false,group:'materiales'})),
     ...OPTIONAL_PREVIEWS.map(url=>({url,kind:'model',mandatory:false,group:'visores'}))
   ]);
+  function planned(){return g.GenesisDevice?.safePreviews?URLS.filter(x=>x.kind!=='model'):URLS;}
   const records=new Map();
   let inflight=null;
   let done=false;
@@ -117,7 +118,7 @@
   function prepare(options={}){
     if(inflight)return inflight;
     inflight=(async()=>{
-      const byURL=new Map(URLS.map(a=>[a.url,a]));
+      const byURL=new Map(planned().map(a=>[a.url,a]));
       const entries=[...byURL.values()];
       const totals={total:entries.length,ready:0,failed:0,mandatoryFailures:[],bytes:0};
       let next=0;
@@ -140,7 +141,7 @@
   }
   g.GenesisAssetPreflight=Object.freeze({
     prepare,
-    manifest:()=>URLS.map(x=>({...x})),
+    manifest:()=>planned().map(x=>({...x})),
     get status(){return report},
     get ready(){return done},
     urlFor(url){const item=records.get(url);return item?.status==='ready'?(item.blobURL||url):null},
