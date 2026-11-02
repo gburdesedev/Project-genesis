@@ -235,10 +235,10 @@ export function mountVillageTrees(app, villageRoot, options={}){
     }
     if(task.lod===2&&!initiallySettled.has(task.species)){
      initiallySettled.add(task.species);
-     if(ready.has(task.key))options.onResourceLoaded?.('tree:'+task.species+':lod2');
+     if(ready.has(task.key))try{options.onResourceLoaded?.('tree:'+task.species+':lod2')}catch(progressError){console.warn('Genesis trees: error en progreso LOD2',progressError)}
      if(initiallySettled.size===Object.keys(TYPES).length)resolveInitial({loaded:Object.keys(TYPES).length-failed.size,failed:failed.size});
     }
-    if(task.lod===1&&ready.has(task.key))options.onResourceLoaded?.('tree:'+task.species+':lod1');
+    if(task.lod===1&&ready.has(task.key))try{options.onResourceLoaded?.('tree:'+task.species+':lod1')}catch(progressError){console.warn('Genesis trees: error en progreso LOD1',progressError)}
     checkAll();
     update(focusX,focusZ,true);
     globalThis.__genesisTreeStatus=status();
