@@ -44,9 +44,16 @@ const server=http.createServer((req,res)=>{
   const after=await page.locator('.genesisMarketCard[data-slot="0"] small').textContent();
   assert.notEqual(before,after,'Buy did not change live inventory count');
   assert.match(after,/Tenés 1 · Precio: 0 oro/);
-  await page.screenshot({path:path.join(out,'market-herrero.png'),timeout:15000});
   const summary={ok:true,npc:npc.status,catalog:items,before,after,errors:errors.slice(0,12)};
   fs.writeFileSync(path.join(out,'status.json'),JSON.stringify(summary,null,2));
+  // A headless GPU runner may hang on screenshots even when the real market
+  // and purchase pipeline passed. Preserve truthfully verified gameplay.
+  try{
+    await page.screenshot({path:path.join(out,'market-herrero.png'),timeout:7000,animations:'disabled'});
+  }catch(err){
+    fs.writeFileSync(path.join(out,'screenshot-limitation.txt'),String(err));
+    console.warn('Marketplace screenshot unavailable on GPU runner:',String(err).slice(0,250));
+  }
   console.log('PASS in-game seeded marketplace',JSON.stringify(summary));
  }catch(error){
   const diag=await page.evaluate(()=>({
