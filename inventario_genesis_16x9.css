@@ -398,3 +398,53 @@
 .genInvFamilies .genInvHead{font-weight:normal!important;letter-spacing:.05em}
 .genInvFamily{height:6.25%!important;min-height:0!important;font-size:1.05cqw!important}
 .genInvInfo .genInvInfoMore{background-size:100% 100%!important;}
+
+
+/* PLAYER INVENTORY HEADER — PREPARACION CANONICAL TABS (2026-11-02)
+ * Header compatibility only. Keep the approved inventory body unchanged.
+ * Based on Preparación's original 1536×1024 canvas and 4 PNGs:
+ * 294×94, 320×94, 328×94 and 298×94.
+ * The inventory viewport is 16:9 (1672×941 reference).
+ * All tabs use 94/1024 of viewport height; widths retain source aspect.
+ * No change to other menus or live inventory content.
+ */
+.genInvNav {
+ display:flex!important;justify-content:flex-end!important;
+ align-items:center!important;gap:0.5981cqw!important;
+ padding:0 2cqw 0 26cqw!important;
+ box-sizing:border-box!important;
+}
+.genInvNav .genInvTab {
+ position:relative;flex:0 0 auto!important;
+ height:5.1663cqw!important;max-height:100%!important;
+ min-width:0!important;min-height:0!important;
+ padding:0!important;border:0!important;
+ aspect-ratio:auto!important;
+}
+.genInvNav .genInvTab:nth-child(1){width:16.1583cqw!important}
+.genInvNav .genInvTab:nth-child(2){width:17.5875cqw!important}
+.genInvNav .genInvTab:nth-child(3){width:18.0273cqw!important}
+.genInvNav .genInvTab:nth-child(4){width:16.3783cqw!important}
+.genInvNav .genInvTab>img {
+ display:block!important;width:100%!important;height:100%!important;
+ max-width:100%!important;max-height:100%!important;
+ object-fit:contain!important;filter:none!important;
+}
+.genInvNav .genInvTab[aria-current=page]>img,
+.genInvNav .genInvTab:hover>img{filter:none!important}
+/* Hover and active use Preparación's original 39-layer artwork,
+ * not CSS recoloring or a new button illustration. */
+.genInvNav .genInvTab::after {
+ content:"";position:absolute;inset:0;pointer-events:none;
+ background-position:center;background-size:contain;background-repeat:no-repeat;
+ opacity:0;transition:opacity .12s ease;
+}
+.genInvNav .genInvTab:nth-child(1)::after {background-image:url('assets/ui/preparacion/01_Capas/Efectos/Pestana_Inventario_HoverBrillo.png')}
+.genInvNav .genInvTab:nth-child(2)::after {background-image:url('assets/ui/preparacion/01_Capas/Efectos/Pestana_Preparacion_HoverBrillo.png')}
+.genInvNav .genInvTab:nth-child(3)::after {background-image:url('assets/ui/preparacion/01_Capas/Efectos/Pestana_Fabricaciones_HoverBrillo.png')}
+.genInvNav .genInvTab:nth-child(4)::after {background-image:url('assets/ui/preparacion/01_Capas/Efectos/Pestana_Comparacion_HoverBrillo.png')}
+.genInvNav .genInvTab[aria-current=page]::after,
+.genInvNav .genInvTab:hover::after {opacity:1}
+@media (prefers-reduced-motion:reduce){
+ .genInvNav .genInvTab::after{transition:none}
+}
