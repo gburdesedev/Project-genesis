@@ -58,10 +58,11 @@ const models=Object.freeze([
   "https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_peasant.glb",
   "https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_ranger.glb"
 ]);
+const activeModels=window.GenesisDevice?.safePreviews ? [] : models;
 const modelBlobs=new Map();
 let pending=null;
 let report=null;
-const state={total:images.length+models.length,completed:0,failed:0,bytes:0,phase:'pendiente',errors:[]};
+const state={total:images.length+activeModels.length,completed:0,failed:0,bytes:0,phase:'pendiente',errors:[]};
 const waitImage=url=>new Promise((resolve,reject)=>{
  const image=new Image();let settled=false;
  const timer=setTimeout(()=>{if(settled)return;settled=true;image.onload=image.onerror=null;reject(new Error('Tiempo agotado: '+url))},30000);
@@ -82,10 +83,10 @@ async function waitModel(url){
   state.bytes+=blob.size;
  }finally{clearTimeout(timer)}
 }
-function snapshot(){return{total:state.total,completed:state.completed,failed:state.failed,bytes:state.bytes,phase:state.phase,errors:[...state.errors],imageCount:images.length,previewModelCount:models.length}}
+function snapshot(){return{total:state.total,completed:state.completed,failed:state.failed,bytes:state.bytes,phase:state.phase,errors:[...state.errors],imageCount:images.length,previewModelCount:activeModels.length}}
 async function preloadUi(onProgress){
  if(pending){const value=await pending;onProgress?.(snapshot());return value}
- const jobs=[...images.map(url=>({kind:'imagen',url})),...models.map(url=>({kind:'visor 3D',url}))];
+ const jobs=[...images.map(url=>({kind:'imagen',url})),...activeModels.map(url=>({kind:'visor 3D',url}))];
  state.phase='Descargando interfaz e inventarios';
  pending=(async()=>{
   let next=0;
@@ -109,5 +110,5 @@ async function preloadUi(onProgress){
  return pending;
 }
 function modelUrl(original){return modelBlobs.get(original)||original}
-window.GenesisPreflight=Object.freeze({preloadUi,modelUrl,snapshot,images,models});
+window.GenesisPreflight=Object.freeze({preloadUi,modelUrl,snapshot,images,models,activeModels});
 })();
