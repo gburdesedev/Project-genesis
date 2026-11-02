@@ -506,11 +506,13 @@
   /* Fondo panoramico extendido + artboard 3:2 superpuesto, como Preparacion.
      Ambos usan el mismo PNG original, sin rehacer ni recortar pintura. */
   background-image:
+    linear-gradient(90deg,#080605c9,#1d130eb3 45%,#080605d8),
+    linear-gradient(90deg,#080605c9,#1d130eb3 45%,#080605d8),
     url('assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png'),
     url('assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png');
-  background-position:center top,center top;
-  background-size:84.375% 666.666667%,100% 666.666667%;
-  background-repeat:no-repeat,no-repeat;
+  background-position:left top,right top,center top,center top;
+  background-size:7.8125% 100%,7.8125% 100%,84.375% 666.666667%,100% 666.666667%;
+  background-repeat:no-repeat,no-repeat,no-repeat,no-repeat;
 }
 .genInv .genInvNav{
   position:absolute!important;
