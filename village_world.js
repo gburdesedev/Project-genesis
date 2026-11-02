@@ -222,7 +222,10 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
   }finally{clearTimeout(timer)}
  }
  onPhase('arboles');
- await bootGate(trees.fullReady,'árboles LOD1 y LOD2'); // Nunca descargar LOD mientras se juega.
+ const initialTrees=await bootGate(trees.initialReady,'árboles esenciales LOD2',120000);
+ if(initialTrees.failed)throw new Error('Faltan árboles esenciales LOD2: '+initialTrees.failed+' recursos');
+ // Los LOD1 siguen descargándose mientras el jugador elige su profesión.
+ // El ingreso jugable espera fullReady en prepareRoute, nunca durante el movimiento.
  onPhase('puertas');
  await bootGate(Promise.all(arcanePortals.map(portal=>portal.initialReady)),
    'puerta mágica Arcanista V027');
