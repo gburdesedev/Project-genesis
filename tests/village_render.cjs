@@ -23,9 +23,17 @@ const server=http.createServer((req,res)=>{const url=new URL(req.url,'http://loc
  const state=await page.evaluate(()=>({width:GenesisVillagePlan.bounds.maxX-GenesisVillagePlan.bounds.minX,closed:view.village.blocked(-15.5,16),count:view.village.root.children.filter(e=>e.name.includes('fachada cerrada')).length,scale:view.village.root.children.find(e=>e.name.includes('fachada cerrada')).getLocalScale().x,heightScale:view.village.root.children.find(e=>e.name.includes('fachada cerrada')).getLocalScale().y}));assert.equal(state.width,63);assert.equal(state.closed,true);assert.equal(state.count,5);assert.equal(state.scale,.75);assert.equal(state.heightScale,1);
  await page.close();
  const actual=await browser.newPage({viewport:{width:1280,height:800}});actual.setDefaultTimeout(60000);
- const errors=[];actual.on('pageerror',e=>errors.push(e.message));
+ const errors=[];actual.on('pageerror',e=>{errors.push(e.message);console.error('BOOT_PAGE_ERROR',e.message)});
+ const requestErrors=[];actual.on('requestfailed',req=>{if(requestErrors.length<35){const record={url:req.url(),error:req.failure()?.errorText};requestErrors.push(record);console.error('BOOT_REQUEST_FAIL',JSON.stringify(record))}});
+ actual.on('response',resp=>{if(resp.status()>=400)console.error('BOOT_HTTP_ERROR',resp.status(),resp.url())});
+ actual.on('console',msg=>{if(['warning','error'].includes(msg.type()))console.error('BOOT_BROWSER_CONSOLE',msg.type(),msg.text().slice(0,450))});
+ const readBoot=()=>actual.evaluate(()=>({readyState:document.readyState,progress:document.querySelector('#loadPercent')?.textContent,state:document.querySelector('#loadState')?.textContent,detail:document.querySelector('#loadDetail')?.textContent,count:document.querySelector('#loadCount')?.textContent,failed:!!document.querySelector('.loadingCard.failed'),intro:document.querySelector('#prototypeIntro')?.style.display,appReady:!!document.querySelector('#genesisApp')?.app,boot:window.__genesisBoot,ui:window.GenesisPreflight?.snapshot?.(),door:window.__genesisArcaneDoorStatus,trees:window.__genesisTreeStatus,world:!!window.__genesisVillage})).catch(e=>({error:e.message}));
+ const probe=setInterval(()=>{readBoot().then(v=>console.log('BOOT_DIAGNOSTIC',JSON.stringify(v))).catch(e=>console.error('BOOT_PROBE_ERROR',e.message))},10000);
  await actual.goto(`http://127.0.0.1:${server.address().port}/index.html`,{waitUntil:'domcontentloaded',timeout:120000});
- await actual.waitForFunction(()=>document.querySelector('#prototypeIntro')?.style.display==='grid'||document.querySelector('.loadingCard.failed'),{},{timeout:120000});
+ try{await actual.waitForFunction(()=>document.querySelector('#prototypeIntro')?.style.display==='grid'||document.querySelector('.loadingCard.failed'),{},{timeout:110000});}
+ catch(error){console.error('BOOT_TIMEOUT',JSON.stringify(await readBoot()),'recent requests',JSON.stringify(requestErrors.slice(-15)),'pageErrors',JSON.stringify(errors));fs.mkdirSync('/tmp/genesis-responsive',{recursive:true});await actual.screenshot({path:'/tmp/genesis-responsive/boot-stalled-diagnostic.png'}).catch(()=>{});throw error}
+ finally{clearInterval(probe)}
+ console.log('BOOT_FINAL_STATE',JSON.stringify(await readBoot()));
  assert.equal(await actual.locator('.loadingCard.failed').count(),0,await actual.locator('#loadState').textContent());
  await actual.locator('[data-profession="Herrero"]').click();
  await actual.waitForFunction(()=>document.querySelector('#loading')?.style.display==='none'||document.querySelector('.loadingCard.failed'),{},{timeout:120000});
