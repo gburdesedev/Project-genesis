@@ -144,6 +144,7 @@ async function init(){
  await Promise.all(Object.entries(GLBS).map(async ([key,url])=>{src[key]=await acquire(app,url,key);}));
  status.phase='installing';report();
  attemptMount(app,src);
+ globalThis.__genesisProductionHerreroMountNow=()=>attemptMount(app,src);
  const check=setInterval(()=>{
    attemptMount(app,src);
    for(const item of installed.values())item.ensureDoorVisual?.();
@@ -157,4 +158,4 @@ async function init(){
  window.addEventListener('pagehide',()=>{clearInterval(check);app.off('update',update);restore()}, {once:true});
  status.phase='running';report();
 }
-init().catch(e=>{status.phase='error';status.errors.push(String(e?.stack||e));report();console.error('Genesis blacksmith install',e)});
+globalThis.__genesisProductionHerreroReady=init().then(()=>({ok:true,status})).catch(e=>{status.phase='error';status.errors.push(String(e?.stack||e));report();console.error('Genesis blacksmith install',e);return{ok:false,error:String(e?.message||e),status}});
