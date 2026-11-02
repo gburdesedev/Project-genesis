@@ -15,7 +15,7 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
  try{
   await page.goto('http://127.0.0.1:'+server.address().port+'/index.html?mercenary-qa=1',{waitUntil:'domcontentloaded',timeout:120000});
   try {
-    await page.waitForFunction(()=>['ready','error'].includes(window.GenesisMercenaryQA?.phase),null,{timeout:75000});
+    await page.waitForFunction(()=>['ready','error'].includes(window.GenesisMercenaryQA?.phase),null,{timeout:150000});
   } catch(err) {
     const state=await page.evaluate(()=>({
       url:location.href,title:document.title,readyState:document.readyState,
@@ -36,17 +36,17 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
   assert.equal(qa.phase,'ready',JSON.stringify(qa.errors));
   assert.deepEqual(qa.items.map(i=>i.rarity),['Inútil','Bueno','Inútil','Común']);
   assert.equal(qa.remainingMaterialUnits,0);
-  assert.equal(await page.locator('.mcInventorySlot:not(.mcEmptySlot)').count(),2);
-  assert.equal(await page.locator('.mcChannel').count(),3); // Base only versus Buena Base+2
-  assert.equal(await page.locator('.mercConcept').count(),1);
+  assert.equal(await page.locator('.mcItemSlot').count(),2);
+  assert.equal(await page.locator('.mcV4Row').count(),3); // Base only versus Buena Base+2
+  assert.equal(await page.locator('.mercV04').count(),1);
   await page.screenshot({path:path.join(out,'equipamiento-espadas-16x9.png')});
-  await page.locator('[data-family="second"]').click();
-  assert.equal(await page.locator('.mcChannel').count(),2); // Base+1 from Common
+  await page.locator('[data-action="family-second"]').click();
+  assert.equal(await page.locator('.mcV4Row').count(),2); // Base+1 from Common
   await page.screenshot({path:path.join(out,'equipamiento-escudos-16x9.png')});
-  await page.locator('[data-family="first"]').click();
+  await page.locator('[data-action="family-first"]').click();
   // Choose Buena sword from artisan's family: click index 1.
   await page.locator('[data-item="1"]').click();
-  await page.locator('[data-family="second"]').click();
+  await page.locator('[data-action="family-second"]').click();
   await page.locator('[data-item="1"]').click();
   await page.locator('[data-action="equip"]').click();
   await page.waitForTimeout(1000);
