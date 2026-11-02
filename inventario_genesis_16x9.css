@@ -471,3 +471,14 @@
   background:var(--gen-tab-hover) center/100% 100% no-repeat;
   pointer-events:none;opacity:.85;
 }
+
+/* Paridad de tamaño REAL con Preparación. La función syncOriginalLayout
+ * limita --prep-scale a 1 incluso en pantallas grandes: los gráficos no
+ * superan sus dimensiones originales. Este mismo límite se aplica SOLO
+ * a las pestañas del Inventario, conservando el cuerpo aprobado.
+ * 1240px = 294+320+328+298, 604px = 1820.444/2-(142.222+164).
+ */
+.genInv .genInvNav {
+  width:min(68.115%, 1240px)!important;
+  margin-left:max(16.824%, calc(50% - 604px))!important;
+}
