@@ -13,6 +13,21 @@
     'Mineral de hierro':'assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png',
     'Lingote de hierro':'assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png'
   };
+  // Uses exactly the same panorama fit as Preparación's syncOriginalLayout().
+  function syncInventoryLayout() {
+    const frame=document.querySelector('.genInvPanorama');
+    const layer=document.getElementById('modalLayer');
+    if(!frame||!layer||!layer.clientWidth||!layer.clientHeight)return;
+    const style=getComputedStyle(layer);
+    const width=layer.clientWidth-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight);
+    const height=layer.clientHeight-parseFloat(style.paddingTop)-parseFloat(style.paddingBottom);
+    const W=1820.4444444444443;
+    const scale=Math.max(.01,Math.min(1,width/W,height/1024));
+    frame.style.setProperty('--geninv-layout-width',(W*scale)+'px');
+    frame.style.setProperty('--geninv-layout-height',(1024*scale)+'px');
+  }
+  addEventListener('resize',syncInventoryLayout,{passive:true});
+  window.visualViewport?.addEventListener('resize',syncInventoryLayout,{passive:true});
   function esc(x) {
     return String(x == null ? '' : x).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]});
   }
@@ -112,6 +127,7 @@
           '<span>Página '+(state.page+1)+' / '+pages+'</span><button id="genInvNext" '+(state.page===pages-1?'disabled':'')+'>▶</button></div></section>'+
       '</main></div></div>';
     ctx.modal(html,'preparationModal genInvModal');
+    syncInventoryLayout();
     const board=document.querySelector('#genInv');
     if(!board)return;
     board.querySelectorAll('[data-nav]').forEach(function(b){b.onclick=function(){
