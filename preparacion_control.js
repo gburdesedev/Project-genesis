@@ -314,7 +314,7 @@
     const render3D = !safePreviews && art.model && type !== 'featured';
     const exposure = material === CHARCOAL ? '1.16' : '1.45';
     const visual = render3D
-      ? `<model-viewer class="prepMaterialModel" src="${escape(art.model)}" poster="${poster}" loading="lazy" reveal="auto" interaction-prompt="none" camera-orbit="0deg 75deg auto" environment-image="neutral" exposure="${exposure}" shadow-intensity="0" alt="${name}"></model-viewer>`
+      ? `<model-viewer class="prepMaterialModel" src="${escape(window.GenesisBootAssets?.modelURL?.(art.model)||art.model)}" poster="${poster}" loading="lazy" reveal="auto" interaction-prompt="none" camera-orbit="0deg 75deg auto" environment-image="neutral" exposure="${exposure}" shadow-intensity="0" alt="${name}"></model-viewer>`
       : `<img class="prepMaterialPoster" src="${poster}" alt="${name}" loading="lazy" draggable="false">`;
     return `<span class="prepMaterialVisual ${type}${material === CHARCOAL ? ' charcoal' : ''}" data-material="${name}">${visual}</span>`;
   }
