@@ -44,7 +44,7 @@
     const channels=Array.isArray(item.channels)?item.channels:[];
     if(!channels.length)return '<p class="genInvEmptyChannels">Este objeto todavía no tiene canales registrados.</p>';
     const channelName=function(c){return Array.isArray(c)?c[0]:(c?.name||c?.channel||'')};
-    const isBase=function(c){return /^(?:canal\\s+)?base$/i.test(String(channelName(c)).trim())};
+    const isBase=function(c){return /^(?:canal\s+)?base$/i.test(String(channelName(c)).trim())};
     const ordered=channels.filter(isBase).concat(channels.filter(function(c){return !isBase(c)}));
     return ordered.map(function(c){
       const name=channelName(c);
