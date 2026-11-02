@@ -35,7 +35,7 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
   const safeScreenshot=async(name)=>{
     const dest=path.join(out,name);
     try{
-      await page.locator('.mercV04').screenshot({path:dest,timeout:8500,animations:'disabled'});
+      if(process.env.GENESIS_SCREENSHOT==='1')await page.locator('.mercV04').screenshot({path:dest,timeout:8500,animations:'disabled'});
       console.log('SCREENSHOT_SAVED',name);
     }catch(err){console.warn('SCREENSHOT_SKIPPED',name,String(err.message).slice(0,200));}
   };
@@ -63,6 +63,11 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
     });
   });
   console.log('MERCENARY_QA_CLICK_TARGETS',JSON.stringify(clickTargets));
+  console.log('MERCENARY_QA_HOTSPOT_DEBUG',JSON.stringify(await page.evaluate(()=>{
+    const e=document.querySelector('.mercV04 [data-action="family-second"]'),b=e?.getBoundingClientRect(),s=e?getComputedStyle(e):null;
+    const parent=e?.offsetParent,p=parent?.getBoundingClientRect();
+    return {outerHTML:e?.outerHTML,cssText:e?.style?.cssText,rect:b?.toJSON?.(),computed:s&&{position:s.position,display:s.display,visibility:s.visibility,width:s.width,height:s.height,left:s.left,top:s.top,transform:s.transform,contain:s.contain,boxSizing:s.boxSizing},offsetParent:parent?.className,parentBounds:p?.toJSON?.(),boardDimensions:document.querySelector('.mercV04')?.getBoundingClientRect()?.toJSON?.()};
+  })));
   assert.ok(clickTargets.every(t=>t.hitVisible&&t.width>20&&t.height>15),'Approved art hotspots must have physical pointer targets');
   await page.locator('[data-action="family-second"]').click();
   assert.equal(await page.locator('.mcV4Row').count(),2); // Base+1 from Common
