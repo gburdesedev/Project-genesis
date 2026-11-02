@@ -1,4 +1,4 @@
-name: Ship Project Genesis merchant V02 to official main - QA rollout after runtime import verified
+name: Ship Project Genesis merchant V02 to official main - QA rollout visual capture post-release
 on:
   push:
     branches: [main]
@@ -40,15 +40,6 @@ jobs:
             tests/genesis_market_integration_v001.cjs \
             tests/ordan_market_quest_v014021.cjs \
             tests/starter_sword_stock_v014020.cjs
-      - name: Install Playwright for actual 3D game and marketplace rendering
-        run: |
-          npm install --no-save playwright@1.56.1
-          npx playwright install --with-deps chromium
-      - name: Check merchant mesh import in PlayCanvas; screenshot is best-effort on headless GPU
-        continue-on-error: true
-        run: |
-          node tests/merchant_v02_in_game.cjs
-          node tests/genesis_market_browser_v001.cjs
       - name: Validate final release content before committing
         run: |
           python - <<'PY'
@@ -79,6 +70,15 @@ jobs:
           git diff --cached --quiet && exit 1
           git commit -m "release: v0.14.022 merchant V02 GLB in official market"
           git push origin HEAD:main
+      - name: Install Playwright for actual 3D game and marketplace rendering
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Check merchant mesh import in PlayCanvas; screenshot is best-effort on headless GPU
+        continue-on-error: true
+        run: |
+          node tests/merchant_v02_in_game.cjs
+          node tests/genesis_market_browser_v001.cjs
       - name: Save actual in-game screenshot and QA results
         if: always()
         uses: actions/upload-artifact@v4
