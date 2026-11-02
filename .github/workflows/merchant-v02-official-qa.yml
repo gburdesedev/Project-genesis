@@ -2,7 +2,7 @@ name: Ship merchant V02 from approved 75962 GLB - in game QA
 on:
   push:
     branches: [feature/merchant-v02-official-20261102]
-    paths: [.github/workflows/merchant-v02-official-qa.yml]
+    paths: [.github/workflows/merchant-v02-official-qa.yml, scripts/integrate_merchant_v02_official.py, tests/merchant_v02_browser.cjs]
   workflow_dispatch:
 permissions:
   contents: write
@@ -61,7 +61,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html village_world.js genesis_market_v001.js assets/playcanvas/approved/characters/mercader-v02-75962.glb
+          git add index.html village_world.js genesis_market_v001.js assets/playcanvas/approved/characters/mercader-v02-75962.glb tests/ordan_market_quest_v014021.cjs tests/starter_sword_stock_v014020.cjs
           git diff --cached --check
           git commit -m "feat: Project Genesis v0.14.022 real merchant V02 in market"
           git push origin HEAD:feature/merchant-v02-official-20261102
