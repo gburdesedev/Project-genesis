@@ -314,7 +314,7 @@
     const render3D = !safePreviews && art.model && type !== 'featured';
     const exposure = material === CHARCOAL ? '1.16' : '1.45';
     const visual = render3D
-      ? `<model-viewer class="prepMaterialModel" src="${escape(art.model)}" poster="${poster}" loading="lazy" reveal="auto" interaction-prompt="none" camera-orbit="0deg 75deg auto" environment-image="neutral" exposure="${exposure}" shadow-intensity="0" alt="${name}"></model-viewer>`
+      ? `<model-viewer class="prepMaterialModel" src="${escape(window.GenesisPreflight?.modelUrl(art.model) || art.model)}" poster="${poster}" loading="lazy" reveal="auto" interaction-prompt="none" camera-orbit="0deg 75deg auto" environment-image="neutral" exposure="${exposure}" shadow-intensity="0" alt="${name}"></model-viewer>`
       : `<img class="prepMaterialPoster" src="${poster}" alt="${name}" loading="lazy" draggable="false">`;
     return `<span class="prepMaterialVisual ${type}${material === CHARCOAL ? ' charcoal' : ''}" data-material="${name}">${visual}</span>`;
   }
@@ -520,10 +520,10 @@
       if(!window.__GenesisInv16Loading){
         window.__GenesisInv16Loading=true;
         const style=document.createElement('link');
-        style.rel='stylesheet';style.href='inventario_genesis_16x9.css?v=0.1.003-head-50036d1';
+        style.rel='stylesheet';style.href='inventario_genesis_16x9.css?v=preflight-20261102';
         document.head.append(style);
         const loader=document.createElement('script');
-        loader.src='inventario_genesis_16x9.js?v=0.1.001';
+        loader.src='inventario_genesis_16x9.js?v=preflight-20261102';
         loader.onload=()=>renderWorkspace('Inventario');
         loader.onerror=()=>{window.__GenesisInv16Loading=false;style.remove();};
         document.head.append(loader);
