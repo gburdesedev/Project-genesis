@@ -25,7 +25,39 @@ const server=http.createServer((req,res)=>{const url=new URL(req.url,'http://loc
  const actual=await browser.newPage({viewport:{width:1280,height:800}});actual.setDefaultTimeout(60000);
  const errors=[];actual.on('pageerror',e=>errors.push(e.message));
  await actual.goto(`http://127.0.0.1:${server.address().port}/index.html`,{waitUntil:'domcontentloaded',timeout:120000});
- await actual.waitForFunction(()=>document.querySelector('#prototypeIntro')?.style.display==='grid'||document.querySelector('.loadingCard.failed'),{},{timeout:120000});
+ const failedRequests=[];const browserMessages=[];
+ actual.on('requestfailed',req=>{if(failedRequests.length<25)failedRequests.push(req.url()+' · '+(req.failure()?.errorText||'unknown'))});
+ actual.on('console',msg=>{if(['error','warning'].includes(msg.type())&&browserMessages.length<30)browserMessages.push(msg.type()+': '+msg.text())});
+ actual.on('pageerror',err=>{if(browserMessages.length<30)browserMessages.push('PAGE ERROR: '+err.message)});
+ const bootSnapshot=async label=>{
+   const info=await actual.evaluate(()=>{
+     const q=s=>document.querySelector(s),txt=s=>q(s)?.textContent?.trim()?.slice(0,240)||null;
+     const status=x=>x?({phase:x.phase,installed:x.installed,errors:x.errors?.slice?.(0,3),error:x.error,ready:x.ready,pending:x.pending}):null;
+     return {readyState:document.readyState,appReady:!!q('#genesisApp')?.app,
+       introDisplay:q('#prototypeIntro')?.style.display||null,
+       loadingDisplay:q('#loading')?.style.display||null,
+       loadingFailed:!!q('.loadingCard.failed'),
+       loadState:txt('#loadState'),loadDetail:txt('#loadDetail'),loadCount:txt('#loadCount'),
+       progress:txt('#loadPercent'),preload:window.__genesisBoot,
+       tree:window.__genesisTreeStatus,arcaneDoor:window.__genesisArcaneDoorStatus,
+       smith:status(window.__genesisProductionHerreroV015),
+       arcanist:status(window.__genesisArcanistaFourWallsV006),
+       ui:window.GenesisPreflight?.snapshot?.(),
+       assetErrors:window.__genesisRouteAssetErrors?.slice?.(-5),
+       loadedResources:performance.getEntriesByType('resource').length};
+   });
+   console.log('GENESIS_BOOT_DIAG '+label+' '+JSON.stringify({info,failedRequests:failedRequests.slice(-12),browserMessages:browserMessages.slice(-12)}));
+ };
+ const timers=[15000,45000,85000].map(ms=>setTimeout(()=>bootSnapshot(ms+'ms').catch(e=>console.log('GENESIS_BOOT_DIAG ERROR '+e.message)),ms));
+ try{
+   await actual.waitForFunction(()=>document.querySelector('#prototypeIntro')?.style.display==='grid'||document.querySelector('.loadingCard.failed'),{},{timeout:120000});
+ }catch(error){
+   await bootSnapshot('TIMEOUT');
+   fs.mkdirSync('/tmp/genesis-responsive',{recursive:true});
+   await actual.screenshot({path:'/tmp/genesis-responsive/boot-stalled-diagnostic.png'}).catch(()=>{});
+   throw error;
+ }finally{timers.forEach(clearTimeout);}
+
  assert.equal(await actual.locator('.loadingCard.failed').count(),0,await actual.locator('#loadState').textContent());
  await actual.locator('[data-profession="Herrero"]').click();
  await actual.waitForFunction(()=>document.querySelector('#loading')?.style.display==='none'||document.querySelector('.loadingCard.failed'),{},{timeout:120000});
