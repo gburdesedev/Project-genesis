@@ -50,6 +50,14 @@
   "assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png",
   "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png"
 ];
+ const BINARY_MODELS=[
+  "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_55k_pbr1536_v007.glb",
+  "assets/playcanvas/candidates/materials/iron_ingot/v175/iron_v175_web_candidate.glb",
+  "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_final_3_piezas_web.glb",
+  "https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/sword.glb",
+  "https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/shield_round.glb"
+];
+ const models=new Map();
  let pending=null;
  const report={ready:false,total:0,loaded:0,failed:[],optionalFailed:[]};
  function imageReady(url,timeoutMs=25000){
@@ -62,6 +70,20 @@
    img.decoding='async';img.src=url;
    if(img.complete&&img.naturalWidth>0)end(true);
   });
+ }
+ async function binaryReady(url){
+  if(models.has(url))return models.get(url);
+  const response=await fetch(url,{mode:'cors',cache:'default'});
+  if(!response.ok)throw new Error('GLB HTTP '+response.status+': '+url);
+  const blob=await response.blob();
+  if(blob.size<100)throw new Error('GLB vacío: '+url);
+  const local=URL.createObjectURL(blob);
+  models.set(url,local);
+  report.binaryBytes=(report.binaryBytes||0)+blob.size;
+  return local;
+ }
+ function modelURL(original){
+  return models.get(original)||original;
  }
  function importStyle(url){
   return new Promise((resolve,reject)=>{
@@ -91,9 +113,12 @@
     {name:'Interfaz · CSS',required:true,do:()=>importStyle('inventario_genesis_16x9.css?v=boot-001')},
     {name:'Interfaz · controlador',required:true,do:()=>importJS('inventario_genesis_16x9.js?v=boot-001')},
     ...REQUIRED.map(url=>({name:url,required:true,do:()=>imageReady(url)})),
-    ...OPTIONAL.filter(url=>!REQUIRED.includes(url)).map(url=>({name:url,required:false,do:()=>imageReady(url)}))
+    ...OPTIONAL.filter(url=>!REQUIRED.includes(url)).map(url=>({name:url,required:false,do:()=>imageReady(url)})),
+    ...(!window.GenesisDevice?.safePreviews
+      ? BINARY_MODELS.map(url=>({name:url,required:true,do:()=>binaryReady(url)}))
+      : [])
    ];
-   report.total=tasks.length;report.loaded=0;report.failed=[];report.optionalFailed=[];report.ready=false;
+   report.total=tasks.length;report.loaded=0;report.failed=[];report.optionalFailed=[];report.binaryBytes=0;report.ready=false;
    let next=0;
    async function worker(){
     while(next<tasks.length){
@@ -103,12 +128,12 @@
      onProgress?.(report.loaded+report.failed.length+report.optionalFailed.length,report.total,t.name,report);
     }
    }
-   await Promise.all(Array.from({length:4},()=>worker()));
+   await Promise.all(Array.from({length:3},()=>worker()));
    if(report.failed.length)throw new Error('Faltan '+report.failed.length+' recursos UI obligatorios: '+report.failed.slice(0,3).map(x=>x.asset).join(', '));
    report.ready=true;
    return report;
   })();
   try{return await pending;}catch(e){pending=null;throw e;}
  }
- window.GenesisBootAssets={prepare,report,get required(){return REQUIRED.slice();},get optional(){return OPTIONAL.slice();}};
+ window.GenesisBootAssets={prepare,report,modelURL,get required(){return REQUIRED.slice();},get optional(){return OPTIONAL.slice();},get binaries(){return BINARY_MODELS.slice();}};
 })();
