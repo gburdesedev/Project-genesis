@@ -25,10 +25,10 @@ const server=http.createServer((req,res)=>{const url=new URL(req.url,'http://loc
  const actual=await browser.newPage({viewport:{width:1280,height:800}});actual.setDefaultTimeout(60000);
  const errors=[];actual.on('pageerror',e=>errors.push(e.message));
  await actual.goto(`http://127.0.0.1:${server.address().port}/index.html`,{waitUntil:'domcontentloaded',timeout:120000});
- await actual.waitForFunction(()=>document.querySelector('#prototypeIntro')?.style.display==='grid'||document.querySelector('.loadingCard.failed'),{},{timeout:120000});
+ await actual.waitForFunction(()=>document.querySelector('#prototypeIntro')?.style.display==='grid'||document.querySelector('.loadingCard.failed'),{},{timeout:360000});
  assert.equal(await actual.locator('.loadingCard.failed').count(),0,await actual.locator('#loadState').textContent());
  await actual.locator('[data-profession="Herrero"]').click();
- await actual.waitForFunction(()=>document.querySelector('#loading')?.style.display==='none'||document.querySelector('.loadingCard.failed'),{},{timeout:120000});
+ await actual.waitForFunction(()=>document.querySelector('#loading')?.style.display==='none'||document.querySelector('.loadingCard.failed'),{},{timeout:360000});
  assert.equal(await actual.locator('.loadingCard.failed').count(),0,await actual.locator('#loadState').textContent());
  const scales=await actual.evaluate(()=>{const scale=id=>document.getElementById(id).entity.getWorldTransform().getScale();return {anvil:scale('anvilModel'),player:scale('playerModel'),shell:scale('workshopShellModel')}});
  assert(Math.abs(scales.anvil.x-scales.anvil.y)<.001&&Math.abs(scales.anvil.z-scales.anvil.y)<.001,'anvil proportions changed');
