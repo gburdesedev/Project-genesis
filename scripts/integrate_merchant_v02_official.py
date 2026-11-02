@@ -76,6 +76,6 @@ for testname in ('tests/ordan_market_quest_v014021.cjs','tests/starter_sword_sto
     test=path.read_text(encoding='utf-8')
     assert '021' in test
     # Only changes are in test text; gameplay logic remains untouched.
-    test=test.replace('021','022').replace('20261101.03','20261102.01')
+    test=test.replace('021','022').replace('20261101','20261102').replace(r'20261102\.03',r'20261102\.01')
     path.write_text(test,encoding='utf-8')
 print('UPDATED market model, release v0.14.022 and release assertion tests')
