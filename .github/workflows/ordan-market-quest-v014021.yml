@@ -1,0 +1,40 @@
+name: "Project Genesis Ordan · market quest v0.14.021"
+on:
+  push:
+    branches: [feat/ordan-guided-market-quest-v014021]
+  pull_request:
+    paths:
+      - index.html
+      - village_world.js
+      - genesis_market_v001.js
+      - genesis_market_domain_v001.js
+      - genesis_market_quest_v001.js
+      - preparacion_control.js
+      - tests/ordan_market_quest_v014021.cjs
+      - tests/starter_sword_stock_v014020.cjs
+      - tests/genesis_market_domain_v001.cjs
+      - tests/genesis_market_integration_v001.cjs
+      - .github/workflows/ordan-market-quest-v014021.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  quest-integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check module and test syntax
+        run: |
+          node --check index.html || true
+          node --check village_world.js
+          node --check genesis_market_v001.js
+          node --check genesis_market_domain_v001.js
+          node --check genesis_market_quest_v001.js
+          node --check preparacion_control.js
+          node --check tests/ordan_market_quest_v014021.cjs
+      - name: Validate 80 seeded trades, quests and previous demos
+        run: node --test tests/ordan_market_quest_v014021.cjs tests/starter_sword_stock_v014020.cjs tests/genesis_market_domain_v001.cjs tests/genesis_market_integration_v001.cjs
