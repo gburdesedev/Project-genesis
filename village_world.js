@@ -210,13 +210,13 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
  // Las promesas que dependen de assets remotos no pueden dejar el
  // inicio bloqueado indefinidamente. No abrimos el juego al vencer el plazo:
  // reportamos el recurso que falta y dejamos visible Reintentar.
- async function bootGate(promise,label,timeout=90000){
+ async function bootGate(promise,label,timeout=240000){
   let timer;
   try{
    return await Promise.race([
     promise,
     new Promise((_,reject)=>{
-     timer=setTimeout(()=>reject(new Error('Carga incompleta: '+label+' (90 s)')),timeout);
+     timer=setTimeout(()=>reject(new Error('Carga incompleta: '+label+' ('+Math.round(timeout/1000)+' s)')),timeout);
     })
    ]);
   }finally{clearTimeout(timer)}
