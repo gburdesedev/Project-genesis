@@ -1,0 +1,62 @@
+name: Test Fresno V03 real PlayCanvas HDRI browser
+on:
+  push:
+    branches: [experiment/fresno-hdri-playcanvas-20261102]
+    paths:
+      - .github/workflows/fresno-hdri-playcanvas.yml
+      - previews/fresno-hdri-playcanvas/index.html
+      - tests/fresno_hdri_playcanvas_real.cjs
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  visual-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: genesis-fresno-v03-hdri32-cycles
+          run-id: 41513660410
+          repository: ProjectgenesisAssets/genesis-workshop-assets
+          github-token: ${{ github.token }}
+          path: source
+      - name: Prepare exact GLBs and HDRI from Blender V03 QA
+        run: |
+          set -euo pipefail
+          dir=previews/fresno-hdri-playcanvas
+          cp source/models/ProjectGenesis_Tablas_Fresno_V03_Calido_HDRI.glb "$dir/fresno_tablas_v03.glb"
+          curl -fLsS --retry 3 --connect-timeout 30 "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/6bdc2bb85f42fa24cc509a29e7be9f76049f58b9/README.md" -o /tmp/provenance_readme || true
+          curl -fLsS --retry 3 --connect-timeout 30 --max-time 150 \
+            "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/studio_small_09_2k.hdr" -o "$dir/studio_small_09_2k.hdr"
+          curl -fLsS --retry 3 --connect-timeout 30 \
+            "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/7b37220a102225cef484dee4d5fc08768e0609d6/doesnotexist" -o /tmp/unused || true
+          # The log was not modified in HDRI V03, use the exact V02 original.
+      - uses: actions/download-artifact@v4
+        with:
+          name: genesis-fresno-v02-troncos-tablas-blender
+          run-id: 41503321995
+          repository: ProjectgenesisAssets/genesis-workshop-assets
+          github-token: ${{ github.token }}
+          path: source_log
+      - name: Place log and install Chromium
+        run: |
+          cp source_log/models/ProjectGenesis_Tronco_Fresno_V02.glb previews/fresno-hdri-playcanvas/fresno_tronco_v02.glb
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Execute genuine browser WebGL HDRI test and save actual pixel frame
+        run: node tests/fresno_hdri_playcanvas_real.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-fresno-hdri-playcanvas-real-frame
+          path: |
+            previews/fresno-hdri-playcanvas/fresno_v03_playcanvas_hdri_real.png
+            previews/fresno-hdri-playcanvas/qa-result.json
+          if-no-files-found: warn
+          retention-days: 14
