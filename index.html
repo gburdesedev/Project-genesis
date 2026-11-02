@@ -953,7 +953,7 @@ const bootState=window.__genesisBoot||{loaded:0,total:0,error:null};
 // Contar el archivo descargado, el modelo/clip instanciado y la textura del mundo una sola vez.
 // Los LOD de árboles fuera de vista se transmiten luego y no bloquean esta etapa.
 const bootPrepTotal=[...document.querySelectorAll('pc-model[asset]:not([data-route])'),...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]')).length;
-const bootProgress={downloaded:0,downloadTotal:0,prepared:0,prepareTotal:bootPrepTotal,world:0,worldTotal:13,ui:0,uiTotal:window.GenesisPreflight?.snapshot().total||0};
+const bootProgress={downloaded:0,downloadTotal:0,prepared:0,prepareTotal:bootPrepTotal,world:0,worldTotal:13,ui:0,uiTotal:window.GenesisPreflight?.snapshot().total||0,externals:0,externalsTotal:2};
 const groupSpec=[
  ['paredes','Paredes'],['puertas','Puertas'],['objetos','Objetos'],
  ['animaciones','Animaciones'],['arboles','Árboles'],['suelos','Suelos y caminos']
@@ -985,8 +985,8 @@ function syncGroupRows(){
 function groupStage(id){return 'Cargando '+(groupSpec.find(([key])=>key===id)?.[1].toLowerCase()||'recursos')}
 
 function showBootProgress(stage,detail=''){
- const total=bootProgress.downloadTotal+bootProgress.prepareTotal+bootProgress.worldTotal+bootProgress.uiTotal;
- const loaded=bootProgress.downloaded+bootProgress.prepared+bootProgress.world+bootProgress.ui;
+ const total=bootProgress.downloadTotal+bootProgress.prepareTotal+bootProgress.worldTotal+bootProgress.uiTotal+bootProgress.externalsTotal;
+ const loaded=bootProgress.downloaded+bootProgress.prepared+bootProgress.world+bootProgress.ui+bootProgress.externals;
  if(!total)return;
  setLoadUI(100*loaded/total,stage,detail);
  loadCount.textContent=loaded+' de '+total+' recursos listos';
@@ -1001,7 +1001,7 @@ function syncPreloadProgress(loaded,total){
 // Interfaces y visores se cargan mientras PlayCanvas prepara el mundo.
 const uiAssetsPromise=window.GenesisPreflight
   ? window.GenesisPreflight.preloadUi(report=>{
-     bootProgress.ui=report.completed;
+     bootProgress.ui=report.completed-report.failed;
      bootProgress.uiTotal=report.total;
      showBootProgress('Preparando menús e inventarios',report.completed+' / '+report.total+' recursos UI · '+(report.last||''));
     }).then(report=>({report}),error=>({error}))
@@ -1667,7 +1667,7 @@ async function activateRouteGroups(prof,priority,onProgress){
     const problem=results.find(r=>r.status==='rejected');
     failures.push(asset+': '+(problem?.reason?.message||'Instancia vacía'));
    }
-   onProgress?.(loaded+failed,total,(ok?'Listo: ':'Error: ')+asset);
+   onProgress?.(loaded,total,(ok?'Listo: ':'Error: ')+asset);
   }
  }
  await Promise.all(Array.from({length:Math.min(3,total)},worker));
@@ -1724,11 +1724,35 @@ function frame(now){requestAnimationFrame(frame);village.trees?.update(px,pz);co
  if(gameStarted&&activeRoute&&mentorFollowState!=='walking'&&mentorFollowState!=='market'){const mentor=activeRoute.mentor(),mp=mentor.getPosition(),dist=Math.hypot(px-mp.x,pz-mp.z),desired=dist<7?deg(Math.atan2(px-mp.x,pz-mp.z)):-21,delta=((desired-mentorYaw+540)%360)-180;mentorYaw+=delta*Math.min(1,dt*4.1);mentor.setEulerAngles(0,mentorYaw,0);if(activeRoute.mentorGesture&&now>mentorGestureAt&&!mentorGestureReturn){activeRoute.mentorAnims.forEach(a=>a.transition(activeRoute.mentorGesture,.28));mentorGestureReturn=now+2200}if(mentorGestureReturn&&now>mentorGestureReturn){activeRoute.mentorAnims.forEach(a=>activeRoute.mentorIdle&&a.transition(activeRoute.mentorIdle,.32));mentorGestureReturn=0;mentorGestureAt=now+7800}}
  updateInteractionUI();updateCameraGuide();const camComp=document.querySelector('#cameraRig pc-camera')?.component;if(gameStarted&&activeRoute&&camComp){const p=activeRoute.mentor().getPosition(),screen=new Vec3();camComp.worldToScreen(new Vec3(p.x,2.25,p.z),screen);if(screen.z>0&&screen.x>=0&&screen.x<=innerWidth&&screen.y>=0&&screen.y<=innerHeight){npcTag.style.display='block';npcTag.style.left=screen.x+'px';npcTag.style.top=screen.y+'px'}else npcTag.style.display='none'}else npcTag.style.display='none';
 }
+// Los visuales instalados por módulos independientes también son recursos de
+// arranque. Las promesas de red no bastan: deben existir los nodos en escena.
+async function waitVisualModulesBeforePlay(){
+ const deadline=performance.now()+90000;
+ while(performance.now()<deadline){
+  const smith=window.__genesisProductionHerreroV015;
+  const arcane=window.__genesisArcanistaFourWallsV006;
+  if(smith?.phase==='error')throw new Error('Herreria V015: '+(smith.errors?.[0]||'fallo de integración'));
+  if(arcane?.phase==='error'||arcane?.phase==='village-unavailable-after-15min')
+    throw new Error('Arcanista V006: '+(arcane.error||arcane.phase));
+  const smithReady=smith?.phase==='running'&&smith?.installed?.some(x=>x.kind==='village');
+  const arcaneReady=arcane?.installed===true;
+  bootProgress.externals=Number(!!smithReady)+Number(!!arcaneReady);
+  showBootProgress('Integrando arquitectura del mundo',
+   'Herrería V015 y Arcanista V006: '+bootProgress.externals+' de 2 instalados');
+  if(smithReady&&arcaneReady)return;
+  await new Promise(r=>setTimeout(r,250));
+ }
+ throw new Error('No se completó el montaje de herrería V015 y Arcanista V006 antes del inicio');
+}
 requestAnimationFrame(frame);
 const uiPreflightResult=await uiAssetsPromise;
 if(uiPreflightResult.error){
  failLoading(uiPreflightResult.error.message,'No se habilitó la escena: faltan recursos de inventario. Reintentá.');
  throw uiPreflightResult.error;
+}
+try{await waitVisualModulesBeforePlay()}catch(err){
+ failLoading(err.message,'No se habilitó la partida: falta arquitectura 3D externa. Reintentá.');
+ throw err;
 }
 showBootProgress('Interfaz y escena preparadas','Todos los recursos iniciales están listos.');
 setLoadUI(100,'Núcleo listo','Edric, cámara y controles preparados. El taller se cargará después de elegir profesión.');clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
