@@ -95,7 +95,7 @@
           : '<span class="genInvCreationGlyph" aria-hidden="true"></span>');
       return '<button class="genInvSlot'+(selected?' selected':'')+'" data-select="'+i+'" aria-label="'+esc(entry.name)+'" aria-pressed="'+selected+'">'+content+'<span>'+esc(entry.material?entry.qty:(entry.rarity||''))+'</span></button>';
     }).join('');
-    const html='<div class="genInv" id="genInv">'+
+    const html='<div class="genInvPanorama"><div class="genInv" id="genInv">'+
       '<header class="genInvNav">'+navMarkup+'</header>'+
       '<main class="genInvMain">'+
         '<aside class="genInvFamilies"><h2 class="genInvHead">FAMILIAS</h2>'+familiesMarkup+
@@ -110,7 +110,7 @@
           '<div class="genInvSlots">'+slots+'</div>'+
           '<div class="genInvPage"><button id="genInvPrev" '+(state.page===0?'disabled':'')+'>◀</button>'+
           '<span>Página '+(state.page+1)+' / '+pages+'</span><button id="genInvNext" '+(state.page===pages-1?'disabled':'')+'>▶</button></div></section>'+
-      '</main></div>';
+      '</main></div></div>';
     ctx.modal(html,'preparationModal genInvModal');
     const board=document.querySelector('#genInv');
     if(!board)return;
