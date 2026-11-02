@@ -46,7 +46,7 @@ for(const [id,craft,wanted] of [['espada_hierro',1,'Inútil'],['espada_hierro',2
  await page.screenshot({path:path.join(out,'concept-espada-buena-real.png')});
  assert.equal(await page.locator('.mcV4Row').count(),3);
  await page.locator('[data-action="family-second"]').click();
- assert.equal(await page.locator('.mcV4Row').count(),2);
+ assert.equal(await page.locator('.mcV4Row').count(),1); // equipped shield Base; candidate not selected yet
  await page.screenshot({path:path.join(out,'concept-escudo-comun-real.png')});
  console.log('PASS approved 16:9 comparison from actual NGE engine',fabricated.map(i=>i.rarity));
  }finally{await browser.close()}
