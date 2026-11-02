@@ -130,13 +130,14 @@ const MERCHANT_V02_GLB='./assets/playcanvas/approved/characters/merchant_v02_759
 function loadMerchantV02(app,merchantRoot,visual){
   visual.phase='loading';
   visual.assetUrl=MERCHANT_V02_GLB;
+  const ready=new Promise(resolve=>{
   try{
     app.assets.loadFromUrl(MERCHANT_V02_GLB,'container',(error,asset)=>{
       if(error||!asset?.resource){
         visual.phase='fallback';
         visual.error=String(error||'GLB container missing');
         console.warn('Genesis merchant V02: keeping fallback',visual.error);
-        return;
+        resolve(false);return;
       }
       let model;
       try{
@@ -188,11 +189,17 @@ function loadMerchantV02(app,merchantRoot,visual){
         visual.error=String(cause);
         console.warn('Genesis merchant V02: model setup failed',cause);
       }
+      resolve(visual.phase==='ready');
     });
   }catch(error){
     visual.phase='fallback';visual.error=String(error);
     console.warn('Genesis merchant V02: loading unavailable',error);
+    resolve(false);
   }
+  });
+  visual.ready=ready;
+  globalThis.__genesisMerchantAssetReady=ready;
+  return ready;
 }
 
 export function mountGenesisMarket(options){
