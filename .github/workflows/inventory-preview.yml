@@ -3,6 +3,11 @@ on:
   pull_request:
     paths:
       - 'preparacion_control.js'
+      - 'index.html'
+      - 'genesis_asset_preflight_v001.js'
+      - 'genesis_workshop_live_v015.js'
+      - 'genesis_arcanista_four_walls_v006.js'
+      - 'tests/preflight_assets.cjs'
       - 'inventario_genesis_16x9.js'
       - 'inventario_genesis_16x9.css'
       - 'tests/inventario_16x9.cjs'
@@ -23,6 +28,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --prefix /tmp/genesis-inventory-preview playwright@1.56.1
+      - run: node tests/preflight_assets.cjs
       - run: NODE_PATH=/tmp/genesis-inventory-preview/node_modules node tests/inventario_16x9.cjs
       - uses: actions/upload-artifact@v4
         if: always()
