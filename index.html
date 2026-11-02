@@ -198,6 +198,7 @@ if(!window.GenesisDevice.safePreviews){const script=document.createElement('scri
 </script>
 <meta name="genesis-build" content="playcanvas-v0.14.022-build-20261102.04-camino-vertical-slice-herrero">
 <link rel="stylesheet" href="./responsive.css?v=0.11.017">
+<script src="./genesis_boot_assets_v001.js?v=boot-001"></script>
 </head>
 <body>
 
@@ -210,7 +211,7 @@ window.__genesisPreloadProgress=function(event){
   const fill=document.getElementById('loadBarFill'),pct=document.getElementById('loadPercent'),state=document.getElementById('loadState'),detail=document.getElementById('loadDetail'),count=document.getElementById('loadCount');
   const total=window.__genesisBoot.total,loaded=window.__genesisBoot.loaded;
   if(total>0){
-    const value=Math.min(85,Math.round((loaded/total)*85));
+    const value=Math.min(70,Math.round((loaded/total)*70));
     if(fill)fill.style.width=value+'%'; if(pct)pct.textContent=value+'%';
     if(state)state.textContent='Descargando los recursos iniciales';
     if(count)count.textContent=Math.min(loaded,total)+' de '+total+' assets descargados';
@@ -985,7 +986,7 @@ function showBootProgress(stage,detail=''){
  const total=bootProgress.downloadTotal+bootProgress.prepareTotal+bootProgress.worldTotal;
  const loaded=bootProgress.downloaded+bootProgress.prepared+bootProgress.world;
  if(!total)return;
- setLoadUI(100*loaded/total,stage,detail);
+ setLoadUI(Math.min(80,80*loaded/total),stage,detail);
  loadCount.textContent=loaded+' de '+total+' recursos listos';
  syncGroupRows();
 }
@@ -1637,11 +1638,88 @@ function routeModels(prof,priority){return[...document.querySelectorAll(`pc-mode
 function groupRouteModels(models){const map=new Map();for(const el of models){const asset=el.dataset.asset;if(!map.has(asset))map.set(asset,[]);map.get(asset).push(el)}return[...map.entries()]}
 function loadDeferredModelAsset(el,asset,timeout=12000){return new Promise((resolve,reject)=>{let done=false;const label=el.getAttribute('name')||el.id||asset;const finish=(ok,msg)=>{if(done)return;done=true;clearTimeout(timer);el.removeEventListener('load',onLoad);el.removeEventListener('error',onError);if(!ok&&!el.contentEntity){try{el.removeAttribute('asset')}catch(_){}}ok?resolve(el):reject(new Error(msg||('No pudo cargarse '+label+' ['+asset+']')))};const onLoad=()=>finish(!!el.contentEntity,el.contentEntity?'':'El modelo terminó sin contenido: '+label+' ['+asset+']');const onError=e=>finish(false,(e?.message||'Falló la carga')+' · '+label+' ['+asset+']');const timer=setTimeout(()=>finish(false,'Tiempo agotado cargando '+label+' ['+asset+']'),timeout);el.addEventListener('load',onLoad,{once:true});el.addEventListener('error',onError,{once:true});if(el.getAttribute('asset')!==asset)el.setAttribute('asset',asset);else if(!el.contentEntity){el.removeAttribute('asset');requestAnimationFrame(()=>el.setAttribute('asset',asset))}if(el.contentEntity)finish(true)})}
 async function activateDeferredModel(el,timeout=12000){if(el.contentEntity)return el;const primary=el.dataset.asset;if(!primary)return el;const fallback=el.dataset.fallbackAsset;try{return await loadDeferredModelAsset(el,primary,timeout)}catch(primaryError){if(!fallback)throw primaryError;console.warn('Genesis asset fallback:',primaryError.message,'→',fallback);try{return await loadDeferredModelAsset(el,fallback,Math.min(timeout,8000))}catch(fallbackError){throw new Error(primaryError.message+' | Fallback '+fallback+' también falló: '+fallbackError.message)}}}
-async function activateRouteGroups(prof,priority,onProgress){const groups=groupRouteModels(routeModels(prof,priority));if(!groups.length){onProgress?.(1,1,'Ruta ya preparada');return{total:0,loaded:0,failed:0,timedOut:false}}let complete=0,loaded=0,failed=0;const jobs=groups.map(([asset,els])=>Promise.allSettled(els.map(el=>activateDeferredModel(el,12000))).then(results=>{const ok=results.some(r=>r.status==='fulfilled'&&r.value?.contentEntity);if(ok)loaded++;else failed++;complete++;onProgress?.(loaded,groups.length,(ok?'✓ ':'↻ ')+asset);if(ok){try{refreshRouteBindings(prof)}catch(_){}}return ok}));const all=Promise.allSettled(jobs);const guard=sleep(6500).then(()=>null);const result=await Promise.race([all,guard]);const timedOut=result===null;if(timedOut){onProgress?.(loaded,groups.length,'Entrada habilitada · los modelos restantes continúan cargando')}return{total:groups.length,loaded,failed,timedOut}}
+/* Route resources: deduplicate URLs, cap simultaneous GLB requests, and await
+ * every instance. A timeout or incomplete model blocks starting the game.
+ * There is deliberately NO Promise.race allowing background loads to escape. */
+async function activateRouteGroups(prof,priority,onProgress){
+ const groups=groupRouteModels(routeModels(prof,priority));
+ if(!groups.length)return {total:0,loaded:0,failed:0,errors:[]};
+ let cursor=0,done=0,loaded=0;
+ const errors=[];
+ async function worker(){
+  while(cursor<groups.length){
+   const [asset,els]=groups[cursor++];
+   let error=null;
+   for(const el of els){
+    if(el.contentEntity)continue;
+    try{
+      await activateDeferredModel(el,30000);
+      if(!el.contentEntity)throw new Error('Modelo sin geometría: '+(el.id||asset));
+    }catch(e){
+      // Bounded retry: sometimes the CDN fails a transient GLB request.
+      try{
+       await sleep(500);
+       await activateDeferredModel(el,30000);
+       if(!el.contentEntity)throw new Error('Modelo vacío: '+(el.id||asset));
+      }catch(retryError){error=retryError;break}
+    }
+   }
+   done++;
+   if(error)errors.push({asset,error:error.message||String(error)});
+   else{loaded++;try{refreshRouteBindings(prof)}catch(e){console.warn('Route binding warning:',e)}}
+   onProgress?.(done,groups.length,(error?'Error: ':'Listo: ')+asset);
+  }
+ }
+ await Promise.all(Array.from({length:Math.min(3,groups.length)},()=>worker()));
+ return {total:groups.length,loaded,failed:errors.length,errors};
+}
 function refreshRouteBindings(prof){document.querySelectorAll(`pc-model[data-route="${prof}"]`).forEach(el=>el.contentEntity&&hideCollisionMeshes(el));if(prof==='Herrero'){tintModel(document.getElementById('ordanModel'),[.58,.52,.43],0);tintModel(document.getElementById('ordanHairModel'),[.62,.62,.60],0);const root=document.getElementById('chestModel')?.contentEntity;chestLid=root?.findByName?.('Lid')||null;if(chestLid){const e=chestLid.getLocalEulerAngles();chestLidBase={x:e.x,y:e.y,z:e.z}}if(forgeVisualBoundRoot!==forgeModelEl?.contentEntity){forgeVisualBoundRoot=forgeModelEl?.contentEntity||null;forgeHotMaterialPatched=false;forgeCoalMaterials=[]}igniteForgeVisual()}else{tintModel(document.getElementById('tannerMentorModel'),[.72,.54,.37],0);tintModel(document.getElementById('tannerMentorHairModel'),[.33,.24,.18],0);tannerChestClosed=chooseClip(tannerChestAnim,'Chest_Closed');tannerChestOpen=chooseClip(tannerChestAnim,'Chest_Open');tannerChestOpened=chooseClip(tannerChestAnim,'Chest_Opened');if(tannerChestClosed)tannerChestAnim?.transition?.(tannerChestClosed,.01);applyTannerVisualPass()}}
-async function prepareRoute(prof){if(routeReady.has(prof))return;routeLoading=true;intro.style.display='none';loading.style.display='grid';loadRetry.style.display='none';const planned=groupRouteModels(routeModels(prof,'critical')).length;loadCount.textContent='0 de '+planned+' assets del '+prof;setLoadUI(0,'Preparando '+prof,'Los modelos se cargan en paralelo. Los que falten seguirán en segundo plano.');const report=await activateRouteGroups(prof,'critical',(done,total,label)=>{setLoadUI(100*done/Math.max(1,total),'Preparando '+prof,label);loadCount.textContent=done+' de '+total+' assets del '+prof+' cargados'});try{refreshRouteBindings(prof)}catch(err){console.warn('Bindings parciales de ruta:',err)}routeReady.add(prof);if(!report?.timedOut&&report?.failed===0)setLoadUI(100,prof+' listo','Ruta preparada. El decorado secundario continuará en segundo plano.');else setLoadUI(100*report.loaded/Math.max(1,report.total),prof+' disponible',''+report.loaded+' de '+report.total+' assets listos; los restantes seguirán en segundo plano.');loadCount.textContent=report.loaded+' de '+report.total+' assets del '+prof+' cargados';await sleep(90)}
-function streamRouteDecor(prof){const models=routeModels(prof,'stream');let index=0;const pump=()=>{if(index>=models.length)return;const batch=models.slice(index,index+4);index+=4;for(const el of batch)activateDeferredModel(el,45000).then(()=>{hideCollisionMeshes(el);if(prof==='Curtidor'){applyTannerVisualPass()}}).catch(err=>console.warn('Decoración diferida:',err.message));setTimeout(pump,180)};(window.requestIdleCallback?requestIdleCallback(()=>pump(),{timeout:420}):setTimeout(pump,160))}
-async function chooseProfessionRoute(prof){if(routeLoading||gameStarted)return;const buttons=[...document.querySelectorAll('[data-profession]')];buttons.forEach(b=>b.disabled=true);try{await prepareRoute(prof);startRoute(prof);loading.style.display='none';streamRouteDecor(prof)}catch(err){console.error(err);failLoading(err?.message||String(err),'No se habilitó la ruta. Reintentá; el resto del prototipo no se cargó.');intro.style.display='none'}finally{routeLoading=false;buttons.forEach(b=>b.disabled=false)}}
+/* A profession cannot start until all critical and decorative models are
+ * instantiated. The bar reserves its final percentage for mercenary assets. */
+async function prepareRoute(prof){
+ if(routeReady.has(prof))return;
+ routeLoading=true;
+ intro.style.display='none';loading.style.display='grid';loadRetry.style.display='none';
+ const phases=['critical','stream'];
+ const totals=phases.map(priority=>groupRouteModels(routeModels(prof,priority)).length);
+ const total=totals.reduce((a,b)=>a+b,0)+1; // one mercenary readiness gate
+ let completed=0;
+ loadCount.textContent='0 de '+total+' grupos de la ruta y equipamiento';
+ setLoadUI(88,'Preparando '+prof,'Todos los modelos se completan antes de habilitar la partida.');
+ for(let i=0;i<phases.length;i++){
+  const priority=phases[i];
+  const report=await activateRouteGroups(prof,priority,(done,count,label)=>{
+   const current=completed+done;
+   setLoadUI(88+11*(current/total),priority==='critical'?'Taller y personajes':'Decoración y entorno',label);
+   loadCount.textContent=current+' de '+total+' grupos y equipamiento listos';
+  });
+  if(report.failed)throw new Error('Faltan '+report.failed+' recursos de '+prof+' ('+priority+'): '+report.errors.slice(0,3).map(e=>e.asset+' '+e.error).join(' | '));
+  completed+=report.total;
+ }
+ try{refreshRouteBindings(prof)}catch(err){console.warn('Bindings:',err)}
+ setLoadUI(99,'Equipamiento y mercenarios','Preparando recursos completos del mercenario antes de jugar.');
+ await ensureMercenaryReady();
+ loadCount.textContent=total+' de '+total+' grupos y equipamiento listos';
+ routeReady.add(prof);
+}
+async function chooseProfessionRoute(prof){
+ if(routeLoading||gameStarted)return;
+ const buttons=[...document.querySelectorAll('[data-profession]')];
+ buttons.forEach(b=>b.disabled=true);
+ try{
+  await prepareRoute(prof);
+  startRoute(prof);
+  setLoadUI(100,'Partida preparada','Todas las cargas obligatorias de '+prof+' terminaron.');
+  loading.style.display='none';
+ }catch(err){
+  console.error('Genesis route loading:',err);
+  failLoading(err?.message||String(err),'La partida no comenzó: hay recursos sin cargar. Reintentá la carga.');
+  intro.style.display='none';
+ }finally{
+  routeLoading=false;
+  buttons.forEach(b=>b.disabled=false);
+ }
+}
 
 function startRoute(prof){village.setProfession(prof);selectedProfession=prof;activeRoute=ROUTES[prof];const engine=window.GenesisPrototypeEngines;if(!engine){toast('Motor NGE Alpha no disponible.',1600);return}craftSession=engine.generateSession(prof);gameStarted=true;tutorialStep=0;workshopKey=false;debrisCleared=false;auxCleared=false;chestOpen=false;playerInventory={};inventoryOpen=false;inventoryTutorialOpened=false;craftedItems=[];usedItemNames=new Set();resetMercenaryExtension();forgeHot=false;tannerOperational=false;igniteForgeVisual();if(tannerWorkLight)tannerWorkLight.intensity=.72;doorAngle=doorTarget=tannerDoorAngle=tannerDoorTarget=0;if(doorLeafEntity)doorLeafEntity.setEulerAngles(0,0,0);if(tannerDoorLeafEntity)tannerDoorLeafEntity.setEulerAngles(0,0,0);const center=activeRoute.center;px=center;pz=6.3;player.setPosition(px,0,pz);camera.setPosition(center,3,10);camYaw=0;camPitch=24;camDist=cameraSolvedDist=4.7;const mentor=activeRoute.mentor();mentor.setPosition(center+1.72*WORKSHOP_SCALE,0,1.90*WORKSHOP_SCALE);mentorYaw=-21;mentor.setEulerAngles(0,mentorYaw,0);mentorFollowState='outside';mentorFollowDelay=0;mentorPath=[];mentorWaypoint=0;marketEscortWaypoint=0;marketEscortWaiting=false;setMentorAnim(activeRoute.mentorIdle,.01);npcTag.textContent=activeRoute.mentorName.toUpperCase();professionChip.textContent=`PROFESIÓN · ${prof.toUpperCase()} · 2 FAMILIAS · 4 FABRICACIONES`;professionChip.style.display='block';materialsPanel.style.display='none';if(inventoryTouch){inventoryTouch.classList.add('locked');inventoryTouch.classList.remove('ready')}intro.style.display='none';mouseCapture.refresh();const fastSetup=applyDevFastTestState();restoreKnownLightingProfile();if(forgeHot){igniteForgeVisual();pulseForge(.10)}if(!fastSetup){setTutorialStep(0);toast(`Recorrido ${prof} iniciado.`,1500);mentorGestureAt=performance.now()+4800;mentorGestureReturn=0}}
 document.querySelectorAll('[data-profession]').forEach(btn=>btn.addEventListener('click',()=>{getAudio();uiTick();chooseProfessionRoute(btn.dataset.profession)}));
@@ -1659,7 +1737,17 @@ function frame(now){requestAnimationFrame(frame);village.trees?.update(px,pz);co
 }
 requestAnimationFrame(frame);
 
-setLoadUI(100,'Núcleo listo','Edric, cámara y controles preparados. El taller se cargará después de elegir profesión.');clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
+// The initial progress bar includes every approved UI sprite and inventory logic.
+if(!window.GenesisBootAssets?.prepare){throw new Error('No se cargó el gestor de recursos UI.');}
+setLoadUI(80,'Preparando interfaces','Verificando Preparación, Inventario, Fabricación y Comparación.');
+const uiStatus=await window.GenesisBootAssets.prepare((done,total,label)=>{
+ setLoadUI(80+8*done/Math.max(1,total),'Preparando interfaces',label);
+ loadCount.textContent=done+' de '+total+' archivos de interfaz verificados';
+});
+window.__genesisPreloadedUI=uiStatus;
+setLoadUI(88,'Núcleo e interfaces listos','Elegí una profesión para completar los modelos antes de iniciar la partida.');
+clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';
+setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
 </script>
 
 <script id="genesis-prototype-engines">
