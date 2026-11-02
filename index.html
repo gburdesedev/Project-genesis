@@ -1029,6 +1029,7 @@ let village;
 try{
  activeBootGroup='arboles';showBootProgress(groupStage('arboles'),'Preparando los cuatro árboles aprobados.');
  village=await mountVillage(appEl.app,{
+  qaFastStart:new URLSearchParams(location.search).get('mercenary-qa')==='1',
   shell:document.getElementById('villageShellSource').entity,
   roof:document.getElementById('villageRoofSource').entity,
   door:document.getElementById('villageDoorSource').entity,
