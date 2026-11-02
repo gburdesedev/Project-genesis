@@ -471,3 +471,18 @@
   background:var(--gen-tab-hover) center/100% 100% no-repeat;
   pointer-events:none;opacity:.85;
 }
+
+/* Paridad de tamaño REAL con Preparación. La función syncOriginalLayout
+ * limita --prep-scale a 1 incluso en pantallas grandes: los gráficos no
+ * superan sus dimensiones originales. Este mismo límite se aplica SOLO
+ * a las pestañas del Inventario, conservando el cuerpo aprobado.
+ * 1240px = 294+320+328+298, 604px = 1820.444/2-(142.222+164).
+ */
+.genInv .genInvNav {
+  /* Igualar también el alto disponible REAL de Preparación: el modal
+   deja 36px para las holguras/padding del layer a 720p, frente a 16px
+   en el visor del Inventario. 1240 / 1024 = 1.2109375. */
+  --gen-tab-matched-width:min(68.115%, 1240px, calc((100dvh - 36px) * 1.2109375));
+  width:var(--gen-tab-matched-width)!important;
+  margin-left:calc(50% - var(--gen-tab-matched-width) * 0.487096774)!important;
+}

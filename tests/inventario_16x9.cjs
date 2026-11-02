@@ -97,6 +97,38 @@ assert(fit.every(r=>r.top>=0&&r.bottom<=r.limit+1),'NGE, channels and button mus
 assert.equal(await page.locator('.genInvViewer .genInvViewLabel').innerText(),'Objeto fabricado · visor 360°');
 await page.waitForFunction(()=>Array.from(document.querySelectorAll('.genInvTab img')).length===4&&Array.from(document.querySelectorAll('.genInvTab img')).every(i=>i.complete&&i.naturalWidth>0));
 await page.screenshot({path:out+'/inventario-16x9-espadas.png',fullPage:false});
+// Comparación de TAMAÑOS reales: las pestañas originales de Preparación y
+// las de Inventario deben medir igual al alternar de pantalla, sin estirar PNG.
+const tabMetrics=async selector=>page.locator(selector).evaluateAll(nodes=>
+ nodes.map(n=>{const r=n.getBoundingClientRect();return {w:r.width,h:r.height};}));
+const requireMatchingTabs=(inv,prep,label)=>{
+ assert.equal(inv.length,4,label+': Inventario debe tener cuatro pestañas');
+ assert.equal(prep.length,4,label+': Preparación debe tener cuatro pestañas');
+ for(let i=0;i<4;i++){
+  assert(Math.abs(inv[i].w-prep[i].w)<=1.5,
+    label+': ancho distinto en pestaña '+i+' Inventario='+inv[i].w+' Preparación='+prep[i].w);
+  assert(Math.abs(inv[i].h-prep[i].h)<=1.5,
+    label+': altura distinta en pestaña '+i+' Inventario='+inv[i].h+' Preparación='+prep[i].h);
+ }
+};
+const invDesktop=await tabMetrics('.genInvTab');
+await page.locator('.genInvTab[data-nav="Preparacion"]').click();
+await page.waitForSelector('.prepSkinTab');
+const prepDesktop=await tabMetrics('.prepSkinTab');
+requireMatchingTabs(invDesktop,prepDesktop,'1920x1080');
+await page.screenshot({path:out+'/inventario-16x9-preparacion-referencia.png',fullPage:false});
+await page.locator('.prepSkinTab[data-tab="Inventario"]').click();
+await page.waitForSelector('#genInv');
+
+await page.setViewportSize({width:1280,height:720});
+const invSmall=await tabMetrics('.genInvTab');
+await page.locator('.genInvTab[data-nav="Preparacion"]').click();
+await page.waitForSelector('.prepSkinTab');
+const prepSmall=await tabMetrics('.prepSkinTab');
+requireMatchingTabs(invSmall,prepSmall,'1280x720');
+await page.screenshot({path:out+'/inventario-16x9-preparacion-1280.png',fullPage:false});
+await page.locator('.prepSkinTab[data-tab="Inventario"]').click();
+await page.waitForSelector('#genInv');
 await page.locator('.genInvTab[data-nav="Fabricaciones"]').click();
 assert.equal(await page.locator('.prepArtboard[data-active-tab="Fabricaciones"]').count(),1);
 assert.equal(errors.length,0,errors.join('\n'));
