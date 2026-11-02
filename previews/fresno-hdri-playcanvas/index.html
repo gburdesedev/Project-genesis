@@ -1,0 +1,78 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Project Genesis · Fresnos HDRI PlayCanvas QA</title><style>html,body{margin:0;background:#1d222a;color:#ddd;font-family:system-ui}header{padding:10px 20px}canvas{display:block;margin:auto;width:min(96vw,1200px);height:auto;aspect-ratio:16/9}#status{font-family:monospace;white-space:pre-wrap;margin:10px 20px}</style></head><body><header><b>PROJECT GENESIS / Fresnos V03 · PlayCanvas HDRI real</b> — vista de pruebas aislada</header><canvas id="screen" width="1200" height="675"></canvas><div id="status">Cargando modelos y HDRI...</div><script type="module">
+import * as pc from 'https://cdn.jsdelivr.net/npm/playcanvas@2.12.2/build/playcanvas.mjs';
+const canvas=document.querySelector('#screen'),status=document.querySelector('#status');
+const app=new pc.Application(canvas,{graphicsDeviceOptions:{alpha:false,antialias:true,preserveDrawingBuffer:true},mouse:new pc.Mouse(canvas)});
+app.setCanvasFillMode(pc.FILLMODE_NONE);
+app.setCanvasResolution(pc.RESOLUTION_FIXED,1200,675);
+app.scene.ambientLight=new pc.Color(.08,.08,.08);
+app.scene.toneMapping=pc.TONEMAP_ACES;
+app.scene.exposure=.68;
+app.scene.skyboxIntensity=.75;
+app.start();
+const diagnostic={stage:'started',engine:'PlayCanvas',models:{},hdri:null,errors:[]};
+window.__fresnoQA=diagnostic;
+function update(stage){diagnostic.stage=stage;status.textContent=JSON.stringify(diagnostic,null,2);console.log('FRESNO_QA',stage,JSON.stringify(diagnostic));}
+function asset(url,type){
+  return new Promise((resolve,reject)=>app.assets.loadFromUrl(url,type,(e,a)=>e?reject(new Error(url+' '+e)):resolve(a)));
+}
+function bounds(meshes){
+ let mn=new pc.Vec3(Infinity,Infinity,Infinity),mx=new pc.Vec3(-Infinity,-Infinity,-Infinity);
+ for(const r of meshes){
+  for(const mi of (r.meshInstances||[])){
+   const aabb=mi.aabb;if(!aabb)continue;
+   const lo=aabb.getMin(),hi=aabb.getMax();
+   mn.min(lo);mx.max(hi);
+  }
+ }
+ return {mn,mx,size:mx.clone().sub(mn)};
+}
+async function place(url,label,targetX){
+ const a=await asset(url,'container');
+ const e=a.resource.instantiateRenderEntity();
+ e.name=label;app.root.addChild(e);
+ const rend=e.findComponents('render'), count=rend.reduce((n,r)=>n+(r.meshInstances?.length||0),0);
+ if(!count)throw Error('no meshInstances '+label);
+ let b=bounds(rend);
+ const scale=1.7/Math.max(b.size.x,b.size.y,b.size.z,.01);
+ e.setLocalScale(scale,scale,scale);
+ // center geometry and place bottom at y=0
+ b=bounds(rend);
+ e.setLocalPosition(targetX-(b.mn.x+b.mx.x)/2,-b.mn.y,-(b.mn.z+b.mx.z)/2);
+ diagnostic.models[label]={meshInstances:count,materials:rend.flatMap(r=>r.meshInstances||[]).map(m=>m.material?.name),
+ bboxMeters:[b.size.x,b.size.y,b.size.z],loaded:true};
+ return e;
+}
+try{
+ update('loading hdri');
+ const hdr=(await asset('studio_small_09_2k.hdr','texture')).resource;
+ diagnostic.hdri={source:'Poly Haven Studio Small 09 HDR',format:hdr.format,width:hdr.width,height:hdr.height};
+ const source=pc.EnvLighting.generateLightingSource(hdr);
+ const atlas=pc.EnvLighting.generateAtlas(source);
+ source.destroy();
+ // Environment assigned to BOTH assets in isolated comparison, not whole live game.
+ app.scene.envAtlas=atlas;
+ app.scene.skybox=null;
+ app.scene.skyboxIntensity=.78;
+ update('lighting prepared');
+ const floor=new pc.Entity('studio floor');
+ floor.addComponent('render',{type:'box'});
+ floor.setLocalScale(8,.08,6);floor.setPosition(0,-.07,0);
+ floor.render.material=new pc.StandardMaterial();
+ floor.render.material.diffuse=new pc.Color(.13,.145,.16);floor.render.material.update();
+ app.root.addChild(floor);
+ const key=new pc.Entity('soft key');
+ key.addComponent('light',{type:'directional',color:new pc.Color(1,.97,.90),intensity:1.0,castShadows:false});
+ key.setEulerAngles(40,32,0);app.root.addChild(key);
+ update('loading GLB');
+ await place('fresno_tablas_v03.glb','Tablas fresno V03',-1.28);
+ await place('fresno_tronco_v02.glb','Tronco fresno V02',1.28);
+ const camera=new pc.Entity('camera');
+ camera.addComponent('camera',{clearColor:new pc.Color(.12,.14,.17),fov:40,farClip:80,nearClip:.1});
+ camera.setPosition(2.7,3.1,5.4);camera.lookAt(0,.18,0);
+ app.root.addChild(camera);
+ diagnostic.hdri.applied=true;
+ diagnostic.glbCount=2;
+ update('ready');
+ window.__fresnoApp=app;
+}catch(e){diagnostic.errors.push(String(e));update('failed');console.error(e);}
+</script></body></html>
