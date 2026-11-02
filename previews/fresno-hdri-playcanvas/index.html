@@ -6,10 +6,10 @@ app.setCanvasFillMode(pc.FILLMODE_NONE);
 app.setCanvasResolution(pc.RESOLUTION_FIXED,1200,675);
 app.scene.ambientLight=new pc.Color(.08,.08,.08);
 app.scene.toneMapping=pc.TONEMAP_ACES;
-app.scene.exposure=.68;
-app.scene.skyboxIntensity=.75;
+app.scene.exposure=.55;
+app.scene.skyboxIntensity=.64;
 app.start();
-const diagnostic={stage:'started',engine:'PlayCanvas',models:{},hdri:null,errors:[]};
+const diagnostic={stage:'started',engine:'PlayCanvas',version:'fresno-calibracion-v04',exposure:.55,environmentIntensity:.64,keyIntensity:.78,models:{},hdri:null,errors:[]};
 window.__fresnoQA=diagnostic;
 function update(stage){diagnostic.stage=stage;status.textContent=JSON.stringify(diagnostic,null,2);console.log('FRESNO_QA',stage,JSON.stringify(diagnostic));}
 function asset(url,type){
@@ -32,6 +32,21 @@ async function place(url,label,targetX){
  e.name=label;app.root.addChild(e);
  const rend=e.findComponents('render'), count=rend.reduce((n,r)=>n+(r.meshInstances?.length||0),0);
  if(!count)throw Error('no meshInstances '+label);
+ // Localized calibration ONLY for the ash boards; do not change the log.
+ const colorAdjustments=[];
+ if(label==='Tablas fresno V03'){
+   for(const mi of rend.flatMap(r=>r.meshInstances||[])){
+     const m=mi.material;
+     if(!m || !m.diffuse)continue;
+     const isEnd=/testa|anillos|corte/i.test(m.name||'');
+     const factor=isEnd?[.92,.88,.83]:[.95,.91,.86];
+     m.diffuse=new pc.Color(m.diffuse.r*factor[0],m.diffuse.g*factor[1],m.diffuse.b*factor[2]);
+     if(m.aoMap)m.aoMapIntensity=1;
+     m.update();
+     colorAdjustments.push({name:m.name,factor});
+   }
+ }
+
  let b=bounds(rend);
  const scale=1.7/Math.max(b.size.x,b.size.y,b.size.z,.01);
  e.setLocalScale(scale,scale,scale);
@@ -39,7 +54,7 @@ async function place(url,label,targetX){
  b=bounds(rend);
  e.setLocalPosition(targetX-(b.mn.x+b.mx.x)/2,-b.mn.y,-(b.mn.z+b.mx.z)/2);
  diagnostic.models[label]={meshInstances:count,materials:rend.flatMap(r=>r.meshInstances||[]).map(m=>m.material?.name),
- bboxMeters:[b.size.x,b.size.y,b.size.z],loaded:true};
+ bboxMeters:[b.size.x,b.size.y,b.size.z],loaded:true,colorAdjustments};
  return e;
 }
 try{
@@ -52,7 +67,7 @@ try{
  // Environment assigned to BOTH assets in isolated comparison, not whole live game.
  app.scene.envAtlas=atlas;
  app.scene.skybox=null;
- app.scene.skyboxIntensity=.78;
+ app.scene.skyboxIntensity=.64;
  update('lighting prepared');
  const floor=new pc.Entity('studio floor');
  floor.addComponent('render',{type:'box'});
@@ -61,7 +76,7 @@ try{
  floor.render.material.diffuse=new pc.Color(.13,.145,.16);floor.render.material.update();
  app.root.addChild(floor);
  const key=new pc.Entity('soft key');
- key.addComponent('light',{type:'directional',color:new pc.Color(1,.97,.90),intensity:1.0,castShadows:false});
+ key.addComponent('light',{type:'directional',color:new pc.Color(1,.97,.90),intensity:.78,castShadows:false});
  key.setEulerAngles(40,32,0);app.root.addChild(key);
  update('loading GLB');
  await place('fresno_tablas_v03.glb','Tablas fresno V03',-1.28);
