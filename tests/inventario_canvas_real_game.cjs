@@ -64,7 +64,11 @@ const server=http.createServer((req,res)=>{
       const app=document.querySelector('#genesisApp')?.app;
       if(app){app.autoRender=false;app.renderNextFrame=false;app.timeScale=0;}
     });
-    // Reuse the production GenesisPreparation modal and inventory controller
+    // Eagerly load the actual same production Inventory script/styles so the
+    // full-game test isolates menu layout from the async loader race.
+    await page.addStyleTag({url:'/inventario_genesis_16x9.css'});
+    await page.addScriptTag({url:'/inventario_genesis_16x9.js'});
+        // Reuse the production GenesisPreparation modal and inventory controller
     // with a QA session, not with modifications to persisted game data.
     await page.evaluate(()=>{
       window.__inventoryCanvasQA={
