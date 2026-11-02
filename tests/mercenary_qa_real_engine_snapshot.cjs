@@ -42,11 +42,11 @@ for(const [id,craft,wanted] of [['espada_hierro',1,'Inútil'],['espada_hierro',2
   itemIcon:(id)=>d.icons[id]||'',statsHTML:'',getMercInventoryHTML:()=>'<p>Inventario</p>',
   onConfirm:()=>{}
  }),data);
- try{await page.locator('.mcHero model-viewer').evaluate(async x=>{if(typeof x.updateComplete==='object')await x.updateComplete;});await page.waitForTimeout(2400);}catch(e){console.warn('Mercenary GLB preview:',e.message)}
+ try{await page.locator('.mcV4Body model-viewer').evaluate(async x=>{if(typeof x.updateComplete==='object')await x.updateComplete;});await page.waitForTimeout(2400);}catch(e){console.warn('Mercenary GLB preview:',e.message)}
  await page.screenshot({path:path.join(out,'concept-espada-buena-real.png')});
- assert.equal(await page.locator('.mcChannel').count(),3);
- await page.locator('[data-family="second"]').click();
- assert.equal(await page.locator('.mcChannel').count(),2);
+ assert.equal(await page.locator('.mcV4Row').count(),3);
+ await page.locator('[data-action="family-second"]').click();
+ assert.equal(await page.locator('.mcV4Row').count(),2);
  await page.screenshot({path:path.join(out,'concept-escudo-comun-real.png')});
  console.log('PASS approved 16:9 comparison from actual NGE engine',fabricated.map(i=>i.rarity));
  }finally{await browser.close()}
