@@ -111,9 +111,20 @@ const requireMatchingTabs=(inv,prep,label)=>{
     label+': altura distinta en pestaña '+i+' Inventario='+inv[i].h+' Preparación='+prep[i].h);
  }
 };
+
+const geometryReport=async(label)=>{
+ const data=await page.evaluate(()=>{
+   const geom=s=>{const e=document.querySelector(s);if(!e)return null;const r=e.getBoundingClientRect();return {x:Math.round(r.x*100)/100,y:Math.round(r.y*100)/100,w:Math.round(r.width*100)/100,h:Math.round(r.height*100)/100};};
+   return {viewport:[innerWidth,innerHeight],modal:geom('#modal'),inventory:geom('#genInv'),inventoryHeader:geom('.genInvNav'),inventoryTabs:[...document.querySelectorAll('.genInvTab')].map(e=>{const r=e.getBoundingClientRect();return [r.x,r.y,r.width,r.height].map(x=>Math.round(x*100)/100)}),inventoryGrid:geom('.genInvGrid'),inventoryHero:geom('.genInvViewer'),prepScroll:geom('.prepSkinScroll'),prepBoard:geom('.prepArtboard'),prepTabs:[...document.querySelectorAll('.prepSkinTab')].map(e=>{const r=e.getBoundingClientRect();return [r.x,r.y,r.width,r.height].map(x=>Math.round(x*100)/100)}),style:getComputedStyle(document.querySelector('.prepSkinScroll')||document.querySelector('#genInv')).getPropertyValue('--prep-scale')};
+ });
+ console.log('GEOMETRY '+label+' '+JSON.stringify(data));
+};
+
+await geometryReport('INV_1080');
 const invDesktop=await tabMetrics('.genInvTab');
 await page.locator('.genInvTab[data-nav="Preparacion"]').click();
 await page.waitForSelector('.prepSkinTab');
+await geometryReport('PREP_1080');
 const prepDesktop=await tabMetrics('.prepSkinTab');
 requireMatchingTabs(invDesktop,prepDesktop,'1920x1080');
 await page.screenshot({path:out+'/inventario-16x9-preparacion-referencia.png',fullPage:false});
@@ -121,9 +132,11 @@ await page.locator('.prepSkinTab[data-tab="Inventario"]').click();
 await page.waitForSelector('#genInv');
 
 await page.setViewportSize({width:1280,height:720});
+await geometryReport('INV_720');
 const invSmall=await tabMetrics('.genInvTab');
 await page.locator('.genInvTab[data-nav="Preparacion"]').click();
 await page.waitForSelector('.prepSkinTab');
+await geometryReport('PREP_720');
 const prepSmall=await tabMetrics('.prepSkinTab');
 requireMatchingTabs(invSmall,prepSmall,'1280x720');
 await page.screenshot({path:out+'/inventario-16x9-preparacion-1280.png',fullPage:false});
