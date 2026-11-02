@@ -82,5 +82,5 @@ async function mount(){
  }
  state.phase='village-unavailable-after-15min';
 }
-mount().catch(error=>{state.phase='error';state.error=String(error?.stack||error);
- console.error('[GENESIS_ARCANISTA_V006]',error)});
+globalThis.__genesisArcanistaFourWallsReady=mount().then(()=>({ok:state.installed,status:state})).catch(error=>{state.phase='error';state.error=String(error?.stack||error);
+ console.error('[GENESIS_ARCANISTA_V006]',error);return{ok:false,error:state.error,status:state}});
