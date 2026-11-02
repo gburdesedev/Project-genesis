@@ -36,7 +36,7 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
     const dest=path.join(out,name);
     try{
       if(process.env.GENESIS_SCREENSHOT==='1')await page.locator('.mercV04').screenshot({path:dest,timeout:8500,animations:'disabled'});
-      console.log('SCREENSHOT_SAVED',name);
+      console.log(process.env.GENESIS_SCREENSHOT==='1'?'SCREENSHOT_SAVED':'SCREENSHOT_DISABLED_FOR_HEADLESS_QA',name);
     }catch(err){console.warn('SCREENSHOT_SKIPPED',name,String(err.message).slice(0,200));}
   };
   const qa=await page.evaluate(()=>{const x=window.GenesisMercenaryQA;return {phase:x.phase,steps:x.steps,items:x.items,errors:x.errors,emissive:x.emissive,remainingMaterialUnits:x.remainingMaterialUnits}});
@@ -91,15 +91,28 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
     return {outerHTML:e?.outerHTML,cssText:e?.style?.cssText,rect:b?.toJSON?.(),computed:s&&{position:s.position,display:s.display,visibility:s.visibility,width:s.width,height:s.height,left:s.left,top:s.top,transform:s.transform,contain:s.contain,boxSizing:s.boxSizing},offsetParent:parent?.className,parentBounds:p?.toJSON?.(),boardDimensions:document.querySelector('.mercV04')?.getBoundingClientRect()?.toJSON?.()};
   })));
   assert.ok(clickTargets.every(t=>t.hitVisible&&t.width>20&&t.height>15),'Approved art hotspots must have physical pointer targets');
-  await page.locator('[data-action="family-second"]').click();
+  // Verify the true painted hit target before exercising native DOM click handlers.
+  // Full Playwright mouse wait can time out when SwiftShader monopolizes the CI compositor.
+  const clickArt=async(selector)=>{
+    const hit=await page.evaluate(sel=>{
+      const el=document.querySelector('.mercV04 '+sel);
+      if(!el)return {ok:false,reason:'missing'};
+      const b=el.getBoundingClientRect(),top=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);
+      return {ok:b.width>12&&b.height>12&&(top===el||el.contains(top)),rect:b.toJSON(),hit:top?.outerHTML?.slice(0,250)};
+    },selector);
+    console.log('MERCENARY_QA_POINTER_HIT',selector,JSON.stringify(hit));
+    assert.ok(hit.ok,'The approved art control is obstructed or has no hit area: '+selector+' '+JSON.stringify(hit));
+    await page.evaluate(sel=>document.querySelector('.mercV04 '+sel).click(),selector);
+  };
+  await clickArt('[data-action="family-second"]');
   assert.equal(await page.locator('.mcV4Row').count(),2); // Base+1 from Common
   await safeScreenshot('equipamiento-escudos-16x9.png');
-  await page.locator('[data-action="family-first"]').click();
+  await clickArt('[data-action="family-first"]');
   // Choose Buena sword from artisan's family: click index 1.
-  await page.locator('[data-item="1"]').click();
-  await page.locator('[data-action="family-second"]').click();
-  await page.locator('[data-item="1"]').click();
-  await page.locator('[data-action="equip"]').click();
+  await clickArt('[data-item="1"]');
+  await clickArt('[data-action="family-second"]');
+  await clickArt('[data-item="1"]');
+  await clickArt('[data-action="equip"]');
   await page.waitForTimeout(1000);
   const applied=await page.evaluate(()=>({
     qa:window.GenesisMercenaryQA?.phase,
