@@ -520,7 +520,7 @@
       if(!window.__GenesisInv16Loading){
         window.__GenesisInv16Loading=true;
         const style=document.createElement('link');
-        style.rel='stylesheet';style.href='inventario_genesis_16x9.css?v=0.1.001';
+        style.rel='stylesheet';style.href='inventario_genesis_16x9.css?v=0.1.003-head-50036d1';
         document.head.append(style);
         const loader=document.createElement('script');
         loader.src='inventario_genesis_16x9.js?v=0.1.001';
