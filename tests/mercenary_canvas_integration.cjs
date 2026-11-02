@@ -3,11 +3,18 @@
 const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
 const path=require('node:path');
+const fs=require('node:fs');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
  try{
   const page=await browser.newPage({viewport:{width:1670,height:942},deviceScaleFactor:1});
-  await page.setContent('<!doctype html><html><head><meta charset="utf-8"></head><body style="background:#090807;margin:0"><div id="modalLayer" style="position:fixed;inset:0;display:grid;place-items:center"><div id="modal"></div></div></body></html>');
+  // Preview must load the real approved artwork, never silently pass with a black background.
+  await page.route('http://genesis.test/assets/ui/mercenary/v04/**',async route=>{
+    const file=path.resolve(__dirname,'..',new URL(route.request().url()).pathname.slice(1));
+    if(!file.startsWith(path.resolve(__dirname,'..')+path.sep) || !fs.existsSync(file))return route.fulfill({status:404,body:'Asset missing'});
+    return route.fulfill({status:200,contentType:'image/png',body:fs.readFileSync(file)});
+  });
+  await page.setContent('<!doctype html><html><head><meta charset="utf-8"><base href="http://genesis.test/"></head><body style="background:#090807;margin:0"><div id="modalLayer" style="position:fixed;inset:0;display:grid;place-items:center"><div id="modal"></div></div></body></html>');
   await page.addStyleTag({path:path.resolve(__dirname,'../mercenary_equipment_canvas_v001.css')});
   await page.addScriptTag({path:path.resolve(__dirname,'../mercenary_equipment_canvas_v001.js')});
   await page.evaluate(()=>{
@@ -28,6 +35,10 @@ const path=require('node:path');
     });
   });
   assert.equal(await page.locator('.mercV04').count(),1);
+  const art=await page.locator('.mercV04>.mcArt').evaluate(async img=>{await img.decode();return {width:img.naturalWidth,height:img.naturalHeight}});
+  assert.ok(art.width>=1500&&art.height>=900,'approved art template must actually render, not just exist as a missing image');
+  const hit=await page.locator('[data-action="family-second"]').evaluate(x=>x.getBoundingClientRect().toJSON());
+  assert.ok(hit.width>50&&hit.height>15,'real clickable hotspot required; '+JSON.stringify(hit));
   assert.equal(await page.locator('.mcV4Row').count(),4);
   assert.equal(await page.locator('[data-action="slot-first"]').count(),1);
   assert.equal(await page.locator('[data-action="slot-second"]').count(),1);
