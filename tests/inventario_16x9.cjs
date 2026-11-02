@@ -111,9 +111,35 @@ const requireMatchingTabs=(inv,prep,label)=>{
     label+': altura distinta en pestaña '+i+' Inventario='+inv[i].h+' Preparación='+prep[i].h);
  }
 };
+
+const geometryReport=async(label)=>{
+ const data=await page.evaluate(()=>{
+   const geom=s=>{const e=document.querySelector(s);if(!e)return null;const r=e.getBoundingClientRect();return {x:Math.round(r.x*100)/100,y:Math.round(r.y*100)/100,w:Math.round(r.width*100)/100,h:Math.round(r.height*100)/100};};
+   return {viewport:[innerWidth,innerHeight],modal:geom('#modal'),inventory:geom('#genInv'),inventoryHeader:geom('.genInvNav'),inventoryTabs:[...document.querySelectorAll('.genInvTab')].map(e=>{const r=e.getBoundingClientRect();return [r.x,r.y,r.width,r.height].map(x=>Math.round(x*100)/100)}),inventoryGrid:geom('.genInvGrid'),inventoryHero:geom('.genInvViewer'),prepScroll:geom('.prepSkinScroll'),prepBoard:geom('.prepArtboard'),prepTabs:[...document.querySelectorAll('.prepSkinTab')].map(e=>{const r=e.getBoundingClientRect();return [r.x,r.y,r.width,r.height].map(x=>Math.round(x*100)/100)}),style:getComputedStyle(document.querySelector('.prepSkinScroll')||document.querySelector('#genInv')).getPropertyValue('--prep-scale')};
+ });
+ console.log('GEOMETRY '+label+' '+JSON.stringify(data));
+};
+
+await geometryReport('INV_1080');
+
+const fullGeometry=async(selector)=>page.locator(selector).evaluateAll(nodes=>
+ nodes.map(n=>{const r=n.getBoundingClientRect();return [r.x,r.y,r.width,r.height].map(v=>Math.round(v*100)/100)}));
+const assertSharedGeometry=(a,b,label)=>{
+ assert.equal(a.length,b.length,label+' count');
+ for(let i=0;i<a.length;i++)for(let j=0;j<4;j++)
+   assert(Math.abs(a[i][j]-b[i][j])<=1.6,
+     label+' different at element '+i+' property '+j+': '+a[i][j]+' != '+b[i][j]);
+};
+const invDesktopCoordinates=await fullGeometry('.genInvTab');
+const invDesktopWindow=await fullGeometry('#modal');
 const invDesktop=await tabMetrics('.genInvTab');
 await page.locator('.genInvTab[data-nav="Preparacion"]').click();
 await page.waitForSelector('.prepSkinTab');
+await geometryReport('PREP_1080');
+const prepDesktopCoordinates=await fullGeometry('.prepSkinTab');
+const prepDesktopWindow=await fullGeometry('#modal');
+assertSharedGeometry(invDesktopCoordinates,prepDesktopCoordinates,'1080p absolute tabs');
+assertSharedGeometry(invDesktopWindow,prepDesktopWindow,'1080p full canvas');
 const prepDesktop=await tabMetrics('.prepSkinTab');
 requireMatchingTabs(invDesktop,prepDesktop,'1920x1080');
 await page.screenshot({path:out+'/inventario-16x9-preparacion-referencia.png',fullPage:false});
@@ -121,9 +147,17 @@ await page.locator('.prepSkinTab[data-tab="Inventario"]').click();
 await page.waitForSelector('#genInv');
 
 await page.setViewportSize({width:1280,height:720});
+await geometryReport('INV_720');
+const invSmallCoordinates=await fullGeometry('.genInvTab');
+const invSmallWindow=await fullGeometry('#modal');
 const invSmall=await tabMetrics('.genInvTab');
 await page.locator('.genInvTab[data-nav="Preparacion"]').click();
 await page.waitForSelector('.prepSkinTab');
+await geometryReport('PREP_720');
+const prepSmallCoordinates=await fullGeometry('.prepSkinTab');
+const prepSmallWindow=await fullGeometry('#modal');
+assertSharedGeometry(invSmallCoordinates,prepSmallCoordinates,'720p absolute tabs');
+assertSharedGeometry(invSmallWindow,prepSmallWindow,'720p full canvas');
 const prepSmall=await tabMetrics('.prepSkinTab');
 requireMatchingTabs(invSmall,prepSmall,'1280x720');
 await page.screenshot({path:out+'/inventario-16x9-preparacion-1280.png',fullPage:false});
