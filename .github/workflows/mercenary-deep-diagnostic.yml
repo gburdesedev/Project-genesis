@@ -1,0 +1,29 @@
+name: Mercenary deep boot diagnosis (read-only)
+on:
+  push:
+    branches: ['feature/mercenary-equipment-runtime-v001']
+    paths: ['tests/mercenary_deep_diagnostic.cjs', '.github/workflows/mercenary-deep-diagnostic.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trace-world-to-mercenary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium
+        run: |
+          npm install --prefix /tmp/genesis-deep playwright@1.56.1
+          /tmp/genesis-deep/node_modules/.bin/playwright install --with-deps chromium
+      - name: Trace actual game initialization and mercenary models
+        run: NODE_PATH=/tmp/genesis-deep/node_modules node tests/mercenary_deep_diagnostic.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mercenary-deep-boot-diagnostics
+          path: /tmp/genesis-mercenary-diagnostic
+          retention-days: 7
