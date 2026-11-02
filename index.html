@@ -1022,7 +1022,7 @@ try{
  const prepItems=[...modelEls.map(el=>({kind:'modelo',label:el.getAttribute('name')||el.id||el.getAttribute('asset')||'modelo',el})),...clipEls.map(el=>({kind:'animación',label:el.getAttribute('name')||el.getAttribute('asset')||'clip',el}))];
  for(const item of prepItems){item.group=groupFor(item);bootGroups[item.group].total++}
  let prepared=0;const prepTotal=Math.max(1,prepItems.length);
- const bootWait=(promise,label,timeout=18000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Tiempo agotado preparando '+label)),timeout))]);
+ const bootWait=async(promise,label,timeout=18000)=>{let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Tiempo agotado preparando '+label+' ('+Math.round(timeout/1000)+' s)')),timeout)})])}finally{clearTimeout(timer)}};
  // Each group has a truthful, independently counted stage. Resources still
  // download concurrently; these gates verify they are actually instantiated.
  for(const group of ['paredes','puertas','suelos','objetos','animaciones']){
@@ -1031,7 +1031,9 @@ try{
   activeBootGroup=group;
   showBootProgress(groupStage(group),bootGroups[group].ready+' de '+bootGroups[group].total+' '+group+' listos');
   await Promise.all(tasks.map(async item=>{
-   await bootWait(item.el.ready(),item.label);
+   const assetSource=item.kind==='modelo'?document.getElementById(item.el.getAttribute('asset'))?.getAttribute('src')||'':'';
+   const remoteModel=item.kind==='modelo'&&/^https?:\/\//.test(assetSource);
+   await bootWait(item.el.ready(),item.label,remoteModel?150000:30000);
    if(item.kind==='modelo'&&!item.el.contentEntity)throw new Error('No pudo instanciarse: '+item.label);
    prepared++;bootProgress.prepared=prepared;bootGroups[group].ready++;
    showBootProgress(groupStage(group),item.label+' · '+bootGroups[group].ready+' de '+bootGroups[group].total);
