@@ -9,7 +9,7 @@ const source=fs.readFileSync(path.join(root,'genesis_asset_preflight_v001.js'),'
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const js=fs.readFileSync(path.join(root,'preparacion_control.js'),'utf8');
 // Asegurar que el módulo principal conserva sintaxis JavaScript válida.
-const gameModule=[...html.matchAll(/<script\\b[^>]*type=["']module["'][^>]*>([\\s\\S]*?)<\\/script>/g)]
+const gameModule=[...html.matchAll(/<script\b[^>]*type=["']module["'][^>]*>([\s\S]*?)<\/script>/g)]
  .map(m=>m[1]).find(code=>code.includes('async function activateRouteGroups'));
 assert(gameModule,'main game module should be present');
 const parse=spawnSync(process.execPath,['--input-type=module','--check'],{input:gameModule,encoding:'utf8'});
