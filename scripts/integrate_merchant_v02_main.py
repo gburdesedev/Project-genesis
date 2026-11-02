@@ -126,6 +126,6 @@ for rel in ("index.html","village_world.js"):
 for test_name in ("tests/ordan_market_quest_v014021.cjs","tests/starter_sword_stock_v014020.cjs"):
     test_file=root/test_name
     qt=test_file.read_text(encoding="utf-8")
-    assert build_old in qt and (version_old in qt or r"0\.14\.021" in qt), test_name
-    test_file.write_text(qt.replace(version_old,version_new).replace(r"0\.14\.021",r"0\.14\.022").replace(build_old,build_new),encoding="utf-8")
+    assert (build_old in qt or r"20261101\.03" in qt) and (version_old in qt or r"0\.14\.021" in qt), test_name
+    test_file.write_text(qt.replace(version_old,version_new).replace(r"0\.14\.021",r"0\.14\.022").replace(build_old,build_new).replace(r"20261101\.03",r"20261102\.04"),encoding="utf-8")
 print("Done. Merchant V02 visual-only integration; interaction ID and market domain unchanged.")
