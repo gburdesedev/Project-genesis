@@ -1404,7 +1404,7 @@ const EQUIP_MODEL_URLS=Object.freeze({
  escudo_hierro:'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/shield_round.glb'
 });
 const MOBILE_SAFE_PREVIEWS=window.GenesisDevice.safePreviews;
-function itemAssetMarkup(item){const src=EQUIP_MODEL_URLS[item.recipe],kind=recipeKind(item.recipe);if(MOBILE_SAFE_PREVIEWS||!src)return `<img alt="${esc(kind)}" src="${itemIcon(item.recipe)}">`;return `<model-viewer src="${src}" alt="${esc(item.name)}" camera-orbit="35deg 70deg auto" auto-rotate rotation-per-second="18deg" shadow-intensity="1" exposure="1.05" interaction-prompt="none" disable-zoom></model-viewer>`}
+function itemAssetMarkup(item){const src=EQUIP_MODEL_URLS[item.recipe],kind=recipeKind(item.recipe);if(MOBILE_SAFE_PREVIEWS||!src)return `<img alt="${esc(kind)}" src="${itemIcon(item.recipe)}">`;return `<model-viewer src="${window.GenesisBootAssets?.modelURL?.(src)||src}" alt="${esc(item.name)}" camera-orbit="35deg 70deg auto" auto-rotate rotation-per-second="18deg" shadow-intensity="1" exposure="1.05" interaction-prompt="none" disable-zoom></model-viewer>`}
 function formulaWeightBreakdown(formula){if(!formula?.materials?.length)return[];const weighted=formula.materials.map(m=>({material:m.material,qty:Number(m.qty)||0,weight:(Number(m.qty)||0)})).sort((a,b)=>b.weight-a.weight||b.qty-a.qty||a.material.localeCompare(b.material,'es'));const total=weighted.reduce((s,m)=>s+m.weight,0)||1;return weighted.map(m=>({...m,pct:Math.round(m.weight*100/total)}))}
 function namingReason(item){const sortedAff=[...item.affinities].sort((a,b)=>b[1]-a[1]);if(!sortedAff.length)return `Cierre Inútil: NGE nombra desde la función base, su intensidad y la composición real de la fórmula, sin inventar afinidades.`;if(sortedAff.length===1)return `La identidad visible del nombre corresponde a ${esc(sortedAff[0][0])}, la afinidad elemental de este cierre.`;return `El nombre muestra las dos afinidades certificadas del cierre, priorizando ${esc(sortedAff[0][0])} por su mayor intensidad.`}
 function metricForChannel(item,channel,index){
@@ -1464,7 +1464,7 @@ function mercElementEffects(a=mercGearRoute()==='Curtidor'?mercArmorItem:mercSwo
 function renderMercStats(a=mercGearRoute()==='Curtidor'?mercArmorItem:mercSwordItem,b=mercGearRoute()==='Curtidor'?mercBootsItem:mercShieldItem){const s=mercStatSnapshot(a,b),row=(label,key)=>{const base=s.base[key],g=s.gear[key]||0,t=s.total[key];return `<div class="statRow"><div class="statName">${label}</div><div class="statBase">${base}</div><div class="statGear">${g?`+${g}`:'—'}</div><div class="statTotal">${t}</div></div>`};const fx=mercElementEffects(a,b),elementRows=fx.length?fx.map(e=>`<div class="elementStatRow" style="--ec:${e.color}"><div class="elementStatName"><i></i>${esc(e.label)}</div><div class="elementStatSource">${esc(e.source)}</div><strong>${esc(e.display)}</strong></div>`).join(''):'<div class="mercInventoryNote">Sin canales elementales equipados.</div>';return `<div class="statSectionLabel">BASE · DEMO 1:1 (NO BALANCE CANÓNICO)</div><div class="statTable"><div class="statRow statHead"><div>PARÁMETRO</div><div>BASE</div><div>EQUIPO</div><div>TOTAL</div></div>${row('Daño base','damage')}${row('Protección base','protection')}${row('Vitalidad','vitality')}${row('Movilidad','mobility')}</div><div class="statSectionLabel elementTitle">CANALES ELEMENTALES · PORCENTUALES E INDEPENDIENTES</div><div class="elementStatTable">${elementRows}</div>`}
 function mercEquippedSummaryItem(item,label,empty='Pendiente'){if(!item)return `<div class="mercEquippedItem emptyEquip"><b>${esc(label)}</b><strong>${esc(empty)}</strong></div>`;const v=itemVisual(item),dual=(item.affinities?.length||0)>=2,badge=item.demoExperimental&&item.demoMaterial?`<small style="display:block;margin-top:4px;color:${item.demoMaterial.color}">${esc(item.demoMaterial.glyph)} ${esc(item.demoMaterial.prepared)} · halo experimental</small>`:'';return `<div class="mercEquippedItem ${dual?'dual':''}" style="--ec:${item.demoMaterial?.color||v.c1};--ec2:${v.c2}"><b>${esc(label)} · ${esc(v.label)}${item.demoExperimental?' · EXPERIMENTAL':''}</b><strong>${esc(item.name)}</strong>${badge}</div>`}
 function renderMercInventory(a=mercGearRoute()==='Curtidor'?mercArmorItem:mercSwordItem,b=mercGearRoute()==='Curtidor'?mercBootsItem:mercShieldItem){const av=a?itemVisual(a):null,bv=b?itemVisual(b):null,aDual=(a?.affinities?.length||0)>=2,bDual=(b?.affinities?.length||0)>=2,l=mercGearLabels(),aSmall=a?(esc(a.rarity)+' · '+esc(av.label)+(a.demoExperimental?' · halo experimental':'')):'Sin equipo',bSmall=b?(esc(b.rarity)+' · '+esc(bv.label)+(b.demoExperimental?' · halo experimental':'')):'Sin equipo';return `<div class="mercInventory"><div class="mercSlot ${a?'equipped':''} ${aDual?'dual':''}" style="--slotc:${a?.demoMaterial?.color||av?.c1||'#ffffff22'};--slotc2:${av?.c2||'#ffffff22'}"><div class="slotEy">${l.slotA}</div><strong>${a?esc(a.name):'Vacío'}</strong><small>${aSmall}</small></div><div class="mercSlot ${b?'equipped':''} ${bDual?'dual':''}" style="--slotc:${b?.demoMaterial?.color||bv?.c1||'#ffffff22'};--slotc2:${bv?.c2||'#ffffff22'}"><div class="slotEy">${l.slotB}</div><strong>${b?esc(b.name):'Vacío'}</strong><small>${bSmall}</small></div><div class="mercSlot empty">CARGA DE EXPEDICIÓN<br>VACÍO</div><div class="mercSlot empty">CARGA DE EXPEDICIÓN<br>VACÍO</div><div class="mercSlot empty">SUMINISTRO<br>VACÍO</div><div class="mercSlot empty">SUMINISTRO<br>VACÍO</div></div><div class="mercInventoryNote">Inventario visual de demostración. La cantidad definitiva de espacios y el balance de carga no se fijan en esta build.</div>`}
-function mercGearModel(item,type){const src=EQUIP_MODEL_URLS[item.recipe],kind=recipeKind(item.recipe);if(MOBILE_SAFE_PREVIEWS||!src)return `<div class="gearAsset"><img src="${itemIcon(item.recipe)}" alt="${esc(item.name)}" style="width:72%;height:72%;object-fit:contain;filter:drop-shadow(0 8px 12px #0008)"><span class="gearType">${esc(kind.toUpperCase())} · VISTA</span></div>`;return `<div class="gearAsset"><model-viewer src="${src}" alt="${esc(item.name)}" camera-orbit="${type==='sword'?'25deg 72deg auto':'15deg 68deg auto'}" auto-rotate rotation-per-second="16deg" shadow-intensity="1" exposure="1.08" interaction-prompt="none" disable-zoom></model-viewer><span class="gearType">${type==='sword'?'ESPADA 3D':'ESCUDO 3D'}</span></div>`}
+function mercGearModel(item,type){const src=EQUIP_MODEL_URLS[item.recipe],kind=recipeKind(item.recipe);if(MOBILE_SAFE_PREVIEWS||!src)return `<div class="gearAsset"><img src="${itemIcon(item.recipe)}" alt="${esc(item.name)}" style="width:72%;height:72%;object-fit:contain;filter:drop-shadow(0 8px 12px #0008)"><span class="gearType">${esc(kind.toUpperCase())} · VISTA</span></div>`;return `<div class="gearAsset"><model-viewer src="${window.GenesisBootAssets?.modelURL?.(src)||src}" alt="${esc(item.name)}" camera-orbit="${type==='sword'?'25deg 72deg auto':'15deg 68deg auto'}" auto-rotate rotation-per-second="16deg" shadow-intensity="1" exposure="1.08" interaction-prompt="none" disable-zoom></model-viewer><span class="gearType">${type==='sword'?'ESPADA 3D':'ESCUDO 3D'}</span></div>`}
 function mercChoiceCard(item,idx,type,selectedA=null,selectedB=null){const v=itemVisual(item),dual=(item.affinities?.length||0)>=2,isA=['sword','armor'].includes(type),selected=(isA?selectedA:selectedB)===item,aff=item.affinities?.length?item.affinities.map(a=>a[0]).join(' + '):'Sólo Canal Base',metric=metricForChannel(item,item.channels[0],0),channels=item.affinities?.length?item.affinities.map(([n,val])=>`<span class="gearChannel" style="--cc:${AFFINITY_VISUAL[n]||AFFINITY_VISUAL.Base}">${esc(n)} +${val}%</span>`).join(''):`<span class="gearChannel" style="--cc:${AFFINITY_VISUAL.Base}">BASE ${item.channels?.[0]?.[1]||0}</span>`;return `<div class="gearChoice ${dual?'dual':''} ${selected?'selected':''}" data-gear-type="${type}" data-gear-idx="${idx}" style="--g1:${v.c1};--g2:${v.c2}"><div class="gearRail"></div>${mercGearModel(item,type)}<div class="gearInfo"><h4>${esc(item.name)}</h4><p>${esc(item.rarity)} · ${esc(aff)}</p><div class="gearContribution">Aporta ${esc(metric.display)} · ${esc(metric.label)}</div><div class="gearChannels">${channels}</div></div></div>`}
 async function ensureMercenaryReady(){
  if(mercenaryInitialized&&mercenaryRoot)return true;
@@ -1710,6 +1710,7 @@ async function chooseProfessionRoute(prof){
   await prepareRoute(prof);
   startRoute(prof);
   setLoadUI(100,'Partida preparada','Todas las cargas obligatorias de '+prof+' terminaron.');
+  clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';
   loading.style.display='none';
  }catch(err){
   console.error('Genesis route loading:',err);
@@ -1737,17 +1738,21 @@ function frame(now){requestAnimationFrame(frame);village.trees?.update(px,pz);co
 }
 requestAnimationFrame(frame);
 
-// The initial progress bar includes every approved UI sprite and inventory logic.
-if(!window.GenesisBootAssets?.prepare){throw new Error('No se cargó el gestor de recursos UI.');}
-setLoadUI(80,'Preparando interfaces','Verificando Preparación, Inventario, Fabricación y Comparación.');
-const uiStatus=await window.GenesisBootAssets.prepare((done,total,label)=>{
- setLoadUI(80+8*done/Math.max(1,total),'Preparando interfaces',label);
- loadCount.textContent=done+' de '+total+' archivos de interfaz verificados';
-});
-window.__genesisPreloadedUI=uiStatus;
-setLoadUI(88,'Núcleo e interfaces listos','Elegí una profesión para completar los modelos antes de iniciar la partida.');
-clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';
-setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
+// All UI sprites, inventory controllers and 3D preview GLBs finish before the intro.
+try{
+ if(!window.GenesisBootAssets?.prepare)throw new Error('No se cargó el gestor de recursos UI.');
+ setLoadUI(80,'Preparando interfaces','Verificando Preparación, Inventario y vistas 3D.');
+ const uiStatus=await window.GenesisBootAssets.prepare((done,total,label)=>{
+  setLoadUI(80+8*done/Math.max(1,total),'Preparando interfaces',label);
+  loadCount.textContent=done+' de '+total+' recursos de interfaz procesados';
+ });
+ window.__genesisPreloadedUI=uiStatus;
+ setLoadUI(88,'Núcleo e interfaces listos','Elegí una profesión para completar los modelos antes de iniciar la partida.');
+ setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
+}catch(err){
+ failLoading(err?.message||String(err),'No se habilita la partida mientras falten recursos de interfaz.');
+ throw err;
+}
 </script>
 
 <script id="genesis-prototype-engines">
