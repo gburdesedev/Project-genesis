@@ -3,10 +3,17 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const path=require('node:path');
+const {spawnSync}=require('node:child_process');
 const root=path.join(__dirname,'..');
 const source=fs.readFileSync(path.join(root,'genesis_asset_preflight_v001.js'),'utf8');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const js=fs.readFileSync(path.join(root,'preparacion_control.js'),'utf8');
+// Asegurar que el módulo principal conserva sintaxis JavaScript válida.
+const gameModule=[...html.matchAll(/<script\\b[^>]*type=["']module["'][^>]*>([\\s\\S]*?)<\\/script>/g)]
+ .map(m=>m[1]).find(code=>code.includes('async function activateRouteGroups'));
+assert(gameModule,'main game module should be present');
+const parse=spawnSync(process.execPath,['--input-type=module','--check'],{input:gameModule,encoding:'utf8'});
+assert.equal(parse.status,0,parse.stderr||'Invalid main module');
 assert(html.includes('./genesis_asset_preflight_v001.js'),'preflight loaded before the game');
 assert(html.includes('./inventario_genesis_16x9.css'),'Inventory CSS preloaded');
 assert(html.includes('./inventario_genesis_16x9.js'),'Inventory JS preloaded');
