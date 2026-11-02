@@ -7,6 +7,7 @@ on:
       - 'preparacion_control.js'
       - 'mercenary_equipment_canvas_v001.js'
       - 'tests/asset_preflight_v001.cjs'
+      - 'tests/route_preflight_v001.cjs'
       - '.github/workflows/asset-preflight-check.yml'
   workflow_dispatch:
 permissions:
@@ -21,3 +22,4 @@ jobs:
         with:
           node-version: '22'
       - run: node tests/asset_preflight_v001.cjs
+      - run: node tests/route_preflight_v001.cjs
