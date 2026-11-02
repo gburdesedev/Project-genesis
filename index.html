@@ -198,6 +198,9 @@ if(!window.GenesisDevice.safePreviews){const script=document.createElement('scri
 </script>
 <meta name="genesis-build" content="playcanvas-v0.14.022-build-20261102.04-camino-vertical-slice-herrero">
 <link rel="stylesheet" href="./responsive.css?v=0.11.017">
+<link rel="stylesheet" href="./inventario_genesis_16x9.css?v=preflight-20261102">
+<script src="./genesis_asset_preflight_v001.js?v=20261102.1"></script>
+<script src="./inventario_genesis_16x9.js?v=preflight-20261102"></script>
 </head>
 <body>
 
@@ -950,7 +953,7 @@ const bootState=window.__genesisBoot||{loaded:0,total:0,error:null};
 // Contar el archivo descargado, el modelo/clip instanciado y la textura del mundo una sola vez.
 // Los LOD de árboles fuera de vista se transmiten luego y no bloquean esta etapa.
 const bootPrepTotal=[...document.querySelectorAll('pc-model[asset]:not([data-route])'),...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]')).length;
-const bootProgress={downloaded:0,downloadTotal:0,prepared:0,prepareTotal:bootPrepTotal,world:0,worldTotal:13};
+const bootProgress={downloaded:0,downloadTotal:0,prepared:0,prepareTotal:bootPrepTotal,world:0,worldTotal:13,ui:0,uiTotal:window.GenesisPreflight?.snapshot().total||0,externals:0,externalsTotal:2};
 const groupSpec=[
  ['paredes','Paredes'],['puertas','Puertas'],['objetos','Objetos'],
  ['animaciones','Animaciones'],['arboles','Árboles'],['suelos','Suelos y caminos']
@@ -982,8 +985,8 @@ function syncGroupRows(){
 function groupStage(id){return 'Cargando '+(groupSpec.find(([key])=>key===id)?.[1].toLowerCase()||'recursos')}
 
 function showBootProgress(stage,detail=''){
- const total=bootProgress.downloadTotal+bootProgress.prepareTotal+bootProgress.worldTotal;
- const loaded=bootProgress.downloaded+bootProgress.prepared+bootProgress.world;
+ const total=bootProgress.downloadTotal+bootProgress.prepareTotal+bootProgress.worldTotal+bootProgress.uiTotal+bootProgress.externalsTotal;
+ const loaded=bootProgress.downloaded+bootProgress.prepared+bootProgress.world+bootProgress.ui+bootProgress.externals;
  if(!total)return;
  setLoadUI(100*loaded/total,stage,detail);
  loadCount.textContent=loaded+' de '+total+' recursos listos';
@@ -995,6 +998,14 @@ function syncPreloadProgress(loaded,total){
  bootProgress.downloaded=Math.max(bootProgress.downloaded,Math.min(loaded,total));
  showBootProgress(activeBootGroup?groupStage(activeBootGroup):'Descargando archivos del juego','La barra avanza cuando cada recurso termina realmente de cargar.');
 }
+// Interfaces y visores se cargan mientras PlayCanvas prepara el mundo.
+const uiAssetsPromise=window.GenesisPreflight
+  ? window.GenesisPreflight.preloadUi(report=>{
+     bootProgress.ui=report.completed-report.failed;
+     bootProgress.uiTotal=report.total;
+     showBootProgress('Preparando menús e inventarios',report.completed+' / '+report.total+' recursos UI · '+(report.last||''));
+    }).then(report=>({report}),error=>({error}))
+  : Promise.resolve({error:new Error('No se cargó el precargador de interfaz')});
 if(bootState.total>0)syncPreloadProgress(bootState.loaded,bootState.total);
 appEl.addEventListener('progress',e=>{bootState.loaded=Number(e.loaded)||0;bootState.total=Number(e.total)||0;syncPreloadProgress(bootState.loaded,bootState.total)});
 const routeAssetErrors=[];appEl.addEventListener('error',e=>{const target=e.target;if(target===appEl)return;const id=target?.id||target?.getAttribute?.('name')||target?.getAttribute?.('asset')||target?.tagName||'asset';const message=e?.message||'Error de asset';routeAssetErrors.push({id,message,at:Date.now()});console.warn('Genesis child asset/model error:',id,message)},true);window.__genesisRouteAssetErrors=routeAssetErrors;
@@ -1403,7 +1414,7 @@ const EQUIP_MODEL_URLS=Object.freeze({
  escudo_hierro:'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/shield_round.glb'
 });
 const MOBILE_SAFE_PREVIEWS=window.GenesisDevice.safePreviews;
-function itemAssetMarkup(item){const src=EQUIP_MODEL_URLS[item.recipe],kind=recipeKind(item.recipe);if(MOBILE_SAFE_PREVIEWS||!src)return `<img alt="${esc(kind)}" src="${itemIcon(item.recipe)}">`;return `<model-viewer src="${src}" alt="${esc(item.name)}" camera-orbit="35deg 70deg auto" auto-rotate rotation-per-second="18deg" shadow-intensity="1" exposure="1.05" interaction-prompt="none" disable-zoom></model-viewer>`}
+function itemAssetMarkup(item){const src=window.GenesisPreflight?.modelUrl(EQUIP_MODEL_URLS[item.recipe]) || EQUIP_MODEL_URLS[item.recipe],kind=recipeKind(item.recipe);if(MOBILE_SAFE_PREVIEWS||!src)return `<img alt="${esc(kind)}" src="${itemIcon(item.recipe)}">`;return `<model-viewer src="${src}" alt="${esc(item.name)}" camera-orbit="35deg 70deg auto" auto-rotate rotation-per-second="18deg" shadow-intensity="1" exposure="1.05" interaction-prompt="none" disable-zoom></model-viewer>`}
 function formulaWeightBreakdown(formula){if(!formula?.materials?.length)return[];const weighted=formula.materials.map(m=>({material:m.material,qty:Number(m.qty)||0,weight:(Number(m.qty)||0)})).sort((a,b)=>b.weight-a.weight||b.qty-a.qty||a.material.localeCompare(b.material,'es'));const total=weighted.reduce((s,m)=>s+m.weight,0)||1;return weighted.map(m=>({...m,pct:Math.round(m.weight*100/total)}))}
 function namingReason(item){const sortedAff=[...item.affinities].sort((a,b)=>b[1]-a[1]);if(!sortedAff.length)return `Cierre Inútil: NGE nombra desde la función base, su intensidad y la composición real de la fórmula, sin inventar afinidades.`;if(sortedAff.length===1)return `La identidad visible del nombre corresponde a ${esc(sortedAff[0][0])}, la afinidad elemental de este cierre.`;return `El nombre muestra las dos afinidades certificadas del cierre, priorizando ${esc(sortedAff[0][0])} por su mayor intensidad.`}
 function metricForChannel(item,channel,index){
@@ -1463,7 +1474,7 @@ function mercElementEffects(a=mercGearRoute()==='Curtidor'?mercArmorItem:mercSwo
 function renderMercStats(a=mercGearRoute()==='Curtidor'?mercArmorItem:mercSwordItem,b=mercGearRoute()==='Curtidor'?mercBootsItem:mercShieldItem){const s=mercStatSnapshot(a,b),row=(label,key)=>{const base=s.base[key],g=s.gear[key]||0,t=s.total[key];return `<div class="statRow"><div class="statName">${label}</div><div class="statBase">${base}</div><div class="statGear">${g?`+${g}`:'—'}</div><div class="statTotal">${t}</div></div>`};const fx=mercElementEffects(a,b),elementRows=fx.length?fx.map(e=>`<div class="elementStatRow" style="--ec:${e.color}"><div class="elementStatName"><i></i>${esc(e.label)}</div><div class="elementStatSource">${esc(e.source)}</div><strong>${esc(e.display)}</strong></div>`).join(''):'<div class="mercInventoryNote">Sin canales elementales equipados.</div>';return `<div class="statSectionLabel">BASE · DEMO 1:1 (NO BALANCE CANÓNICO)</div><div class="statTable"><div class="statRow statHead"><div>PARÁMETRO</div><div>BASE</div><div>EQUIPO</div><div>TOTAL</div></div>${row('Daño base','damage')}${row('Protección base','protection')}${row('Vitalidad','vitality')}${row('Movilidad','mobility')}</div><div class="statSectionLabel elementTitle">CANALES ELEMENTALES · PORCENTUALES E INDEPENDIENTES</div><div class="elementStatTable">${elementRows}</div>`}
 function mercEquippedSummaryItem(item,label,empty='Pendiente'){if(!item)return `<div class="mercEquippedItem emptyEquip"><b>${esc(label)}</b><strong>${esc(empty)}</strong></div>`;const v=itemVisual(item),dual=(item.affinities?.length||0)>=2,badge=item.demoExperimental&&item.demoMaterial?`<small style="display:block;margin-top:4px;color:${item.demoMaterial.color}">${esc(item.demoMaterial.glyph)} ${esc(item.demoMaterial.prepared)} · halo experimental</small>`:'';return `<div class="mercEquippedItem ${dual?'dual':''}" style="--ec:${item.demoMaterial?.color||v.c1};--ec2:${v.c2}"><b>${esc(label)} · ${esc(v.label)}${item.demoExperimental?' · EXPERIMENTAL':''}</b><strong>${esc(item.name)}</strong>${badge}</div>`}
 function renderMercInventory(a=mercGearRoute()==='Curtidor'?mercArmorItem:mercSwordItem,b=mercGearRoute()==='Curtidor'?mercBootsItem:mercShieldItem){const av=a?itemVisual(a):null,bv=b?itemVisual(b):null,aDual=(a?.affinities?.length||0)>=2,bDual=(b?.affinities?.length||0)>=2,l=mercGearLabels(),aSmall=a?(esc(a.rarity)+' · '+esc(av.label)+(a.demoExperimental?' · halo experimental':'')):'Sin equipo',bSmall=b?(esc(b.rarity)+' · '+esc(bv.label)+(b.demoExperimental?' · halo experimental':'')):'Sin equipo';return `<div class="mercInventory"><div class="mercSlot ${a?'equipped':''} ${aDual?'dual':''}" style="--slotc:${a?.demoMaterial?.color||av?.c1||'#ffffff22'};--slotc2:${av?.c2||'#ffffff22'}"><div class="slotEy">${l.slotA}</div><strong>${a?esc(a.name):'Vacío'}</strong><small>${aSmall}</small></div><div class="mercSlot ${b?'equipped':''} ${bDual?'dual':''}" style="--slotc:${b?.demoMaterial?.color||bv?.c1||'#ffffff22'};--slotc2:${bv?.c2||'#ffffff22'}"><div class="slotEy">${l.slotB}</div><strong>${b?esc(b.name):'Vacío'}</strong><small>${bSmall}</small></div><div class="mercSlot empty">CARGA DE EXPEDICIÓN<br>VACÍO</div><div class="mercSlot empty">CARGA DE EXPEDICIÓN<br>VACÍO</div><div class="mercSlot empty">SUMINISTRO<br>VACÍO</div><div class="mercSlot empty">SUMINISTRO<br>VACÍO</div></div><div class="mercInventoryNote">Inventario visual de demostración. La cantidad definitiva de espacios y el balance de carga no se fijan en esta build.</div>`}
-function mercGearModel(item,type){const src=EQUIP_MODEL_URLS[item.recipe],kind=recipeKind(item.recipe);if(MOBILE_SAFE_PREVIEWS||!src)return `<div class="gearAsset"><img src="${itemIcon(item.recipe)}" alt="${esc(item.name)}" style="width:72%;height:72%;object-fit:contain;filter:drop-shadow(0 8px 12px #0008)"><span class="gearType">${esc(kind.toUpperCase())} · VISTA</span></div>`;return `<div class="gearAsset"><model-viewer src="${src}" alt="${esc(item.name)}" camera-orbit="${type==='sword'?'25deg 72deg auto':'15deg 68deg auto'}" auto-rotate rotation-per-second="16deg" shadow-intensity="1" exposure="1.08" interaction-prompt="none" disable-zoom></model-viewer><span class="gearType">${type==='sword'?'ESPADA 3D':'ESCUDO 3D'}</span></div>`}
+function mercGearModel(item,type){const src=window.GenesisPreflight?.modelUrl(EQUIP_MODEL_URLS[item.recipe]) || EQUIP_MODEL_URLS[item.recipe],kind=recipeKind(item.recipe);if(MOBILE_SAFE_PREVIEWS||!src)return `<div class="gearAsset"><img src="${itemIcon(item.recipe)}" alt="${esc(item.name)}" style="width:72%;height:72%;object-fit:contain;filter:drop-shadow(0 8px 12px #0008)"><span class="gearType">${esc(kind.toUpperCase())} · VISTA</span></div>`;return `<div class="gearAsset"><model-viewer src="${src}" alt="${esc(item.name)}" camera-orbit="${type==='sword'?'25deg 72deg auto':'15deg 68deg auto'}" auto-rotate rotation-per-second="16deg" shadow-intensity="1" exposure="1.08" interaction-prompt="none" disable-zoom></model-viewer><span class="gearType">${type==='sword'?'ESPADA 3D':'ESCUDO 3D'}</span></div>`}
 function mercChoiceCard(item,idx,type,selectedA=null,selectedB=null){const v=itemVisual(item),dual=(item.affinities?.length||0)>=2,isA=['sword','armor'].includes(type),selected=(isA?selectedA:selectedB)===item,aff=item.affinities?.length?item.affinities.map(a=>a[0]).join(' + '):'Sólo Canal Base',metric=metricForChannel(item,item.channels[0],0),channels=item.affinities?.length?item.affinities.map(([n,val])=>`<span class="gearChannel" style="--cc:${AFFINITY_VISUAL[n]||AFFINITY_VISUAL.Base}">${esc(n)} +${val}%</span>`).join(''):`<span class="gearChannel" style="--cc:${AFFINITY_VISUAL.Base}">BASE ${item.channels?.[0]?.[1]||0}</span>`;return `<div class="gearChoice ${dual?'dual':''} ${selected?'selected':''}" data-gear-type="${type}" data-gear-idx="${idx}" style="--g1:${v.c1};--g2:${v.c2}"><div class="gearRail"></div>${mercGearModel(item,type)}<div class="gearInfo"><h4>${esc(item.name)}</h4><p>${esc(item.rarity)} · ${esc(aff)}</p><div class="gearContribution">Aporta ${esc(metric.display)} · ${esc(metric.label)}</div><div class="gearChannels">${channels}</div></div></div>`}
 async function ensureMercenaryReady(){
  if(mercenaryInitialized&&mercenaryRoot)return true;
@@ -1637,12 +1648,68 @@ function routeModels(prof,priority){return[...document.querySelectorAll(`pc-mode
 function groupRouteModels(models){const map=new Map();for(const el of models){const asset=el.dataset.asset;if(!map.has(asset))map.set(asset,[]);map.get(asset).push(el)}return[...map.entries()]}
 function loadDeferredModelAsset(el,asset,timeout=12000){return new Promise((resolve,reject)=>{let done=false;const label=el.getAttribute('name')||el.id||asset;const finish=(ok,msg)=>{if(done)return;done=true;clearTimeout(timer);el.removeEventListener('load',onLoad);el.removeEventListener('error',onError);if(!ok&&!el.contentEntity){try{el.removeAttribute('asset')}catch(_){}}ok?resolve(el):reject(new Error(msg||('No pudo cargarse '+label+' ['+asset+']')))};const onLoad=()=>finish(!!el.contentEntity,el.contentEntity?'':'El modelo terminó sin contenido: '+label+' ['+asset+']');const onError=e=>finish(false,(e?.message||'Falló la carga')+' · '+label+' ['+asset+']');const timer=setTimeout(()=>finish(false,'Tiempo agotado cargando '+label+' ['+asset+']'),timeout);el.addEventListener('load',onLoad,{once:true});el.addEventListener('error',onError,{once:true});if(el.getAttribute('asset')!==asset)el.setAttribute('asset',asset);else if(!el.contentEntity){el.removeAttribute('asset');requestAnimationFrame(()=>el.setAttribute('asset',asset))}if(el.contentEntity)finish(true)})}
 async function activateDeferredModel(el,timeout=12000){if(el.contentEntity)return el;const primary=el.dataset.asset;if(!primary)return el;const fallback=el.dataset.fallbackAsset;try{return await loadDeferredModelAsset(el,primary,timeout)}catch(primaryError){if(!fallback)throw primaryError;console.warn('Genesis asset fallback:',primaryError.message,'→',fallback);try{return await loadDeferredModelAsset(el,fallback,Math.min(timeout,8000))}catch(fallbackError){throw new Error(primaryError.message+' | Fallback '+fallback+' también falló: '+fallbackError.message)}}}
-async function activateRouteGroups(prof,priority,onProgress){const groups=groupRouteModels(routeModels(prof,priority));if(!groups.length){onProgress?.(1,1,'Ruta ya preparada');return{total:0,loaded:0,failed:0,timedOut:false}}let complete=0,loaded=0,failed=0;const jobs=groups.map(([asset,els])=>Promise.allSettled(els.map(el=>activateDeferredModel(el,12000))).then(results=>{const ok=results.some(r=>r.status==='fulfilled'&&r.value?.contentEntity);if(ok)loaded++;else failed++;complete++;onProgress?.(loaded,groups.length,(ok?'✓ ':'↻ ')+asset);if(ok){try{refreshRouteBindings(prof)}catch(_){}}return ok}));const all=Promise.allSettled(jobs);const guard=sleep(6500).then(()=>null);const result=await Promise.race([all,guard]);const timedOut=result===null;if(timedOut){onProgress?.(loaded,groups.length,'Entrada habilitada · los modelos restantes continúan cargando')}return{total:groups.length,loaded,failed,timedOut}}
+// Instanciar la ruta COMPLETA antes de iniciar el juego. Sin deadline
+// artificial ni descargas adicionales de decoración durante la partida.
+async function activateRouteGroups(prof,priority,onProgress){
+ const models=[...routeModels(prof,'critical'),...routeModels(prof,'stream'),...routeModels('SharedMercenary','ondemand')];
+ const grouped=groupRouteModels(models),total=grouped.length;
+ let next=0,loaded=0,failed=0;
+ const failures=[];
+ onProgress?.(0,total,'Plan: '+models.length+' instancias; '+total+' recursos únicos');
+ async function worker(){
+  while(next<grouped.length){
+   const [asset,els]=grouped[next++];
+   const results=await Promise.allSettled(els.map(el=>activateDeferredModel(el,45000)));
+   const ok=results.every((r,i)=>r.status==='fulfilled'&&!!els[i].contentEntity);
+   if(ok)loaded++;
+   else{
+    failed++;
+    const problem=results.find(r=>r.status==='rejected');
+    failures.push(asset+': '+(problem?.reason?.message||'Instancia vacía'));
+   }
+   onProgress?.(loaded,total,(ok?'Listo: ':'Error: ')+asset);
+  }
+ }
+ await Promise.all(Array.from({length:Math.min(3,total)},worker));
+ if(failed)throw new Error('Faltan '+failed+' recursos de la ruta: '+failures.slice(0,3).join(' | '));
+ return{total,loaded,failed:0,timedOut:false,instances:models.length};
+}
 function refreshRouteBindings(prof){document.querySelectorAll(`pc-model[data-route="${prof}"]`).forEach(el=>el.contentEntity&&hideCollisionMeshes(el));if(prof==='Herrero'){tintModel(document.getElementById('ordanModel'),[.58,.52,.43],0);tintModel(document.getElementById('ordanHairModel'),[.62,.62,.60],0);const root=document.getElementById('chestModel')?.contentEntity;chestLid=root?.findByName?.('Lid')||null;if(chestLid){const e=chestLid.getLocalEulerAngles();chestLidBase={x:e.x,y:e.y,z:e.z}}if(forgeVisualBoundRoot!==forgeModelEl?.contentEntity){forgeVisualBoundRoot=forgeModelEl?.contentEntity||null;forgeHotMaterialPatched=false;forgeCoalMaterials=[]}igniteForgeVisual()}else{tintModel(document.getElementById('tannerMentorModel'),[.72,.54,.37],0);tintModel(document.getElementById('tannerMentorHairModel'),[.33,.24,.18],0);tannerChestClosed=chooseClip(tannerChestAnim,'Chest_Closed');tannerChestOpen=chooseClip(tannerChestAnim,'Chest_Open');tannerChestOpened=chooseClip(tannerChestAnim,'Chest_Opened');if(tannerChestClosed)tannerChestAnim?.transition?.(tannerChestClosed,.01);applyTannerVisualPass()}}
-async function prepareRoute(prof){if(routeReady.has(prof))return;routeLoading=true;intro.style.display='none';loading.style.display='grid';loadRetry.style.display='none';const planned=groupRouteModels(routeModels(prof,'critical')).length;loadCount.textContent='0 de '+planned+' assets del '+prof;setLoadUI(0,'Preparando '+prof,'Los modelos se cargan en paralelo. Los que falten seguirán en segundo plano.');const report=await activateRouteGroups(prof,'critical',(done,total,label)=>{setLoadUI(100*done/Math.max(1,total),'Preparando '+prof,label);loadCount.textContent=done+' de '+total+' assets del '+prof+' cargados'});try{refreshRouteBindings(prof)}catch(err){console.warn('Bindings parciales de ruta:',err)}routeReady.add(prof);if(!report?.timedOut&&report?.failed===0)setLoadUI(100,prof+' listo','Ruta preparada. El decorado secundario continuará en segundo plano.');else setLoadUI(100*report.loaded/Math.max(1,report.total),prof+' disponible',''+report.loaded+' de '+report.total+' assets listos; los restantes seguirán en segundo plano.');loadCount.textContent=report.loaded+' de '+report.total+' assets del '+prof+' cargados';await sleep(90)}
-function streamRouteDecor(prof){const models=routeModels(prof,'stream');let index=0;const pump=()=>{if(index>=models.length)return;const batch=models.slice(index,index+4);index+=4;for(const el of batch)activateDeferredModel(el,45000).then(()=>{hideCollisionMeshes(el);if(prof==='Curtidor'){applyTannerVisualPass()}}).catch(err=>console.warn('Decoración diferida:',err.message));setTimeout(pump,180)};(window.requestIdleCallback?requestIdleCallback(()=>pump(),{timeout:420}):setTimeout(pump,160))}
-async function chooseProfessionRoute(prof){if(routeLoading||gameStarted)return;const buttons=[...document.querySelectorAll('[data-profession]')];buttons.forEach(b=>b.disabled=true);try{await prepareRoute(prof);startRoute(prof);loading.style.display='none';streamRouteDecor(prof)}catch(err){console.error(err);failLoading(err?.message||String(err),'No se habilitó la ruta. Reintentá; el resto del prototipo no se cargó.');intro.style.display='none'}finally{routeLoading=false;buttons.forEach(b=>b.disabled=false)}}
-
+async function prepareRoute(prof){
+ if(routeReady.has(prof))return;
+ routeLoading=true;
+ intro.style.display='none';loading.style.display='grid';
+ loadingCard.classList.remove('failed');loadRetry.style.display='none';
+ const all=[...routeModels(prof,'critical'),...routeModels(prof,'stream'),...routeModels('SharedMercenary','ondemand')];
+ const total=groupRouteModels(all).length;
+ loadCount.textContent='0 de '+total+' modelos únicos · '+all.length+' instancias';
+ setLoadUI(0,'Preparando partida completa','Talleres, decoración y mercenarios se cargan ANTES de jugar.');
+ const report=await activateRouteGroups(prof,'all',(done,count,label)=>{
+  setLoadUI(count?100*done/count:100,'Cargando ruta completa de '+prof,label);
+  loadCount.textContent=done+' de '+count+' modelos únicos · '+all.length+' instancias';
+ });
+ refreshRouteBindings(prof);
+ routeReady.add(prof);
+ setLoadUI(100,'Partida completamente preparada','No queda decoración diferida en segundo plano.');
+ loadCount.textContent=report.loaded+' de '+report.total+' modelos únicos · '+report.instances+' instancias';
+}
+async function chooseProfessionRoute(prof){
+ if(routeLoading||gameStarted)return;
+ const buttons=[...document.querySelectorAll('[data-profession]')];
+ buttons.forEach(b=>b.disabled=true);
+ try{
+  await prepareRoute(prof);
+  startRoute(prof);
+  loading.style.display='none';
+ }catch(err){
+  console.error(err);
+  failLoading(err?.message||String(err),'No se habilitó la ruta: todos sus recursos deben estar completos. Reintentá.');
+  intro.style.display='none';
+ }finally{
+  routeLoading=false;
+  buttons.forEach(b=>b.disabled=false);
+ }
+}
 function startRoute(prof){village.setProfession(prof);selectedProfession=prof;activeRoute=ROUTES[prof];const engine=window.GenesisPrototypeEngines;if(!engine){toast('Motor NGE Alpha no disponible.',1600);return}craftSession=engine.generateSession(prof);gameStarted=true;tutorialStep=0;workshopKey=false;debrisCleared=false;auxCleared=false;chestOpen=false;playerInventory={};inventoryOpen=false;inventoryTutorialOpened=false;craftedItems=[];usedItemNames=new Set();resetMercenaryExtension();forgeHot=false;tannerOperational=false;igniteForgeVisual();if(tannerWorkLight)tannerWorkLight.intensity=.72;doorAngle=doorTarget=tannerDoorAngle=tannerDoorTarget=0;if(doorLeafEntity)doorLeafEntity.setEulerAngles(0,0,0);if(tannerDoorLeafEntity)tannerDoorLeafEntity.setEulerAngles(0,0,0);const center=activeRoute.center;px=center;pz=6.3;player.setPosition(px,0,pz);camera.setPosition(center,3,10);camYaw=0;camPitch=24;camDist=cameraSolvedDist=4.7;const mentor=activeRoute.mentor();mentor.setPosition(center+1.72*WORKSHOP_SCALE,0,1.90*WORKSHOP_SCALE);mentorYaw=-21;mentor.setEulerAngles(0,mentorYaw,0);mentorFollowState='outside';mentorFollowDelay=0;mentorPath=[];mentorWaypoint=0;marketEscortWaypoint=0;marketEscortWaiting=false;setMentorAnim(activeRoute.mentorIdle,.01);npcTag.textContent=activeRoute.mentorName.toUpperCase();professionChip.textContent=`PROFESIÓN · ${prof.toUpperCase()} · 2 FAMILIAS · 4 FABRICACIONES`;professionChip.style.display='block';materialsPanel.style.display='none';if(inventoryTouch){inventoryTouch.classList.add('locked');inventoryTouch.classList.remove('ready')}intro.style.display='none';mouseCapture.refresh();const fastSetup=applyDevFastTestState();restoreKnownLightingProfile();if(forgeHot){igniteForgeVisual();pulseForge(.10)}if(!fastSetup){setTutorialStep(0);toast(`Recorrido ${prof} iniciado.`,1500);mentorGestureAt=performance.now()+4800;mentorGestureReturn=0}}
 document.querySelectorAll('[data-profession]').forEach(btn=>btn.addEventListener('click',()=>{getAudio();uiTick();chooseProfessionRoute(btn.dataset.profession)}));
 
@@ -1657,8 +1724,37 @@ function frame(now){requestAnimationFrame(frame);village.trees?.update(px,pz);co
  if(gameStarted&&activeRoute&&mentorFollowState!=='walking'&&mentorFollowState!=='market'){const mentor=activeRoute.mentor(),mp=mentor.getPosition(),dist=Math.hypot(px-mp.x,pz-mp.z),desired=dist<7?deg(Math.atan2(px-mp.x,pz-mp.z)):-21,delta=((desired-mentorYaw+540)%360)-180;mentorYaw+=delta*Math.min(1,dt*4.1);mentor.setEulerAngles(0,mentorYaw,0);if(activeRoute.mentorGesture&&now>mentorGestureAt&&!mentorGestureReturn){activeRoute.mentorAnims.forEach(a=>a.transition(activeRoute.mentorGesture,.28));mentorGestureReturn=now+2200}if(mentorGestureReturn&&now>mentorGestureReturn){activeRoute.mentorAnims.forEach(a=>activeRoute.mentorIdle&&a.transition(activeRoute.mentorIdle,.32));mentorGestureReturn=0;mentorGestureAt=now+7800}}
  updateInteractionUI();updateCameraGuide();const camComp=document.querySelector('#cameraRig pc-camera')?.component;if(gameStarted&&activeRoute&&camComp){const p=activeRoute.mentor().getPosition(),screen=new Vec3();camComp.worldToScreen(new Vec3(p.x,2.25,p.z),screen);if(screen.z>0&&screen.x>=0&&screen.x<=innerWidth&&screen.y>=0&&screen.y<=innerHeight){npcTag.style.display='block';npcTag.style.left=screen.x+'px';npcTag.style.top=screen.y+'px'}else npcTag.style.display='none'}else npcTag.style.display='none';
 }
+// Los visuales instalados por módulos independientes también son recursos de
+// arranque. Las promesas de red no bastan: deben existir los nodos en escena.
+async function waitVisualModulesBeforePlay(){
+ const deadline=performance.now()+90000;
+ while(performance.now()<deadline){
+  const smith=window.__genesisProductionHerreroV015;
+  const arcane=window.__genesisArcanistaFourWallsV006;
+  if(smith?.phase==='error')throw new Error('Herreria V015: '+(smith.errors?.[0]||'fallo de integración'));
+  if(arcane?.phase==='error'||arcane?.phase==='village-unavailable-after-15min')
+    throw new Error('Arcanista V006: '+(arcane.error||arcane.phase));
+  const smithReady=smith?.phase==='running'&&smith?.installed?.some(x=>x.kind==='village');
+  const arcaneReady=arcane?.installed===true;
+  bootProgress.externals=Number(!!smithReady)+Number(!!arcaneReady);
+  showBootProgress('Integrando arquitectura del mundo',
+   'Herrería V015 y Arcanista V006: '+bootProgress.externals+' de 2 instalados');
+  if(smithReady&&arcaneReady)return;
+  await new Promise(r=>setTimeout(r,250));
+ }
+ throw new Error('No se completó el montaje de herrería V015 y Arcanista V006 antes del inicio');
+}
 requestAnimationFrame(frame);
-
+const uiPreflightResult=await uiAssetsPromise;
+if(uiPreflightResult.error){
+ failLoading(uiPreflightResult.error.message,'No se habilitó la escena: faltan recursos de inventario. Reintentá.');
+ throw uiPreflightResult.error;
+}
+try{await waitVisualModulesBeforePlay()}catch(err){
+ failLoading(err.message,'No se habilitó la partida: falta arquitectura 3D externa. Reintentá.');
+ throw err;
+}
+showBootProgress('Interfaz y escena preparadas','Todos los recursos iniciales están listos.');
 setLoadUI(100,'Núcleo listo','Edric, cámara y controles preparados. El taller se cargará después de elegir profesión.');clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
 </script>
 
