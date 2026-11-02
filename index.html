@@ -955,13 +955,14 @@ const bootState=window.__genesisBoot||{loaded:0,total:0,error:null};
 // Contar el archivo descargado, el modelo/clip instanciado y la textura del mundo una sola vez.
 // Los LOD de árboles fuera de vista se transmiten luego y no bloquean esta etapa.
 const bootPrepTotal=[...document.querySelectorAll('pc-model[asset]:not([data-route])'),...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]')).length;
-const bootProgress={downloaded:0,downloadTotal:0,prepared:0,prepareTotal:bootPrepTotal,world:0,worldTotal:13};
+const treeVariantTotal=window.GenesisDevice?.safePreviews?4:8;
+const bootProgress={downloaded:0,downloadTotal:0,prepared:0,prepareTotal:bootPrepTotal,world:0,worldTotal:treeVariantTotal+9};
 const groupSpec=[
  ['paredes','Paredes'],['puertas','Puertas'],['objetos','Objetos'],
  ['animaciones','Animaciones'],['arboles','Árboles'],['suelos','Suelos y caminos']
 ];
 const bootGroups=Object.fromEntries(groupSpec.map(([id])=>[id,{ready:0,total:0}]));
-bootGroups.arboles.total=4;
+bootGroups.arboles.total=treeVariantTotal;
 bootGroups.suelos.total=8;
 bootGroups.puertas.total=1; // V027: puerta mágica externa
 const loadGroupsEl=document.getElementById('loadGroups');
@@ -1040,7 +1041,7 @@ try{
 
 let village;
 try{
- activeBootGroup='arboles';showBootProgress(groupStage('arboles'),'Preparando los cuatro árboles aprobados.');
+ activeBootGroup='arboles';showBootProgress(groupStage('arboles'),'Preparando todas las versiones LOD de los cuatro árboles aprobados.');
  village=await mountVillage(appEl.app,{
   shell:document.getElementById('villageShellSource').entity,
   roof:document.getElementById('villageRoofSource').entity,
