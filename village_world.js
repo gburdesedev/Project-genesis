@@ -208,7 +208,7 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
  // Do not enable movement until each baseline LOD2 has loaded or explicitly failed.
  // Failed variants have no collision; the scene never contains invisible trunks.
  onPhase('arboles');
- await trees.initialReady;
+ await trees.allReady;
  onPhase('puertas');
  await Promise.all(arcanePortals.map(portal=>portal.initialReady));
  return Object.freeze({root,plan,trees,arcanePortals,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
