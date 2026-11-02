@@ -58,27 +58,27 @@ async function simulation({mobile=false,missing=''}={}){
 (async()=>{
  const {api}=await simulation();
  const manifest=api.manifest();
- assert.equal(manifest.length,47,'47 recursos UI deduplicados (39 capas, 3 posters, 5 previews)');
+ assert.equal(manifest.length,49,'47 recursos UI deduplicados (39 capas, 3 posters, 7 previews)');
  assert.equal(manifest.filter(x=>x.mandatory).length,39);
  const observed=[];
  const result=await api.prepare({onProgress:p=>observed.push(p.complete)});
- assert.equal(result.ready,47);
- assert.equal(result.total,47);
+ assert.equal(result.ready,49);
+ assert.equal(result.total,49);
  assert.equal(result.failed,0);
  assert.equal(result.mandatoryFailures.length,0);
- assert.equal(observed.length,47);
- assert.equal(Math.max(...observed),47);
- assert.equal(new Set(manifest.map(x=>x.url)).size,47);
+ assert.equal(observed.length,49);
+ assert.equal(Math.max(...observed),49);
+ assert.equal(new Set(manifest.map(x=>x.url)).size,49);
  assert(api.urlFor(manifest.find(x=>x.kind==='model').url).startsWith('blob:'));
  assert(api.ready,'Interfaz lista sólo cuando terminan todas las tareas');
 
  const {api:mobile}=await simulation({mobile:true});
- assert.equal(mobile.manifest().length,42,'La vista móvil PNG no debe descargar GLB 3D innecesarios');
+ assert.equal(mobile.manifest().length,44,'La vista móvil PNG no debe descargar GLB 3D innecesarios');
  const mobileResults=await mobile.prepare();
- assert.equal(mobileResults.total,42);
+ assert.equal(mobileResults.total,44);
 
  const {api:unavailable}=await simulation({missing:'FondoEstructural'});
  await assert.rejects(unavailable.prepare(),/No se completó el arte obligatorio/);
  assert.equal(unavailable.ready,false);
- console.log('PASS Genesis preflight: 39 PNG críticos, 3 posters, 5 GLB opcionales, carga limitada, sin streaming tardío.');
+ console.log('PASS Genesis preflight: 39 PNG críticos, 3 posters, 7 GLB opcionales, carga limitada, sin streaming tardío.');
 })().catch(error=>{console.error(error);process.exitCode=1});
