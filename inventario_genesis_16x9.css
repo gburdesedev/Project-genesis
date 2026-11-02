@@ -502,9 +502,15 @@
 }
 .genInv::after{
   content:"";position:absolute;z-index:1;pointer-events:none;
-  top:0;left:7.8125%;width:84.375%;height:15%;
-  background:url('assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png')
-    center top / 100% 666.666667% no-repeat;
+  top:0;left:0;width:100%;height:15%;
+  /* Fondo panoramico extendido + artboard 3:2 superpuesto, como Preparacion.
+     Ambos usan el mismo PNG original, sin rehacer ni recortar pintura. */
+  background-image:
+    url('assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png'),
+    url('assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png');
+  background-position:center top,center top;
+  background-size:84.375% 666.666667%,100% 666.666667%;
+  background-repeat:no-repeat,no-repeat;
 }
 .genInv .genInvNav{
   position:absolute!important;
