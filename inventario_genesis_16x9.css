@@ -464,3 +464,26 @@
 }
 .genInvSlot{min-height:0!important;min-width:0!important}
 .genInvPage{flex:0 0 auto!important;min-height:6%!important}
+
+
+/* Approved frame must be visible behind tabs, as in Preparación. */
+.genInvPanorama>.genInv{background:transparent!important}
+.genInvNav{background:transparent!important}
+.genInvInfo{padding:4.3% 4.9% 2%!important}
+.genInvInfo .genInvInfoTitle{margin:0 0 1%!important;padding:0 0 1%!important}
+.genInvInfo .genInvInfoLine{padding:.7% .5%!important;font-size:.94cqw!important}
+.genInvInfo .genInvSubhead{margin:1.2% 0 .4%!important;padding:0 0 .4%!important}
+.genInvInfo .genInvChannels{
+  flex:1 1 auto!important;min-height:4.8cqw!important;
+  max-height:33%!important;overflow-y:auto!important;scrollbar-width:thin
+}
+.genInvInfo .genInvChannel{min-height:1.65cqw!important;padding:.3% 2%!important}
+.genInvInfo .genInvNgeText{
+  flex:0 1 auto!important;min-height:1.5cqw!important;
+  max-height:3.2cqw!important;overflow-y:auto!important;
+  line-height:1.25!important;margin:0 0 .4%!important
+}
+.genInvInfo .genInvInfoMore{
+  height:2.55cqw!important;min-height:2.55cqw!important;
+  margin:.8% 0 0!important
+}
