@@ -91,6 +91,8 @@ test('existing pre-chest market purchases remain additive and navigation explain
  assert.match(source,/playerInventory\[material\] = \(playerInventory\[material\] \|\| 0\) \+ quantity/);
  assert.match(source,/El baúl contiene únicamente el lote para tus dos primeras espadas/);
  assert.match(source,/los materiales del escudo se obtienen gratis en el mercado/);
- assert.match(fs.readFileSync(path.join(root,'village_world.js'),'utf8'),/version='v0\.14\.022'/);
- assert.match(source,/<title>Project Genesis v0\.14\.022 · Build 20261102\.04/);
+ const release=source.match(/<title>Project Genesis (v0\.\d+\.\d+) · Build (\d{8}\.\d+)/);
+ assert(release,'El juego debe publicar versión y build');
+ const world=fs.readFileSync(path.join(root,'village_world.js'),'utf8');
+ assert(world.includes("version='"+release[1]+"', build='"+release[2]+"'"),'El mundo debe usar la misma versión que la página');
 });

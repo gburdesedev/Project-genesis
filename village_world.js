@@ -132,7 +132,7 @@ function arcaneSurround(app,building,cobble,shell){
  return frame;
 }
 function stampVersion(){
- const version='v0.14.022', build='20261102.04';
+ const version='v0.14.023', build='20261102.05';
  globalThis.__genesisVillageBuild={version,build};
  document.title=document.title.replace(/v0\.14(?:[a-c]|\.\d{3})?/gi,version);
  // The existing HUD build label lives in the monolithic demo HTML. Update
@@ -221,10 +221,17 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
    ]);
   }finally{clearTimeout(timer)}
  }
- onPhase('arboles');
- await bootGate(trees.fullReady,'árboles LOD1 y LOD2'); // Nunca descargar LOD mientras se juega.
- onPhase('puertas');
- await bootGate(Promise.all(arcanePortals.map(portal=>portal.initialReady)),
-   'puerta mágica Arcanista V027');
- return Object.freeze({root,plan,trees,arcanePortals,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
+ // Montaje inmediato de la aldea: los LOD descargan en paralelo al menú
+ // de selección; NO se habilita movimiento hasta esperar waitForPlayableAssets().
+ async function waitForPlayableAssets(){
+  onPhase('arboles');
+  const treeReport=await bootGate(trees.fullReady,'árboles LOD1 y LOD2',180000);
+  if(treeReport.failed)throw new Error('Faltan '+treeReport.failed+' LOD de árboles: no se habilitó la partida');
+  onPhase('puertas');
+  const doorReports=await bootGate(Promise.all(arcanePortals.map(portal=>portal.initialReady)),
+    'puerta mágica Arcanista V027',180000);
+  if(doorReports.some(result=>result.phase!=='ready'))throw new Error('La puerta Arcanista V027 no completó la carga');
+  return Object.freeze({trees:treeReport,doors:doorReports.length});
+ }
+ return Object.freeze({root,plan,trees,arcanePortals,waitForPlayableAssets,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
 }
