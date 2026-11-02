@@ -10,7 +10,7 @@ async function runMercenaryQABoot(){
  demand(engine&&prep,'Genesis original engines must load');
  try{
   log('loading-real-route');
-  await chooseProfessionRoute('Herrero');
+  // QA only: initialize the original game session without blocking on optional workshop models.\n  startRoute('Herrero');
   demand(selectedProfession==='Herrero'&&!!craftSession,'gameplay session');
   const session=craftSession;
   log('procedural-session',{seed:session.seed,formulaSignatures:Object.fromEntries(Object.entries(session.formulas).map(([k,v])=>[k,v.signature]))});
