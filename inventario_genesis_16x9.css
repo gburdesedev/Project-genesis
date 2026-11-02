@@ -474,7 +474,7 @@
 .genInvInfo .genInvInfoLine{padding:.7% .5%!important;font-size:.94cqw!important}
 .genInvInfo .genInvSubhead{margin:1.2% 0 .4%!important;padding:0 0 .4%!important}
 .genInvInfo .genInvChannels{
-  flex:1 1 auto!important;min-height:4.8cqw!important;
+  flex:1 1 auto!important;min-height:5.7cqw!important;
   max-height:33%!important;overflow-y:auto!important;scrollbar-width:thin
 }
 .genInvInfo .genInvChannel{min-height:1.65cqw!important;padding:.3% 2%!important}
