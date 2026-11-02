@@ -222,7 +222,7 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
   }finally{clearTimeout(timer)}
  }
  onPhase('arboles');
- await bootGate(trees.fullReady,'árboles LOD1 y LOD2'); // Nunca descargar LOD mientras se juega.
+ await bootGate(trees.fullReady,'árboles LOD1 y LOD2',180000); // Nunca descargar LOD mientras se juega.
  onPhase('puertas');
  await bootGate(Promise.all(arcanePortals.map(portal=>portal.initialReady)),
    'puerta mágica Arcanista V027');

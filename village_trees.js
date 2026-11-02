@@ -185,7 +185,10 @@ export function mountVillageTrees(app, villageRoot, options={}){
  };
  app.on('update',windTick);
  let active=0,focusX=0,focusZ=0,lastUpdate=0;
- const maxConcurrent=safeMobile?2:4;
+ // Ocho variantes desktop (4 especies x LOD1/LOD2): iniciar las ocho en paralelo.
+ // Antes se descargaban en dos tandas de cuatro y excedían el watchdog de 90 s.
+ // No se reducen polígonos, texturas ni se difieren LOD durante la partida.
+ const maxConcurrent=safeMobile?2:8;
  const initiallySettled=new Set();
  let resolveInitial;
  const initialReady=new Promise(resolve=>{resolveInitial=resolve;});
