@@ -24,3 +24,9 @@ console.log('CHECK_SRC',JSON.stringify({
   QAHook:s.includes('mercenary-qa=1'),
   version:s.match(/<title[^>]*>[^<]+<[/]title>/)?.[0]||null
 }));
+
+console.log('CSS_SEARCH',JSON.stringify(['content-visibility','contain:','visibility: hidden','visibility:hidden','display: none','display:none','contain-intrinsic-size','contentVisibility'].map(term=>{
+ let pos=0,hits=[];
+ while((pos=s.indexOf(term,pos))>=0&&hits.length<30){hits.push({at:pos,snippet:s.slice(Math.max(0,pos-180),pos+230)});pos+=term.length;}
+ return {term,count:hits.length,hits};
+})));
