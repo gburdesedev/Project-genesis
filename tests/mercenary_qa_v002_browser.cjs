@@ -45,6 +45,17 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
     return fields.map(sel=>{const el=document.querySelector(sel);if(!el)return {sel,missing:true};const style=getComputedStyle(el),rect=el.getBoundingClientRect();return {sel,display:style.display,visibility:style.visibility,opacity:style.opacity,width:rect.width,height:rect.height,top:rect.top,left:rect.left,inlineDisplay:el.style.display};});
   });
   console.log('MERCENARY_QA_LAYOUT',JSON.stringify(layout));
+  // Real browser pixels must follow the approved 1670x942 artboard, not collapse to zero.
+  const clickTargets=await page.evaluate(()=>{
+    const names=['family-first','family-second','inspect','equip','back'];
+    return names.map(name=>{
+      const node=document.querySelector('.mercV04 [data-action="'+name+'"]');
+      const b=node?.getBoundingClientRect();
+      return {name,width:b?.width||0,height:b?.height||0,hitVisible:!!node&&getComputedStyle(node).display!=='none'};
+    });
+  });
+  console.log('MERCENARY_QA_CLICK_TARGETS',JSON.stringify(clickTargets));
+  assert.ok(clickTargets.every(t=>t.hitVisible&&t.width>20&&t.height>15),'Approved art hotspots must have physical pointer targets');
   await page.locator('[data-action="family-second"]').click();
   assert.equal(await page.locator('.mcV4Row').count(),2); // Base+1 from Common
   await page.screenshot({path:path.join(out,'equipamiento-escudos-16x9.png')});
