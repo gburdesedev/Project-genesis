@@ -44,7 +44,7 @@ const path=require('node:path');
   assert.equal(await page.locator('.mcV4Overlay').count(),1);
   await page.locator('[data-action="dismiss"]').click();
   await page.locator('[data-action="family-first"]').click();
-  assert.equal(await page.locator('.mcV4Row').count(),1,'channels are not baked into template');
+  assert.equal(await page.locator('.mcV4Row').count(),2,'only actual equipped sword channels are shown until selecting a new item');
   await page.locator('[data-item="1"]').click();
   assert.equal(await page.locator('.mcV4Row').count(),4);
   await page.screenshot({path:'/tmp/mercenary-concept-16x9.png',fullPage:true});
