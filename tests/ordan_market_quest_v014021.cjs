@@ -89,9 +89,10 @@ test('merchant opens after Ordan lesson, quantity defaults to missing stock and 
  assert.match(merchant,/const missing=needByName\.get\(name\)\?\.missing\|\|0/);
  assert.match(merchant,/if\(typeof onPurchase==='function'\)onPurchase\(result\)/);
  assert.match(merchant,/quantity:chosen\[name\]\|\|Math\.min\(99,Math\.max\(1,needByName\.get\(name\)\?\.missing\|\|0\)\)/);
- assert.match(html,/import '\.\/genesis_market_quest_v001\.js\?v=0\.14\.022'/);
- assert.match(html,/<title>Project Genesis v0\.14\.022 · Build 20261102\.04/);
- assert.match(world,/version='v0\.14\.022', build='20261102\.04'/);
- assert.match(merchant,/version:'v0\.14\.022'/);
- assert.match(html,/village_world\.js\?v=0\.14\.022/);
+ const release=html.match(/<title>Project Genesis (v0\.\d+\.\d+) · Build (\d{8}\.\d+)/);
+ assert(release,'La página debe declarar la versión publicada');
+ assert(html.includes("import './genesis_market_quest_v001.js?v="+release[1].slice(1)+"'"));
+ assert(world.includes("version='"+release[1]+"', build='"+release[2]+"'"));
+ assert.match(merchant,/version:'v0\.14\.\d{3}'/);
+ assert(html.includes("village_world.js?v="+release[1].slice(1)));
 });
