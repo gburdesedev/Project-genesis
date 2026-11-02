@@ -1680,17 +1680,13 @@ async function prepareRoute(prof){
  routeLoading=true;
  intro.style.display='none';loading.style.display='grid';
  loadingCard.classList.remove('failed');loadRetry.style.display='none';
- // Los LOD1 completan en paralelo con la elección de profesión, pero nunca durante la partida.
- if(village?.trees?.fullReady){
-  const before=village.trees.status?.();
-  setLoadUI(0,'Completando árboles antes de jugar',
-   'LOD aprobados: '+(before?.residentVariants||0)+' de '+(window.GenesisDevice?.safePreviews?4:8)+'.');
-  let timer;
-  const trees=await Promise.race([
-   village.trees.fullReady,
-   new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Carga incompleta: LOD1 y LOD2 de árboles (180 s)')),180000);})
-  ]).finally(()=>clearTimeout(timer));
-  if(trees.failed)throw new Error('Faltan '+trees.failed+' LOD de árboles; no se iniciará la partida con recursos incompletos.');
+ // El usuario puede ver y elegir la profesión mientras terminan los GLB externos.
+ // La partida permanece bloqueada hasta tener árboles LOD1/LOD2 y puerta V027.
+ if(village?.waitForPlayableAssets){
+  const before=village.trees?.status?.();
+  setLoadUI(0,'Completando escena antes de jugar',
+   'Árboles LOD: '+(before?.residentVariants||0)+' de '+(window.GenesisDevice?.safePreviews?4:8)+'.');
+  await village.waitForPlayableAssets();
  }
  const all=[...routeModels(prof,'critical'),...routeModels(prof,'stream'),...routeModels('SharedMercenary','ondemand')];
  const total=groupRouteModels(all).length;
@@ -1766,8 +1762,8 @@ try{await waitVisualModulesBeforePlay()}catch(err){
  failLoading(err.message,'No se habilitó la partida: falta arquitectura 3D externa. Reintentá.');
  throw err;
 }
-showBootProgress('Interfaz y escena preparadas','Todos los recursos iniciales están listos.');
-setLoadUI(100,'Núcleo listo','Edric, cámara y controles preparados. El taller se cargará después de elegir profesión.');clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
+showBootProgress('Menú disponible','Árboles y puerta terminan de cargar antes de comenzar la partida.');
+setLoadUI(100,'Menú de inicio listo','Edric, cámara y controles preparados. Recursos 3D adicionales se verifican al elegir profesión.');clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
 </script>
 
 <script id="genesis-prototype-engines">
