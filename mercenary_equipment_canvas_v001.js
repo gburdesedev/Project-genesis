@@ -27,7 +27,7 @@ function insertStyle(){
  .mercV04 .mcV4Compare small{font-size:1.05cqw;white-space:nowrap;max-width:100%;text-overflow:ellipsis;overflow:hidden;color:#f1d7a0}
  .mercV04 .mcV4Compare small.rarity{font-size:.91cqw;color:#dbb86b}
  .mercV04 .mcV4Channels{position:absolute;overflow-y:auto;overflow-x:hidden;scrollbar-color:#b87a22 #100b06;scrollbar-width:thin;padding:1cqw .1cqw 1cqw .15cqw}
- .mercV04 .mcV4Row{height:5.7cqw;min-height:1px;position:relative;display:flex;align-items:center;flex:none;margin-bottom:.20cqw}
+ .mercV04 .mcV4Row{height:3.42cqw;min-height:1px;position:relative;display:flex;align-items:center;flex:none;margin-bottom:.20cqw}
  .mercV04 .mcV4RowArt{position:absolute;left:0;top:0;width:100%;height:100%;background-repeat:no-repeat;background-size:100% 800%;pointer-events:none}
  .mercV04 .mcV4Numbers{position:absolute;left:62%;right:.5%;top:24%;display:flex;justify-content:space-between;align-items:center;font-size:1.18cqw;text-shadow:0 1px 3px black;font-variant-numeric:tabular-nums;font-weight:bold}
  .mercV04 .mcV4Numbers .positive{color:#80e967}.mercV04 .mcV4Numbers .negative{color:#ed8b83}.mercV04 .mcV4Numbers .neutral{color:#f0e0bd}
