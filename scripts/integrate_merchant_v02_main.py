@@ -125,6 +125,6 @@ for rel in ("index.html","village_world.js"):
 # Update existing pinned version assertions, not the gameplay rules or quest logic.
 quest_test=root/"tests/ordan_market_quest_v014021.cjs"
 qt=quest_test.read_text(encoding="utf-8")
-assert version_old in qt and build_old in qt
-quest_test.write_text(qt.replace(version_old,version_new).replace(build_old,build_new),encoding="utf-8")
+assert build_old in qt and (version_old in qt or r"0\.14\.021" in qt)
+quest_test.write_text(qt.replace(version_old,version_new).replace(r"0\.14\.021",r"0\.14\.022").replace(build_old,build_new),encoding="utf-8")
 print("Done. Merchant V02 visual-only integration; interaction ID and market domain unchanged.")
