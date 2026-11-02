@@ -773,6 +773,8 @@ window.__genesisAppError=function(event){
 <script src="./camera_mouse.js?v=20261025-1"></script>
 <script src="./preparacion_control.js?v=0.14c.020-static-featured"></script>
 <script src="./mercenary_equipment_canvas_v001.js?v=0.1.001"></script>
+<script type="module" src="./genesis_workshop_live_v015.js?v=0.17.014-herrero-v082b"></script>
+<script type="module" src="./genesis_arcanista_four_walls_v006.js?v=0.16.006b"></script>
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
 import { Vec3 } from 'playcanvas';
@@ -953,11 +955,11 @@ const bootState=window.__genesisBoot||{loaded:0,total:0,error:null};
 // Contar el archivo descargado, el modelo/clip instanciado y la textura del mundo una sola vez.
 // Los LOD de árboles fuera de vista se transmiten luego y no bloquean esta etapa.
 const bootPrepTotal=[...document.querySelectorAll('pc-model[asset]:not([data-route])'),...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]')).length;
-const bootProgress={downloaded:0,downloadTotal:0,prepared:0,prepareTotal:bootPrepTotal,world:0,worldTotal:13,ui:0,uiTotal:0,merc:0,mercTotal:0};
+const bootProgress={downloaded:0,downloadTotal:0,prepared:0,prepareTotal:bootPrepTotal,world:0,worldTotal:13,ui:0,uiTotal:0,merc:0,mercTotal:0,architecture:0,architectureTotal:0};
 const groupSpec=[
  ['paredes','Paredes'],['puertas','Puertas'],['objetos','Objetos'],
  ['animaciones','Animaciones'],['arboles','Árboles'],['suelos','Suelos y caminos'],
- ['interfaz','Interfaz e inventarios'],['mercenarios','Equipo del mercenario']
+ ['interfaz','Interfaz e inventarios'],['mercenarios','Equipo del mercenario'],['arquitectura','Arquitectura HQ']
 ];
 const bootGroups=Object.fromEntries(groupSpec.map(([id])=>[id,{ready:0,total:0}]));
 bootGroups.arboles.total=4;
@@ -986,8 +988,8 @@ function syncGroupRows(){
 function groupStage(id){return 'Cargando '+(groupSpec.find(([key])=>key===id)?.[1].toLowerCase()||'recursos')}
 
 function showBootProgress(stage,detail=''){
- const total=bootProgress.downloadTotal+bootProgress.prepareTotal+bootProgress.worldTotal+bootProgress.uiTotal+bootProgress.mercTotal;
- const loaded=bootProgress.downloaded+bootProgress.prepared+bootProgress.world+bootProgress.ui+bootProgress.merc;
+ const total=bootProgress.downloadTotal+bootProgress.prepareTotal+bootProgress.worldTotal+bootProgress.uiTotal+bootProgress.mercTotal+bootProgress.architectureTotal;
+ const loaded=bootProgress.downloaded+bootProgress.prepared+bootProgress.world+bootProgress.ui+bootProgress.merc+bootProgress.architecture;
  if(!total)return;
  setLoadUI(100*loaded/total,stage,detail);
  loadCount.textContent=loaded+' de '+total+' recursos listos';
@@ -1757,6 +1759,30 @@ try{
   }));
  }
  await ensureMercenaryReady();
+ // Estas cinco mallas HQ se cargaban por módulos independientes. Registrar
+ // su resultado antes de habilitar el mundo evita reemplazos tardíos en GPU.
+ bootProgress.architectureTotal=5;
+ bootGroups.arquitectura.total=5;
+ activeBootGroup='arquitectura';
+ showBootProgress('Verificando arquitectura HQ','Fachada del Herrero, techo, chimenea, puerta y muros arcanistas.');
+ async function moduleReady(name){
+  const deadline=performance.now()+30000;
+  while(!window[name]){
+   if(performance.now()>deadline)throw new Error('No se inició el módulo de arquitectura '+name);
+   await sleep(120);
+  }
+  return window[name];
+ }
+ for(const [id,label,size] of [
+  ['__genesisProductionHerreroReady','Herrería V015',4],
+  ['__genesisArcanistaReady','Arcanista V006',1]
+ ]){
+  const promise=await moduleReady(id);
+  const ok=await Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Tiempo agotado verificando '+label)),120000))]);
+  bootProgress.architecture+=size;bootGroups.arquitectura.ready+=size;
+  showBootProgress('Verificando arquitectura HQ',label+(ok?' terminado':' usa geometría original de respaldo'));
+  if(!ok)console.warn('Genesis arquitectura secundaria no disponible:',label);
+ }
  activeBootGroup='';
  setLoadUI(100,'Recursos iniciales listos','Escena, todos los menús y mercenarios preparados. Elegí el recorrido para cargar el taller antes de jugar.');
  clearInterval(loadTimer);
@@ -2070,7 +2096,7 @@ window.GenesisPrototypeEngines=Object.freeze({recipes:REC,formulaProfiles:FORMUL
 </script>
 
 <script type="module" src="./previews/genesis-v038-fuente-hq-runtime.js?v=0.15.001"></script>
-<script type="module" src="./genesis_workshop_live_v015.js?v=0.17.014-herrero-v082b"></script>
-<script type="module" src="./genesis_arcanista_four_walls_v006.js?v=0.16.006b"></script>
+
+
 </body>
 </html>
