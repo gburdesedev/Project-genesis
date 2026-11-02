@@ -1,0 +1,24 @@
+name: Genesis boot asset gates
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'genesis_boot_assets_v001.js'
+      - 'preparacion_control.js'
+      - 'tests/boot_preload.cjs'
+      - '.github/workflows/boot-preload.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  boot-manifest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check genesis_boot_assets_v001.js
+      - run: node --check preparacion_control.js
+      - run: node tests/boot_preload.cjs
