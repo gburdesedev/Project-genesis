@@ -96,6 +96,11 @@
     // Curtidor is plaza scenery only in this vertical slice. Its gameplay
     // models and animation clips must never request missing vendor assets.
     // Keep DOM/entity references so dormant legacy handlers cannot throw.
+    // The obsolete Curtidor chest omitted data-route, so its three
+    // Chest_* animation clips escaped the route filter and blocked the
+    // *initial* boot when their backing pc-asset was removed.
+    const tannerChest=document.getElementById('tannerChestModel');
+    if(tannerChest)tannerChest.dataset.route='Curtidor';
     const tannerModels=[...document.querySelectorAll('pc-model[data-route="Curtidor"]')];
     for(const model of tannerModels){
       delete model.dataset.asset;
