@@ -1,0 +1,58 @@
+name: Vendor original floor texture to approved
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-vendor-floor-texture.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  vendor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+      - name: Find and copy exact original floor texture
+        run: |
+          python3 - <<'PY'
+          import re,pathlib,json,urllib.request,urllib.parse,hashlib
+          s=pathlib.Path('index.html').read_text(encoding='utf8')
+          dest=pathlib.Path('assets/playcanvas/approved/world/floors/blacksmith')
+          dest.mkdir(parents=True,exist_ok=True)
+          ids=['stoneFloorTex085','stoneFloorMat085']
+          definitions={}
+          for id in ids:
+            m=re.search(r'<pc-(?:texture|material|asset)\b(?=[^>]*\bid=["\']'+id+r'["\'])[^>]*>',s,re.I)
+            if m:definitions[id]=m.group()
+          report={'definitions':definitions,'status':'not_found'}
+          tag=definitions.get('stoneFloorTex085','')
+          m=re.search(r'\bsrc=["\']([^"\']+)["\']',tag)
+          if m:
+            url=m.group(1);report['source']=url
+            try:
+              parsed=urllib.parse.urlparse(url)
+              if parsed.scheme in ('https','http'):
+                req=urllib.request.Request(url,headers={'User-Agent':'ProjectGenesisAssetRecovery/1.0'})
+                with urllib.request.urlopen(req,timeout=40) as f:data=f.read(25_000_000)
+              else:
+                p=pathlib.Path(urllib.parse.unquote(parsed.path).lstrip('/'))
+                data=p.read_bytes()
+              if len(data)<16:raise ValueError('Texture file too small')
+              ext=pathlib.Path(parsed.path).suffix.lower()
+              if data.startswith(b'\x89PNG\r\n\x1a\n'):ext='.png'
+              elif data.startswith(b'\xff\xd8\xff'):ext='.jpg'
+              elif data.startswith(b'RIFF') and data[8:12]==b'WEBP':ext='.webp'
+              elif ext not in ('.ktx2','.dds'):raise ValueError('Unsupported texture signature')
+              target=dest/('stoneFloorTex085'+ext);target.write_bytes(data)
+              report.update(status='copied',path=str(target),bytes=len(data),sha256=hashlib.sha256(data).hexdigest())
+            except Exception as e:report.update(status='failed',error=str(e))
+          (dest/'texture-recovery.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+          print(json.dumps(report,ensure_ascii=False))
+          PY
+      - name: Commit source and recovery report
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add assets/playcanvas/approved/world/floors/blacksmith/
+          git diff --cached --quiet || (git commit -m "assets(v015): vendor original floor texture and provenance" && git push)
