@@ -1,0 +1,42 @@
+name: Summarize historical PBR floor references
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-summarize-floor-history.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+      - name: Summarize matched paths without massive output
+        run: |
+          python3 - <<'PY'
+          import json,re,pathlib,collections
+          p=pathlib.Path('tests/v015-v001/LEGACY_CANVAS_FLOOR_REFERENCES.json')
+          data=json.loads(p.read_text())
+          paths=collections.Counter()
+          samples={}
+          for version in data.get('versions',[]):
+            for match in version.get('matches',[]):
+              line=match.get('text','')
+              for candidate in re.findall(r'[^\s"\x27<>]+\.(?:png|jpg|jpeg|webp|ktx2|dds|exr|hdr|gltf|glb)(?:\?[^\s"\x27<>]*)?',line,re.I):
+                if len(candidate)>240:continue
+                paths[candidate]+=1
+                samples.setdefault(candidate,{'commit':version.get('commit'),'file':version.get('file'),'line':match.get('line')})
+          relevant=[{'reference':p,'occurrences':n,**samples[p]} for p,n in paths.most_common(100)]
+          result={'commits_checked':data.get('commits_checked'),'versions_with_matches':len(data.get('versions',[])),'unique_asset_paths':len(paths),'asset_references':relevant}
+          target=pathlib.Path('tests/v015-v001/PBR_FLOOR_HISTORY_SUMMARY.json')
+          target.write_text(json.dumps(result,ensure_ascii=False,indent=2))
+          print(json.dumps({'commits':result['commits_checked'],'references':len(paths),'top':relevant[:10]}))
+          PY
+      - name: Commit summary
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tests/v015-v001/PBR_FLOOR_HISTORY_SUMMARY.json
+          git diff --cached --quiet || (git commit -m "audit(v015): summarize PBR paths in old Canvas revisions" && git push)
