@@ -1,0 +1,74 @@
+name: Recover original plaza ground and textures
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-recover-plaza-floor.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+      - name: Extract plaza ground entities and embedded textures
+        run: |
+          python3 - <<'PY'
+          import pathlib,re,json,base64,hashlib,urllib.parse,urllib.request
+          html=pathlib.Path('index.html').read_text(encoding='utf-8')
+          out=pathlib.Path('assets/playcanvas/approved/world/floors/plaza')
+          out.mkdir(parents=True,exist_ok=True)
+          entities=re.findall(r'<pc-entity\b[^>]*>',html,re.I)
+          plaza=[x for x in entities if re.search(r'plaza|square|ground|cobble|pavement|road|path|stone|terrain|floor',x,re.I) and not re.search(r'tanner|curtidor',x,re.I)]
+          materials={}
+          for tag in re.findall(r'<pc-material\b[^>]*>',html,re.I):
+            m=re.search(r'\bid=["\']([^"\']+)["\']',tag)
+            if m:materials[m.group(1)]=tag
+          assets={}
+          for tag in re.findall(r'<pc-asset\b[^>]*>',html,re.I):
+            m=re.search(r'\bid=["\']([^"\']+)["\']',tag)
+            if m:assets[m.group(1)]=tag
+          ids=set()
+          for tag in plaza:
+            m=re.search(r'\bmaterial=["\']([^"\']+)["\']',tag)
+            if m:ids.add(m.group(1))
+          definitions={k:materials[k] for k in sorted(ids) if k in materials}
+          textures={}
+          for mat in definitions.values():
+            for key in re.findall(r'\b(?:diffuse-map|normal-map|metalness-map|gloss-map|opacity-map|ao-map)=["\']([^"\']+)["\']',mat):
+              if key in assets:textures[key]=assets[key]
+          report={'status':'inventory','plaza_ground_candidates':plaza,'material_definitions':definitions,'texture_assets':{},'note':'Candidate inventory; verify plaza membership before approving'}
+          for key,tag in textures.items():
+            m=re.search(r'\bsrc=["\']([^"\']+)["\']',tag)
+            if not m:continue
+            src=m.group(1)
+            info={'source_kind':'embedded' if src.startswith('data:') else 'path_or_url'}
+            try:
+              if src.startswith('data:image/') and ';base64,' in src:
+                mime,payload=src.split(';base64,',1)
+                data=base64.b64decode(payload,validate=True)
+                ext='webp' if 'webp' in mime else 'png' if 'png' in mime else 'jpg'
+              elif src.startswith('https://'):
+                with urllib.request.urlopen(src,timeout=40) as response:data=response.read(30000000)
+                ext=pathlib.Path(urllib.parse.urlparse(src).path).suffix.lstrip('.') or 'bin'
+              else:
+                p=pathlib.Path(urllib.parse.unquote(src.split('?',1)[0]))
+                data=p.read_bytes();ext=p.suffix.lstrip('.') or 'bin'
+              if len(data)<16:raise ValueError('Too small')
+              target=out/(key+'.'+ext)
+              target.write_bytes(data)
+              info.update(status='copied',file=str(target),bytes=len(data),sha256=hashlib.sha256(data).hexdigest())
+            except Exception as e:info.update(status='failed',error=str(e))
+            report['texture_assets'][key]=info
+          (out/'plaza-floor-inventory.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+          (out/'plaza-ground-candidates.html').write_text('\n'.join(plaza)+'\n')
+          print('Candidates',len(plaza),'materials',len(definitions),'textures',len(textures))
+          PY
+      - name: Commit recovered resources
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add assets/playcanvas/approved/world/floors/plaza/
+          git diff --cached --quiet || (git commit -m "assets(v015): inventory original plaza floor and vendor referenced textures" && git push)
