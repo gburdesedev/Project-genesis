@@ -1661,7 +1661,7 @@ function groupRouteModels(models){const map=new Map();for(const el of models){co
 // A model is ready only when its PlayCanvas render entity exists.
 // Resource Timing exposes bytes once a request finishes; no synthetic byte percentages.
 const ROUTE_ASSET_TIMEOUT_MS=120000;
-const routeAssetProgress=window.__genesisAssetProgress=Object.create(null);
+const routeAssetProgress=globalThis.__genesisAssetProgress=Object.create(null);
 function describeRouteAsset(asset){
  const node=document.getElementById(asset),url=node?.getAttribute('src')||'';
  const target=url?new URL(url,location.href).href:'';
