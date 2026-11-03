@@ -1,0 +1,58 @@
+name: V015 audit original mercenaries and animations
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-audit-mercenaries.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+          lfs: true
+      - name: Inventory original character rigs and clips
+        run: |
+          python3 - <<'PY'
+          import pathlib,json,struct,re
+          root=pathlib.Path('.')
+          result={'version':'v0.15-v003-audit','status':'inspection-only','models':[],'references':[],'note':'An asset is approved for animation only after a compatible rig and clips are confirmed.'}
+          for path in root.rglob('*.glb'):
+            if '.git' in path.parts or 'node_modules' in path.parts:continue
+            name=str(path)
+            if not any(t in name.lower() for t in ('mercen','ranger','peasant','warrior','guard','soldier','knight','human','character','npc')):continue
+            try:
+              with path.open('rb') as f:
+                header=f.read(20)
+                if len(header)<20 or header[:4]!=b'glTF':continue
+                chunk_length,chunk_type=struct.unpack_from('<II',header,12)
+                if chunk_type!=0x4e4f534a:continue
+                meta=json.loads(f.read(chunk_length))
+              clips=[{'name':a.get('name','unnamed'),'channels':len(a.get('channels',[]))} for a in meta.get('animations',[])]
+              result['models'].append({'path':name,'bytes':path.stat().st_size,'skins':len(meta.get('skins',[])),'animations':clips,'nodes':len(meta.get('nodes',[])),'is_animated':bool(clips)})
+            except Exception as e:result['models'].append({'path':name,'error':str(e)})
+          for path in root.rglob('*'):
+            if not path.is_file() or path.suffix.lower() not in ('.js','.json','.html','.ts'):continue
+            if path.stat().st_size>1200000:continue
+            if 'node_modules' in path.parts or '.git' in path.parts:continue
+            try:content=path.read_text(errors='replace')
+            except:continue
+            matches=list(re.finditer(r'(?i)mercenar|male_ranger|animcomponent|animstategraph',content))
+            if matches:result['references'].append({'path':str(path),'hits':len(matches),'examples':[content[max(0,m.start()-90):min(len(content),m.end()+130)].replace('\n',' ') for m in matches[:5]]})
+          result['models'].sort(key=lambda x:x['path'])
+          result['references'].sort(key=lambda x:x['path'])
+          out=root/'assets/playcanvas/approved/characters/mercenaries'
+          out.mkdir(parents=True,exist_ok=True)
+          (out/'AUDIT_V003.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
+          print('Models:',len(result['models']),'references:',len(result['references']))
+          for m in result['models']:print(m)
+          PY
+      - name: Commit approved-assets audit report only
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add assets/playcanvas/approved/characters/mercenaries/AUDIT_V003.json
+          git diff --cached --quiet || (git commit -m "audit(v003): inventory mercenary rigs and animation clips" && git push)
