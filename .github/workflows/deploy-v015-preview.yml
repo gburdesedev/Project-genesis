@@ -22,10 +22,10 @@ jobs:
           page=(root/'index.html').read_text()
           manifest=json.loads((root/'manifest.json').read_text())
           assert 'PROJECT GENESIS' in page, 'Genesis menu missing'
-          assert 'Project Genesis 0.15 V005' in page, 'V005 title missing'
-          assert manifest['version']=='0.15-v005', 'V005 manifest mismatch'
+          assert 'Project Genesis 0.15 V006' in page, 'V006 title missing'
+          assert manifest['version']=='0.15-v006', 'V006 manifest mismatch'
           for c in manifest['characters']:
               path=(root/c['file']).resolve()
               assert path.is_file(),f"Missing asset: {path}"
-          print('V005 publication files verified; no overwrite or extra commit')
+          print('V006 publication files verified; no overwrite or extra commit')
           PY
