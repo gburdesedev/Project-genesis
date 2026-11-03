@@ -1,0 +1,49 @@
+name: Copy original plaza PBR textures to approved assets
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-copy-plaza-pbr.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+      - name: Copy verified original texture files without changes
+        run: |
+          python3 - <<'PY'
+          import pathlib,shutil,hashlib,json
+          source=pathlib.Path('assets/world/v0.11.004')
+          dest=pathlib.Path('assets/playcanvas/approved/world/floors/plaza/cobblestone')
+          dest.mkdir(parents=True,exist_ok=True)
+          names=['cobble_color.png','cobble_normal.png','cobble_gloss.png','cobble_ao.png']
+          report={'material':'cobblestone','source':str(source),'destination':str(dest),'files':[]}
+          for name in names:
+            src=source/name
+            if not src.is_file():raise SystemExit('Missing original file: '+str(src))
+            target=dest/name
+            shutil.copy2(src,target)
+            digest=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+            if digest(src)!=digest(target):raise SystemExit('Copy integrity mismatch: '+name)
+            report['files'].append({'name':name,'bytes':target.stat().st_size,'sha256':digest(target)})
+          shared=pathlib.Path('assets/playcanvas/approved/world/floors/shared')
+          shared.mkdir(parents=True,exist_ok=True)
+          traffic=source/'traffic_normal.png'
+          if traffic.is_file():
+            target=shared/'traffic_normal.png'
+            shutil.copy2(traffic,target)
+            if digest(traffic)!=digest(target):raise SystemExit('Traffic normal integrity mismatch')
+            report['shared_traffic_normal']={'path':str(target),'bytes':target.stat().st_size,'sha256':digest(target)}
+          (dest/'COPY_REPORT.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+          print(json.dumps(report,ensure_ascii=False))
+          PY
+      - name: Commit approved textures
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add assets/playcanvas/approved/world/floors/plaza/cobblestone assets/playcanvas/approved/world/floors/shared/traffic_normal.png
+          git diff --cached --quiet || (git commit -m "assets(v015): copy original cobblestone PBR maps to approved plaza folder" && git push)
