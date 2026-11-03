@@ -39,7 +39,19 @@ const server=http.createServer((req,res)=>{const url=new URL(req.url,'http://loc
    door:window.__genesisArcaneDoorStatus,
    smith:window.__genesisProductionHerreroV015,
    arcane:window.__genesisArcanistaFourWallsV006,
-   memory:window.GenesisMemoryProbe?.snapshot?.()
+   memory:window.GenesisMemoryProbe?.snapshot?.(),
+   stalledAssets:['forgeStation','barrelReal','mercHairBuzz10'].map(id=>{
+    const el=document.getElementById(id);
+    const models=[...document.querySelectorAll('pc-model[data-asset="'+id+'"]')];
+    const registry=document.querySelector('#genesisApp')?.app?.assets;
+    const registered=registry?.getByUrl?.(el?.getAttribute('src')||'');
+    return {id,assetPresent:!!el,src:el?.getAttribute('src'),
+      assetType:el?.getAttribute('type'),assetLoaded:el?.asset?.loaded,
+      registryLoaded:registered?.loaded,registryLoading:registered?.loading,
+      resourcePresent:!!registered?.resource,
+      models:models.map(m=>({name:m.getAttribute('name'),hasAsset:m.hasAttribute('asset'),asset:m.getAttribute('asset'),dataAsset:m.dataset.asset,content:!!m.contentEntity,connected:m.isConnected}))
+    };
+   })
   })).catch(e=>({evaluationError:String(e)}));
   console.log('VILLAGE_BOOT_DIAGNOSTIC '+JSON.stringify({phase,state,errors:errors.slice(-20),requestsFailed:requestsFailed.slice(-40),httpErrors:httpErrors.slice(-40),consoleErrors:consoleErrors.slice(-20)}));
  };
