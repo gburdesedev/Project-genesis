@@ -30,7 +30,7 @@ jobs:
             tag=found.group(0)
             report['model_elements'][name]=tag[:1500]
             attrs=dict(re.findall(r'([\w-]+)=["\']([^"\']*)["\']',tag))
-            assetid=attrs.get('asset','').lstrip('#')
+            assetid=(attrs.get('asset') or attrs.get('data-asset') or '').lstrip('#')
             assettag=asset_tags.get(assetid,'')
             report['asset_elements'][assetid]=assettag[:1600]
             assetattrs=dict(re.findall(r'([\w-]+)=["\']([^"\']*)["\']',assettag))
