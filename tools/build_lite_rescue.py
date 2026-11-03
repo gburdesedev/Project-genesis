@@ -65,9 +65,8 @@ print('index.html lightweight rescue ready',len(s))
 # Early-return geometry-only village, zero requests for tree LODs or 4K road maps.
 path=root/'village_world.js'
 s=path.read_text(encoding='utf-8')
-needle="""  stampVersion();
-  const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14c');app.root.addChild(root);"""
-if s.count(needle)!=1:raise RuntimeError('village root mark missing')
+needle="  stampVersion();"
+if s.count(needle)!=1:raise RuntimeError('village stampVersion mark missing')
 replacement="""  stampVersion();
   if(globalThis.__GENESIS_LITE_BOOT){
    const plan=globalThis.GenesisVillagePlan,root=new Entity('Project Genesis · Aldea básica modo rescate');
