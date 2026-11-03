@@ -103,10 +103,11 @@
       model.dataset.genesisRescue='decorative-only';
       model.querySelectorAll('pc-anim-clip').forEach(clip=>clip.removeAttribute('asset'));
     }
-    // Some clips are independent Web Components and preload at bootstrap;
-    // remove only the known broken chest source, not the village structures.
+    // A pc-asset with no src crashes PlayCanvas Web Components (url.load).
+    // Remove the obsolete declaration entirely; dormant Curtidor clips must
+    // not refer to it. Plaza architecture is independent of this asset.
     const brokenChest=document.getElementById('tannerChest09');
-    if(brokenChest)brokenChest.removeAttribute('src');
+    if(brokenChest)brokenChest.remove();
     for(const id of ['hammerRackModel2A','blacksmithSignModel2A']){
       const model=document.getElementById(id);
       if(model){delete model.dataset.asset;model.dataset.genesisRescue='vendor-unavailable';model.enabled=false;}
