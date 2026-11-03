@@ -20,14 +20,14 @@ def one(old,new,label):
 one('window.__genesisBoot={loaded:0,total:0,error:null};',
     'window.__GENESIS_LITE_BOOT=true;window.__genesisBoot={loaded:0,total:0,error:null};',
     'lite flag')
-# The HQ fountain 16.7MB was eager on initial HTML parsing; remove both asset and model.
-s,n=re.subn(r'\s*<pc-asset id="genesisFountainV011HQAsset"[^>]*></pc-asset>','',s,count=1)
-if n!=1:raise RuntimeError('fountain pc-asset not found')
-s,n=re.subn(r'\s*<pc-model id="genesisFountainV011Model"[^\n]*</pc-model>','',s,count=1)
-if n!=1:raise RuntimeError('fountain pc-model not found')
-# The rooftop shell is not needed for the geometry-only village and pulls 15MB textures.
-s,n=re.subn(r'\s*<pc-model id="villageRoofSource"[^>]*></pc-model>','',s,count=1)
-if n!=1:raise RuntimeError('roof source not found')
+# Preserve original entities and approved asset declarations. Disable only loading.
+# Fountain model and roof template keep their IDs and original asset references in data-disabled-asset.
+for ident in ('genesisFountainV011Model','villageRoofSource'):
+ pattern=r'(<pc-model id="'+ident+r'"\\b[^>]*?)\\sasset="([^"]+)"'
+ match=re.search(pattern,s)
+ if not match:raise RuntimeError('missing optional model '+ident)
+ s=s[:match.start()]+match.group(1)+' data-disabled-asset="'+match.group(2)+'" data-route="LiteDecor"'+s[match.end():]
+# No missing entity required: source roof is intentionally inactive while using basic village.
 one("roof:document.getElementById('villageRoofSource').entity,",
     "roof:document.getElementById('villageRoofSource')?.entity||null,",
     'optional roof')
@@ -47,13 +47,16 @@ one("async function waitVisualModulesBeforePlay(){",
 one("const clipEls=window.GenesisDevice?.safePreviews?[]:",
     "const clipEls=(window.__GENESIS_LITE_BOOT||window.GenesisDevice?.safePreviews)?[]:",
     'skip nonessential animation gate')
-s,n=re.subn(r'if\\(window\\.GenesisDevice\\?\\.safePreviews\\)\\s*\\{(?=\\s*\\[playerAnim)',
-            'if(window.__GENESIS_LITE_BOOT||window.GenesisDevice?.safePreviews){',s,count=1)
-if n!=1:raise RuntimeError('animation readiness bypass not found')
+one("if(window.GenesisDevice?.safePreviews){",
+    "if(window.__GENESIS_LITE_BOOT||window.GenesisDevice?.safePreviews){",
+    'animation readiness bypass')
 # Heavy UAL1 (7.6MB) was eager; defer, animation clips won't gate boot.
 s,n=re.subn(r'(<pc-asset id="ual1086"[^>]*?)(></pc-asset>)',r'\1 lazy\2',s,count=1)
 if n!=1:raise RuntimeError('UAL1 pc-asset not found')
-# Clip elements request the 7.6MB UAL library automatically, even when boot ignores readiness.\ns,clips=re.subn(r'<pc-anim-clip\\b[^>]*></pc-anim-clip>','',s)\nprint('Temporarily disabled animation clips:',clips)\n# Prevent loading optional character hair / head animations upfront; remain as declarative components.
+# Preserve original clip nodes and their asset identifiers for the final project.
+s,clips=re.subn(r'(<pc-anim-clip\\b[^>]*?)\\sasset="([^"]+)"',
+                 lambda m:m.group(1)+' data-disabled-asset="'+m.group(2)+'"',s)
+print('Temporarily disabled animation clip requests:',clips)
 # Keep player and Ordan models, camera, light, original game systems unchanged.
 # The workshop PBR models remain in markup but are all lazy route models in lite boot.
 p.write_text(s,encoding='utf-8')
