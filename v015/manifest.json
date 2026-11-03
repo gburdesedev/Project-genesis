@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v007",
+  "version": "0.15-v008",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "procedural",
@@ -60,5 +60,47 @@
       ]
     }
   ],
-  "note": "V007: merchant within 63x63 terrain; original scene placements and artisan head still require asset verification."
+  "note": "V008: esquema de carga y controles táctiles; coordenadas y archivos de V007 preservados. La escena original completa y la cabeza del artesano requieren integración y no se declaran restauradas.",
+  "loadingStages": [
+    {
+      "id": "gui",
+      "name": "GUI y controles",
+      "kind": "inline",
+      "required": true
+    },
+    {
+      "id": "engine",
+      "name": "Núcleo del juego",
+      "kind": "runtime",
+      "required": true
+    },
+    {
+      "id": "blacksmith",
+      "name": "Camino del Herrero",
+      "kind": "assets",
+      "required": true,
+      "assets": [
+        "artisan",
+        "ordan",
+        "ordan-beard"
+      ]
+    },
+    {
+      "id": "environment",
+      "name": "Plaza y entorno",
+      "kind": "pending",
+      "required": false,
+      "assets": []
+    },
+    {
+      "id": "secondary",
+      "name": "Contenido secundario",
+      "kind": "assets",
+      "required": false,
+      "assets": [
+        "merchant",
+        "mercenary"
+      ]
+    }
+  ]
 }
