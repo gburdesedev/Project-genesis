@@ -23,7 +23,7 @@ one('window.__genesisBoot={loaded:0,total:0,error:null};',
 # Preserve original entities and approved asset declarations. Disable only loading.
 # Fountain model and roof template keep their IDs and original asset references in data-disabled-asset.
 for ident in ('genesisFountainV011Model','villageRoofSource'):
- pattern=r'(<pc-model id="'+ident+r'"\\b[^>]*?)\\sasset="([^"]+)"'
+ pattern=r'(<pc-model id="'+ident+r'"[^>]*?) asset="([^"]+)"'
  match=re.search(pattern,s)
  if not match:raise RuntimeError('missing optional model '+ident)
  s=s[:match.start()]+match.group(1)+' data-disabled-asset="'+match.group(2)+'" data-route="LiteDecor"'+s[match.end():]
@@ -54,7 +54,7 @@ one("if(window.GenesisDevice?.safePreviews){",
 s,n=re.subn(r'(<pc-asset id="ual1086"[^>]*?)(></pc-asset>)',r'\1 lazy\2',s,count=1)
 if n!=1:raise RuntimeError('UAL1 pc-asset not found')
 # Preserve original clip nodes and their asset identifiers for the final project.
-s,clips=re.subn(r'(<pc-anim-clip\\b[^>]*?)\\sasset="([^"]+)"',
+s,clips=re.subn(r'(<pc-anim-clip[^>]*?) asset="([^"]+)"',
                  lambda m:m.group(1)+' data-disabled-asset="'+m.group(2)+'"',s)
 print('Temporarily disabled animation clip requests:',clips)
 # Keep player and Ordan models, camera, light, original game systems unchanged.
