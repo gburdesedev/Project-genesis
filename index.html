@@ -1369,6 +1369,12 @@ const MERC_CANDIDATES=[
  {id:2,label:'Guerrero 03',body:'peasant',hair:'long',beard:true,scale:1.06,look:'Veterano robusto · barba y melena',note:'Perfil robusto',stats:{damage:8,protection:6,vitality:12,mobility:5}}
 ];
 let mercCandidate=null,mercSwordItem=null,mercShieldItem=null,mercArmorItem=null,mercBootsItem=null,mercenaryRoot=null,mercenaryState='hidden',mercDeparturePath=[],mercDepartureWaypoint=0,mercBodyAnim=null,mercBodyRangerAnim=null,mercHeadAnim=null,mercHairAnims=[],mercAnimControllers=[],mercIdle=null,mercWalk=null,mercGearAttached=false,mercMaterialsPatched=false,mercActiveBodyModelId='mercBodyModel',mercEditSwordItem=null,mercEditShieldItem=null,mercEditArmorItem=null,mercEditBootsItem=null,mercGearMaterialBases=new Map(),mercenaryInitialized=false,mercenaryReadyPromise=null;
+if(new URLSearchParams(location.search).get('mercenary-qa')==='1'){
+ window.GenesisMercenaryQAGear=()=>({
+  swordId:mercSwordItem?.id??null,shieldId:mercShieldItem?.id??null,
+  swordRarity:mercSwordItem?.rarity??null,shieldRarity:mercShieldItem?.rarity??null
+ });
+}
 function mercNode(id){return document.getElementById(id)}
 function mercGearRoute(){return selectedProfession==='Curtidor'?'Curtidor':'Herrero'}
 function mercGearReady(){return mercGearRoute()==='Curtidor'?!!(mercArmorItem&&mercBootsItem):!!(mercSwordItem&&mercShieldItem)}
