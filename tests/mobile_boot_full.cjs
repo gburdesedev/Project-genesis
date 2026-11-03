@@ -45,6 +45,10 @@ const server=http.createServer((req,res)=>{
   assert.equal(result.intro,'grid','Mobile intro never opened: '+JSON.stringify(result));
   console.log('MOBILE_INTRO_READY',JSON.stringify(result));
   const startingUrl=page.url();
+  let documentNavigations=0;
+  let pageCrashes=0;
+  page.on('framenavigated',frame=>{if(frame===page.mainFrame())documentNavigations++});
+  page.on('crash',()=>{pageCrashes++});
   await page.locator('[data-profession="Herrero"]').click({timeout:15000});
   console.log('MOBILE_HERRERO_SELECTED');
   for(let i=0;i<30;i++){
@@ -55,7 +59,10 @@ const server=http.createServer((req,res)=>{
   }
   const after=await state();
   await page.screenshot({path:'/tmp/genesis-mobile-boot/iphone-after-herrero.png',timeout:15000}).catch(e=>console.log('MOBILE_SCREENSHOT_ERROR',e.message));
+  assert.equal(documentNavigations,0,'Mobile document reloaded after choosing Herrero');
+  assert.equal(pageCrashes,0,'Mobile WebKit renderer crashed');
   assert.equal(page.url(),startingUrl,'Mobile page navigated/reloaded after choosing Herrero');
+  assert(/modelos únicos/.test(after.count||''),'Herrero route did not report its model stage: '+JSON.stringify(after));
   assert(!after.failed,'Mobile Herrero route failed: '+JSON.stringify(after));
   assert.equal(await page.evaluate(()=>document.querySelector('#loading')?.style.display),'none','Herrero did not enter the game: '+JSON.stringify(after));
   console.log('PASS: Mobile WebKit fully entered Herrero world');

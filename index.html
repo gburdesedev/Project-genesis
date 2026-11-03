@@ -1490,10 +1490,13 @@ async function ensureMercenaryReady(){
  mercenaryReadyPromise=(async()=>{
   const ids=['mercBodyModel','mercBodyRangerModel','mercHeadModel','mercHairPartedModel','mercHairBuzzModel','mercHairLongModel','mercBeardModel','mercSwordModel','mercShieldModel'];
   const models=ids.map(id=>mercNode(id)).filter(Boolean);
-  for(let i=0;i<models.length;i+=3){
-   const batch=models.slice(i,i+3);
-   await Promise.all(batch.map(el=>activateDeferredModel(el,30000)));
-   await sleep(20);
+  const mobile=globalThis.GenesisDevice?.safePreviews===true;
+  for(let i=0;i<models.length;i+=mobile?1:3){
+   const batch=models.slice(i,i+(mobile?1:3));
+   if(mobile){
+    for(const el of batch)await activateDeferredModel(el,30000);
+   }else await Promise.all(batch.map(el=>activateDeferredModel(el,30000)));
+   await sleep(mobile?40:20);
   }
   const missing=ids.filter(id=>!mercNode(id)?.contentEntity);
   if(missing.length)throw new Error('Mercenario incompleto: '+missing.join(', '));
@@ -1653,13 +1656,21 @@ const routeReady=new Set();
 let routeLoading=false;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function routeModels(prof,priority){return[...document.querySelectorAll(`pc-model[data-route="${prof}"][data-priority="${priority}"]`)].filter(el=>el.dataset.asset&&!el.contentEntity)}
+// Mobile must not instantiate optional decorations and nine mercenary models
+// in the same gesture as entering the blacksmith. Keep them available for
+// dedicated on-demand activation when those screens are actually used.
+function routeAdmissionModels(prof){
+ const core=routeModels(prof,'critical');
+ if(globalThis.GenesisDevice?.safePreviews===true)return core;
+ return [...core,...routeModels(prof,'stream'),...routeModels('SharedMercenary','ondemand')];
+}
 function groupRouteModels(models){const map=new Map();for(const el of models){const asset=el.dataset.asset;if(!map.has(asset))map.set(asset,[]);map.get(asset).push(el)}return[...map.entries()]}
 function loadDeferredModelAsset(el,asset,timeout=12000){return new Promise((resolve,reject)=>{let done=false;const label=el.getAttribute('name')||el.id||asset;const finish=(ok,msg)=>{if(done)return;done=true;clearTimeout(timer);el.removeEventListener('load',onLoad);el.removeEventListener('error',onError);if(!ok&&!el.contentEntity){try{el.removeAttribute('asset')}catch(_){}}ok?resolve(el):reject(new Error(msg||('No pudo cargarse '+label+' ['+asset+']')))};const onLoad=()=>finish(!!el.contentEntity,el.contentEntity?'':'El modelo terminó sin contenido: '+label+' ['+asset+']');const onError=e=>finish(false,(e?.message||'Falló la carga')+' · '+label+' ['+asset+']');const timer=setTimeout(()=>finish(false,'Tiempo agotado cargando '+label+' ['+asset+']'),timeout);el.addEventListener('load',onLoad,{once:true});el.addEventListener('error',onError,{once:true});if(el.getAttribute('asset')!==asset)el.setAttribute('asset',asset);else if(!el.contentEntity){el.removeAttribute('asset');requestAnimationFrame(()=>el.setAttribute('asset',asset))}if(el.contentEntity)finish(true)})}
 async function activateDeferredModel(el,timeout=12000){if(el.contentEntity)return el;const primary=el.dataset.asset;if(!primary)return el;const fallback=el.dataset.fallbackAsset;try{return await loadDeferredModelAsset(el,primary,timeout)}catch(primaryError){if(!fallback)throw primaryError;console.warn('Genesis asset fallback:',primaryError.message,'→',fallback);try{return await loadDeferredModelAsset(el,fallback,Math.min(timeout,8000))}catch(fallbackError){throw new Error(primaryError.message+' | Fallback '+fallback+' también falló: '+fallbackError.message)}}}
 // Instanciar la ruta COMPLETA antes de iniciar el juego. Sin deadline
 // artificial ni descargas adicionales de decoración durante la partida.
 async function activateRouteGroups(prof,priority,onProgress){
- const models=[...routeModels(prof,'critical'),...routeModels(prof,'stream'),...routeModels('SharedMercenary','ondemand')];
+ const models=routeAdmissionModels(prof);
  const grouped=groupRouteModels(models),total=grouped.length;
  let next=0,loaded=0,failed=0;
  const failures=[];
@@ -1667,7 +1678,16 @@ async function activateRouteGroups(prof,priority,onProgress){
  async function worker(){
   while(next<grouped.length){
    const [asset,els]=grouped[next++];
-   const results=await Promise.allSettled(els.map(el=>activateDeferredModel(el,45000)));
+   const results=[];
+   // WebKit on actual iPhones can be terminated by simultaneous GLB decoding,
+   // even if the same route passes on desktop-class CI machines.
+   if(globalThis.GenesisDevice?.safePreviews===true){
+    for(const el of els){
+     try{results.push({status:'fulfilled',value:await activateDeferredModel(el,45000)})}
+     catch(reason){results.push({status:'rejected',reason})}
+     await sleep(0);
+    }
+   }else results.push(...await Promise.allSettled(els.map(el=>activateDeferredModel(el,45000))));
    const ok=results.every((r,i)=>r.status==='fulfilled'&&!!els[i].contentEntity);
    if(ok)loaded++;
    else{
@@ -1678,7 +1698,7 @@ async function activateRouteGroups(prof,priority,onProgress){
    onProgress?.(loaded,total,(ok?'Listo: ':'Error: ')+asset);
   }
  }
- await Promise.all(Array.from({length:Math.min(3,total)},worker));
+ await Promise.all(Array.from({length:Math.min(globalThis.GenesisDevice?.safePreviews===true?1:3,total)},worker));
  if(failed)throw new Error('Faltan '+failed+' recursos de la ruta: '+failures.slice(0,3).join(' | '));
  return{total,loaded,failed:0,timedOut:false,instances:models.length};
 }
@@ -1688,7 +1708,7 @@ async function prepareRoute(prof){
  routeLoading=true;
  intro.style.display='none';loading.style.display='grid';
  loadingCard.classList.remove('failed');loadRetry.style.display='none';
- const all=[...routeModels(prof,'critical'),...routeModels(prof,'stream'),...routeModels('SharedMercenary','ondemand')];
+ const all=routeAdmissionModels(prof);
  const total=groupRouteModels(all).length;
  loadCount.textContent='0 de '+total+' modelos únicos · '+all.length+' instancias';
  setLoadUI(0,'Preparando partida completa','Talleres, decoración y mercenarios se cargan ANTES de jugar.');
