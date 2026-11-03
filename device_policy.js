@@ -93,6 +93,16 @@
       const model=document.getElementById(id),asset=document.getElementById(local);
       if(model&&asset){model.dataset.asset=local;model.dataset.genesisRescue='local';}
     }
+    // El cofre del Curtidor tiene un origen HTTP 404 incluso en la carga
+    // inicial, antes de escoger oficio; reutilizar el GLB local existente.
+    const tannerChest=document.getElementById('tannerChest09');
+    const localChest=document.getElementById('genesisChest');
+    if(tannerChest&&localChest){
+      const localSrc=localChest.getAttribute('src');
+      if(localSrc)tannerChest.setAttribute('src',localSrc);
+      const tannerModel=document.getElementById('tannerChestModel');
+      if(tannerModel)tannerModel.dataset.genesisRescue='local-chest';
+    }
     for(const id of ['hammerRackModel2A','blacksmithSignModel2A']){
       const model=document.getElementById(id);
       if(model){delete model.dataset.asset;model.dataset.genesisRescue='vendor-unavailable';model.enabled=false;}
