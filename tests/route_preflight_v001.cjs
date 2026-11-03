@@ -32,13 +32,16 @@ class Model{
 }
 function setup(models){
  const document={
+  getElementById(){return null},
   querySelectorAll(selector){
    const parts=selector.match(/^pc-model\[data-route="([^"]+)"\]\[data-priority="([^"]+)"\]$/);
    assert(parts,'unexpected selector '+selector);
    return models.filter(m=>m.dataset.route===parts[1]&&m.dataset.priority===parts[2]);
   }
  };
- const context={document,setTimeout,clearTimeout,requestAnimationFrame:fn=>queueMicrotask(fn),
+ const context={document,setTimeout,clearTimeout,setInterval,clearInterval,
+  requestAnimationFrame:fn=>queueMicrotask(fn),
+  performance:{now:()=>Date.now(),getEntriesByName:()=>[]},URL,location:{href:'http://localhost/index.html'},
   console,Promise,Map,Set,Error};
  vm.runInNewContext(code,context,{filename:'route-loader-test.mjs'});
  return context.runRoutePreflight;
