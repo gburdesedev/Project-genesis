@@ -84,6 +84,24 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initOrientationGate,{once:true});
   else initOrientationGate();
 
+
+  // Recovery for historical third-party URLs that now return HTTP 404.
+  // Preserve original declarations for restoration; substitute existing local
+  // embedded GLBs and omit nonessential decoration from the mandatory route.
+  function rescueMissingVendorProps(){
+    for(const [id,local] of [['anvilModel','anvil085'],['bellowsModel','bellows085']]){
+      const model=document.getElementById(id),asset=document.getElementById(local);
+      if(model&&asset){model.dataset.asset=local;model.dataset.genesisRescue='local';}
+    }
+    for(const id of ['hammerRackModel2A','blacksmithSignModel2A']){
+      const model=document.getElementById(id);
+      if(model){delete model.dataset.asset;model.dataset.genesisRescue='vendor-unavailable';model.enabled=false;}
+    }
+    console.info('Genesis: legacy blacksmith vendor props recovered (2 local, 2 decorative deferred)');
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',rescueMissingVendorProps,{once:true});
+  else rescueMissingVendorProps();
+
   window.GenesisDevice=Object.freeze({
     safePreviews,
     configureApp(element) {
