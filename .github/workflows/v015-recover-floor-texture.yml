@@ -1,0 +1,48 @@
+name: Recover approved blacksmith floor texture
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-recover-floor-texture.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+      - name: Resolve exact original texture and copy locally
+        run: |
+          python3 - <<'PY'
+          import re,json,pathlib,urllib.parse,shutil
+          s=pathlib.Path('index.html').read_text(encoding='utf8')
+          out=pathlib.Path('assets/playcanvas/approved/world/floors/blacksmith')
+          out.mkdir(parents=True,exist_ok=True)
+          ids=['stoneFloorTex085','stoneFloorMat085']
+          definitions={}
+          for i in ids:
+            m=re.search(r'<pc-(?:texture|material|asset)\b(?=[^>]*\bid=["\']'+re.escape(i)+r'["\'])[^>]*>',s,re.I)
+            if m:definitions[i]=m.group()
+          tex=definitions.get('stoneFloorTex085')
+          if not tex:raise SystemExit('Original texture definition missing: refusing substitute')
+          src=re.search(r'\bsrc=["\']([^"\']+)["\']',tex)
+          if not src:raise SystemExit('Original texture has no src; refusing placeholder')
+          url=src.group(1)
+          parsed=urllib.parse.urlparse(url)
+          if parsed.scheme or parsed.netloc:raise SystemExit('External texture source; requires vendoring with provenance: '+url)
+          original=(pathlib.Path('index.html').parent/urllib.parse.unquote(parsed.path)).resolve()
+          if not original.is_file():raise SystemExit('Original texture file missing: '+str(original))
+          dest=out/('stoneFloorTex085'+original.suffix.lower())
+          shutil.copyfile(original,dest)
+          report={'texture_id':'stoneFloorTex085','source':url,'copied_to':str(dest),'bytes':dest.stat().st_size,'definitions':definitions}
+          (out/'texture-recovery.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+          print(report)
+          PY
+      - name: Commit recovered texture
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add assets/playcanvas/approved/world/floors/blacksmith/
+          git diff --cached --quiet || (git commit -m "assets(v015): vendor original blacksmith floor texture" && git push)
