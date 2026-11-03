@@ -47,9 +47,9 @@ one("async function waitVisualModulesBeforePlay(){",
 one("const clipEls=window.GenesisDevice?.safePreviews?[]:",
     "const clipEls=(window.__GENESIS_LITE_BOOT||window.GenesisDevice?.safePreviews)?[]:",
     'skip nonessential animation gate')
-one("if(window.GenesisDevice?.safePreviews){\n    [playerAnim",
-    "if(window.__GENESIS_LITE_BOOT||window.GenesisDevice?.safePreviews){\n    [playerAnim",
-    'animation readiness bypass')
+s,n=re.subn(r'if\\(window\\.GenesisDevice\\?\\.safePreviews\\)\\s*\\{(?=\\s*\\[playerAnim)',
+            'if(window.__GENESIS_LITE_BOOT||window.GenesisDevice?.safePreviews){',s,count=1)
+if n!=1:raise RuntimeError('animation readiness bypass not found')
 # Heavy UAL1 (7.6MB) was eager; defer, animation clips won't gate boot.
 s,n=re.subn(r'(<pc-asset id="ual1086"[^>]*?)(></pc-asset>)',r'\1 lazy\2',s,count=1)
 if n!=1:raise RuntimeError('UAL1 pc-asset not found')
