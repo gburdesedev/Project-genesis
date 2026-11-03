@@ -1,0 +1,45 @@
+name: Scan previous Canvas versions for PBR plaza references
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-scan-legacy-canvas-floors.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+          fetch-depth: 0
+      - name: Scan historical index and scene scripts
+        run: |
+          python3 - <<'PY'
+          import subprocess,re,json,pathlib
+          pattern=re.compile(r'plaza|ground|floor|pbr|cobble|gravel|grava|adoquin|arena|sand|terrain|roughness|normal.?map|pavement|road|stone',re.I)
+          commits=subprocess.check_output(['git','log','--all','--format=%H','--','index.html','village_plan.js'],text=True).splitlines()
+          results=[]
+          for sha in commits[:160]:
+            for filename in ['index.html','village_plan.js']:
+              p=subprocess.run(['git','show',sha+':'+filename],capture_output=True,text=True,errors='replace')
+              if p.returncode:continue
+              lines=p.stdout.splitlines()
+              matched=[]
+              for i,line in enumerate(lines):
+                if not pattern.search(line):continue
+                if len(line)>1200:line=line[:1200]+' [truncated]'
+                matched.append({'line':i+1,'text':line.strip()})
+              if matched:results.append({'commit':sha,'file':filename,'matches':matched[:180],'total_matches':len(matched)})
+          target=pathlib.Path('tests/v015-v001/LEGACY_CANVAS_FLOOR_REFERENCES.json')
+          target.parent.mkdir(parents=True,exist_ok=True)
+          target.write_text(json.dumps({'commits_checked':len(commits[:160]),'versions':results},ensure_ascii=False,indent=2))
+          print('Checked',len(commits[:160]),'commits; matching files',len(results))
+          PY
+      - name: Commit historical references
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tests/v015-v001/LEGACY_CANVAS_FLOOR_REFERENCES.json
+          git diff --cached --quiet || (git commit -m "audit(v015): find original plaza PBR references in earlier Canvas revisions" && git push)
