@@ -1,0 +1,71 @@
+{
+  "previous_canvas_floor_like_instances": 27,
+  "unique_asset_ids": 3,
+  "assets": {
+    "roofReal086": {
+      "instances": 1,
+      "src": "./assets/vendor/genesis/externals/roofReal086/src/Roof_RoundTiles_6x10.gltf",
+      "examples": [
+        {
+          "id": "roofFinalModel",
+          "name": "Complete tiled workshop roof",
+          "data-asset": "roofReal086",
+          "data-route": "Herrero",
+          "data-priority": "critical",
+          "position": "0 3.45 -5.05",
+          "rotation": "0 0 0",
+          "scale": "1.28 .55 .86"
+        }
+      ]
+    },
+    "tannerFloor09": {
+      "instances": 25,
+      "src": "https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Floor_WoodDark.gltf",
+      "examples": [
+        {
+          "name": "Curtidor wood floor 0_0",
+          "data-asset": "tannerFloor09",
+          "data-route": "Curtidor",
+          "data-priority": "critical",
+          "position": "-4 .014 -9"
+        },
+        {
+          "name": "Curtidor wood floor 0_1",
+          "data-asset": "tannerFloor09",
+          "data-route": "Curtidor",
+          "data-priority": "critical",
+          "position": "-4 .014 -7"
+        },
+        {
+          "name": "Curtidor wood floor 0_2",
+          "data-asset": "tannerFloor09",
+          "data-route": "Curtidor",
+          "data-priority": "critical",
+          "position": "-4 .014 -5"
+        }
+      ]
+    },
+    "tannerRoof09": {
+      "instances": 1,
+      "src": "https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Roof_RoundTiles_6x8.gltf",
+      "examples": [
+        {
+          "id": "tannerRoofModel",
+          "name": "Curtidor compact tiled roof",
+          "data-asset": "tannerRoof09",
+          "data-route": "Curtidor",
+          "data-priority": "critical",
+          "position": "0 3.45 -5.05",
+          "scale": "1.75 .55 1.25"
+        }
+      ]
+    }
+  },
+  "ground_entities": [
+    "<pc-entity id=\"floor085\" name=\"Worn stone workshop floor\" position=\"0 .012 -5.0\" scale=\"10.55 1 9.95\">"
+  ],
+  "village_plan_floor_lines": [
+    "  const roads=[",
+    "  const plan=Object.freeze({bounds,workshops,plaza,market,roads,blocked,workshopScale,toWorld,toLocal,movementSpeed});"
+  ]
+}
