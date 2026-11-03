@@ -1,0 +1,9 @@
+{
+  "status": "inventory",
+  "plaza_ground_candidates": [
+    "<pc-entity id=\"floor085\" name=\"Worn stone workshop floor\" position=\"0 .012 -5.0\" scale=\"10.55 1 9.95\">"
+  ],
+  "material_definitions": {},
+  "texture_assets": {},
+  "note": "Candidate inventory; verify plaza membership before approving"
+}
