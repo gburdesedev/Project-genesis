@@ -1,0 +1,30 @@
+name: Disable wallBrick2A diagnostic
+on:
+  push:
+    branches: [fix/disable-wallbrick2a-20261103]
+    paths: ['tools/disable_wallbrick2a.py','.github/workflows/disable-wallbrick2a.yml']
+  workflow_dispatch:
+permissions: {contents: write}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          for p in Path('.').rglob('*'):
+           if not p.is_file() or p.suffix not in ('.html','.js','.json','.mjs'):continue
+           if '.git' in p.parts:continue
+           try:s=p.read_text()
+           except:continue
+           for m in list(re.finditer('wallBrick2A|Wall_UnevenBrick_Straight',s,re.I))[:8]:
+            print(str(p),repr(s[max(0,m.start()-130):m.end()+130]))
+          PY
+      - run: python tools/disable_wallbrick2a.py
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || { git commit -m "test: disable wallBrick2A"; git push; }
