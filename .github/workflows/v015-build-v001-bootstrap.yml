@@ -1,0 +1,60 @@
+name: Build v0.15 V001 bootable test
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-build-v001-bootstrap.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+      - name: Vendor PlayCanvas runtime and integrate original plaza textures
+        run: |
+          python3 - <<'PY'
+          import pathlib,urllib.request,json,hashlib
+          engine=pathlib.Path('assets/vendor/playcanvas/playcanvas.min.js')
+          engine.parent.mkdir(parents=True,exist_ok=True)
+          url='https://cdn.jsdelivr.net/npm/playcanvas@2.22.1/build/playcanvas.min.js'
+          if not engine.is_file() or engine.stat().st_size<100000:
+            req=urllib.request.Request(url,headers={'User-Agent':'ProjectGenesisAssetBuild/1.0'})
+            with urllib.request.urlopen(req,timeout=60) as response: data=response.read()
+            if len(data)<100000:raise RuntimeError('Invalid PlayCanvas download size')
+            engine.write_bytes(data)
+          html=pathlib.Path('tests/v015-v001/playcanvas-v001.html')
+          text=html.read_text()
+          needle="mat.diffuse=new pc.Color(.32,.34,.29);mat.update();"
+          replacement="""mat.diffuse=new pc.Color(.72,.72,.72);mat.update();
+          const texBase='../../assets/playcanvas/approved/world/floors/plaza/cobblestone/';
+          const textureFiles=[['diffuseMap','cobble_color.png'],['normalMap','cobble_normal.png'],['aoMap','cobble_ao.png']];
+          for(const [property,file] of textureFiles){
+            const texture=new pc.Asset('Original PBR '+file,'texture',{url:texBase+file});
+            app.assets.add(texture);
+            texture.once('load',()=>{mat[property]=texture.resource;mat.update();});
+            texture.once('error',err=>console.error('PBR texture failed',file,err));
+            app.assets.load(texture);
+          }
+          """
+          if 'const texBase=' not in text:
+            if needle not in text:raise RuntimeError('Cannot locate material initialization')
+            text=text.replace(needle,replacement)
+          html.write_text(text)
+          report={'runtime':str(engine),'runtime_bytes':engine.stat().st_size,'runtime_sha256':hashlib.sha256(engine.read_bytes()).hexdigest(),'plaza_maps':[],'entrypoint':str(html),'note':'Bootstrapped test; browser playability and original gameplay not yet verified'}
+          for name in ['cobble_color.png','cobble_normal.png','cobble_ao.png','cobble_gloss.png']:
+            p=pathlib.Path('assets/playcanvas/approved/world/floors/plaza/cobblestone')/name
+            if not p.is_file():raise RuntimeError('Missing PBR file: '+str(p))
+            report['plaza_maps'].append({'path':str(p),'bytes':p.stat().st_size})
+          pathlib.Path('tests/v015-v001/BUILD_BOOTSTRAP_REPORT.json').write_text(json.dumps(report,indent=2))
+          print(json.dumps(report,indent=2))
+          PY
+      - name: Commit runtime and PBR integration
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add assets/vendor/playcanvas/playcanvas.min.js tests/v015-v001/playcanvas-v001.html tests/v015-v001/BUILD_BOOTSTRAP_REPORT.json
+          git diff --cached --quiet || (git commit -m "build(v015): vendor runtime and wire recovered plaza PBR textures" && git push)
