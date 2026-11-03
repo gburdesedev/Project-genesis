@@ -12,6 +12,17 @@ def replace(path,old,new,label):
 # Light mode always on for this rescue build; desktop and iOS get identical baseline.
 p=root/'index.html'
 s=p.read_text(encoding='utf-8')
+# The workflow commits the built index on this branch; subsequent pushes must
+# operate idempotently on the already-generated HTML instead of reapplying.
+if 'window.__GENESIS_LITE_BOOT=true' in s:
+ print('Lite rescue already built: ensuring the HQ fountain declaration is lazy')
+ import re
+ s,n=re.subn(r'(<pc-asset id="genesisFountainV011HQAsset"[^>]*?)(?<! lazy)(></pc-asset>)',
+              lambda m:m.group(1)+' lazy'+m.group(2),s,count=1)
+ if n==0 and not re.search(r'<pc-asset id="genesisFountainV011HQAsset"[^>]*\\blazy',s):
+  raise RuntimeError('Cannot verify lazy HQ fountain')
+ p.write_text(s,encoding='utf-8')
+ raise SystemExit(0)
 def one(old,new,label):
  global s
  n=s.count(old)
