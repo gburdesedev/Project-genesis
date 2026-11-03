@@ -1,0 +1,39 @@
+name: Extract embedded original blacksmith floor WebP
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-extract-embedded-floor-texture.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+      - name: Decode exact original WebP to approved assets
+        run: |
+          python3 - <<'PY'
+          import re,base64,hashlib,pathlib,json
+          s=pathlib.Path('index.html').read_text(encoding='utf-8')
+          m=re.search(r'<pc-asset\b(?=[^>]*\bid=["\']stoneFloorTex085["\'])[^>]*>',s,re.I)
+          if not m:raise SystemExit('stoneFloorTex085 asset not found')
+          src=re.search(r'\bsrc=["\'](data:image/webp;base64,([^"\']+))["\']',m.group(),re.I)
+          if not src:raise SystemExit('Expected embedded WebP source missing')
+          data=base64.b64decode(src.group(2),validate=True)
+          if not (data[:4]==b'RIFF' and data[8:12]==b'WEBP'):raise SystemExit('Not a valid WebP')
+          out=pathlib.Path('assets/playcanvas/approved/world/floors/blacksmith')
+          out.mkdir(parents=True,exist_ok=True)
+          p=out/'stoneFloorTex085.webp';p.write_bytes(data)
+          report={'status':'copied','source':'index.html embedded data:image/webp;base64','path':str(p),'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()}
+          (out/'texture-recovery.json').write_text(json.dumps(report,indent=2))
+          print(report)
+          PY
+      - name: Commit exact WebP
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add assets/playcanvas/approved/world/floors/blacksmith/
+          git diff --cached --quiet || (git commit -m "assets(v015): extract exact embedded blacksmith floor WebP" && git push)
