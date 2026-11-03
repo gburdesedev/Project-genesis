@@ -61,6 +61,20 @@ assert(geometries.slot.width/geometries.slot.height>=.8&&geometries.slot.width/g
 assert(geometries.heroImg.bottom < geometries.heroWrap.bottom+1,'preview image must remain inside its viewer');
 assert(!geometries.viewerBg.includes('FondoVisorHerreria'),'no baked anvil under the inventory item');
 assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),2);
+const hoverSlot=page.locator('.genInvSlot:not(:disabled)').first();
+const artBefore=await hoverSlot.evaluate(el=>getComputedStyle(el).backgroundImage);
+const beforeTilt=await hoverSlot.locator('img').first().evaluate(el=>getComputedStyle(el).transform);
+const slotBox=await hoverSlot.boundingBox();
+await page.mouse.move(slotBox.x+slotBox.width*.85,slotBox.y+slotBox.height*.50);
+await page.waitForTimeout(200);
+const duringTilt=await hoverSlot.locator('img').first().evaluate(el=>({transform:getComputedStyle(el).transform,angle:el.style.getPropertyValue('--gen-slot-rotation')}));
+assert(duringTilt.angle&&Math.abs(parseFloat(duringTilt.angle))<=45&&parseFloat(duringTilt.angle)>0,'slot artwork must tilt toward pointer up to 45 degrees');
+assert.notEqual(duringTilt.transform,beforeTilt,'only slot item art must move');
+assert.equal(await hoverSlot.evaluate(el=>getComputedStyle(el).backgroundImage),artBefore,'approved slot background must remain unchanged');
+await page.mouse.move(slotBox.x-30,slotBox.y-30);
+await page.waitForTimeout(200);
+assert.equal(await hoverSlot.locator('img').first().evaluate(el=>el.style.getPropertyValue('--gen-slot-rotation')),'','image tilt must reset after hover');
+
 await page.evaluate(()=>{stock={};items=[];openLive()});
 assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),0,'empty live inventory must show twenty empty slots');
 assert.equal(await page.locator('[data-family="Espadas"]').count(),0,'no invented family without actual creations');
