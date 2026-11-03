@@ -1,0 +1,14 @@
+{
+  "model_elements": {
+    "ordanModel": "<pc-model id=\"ordanModel\" name=\"Maese Ordan · provisional master artisan\" data-asset=\"rangerMale086\" data-route=\"Herrero\" data-priority=\"critical\" position=\"1.72 0 1.90\" rotation=\"0 -21 0\" scale=\"1.07 1.07 1.07\">",
+    "ordanHairModel": "<pc-model id=\"ordanHairModel\" name=\"Ordan beard\" data-asset=\"hairBeard086\" data-route=\"Herrero\" data-priority=\"critical\">"
+  },
+  "asset_elements": {
+    "": ""
+  },
+  "copied": [],
+  "errors": [
+    "Missing asset src for ordanModel via ",
+    "Missing asset src for ordanHairModel via "
+  ]
+}
