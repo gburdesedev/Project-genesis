@@ -27,3 +27,9 @@ for i,term in hits[:150]:
  out.extend(f'{j+1}: {lines[j][:280]}' for j in range(start,end))
 Path('tools/boot_inspection_excerpts.txt').write_text('\n'.join(out)[:120000],encoding='utf-8')
 print('Extracted',len(hits),'matches; output',len(out),'lines')
+
+# Focused exact blocks for editing
+for first,last in [(900,1135),(1650,1805)]:
+ out=['# Boot source lines '+str(first)+'-'+str(last)]
+ out.extend(f'{i+1}: {lines[i]}' for i in range(first-1,min(last,len(lines))))
+ Path(f'tools/boot_source_{first}_{last}.txt').write_text('\n'.join(out),encoding='utf-8')
