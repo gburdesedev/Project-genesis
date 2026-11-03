@@ -131,6 +131,16 @@ export function mountArcanePortal(app,building,fallbackDoor,options={}){
  };
  const report=()=>({version:'V027',phase,detail,url:ARCANE_DOOR_SOURCE});
  globalThis.__genesisArcaneDoorStatus=report();
+ // The player cannot enter Arcanista in the current mobile demo. Loading its
+ // 191-renderer hero door here is unnecessary and can exhaust phone GPU memory.
+ // Preserve the approved HQ door for desktop, and reuse the existing door
+ // already provided by the world on touch/mobile devices.
+ if(globalThis.GenesisDevice?.safePreviews===true){
+  phase='mobile-fallback';
+  detail='Puerta de respaldo; V027 HQ reservada para PC';
+  settle();
+  return Object.freeze({pivot,status:report,initialReady});
+ }
  app.assets.loadFromUrl(ARCANE_DOOR_SOURCE,'container',(error,asset)=>{
   if(error||!asset?.resource){
    phase='fallback';detail=String(error||'GLB sin recurso');

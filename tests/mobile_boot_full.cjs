@@ -40,6 +40,7 @@ const server=http.createServer((req,res)=>{
   }
   fs.mkdirSync('/tmp/genesis-mobile-boot',{recursive:true});
   await page.screenshot({path:'/tmp/genesis-mobile-boot/iphone-landscape-boot.png',timeout:15000}).catch(e=>console.log('MOBILE_SCREENSHOT_ERROR',e.message));
+  assert.equal(result.door?.phase,'mobile-fallback','Mobile must avoid expensive Arcane V027 door: '+JSON.stringify(result.door));
   assert(!result.failed,'Mobile loading failed: '+JSON.stringify(result));
   assert.equal(result.intro,'grid','Mobile intro never opened: '+JSON.stringify(result));
   console.log('MOBILE_INTRO_READY',JSON.stringify(result));
