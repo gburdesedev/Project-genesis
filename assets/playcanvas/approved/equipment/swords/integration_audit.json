@@ -1,0 +1,12 @@
+{
+  "model": "GENESIS_SWORD_PROVISIONAL_V001",
+  "sha256": "210d41cc2bc96d03862029d983af9ffcf71d093fd2e662ecb85a479db928d4ad",
+  "file": "assets/playcanvas/approved/equipment/swords/genesis_sword_provisional_v001.glb",
+  "size": 166580,
+  "source": "https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/feature/genesis-sword-provisional-webgl-20261103/assets/playcanvas/swords/provisional_v001/genesis_sword_provisional_v001.glb",
+  "web_references": 2,
+  "replacement": "visual-only",
+  "fabrication_logic_edited": false,
+  "mercenary_logic_edited": false,
+  "fab_source_used": false
+}
