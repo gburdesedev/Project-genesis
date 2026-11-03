@@ -28,13 +28,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Get canonical inventory and original-byte mirroring tool
+      - name: Download pinned master lock and manifest
         run: |
           mkdir -p /tmp/genesis-vendor
-          curl -fL --retry 3 --connect-timeout 30 "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/feature/playcanvas-master-20261103/playcanvas-runtime/manifest.json" -o /tmp/genesis-vendor/manifest.json
-          curl -fL --retry 3 --connect-timeout 30 "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/feature/playcanvas-master-20261103/playcanvas-runtime/mirror.py" -o /tmp/genesis-vendor/mirror.py
-      - name: Download and validate original models with all glTF dependencies
-        run: python /tmp/genesis-vendor/mirror.py --manifest /tmp/genesis-vendor/manifest.json --root assets/vendor/genesis/externals --lock /tmp/genesis-vendor/lock.json
+          curl -fL --retry 3 --connect-timeout 30 "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/dc8b899333f33a80101f7b3c386f5e6a1bf963dd/playcanvas-runtime/manifest.json" -o /tmp/genesis-vendor/manifest.json
+          curl -fL --retry 3 --connect-timeout 30 "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/dc8b899333f33a80101f7b3c386f5e6a1bf963dd/playcanvas-runtime/lock.json" -o /tmp/genesis-vendor/lock.json
+      - name: Copy verified bytes from master into demo
+        run: python tools/install_master_runtime.py --lock /tmp/genesis-vendor/lock.json --root assets/vendor/genesis/externals --master-sha dc8b899333f33a80101f7b3c386f5e6a1bf963dd
       - name: Rewrite remote URLs only after successful hash validation
         run: python tools/localize_runtime_assets.py --manifest /tmp/genesis-vendor/manifest.json --lock /tmp/genesis-vendor/lock.json --asset-root assets/vendor/genesis/externals
       - name: Commit local models and updated paths to experiment branch
