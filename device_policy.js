@@ -93,21 +93,25 @@
       const model=document.getElementById(id),asset=document.getElementById(local);
       if(model&&asset){model.dataset.asset=local;model.dataset.genesisRescue='local';}
     }
-    // El cofre del Curtidor tiene un origen HTTP 404 incluso en la carga
-    // inicial, antes de escoger oficio; reutilizar el GLB local existente.
-    const tannerChest=document.getElementById('tannerChest09');
-    const localChest=document.getElementById('genesisChest');
-    if(tannerChest&&localChest){
-      const localSrc=localChest.getAttribute('src');
-      if(localSrc)tannerChest.setAttribute('src',localSrc);
-      const tannerModel=document.getElementById('tannerChestModel');
-      if(tannerModel)tannerModel.dataset.genesisRescue='local-chest';
+    // Curtidor is plaza scenery only in this vertical slice. Its gameplay
+    // models and animation clips must never request missing vendor assets.
+    // Keep DOM/entity references so dormant legacy handlers cannot throw.
+    const tannerModels=[...document.querySelectorAll('pc-model[data-route="Curtidor"]')];
+    for(const model of tannerModels){
+      delete model.dataset.asset;
+      model.removeAttribute('asset');
+      model.dataset.genesisRescue='decorative-only';
+      model.querySelectorAll('pc-anim-clip').forEach(clip=>clip.removeAttribute('asset'));
     }
+    // Some clips are independent Web Components and preload at bootstrap;
+    // remove only the known broken chest source, not the village structures.
+    const brokenChest=document.getElementById('tannerChest09');
+    if(brokenChest)brokenChest.removeAttribute('src');
     for(const id of ['hammerRackModel2A','blacksmithSignModel2A']){
       const model=document.getElementById(id);
       if(model){delete model.dataset.asset;model.dataset.genesisRescue='vendor-unavailable';model.enabled=false;}
     }
-    console.info('Genesis: legacy blacksmith vendor props recovered (2 local, 2 decorative deferred)');
+    console.info('Genesis: Herrero local recovery; Curtidor scenery only, '+tannerModels.length+' gameplay models deferred');
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',rescueMissingVendorProps,{once:true});
   else rescueMissingVendorProps();
