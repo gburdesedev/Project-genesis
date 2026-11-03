@@ -84,6 +84,39 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initOrientationGate,{once:true});
   else initOrientationGate();
 
+
+  // Recovery for historical third-party URLs that now return HTTP 404.
+  // Preserve original declarations for restoration; substitute existing local
+  // embedded GLBs and omit nonessential decoration from the mandatory route.
+  function rescueMissingVendorProps(){
+    for(const [id,local] of [['anvilModel','anvil085'],['bellowsModel','bellows085']]){
+      const model=document.getElementById(id),asset=document.getElementById(local);
+      if(model&&asset){model.dataset.asset=local;model.dataset.genesisRescue='local';}
+    }
+    // Curtidor is plaza scenery only in this vertical slice. Its gameplay
+    // models and animation clips must never request missing vendor assets.
+    // Keep DOM/entity references so dormant legacy handlers cannot throw.
+    const tannerModels=[...document.querySelectorAll('pc-model[data-route="Curtidor"]')];
+    for(const model of tannerModels){
+      delete model.dataset.asset;
+      model.removeAttribute('asset');
+      model.dataset.genesisRescue='decorative-only';
+      model.querySelectorAll('pc-anim-clip').forEach(clip=>clip.removeAttribute('asset'));
+    }
+    // A pc-asset with no src crashes PlayCanvas Web Components (url.load).
+    // Remove the obsolete declaration entirely; dormant Curtidor clips must
+    // not refer to it. Plaza architecture is independent of this asset.
+    const brokenChest=document.getElementById('tannerChest09');
+    if(brokenChest)brokenChest.remove();
+    for(const id of ['hammerRackModel2A','blacksmithSignModel2A']){
+      const model=document.getElementById(id);
+      if(model){delete model.dataset.asset;model.dataset.genesisRescue='vendor-unavailable';model.enabled=false;}
+    }
+    console.info('Genesis: Herrero local recovery; Curtidor scenery only, '+tannerModels.length+' gameplay models deferred');
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',rescueMissingVendorProps,{once:true});
+  else rescueMissingVendorProps();
+
   window.GenesisDevice=Object.freeze({
     safePreviews,
     configureApp(element) {

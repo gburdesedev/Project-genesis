@@ -401,7 +401,7 @@ window.__genesisAppError=function(event){
 <pc-model id="chimneySootModel" name="Blocked chimney soot" data-asset="chimneySoot" data-route="Herrero" data-priority="critical" rotation="0 0 0" scale="1.25 1.25 1.25" position="0 0 0"></pc-model>
 </pc-entity>
     <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="4.18 0 -7.22" scale="1.333333333333 1 1.333333333333">
-<pc-model id="bellowsModel" name="Blacksmith bellows · authored prop" data-asset="bellowsReal086" data-route="Herrero" data-priority="critical" rotation="0 90 0" scale="1.04 1.04 1.04" position="0 0 0"></pc-model>
+<pc-model id="bellowsModel" name="Blacksmith bellows · authored prop" data-asset="bellowsReal086" data-unavailable-source="bellowsReal086" rotation="0 90 0" scale="1.04 1.04 1.04" position="0 0 0"></pc-model>
 </pc-entity>
     <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="4.27 .02 -9.18" scale="1.333333333333 1 1.333333333333">
 <pc-model name="Coal pile" data-asset="coalPile" data-route="Herrero" data-priority="stream" rotation="0 18 0" position="0 0 0"></pc-model>
@@ -409,13 +409,13 @@ window.__genesisAppError=function(event){
 
     <!-- Curated workshop set: assets are arranged by function to form a believable blacksmith workflow. -->
     <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="1.44 0 -6.55" scale="1.333333333333 1 1.333333333333">
-<pc-model id="anvilModel" name="Blacksmith anvil on stump · authored prop" data-asset="anvilReal086" data-route="Herrero" data-priority="critical" rotation="0 16 0" scale="1.02 1.02 1.02" position="0 0 0"></pc-model>
+<pc-model id="anvilModel" name="Blacksmith anvil on stump · authored prop" data-asset="anvilReal086" data-unavailable-source="anvilReal086" rotation="0 16 0" scale="1.02 1.02 1.02" position="0 0 0"></pc-model>
 </pc-entity>
     <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="-4.86 0 -8.86" scale="1.333333333333 1 1.333333333333">
-<pc-model id="hammerRackModel2A" name="Blacksmith hammer rack" data-asset="hammerRack2A" data-route="Herrero" data-priority="stream" rotation="0 90 0" scale=".92 .92 .92" position="0 0 0"></pc-model>
+<pc-model id="hammerRackModel2A" name="Blacksmith hammer rack" data-asset="hammerRack2A" data-unavailable-source="hammerRack2A" rotation="0 90 0" scale=".92 .92 .92" position="0 0 0"></pc-model>
 </pc-entity>
     <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="2.55 2.15 .34" scale="1.333333333333 1 1.333333333333">
-<pc-model id="blacksmithSignModel2A" name="Blacksmith exterior sign" data-asset="blacksmithSign2A" data-route="Herrero" data-priority="stream" rotation="0 180 0" scale=".82 .82 .82" position="0 0 0"></pc-model>
+<pc-model id="blacksmithSignModel2A" name="Blacksmith exterior sign" data-asset="blacksmithSign2A" data-unavailable-source="blacksmithSign2A" rotation="0 180 0" scale=".82 .82 .82" position="0 0 0"></pc-model>
 </pc-entity>
     <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="-3.74 0 -8.58" scale="1.333333333333 1 1.333333333333">
 <pc-model id="benchModel" name="Primary blacksmith workbench" data-asset="benchReal" data-route="Herrero" data-priority="critical" rotation="0 90 0" scale="1.02 1.02 1.02" position="0 0 0"></pc-model>
@@ -534,7 +534,7 @@ window.__genesisAppError=function(event){
 <pc-model id="tannerRopeModel" name="Curtidor rope" data-asset="tannerRope09" data-route="Curtidor" data-priority="stream" rotation="0 90 90" scale=".72 .72 .72" position="0 0 0"></pc-model>
 </pc-entity>
       <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="-4.02 .024 -3.03" scale="1.333333333333 1 1.333333333333">
-<pc-model id="tannerChestModel" name="Curtidor material chest" data-asset="tannerChest09" data-route="Curtidor" data-priority="critical" rotation="0 8 0" scale="1.02 1.02 1.02" position="0 0 0">
+<pc-model id="tannerChestModel" name="Curtidor material chest" data-asset="tannerChest09" data-unavailable-source="tannerChest09" rotation="0 8 0" scale="1.02 1.02 1.02" position="0 0 0">
         <pc-anim id="tannerChestAnim" clip="Chest_Closed" activate="true" transition-time="0.12">
           <pc-anim-clip name="Chest_Closed" asset="tannerChest09"></pc-anim-clip>
           <pc-anim-clip name="Chest_Open" asset="tannerChest09"></pc-anim-clip>
@@ -1018,7 +1018,7 @@ try{
  await Promise.race([whenReady('#genesisApp'),new Promise((_,reject)=>appEl.addEventListener('error',e=>{if(e.target===appEl)reject(new Error(e?.message||'Fallo iniciando PlayCanvas.'))}))]);
  window.GenesisFPS.attach(appEl.app,document.getElementById('tech'));
  const modelEls=[...document.querySelectorAll('pc-model[asset]:not([data-route])')];
- const clipEls=[...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]'));
+ const clipEls=window.GenesisDevice?.safePreviews?[]:[...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]'));
  const prepItems=[...modelEls.map(el=>({kind:'modelo',label:el.getAttribute('name')||el.id||el.getAttribute('asset')||'modelo',el})),...clipEls.map(el=>({kind:'animación',label:el.getAttribute('name')||el.getAttribute('asset')||'clip',el}))];
  for(const item of prepItems){item.group=groupFor(item);bootGroups[item.group].total++}
  let prepared=0;const prepTotal=Math.max(1,prepItems.length);
@@ -1039,9 +1039,17 @@ try{
  }
  const [p,o,c]=await Promise.all([bootWait(whenReady('#playerModel'),'Edric cuerpo'),bootWait(whenReady('#ordanModel'),'Ordan'),bootWait(whenReady('#cameraRig'),'cámara')]);
  player=p.entity;ordan=o.entity;tannerMentor=document.getElementById('tannerMentorModel')?.entity||ordan;camera=c.entity;setupGameViewport();
- [playerAnim,playerHeadAnim,playerHairAnim,ordanAnim,ordanHeadAnim,ordanHairAnim]=await bootWait(Promise.all([
-   whenReady('#playerAnim'),whenReady('#playerHeadAnim'),whenReady('#playerHairAnim'),whenReady('#ordanAnim'),whenReady('#ordanHeadAnim'),whenReady('#ordanHairAnim')
- ]),'animaciones núcleo',18000);
+ // Animations are decorative during mobile boot: never block world admission.
+ // WebKit may leave a clip readiness promise pending; attach components when ready.
+ const coreAnimSelectors=['#playerAnim','#playerHeadAnim','#playerHairAnim','#ordanAnim','#ordanHeadAnim','#ordanHairAnim'];
+ if(window.GenesisDevice?.safePreviews){
+   [playerAnim,playerHeadAnim,playerHairAnim,ordanAnim,ordanHeadAnim,ordanHairAnim]=coreAnimSelectors.map(selector=>document.querySelector(selector));
+   console.info('Genesis mobile: animation clips no longer gate world boot');
+ }else{
+   const coreAnimations=[];
+   for(const selector of coreAnimSelectors)coreAnimations.push(await bootWait(whenReady(selector),selector,18000));
+   [playerAnim,playerHeadAnim,playerHairAnim,ordanAnim,ordanHeadAnim,ordanHairAnim]=coreAnimations;
+ }
 }catch(err){failLoading(err?.message||String(err),'La escena no se habilitó; el recurso indicado no terminó de prepararse.');throw err}
 
 let village;

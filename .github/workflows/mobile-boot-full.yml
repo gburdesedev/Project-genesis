@@ -1,0 +1,30 @@
+name: Project Genesis full iPhone WebKit boot
+on:
+  pull_request:
+    paths:
+      - 'tests/mobile_boot_full.cjs'
+      - 'device_policy.js'
+      - '.github/workflows/mobile-boot-full.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  iphone-boot:
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/genesis-mobile-ci playwright@1.56.1
+      - run: NODE_PATH=/tmp/genesis-mobile-ci/node_modules node tests/mobile_boot_full.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-iphone-boot-screenshot
+          path: /tmp/genesis-mobile-boot
+          retention-days: 3
