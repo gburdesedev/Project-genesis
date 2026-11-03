@@ -1,0 +1,14 @@
+name: Provisional sword integration source audit
+on:
+  push:
+    branches: ['feature/mercenary-equipment-runtime-v001']
+    paths: ['scripts/inspect_provisional_sword_hooks.py','.github/workflows/inspect-provisional-sword-hooks.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/inspect_provisional_sword_hooks.py
