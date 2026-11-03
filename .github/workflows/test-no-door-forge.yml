@@ -1,0 +1,27 @@
+name: Test Herrero without door and forge
+on:
+  push:
+    branches: [fix/herrero-sequential-glb-20261103]
+    paths: ['tools/diagnostic_no_door_forge.py','.github/workflows/test-no-door-forge.yml']
+  workflow_dispatch:
+permissions: {contents: write}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python tools/diagnostic_no_door_forge.py
+      - run: |
+          node --check genesis_workshop_live_v015.js
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('genesis_workshop_live_v015.js').read_text()
+          assert 'sources.door.clone()' not in s
+          assert 'const upgraded=null;' in s
+          assert 'blacksmith_four_walls_arched_v082.glb' in s
+          PY
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html genesis_workshop_live_v015.js
+          git diff --cached --quiet || { git commit -m "test: disable door and forge while keeping workshop walls"; git push; }

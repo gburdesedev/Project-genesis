@@ -207,7 +207,7 @@ if(!window.GenesisDevice.safePreviews){const script=document.createElement('scri
 
 <script>
 // Capture PlayCanvas preload progress before the module script starts.
-window.__GENESIS_LITE_BOOT=true;window.__genesisBoot={loaded:0,total:0,error:null};
+window.__GENESIS_LITE_BOOT=true;window.__GENESIS_TEST_NO_DOOR_FORGE=true;window.__genesisBoot={loaded:0,total:0,error:null};
 window.__genesisPreloadProgress=function(event){
   window.__genesisBoot.loaded=Number(event.loaded)||0;
   window.__genesisBoot.total=Number(event.total)||0;
@@ -350,7 +350,7 @@ window.__genesisAppError=function(event){
     <!-- Shared façade templates; mesh/texture resources are reused by the village. -->
     <pc-model id="villageShellSource" asset="workshopShell" position="0 -1000 0"></pc-model>
     <pc-model id="villageRoofSource" data-disabled-asset="roofReal086" data-route="LiteDecor" position="0 -1000 0" scale="1.28 .55 .86"></pc-model>
-    <pc-model id="villageDoorSource" asset="doorLeaf083" position="0 -1000 0"></pc-model>
+    <pc-model id="villageDoorSource" data-disabled-asset="doorLeaf083" position="0 -1000 0"></pc-model>
     <!-- Navigation ground + real modular paving/floor. -->
     <!-- v0.9a.2 · acceso del Curtidor desde la misma pequeña plaza. -->
 
