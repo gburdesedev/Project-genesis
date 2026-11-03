@@ -9,7 +9,7 @@ app.scene.toneMapping=pc.TONEMAP_ACES;
 app.scene.exposure=.55;
 app.scene.skyboxIntensity=.64;
 app.start();
-const diagnostic={stage:'started',engine:'PlayCanvas',version:'fresno-calibracion-v04',exposure:.55,environmentIntensity:.64,keyIntensity:.78,models:{},hdri:null,errors:[]};
+const diagnostic={stage:'started',engine:'PlayCanvas',version:'fresno-calibracion-v05',exposure:.55,environmentIntensity:.64,keyIntensity:.78,models:{},hdri:null,errors:[]};
 window.__fresnoQA=diagnostic;
 function update(stage){diagnostic.stage=stage;status.textContent=JSON.stringify(diagnostic,null,2);console.log('FRESNO_QA',stage,JSON.stringify(diagnostic));}
 function asset(url,type){
@@ -39,11 +39,12 @@ async function place(url,label,targetX){
      const m=mi.material;
      if(!m || !m.diffuse)continue;
      const isEnd=/testa|anillos|corte/i.test(m.name||'');
-     const factor=isEnd?[.92,.88,.83]:[.95,.91,.86];
+     const factor=isEnd?[.90,.85,.80]:[.94,.88,.82];
      m.diffuse=new pc.Color(m.diffuse.r*factor[0],m.diffuse.g*factor[1],m.diffuse.b*factor[2]);
      if(m.aoMap)m.aoMapIntensity=1;
+     if(!isEnd){m.bumpiness=Math.min(1,(m.bumpiness||1)*1.08);m.gloss=Math.max(0,(m.gloss||.16)*.94);}
      m.update();
-     colorAdjustments.push({name:m.name,factor});
+     colorAdjustments.push({name:m.name,factor,bumpiness:m.bumpiness,gloss:m.gloss});
    }
  }
 
