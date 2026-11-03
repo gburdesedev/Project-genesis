@@ -27,7 +27,18 @@ const server=http.createServer((req,res)=>{
    const s=await state();console.log('MOBILE_BOOT_PROGRESS',JSON.stringify(s));
    if(s.intro==='grid'||s.failed)break;
   }
-  const result=await state();fs.mkdirSync('/tmp/genesis-mobile-boot',{recursive:true});
+  const result=await state();
+  if(result.failed||result.intro!=='grid'){
+   const pending=await page.evaluate(()=>[...document.querySelectorAll('pc-anim-clip,pc-model[asset]')].map(el=>({
+    tag:el.tagName,id:el.id||null,name:el.getAttribute('name'),asset:el.getAttribute('asset'),
+    parent:el.closest('pc-model[data-route]')?.getAttribute('data-route')||'bootstrap',
+    connected:el.isConnected,readyState:el.readyState||null,
+    content:!!el.contentEntity,resource:!!el.resource
+   })));
+   console.log('MOBILE_ASSET_DIAGNOSTIC',JSON.stringify(pending));
+   console.log('MOBILE_ASSET_ERRORS',JSON.stringify(await page.evaluate(()=>window.__genesisRouteAssetErrors||[])));
+  }
+  fs.mkdirSync('/tmp/genesis-mobile-boot',{recursive:true});
   await page.screenshot({path:'/tmp/genesis-mobile-boot/iphone-landscape-boot.png',timeout:15000}).catch(e=>console.log('MOBILE_SCREENSHOT_ERROR',e.message));
   assert(!result.failed,'Mobile loading failed: '+JSON.stringify(result));
   assert.equal(result.intro,'grid','Mobile intro never opened: '+JSON.stringify(result));
