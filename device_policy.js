@@ -132,4 +132,49 @@
     requestLandscape,
     isPortrait
   });
+  // Diagnostic only: ?genesis_memory=1. No changes to loading/gameplay.
+  if(new URLSearchParams(location.search).get('genesis_memory')==='1'){
+    const key='genesis:memory-probe:v1';
+    let previous={runs:0,history:[]};
+    try{previous=JSON.parse(sessionStorage.getItem(key)||'{}')||previous}catch(_){}
+    const run=(Number(previous.runs)||0)+1;
+    const history=Array.isArray(previous.history)?previous.history.slice(-12):[];
+    const started=performance.now();
+    let overlay=null,last=null,error='';
+    const mb=n=>Number.isFinite(n)?(n/1048576).toFixed(1)+' MB':'no disponible';
+    const take=()=>{
+      const heap=performance.memory;
+      const state=document.querySelector('#loadState')?.textContent?.trim()||'';
+      const detail=document.querySelector('#loadDetail')?.textContent?.trim()||'';
+      const count=document.querySelector('#loadCount')?.textContent?.trim()||'';
+      const route=document.querySelector('#prototypeIntro')?.style.display==='none'?'selección superada':'selección pendiente';
+      const r={
+        seconds:Math.round((performance.now()-started)/1000),
+        heapBytes:Number.isFinite(heap?.usedJSHeapSize)?heap.usedJSHeapSize:null,
+        heapLimitBytes:Number.isFinite(heap?.jsHeapSizeLimit)?heap.jsHeapSizeLimit:null,
+        resources:performance.getEntriesByType('resource').length,
+        state:state.slice(0,100),detail:detail.slice(0,140),count:count.slice(0,70),
+        route,error
+      };
+      last=r;history.push(r);if(history.length>12)history.shift();
+      try{sessionStorage.setItem(key,JSON.stringify({runs:run,history,last:r}))}catch(_){}
+      return r;
+    };
+    const render=()=>{
+      const r=take();
+      if(!overlay){
+        overlay=document.createElement('pre');
+        overlay.id='genesisMemoryProbe';
+        overlay.style.cssText='position:fixed;z-index:2147483647;right:6px;bottom:6px;max-width:250px;max-height:155px;overflow:hidden;margin:0;padding:8px;background:rgba(0,0,0,.84);border:1px solid #e1b966;border-radius:5px;color:#fff;font:11px/1.4 monospace;white-space:pre-wrap;pointer-events:none';
+        (document.body||document.documentElement).appendChild(overlay);
+      }
+      overlay.textContent='GENESIS · MEMORIA (DIAGNÓSTICO)\nJS heap: '+mb(r.heapBytes)+(r.heapLimitBytes?' / '+mb(r.heapLimitBytes):'')+'\nRecursos solicitados: '+r.resources+'\nCarga: '+(r.count||r.state||'iniciando')+'\n'+r.route+'\nSesiones en pestaña: '+run+'\n'+(r.error?'ERROR: '+r.error:'Memoria GPU/total: no medible');
+    };
+    addEventListener('error',e=>{error=String(e.message||e.error||'error').slice(0,120);take()});
+    addEventListener('unhandledrejection',e=>{error=String(e.reason||'promesa rechazada').slice(0,120);take()});
+    addEventListener('pagehide',()=>take());
+    window.GenesisMemoryProbe=Object.freeze({snapshot:()=>last,history:()=>history.slice(),previousRuns:run-1});
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',render,{once:true});else render();
+    setInterval(render,2000);
+  }
 })();
