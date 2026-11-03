@@ -34,7 +34,7 @@ if count==2:
 else:
     updated=source
 # Expose the current real equipment ONLY in opt-in QA mode. Do not alter gameplay.
-hook='mercenaryReadyPromise=null;\\nfunction mercNode(id)'
+hook='mercenaryReadyPromise=null;' + chr(10) + 'function mercNode(id)'
 qa_hook='''mercenaryReadyPromise=null;
 if(new URLSearchParams(location.search).get('mercenary-qa')==='1'){
  window.GenesisMercenaryQAGear=()=>({
