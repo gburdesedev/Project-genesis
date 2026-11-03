@@ -1,0 +1,63 @@
+name: Build isolated Herrero V015
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-build-herrero-only.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  isolate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+      - name: Build isolated copy of existing Canvas
+        run: |
+          python3 - <<'PY'
+          import re,pathlib,json
+          source=pathlib.Path('index.html').read_text(encoding='utf8')
+          s=source
+          stats={}
+          # Remove all asset declarations identified by their tanner-specific ID.
+          s,n=re.subn(r'<pc-asset\b(?=[^>]*\bid=["\'](?:tanner|curtidor)[^"\']*["\'])[^>]*>(?:\s*</pc-asset>)?', '',s,flags=re.I)
+          stats['tanner_assets_removed']=n
+          # Remove complete tanner workshop hierarchy (balanced pc-entity tags).
+          start=re.search(r'<pc-entity\b[^>]*\bid=["\']tannerWorkshopRoot["\'][^>]*>',s,re.I)
+          if start:
+            token=re.compile(r'</?pc-entity\b[^>]*>',re.I)
+            depth=0; end=None
+            for m in token.finditer(s,start.start()):
+              if m.group().lower().startswith('</'):depth-=1
+              else:depth+=1
+              if depth==0:end=m.end();break
+            if end is None:raise RuntimeError('Tanner workshop unbalanced')
+            s=s[:start.start()]+s[end:]
+            stats['tanner_workshop_removed']=True
+          else:stats['tanner_workshop_removed']=False
+          # Remove other standalone tanner-specific model tags.
+          s,n=re.subn(r'<pc-model\b(?=[^>]*\bdata-route=["\']Curtidor["\'])[^>]*>(?:\s*</pc-model>)?', '',s,flags=re.I)
+          stats['tanner_models_removed']=n
+          # Remove any residual tanner-specific asset declarations and detect dangling references.
+          tanner_ids=re.findall(r'<pc-asset\b[^>]*\bid=["\']([^"\']*(?:tanner|curtidor)[^"\']*)["\']',s,re.I)
+          if tanner_ids:raise RuntimeError('Tanner assets remain: '+repr(tanner_ids[:10]))
+          # The existing code contains shared engine logic mentioning Curtidor.
+          # Keep it intact rather than dangerously changing gameplay expressions.
+          stats['remaining_curtidor_mentions']=len(re.findall('curtidor',s,re.I))
+          stats['remaining_tanner_mentions']=len(re.findall('tanner',s,re.I))
+          # Stop the build instead of falsely certifying isolation when shared JS still calls Curtidor.
+          pathlib.Path('tests/v015-v001').mkdir(parents=True,exist_ok=True)
+          pathlib.Path('tests/v015-v001/ISOLATION_AUDIT.json').write_text(json.dumps(stats,indent=2))
+          if stats['remaining_curtidor_mentions'] or stats['remaining_tanner_mentions']:
+            print('BLOCKED: still has shared Curtidor/Tanner code. Report:',stats)
+            raise SystemExit('Full isolation not achieved; refusing to publish partial build')
+          pathlib.Path('index.v015-v001.html').write_text(s,encoding='utf8')
+          print('PASS:',stats)
+          PY
+      - name: Commit only validated build
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add index.v015-v001.html
+          git diff --cached --quiet || (git commit -m "build(v015): publish verified Herrero-only Canvas" && git push)
