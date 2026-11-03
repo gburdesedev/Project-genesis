@@ -1,0 +1,48 @@
+name: Locate actual plaza texture images from old Canvas
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-plaza-texture-references-fast.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+          fetch-depth: 0
+      - name: Search all tracked image paths and historical Canvas asset references
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import subprocess,re,json,pathlib,collections
+          run=lambda *args: subprocess.run(args,capture_output=True,text=True,errors='replace',timeout=90).stdout
+          images=run('git','log','--all','--name-only','--pretty=format:')
+          ext=re.compile(r'\.(png|jpe?g|webp|ktx2|exr|tga)(?:$|\?)',re.I)
+          terms=re.compile(r'plaza|suelo|piso|floor|ground|arena|sand|grava|gravel|adoquin|cobble|road|pbr|normal|rough|albedo|diffuse|stone|terrain|pav',re.I)
+          candidates=sorted({s.strip() for s in images.splitlines() if ext.search(s.strip()) and terms.search(s.strip())})
+          commits=run('git','log','--all','--format=%H','--','index.html').splitlines()[:130]
+          found=collections.defaultdict(lambda:{'count':0,'commit':None,'sample':None})
+          for sha in commits:
+            source=run('git','show',sha+':index.html')
+            for line in source.splitlines():
+              if not terms.search(line):continue
+              for match in re.findall(r'[^\s"\x27<>]{1,260}\.(?:png|jpe?g|webp|ktx2)(?:\?[^\s"\x27<>]*)?',line,re.I):
+                item=found[match];item['count']+=1
+                if item['commit'] is None:item.update(commit=sha,sample=line[:320])
+          report={'commits_scanned':len(commits),'historical_image_paths':candidates[:300],'references':[{'path':k,**v} for k,v in sorted(found.items(),key=lambda p:-p[1]['count'])[:80]]}
+          target=pathlib.Path('tests/v015-v001/PLAZA_PBR_REFERENCES_VERIFIED.json')
+          target.parent.mkdir(parents=True,exist_ok=True)
+          target.write_text(json.dumps(report,ensure_ascii=False,indent=2))
+          print('Historical images:',len(candidates),'Canvas image references:',len(found))
+          PY
+      - name: Commit result
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tests/v015-v001/PLAZA_PBR_REFERENCES_VERIFIED.json
+          git diff --cached --quiet || (git commit -m "audit(v015): report actual historical plaza PBR image references" && git push)
