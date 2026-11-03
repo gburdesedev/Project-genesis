@@ -1,0 +1,344 @@
+# Boot source lines 1800-2142
+1800:  if(gameStarted&&activeRoute&&mentorFollowState!=='walking'&&mentorFollowState!=='market'){const mentor=activeRoute.mentor(),mp=mentor.getPosition(),dist=Math.hypot(px-mp.x,pz-mp.z),desired=dist<7?deg(Math.atan2(px-mp.x,pz-mp.z)):-21,delta=((desired-mentorYaw+540)%360)-180;mentorYaw+=delta*Math.min(1,dt*4.1);mentor.setEulerAngles(0,mentorYaw,0);if(activeRoute.mentorGesture&&now>mentorGestureAt&&!mentorGestureReturn){activeRoute.mentorAnims.forEach(a=>a.transition(activeRoute.mentorGesture,.28));mentorGestureReturn=now+2200}if(mentorGestureReturn&&now>mentorGestureReturn){activeRoute.mentorAnims.forEach(a=>activeRoute.mentorIdle&&a.transition(activeRoute.mentorIdle,.32));mentorGestureReturn=0;mentorGestureAt=now+7800}}
+1801:  updateInteractionUI();updateCameraGuide();const camComp=document.querySelector('#cameraRig pc-camera')?.component;if(gameStarted&&activeRoute&&camComp){const p=activeRoute.mentor().getPosition(),screen=new Vec3();camComp.worldToScreen(new Vec3(p.x,2.25,p.z),screen);if(screen.z>0&&screen.x>=0&&screen.x<=innerWidth&&screen.y>=0&&screen.y<=innerHeight){npcTag.style.display='block';npcTag.style.left=screen.x+'px';npcTag.style.top=screen.y+'px'}else npcTag.style.display='none'}else npcTag.style.display='none';
+1802: }
+1803: // Los visuales instalados por módulos independientes también son recursos de
+1804: // arranque. Las promesas de red no bastan: deben existir los nodos en escena.
+1805: async function waitVisualModulesBeforePlay(){
+1806:  const deadline=performance.now()+90000;
+1807:  while(performance.now()<deadline){
+1808:   const smith=window.__genesisProductionHerreroV015;
+1809:   const arcane=window.__genesisArcanistaFourWallsV006;
+1810:   if(smith?.phase==='error')throw new Error('Herreria V015: '+(smith.errors?.[0]||'fallo de integración'));
+1811:   if(arcane?.phase==='error'||arcane?.phase==='village-unavailable-after-15min')
+1812:     throw new Error('Arcanista V006: '+(arcane.error||arcane.phase));
+1813:   const smithReady=smith?.phase==='running'&&smith?.installed?.some(x=>x.kind==='village');
+1814:   const arcaneReady=arcane?.installed===true;
+1815:   bootProgress.externals=Number(!!smithReady)+Number(!!arcaneReady);
+1816:   showBootProgress('Integrando arquitectura del mundo',
+1817:    'Herrería V015 y Arcanista V006: '+bootProgress.externals+' de 2 instalados');
+1818:   if(smithReady&&arcaneReady)return;
+1819:   await new Promise(r=>setTimeout(r,250));
+1820:  }
+1821:  throw new Error('No se completó el montaje de herrería V015 y Arcanista V006 antes del inicio');
+1822: }
+1823: requestAnimationFrame(frame);
+1824: const uiPreflightResult=await uiAssetsPromise;
+1825: if(uiPreflightResult.error){
+1826:  failLoading(uiPreflightResult.error.message,'No se habilitó la escena: faltan recursos de inventario. Reintentá.');
+1827:  throw uiPreflightResult.error;
+1828: }
+1829: try{await waitVisualModulesBeforePlay()}catch(err){
+1830:  failLoading(err.message,'No se habilitó la partida: falta arquitectura 3D externa. Reintentá.');
+1831:  throw err;
+1832: }
+1833: showBootProgress('Interfaz y escena preparadas','Todos los recursos iniciales están listos.');
+1834: setLoadUI(100,'Núcleo listo','Edric, cámara y controles preparados. El taller se cargará después de elegir profesión.');clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
+1835: </script>
+1836: 
+1837: <script id="genesis-prototype-engines">
+1838: /* Project Genesis · Items + NGE Alpha reducido para el PROTOTIPO v0.11.
+1839:    v0.11: naming por tablas internas con semilla derivada de timestamp; sin historial NGE persistente entre ejecuciones.
+1840:    Conserva criterios canónicos de Daño/Protección, rareza por canales y pool Nivel 1 auditados.
+1841:    Pipeline: fórmula procedural de sesión -> fabricación mecánica -> cierre -> NGE.
+1842:    Materiales: subconjunto del catálogo canónico de Materiales Básicos de Nivel 1.
+1843:    Cantidades: perfil controlado del prototipo; NO balance canónico definitivo.
+1844:    VT: fallback neutro 1:1 sólo para demostrar la arquitectura; NO tabla canónica. */
+1845: (()=>{"use strict";
+1846: const AFF=["Luz","Sombra","Fuego","Hielo","Naturaleza","Tierra","Rayo"];
+1847: const RAR={1:"Inútil",2:"Común",3:"Bueno",4:"Excelente",5:"Raro",6:"Épico",7:"Legendario",8:"Mítico"};
+1848: const REC={
+1849:  espada_hierro:{name:"Espada de hierro",profession:"Herrero",type:"Espada",base:"Daño",mechanic:"damage",elementalMode:"percent_of_base",family:1},
+1850:  escudo_hierro:{name:"Escudo de hierro",profession:"Herrero",type:"Escudo",base:"Protección",mechanic:"protection",elementalMode:"elemental_percent",family:2},
+1851:  armadura_cuero:{name:"Armadura de cuero",profession:"Curtidor",type:"Armadura",base:"Protección",mechanic:"protection",elementalMode:"elemental_percent",family:1},
+1852:  botas_cuero:{name:"Botas de cuero",profession:"Curtidor",type:"Botas",base:"Protección",mechanic:"protection",elementalMode:"elemental_percent",family:2}
+1853: };
+1854: const FAMILY_BY_PROF={Herrero:["espada_hierro","escudo_hierro"],Curtidor:["armadura_cuero","botas_cuero"]};
+1855: /* Fórmulas de demostración: sólo usan el pool canónico de Materiales Básicos de Nivel 1.
+1856:    Las cantidades/selección concreta siguen siendo perfil de prototipo y NO receta/balance canónico. */
+1857: const FORMULA_PROFILE={
+1858:  espada_hierro:{slots:[{role:"principal",pool:["Lingote de hierro"],min:2,max:3},{role:"proceso",pool:["Carbón vegetal"],min:1,max:2},{role:"secundario",pool:["Cuero bovino curtido","Cuero caprino curtido","Cordel de cáñamo","Hilo de lino"],min:1,max:2},{role:"secundario",pool:["Madera seca de fresno","Madera seca de roble"],min:1,max:1}]},
+1859:  escudo_hierro:{slots:[{role:"principal",pool:["Lingote de hierro"],min:2,max:4},{role:"secundario",pool:["Madera seca de roble","Madera seca de fresno"],min:2,max:3},{role:"secundario",pool:["Cuero bovino curtido","Cuero caprino curtido","Cordel de cáñamo","Hilo de lino"],min:1,max:2}]},
+1860:  armadura_cuero:{slots:[{role:"principal",pool:["Cuero bovino curtido","Cuero caprino curtido"],min:3,max:5},{role:"secundario",pool:["Hilo de lino","Cordel de cáñamo"],min:1,max:2},{role:"secundario",pool:["Tela de lino"],min:1,max:2}]},
+1861:  botas_cuero:{slots:[{role:"principal",pool:["Cuero bovino curtido","Cuero caprino curtido"],min:2,max:3},{role:"secundario",pool:["Hilo de lino","Cordel de cáñamo"],min:1,max:2},{role:"secundario",pool:["Tela de lino"],min:1,max:1}]}
+1862: };
+1863: // VT canónico de Nivel 1 sigue pendiente. El 1:1 preserva arquitectura sin afirmar balance.
+1864: const VT_PROTOTYPE=Object.freeze({
+1865:  "Lingote de hierro":1,"Carbón vegetal":1,"Cuero bovino curtido":1,"Cuero caprino curtido":1,
+1866:  "Hilo de lino":1,"Cordel de cáñamo":1,"Tela de lino":1,"Madera seca de fresno":1,"Madera seca de roble":1
+1867: });
+1868: const VT_PROFILE_MODE="PROTOTYPE_NEUTRAL_FALLBACK";
+1869: const FORMS={
+1870:  Espada:["Espada","Hoja","Filo"],
+1871:  Escudo:["Escudo","Baluarte","Égida"],
+1872:  Armadura:["Armadura","Coraza","Vestidura"],
+1873:  Botas:["Botas","Calzado"]
+1874: };
+1875: /* NGE reducido de la demo: recupera las 9 bandas lingüísticas del NGE de ítems.
+1876:    Estas bandas interpretan intensidades YA RESUELTAS; nunca deciden mecánicas. */
+1877: const NARRATIVE_BANDS=Object.freeze([
+1878:  {min:1,max:5,label:"Traza"},{min:6,max:10,label:"Débil"},{min:11,max:20,label:"Presente"},
+1879:  {min:21,max:35,label:"Marcada"},{min:36,max:50,label:"Intensa"},{min:51,max:65,label:"Potente"},
+1880:  {min:66,max:80,label:"Extrema"},{min:81,max:99.99,label:"Extraordinaria"},{min:100,max:100,label:"Absoluta"}
+1881: ]);
+1882: function narrativeLevel(v){v=Number(v)||1;for(let i=0;i<NARRATIVE_BANDS.length;i++)if(v>=NARRATIVE_BANDS[i].min&&v<=NARRATIVE_BANDS[i].max)return i;return v>=100?8:0}
+1883: function narrativeBand(v){return NARRATIVE_BANDS[narrativeLevel(v)]}
+1884: const BASE_LEX={
+1885:  "Daño":[
+1886:   ["del Temple Frágil","del Temple Vacilante","de la Marca Leve"],
+1887:   ["del Corte Modesto","del Temple Irregular","del Filo Inseguro"],
+1888:   ["del Hierro Firme","del Golpe Mesurado","del Corte Honesto"],
+1889:   ["del Corte Seguro","del Temple Robusto","de la Mano Firme"],
+1890:   ["del Golpe Profundo","del Temple Tenaz","de la Fuerza Forjada"],
+1891:   ["del Impacto Poderoso","del Golpe Dominante","del Hierro Implacable"],
+1892:   ["del Golpe Colosal","de la Ruptura","del Corte Devastador"],
+1893:   ["de la Fuerza Titánica","del Golpe Inquebrantable","del Temple Soberano"],
+1894:   ["del Golpe Perfecto","de la Fuerza Absoluta","del Temple Primordial"]
+1895:  ],
+1896:  "Protección":[
+1897:   ["del Resguardo Frágil","de la Cobertura Leve","del Amparo Escaso"],
+1898:   ["del Resguardo Modesto","de la Guarda Irregular","del Amparo Débil"],
+1899:   ["de la Guarda Firme","del Resguardo Honesto","de la Cobertura Segura"],
+1900:   ["del Amparo Robusto","de la Guarda Estable","del Resguardo Marcado"],
+1901:   ["de la Protección Profunda","del Amparo Tenaz","de la Guarda Intensa"],
+1902:   ["del Baluarte Poderoso","de la Guarda Dominante","del Amparo Implacable"],
+1903:   ["de la Protección Colosal","del Baluarte Extremo","de la Guarda Inamovible"],
+1904:   ["del Resguardo Titánico","del Baluarte Soberano","de la Guarda Inquebrantable"],
+1905:   ["de la Protección Absoluta","del Amparo Perfecto","del Baluarte Primordial"]
+1906:  ]
+1907: };
+1908: const LEX={
+1909:  Luz:[
+1910:   ["de Luz Tenue","del Primer Destello","del Brillo Pálido"],["de la Claridad Suave","del Alba Leve","del Resplandor Naciente"],["del Alba Radiante","del Resplandor","de la Luz Serena"],
+1911:   ["de la Luz Centelleante","del Día Áureo","del Halo Radiante"],["del Fulgor","de la Luz Refulgente","del Esplendor"],["del Fulgor Intenso","del Sol Ascendente","de la Claridad Ardiente"],
+1912:   ["del Sol Implacable","del Mediodía","de la Luz Fulgurante"],["del Sol Eterno","de la Luz Celestial","del Alba Soberana"],["de la Luz Absoluta","del Primer Sol","del Fulgor Primordial"]
+1913:  ],
+1914:  Sombra:[
+1915:   ["de Sombra Tenue","de la Penumbra Leve","del Ocaso Pálido"],["de la Penumbra","del Velo Sombrío","de la Noche Joven"],["de la Sombra","del Ocaso","del Velo Umbrío"],
+1916:   ["de la Noche Cerrada","de la Sombra Profunda","del Eclipse Parcial"],["del Eclipse","de la Oscuridad","del Manto Tenebroso"],["de la Noche Profunda","del Vacío Umbrío","del Eclipse Negro"],
+1917:   ["del Abismo","de la Noche Sin Luna","de la Sombra Devastadora"],["de la Noche Eterna","del Abismo Soberano","del Eclipse Final"],["de la Sombra Absoluta","de la Noche Primordial","del Vacío Primero"]
+1918:  ],
+1919:  Fuego:[
+1920:   ["del Ascua Tenue","de la Brasa Pálida","del Primer Calor"],["de la Brasa","de la Llama Joven","del Rescoldo"],["de la Llama","del Fuego Vivo","del Calor Ardiente"],
+1921:   ["de la Llama Voraz","del Fuego Ígneo","de la Brasa Roja"],["del Fuego Incandescente","de la Forja Ardiente","de la Llama Intensa"],["del Incendio","de la Llama Abrasadora","del Crisol Rojo"],
+1922:   ["del Fuego Devastador","de la Pira","de la Llama Implacable"],["del Fuego Eterno","del Sol Incendiado","de la Llama Soberana"],["del Fuego Absoluto","de la Primera Llama","del Incendio Primordial"]
+1923:  ],
+1924:  Hielo:[
+1925:   ["de la Escarcha","del Frío Tenue","del Primer Hielo"],["de la Helada","del Invierno Leve","del Cristal Frío"],["de la Ventisca","del Hielo","del Invierno"],
+1926:   ["del Témpano","del Frío Gélido","de la Escarcha Profunda"],["del Hielo Glacial","de la Ventisca Blanca","del Frío Intenso"],["del Corazón Glaciar","de la Tormenta Blanca","del Invierno Profundo"],
+1927:   ["de la Gran Ventisca","del Glaciar","del Frío Implacable"],["del Invierno Eterno","del Glaciar Soberano","de la Nieve Sin Fin"],["del Hielo Absoluto","del Primer Invierno","del Frío Primordial"]
+1928:  ],
+1929:  Naturaleza:[
+1930:   ["del Brote","de la Savia Tenue","de la Espina Joven"],["de la Raíz","de la Hoja Verde","de la Savia"],["de la Espina","del Bosque Joven","de la Rama Viva"],
+1931:   ["de la Raíz Profunda","de la Savia Viva","del Ramaje Verde"],["del Bosque","de la Espina Firme","de la Vida Salvaje"],["del Roble Ancestral","de la Raíz Dominante","de la Savia Intensa"],
+1932:   ["de la Selva Implacable","de las Mil Espinas","del Ramaje Indómito"],["del Bosque Eterno","de la Vida Ancestral","de la Raíz Soberana"],["de la Naturaleza Absoluta","de la Primera Raíz","de la Vida Primordial"]
+1933:  ],
+1934:  Tierra:[
+1935:   ["del Polvo","de la Piedra Leve","del Primer Guijarro"],["de la Piedra","del Suelo Firme","del Mineral Pálido"],["de la Roca","del Mineral","de la Tierra Firme"],
+1936:   ["del Granito","de la Piedra Profunda","del Suelo Inmóvil"],["de la Montaña","de la Roca Intensa","del Mineral Pesado"],["del Corazón de Piedra","de la Roca Dominante","de la Montaña Profunda"],
+1937:   ["del Monolito","de la Montaña Implacable","de la Tierra Devastadora"],["de la Cordillera Eterna","del Monolito Soberano","de la Roca Ancestral"],["de la Tierra Absoluta","de la Primera Montaña","del Mundo Primordial"]
+1938:  ],
+1939:  Rayo:[
+1940:   ["de la Chispa","de la Carga Tenue","del Primer Destello"],["de la Centella Leve","de la Estática","del Chisporroteo"],["de la Centella","del Relámpago","de la Carga Viva"],
+1941:   ["del Trueno","del Rayo Azul","de la Descarga"],["de la Tormenta","del Relámpago Intenso","del Trueno Profundo"],["de la Tempestad","del Rayo Dominante","de la Tormenta Eléctrica"],
+1942:   ["del Cielo Partido","de la Tempestad Implacable","del Gran Trueno"],["de la Tormenta Eterna","del Rayo Soberano","del Cielo Furioso"],["del Rayo Absoluto","de la Primera Tormenta","del Trueno Primordial"]
+1943:  ]
+1944: };
+1945: /* Cada material posee 4 lecturas de peso relativo x 4 variantes lingüísticas.
+1946:    El texto describe presencia/peso en la fórmula, no añade propiedades mecánicas. */
+1947: const MAT={
+1948:  "Lingote de hierro":[["del Hierro","del Metal Gris","de la Forja de Hierro","del Hierro Simple"],["del Hierro Forjado","del Hierro Templado","del Hierro Batido","de la Forja Firme"],["del Hierro Denso","del Metal Forjado","del Hierro Reforzado","de la Forja Cerrada"],["del Hierro Dominante","del Hierro Pesado","del Metal Macizo","de la Forja Profunda"]],
+1949:  "Carbón vegetal":[["de la Brasa Negra","del Carbón Vegetal","de la Forja Negra","del Rescoldo de Forja"],["del Carbón de Forja","de la Brasa Viva","del Rescoldo Firme","de la Forja al Carbón"],["de la Forja Oscura","del Carbón Intenso","de la Brasa Profunda","del Temple al Carbón"],["de la Forja Profunda","de la Brasa Dominante","del Carbón Pesado","del Crisol Oscuro"]],
+1950:  "Cuero bovino curtido":[["del Cuero Bovino","de la Piel Bovina","del Curtido Bovino","de la Piel Tratada"],["del Cuero Bovino Firme","de la Piel Bovina Curtida","del Curtido Firme","de la Piel Bovina Tensada"],["del Cuero Bovino Denso","de la Piel Bovina Reforzada","del Curtido Denso","de la Piel Bovina Cerrada"],["del Cuero Bovino Robusto","de la Piel Bovina Dominante","del Curtido Profundo","de la Piel Bovina Pesada"]],
+1951:  "Cuero caprino curtido":[["del Cuero Caprino","de la Piel Caprina","del Curtido Caprino","de la Piel Tratada"],["del Cuero Caprino Firme","de la Piel Caprina Curtida","del Curtido Firme","de la Piel Caprina Tensada"],["del Cuero Caprino Denso","de la Piel Caprina Reforzada","del Curtido Denso","de la Piel Caprina Cerrada"],["del Cuero Caprino Robusto","de la Piel Caprina Dominante","del Curtido Profundo","de la Piel Caprina Pesada"]],
+1952:  "Hilo de lino":[["del Hilo de Lino","del Lino Trenzado","de la Hebra de Lino","del Lino Simple"],["del Lino Firme","del Hilo de Lino Tensado","de la Hebra Firme","del Trenzado de Lino"],["del Lino Reforzado","del Hilo de Lino Denso","de la Hebra Reforzada","del Trenzado Cerrado"],["del Lino Dominante","del Hilo de Lino Cerrado","de la Hebra Profunda","del Trenzado Pesado"]],
+1953:  "Cordel de cáñamo":[["del Cordel de Cáñamo","del Cáñamo Trenzado","de la Fibra de Cáñamo","del Cáñamo Simple"],["del Cáñamo Firme","del Cordel Tensado","de la Fibra Firme","del Trenzado de Cáñamo"],["del Cáñamo Reforzado","del Cordel Denso","de la Fibra Reforzada","del Trenzado Cerrado"],["del Cáñamo Dominante","del Cordel Cerrado","de la Fibra Profunda","del Trenzado Pesado"]],
+1954:  "Tela de lino":[["de la Tela de Lino","del Tejido de Lino","de la Trama de Lino","del Lino Tejido"],["de la Tela Firme","del Tejido Tensado","de la Trama Firme","del Lino Cerrado"],["de la Tela Reforzada","del Tejido Denso","de la Trama Reforzada","del Lino Compacto"],["de la Tela Dominante","del Tejido Cerrado","de la Trama Profunda","del Lino Pesado"]],
+1955:  "Madera seca de fresno":[["del Fresno Seco","de la Madera de Fresno","de la Veta de Fresno","del Fresno Preparado"],["del Fresno Firme","del Fresno Secado","de la Veta Firme","de la Madera de Fresno Tensada"],["del Fresno Reforzado","de la Veta de Fresno","de la Madera de Fresno Densa","del Fresno Cerrado"],["del Fresno Dominante","de la Madera de Fresno Densa","de la Veta Profunda","del Fresno Pesado"]],
+1956:  "Madera seca de roble":[["del Roble Seco","de la Madera de Roble","de la Veta de Roble","del Roble Preparado"],["del Roble Firme","del Roble Secado","de la Veta Firme","de la Madera de Roble Tensada"],["del Roble Reforzado","de la Veta de Roble","de la Madera de Roble Densa","del Roble Cerrado"],["del Roble Dominante","de la Madera de Roble Densa","de la Veta Profunda","del Roble Pesado"]]
+1957: };
+1958: const MAT_SECOND={
+1959:  "Lingote de hierro":["con Hierro","con refuerzo de Hierro","con nervio de Hierro","con estructura de Hierro"],"Carbón vegetal":["con Brasa de Forja","con temple al Carbón","con Carbón de Forja","con Rescoldo"],
+1960:  "Cuero bovino curtido":["con Cuero Bovino","con refuerzo Bovino","con Piel Bovina","con curtido Bovino"],"Cuero caprino curtido":["con Cuero Caprino","con refuerzo Caprino","con Piel Caprina","con curtido Caprino"],
+1961:  "Hilo de lino":["con Hilo de Lino","con trama de Lino","con hebra de Lino","con costura de Lino"],"Cordel de cáñamo":["con Cordel de Cáñamo","con trama de Cáñamo","con fibra de Cáñamo","con amarre de Cáñamo"],"Tela de lino":["con Tela de Lino","con tejido de Lino","con trama de Lino","con paño de Lino"],
+1962:  "Madera seca de fresno":["con Fresno","con núcleo de Fresno","con veta de Fresno","con refuerzo de Fresno"],"Madera seca de roble":["con Roble","con núcleo de Roble","con veta de Roble","con refuerzo de Roble"]
+1963: };
+1964: 
+1965: /* NGE DEMO: no usa firmas inventadas. La diversidad nominal debe surgir de hechos reales del objeto:
+1966:    forma, intensidad base, materiales elegidos por la fórmula y cantidades de esos materiales. */
+1967: const NGE_TEMPLATE_COUNT=Object.freeze({Inútil:8,Común:8,Bueno:8});
+1968: function normalizeNgeName(name){return String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim().toLocaleLowerCase()}
+1969: /* DEMO STANDALONE: el timestamp es la raíz de entropía. No existe registro global entre ejecuciones.
+1970:    Un contador monotónico evita que dos operaciones del mismo milisegundo compartan la misma raíz. */
+1971: const NGE_DEMO_BOOT_TIMESTAMP=Date.now();
+1972: let NGE_DEMO_SEED_COUNTER=0;
+1973: function ngeLexicalStats(){
+1974:  const forms=Object.values(FORMS).reduce((s,a)=>s+a.length,0),base=Object.values(BASE_LEX).reduce((s,levels)=>s+levels.reduce((x,a)=>x+a.length,0),0),aff=Object.values(LEX).reduce((s,levels)=>s+levels.reduce((x,a)=>x+a.length,0),0),mat=Object.values(MAT).reduce((s,levels)=>s+levels.reduce((x,a)=>x+a.length,0),0),mat2=Object.values(MAT_SECOND).reduce((s,a)=>s+a.length,0);
+1975:  return{forms,base,aff,mat,mat2,total:forms+base+aff+mat+mat2}
+1976: }
+1977: function ngeTheoreticalNames(){
+1978:  const affPer=LEX[AFF[0]].reduce((s,a)=>s+a.length,0),basePer=BASE_LEX.Daño.reduce((s,a)=>s+a.length,0);let total=0;
+1979:  for(const [id,rec] of Object.entries(REC)){
+1980:   const formCount=FORMS[rec.type].length,materials=new Set(FORMULA_PROFILE[id].slots.flatMap(s=>s.pool)),materialVariants=[...materials].reduce((s,m)=>s+(MAT[m]?.reduce((x,a)=>x+a.length,0)||0),0);
+1981:   const inutil=formCount*basePer*materialVariants*NGE_TEMPLATE_COUNT.Inútil;
+1982:   const comun=formCount*AFF.length*affPer*materialVariants*NGE_TEMPLATE_COUNT.Común;
+1983:   const bueno=formCount*((AFF.length*(AFF.length-1))/2)*affPer*affPer*materialVariants*NGE_TEMPLATE_COUNT.Bueno;
+1984:   total+=inutil+comun+bueno
+1985:  }
+1986:  return Math.round(total)
+1987: }
+1988: function hash(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+1989: function rng(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)|0;let t=Math.imul(a^a>>>15,1|a);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296}}
+1990: function randomSeed(){
+1991:  const now=Date.now(),perf=(typeof performance!=="undefined"&&performance.now)?Math.floor(performance.now()*1000):0;
+1992:  NGE_DEMO_SEED_COUNTER=(NGE_DEMO_SEED_COUNTER+1)>>>0;
+1993:  return hash(`${NGE_DEMO_BOOT_TIMESTAMP}|${now}|${perf}|${NGE_DEMO_SEED_COUNTER}`)>>>0
+1994: }
+1995: function ri(r,a,b){return a+Math.floor(r()*(b-a+1))}
+1996: function round2(v){return Math.round((Number(v)+Number.EPSILON)*100)/100}
+1997: function intensity(r){return round2(1+r()*99)}
+1998: function pick(r,a){return a[Math.floor(r()*a.length)]}
+1999: function cloneFormula(f){return{id:f.id,sessionSeed:f.sessionSeed,materials:f.materials.map(x=>({...x})),signature:f.signature}}
+2000: function buildFormula(id,sessionSeed){const profile=FORMULA_PROFILE[id];if(!profile)throw Error("formula profile");const r=rng(hash(`${sessionSeed}|formula|${id}`)),materials=profile.slots.map(slot=>({role:slot.role,material:pick(r,slot.pool),qty:ri(r,slot.min,slot.max)})),signature=materials.map(m=>`${m.role}:${m.material}:${m.qty}`).join("|");return{id,sessionSeed,materials,signature}}
+2001: function generateSession(profession,{seed=randomSeed()}={}){const ids=FAMILY_BY_PROF[profession];if(!ids)throw Error("profession");const formulas={};for(const id of ids)formulas[id]=buildFormula(id,seed);// El lote de regalo del Herrero cubre SOLO las dos primeras espadas.
+2002:  // La semilla sigue generando y conservando ambas recetas; los escudos se abastecen en el mercado.
+2003:  const starterIds=profession==="Herrero"?["espada_hierro"]:ids;
+2004:  const requiredStock={};for(const id of starterIds)for(const m of formulas[id].materials)requiredStock[m.material]=(requiredStock[m.material]||0)+m.qty*2;
+2005:  const stock={...requiredStock};return{id:`${profession.slice(0,3).toUpperCase()}-${seed.toString(16).padStart(8,"0").toUpperCase()}`,profession,seed,formulas,requiredStock,stock}}
+2006: const PROTOTYPE_LEVEL_GLOBAL=1;
+2007: const PROTOTYPE_LEVEL1_MAX_CHANNELS=3;
+2008: /* DS-007 deja pendiente la curva exacta de umbrales. Estos enteros son SOLO perfil de demostración
+2009:    para poder recorrer la cadena Base -> afinidad -> afinidad sin canonizar probabilidades. */
+2010: const DEMO_CHANNEL_THRESHOLDS=Object.freeze([56,72]);
+2011: /* BLOQUEO PEDAGÓGICO DE ESTA DEMO (NO REGLA CANÓNICA DEL JUEGO FINAL):
+2012:    - fabricación 1: Inútil obligatoria, para presentar Canal Base aislado;
+2013:    - fabricación 2: Común o Bueno obligatoria, para hacer visible la proceduralidad/afinidades.
+2014:    El bloqueo NO salta la cadena DS-007: condiciona las intensidades de esta muestra para que
+2015:    los umbrales conduzcan legítimamente al número de canales que la demo necesita enseñar. */
+2016: const DEMO_PEDAGOGICAL_LOCK=Object.freeze({first:'Inútil',second:Object.freeze(['Común','Bueno'])});
+2017: function intensityBetween(r,min,max){return round2(min+r()*(max-min))}
+2018: function resolvePrototypeChannels(rec,r,craft){
+2019:  const pool=[...AFF],channels=[];
+2020:  if(craft===1){
+2021:   // Debe fallar el primer umbral: sólo Canal Base => Inútil.
+2022:   channels.push([rec.base,intensityBetween(r,1,DEMO_CHANNEL_THRESHOLDS[0]-.01)]);
+2023:   return channels
+2024:  }
+2025:  // Segunda fabricación: el Canal Base debe habilitar al menos una afinidad.
+2026:  channels.push([rec.base,intensityBetween(r,DEMO_CHANNEL_THRESHOLDS[0],100)]);
+2027:  const firstName=pool.splice(Math.floor(r()*pool.length),1)[0];
+2028:  const makeGood=r()>=.5;
+2029:  const firstAffinity=makeGood
+2030:   ? intensityBetween(r,DEMO_CHANNEL_THRESHOLDS[1],100)
+2031:   : intensityBetween(r,1,DEMO_CHANNEL_THRESHOLDS[1]-.01);
+2032:  channels.push([firstName,firstAffinity]);
+2033:  if(makeGood&&channels.length<PROTOTYPE_LEVEL1_MAX_CHANNELS){
+2034:   const secondName=pool.splice(Math.floor(r()*pool.length),1)[0];
+2035:   channels.push([secondName,intensity(r)])
+2036:  }
+2037:  return channels
+2038: }
+2039: function fabricate(id,{craft=1,seed=randomSeed(),artisan="artesano",formula=null}={}){const rec=REC[id];if(!rec)throw Error("recipe");if(craft!==1&&craft!==2)throw Error("craft");if(!formula||formula.id!==id)throw Error("session formula required");const r=rng(hash(`${seed}|${id}`)),channels=resolvePrototypeChannels(rec,r,craft),base=channels[0],aff=channels.slice(1);return{id:`proto-${id}-${seed.toString(16)}`,recipe:id,artisan,seed,craft,family:rec.family,profession:rec.profession,levelGlobal:PROTOTYPE_LEVEL_GLOBAL,formula:cloneFormula(formula),base:[...base],affinities:aff.map(x=>[...x]),channels:channels.map(x=>[...x]),rarity:RAR[channels.length]}}
+2040: function materialLevel(effectiveWeight,share){if(effectiveWeight>=5||share>=.72)return 3;if(effectiveWeight>=3||share>=.54)return 2;if(effectiveWeight>=2||share>=.34)return 1;return 0}
+2041: function materialQuantityLevel(qty,share){
+2042:  qty=Number(qty)||1;share=Number(share)||0;
+2043:  if(qty>=4||share>=.55)return 3;
+2044:  if(qty>=3||share>=.40)return 2;
+2045:  if(qty>=2||share>=.25)return 1;
+2046:  return 0
+2047: }
+2048: /* Ruleta ponderada por CANTIDAD REAL de la fórmula. Sin reemplazo:
+2049:    - más unidades => más posibilidades de salir antes;
+2050:    - cantidades iguales => exactamente el mismo peso; la semilla desempata;
+2051:    - una vez elegido un material, sale del pool y no puede repetirse en esa lectura. */
+2052: function weightedMaterialOrder(item,r){
+2053:  const pool=(item.formula?.materials||[]).filter(m=>MAT[m.material]).map(m=>({...m,weight:Math.max(1,Number(m.qty)||1)})),order=[];
+2054:  while(pool.length){
+2055:   const total=pool.reduce((sum,m)=>sum+m.weight,0);let roll=r()*total,index=pool.length-1;
+2056:   for(let i=0;i<pool.length;i++){roll-=pool[i].weight;if(roll<0){index=i;break}}
+2057:   order.push(pool.splice(index,1)[0])
+2058:  }
+2059:  return order
+2060: }
+2061: function secondaryMaterialFragment(material,r){
+2062:  const list=MAT_SECOND[material.material]||[];
+2063:  return list.length?pick(r,list):''
+2064: }
+2065: function materialFragments(item,r){
+2066:  const order=weightedMaterialOrder(item,r),totalQty=order.reduce((sum,m)=>sum+(Number(m.qty)||0),0);
+2067:  if(!order.length)return{primary:'',secondary:'',tertiary:'',quaternary:'',order:[],totalQty:0};
+2068:  const first=order[0],firstShare=(Number(first.qty)||1)/Math.max(1,totalQty),level=materialQuantityLevel(first.qty,firstShare);
+2069:  const primary=pick(r,MAT[first.material][level]);
+2070:  const secondary=order[1]?secondaryMaterialFragment(order[1],r):'';
+2071:  const tertiary=order[2]?secondaryMaterialFragment(order[2],r):'';
+2072:  return{primary,secondary,tertiary,order,totalQty}
+2073: }
+2074: function joinSecondaryMaterials(...parts){
+2075:  const clean=parts.filter(Boolean).map(x=>String(x).replace(/^con\s+/i,''));
+2076:  if(!clean.length)return'';
+2077:  if(clean.length===1)return`con ${clean[0]}`;
+2078:  return`con ${clean.slice(0,-1).join(', ')} y ${clean[clean.length-1]}`
+2079: }
+2080: function channelFragments(item,r){const entries=[{name:item.base[0],value:item.base[1],kind:"base",fragment:pick(r,BASE_LEX[item.base[0]][narrativeLevel(item.base[1])])},...item.affinities.map(([name,value])=>({name,value,kind:"affinity",fragment:pick(r,LEX[name][narrativeLevel(value)])}))];entries.sort((a,b)=>b.value-a.value||(a.kind==="affinity"?-1:1)||a.name.localeCompare(b.name));return entries}
+2081: function _nameCandidates(item,r){
+2082:  const rec=REC[item.recipe],form=pick(r,FORMS[rec.type]),mf=materialFragments(item,r),baseFrag=pick(r,BASE_LEX[item.base[0]][narrativeLevel(item.base[1])]),sortedAff=[...item.affinities].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+2083:  if(sortedAff.length===0){
+2084:   /* Inútil: tres lecturas materiales REALES. El orden sale de una ruleta por cantidad sin reemplazo.
+2085:      Si dos materiales tienen la misma cantidad, ambos poseen exactamente la misma probabilidad de ocupar cada posición. */
+2086:   const materialTail=joinSecondaryMaterials(mf.secondary,mf.tertiary);
+2087:   const materialTailAlt=joinSecondaryMaterials(mf.tertiary,mf.secondary);
+2088:   const options=[
+2089:    `${form} ${baseFrag} ${mf.primary} ${materialTail}`,
+2090:    `${form} ${mf.primary} ${baseFrag} ${materialTail}`,
+2091:    `${form} ${mf.primary} ${materialTail} ${baseFrag}`,
+2092:    `${form} ${baseFrag} ${materialTail} ${mf.primary}`,
+2093:    `${form} ${materialTailAlt} ${baseFrag} ${mf.primary}`,
+2094:    `${form} ${materialTail} ${mf.primary} ${baseFrag}`,
+2095:    `${form} ${baseFrag} ${mf.primary} ${materialTailAlt}`,
+2096:    `${form} ${materialTailAlt} ${mf.primary} ${baseFrag}`
+2097:   ];
+2098:   return [...new Set(options.map(x=>x.replace(/\s+/g,' ').trim()))]
+2099:  }
+2100:  const a1=_fragmentForPrototypeAffinity(sortedAff[0][0],sortedAff[0][1],r),materialTail=joinSecondaryMaterials(mf.secondary,mf.tertiary);
+2101:  if(sortedAff.length===1){
+2102:   const options=[`${form} ${a1} ${mf.primary}`,`${form} ${a1} ${mf.primary} ${materialTail}`,`${form} ${mf.primary} ${a1} ${materialTail}`,`${form} ${a1} ${baseFrag} ${mf.primary}`,`${form} ${mf.primary} ${a1} ${baseFrag}`,`${form} ${baseFrag} ${a1} ${mf.primary}`,`${form} ${a1} ${materialTail} ${mf.primary}`,`${form} ${materialTail} ${a1} ${mf.primary}`];
+2103:   return [...new Set(options.map(x=>x.replace(/\s+/g,' ').trim()))]
+2104:  }
+2105:  const a2=_fragmentForPrototypeAffinity(sortedAff[1][0],sortedAff[1][1],r);
+2106:  const options=[`${form} ${a1} ${a2} ${mf.primary}`,`${form} ${a1} ${mf.primary} ${a2} ${materialTail}`,`${form} ${mf.primary} ${a1} ${a2}`,`${form} ${a1} ${a2} ${baseFrag}`,`${form} ${baseFrag} ${a1} ${a2} ${mf.primary}`,`${form} ${a1} ${materialTail} ${a2}`,`${form} ${mf.primary} ${a1} ${a2} ${materialTail}`,`${form} ${a1} ${a2} ${mf.primary} ${materialTail}`];
+2107:  return [...new Set(options.map(x=>x.replace(/\s+/g,' ').trim()))]
+2108: }
+2109: function present(item,used=new Set()){
+2110:  const formulaSig=item.formula?.signature||"",occupied=new Set();
+2111:  for(const n of used||[])occupied.add(normalizeNgeName(n));
+2112:  /* La semilla mecánica del objeto deriva del timestamp/counter de esta ejecución.
+2113:     NGE sólo la usa para recorrer tablas lingüísticas; no decide ninguna mecánica. */
+2114:  for(let attempt=0;attempt<8192;attempt++){
+2115:   const r=rng(hash(`${item.seed}|${item.recipe}|${formulaSig}|${JSON.stringify(item.channels)}|nge-v4-qty|${attempt}`)),candidates=_nameCandidates(item,r),start=Math.floor(r()*candidates.length);
+2116:   for(let offset=0;offset<candidates.length;offset++){
+2117:    const name=candidates[(start+offset)%candidates.length],norm=normalizeNgeName(name);
+2118:    if(!norm||occupied.has(norm))continue;
+2119:    const shortChannels=item.channels.map(([n,v],i)=>i===0?`${n} ${v}`:`${n} +${v}%`).join(" · "),bands=item.channels.map(([n,v])=>`${n}: ${narrativeBand(v).label}`).join(" · ");
+2120:    return{...item,name,description:`Resultado certificado · ${item.rarity} · ${shortChannels}`,naming:{engine:"NGE_DEMO_REDUCED_V4",bands,seedMode:"timestamp+counter+object",antiRepeat:"sesión"}}
+2121:   }
+2122:  }
+2123:  throw Error("NGE name space exhausted for this item signature")
+2124: }
+2125: function _fragmentForPrototypeAffinity(name,value,r){return pick(r,LEX[name][narrativeLevel(value)])}
+2126: function selfTest(N=10000){
+2127:  let invalid=0,dupeAffinity=0,badRarity=0,badRange=0,overLevel1=0,badDemoFirst=0,badDemoSecond=0;
+2128:  const sessions={Herrero:generateSession("Herrero",{seed:123456}),Curtidor:generateSession("Curtidor",{seed:654321})},ids=[...FAMILY_BY_PROF.Herrero,...FAMILY_BY_PROF.Curtidor];
+2129:  for(let i=1;i<=N;i++)for(const id of ids){const prof=REC[id].profession,f=generateSession(prof,{seed:(i*2654435761)>>>0}).formulas[id],it=fabricate(id,{craft:(i&1)+1,seed:(i*104729+hash(id))>>>0,formula:f}),names=it.affinities.map(a=>a[0]);if(it.channels.length<1||it.channels.length>3)invalid++;if(new Set(names).size!==names.length)dupeAffinity++;if(it.rarity!==RAR[it.channels.length])badRarity++;if(it.channels.some(c=>c[1]<1||c[1]>100||Math.abs(c[1]-round2(c[1]))>1e-9))badRange++;if(it.levelGlobal<=9&&it.channels.length>3)overLevel1++;if(it.craft===1&&it.rarity!=='Inútil')badDemoFirst++;if(it.craft===2&&!['Común','Bueno'].includes(it.rarity))badDemoSecond++}
+2130:  const stable=JSON.stringify(sessions.Herrero.formulas)===JSON.stringify(generateSession("Herrero",{seed:123456}).formulas)&&JSON.stringify(sessions.Curtidor.formulas)===JSON.stringify(generateSession("Curtidor",{seed:654321}).formulas);
+2131:  return{invalidChannelCounts:invalid,duplicateAffinityWithinItem:dupeAffinity,rarityMismatch:badRarity,intensityRangeOrPrecisionErrors:badRange,level1CeilingViolations:overLevel1,demoFirstMustBeUselessErrors:badDemoFirst,demoSecondMustBeCommonOrGoodErrors:badDemoSecond,formulaStableForSeed:stable,ok:invalid===0&&dupeAffinity===0&&badRarity===0&&badRange===0&&overLevel1===0&&badDemoFirst===0&&badDemoSecond===0&&stable}
+2132: }
+2133: const _ngeLex=ngeLexicalStats();const _ngeStats=Object.freeze({theoreticalNames:ngeTheoreticalNames(),lexicalFragments:_ngeLex.total,families:Object.keys(REC).length,materials:Object.keys(MAT).length,affinities:AFF.length,seedMode:"TIMESTAMP_DERIVED",mode:"REDUCED_TABLE_WEIGHTED_QTY_V4"});
+2134: window.GenesisPrototypeEngines=Object.freeze({recipes:REC,formulaProfiles:FORMULA_PROFILE,vtPrototype:VT_PROTOTYPE,vtProfileMode:VT_PROFILE_MODE,materialCount:Object.keys(VT_PROTOTYPE).length,levelGlobal:PROTOTYPE_LEVEL_GLOBAL,maxChannels:PROTOTYPE_LEVEL1_MAX_CHANNELS,demoThresholds:DEMO_CHANNEL_THRESHOLDS,demoPedagogicalLock:DEMO_PEDAGOGICAL_LOCK,ngeStats:_ngeStats,generateSession,fabricate,present,selfTest});
+2135: })();
+2136: </script>
+2137: 
+2138: <script type="module" src="./previews/genesis-v038-fuente-hq-runtime.js?v=0.15.001"></script>
+2139: <script type="module" src="./genesis_workshop_live_v015.js?v=0.17.014-herrero-v082b"></script>
+2140: <script type="module" src="./genesis_arcanista_four_walls_v006.js?v=0.16.006b"></script>
+2141: </body>
+2142: </html>

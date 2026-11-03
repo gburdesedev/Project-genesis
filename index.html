@@ -201,6 +201,7 @@ if(!window.GenesisDevice.safePreviews){const script=document.createElement('scri
 <link rel="stylesheet" href="./inventario_genesis_16x9.css?v=preflight-20261102">
 <script src="./genesis_asset_preflight_v001.js?v=20261102.1"></script>
 <script src="./inventario_genesis_16x9.js?v=preflight-20261102"></script>
+<script src="./genesis_asset_diagnostics_v001.js?v=20261103.1"></script>
 </head>
 <body>
 
@@ -1022,7 +1023,7 @@ try{
  const prepItems=[...modelEls.map(el=>({kind:'modelo',label:el.getAttribute('name')||el.id||el.getAttribute('asset')||'modelo',el})),...clipEls.map(el=>({kind:'animación',label:el.getAttribute('name')||el.getAttribute('asset')||'clip',el}))];
  for(const item of prepItems){item.group=groupFor(item);bootGroups[item.group].total++}
  let prepared=0;const prepTotal=Math.max(1,prepItems.length);
- const bootWait=(promise,label,timeout=18000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Tiempo agotado preparando '+label)),timeout))]);
+ const bootWait=(promise,label,timeout=120000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Tiempo agotado preparando '+label)),timeout))]);
  // Each group has a truthful, independently counted stage. Resources still
  // download concurrently; these gates verify they are actually instantiated.
  for(const group of ['paredes','puertas','suelos','objetos','animaciones']){
@@ -1047,7 +1048,7 @@ try{
    console.info('Genesis mobile: animation clips no longer gate world boot');
  }else{
    const coreAnimations=[];
-   for(const selector of coreAnimSelectors)coreAnimations.push(await bootWait(whenReady(selector),selector,18000));
+   for(const selector of coreAnimSelectors)coreAnimations.push(await bootWait(whenReady(selector),selector,120000));
    [playerAnim,playerHeadAnim,playerHairAnim,ordanAnim,ordanHeadAnim,ordanHairAnim]=coreAnimations;
  }
 }catch(err){failLoading(err?.message||String(err),'La escena no se habilitó; el recurso indicado no terminó de prepararse.');throw err}
@@ -1746,7 +1747,7 @@ async function activateRouteGroups(prof,priority,onProgress){
    onProgress?.(loaded,total,(ok?'Listo: ':'Error: ')+asset);
   }
  }
- await Promise.all(Array.from({length:Math.min(3,total)},worker));
+ await Promise.all(Array.from({length:Math.min(window.GenesisDevice?.safePreviews?1:3,total)},worker));
  if(failed)throw new Error('Faltan '+failed+' recursos de la ruta: '+failures.slice(0,3).join(' | '));
  return{total,loaded,failed:0,timedOut:false,instances:models.length};
 }
@@ -1803,7 +1804,7 @@ function frame(now){requestAnimationFrame(frame);village.trees?.update(px,pz);co
 // Los visuales instalados por módulos independientes también son recursos de
 // arranque. Las promesas de red no bastan: deben existir los nodos en escena.
 async function waitVisualModulesBeforePlay(){
- const deadline=performance.now()+90000;
+ const deadline=performance.now()+120000;
  while(performance.now()<deadline){
   const smith=window.__genesisProductionHerreroV015;
   const arcane=window.__genesisArcanistaFourWallsV006;
@@ -1831,7 +1832,7 @@ try{await waitVisualModulesBeforePlay()}catch(err){
  throw err;
 }
 showBootProgress('Interfaz y escena preparadas','Todos los recursos iniciales están listos.');
-setLoadUI(100,'Núcleo listo','Edric, cámara y controles preparados. El taller se cargará después de elegir profesión.');clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
+await prepareRoute('Herrero');setLoadUI(100,'Juego completo listo','Herrero preparado antes de elegir profesión.');clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
 </script>
 
 <script id="genesis-prototype-engines">
