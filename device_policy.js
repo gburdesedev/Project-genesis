@@ -132,7 +132,6 @@
     requestLandscape,
     isPortrait
   });
-}
   // Diagnostic only: ?genesis_memory=1. No changes to loading/gameplay.
   if(new URLSearchParams(location.search).get('genesis_memory')==='1'){
     const key='genesis:memory-probe:v1';
