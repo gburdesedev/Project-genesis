@@ -6,6 +6,13 @@ on:
     paths:
       - tools/localize_runtime_assets.py
       - .github/workflows/local-playcanvas-assets.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'playcanvas-runtime/**'
+      - 'tools/**'
+      - '.github/workflows/**'
   workflow_dispatch:
 permissions:
   contents: write
@@ -17,6 +24,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: true
+          ref: ${{ github.head_ref || github.ref_name }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
