@@ -1712,11 +1712,13 @@ async function activateDeferredModel(el,timeout=ROUTE_ASSET_TIMEOUT_MS,onProgres
  if(el.contentEntity)return el;
  const primary=el.dataset.asset;if(!primary)return el;
  const fallback=el.dataset.fallbackAsset;
+ const deadline=performance.now()+timeout;
  try{return await loadDeferredModelAsset(el,primary,timeout,onProgress)}
  catch(primaryError){
-  if(!fallback)throw primaryError;
+  const remaining=Math.max(0,Math.ceil(deadline-performance.now()));
+  if(!fallback||!remaining)throw primaryError;
   console.warn('Genesis asset fallback:',primaryError.message,'→',fallback);
-  return loadDeferredModelAsset(el,fallback,timeout,onProgress);
+  return loadDeferredModelAsset(el,fallback,remaining,onProgress);
  }
 }
 // Instanciar la ruta COMPLETA antes de iniciar el juego. Sin deadline
