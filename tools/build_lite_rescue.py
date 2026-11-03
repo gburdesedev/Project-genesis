@@ -33,7 +33,7 @@ one("roof:document.getElementById('villageRoofSource').entity,",
     'optional roof')
 # Avoid the global UI precache, which is not needed to enter the world.
 one("const uiAssetsPromise=window.GenesisPreflight",
-    "const uiAssetsPromise=!window.__GENESIS_LITE_BOOT&&window.GenesisPreflight",
+    "const uiAssetsPromise=window.__GENESIS_LITE_BOOT?Promise.resolve({report:{total:0,completed:0,failed:0}}):window.GenesisPreflight",
     'skip expensive UI prefetched files')
 # Heavy 3D route assets were lazy. Skip route instantiation completely in rescue mode.
 one("async function prepareRoute(prof){\n  if(routeReady.has(prof))return;",
@@ -53,7 +53,7 @@ one("if(window.GenesisDevice?.safePreviews){\n    [playerAnim",
 # Heavy UAL1 (7.6MB) was eager; defer, animation clips won't gate boot.
 s,n=re.subn(r'(<pc-asset id="ual1086"[^>]*?)(></pc-asset>)',r'\1 lazy\2',s,count=1)
 if n!=1:raise RuntimeError('UAL1 pc-asset not found')
-# Prevent loading optional character hair / head animations upfront; remain as declarative components.
+# Clip elements request the 7.6MB UAL library automatically, even when boot ignores readiness.\ns,clips=re.subn(r'<pc-anim-clip\\b[^>]*></pc-anim-clip>','',s)\nprint('Temporarily disabled animation clips:',clips)\n# Prevent loading optional character hair / head animations upfront; remain as declarative components.
 # Keep player and Ordan models, camera, light, original game systems unchanged.
 # The workshop PBR models remain in markup but are all lazy route models in lite boot.
 p.write_text(s,encoding='utf-8')
