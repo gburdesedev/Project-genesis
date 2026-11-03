@@ -1,0 +1,42 @@
+name: Integrate provisional sword GLB in Genesis game QA
+on:
+  push:
+    branches: ['feature/mercenary-equipment-runtime-v001']
+    paths:
+      - 'scripts/integrate_provisional_sword_v001.py'
+      - '.github/workflows/integrate-provisional-sword.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  integrate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Hash verify and integrate sword, preserve gameplay logic
+        run: |
+          set -euo pipefail
+          python3 scripts/integrate_provisional_sword_v001.py
+      - name: Validate original engine is present and same file is used twice
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html').read_text()
+          url='assets/playcanvas/approved/equipment/swords/genesis_sword_provisional_v001.glb'
+          assert p.count(url)==2,p.count(url)
+          assert 'data-asset="mercSword10"' in p
+          assert 'EQUIP_MODEL_URLS=Object.freeze' in p
+          assert 'function equipMercenaryCreations(' in p
+          print('PASS: same local sword in player inventory, fabrication previews, and equipped mercenary')
+          PY
+      - name: Commit isolated feature-branch asset and HTML URL update
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/playcanvas/approved/equipment/swords/
+          if ! git diff --cached --quiet; then
+            git commit -m 'assets: wire one local sword GLB into inventory, crafting and mercenary'
+            git push origin HEAD:feature/mercenary-equipment-runtime-v001
+          fi
