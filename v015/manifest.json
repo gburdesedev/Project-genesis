@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v006",
+  "version": "0.15-v007",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "procedural",
@@ -43,9 +43,9 @@
       "file": "./assets/playcanvas/approved/characters/merchant_v02_75962.glb",
       "bytes": 2049508,
       "position": [
-        25.5,
+        8,
         0,
-        36.3
+        7
       ]
     },
     {
@@ -60,5 +60,5 @@
       ]
     }
   ],
-  "note": "Diagnostic configuration. Actual PlayCanvas scene positions and model rendering must be verified."
+  "note": "V007: merchant within 63x63 terrain; original scene placements and artisan head still require asset verification."
 }
