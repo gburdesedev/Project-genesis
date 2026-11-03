@@ -1,0 +1,35 @@
+name: V015 Blacksmith startup audit
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-blacksmith-audit.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+      - name: Inspect original Canvas and quest references
+        run: |
+          python3 - <<'PY'
+          import re,json,pathlib
+          p=pathlib.Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          words=['curtidor','tanner','herrero','blacksmith','quest','playcanvas','pc-app','pc-asset','pc-model','script','importmap']
+          report={'index_bytes':len(s.encode()),'index_lines':len(s.splitlines()),'head':s[:2500],'tail':s[-2500:],'counts':{w:len(re.findall(w,s,re.I)) for w in words},'scripts':re.findall(r'<script[^>]*>',s,re.I)[:100],'importmap':re.findall(r'<script[^>]*type=["\']importmap["\'][^>]*>(.*?)</script>',s,re.I|re.S)[:2]}
+          for w in ['curtidor','tanner','herrero','blacksmith','pc-app','pc-asset','pc-model']:
+            hits=list(re.finditer(w,s,re.I))
+            report[w+'_samples']=[s[max(0,m.start()-180):m.end()+240] for m in hits[:12]]
+          pathlib.Path('tests/v015-v001/CANVAS_AUDIT.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+          print(json.dumps({k:v for k,v in report.items() if k not in ('head','tail','importmap') and not k.endswith('_samples')},ensure_ascii=False)[:8000])
+          PY
+      - name: Commit audit
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tests/v015-v001/CANVAS_AUDIT.json
+          git diff --cached --quiet || (git commit -m "audit(v015): inspect Canvas startup and profession references" && git push)
