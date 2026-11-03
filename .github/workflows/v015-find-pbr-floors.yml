@@ -1,0 +1,48 @@
+name: Find original PBR plaza floor sources
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-find-pbr-floors.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+      - name: Search local and public asset repositories for PBR floors
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import pathlib,json,urllib.request,urllib.parse,re,os
+          repositories=['gburdesedev/Project-genesis','ProjectgenesisAssets/genesis-workshop-assets','ProjectgenesisAssets2/genesis-workshop-assets']
+          pattern=re.compile(r'floor|ground|plaza|square|cobble|pav|stone|gravel|grava|arena|sand|adoquin|pbr|terrain|suelo|piso',re.I)
+          results={}
+          for repo in repositories:
+            try:
+              api='https://api.github.com/repos/'+repo
+              req=urllib.request.Request(api,headers={'Accept':'application/vnd.github+json','User-Agent':'ProjectGenesis-floor-inventory','Authorization':'Bearer '+os.environ['GH_TOKEN']})
+              with urllib.request.urlopen(req,timeout=25) as r:info=json.load(r)
+              branch=info['default_branch']
+              req=urllib.request.Request(api+'/git/trees/'+urllib.parse.quote(branch,safe='')+'?recursive=1',headers={'Accept':'application/vnd.github+json','User-Agent':'ProjectGenesis-floor-inventory','Authorization':'Bearer '+os.environ['GH_TOKEN']})
+              with urllib.request.urlopen(req,timeout=40) as r:tree=json.load(r)
+              matches=[{'path':x['path'],'size':x.get('size'),'sha':x.get('sha')} for x in tree.get('tree',[]) if x['type']=='blob' and pattern.search(x['path'])]
+              results[repo]={'branch':branch,'truncated':tree.get('truncated'), 'matches':matches}
+            except Exception as e:results[repo]={'error':str(e)}
+          local=[{'path':str(p),'bytes':p.stat().st_size} for p in pathlib.Path('assets').rglob('*') if p.is_file() and pattern.search(str(p))]
+          results['local_branch']={'matches':local[:500],'total':len(local)}
+          target=pathlib.Path('tests/v015-v001/PBR_FLOOR_SEARCH.json')
+          target.parent.mkdir(parents=True,exist_ok=True)
+          target.write_text(json.dumps(results,ensure_ascii=False,indent=2))
+          print(json.dumps({k:len(v.get('matches',[])) for k,v in results.items()}))
+          PY
+      - name: Commit inventory
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tests/v015-v001/PBR_FLOOR_SEARCH.json
+          git diff --cached --quiet || (git commit -m "audit(v015): locate original PBR floor textures across asset repos" && git push)
