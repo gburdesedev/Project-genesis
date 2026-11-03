@@ -1733,10 +1733,15 @@ async function activateRouteGroups(prof,priority,onProgress){
  async function worker(){
   while(next<grouped.length){
    const [asset,els]=grouped[next++];
-   const results=await Promise.allSettled(els.map(el=>activateDeferredModel(el,ROUTE_ASSET_TIMEOUT_MS,state=>{
+   const results=[];
+    for(const el of els){
+     const result=await Promise.allSettled([activateDeferredModel(el,ROUTE_ASSET_TIMEOUT_MS,state=>{
     const size=state.bytes!=null?' · '+(state.bytes/1048576).toFixed(1)+' MiB':' · bytes no informados';
     onProgress?.(loaded,total,asset+' · '+state.phase+size+' · '+state.seconds+' / 120 s');
-   })));
+   })]);
+     results.push(result[0]);
+     if(window.GenesisDevice?.safePreviews)await new Promise(r=>requestAnimationFrame(()=>r()));
+    }
    const ok=results.every((r,i)=>r.status==='fulfilled'&&!!els[i].contentEntity);
    if(ok)loaded++;
    else{

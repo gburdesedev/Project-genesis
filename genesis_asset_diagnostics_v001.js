@@ -119,5 +119,58 @@ fetch('./tools/genesis_asset_sizes.json').then(r=>r.ok?r.json():{}).then(map=>{
  known=Object.fromEntries(Object.entries(map).map(([k,v])=>[absolute(k),v]));
  for(const r of records.values())if(!r.total)r.total=expected(r.url);
 }).catch(()=>{});
+
+const CRASH_LAST='genesis:boot:last:v2',CRASH_PREVIOUS='genesis:boot:previous:v2';
+const runId=Date.now()+'-'+Math.random().toString(36).slice(2,7);
+const readSaved=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch(_){return null}};
+const previousRun=readSaved(CRASH_LAST);
+if(previousRun?.runId!==runId&&Date.now()-(previousRun?.at||0)<30*60*1000){
+ try{localStorage.setItem(CRASH_PREVIOUS,JSON.stringify(previousRun))}catch(_){}
+}
+function compactReport(){
+ const all=[...records.values()];
+ const unfinished=all.filter(r=>!/^(descargado|recurso preparado)$/.test(r.state));
+ const failed=unfinished.filter(r=>/error|timeout|cancelado/i.test(r.state));
+ const recent=all.filter(r=>r.received>0).sort((a,b)=>b.updated-a.updated).slice(0,8);
+ const selected=[...new Set([...failed,...unfinished.slice(-22),...recent])].slice(0,40);
+ const models=[...document.querySelectorAll('pc-model[data-route="Herrero"]')];
+ return {schema:2,runId,at:Date.now(),seconds:Math.round((performance.now()-started)/1000),
+  count:document.getElementById('loadCount')?.textContent||'',stage:document.getElementById('loadState')?.textContent||'',
+  detail:document.getElementById('loadDetail')?.textContent||'',totalObserved:all.length,finished:all.length-unfinished.length,
+  herreroModels:models.length,herreroInstantiated:models.filter(el=>!!el.contentEntity).length,
+  errors:errors.slice(-5),files:selected.map(r=>({id:r.assetId||'',file:r.url.replace(location.origin,'').slice(-200),state:r.state,received:r.received,total:r.total,error:r.error||'',idleSeconds:Math.round((performance.now()-r.lastChange)/1000)}))};
+}
+function saveCrashSnapshot(){
+ try{localStorage.setItem(CRASH_LAST,JSON.stringify(compactReport()));return true}catch(_){return false}
+}
+function showPreviousReport(){
+ const prior=readSaved(CRASH_PREVIOUS);
+ if(!prior||prior.runId===runId)return;
+ let host=document.getElementById('genesisCrashRecovery');
+ if(!host){
+  host=document.createElement('section');host.id='genesisCrashRecovery';
+  host.style.cssText='margin:8px auto;max-width:98%;border:2px solid #d9a25d;border-radius:8px;padding:10px;background:#2c211b;color:#fff3da;font:12px/1.5 monospace;text-align:left;overflow-wrap:anywhere';
+  const label=document.createElement('div');label.textContent='ÚLTIMA CARGA INTERRUMPIDA · INFORME RECUPERADO';
+  label.style.cssText='font-weight:bold;color:#ffcc81;margin-bottom:6px';
+  const summary=document.createElement('div');summary.id='genesisCrashSummary';
+  const view=document.createElement('details'),title=document.createElement('summary');
+  title.textContent='Ver archivos pendientes y errores';
+  const pre=document.createElement('pre');pre.id='genesisCrashText';
+  pre.style.cssText='white-space:pre-wrap;max-height:210px;overflow:auto;font:11px/1.4 monospace';
+  view.append(title,pre);
+  const copy=document.createElement('button');copy.textContent='COPIAR INFORME RECUPERADO';
+  copy.style.cssText='padding:8px;margin-top:8px;background:#664535;color:white;border:1px solid #c9a46c;border-radius:5px';
+  copy.addEventListener('click',()=>{const txt=JSON.stringify(readSaved(CRASH_PREVIOUS)||prior,null,2);navigator.clipboard?.writeText(txt).catch(()=>{});const area=document.createElement('textarea');area.value=txt;area.style.cssText='width:100%;height:90px';host.appendChild(area);area.select()});
+  host.append(label,summary,view,copy);
+  (document.getElementById('loadDetail')?.parentElement||document.body).appendChild(host);
+ }
+ host.querySelector('#genesisCrashSummary').textContent=prior.seconds+' s · '+prior.count+' · '+prior.stage+' · Herrero '+prior.herreroInstantiated+'/'+prior.herreroModels+' modelos';
+ host.querySelector('#genesisCrashText').textContent=JSON.stringify(prior,null,2);
+}
+window.GenesisAssetDiag.save=saveCrashSnapshot;
+window.GenesisAssetDiag.previous=()=>readSaved(CRASH_PREVIOUS);
+window.addEventListener('pagehide',saveCrashSnapshot);
+setInterval(()=>{saveCrashSnapshot();showPreviousReport()},1500);
+
 setInterval(render,600);
 })();
