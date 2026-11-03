@@ -33,6 +33,20 @@ if count==2:
     HTML.write_text(updated,encoding='utf-8')
 else:
     updated=source
+# Expose the current real equipment ONLY in opt-in QA mode. Do not alter gameplay.
+hook='mercenaryReadyPromise=null;\\nfunction mercNode(id)'
+qa_hook='''mercenaryReadyPromise=null;
+if(new URLSearchParams(location.search).get('mercenary-qa')==='1'){
+ window.GenesisMercenaryQAGear=()=>({
+  swordId:mercSwordItem?.id??null,shieldId:mercShieldItem?.id??null,
+  swordRarity:mercSwordItem?.rarity??null,shieldRarity:mercShieldItem?.rarity??null
+ });
+}
+function mercNode(id)'''
+if 'GenesisMercenaryQAGear' not in updated:
+    if updated.count(hook)!=1:raise RuntimeError('Mercenary QA hook anchor missing or duplicated')
+    updated=updated.replace(hook,qa_hook)
+    HTML.write_text(updated,encoding='utf-8')
 assert updated.count(GLB_REL)==2, 'Both visual sword URLs must match local GLB'
 assert 'data-asset="mercSword10"' in updated
 assert 'id="mercSword10"' in updated
