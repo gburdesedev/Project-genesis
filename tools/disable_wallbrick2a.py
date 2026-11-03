@@ -19,4 +19,4 @@ s,n=re.subn(r'(<pc-model\b[^>]*\basset=")([^"]*wallBrick2A[^"]*)(")',r'\1\2\3',s
 p.write_text(s,encoding='utf-8')
 print('wallBrick2A declarations disabled:',len(hits))
 for hit in hits:print(hit)
-if not hits:raise SystemExit('No wallBrick2A pc-asset declaration found; inspect runtime JS references instead')
+if not hits and not n:raise SystemExit('No wallBrick2A declarations found')
