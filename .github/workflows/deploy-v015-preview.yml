@@ -1,4 +1,4 @@
-name: Validate published v0.15 preview
+name: Validate published v0.15 preview (current version)
 on:
   push:
     branches: [main]
@@ -14,18 +14,18 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Validate V003 preview without overwriting published files
+      - name: Validate current preview without overwriting published files
         run: |
           python3 - <<'PY'
           import json,pathlib
           root=pathlib.Path('v015')
           page=(root/'index.html').read_text()
           manifest=json.loads((root/'manifest.json').read_text())
-          assert 'Genesis 0.15 V003' in page, 'V003 heading missing'
-          assert 'Project Genesis 0.15 V003' in page, 'V003 title missing'
-          assert manifest['version']=='0.15-v003', 'V003 manifest mismatch'
+          assert 'PROJECT GENESIS' in page, 'Genesis menu missing'
+          assert 'Project Genesis 0.15 V005' in page, 'V005 title missing'
+          assert manifest['version']=='0.15-v005', 'V005 manifest mismatch'
           for c in manifest['characters']:
               path=(root/c['file']).resolve()
               assert path.is_file(),f"Missing asset: {path}"
-          print('V003 publication files verified; no overwrite or extra commit')
+          print('V005 publication files verified; no overwrite or extra commit')
           PY
