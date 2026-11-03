@@ -575,3 +575,26 @@
   box-shadow:0 0 10px 3px #e6a439a6,0 0 3px 1px #ffe3a9!important;
   pointer-events:none!important;
 }
+
+
+/* Inventory slot hover V11: move item content only, never approved cell art.
+ * Images use restrained perspective tilt; real model-viewer uses camera orbit
+ * driven by the corresponding pointer handlers in inventario_genesis_16x9.js.
+ */
+.genInvSlot{perspective:380px}
+.genInvSlot>img,.genInvSlot>.genInvCreationGlyph{
+ --gen-slot-rotation:0deg;
+ transform:perspective(380px) rotateY(var(--gen-slot-rotation))!important;
+ transform-origin:center!important;
+ transition:transform 160ms ease-out;
+ backface-visibility:hidden;
+ will-change:transform
+}
+.genInvSlot>model-viewer{pointer-events:none}
+@media(hover:none),(prefers-reduced-motion:reduce){
+ .genInvSlot>img,.genInvSlot>.genInvCreationGlyph{
+  transform:none!important;
+  transition:none!important;
+  will-change:auto
+ }
+}
