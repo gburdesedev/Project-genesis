@@ -24,11 +24,6 @@ once("setLoadUI(100,'Núcleo listo','Edric, cámara y controles preparados. El t
 once("await Promise.all(Array.from({length:Math.min(3,total)},worker));",
      "await Promise.all(Array.from({length:Math.min(window.GenesisDevice?.safePreviews?1:3,total)},worker));",
      'mobile resource worker budget')
-# Model instance creation grouped by asset and serialized on mobile.
-once("const results=await Promise.allSettled(els.map(el=>activateDeferredModel(el,ROUTE_ASSET_TIMEOUT_MS,state=>{",
-     "const results=await Promise.allSettled(els.map(async (el,index)=>{if(window.GenesisDevice?.safePreviews&&index>0){for(let i=0;i<index;i++)while(!els[i].contentEntity&&els[i].dataset.asset===asset)await sleep(100)}return activateDeferredModel(el,ROUTE_ASSET_TIMEOUT_MS,state=>{",
-once("onProgress?.(loaded,total,asset+' · '+state.phase+size+' · '+state.seconds+' / 120 s');\n    })));",
-     "onProgress?.(loaded,total,asset+' · '+state.phase+size+' · '+state.seconds+' / 120 s');\n    })}));",
 index.write_text(data,encoding='utf-8')
 # This manifest supplies actual bytes for local assets; remote files use reported Content-Length.
 assets={}
