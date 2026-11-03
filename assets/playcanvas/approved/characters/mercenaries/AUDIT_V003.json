@@ -1,0 +1,163 @@
+{
+  "version": "v0.15-v003-audit",
+  "status": "inspection-only",
+  "models": [
+    {
+      "path": "assets/playcanvas/approved/characters/merchant_v02_75962.glb",
+      "bytes": 2049508,
+      "skins": 0,
+      "animations": [],
+      "nodes": 1,
+      "is_animated": false
+    },
+    {
+      "path": "assets/playcanvas/approved/characters/ordan/ordanHairModel.glb",
+      "bytes": 57584,
+      "skins": 1,
+      "animations": [],
+      "nodes": 67,
+      "is_animated": false
+    },
+    {
+      "path": "assets/playcanvas/approved/characters/ordan/ordanModel.glb",
+      "bytes": 1617696,
+      "skins": 1,
+      "animations": [],
+      "nodes": 75,
+      "is_animated": false
+    },
+    {
+      "path": "assets/playcanvas/approved/characters/recovered/male_peasant.glb",
+      "bytes": 653892,
+      "skins": 1,
+      "animations": [],
+      "nodes": 70,
+      "is_animated": false
+    },
+    {
+      "path": "assets/playcanvas/approved/characters/recovered/male_ranger.glb",
+      "bytes": 1617696,
+      "skins": 1,
+      "animations": [],
+      "nodes": 75,
+      "is_animated": false
+    },
+    {
+      "path": "assets/vendor/genesis/externals/peasantMale086/src/male_peasant.glb",
+      "bytes": 653892,
+      "skins": 1,
+      "animations": [],
+      "nodes": 70,
+      "is_animated": false
+    },
+    {
+      "path": "assets/vendor/genesis/externals/rangerMale086/src/male_ranger.glb",
+      "bytes": 1617696,
+      "skins": 1,
+      "animations": [],
+      "nodes": 75,
+      "is_animated": false
+    }
+  ],
+  "references": [
+    {
+      "path": "assets/playcanvas/approved/characters/ordan/RECOVERY_REPORT.json",
+      "hits": 2,
+      "examples": [
+        "gerMale086\\\" type=\\\"container\\\" src=\\\"./assets/vendor/genesis/externals/rangerMale086/src/male_ranger.glb\\\" lazy>\",     \"hairBeard086\": \"<pc-asset id=\\\"hairBeard086\\\" type=\\\"container\\\" src=\\\"./assets/vendor/genesis/externals/hairB",
+        "   \"bytes\": 1617696,       \"source\": \"./assets/vendor/genesis/externals/rangerMale086/src/male_ranger.glb\"     },     {       \"name\": \"ordanHairModel\",       \"path\": \"assets/playcanvas/approved/characters/ordan/ordanHairModel.glb\","
+      ]
+    },
+    {
+      "path": "genesis_asset_preflight_v001.js",
+      "hits": 1,
+      "examples": [
+        "santMale086/src/male_peasant.glb\",   \"./assets/vendor/genesis/externals/rangerMale086/src/male_ranger.glb\" ]); const skipPreload = window.GenesisDevice?.safePreviews === true && new URLSearchParams(window.location.search).get('gene"
+      ]
+    },
+    {
+      "path": "mercenary_equipment_canvas_v001.js",
+      "hits": 14,
+      "examples": [
+        "/* Project Genesis · Mercenary concept layout, v0.1.001.    Uses the existing PlayCanvas mission/equipment callbacks; never generates item statistics.    Only ",
+        "  const bodyUrl=opts.body==='ranger'?'./assets/vendor/genesis/externals/rangerMale086/src/male_ranger.glb':'./assets/vendor/genesis/externals/peasantMale086/src/male_peasant.glb';   const cachedBodyUrl=window.GenesisPreflight?.mode",
+        "ap(i=>'<button type=\"button\" '+(i===opts.candidate?'class=\"on\"':'disabled')+' aria-label=\"Mercenario '+(i+1)+'\">'+(i+1)+'</button>').join('')+'</span></div>'+    '<div class=\"mcMercField\">'+     '<div class=\"mcSlotsLeft\">'+slot(",
+        "dow-intensity=\".7\" exposure=\"1.1\" interaction-prompt=\"none\" alt=\"Modelo base GLB real del mercenario de PlayCanvas\"></model-viewer><span class=\"mcModelNote\">GLB base del juego · equipo visible en el mundo</span></div>'+     '<di",
+        "e)+'</div></div>'+    '<div class=\"mcFooterButtons\"><button data-action=\"sheet\">FICHA DEL MERCENARIO</button><button data-action=\"inventory\">INVENTARIO DEL MERCENARIO</button><button data-action=\"back\">CERRAR / VOLVER</button></"
+      ]
+    },
+    {
+      "path": "mercenary_equipment_domain_v001.js",
+      "hits": 16,
+      "examples": [
+        "/* Project Genesis · mercenary equipment domain v001.  * Headless logic, no demo stats or fabricated inventory. ES5-compatible browser global.  * Host bridges:",
+        "s or fabricated inventory. ES5-compatible browser global.  * Host bridges: getItems(), getMercenaries(), saveMercenaries(next),  * renderMercenary(merc,element), openObjectSheet(item), close()/render().  */ (function(root){ 'use",
+        "entory. ES5-compatible browser global.  * Host bridges: getItems(), getMercenaries(), saveMercenaries(next),  * renderMercenary(merc,element), openObjectSheet(item), close()/render().  */ (function(root){ 'use strict'; const FAM",
+        "er global.  * Host bridges: getItems(), getMercenaries(), saveMercenaries(next),  * renderMercenary(merc,element), openObjectSheet(item), close()/render().  */ (function(root){ 'use strict'; const FAMILY={sword:'Espadas',shield:",
+        "r.techniques:[]};  }); } function normalizeMerc(merc){return {id:merc.id,name:merc.name||'Mercenario',equipment:Object.assign({weapon:null,shield:null},merc.equipment||{}),inventoryIds:Array.isArray(merc.inventoryIds)?merc.inven"
+      ]
+    },
+    {
+      "path": "preparacion_control.js",
+      "hits": 2,
+      "examples": [
+        "='<button type=\"button\" class=\"workspaceMaterial\" id=\"workspaceGear\">Gestionar equipo del mercenario</button>';         if(ctx.extraInventory)details+=ctx.extraInventory();         viewer='<p class=\"workspaceViewEmpty\">Casillas ",
+        "='<button type=\"button\" class=\"workspaceMaterial\" id=\"workspaceGear\">Gestionar equipo del mercenario</button>';         if(ctx.extraInventory)details+=ctx.extraInventory();         viewer=materialVisual(material,'featured');    "
+      ]
+    },
+    {
+      "path": "pruebas/mercenario/index.html",
+      "hits": 2,
+      "examples": [
+        "eta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Project Genesis · Mercenario experimental</title><style>body{background:#100e0b;color:#f2dfba;font:18px Georgia;text-align:center;padding:3rem}</style></hea",
+        " attr+'='+q+branchAssets+file+q;   });   // No iframe / srcdoc: retain real URL query for mercenary-qa=1 and same-origin PBR assets.   document.open();document.write(html);document.close();  }catch(error){   document.body.textCo"
+      ]
+    },
+    {
+      "path": "pruebas/mercenario/v04/index.html",
+      "hits": 20,
+      "examples": [
+        "viewport\" content=\"width=device-width,initial-scale=1\"><title>Project Genesis V04 · QA de mercenario con motor real</title><script type=\"module\" src=\"https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/model-viewer.min.js\">",
+        "isplay:grid;place-items:center}#modal{width:100%}.modal{max-height:100%;max-width:100%}/* Mercenary concept V001 · isolated from the approved main inventory */ #modalLayer:has(.mercConceptModal){padding:1.2vh 1.2vw} #modalLayer ",
+        ":0}.mercConceptModal{max-height:100vh!important}} </style></head><body><div id=\"qa\"><b>QA MERCENARIO · Motor NGE original</b><span id=\"summary\">Fabricando...</span><button id=\"open\">Abrir menú</button><span id=\"status\"></span></",
+        "generateSession,fabricate,present,selfTest}); })(); </script><script>/* Project Genesis · Mercenary concept layout, v0.1.001.    Uses the existing PlayCanvas mission/equipment callbacks; never generates item statistics.    Only ",
+        "'ranger'?'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_ranger.glb':'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_peasant.glb';   return '<section class"
+      ]
+    },
+    {
+      "path": "tests/v015-v001/CANVAS_AUDIT.json",
+      "hits": 11,
+      "examples": [
+        "\" href=\\\"./preparacion.css?v=0.14.018-charcoal-v010\\\">\\n<link rel=\\\"stylesheet\\\" href=\\\"./mercenary_equipment_canvas_v001.css?v=0.1.001\\\">\\n\\n<script type=\\\"importmap\\\">\\n{\\n  \\\"imports\\\": {\\n    \\\"playcanvas\\\": \\\"https://cdn.js",
+        "ript src=\\\"./preparacion_control.js?v=0.14c.020-static-featured\\\">\",     \"<script src=\\\"./mercenary_equipment_canvas_v001.js?v=0.1.001\\\">\",     \"<script type=\\\"module\\\">\",     \"<script id=\\\"genesis-prototype-engines\\\">\",     \"<s",
+        "rofessionChip{top:154px}#materialsPanel{bottom:110px;width:220px}}\\n\\n\\n/* v0.11 · shared mercenary visual polish · Herrero + Curtidor */\\n.itemCard.dualAffinity{border-right:4px solid var(--halo2);box-shadow:0 0 28px color-mix(",
+        "rofessionChip{top:154px}#materialsPanel{bottom:110px;width:220px}}\\n\\n\\n/* v0.11 · shared mercenary visual polish · Herrero + Curtidor */\\n.itemCard.dualAffinity{border-right:4px solid var(--halo2);box-shadow:0 0 28px color-mix(",
+        "gerMale086\\\" type=\\\"container\\\" src=\\\"./assets/vendor/genesis/externals/rangerMale086/src/male_ranger.glb\\\" lazy></pc-asset>\\n  <pc-asset id=\\\"maleHead086\\\" type=\\\"container\\\" src=\\\"./assets/vendor/genesis/externals/maleHead086/sr\""
+      ]
+    },
+    {
+      "path": "tests/v015-v001/manifest.json",
+      "hits": 3,
+      "examples": [
+        "    \"position\": [         25.5,         0,         36.3       ]     },     {       \"id\": \"mercenary\",       \"name\": \"Mercenario\",       \"file\": \"../../assets/playcanvas/approved/characters/recovered/male_ranger.glb\",       \"byte",
+        "5.5,         0,         36.3       ]     },     {       \"id\": \"mercenary\",       \"name\": \"Mercenario\",       \"file\": \"../../assets/playcanvas/approved/characters/recovered/male_ranger.glb\",       \"bytes\": 1617696,       \"positio",
+        "name\": \"Mercenario\",       \"file\": \"../../assets/playcanvas/approved/characters/recovered/male_ranger.glb\",       \"bytes\": 1617696,       \"position\": [         4,         0,         3       ]     }   ],   \"note\": \"Diagnostic config"
+      ]
+    },
+    {
+      "path": "tools/genesis_asset_sizes.json",
+      "hits": 1,
+      "examples": [
+        "_WoodTrim_BaseColor.png\": 2082310,   \"./assets/vendor/genesis/externals/rangerMale086/src/male_ranger.glb\": 1617696,   \"./assets/vendor/genesis/externals/hairBeard086/src/Hair_Beard.glb\": 57584,   \"./assets/vendor/genesis/externals"
+      ]
+    },
+    {
+      "path": "tools/playcanvas_localization_report.json",
+      "hits": 1,
+      "examples": [
+        "e_peasant.glb\",     \"rangerMale086\": \"./assets/vendor/genesis/externals/rangerMale086/src/male_ranger.glb\",     \"maleHead086\": \"./assets/vendor/genesis/externals/maleHead086/src/male_head.glb\",     \"hairParted086\": \"./assets/vendor"
+      ]
+    }
+  ],
+  "note": "An asset is approved for animation only after a compatible rig and clips are confirmed."
+}
