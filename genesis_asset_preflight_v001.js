@@ -58,6 +58,7 @@ const models=Object.freeze([
   "https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_peasant.glb",
   "https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_ranger.glb"
 ]);
+const skipPreload = window.GenesisDevice?.safePreviews === true && new URLSearchParams(window.location.search).get('genesis_preflight') === 'off';
 const activeModels=window.GenesisDevice?.safePreviews ? [] : models;
 const modelBlobs=new Map();
 let pending=null;
@@ -86,6 +87,13 @@ async function waitModel(url){
 function snapshot(){return{total:state.total,completed:state.completed,failed:state.failed,bytes:state.bytes,phase:state.phase,errors:[...state.errors],imageCount:images.length,previewModelCount:activeModels.length}}
 async function preloadUi(onProgress){
  if(pending){const value=await pending;onProgress?.(snapshot());return value}
+ if(skipPreload){
+  state.total=0;
+  state.phase='Prueba móvil: precarga UI desactivada';
+  report=snapshot();
+  onProgress?.(report);
+  return report;
+ }
  const jobs=[...images.map(url=>({kind:'imagen',url})),...activeModels.map(url=>({kind:'visor 3D',url}))];
  state.phase='Descargando interfaz e inventarios';
  pending=(async()=>{
