@@ -15,7 +15,7 @@ def disable(m):
  return tag.replace('<pc-asset','<pc-asset lazy',1) if not re.search(r'\blazy\b',tag) else tag
 s=pattern.sub(disable,s)
 # Stop pc-model instances that directly reference the wallBrick2A asset.
-s,n=re.subn(r'(<pc-model\\b[^>]*?)\\sdata-asset="wallBrick2A"',r'\\1 data-disabled-asset="wallBrick2A"',s,flags=re.I)
+s,n=re.subn(r'(<pc-model\b[^>]*?)\sdata-asset="wallBrick2A"',r'\1 data-disabled-asset="wallBrick2A"',s,flags=re.I)
 print('wallBrick2A model references disabled:',n)
 assert n>=2, 'Expected two Herrero wall models to be disabled'
 p.write_text(s,encoding='utf-8')
