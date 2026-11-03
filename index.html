@@ -227,7 +227,7 @@ window.__genesisAppError=function(event){
 </script>
 <pc-app id="genesisApp" backend="webgl2" antialias loading-bar="false" onprogress="window.__genesisPreloadProgress(event)" onerror="window.__genesisAppError(event)">
   <pc-wasm id="genesisHQDracoDecoder" name="DracoDecoderModule" glue="https://developer.playcanvas.com/assets/modules/draco/draco.wasm.js" wasm="https://developer.playcanvas.com/assets/modules/draco/draco.wasm.wasm"></pc-wasm>
-  <pc-asset id="genesisFountainV011HQAsset" type="container" src="./assets/vendor/genesis/externals/genesisFountainV011HQAsset/src/PG_Dolphin_Fountain_V011_PlayCanvas_HQ_Optimized.glb"></pc-asset>
+  <pc-asset id="genesisFountainV011HQAsset" type="container" src="./assets/vendor/genesis/externals/genesisFountainV011HQAsset/src/PG_Dolphin_Fountain_V011_PlayCanvas_HQ_Optimized.glb" lazy></pc-asset>
   <!-- v0.8.8: Quaternius Universal humanoids + shared animation library.
        Mirrors preserve the CC0 archives and WebGL-friendly embedded textures. -->
     <pc-asset id="peasantMale086" type="container" src="./assets/vendor/genesis/externals/peasantMale086/src/male_peasant.glb"></pc-asset>
