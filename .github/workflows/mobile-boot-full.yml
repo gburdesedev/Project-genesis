@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'tests/mobile_boot_full.cjs'
+      - 'device_policy.js'
       - '.github/workflows/mobile-boot-full.yml'
   workflow_dispatch:
 permissions:
