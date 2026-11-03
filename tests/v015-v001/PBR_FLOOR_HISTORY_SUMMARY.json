@@ -1,0 +1,63 @@
+{
+  "commits_checked": 130,
+  "versions_with_matches": 233,
+  "unique_asset_paths": 8,
+  "asset_references": [
+    {
+      "reference": "https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Floor_WoodDark.gltf",
+      "occurrences": 121,
+      "commit": "26e0dae1b1a18f1eea82415d23f33c220a978fe5",
+      "file": "index.html",
+      "line": 252
+    },
+    {
+      "reference": "https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Floor_UnevenBrick.gltf",
+      "occurrences": 107,
+      "commit": "789cba92e413c4f6b0f14d92d198e0267db2be3b",
+      "file": "index.html",
+      "line": 269
+    },
+    {
+      "reference": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/feature/plaza-fuente-delfin-marmol-aaa/public/models/PG_Dolphin_Fountain_V011_PlayCanvas_HQ_Optimized.glb",
+      "occurrences": 59,
+      "commit": "789cba92e413c4f6b0f14d92d198e0267db2be3b",
+      "file": "index.html",
+      "line": 226
+    },
+    {
+      "reference": "./assets/vendor/genesis/externals/floorBrick/src/Floor_UnevenBrick.gltf",
+      "occurrences": 14,
+      "commit": "26e0dae1b1a18f1eea82415d23f33c220a978fe5",
+      "file": "index.html",
+      "line": 273
+    },
+    {
+      "reference": "https://raw.githubusercontent.com/agentkaerf/FreeModels/main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Floor_UnevenBrick.gltf",
+      "occurrences": 8,
+      "commit": "c8366f310a49c3e746b9a663e48bb51ab8d43091",
+      "file": "index.html",
+      "line": 180
+    },
+    {
+      "reference": "https://raw.githubusercontent.com/agentkaerf/FreeModels/main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Floor_WoodDark.gltf",
+      "occurrences": 2,
+      "commit": "c8366f310a49c3e746b9a663e48bb51ab8d43091",
+      "file": "index.html",
+      "line": 166
+    },
+    {
+      "reference": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/integration/herrero-door-webgl-v018/assets/candidates/herrero-door-v018-pbr1024.glb",
+      "occurrences": 1,
+      "commit": "f4e3be754fcd5a18bbb1e1c1dd40403d870f7edd",
+      "file": "index.html",
+      "line": 263
+    },
+    {
+      "reference": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/integration/herrero-door-webgl-v018/assets/candidates/herrero-door-v018-pbr512-mobile.glb",
+      "occurrences": 1,
+      "commit": "f4e3be754fcd5a18bbb1e1c1dd40403d870f7edd",
+      "file": "index.html",
+      "line": 266
+    }
+  ]
+}
