@@ -1,0 +1,32 @@
+{
+  "material": "cobblestone",
+  "source": "assets/world/v0.11.004",
+  "destination": "assets/playcanvas/approved/world/floors/plaza/cobblestone",
+  "files": [
+    {
+      "name": "cobble_color.png",
+      "bytes": 1990102,
+      "sha256": "710af90a186716c4c7cca555df35ad08b4da302ba27032b727059abb9950529b"
+    },
+    {
+      "name": "cobble_normal.png",
+      "bytes": 2079703,
+      "sha256": "6e71c176d643317160762e1d5e0b06ea695ef1c3b412a80252f6c395e7831a86"
+    },
+    {
+      "name": "cobble_gloss.png",
+      "bytes": 110075,
+      "sha256": "f609b0a6aff7b7fa9ad87ac3e52375e13a8bcba4097935ba8537503c2c64640a"
+    },
+    {
+      "name": "cobble_ao.png",
+      "bytes": 136698,
+      "sha256": "af7d511fbdb208c9d545efbd745709e0c410a5e1ae7404b5007c7cb505c3d0cc"
+    }
+  ],
+  "shared_traffic_normal": {
+    "path": "assets/playcanvas/approved/world/floors/shared/traffic_normal.png",
+    "bytes": 2488773,
+    "sha256": "925b70a3a91310850f1f71e747de6b8f028a0a3c2da05cd280e948a300ea4ac5"
+  }
+}
