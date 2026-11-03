@@ -1,65 +1,31 @@
-name: Deploy isolated v0.15 browser preview
+name: Validate published v0.15 preview
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/deploy-v015-preview.yml']
+    paths:
+      - 'v015/**'
+      - '.github/workflows/deploy-v015-preview.yml'
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
-      - name: Checkout preview source branch
-        uses: actions/checkout@v4
-        with:
-          ref: test/v0.15-v001-floor-characters
-          path: source
-      - name: Checkout Pages branch
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          path: published
-      - name: Assemble independent preview without changing root game
+      - uses: actions/checkout@v4
+      - name: Validate V003 preview without overwriting published files
         run: |
           python3 - <<'PY'
-          import pathlib,shutil,json
-          source=pathlib.Path('source')
-          target=pathlib.Path('published/v015')
-          target.mkdir(parents=True,exist_ok=True)
-          page=(source/'index.html').read_text()
-          page=page.replace('src="./tests/v015-v001/v015-diagnostics.js"','src="./v015-diagnostics.js"')
-          page=page.replace('fetch(\'./tests/v015-v001/manifest.json\'','fetch(\'./manifest.json\'')
-          page=page.replace("new URL(c.file,new URL('./tests/v015-v001/',location.href))","new URL(c.file,location.href)")
-          page=page.replace('./assets/','./assets/')
-          (target/'index.html').write_text(page)
-          shutil.copy2(source/'tests/v015-v001/v015-diagnostics.js',target/'v015-diagnostics.js')
-          manifest=json.loads((source/'tests/v015-v001/manifest.json').read_text())
-          for character in manifest['characters']:
-            original=(source/'tests/v015-v001'/character['file']).resolve()
-            if not original.is_file():raise RuntimeError('Missing character: '+str(original))
-            relative=original.relative_to(source.resolve())
-            destination=target/relative
-            destination.parent.mkdir(parents=True,exist_ok=True)
-            shutil.copy2(original,destination)
-            character['file']='./'+str(relative)
-          (target/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
-          required=['assets/vendor/playcanvas/playcanvas.min.js','assets/playcanvas/approved/world/floors/plaza/cobblestone/cobble_color.png','assets/playcanvas/approved/world/floors/plaza/cobblestone/cobble_normal.png','assets/playcanvas/approved/world/floors/plaza/cobblestone/cobble_ao.png','assets/playcanvas/approved/world/floors/plaza/cobblestone/cobble_gloss.png']
-          for name in required:
-            src=source/name
-            if not src.is_file():raise RuntimeError('Missing resource: '+name)
-            dst=target/name
-            dst.parent.mkdir(parents=True,exist_ok=True)
-            shutil.copy2(src,dst)
-          assert 'tests/v015-v001/' not in page
-          assert (target/'index.html').is_file()
-          print('Preview assembled:',sum(p.stat().st_size for p in target.rglob('*') if p.is_file()),'bytes')
+          import json,pathlib
+          root=pathlib.Path('v015')
+          page=(root/'index.html').read_text()
+          manifest=json.loads((root/'manifest.json').read_text())
+          assert 'Genesis 0.15 V003' in page, 'V003 heading missing'
+          assert 'Project Genesis 0.15 V003' in page, 'V003 title missing'
+          assert manifest['version']=='0.15-v003', 'V003 manifest mismatch'
+          for c in manifest['characters']:
+              path=(root/c['file']).resolve()
+              assert path.is_file(),f"Missing asset: {path}"
+          print('V003 publication files verified; no overwrite or extra commit')
           PY
-      - name: Commit only v015 folder to GitHub Pages branch
-        working-directory: published
-        run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add v015/
-          git diff --cached --quiet || (git commit -m "deploy(v015): isolated browser preview under /v015/" && git push)
