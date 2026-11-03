@@ -127,12 +127,12 @@ const server=http.createServer((req,res)=>{try{const p=decodeURIComponent(new UR
   // Verify that the player actually replaced both original creations, not merely
   // clicked decorative buttons or left the old mesh active.
   const actualSwap=await page.evaluate(()=>{
-    const sword=typeof mercSwordItem!=='undefined'?mercSwordItem:null;
-    const shield=typeof mercShieldItem!=='undefined'?mercShieldItem:null;
+    const snapshot=window.GenesisMercenaryQAGear?.();
     const items=window.GenesisMercenaryQA?.items||[];
-    return {swordId:sword?.id,shieldId:shield?.id,wantedSwordId:items[1]?.id,wantedShieldId:items[3]?.id,
-      swordRarity:sword?.rarity,shieldRarity:shield?.rarity};
+    if(!snapshot)return {error:'Real game QA snapshot unavailable'};
+    return {...snapshot,wantedSwordId:items[1]?.id,wantedShieldId:items[3]?.id};
   });
+  assert.ok(!actualSwap.error,actualSwap.error||'');
   assert.equal(actualSwap.swordId,actualSwap.wantedSwordId,'Mercenary must wield the second, Bueno crafted sword');
   assert.equal(actualSwap.shieldId,actualSwap.wantedShieldId,'Mercenary must carry the second, Comun crafted shield');
   console.log('MERCENARY_REAL_EQUIPMENT_SWAP',JSON.stringify(actualSwap));
