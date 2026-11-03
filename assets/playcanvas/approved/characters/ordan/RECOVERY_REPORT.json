@@ -4,11 +4,22 @@
     "ordanHairModel": "<pc-model id=\"ordanHairModel\" name=\"Ordan beard\" data-asset=\"hairBeard086\" data-route=\"Herrero\" data-priority=\"critical\">"
   },
   "asset_elements": {
-    "": ""
+    "rangerMale086": "<pc-asset id=\"rangerMale086\" type=\"container\" src=\"./assets/vendor/genesis/externals/rangerMale086/src/male_ranger.glb\" lazy>",
+    "hairBeard086": "<pc-asset id=\"hairBeard086\" type=\"container\" src=\"./assets/vendor/genesis/externals/hairBeard086/src/Hair_Beard.glb\" lazy>"
   },
-  "copied": [],
-  "errors": [
-    "Missing asset src for ordanModel via ",
-    "Missing asset src for ordanHairModel via "
-  ]
+  "copied": [
+    {
+      "name": "ordanModel",
+      "path": "assets/playcanvas/approved/characters/ordan/ordanModel.glb",
+      "bytes": 1617696,
+      "source": "./assets/vendor/genesis/externals/rangerMale086/src/male_ranger.glb"
+    },
+    {
+      "name": "ordanHairModel",
+      "path": "assets/playcanvas/approved/characters/ordan/ordanHairModel.glb",
+      "bytes": 57584,
+      "source": "./assets/vendor/genesis/externals/hairBeard086/src/Hair_Beard.glb"
+    }
+  ],
+  "errors": []
 }
