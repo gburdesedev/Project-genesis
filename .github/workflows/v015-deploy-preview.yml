@@ -1,0 +1,53 @@
+name: Package v0.15 V001 isolated preview
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-deploy-preview.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+      - name: Validate runtime and preview references
+        run: |
+          python3 - <<'PY'
+          import pathlib,json,re
+          root=pathlib.Path('.')
+          page=root/'tests/v015-v001/playcanvas-v001.html'
+          source=page.read_text()
+          required=['assets/vendor/playcanvas/playcanvas.min.js','tests/v015-v001/v015-diagnostics.js','tests/v015-v001/manifest.json','assets/playcanvas/approved/world/floors/plaza/cobblestone/cobble_color.png','assets/playcanvas/approved/world/floors/plaza/cobblestone/cobble_normal.png','assets/playcanvas/approved/world/floors/plaza/cobblestone/cobble_ao.png']
+          manifest=json.loads((root/'tests/v015-v001/manifest.json').read_text())
+          for c in manifest['characters']:
+            required.append(str((page.parent/c['file']).resolve().relative_to(root.resolve())))
+          missing=[name for name in required if not (root/name).is_file()]
+          print('Checked',len(required),'files. Missing:',missing)
+          if missing:raise SystemExit('Preview missing local assets: '+repr(missing))
+          if 'v015-diagnostics.js' not in source:raise SystemExit('Diagnostics not wired')
+          if 'const texBase=' not in source:raise SystemExit('PBR not wired')
+          if 'assets/vendor/playcanvas/playcanvas.min.js' not in source:raise SystemExit('Engine not wired')
+          PY
+      - name: Prepare isolated deploy bundle
+        run: |
+          mkdir -p dist/v015
+          cp -a tests/v015-v001/. dist/v015/
+          cp dist/v015/playcanvas-v001.html dist/v015/index.html
+          mkdir -p dist/assets
+          cp -a assets/vendor dist/assets/
+          cp -a assets/playcanvas dist/assets/
+          python3 - <<'PY'
+          import pathlib
+          for p in [pathlib.Path('dist/v015/index.html'),pathlib.Path('dist/v015/playcanvas-v001.html')]:
+            s=p.read_text().replace('../../assets/','../assets/')
+            p.write_text(s)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: project-genesis-v015-v001-isolated-preview
+          path: dist/
+          retention-days: 14
