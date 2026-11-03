@@ -1,0 +1,16 @@
+{
+  "source": "index.html",
+  "entity_id": "floor085",
+  "references": [
+    "stoneFloorMat085"
+  ],
+  "definitions": {
+    "stoneFloorMat085": "<pc-material id=\"stoneFloorMat085\" name=\"Worn workshop flagstone\" diffuse=\"#b5aea0\" diffuse-map=\"stoneFloorTex085\" gloss=\"0.05\">"
+  },
+  "is_glb": false,
+  "excluded": [
+    "Curtidor",
+    "tannerFloor09",
+    "tannerRoof09"
+  ]
+}
