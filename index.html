@@ -1052,27 +1052,12 @@ try{
  }
 }catch(err){failLoading(err?.message||String(err),'La escena no se habilitó; el recurso indicado no terminó de prepararse.');throw err}
 
-let village;
-try{
- activeBootGroup='arboles';showBootProgress(groupStage('arboles'),'Preparando los cuatro árboles aprobados.');
- village=await mountVillage(appEl.app,{
-  shell:document.getElementById('villageShellSource').entity,
-  roof:document.getElementById('villageRoofSource').entity,
-  door:document.getElementById('villageDoorSource').entity,
-  onPhase:group=>{activeBootGroup=group;showBootProgress(groupStage(group),'Esperando recursos del grupo '+group+'.')},
-  onResourceLoaded:name=>{
-   const group=name.startsWith('tree:')?'arboles':name.startsWith('door:')?'puertas':'suelos';
-   bootProgress.world++;bootGroups[group].ready++;
-   activeBootGroup=group;
-   showBootProgress(groupStage(group),name+' · '+bootGroups[group].ready+' de '+bootGroups[group].total);
-  }
- });
-}catch(err){failLoading(err.message,'La aldea no terminó de cargar. Reintentá.');throw err}
-window.__genesisVillage=village;
 let genesisMarket=null;
-try {
+function installGenesisMarket(root){
+ if(genesisMarket)return;
+ try {
  genesisMarket=mountGenesisMarket({
-  app:appEl.app,village,
+  app:appEl.app,village:{root},
   character:document.getElementById('playerModel')?.entity,
   getSession:()=>craftSession,
   getInventory:()=>playerInventory,
@@ -1089,6 +1074,25 @@ try {
    }
  });
 } catch (error) { console.error('Mercado V001 no pudo instalarse',error); }
+}
+let village;
+try{
+ activeBootGroup='arboles';showBootProgress(groupStage('arboles'),'Preparando los cuatro árboles aprobados.');
+ village=await mountVillage(appEl.app,{
+  shell:document.getElementById('villageShellSource').entity,
+  roof:document.getElementById('villageRoofSource').entity,
+  door:document.getElementById('villageDoorSource').entity,
+  onRootReady:installGenesisMarket,
+  onPhase:group=>{activeBootGroup=group;showBootProgress(groupStage(group),'Esperando recursos del grupo '+group+'.')},
+  onResourceLoaded:name=>{
+   const group=name.startsWith('tree:')?'arboles':name.startsWith('door:')?'puertas':'suelos';
+   bootProgress.world++;bootGroups[group].ready++;
+   activeBootGroup=group;
+   showBootProgress(groupStage(group),name+' · '+bootGroups[group].ready+' de '+bootGroups[group].total);
+  }
+ });
+}catch(err){failLoading(err.message,'La aldea no terminó de cargar. Reintentá.');throw err}
+window.__genesisVillage=village;
 
 function hideCollisionMeshes(modelEl){const root=modelEl?.contentEntity;if(!root)return;const stack=[root];while(stack.length){const node=stack.pop();const n=(node.name||'').toLowerCase();let collisionLike=n.includes('convcolonly')||n.startsWith('collision_')||n==='collision';const meshes=node.render?.meshInstances||[];if(meshes.length&&meshes.every(mi=>(mi.material?.name||'').toLowerCase().includes('collision')))collisionLike=true;if(collisionLike)node.enabled=false;for(const child of node.children||[])stack.push(child)}}
 document.querySelectorAll('pc-model').forEach(hideCollisionMeshes);
@@ -1654,7 +1658,8 @@ let routeLoading=false;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function routeModels(prof,priority){return[...document.querySelectorAll(`pc-model[data-route="${prof}"][data-priority="${priority}"]`)].filter(el=>el.dataset.asset&&!el.contentEntity)}
 function groupRouteModels(models){const map=new Map();for(const el of models){const asset=el.dataset.asset;if(!map.has(asset))map.set(asset,[]);map.get(asset).push(el)}return[...map.entries()]}
-function loadDeferredModelAsset(el,asset,timeout=12000){return new Promise((resolve,reject)=>{let done=false;const label=el.getAttribute('name')||el.id||asset;const finish=(ok,msg)=>{if(done)return;done=true;clearTimeout(timer);el.removeEventListener('load',onLoad);el.removeEventListener('error',onError);if(!ok&&!el.contentEntity){try{el.removeAttribute('asset')}catch(_){}}ok?resolve(el):reject(new Error(msg||('No pudo cargarse '+label+' ['+asset+']')))};const onLoad=()=>finish(!!el.contentEntity,el.contentEntity?'':'El modelo terminó sin contenido: '+label+' ['+asset+']');const onError=e=>finish(false,(e?.message||'Falló la carga')+' · '+label+' ['+asset+']');const timer=setTimeout(()=>finish(false,'Tiempo agotado cargando '+label+' ['+asset+']'),timeout);el.addEventListener('load',onLoad,{once:true});el.addEventListener('error',onError,{once:true});if(el.getAttribute('asset')!==asset)el.setAttribute('asset',asset);else if(!el.contentEntity){el.removeAttribute('asset');requestAnimationFrame(()=>el.setAttribute('asset',asset))}if(el.contentEntity)finish(true)})}
+function loadDeferredModelAsset(el,asset,timeout=12000){return new Promise((resolve,reject)=>{let done=false;const label=el.getAttribute('name')||el.id||asset;const finish=(ok,msg)=>{if(done)return;done=true;clearTimeout(timer);el.removeEventListener('load',onLoad);el.removeEventListener('error',onError);// Keep the selected asset on timeout: model can still finish instantiating.
+ ok?resolve(el):reject(new Error(msg||('No pudo cargarse '+label+' ['+asset+']')))};const onLoad=()=>finish(!!el.contentEntity,el.contentEntity?'':'El modelo terminó sin contenido: '+label+' ['+asset+']');const onError=e=>finish(false,(e?.message||'Falló la carga')+' · '+label+' ['+asset+']');const timer=setTimeout(()=>finish(false,'Tiempo agotado cargando '+label+' ['+asset+']'),timeout);el.addEventListener('load',onLoad,{once:true});el.addEventListener('error',onError,{once:true});if(el.getAttribute('asset')!==asset)el.setAttribute('asset',asset);else if(!el.contentEntity){/* Keep the original model selection while the container loads: re-arming it mid-flight loses the instance. */}if(el.contentEntity)finish(true)})}
 async function activateDeferredModel(el,timeout=12000){if(el.contentEntity)return el;const primary=el.dataset.asset;if(!primary)return el;const fallback=el.dataset.fallbackAsset;try{return await loadDeferredModelAsset(el,primary,timeout)}catch(primaryError){if(!fallback)throw primaryError;console.warn('Genesis asset fallback:',primaryError.message,'→',fallback);try{return await loadDeferredModelAsset(el,fallback,Math.min(timeout,8000))}catch(fallbackError){throw new Error(primaryError.message+' | Fallback '+fallback+' también falló: '+fallbackError.message)}}}
 // Instanciar la ruta COMPLETA antes de iniciar el juego. Sin deadline
 // artificial ni descargas adicionales de decoración durante la partida.
@@ -1667,7 +1672,7 @@ async function activateRouteGroups(prof,priority,onProgress){
  async function worker(){
   while(next<grouped.length){
    const [asset,els]=grouped[next++];
-   const results=await Promise.allSettled(els.map(el=>activateDeferredModel(el,45000)));
+   const results=await Promise.allSettled(els.map(el=>activateDeferredModel(el,75000)));
    const ok=results.every((r,i)=>r.status==='fulfilled'&&!!els[i].contentEntity);
    if(ok)loaded++;
    else{
