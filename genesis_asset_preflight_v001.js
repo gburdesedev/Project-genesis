@@ -58,7 +58,9 @@ const models=Object.freeze([
   "https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_peasant.glb",
   "https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_ranger.glb"
 ]);
-const skipPreload = window.GenesisDevice?.safePreviews === true && new URLSearchParams(window.location.search).get('genesis_preflight') === 'off';
+const preflightMode=new URLSearchParams(window.location.search).get('genesis_preflight');
+const skipPreload = window.GenesisDevice?.safePreviews === true && preflightMode === 'off';
+const delayedPreload = window.GenesisDevice?.safePreviews === true && preflightMode === 'after';
 const activeModels=window.GenesisDevice?.safePreviews ? [] : models;
 const modelBlobs=new Map();
 let pending=null;
@@ -87,6 +89,37 @@ async function waitModel(url){
 function snapshot(){return{total:state.total,completed:state.completed,failed:state.failed,bytes:state.bytes,phase:state.phase,errors:[...state.errors],imageCount:images.length,previewModelCount:activeModels.length}}
 async function preloadUi(onProgress){
  if(pending){const value=await pending;onProgress?.(snapshot());return value}
+ if(delayedPreload){
+  // Diagnostic C: admit the player with the known-working mobile boot,
+  // then fetch the same UI images sequentially, without gating the scene.
+  state.total=0;
+  state.phase='Esperando entrada al Herrero para cargar UI';
+  report=snapshot();
+  onProgress?.(report);
+  let launched=false;
+  const observer=setInterval(()=>{
+   if(launched)return;
+   const intro=document.querySelector('#prototypeIntro');
+   const loading=document.querySelector('#loading');
+   if(intro?.style.display!=='none'||loading?.style.display!=='none')return;
+   launched=true;clearInterval(observer);
+   const work=async()=>{
+    state.total=images.length;
+    state.phase='Carga diferida de UI';
+    for(const url of images){
+     try{await waitImage(url)}
+     catch(e){state.failed++;state.errors.push(String(e?.message||e))}
+     state.completed++;
+     console.info('Genesis deferred UI:',state.completed,'/',images.length,url);
+     await new Promise(resolve=>setTimeout(resolve,150));
+    }
+    state.phase=state.failed?'Carga diferida con fallos':'Carga diferida completa';
+    console.info('Genesis deferred UI COMPLETE',snapshot());
+   };
+   work().catch(e=>{state.phase='Error en carga diferida';state.errors.push(String(e));console.warn(e)});
+  },500);
+  return report;
+ }
  if(skipPreload){
   state.total=0;
   state.phase='Prueba móvil: precarga UI desactivada';
