@@ -1,0 +1,35 @@
+name: Inventory previous Canvas floors
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-floor-inventory.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+      - run: |
+          python3 - <<'PY'
+          import re,json,pathlib,collections
+          s=pathlib.Path('index.html').read_text()
+          asset={m.group(1):{'url':m.group(2)} for m in re.finditer(r'<pc-asset\b[^>]*\bid="([^"]+)"[^>]*\bsrc="([^"]+)"',s)}
+          models=[]
+          for m in re.finditer(r'<pc-model\b[^>]*>',s):
+            tag=m.group();a=dict(re.findall(r'([\w-]+)="([^"]*)"',tag))
+            if re.search(r'floor|ground|pav|piso|terrain|road|path|cobble|stone|tile',str(a),re.I):models.append(a)
+          groups=collections.defaultdict(list)
+          for m in models:groups[m.get('data-asset','none')].append(m)
+          out={'previous_canvas_floor_like_instances':len(models),'unique_asset_ids':len(groups),'assets':{k:{'instances':len(v),'src':asset.get(k,{}).get('url'),'examples':v[:3]} for k,v in groups.items()},'ground_entities':[x[:500] for x in re.findall(r'<pc-entity\b[^>]*(?:ground|floor|piso|terrain)[^>]*>',s,re.I)[:35]],'village_plan_floor_lines':[line[:350] for line in pathlib.Path('village_plan.js').read_text().splitlines() if re.search(r'floor|ground|pav|piso|terrain|road|path',line,re.I)][:65]}
+          pathlib.Path('tests/v015-v001/FLOOR_INVENTORY.json').write_text(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps({'instances':len(models),'unique':len(groups),'ids':{k:len(v) for k,v in groups.items()}},ensure_ascii=False))
+          PY
+      - run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tests/v015-v001/FLOOR_INVENTORY.json
+          git diff --cached --quiet || (git commit -m "audit(v015): inventory old Canvas floors and instances" && git push)
