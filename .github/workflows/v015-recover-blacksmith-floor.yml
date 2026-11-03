@@ -1,0 +1,49 @@
+name: Recover original blacksmith floor
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-recover-blacksmith-floor.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+      - name: Recover exact floor definition and referenced materials
+        run: |
+          python3 - <<'PY'
+          import pathlib,re,json,html
+          src=pathlib.Path('index.html').read_text(encoding='utf-8')
+          out=pathlib.Path('assets/playcanvas/approved/world/floors/blacksmith')
+          out.mkdir(parents=True,exist_ok=True)
+          start=re.search(r'<pc-entity\b[^>]*\bid=["\']floor085["\'][^>]*>',src,re.I)
+          if not start:raise SystemExit('floor085 not found; no recovery committed')
+          pattern=re.compile(r'</?pc-entity\b[^>]*>',re.I)
+          depth=0;end=None
+          for m in pattern.finditer(src,start.start()):
+            depth+= -1 if m.group().startswith('</') else 1
+            if depth==0:end=m.end();break
+          if end is None:raise SystemExit('floor085 entity not balanced')
+          snippet=src[start.start():end]
+          (out/'floor085.original.html').write_text(snippet,encoding='utf-8')
+          refs=sorted(set(re.findall(r'(?:material|diffuse-map|normal-map|data-asset|asset)=["\']([^"\']+)["\']',snippet,re.I)))
+          materials={}
+          for ref in refs:
+            safe=re.escape(ref)
+            for tag in ('pc-material','pc-texture','pc-asset'):
+              m=re.search(r'<'+tag+r'\b(?=[^>]*\bid=["\']'+safe+r'["\'])[^>]*>',src,re.I)
+              if m:materials[ref]=m.group()
+          (out/'floor085.dependencies.json').write_text(json.dumps({'source':'index.html','entity_id':'floor085','references':refs,'definitions':materials,'is_glb':False,'excluded':['Curtidor','tannerFloor09','tannerRoof09']},ensure_ascii=False,indent=2))
+          (out/'README.md').write_text('# Piso original del Herrero — floor085\n\nDefinición extraída literalmente del Canvas anterior. **No es un GLB**: se compone de una entidad PlayCanvas y sus materiales. Revisar las dependencias antes de integrarlo a la V001. No incluye elementos del Curtidor.\n')
+          print('Recovered original floor085:',len(snippet),'characters, refs:',refs)
+          PY
+      - name: Commit approved floor source
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add assets/playcanvas/approved/world/floors/blacksmith/
+          git diff --cached --quiet || (git commit -m "assets(v015): recover original blacksmith floor085" && git push)
