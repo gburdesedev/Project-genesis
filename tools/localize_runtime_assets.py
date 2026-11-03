@@ -87,5 +87,5 @@ def main():
     (root/"tools/playcanvas_localization_report.json").write_text(
         json.dumps({"schema":1,"mirrored":len(items),"replaced":sum(hits.values()),"unusedIds":unused,
           "localUrls":{items[k]["id"]:rewritten[items[k]["source"]] for k in items}},indent=2)+"\n",encoding="utf-8")
-    if sum(hits.values())==0:raise RuntimeError("No remote references replaced; possibly already localized")
+    if not present:raise RuntimeError("No local runtime asset reference found")
 if __name__=="__main__":main()
