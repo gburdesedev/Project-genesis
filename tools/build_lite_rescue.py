@@ -93,7 +93,7 @@ replacement="""  stampVersion();
     setProfession(prof){for(const w of plan.workshops){const entity=buildings.get(w.profession);if(entity)entity.enabled=w.profession!==prof;}},
     blocked(x,z,r=.33){return plan.blocked(x,z,r)}});
   }
-  const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14c');app.root.addChild(root);"""
+"""
 path.write_text(s.replace(needle,replacement,1),encoding='utf-8')
 print('village_world.js simple level enabled')
 # Don't fetch HQ workshop architecture while lite mode active.
