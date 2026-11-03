@@ -75,7 +75,8 @@ def main():
        [x for x in items if x.startswith("tree_v003_")])
     # Literal URLs for Arcane wall and portal have been replaced above.
     for id in ("arcanistDoorV027","arcanistWallsV006"):
-        if hits[items[id]["source"]] == 0:
+        arcane_file="village_arcanist.js" if id=="arcanistDoorV027" else "genesis_arcanista_four_walls_v006.js"
+        if hits[items[id]["source"]] == 0 and local(id) not in (root/arcane_file).read_text(encoding="utf-8"):
             raise RuntimeError("Arcane GLB still has no local runtime reference: "+id)
         dynamic_done.add(id)
     # Report already-localized assets as present on repeat runs, not missing.
