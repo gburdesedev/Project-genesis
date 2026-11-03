@@ -1658,9 +1658,67 @@ let routeLoading=false;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function routeModels(prof,priority){return[...document.querySelectorAll(`pc-model[data-route="${prof}"][data-priority="${priority}"]`)].filter(el=>el.dataset.asset&&!el.contentEntity)}
 function groupRouteModels(models){const map=new Map();for(const el of models){const asset=el.dataset.asset;if(!map.has(asset))map.set(asset,[]);map.get(asset).push(el)}return[...map.entries()]}
-function loadDeferredModelAsset(el,asset,timeout=12000){return new Promise((resolve,reject)=>{let done=false;const label=el.getAttribute('name')||el.id||asset;const finish=(ok,msg)=>{if(done)return;done=true;clearTimeout(timer);el.removeEventListener('load',onLoad);el.removeEventListener('error',onError);// Keep the selected asset on timeout: model can still finish instantiating.
- ok?resolve(el):reject(new Error(msg||('No pudo cargarse '+label+' ['+asset+']')))};const onLoad=()=>finish(!!el.contentEntity,el.contentEntity?'':'El modelo terminó sin contenido: '+label+' ['+asset+']');const onError=e=>finish(false,(e?.message||'Falló la carga')+' · '+label+' ['+asset+']');const timer=setTimeout(()=>finish(false,'Tiempo agotado cargando '+label+' ['+asset+']'),timeout);el.addEventListener('load',onLoad,{once:true});el.addEventListener('error',onError,{once:true});if(el.getAttribute('asset')!==asset)el.setAttribute('asset',asset);else if(!el.contentEntity){/* Keep the original model selection while the container loads: re-arming it mid-flight loses the instance. */}if(el.contentEntity)finish(true)})}
-async function activateDeferredModel(el,timeout=12000){if(el.contentEntity)return el;const primary=el.dataset.asset;if(!primary)return el;const fallback=el.dataset.fallbackAsset;try{return await loadDeferredModelAsset(el,primary,timeout)}catch(primaryError){if(!fallback)throw primaryError;console.warn('Genesis asset fallback:',primaryError.message,'→',fallback);try{return await loadDeferredModelAsset(el,fallback,Math.min(timeout,8000))}catch(fallbackError){throw new Error(primaryError.message+' | Fallback '+fallback+' también falló: '+fallbackError.message)}}}
+// A model is ready only when its PlayCanvas render entity exists.
+// Resource Timing exposes bytes once a request finishes; no synthetic byte percentages.
+const ROUTE_ASSET_TIMEOUT_MS=120000;
+const routeAssetProgress=window.__genesisAssetProgress=Object.create(null);
+function describeRouteAsset(asset){
+ const node=document.getElementById(asset),url=node?.getAttribute('src')||'';
+ const target=url?new URL(url,location.href).href:'';
+ const entry=target?performance.getEntriesByName(target,'resource').at(-1):null;
+ const loaded=!!node?.asset?.loaded||!!node?.asset?.resource;
+ const bytes=entry?.decodedBodySize||entry?.encodedBodySize||entry?.transferSize||0;
+ return {url,bytes:bytes||null,downloadComplete:loaded||!!entry,
+  resourceReady:!!node?.asset?.resource,loading:!!node?.asset?.loading};
+}
+function loadDeferredModelAsset(el,asset,timeout=ROUTE_ASSET_TIMEOUT_MS,onProgress=()=>{}){
+ return new Promise((resolve,reject)=>{
+  let done=false;
+  const label=el.getAttribute('name')||el.id||asset;
+  const started=performance.now();
+  function publish(){
+   const info=describeRouteAsset(asset),seconds=Math.round((performance.now()-started)/1000);
+   const phase=el.contentEntity?'listo':info.resourceReady?'instanciando':info.downloadComplete?'procesando modelo':'descargando';
+   const state={asset,label,seconds,phase,bytes:info.bytes,downloadComplete:info.downloadComplete,instanceReady:!!el.contentEntity};
+   routeAssetProgress[asset]=state;
+   onProgress(state);
+   if(el.contentEntity)finish(true);
+  }
+  function finish(ok,message){
+   if(done)return;
+   done=true;clearInterval(poller);clearTimeout(timer);
+   el.removeEventListener('load',onLoad);el.removeEventListener('error',onError);
+   const info=describeRouteAsset(asset);
+   routeAssetProgress[asset]={asset,label,seconds:Math.round((performance.now()-started)/1000),
+    phase:ok?'listo':'error',bytes:info.bytes,downloadComplete:info.downloadComplete,instanceReady:!!el.contentEntity};
+   ok?resolve(el):reject(new Error(message||('No pudo cargarse '+label+' ['+asset+']')));
+  }
+  function onLoad(){if(el.contentEntity)finish(true);else publish()}
+  function onError(e){finish(false,(e?.message||'Falló la carga')+' · '+label+' ['+asset+']')}
+  const poller=setInterval(publish,500);
+  const timer=setTimeout(()=>{
+   if(el.contentEntity){finish(true);return}
+   const info=describeRouteAsset(asset);
+   finish(false,'Límite de 120 s agotado: '+label+' ['+asset+'] · '+
+    (info.resourceReady?'modelo descargado, instancia pendiente':info.downloadComplete?'archivo descargado, procesamiento pendiente':'descarga sin completar')+
+    (info.bytes!=null?' · '+(info.bytes/1048576).toFixed(1)+' MiB recibidos':' · bytes aún no informados por el navegador'));
+  },timeout);
+  el.addEventListener('load',onLoad);el.addEventListener('error',onError);
+  if(el.getAttribute('asset')!==asset)el.setAttribute('asset',asset);
+  publish();
+ });
+}
+async function activateDeferredModel(el,timeout=ROUTE_ASSET_TIMEOUT_MS,onProgress=()=>{}){
+ if(el.contentEntity)return el;
+ const primary=el.dataset.asset;if(!primary)return el;
+ const fallback=el.dataset.fallbackAsset;
+ try{return await loadDeferredModelAsset(el,primary,timeout,onProgress)}
+ catch(primaryError){
+  if(!fallback)throw primaryError;
+  console.warn('Genesis asset fallback:',primaryError.message,'→',fallback);
+  return loadDeferredModelAsset(el,fallback,timeout,onProgress);
+ }
+}
 // Instanciar la ruta COMPLETA antes de iniciar el juego. Sin deadline
 // artificial ni descargas adicionales de decoración durante la partida.
 async function activateRouteGroups(prof,priority,onProgress){
@@ -1672,7 +1730,10 @@ async function activateRouteGroups(prof,priority,onProgress){
  async function worker(){
   while(next<grouped.length){
    const [asset,els]=grouped[next++];
-   const results=await Promise.allSettled(els.map(el=>activateDeferredModel(el,75000)));
+   const results=await Promise.allSettled(els.map(el=>activateDeferredModel(el,ROUTE_ASSET_TIMEOUT_MS,state=>{
+    const size=state.bytes!=null?' · '+(state.bytes/1048576).toFixed(1)+' MiB':' · bytes no informados';
+    onProgress?.(loaded,total,asset+' · '+state.phase+size+' · '+state.seconds+' / 120 s');
+   })));
    const ok=results.every((r,i)=>r.status==='fulfilled'&&!!els[i].contentEntity);
    if(ok)loaded++;
    else{
