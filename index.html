@@ -1018,7 +1018,7 @@ try{
  await Promise.race([whenReady('#genesisApp'),new Promise((_,reject)=>appEl.addEventListener('error',e=>{if(e.target===appEl)reject(new Error(e?.message||'Fallo iniciando PlayCanvas.'))}))]);
  window.GenesisFPS.attach(appEl.app,document.getElementById('tech'));
  const modelEls=[...document.querySelectorAll('pc-model[asset]:not([data-route])')];
- const clipEls=[...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]'));
+ const clipEls=window.GenesisDevice?.safePreviews?[]:[...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]'));
  const prepItems=[...modelEls.map(el=>({kind:'modelo',label:el.getAttribute('name')||el.id||el.getAttribute('asset')||'modelo',el})),...clipEls.map(el=>({kind:'animación',label:el.getAttribute('name')||el.getAttribute('asset')||'clip',el}))];
  for(const item of prepItems){item.group=groupFor(item);bootGroups[item.group].total++}
  let prepared=0;const prepTotal=Math.max(1,prepItems.length);
@@ -1039,9 +1039,17 @@ try{
  }
  const [p,o,c]=await Promise.all([bootWait(whenReady('#playerModel'),'Edric cuerpo'),bootWait(whenReady('#ordanModel'),'Ordan'),bootWait(whenReady('#cameraRig'),'cámara')]);
  player=p.entity;ordan=o.entity;tannerMentor=document.getElementById('tannerMentorModel')?.entity||ordan;camera=c.entity;setupGameViewport();
- [playerAnim,playerHeadAnim,playerHairAnim,ordanAnim,ordanHeadAnim,ordanHairAnim]=await bootWait(Promise.all([
-   whenReady('#playerAnim'),whenReady('#playerHeadAnim'),whenReady('#playerHairAnim'),whenReady('#ordanAnim'),whenReady('#ordanHeadAnim'),whenReady('#ordanHairAnim')
- ]),'animaciones núcleo',18000);
+ // Animations are decorative during mobile boot: never block world admission.
+ // WebKit may leave a clip readiness promise pending; attach components when ready.
+ const coreAnimSelectors=['#playerAnim','#playerHeadAnim','#playerHairAnim','#ordanAnim','#ordanHeadAnim','#ordanHairAnim'];
+ if(window.GenesisDevice?.safePreviews){
+   [playerAnim,playerHeadAnim,playerHairAnim,ordanAnim,ordanHeadAnim,ordanHairAnim]=coreAnimSelectors.map(selector=>document.querySelector(selector));
+   console.info('Genesis mobile: animation clips no longer gate world boot');
+ }else{
+   const coreAnimations=[];
+   for(const selector of coreAnimSelectors)coreAnimations.push(await bootWait(whenReady(selector),selector,18000));
+   [playerAnim,playerHeadAnim,playerHairAnim,ordanAnim,ordanHeadAnim,ordanHairAnim]=coreAnimations;
+ }
 }catch(err){failLoading(err?.message||String(err),'La escena no se habilitó; el recurso indicado no terminó de prepararse.');throw err}
 
 let village;
