@@ -2,7 +2,7 @@
 from pathlib import Path
 import re
 s=Path('index.html').read_text(encoding='utf8')
-for needle in ('EQUIP_MODEL_URLS','mercSwordModel','mercSwordItem','equipMercenaryCreations','ensureMercenaryReady','espada_hierro','function showMercenaryEquipment','itemIcon:'):
+for needle in ('EQUIP_MODEL_URLS','mercSwordModel','mercSword10','mercSwordItem','equipMercenaryCreations','ensureMercenaryReady','espada_hierro','function showMercenaryEquipment','equipMercenaryCreations','itemIcon:'):
     print('\n=== '+needle+' ===')
     starts=[m.start() for m in list(re.finditer(re.escape(needle),s))[:6]]
     for i,start in enumerate(starts):
