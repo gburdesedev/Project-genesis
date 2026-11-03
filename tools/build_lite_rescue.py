@@ -27,10 +27,10 @@ for ident in ('genesisFountainV011Model','villageRoofSource'):
  match=re.search(pattern,s)
  if not match:raise RuntimeError('missing optional model '+ident)
  s=s[:match.start()]+match.group(1)+' data-disabled-asset="'+match.group(2)+'" data-route="LiteDecor"'+s[match.end():]
-# The fountain asset declaration itself was EAGER; keeping its src would still download HQ GLB.
-s,n=re.subn(r'(<pc-asset id="genesisFountainV011HQAsset"[^>]*?) src="([^"]+)"',
-            lambda m:m.group(1)+' data-disabled-src="'+m.group(2)+'"',s,count=1)
-if n!=1:raise RuntimeError('fountain asset URL not preserved as disabled')
+# The fountain asset declaration was eager; mark lazy, preserve original URL.
+s,n=re.subn(r'(<pc-asset id="genesisFountainV011HQAsset"[^>]*?)(></pc-asset>)',
+            lambda m:m.group(1)+' lazy'+m.group(2),s,count=1)
+if n!=1:raise RuntimeError('fountain lazy asset declaration missing')
 # No missing entity required: source roof is intentionally inactive while using basic village.
 one("roof:document.getElementById('villageRoofSource').entity,",
     "roof:document.getElementById('villageRoofSource')?.entity||null,",
