@@ -36,12 +36,12 @@ one("const uiAssetsPromise=window.GenesisPreflight",
     "const uiAssetsPromise=window.__GENESIS_LITE_BOOT?Promise.resolve({report:{total:0,completed:0,failed:0}}):window.GenesisPreflight",
     'skip expensive UI prefetched files')
 # Heavy 3D route assets were lazy. Skip route instantiation completely in rescue mode.
-one("async function prepareRoute(prof){\n  if(routeReady.has(prof))return;",
-    "async function prepareRoute(prof){\n  if(window.__GENESIS_LITE_BOOT){routeReady.add(prof);setLoadUI(100,'Modo rescate','Escenario simple: decoración 3D desactivada.');return;}\n  if(routeReady.has(prof))return;",
+one("async function prepareRoute(prof){",
+    "async function prepareRoute(prof){if(window.__GENESIS_LITE_BOOT){routeReady.add(prof);setLoadUI(100,'Modo rescate','Escenario simple: decoración 3D desactivada.');return;}",
     'route bypass')
 # Skip demanding visual modules that download GLBs, and don't keep their 2 items in progress total.
-one("async function waitVisualModulesBeforePlay(){\n  const deadline=",
-    "async function waitVisualModulesBeforePlay(){\n  if(window.__GENESIS_LITE_BOOT){bootProgress.externals=bootProgress.externalsTotal;return;}\n  const deadline=",
+one("async function waitVisualModulesBeforePlay(){",
+    "async function waitVisualModulesBeforePlay(){if(window.__GENESIS_LITE_BOOT){bootProgress.externals=bootProgress.externalsTotal;return;}",
     'visual modules bypass')
 # Disable optional animations in this rescue build: their library costs several MiB.
 one("const clipEls=window.GenesisDevice?.safePreviews?[]:",
