@@ -82,5 +82,5 @@ async function mount(){
  }
  state.phase='village-unavailable-after-15min';
 }
-mount().catch(error=>{state.phase='error';state.error=String(error?.stack||error);
+if(!globalThis.__GENESIS_LITE_BOOT)mount().catch(error=>{state.phase='error';state.error=String(error?.stack||error);
  console.error('[GENESIS_ARCANISTA_V006]',error)});

@@ -1,0 +1,46 @@
+name: Build Project Genesis lightweight rescue
+on:
+  push:
+    branches: [fix/lite-boot-recovery-20261103]
+    paths:
+      - 'tools/build_lite_rescue.py'
+      - '.github/workflows/build-lite-rescue.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python tools/build_lite_rescue.py
+      - name: Check modified scripts and extracted HTML module
+        run: |
+          node --check village_world.js
+          node --check genesis_workshop_live_v015.js
+          node --check genesis_arcanista_four_walls_v006.js
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text(encoding='utf-8')
+          assert 'window.__GENESIS_LITE_BOOT=true' in s
+          assert 'data-disabled-asset="genesisFountainV011HQAsset"' in s
+          assert "if(window.__GENESIS_LITE_BOOT){routeReady.add(prof)" in s
+          assert "if(globalThis.__GENESIS_LITE_BOOT)" in Path('village_world.js').read_text()
+          blocks=re.findall(r'<script\b[^>]*type=["\x27]module["\x27][^>]*>(.*?)</script>',s,re.I|re.S)
+          print('Embedded module count:',len(blocks))
+          assert blocks
+          for i,b in enumerate(blocks):Path(f'/tmp/lite-{i}.mjs').write_text(b)
+          PY
+          for f in /tmp/lite-*.mjs; do node --check "$f"; done
+      - name: Save tested rescue build to branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html village_world.js genesis_workshop_live_v015.js genesis_arcanista_four_walls_v006.js
+          git diff --cached --quiet || { git commit -m "rescue: boot basic scene without HQ models, texture packs or mercenary preload"; git push; }
