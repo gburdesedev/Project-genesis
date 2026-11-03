@@ -1,0 +1,25 @@
+{
+  "runtime": "assets/vendor/playcanvas/playcanvas.min.js",
+  "runtime_bytes": 2466254,
+  "runtime_sha256": "115983998d6cdea9126a7a782f2579a3b98401531abd06e852ad415438508d17",
+  "plaza_maps": [
+    {
+      "path": "assets/playcanvas/approved/world/floors/plaza/cobblestone/cobble_color.png",
+      "bytes": 1990102
+    },
+    {
+      "path": "assets/playcanvas/approved/world/floors/plaza/cobblestone/cobble_normal.png",
+      "bytes": 2079703
+    },
+    {
+      "path": "assets/playcanvas/approved/world/floors/plaza/cobblestone/cobble_ao.png",
+      "bytes": 136698
+    },
+    {
+      "path": "assets/playcanvas/approved/world/floors/plaza/cobblestone/cobble_gloss.png",
+      "bytes": 110075
+    }
+  ],
+  "entrypoint": "tests/v015-v001/playcanvas-v001.html",
+  "note": "Bootstrapped test; browser playability and original gameplay not yet verified"
+}
