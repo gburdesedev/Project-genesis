@@ -1,0 +1,64 @@
+{
+  "version": "0.15-v001",
+  "mode": "floor-and-characters",
+  "floor": {
+    "kind": "procedural",
+    "width": 63,
+    "depth": 63,
+    "collision": true,
+    "y": 0
+  },
+  "characters": [
+    {
+      "id": "artisan",
+      "name": "Artesano",
+      "file": "./assets/playcanvas/approved/characters/recovered/male_peasant.glb",
+      "position": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "ordan",
+      "name": "Ordan",
+      "file": "./assets/playcanvas/approved/characters/ordan/ordanModel.glb",
+      "position": [
+        1.72,
+        0,
+        1.9
+      ],
+      "bytes": 1617696
+    },
+    {
+      "id": "ordan-beard",
+      "name": "Barba de Ordan",
+      "file": "./assets/playcanvas/approved/characters/ordan/ordanHairModel.glb",
+      "bytes": 57584,
+      "attachTo": "ordan"
+    },
+    {
+      "id": "merchant",
+      "name": "Comerciante",
+      "file": "./assets/playcanvas/approved/characters/merchant_v02_75962.glb",
+      "bytes": 2049508,
+      "position": [
+        25.5,
+        0,
+        36.3
+      ]
+    },
+    {
+      "id": "mercenary",
+      "name": "Mercenario",
+      "file": "./assets/playcanvas/approved/characters/recovered/male_ranger.glb",
+      "bytes": 1617696,
+      "position": [
+        4,
+        0,
+        3
+      ]
+    }
+  ],
+  "note": "Diagnostic configuration. Actual PlayCanvas scene positions and model rendering must be verified."
+}
