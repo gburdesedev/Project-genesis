@@ -28,7 +28,13 @@ const server=http.createServer((req,res)=>{
   const npc=await page.evaluate(()=>({status:{version:window.__genesisMarket?.version,npc:window.__genesisMarket?.npc,center:window.__genesisMarket?.center},
     model:!!document.getElementById('genesisApp')?.app?.root.findByName('Mercader de suministros · NPC interactivo V001')}));
   assert(npc.model,'NPC not present in actual PlayCanvas scene');
-  await page.locator('[data-profession="Herrero"]').click({timeout:180000});
+  // Market now mounts as soon as the village root exists, before the intro appears.
+  // Wait for the actual player-select screen; a hidden button is not clickable.
+  await page.waitForFunction(()=>document.querySelector('#prototypeIntro')?.style.display==='grid'||
+    !!document.querySelector('.loadingCard.failed'),null,{timeout:180000});
+  const introError=await page.locator('.loadingCard.failed').count();
+  assert.equal(introError,0,'Village boot failed before profession selection: '+await page.locator('#loadState').textContent());
+  await page.locator('[data-profession="Herrero"]').click({timeout:15000});
   await page.waitForFunction(()=>window.__genesisMarket?.catalog()?.length>0,null,{timeout:180000});
   const items=await page.evaluate(()=>window.__genesisMarket.catalog());
   assert(items.length>=2,'Generated seed contained no known items');
@@ -64,6 +70,7 @@ const server=http.createServer((req,res)=>{
     app:!!document.querySelector('#genesisApp')?.app
   })).catch(e=>({diagnosticError:String(e)}));
   fs.writeFileSync(path.join(out,'browser-error.json'),JSON.stringify({error:String(error),diag,errors:errors.slice(0,50)},null,2));
+  console.error('MARKET_BROWSER_DIAGNOSTIC',JSON.stringify({error:String(error),diag,errors:errors.slice(0,50)}));
   await page.screenshot({path:path.join(out,'market-browser-error.png'),timeout:10000}).catch(()=>{});
   throw error;
  }finally{await browser.close();}

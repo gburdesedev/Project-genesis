@@ -33,7 +33,7 @@ function render(opts){
  function currentItem(){return state.selection||current()||currentPool()[0]||null;}
  function fmtValue(r,side){const c=r[side];return c?(c.name==='Base'?String(c.value):'+'+c.value+'%'):'—';}
  function central(){
-  const bodyUrl=opts.body==='ranger'?'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_ranger.glb':'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_peasant.glb';
+  const bodyUrl=opts.body==='ranger'?'./assets/vendor/genesis/externals/rangerMale086/src/male_ranger.glb':'./assets/vendor/genesis/externals/peasantMale086/src/male_peasant.glb';
   const cachedBodyUrl=window.GenesisPreflight?.modelUrl(bodyUrl)||bodyUrl;
   return '<section class="mcPanel mcCenter">'+
    '<div class="mcMercNav"><span class="mcMercName">'+esc(opts.mercName)+'</span><span class="mcMercIDs">'+[0,1,2].map(i=>'<button type="button" '+(i===opts.candidate?'class="on"':'disabled')+' aria-label="Mercenario '+(i+1)+'">'+(i+1)+'</button>').join('')+'</span></div>'+

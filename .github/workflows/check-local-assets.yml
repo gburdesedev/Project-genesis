@@ -1,0 +1,31 @@
+name: Validate local PlayCanvas assets
+on:
+  push:
+    branches:
+      - feature/local-playcanvas-assets-20261103
+    paths:
+      - 'tools/verify_local_runtime.py'
+      - 'tools/playcanvas_localization_report.json'
+      - 'assets/vendor/genesis/externals/**'
+      - '.github/workflows/check-local-assets.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'tools/verify_local_runtime.py'
+      - 'tools/playcanvas_localization_report.json'
+      - 'assets/vendor/genesis/externals/**'
+      - '.github/workflows/check-local-assets.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check all mirrored paths and glTF dependencies
+        run: python tools/verify_local_runtime.py

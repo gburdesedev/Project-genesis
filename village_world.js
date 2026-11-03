@@ -144,9 +144,11 @@ function stampVersion(){
   node.nodeValue=node.nodeValue.replace(/v0\.14(?:[a-c]|\.\d{3})?/gi,version).replace(/202610(?:29|31)\.0[1-9]/g,build);
  }
 }
-export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{}}){
+export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{},onRootReady=()=>{}}){
  stampVersion();
  const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14c');app.root.addChild(root);
+ // Economy/NPC can mount immediately; detailed trees/PBR may still load asynchronously.
+ onRootReady(root);
  // Begin tree transfers before road PBR maps: four species are part of the initial scene.
  const trees=mountVillageTrees(app,root,{onResourceLoaded});
  onPhase('arboles');

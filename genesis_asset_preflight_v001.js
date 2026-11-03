@@ -53,10 +53,10 @@ const models=Object.freeze([
   "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_55k_pbr1536_v007.glb",
   "assets/playcanvas/candidates/materials/iron_ingot/v175/iron_v175_web_candidate.glb",
   "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_final_3_piezas_web.glb",
-  "https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/sword.glb",
-  "https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/shield_round.glb",
-  "https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_peasant.glb",
-  "https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_ranger.glb"
+  "./assets/vendor/genesis/externals/mercSword10/src/sword.glb",
+  "./assets/vendor/genesis/externals/mercShield10/src/shield_round.glb",
+  "./assets/vendor/genesis/externals/peasantMale086/src/male_peasant.glb",
+  "./assets/vendor/genesis/externals/rangerMale086/src/male_ranger.glb"
 ]);
 const skipPreload = window.GenesisDevice?.safePreviews === true && new URLSearchParams(window.location.search).get('genesis_preflight') === 'off';
 const activeModels=window.GenesisDevice?.safePreviews ? [] : models;
