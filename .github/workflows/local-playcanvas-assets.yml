@@ -31,10 +31,10 @@ jobs:
       - name: Download pinned master lock and manifest
         run: |
           mkdir -p /tmp/genesis-vendor
-          curl -fL --retry 3 --connect-timeout 30 "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/dc8b899333f33a80101f7b3c386f5e6a1bf963dd/playcanvas-runtime/manifest.json" -o /tmp/genesis-vendor/manifest.json
-          curl -fL --retry 3 --connect-timeout 30 "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/dc8b899333f33a80101f7b3c386f5e6a1bf963dd/playcanvas-runtime/lock.json" -o /tmp/genesis-vendor/lock.json
+          curl -fL --retry 3 --connect-timeout 30 "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/48ec244e6aa95854fc456aa66e2b657bfddb757a/playcanvas-runtime/manifest.json" -o /tmp/genesis-vendor/manifest.json
+          curl -fL --retry 3 --connect-timeout 30 "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/48ec244e6aa95854fc456aa66e2b657bfddb757a/playcanvas-runtime/lock.json" -o /tmp/genesis-vendor/lock.json
       - name: Copy verified bytes from master into demo
-        run: python tools/install_master_runtime.py --lock /tmp/genesis-vendor/lock.json --root assets/vendor/genesis/externals --master-sha dc8b899333f33a80101f7b3c386f5e6a1bf963dd
+        run: python tools/install_master_runtime.py --lock /tmp/genesis-vendor/lock.json --root assets/vendor/genesis/externals --master-sha 48ec244e6aa95854fc456aa66e2b657bfddb757a
       - name: Rewrite remote URLs only after successful hash validation
         run: python tools/localize_runtime_assets.py --manifest /tmp/genesis-vendor/manifest.json --lock /tmp/genesis-vendor/lock.json --asset-root assets/vendor/genesis/externals
       - name: Commit local models and updated paths to experiment branch
