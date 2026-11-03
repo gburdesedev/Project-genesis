@@ -207,7 +207,7 @@ if(!window.GenesisDevice.safePreviews){const script=document.createElement('scri
 
 <script>
 // Capture PlayCanvas preload progress before the module script starts.
-window.__genesisBoot={loaded:0,total:0,error:null};
+window.__GENESIS_LITE_BOOT=true;window.__genesisBoot={loaded:0,total:0,error:null};
 window.__genesisPreloadProgress=function(event){
   window.__genesisBoot.loaded=Number(event.loaded)||0;
   window.__genesisBoot.total=Number(event.total)||0;
@@ -235,7 +235,7 @@ window.__genesisAppError=function(event){
   <pc-asset id="maleHead086" type="container" src="./assets/vendor/genesis/externals/maleHead086/src/male_head.glb"></pc-asset>
   <pc-asset id="hairParted086" type="container" src="./assets/vendor/genesis/externals/hairParted086/src/hair_simpleparted.glb"></pc-asset>
   <pc-asset id="hairBeard086" type="container" src="./assets/vendor/genesis/externals/hairBeard086/src/Hair_Beard.glb" lazy></pc-asset>
-  <pc-asset id="ual1086" type="container" src="./assets/vendor/genesis/externals/ual1086/src/UAL1.glb"></pc-asset>
+  <pc-asset id="ual1086" type="container" src="./assets/vendor/genesis/externals/ual1086/src/UAL1.glb" lazy></pc-asset>
   <!-- v0.10a mercenary POC · Quaternius/Genesara CC0 derivatives -->
   <pc-asset id="mercHairBuzz10" type="container" src="./assets/vendor/genesis/externals/mercHairBuzz10/src/hair_buzzed.glb" lazy></pc-asset>
   <pc-asset id="mercHairLong10" type="container" src="./assets/vendor/genesis/externals/mercHairLong10/src/hair_long.glb" lazy></pc-asset>
@@ -349,7 +349,7 @@ window.__genesisAppError=function(event){
 
     <!-- Shared façade templates; mesh/texture resources are reused by the village. -->
     <pc-model id="villageShellSource" asset="workshopShell" position="0 -1000 0"></pc-model>
-    <pc-model id="villageRoofSource" asset="roofReal086" position="0 -1000 0" scale="1.28 .55 .86"></pc-model>
+    <pc-model id="villageRoofSource" data-disabled-asset="roofReal086" data-route="LiteDecor" position="0 -1000 0" scale="1.28 .55 .86"></pc-model>
     <pc-model id="villageDoorSource" asset="doorLeaf083" position="0 -1000 0"></pc-model>
     <!-- Navigation ground + real modular paving/floor. -->
     <!-- v0.9a.2 · acceso del Curtidor desde la misma pequeña plaza. -->
@@ -537,9 +537,9 @@ window.__genesisAppError=function(event){
       <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="-4.02 .024 -3.03" scale="1.333333333333 1 1.333333333333">
 <pc-model id="tannerChestModel" name="Curtidor material chest" data-asset="tannerChest09" data-unavailable-source="tannerChest09" rotation="0 8 0" scale="1.02 1.02 1.02" position="0 0 0">
         <pc-anim id="tannerChestAnim" clip="Chest_Closed" activate="true" transition-time="0.12">
-          <pc-anim-clip name="Chest_Closed" asset="tannerChest09"></pc-anim-clip>
-          <pc-anim-clip name="Chest_Open" asset="tannerChest09"></pc-anim-clip>
-          <pc-anim-clip name="Chest_Opened" asset="tannerChest09"></pc-anim-clip>
+          <pc-anim-clip name="Chest_Closed" data-disabled-asset="tannerChest09"></pc-anim-clip>
+          <pc-anim-clip name="Chest_Open" data-disabled-asset="tannerChest09"></pc-anim-clip>
+          <pc-anim-clip name="Chest_Opened" data-disabled-asset="tannerChest09"></pc-anim-clip>
         </pc-anim>
       </pc-model>
 </pc-entity>
@@ -559,22 +559,22 @@ window.__genesisAppError=function(event){
       <pc-entity name="Original prop proportions" data-preserve-proportions="true" position="1.72 0 1.90" scale="1.333333333333 1 1.333333333333">
 <pc-model id="tannerMentorModel" name="Mentor Curtidor · provisional" data-asset="rangerMale086" data-route="Curtidor" data-priority="critical" rotation="0 -21 0" scale="1.04 1.04 1.04" position="0 0 0">
         <pc-anim id="tannerMentorAnim" clip="Idle_Loop" activate="true" transition-time="0.22">
-          <pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip>
-          <pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip>
-          <pc-anim-clip name="Idle_Talking_Loop" asset="ual1086"></pc-anim-clip>
+          <pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+          <pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+          <pc-anim-clip name="Idle_Talking_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
         </pc-anim>
         <pc-model id="tannerMentorHeadModel" name="Tanner mentor head" data-asset="maleHead086" data-route="Curtidor" data-priority="critical">
           <pc-anim id="tannerMentorHeadAnim" clip="Idle_Loop" activate="true" transition-time="0.22">
-            <pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip>
-            <pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip>
-            <pc-anim-clip name="Idle_Talking_Loop" asset="ual1086"></pc-anim-clip>
+            <pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+            <pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+            <pc-anim-clip name="Idle_Talking_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
           </pc-anim>
         </pc-model>
         <pc-model id="tannerMentorHairModel" name="Tanner mentor hair" data-asset="hairParted086" data-route="Curtidor" data-priority="critical">
           <pc-anim id="tannerMentorHairAnim" clip="Idle_Loop" activate="true" transition-time="0.22">
-            <pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip>
-            <pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip>
-            <pc-anim-clip name="Idle_Talking_Loop" asset="ual1086"></pc-anim-clip>
+            <pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+            <pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+            <pc-anim-clip name="Idle_Talking_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
           </pc-anim>
         </pc-model>
       </pc-model>
@@ -585,41 +585,41 @@ window.__genesisAppError=function(event){
          Outfit, cabeza y pelo comparten el rig Universal y reciben los mismos clips. -->
     <pc-model id="playerModel" name="Edric Varen · provisional artisan" asset="peasantMale086" position="0 0 6.3" rotation="0 180 0" scale="1 1 1">
       <pc-anim id="playerAnim" clip="Idle_Loop" activate="true" transition-time="0.18">
-        <pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip>
-        <pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip>
-      <pc-anim-clip name="Sprint_Loop" asset="ual1086"></pc-anim-clip>
+        <pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+        <pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+      <pc-anim-clip name="Sprint_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
 </pc-anim>
       <pc-model id="playerHeadModel" name="Edric head" asset="maleHead086">
         <pc-anim id="playerHeadAnim" clip="Idle_Loop" activate="true" transition-time="0.18">
-          <pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip>
-          <pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip>
-        <pc-anim-clip name="Sprint_Loop" asset="ual1086"></pc-anim-clip>
+          <pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+          <pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+        <pc-anim-clip name="Sprint_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
 </pc-anim>
       </pc-model>
       <pc-model id="playerHairModel" name="Edric hair" asset="hairParted086">
         <pc-anim id="playerHairAnim" clip="Idle_Loop" activate="true" transition-time="0.18">
-          <pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip>
-          <pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip>
-        <pc-anim-clip name="Sprint_Loop" asset="ual1086"></pc-anim-clip>
+          <pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+          <pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+        <pc-anim-clip name="Sprint_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
 </pc-anim>
       </pc-model>
     </pc-model>
 
     <pc-model id="ordanModel" name="Maese Ordan · provisional master artisan" data-asset="rangerMale086" data-route="Herrero" data-priority="critical" position="1.72 0 1.90" rotation="0 -21 0" scale="1.07 1.07 1.07">
       <pc-anim id="ordanAnim" clip="Idle_Loop" activate="true" transition-time="0.22">
-        <pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip>
-        <pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip>
+        <pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+        <pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
       </pc-anim>
       <pc-model id="ordanHeadModel" name="Ordan head" data-asset="maleHead086" data-route="Herrero" data-priority="critical">
         <pc-anim id="ordanHeadAnim" clip="Idle_Loop" activate="true" transition-time="0.22">
-          <pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip>
-          <pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip>
+          <pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+          <pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
         </pc-anim>
       </pc-model>
       <pc-model id="ordanHairModel" name="Ordan beard" data-asset="hairBeard086" data-route="Herrero" data-priority="critical">
         <pc-anim id="ordanHairAnim" clip="Idle_Loop" activate="true" transition-time="0.22">
-          <pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip>
-          <pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip>
+          <pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+          <pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
         </pc-anim>
       </pc-model>
     </pc-model>
@@ -628,30 +628,30 @@ window.__genesisAppError=function(event){
     <pc-entity id="mercenaryRoot" name="Shared mercenary staging root" position="3.25 -40 3.10" rotation="0 180 0">
       <pc-model id="mercBodyModel" name="Guerrero body · peasant" data-asset="peasantMale086" data-route="SharedMercenary" data-priority="ondemand">
         <pc-anim id="mercBodyAnim" clip="Idle_Loop" activate="true" transition-time="0.18">
-          <pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip>
-          <pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip>
+          <pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+          <pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
         </pc-anim>
       </pc-model>
       <pc-model id="mercBodyRangerModel" name="Guerrero body · ranger" data-asset="rangerMale086" data-route="SharedMercenary" data-priority="ondemand">
         <pc-anim id="mercBodyRangerAnim" clip="Idle_Loop" activate="true" transition-time="0.18">
-          <pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip>
-          <pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip>
+          <pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
+          <pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip>
         </pc-anim>
       </pc-model>
       <pc-model id="mercHeadModel" name="Guerrero head" data-asset="maleHead086" data-route="SharedMercenary" data-priority="ondemand">
-        <pc-anim id="mercHeadAnim" clip="Idle_Loop" activate="true" transition-time="0.18"><pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip><pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip></pc-anim>
+        <pc-anim id="mercHeadAnim" clip="Idle_Loop" activate="true" transition-time="0.18"><pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip><pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip></pc-anim>
       </pc-model>
       <pc-model id="mercHairPartedModel" name="Guerrero hair parted" data-asset="hairParted086" data-route="SharedMercenary" data-priority="ondemand">
-        <pc-anim id="mercHairPartedAnim" clip="Idle_Loop" activate="true" transition-time="0.18"><pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip><pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip></pc-anim>
+        <pc-anim id="mercHairPartedAnim" clip="Idle_Loop" activate="true" transition-time="0.18"><pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip><pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip></pc-anim>
       </pc-model>
       <pc-model id="mercHairBuzzModel" name="Guerrero hair buzzed" data-asset="mercHairBuzz10" data-route="SharedMercenary" data-priority="ondemand">
-        <pc-anim id="mercHairBuzzAnim" clip="Idle_Loop" activate="true" transition-time="0.18"><pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip><pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip></pc-anim>
+        <pc-anim id="mercHairBuzzAnim" clip="Idle_Loop" activate="true" transition-time="0.18"><pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip><pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip></pc-anim>
       </pc-model>
       <pc-model id="mercHairLongModel" name="Guerrero hair long" data-asset="mercHairLong10" data-route="SharedMercenary" data-priority="ondemand">
-        <pc-anim id="mercHairLongAnim" clip="Idle_Loop" activate="true" transition-time="0.18"><pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip><pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip></pc-anim>
+        <pc-anim id="mercHairLongAnim" clip="Idle_Loop" activate="true" transition-time="0.18"><pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip><pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip></pc-anim>
       </pc-model>
       <pc-model id="mercBeardModel" name="Guerrero beard" data-asset="hairBeard086" data-route="SharedMercenary" data-priority="ondemand">
-        <pc-anim id="mercBeardAnim" clip="Idle_Loop" activate="true" transition-time="0.18"><pc-anim-clip name="Idle_Loop" asset="ual1086"></pc-anim-clip><pc-anim-clip name="Walk_Loop" asset="ual1086"></pc-anim-clip></pc-anim>
+        <pc-anim id="mercBeardAnim" clip="Idle_Loop" activate="true" transition-time="0.18"><pc-anim-clip name="Idle_Loop" data-disabled-asset="ual1086"></pc-anim-clip><pc-anim-clip name="Walk_Loop" data-disabled-asset="ual1086"></pc-anim-clip></pc-anim>
       </pc-model>
       <pc-model id="mercSwordModel" name="Equipped crafted sword visual" data-asset="mercSword10" data-route="SharedMercenary" data-priority="ondemand" position="0 -40 0">
         <pc-entity id="mercSwordGlowA" position="0 .28 0"><pc-light id="mercSwordLightA" type="omni" color="#b7c2ca" intensity="0" range="1.45"></pc-light></pc-entity>
@@ -687,7 +687,7 @@ window.__genesisAppError=function(event){
       <pc-entity id="mercBootsGlowA" position="0 .16 0"><pc-light id="mercBootsLightA" type="omni" color="#b7c2ca" intensity="0" range=".72"></pc-light></pc-entity>
       <pc-entity id="mercBootsGlowB" position="0 .11 .04"><pc-light id="mercBootsLightB" type="omni" color="#b7c2ca" intensity="0" range=".62"></pc-light></pc-entity>
     </pc-entity>
-    <pc-model id="genesisFountainV011Model" name="Genesis plaza dolphin fountain V011 HQ" asset="genesisFountainV011HQAsset" position="7 0 16" scale="1 1 1"><pc-anim id="genesisFountainV011Anim" activate="true"></pc-anim></pc-model>
+    <pc-model id="genesisFountainV011Model" name="Genesis plaza dolphin fountain V011 HQ" data-disabled-asset="genesisFountainV011HQAsset" data-route="LiteDecor" position="7 0 16" scale="1 1 1"><pc-anim id="genesisFountainV011Anim" activate="true"></pc-anim></pc-model>
   </pc-scene>
 </pc-app>
 <script>window.GenesisDevice.configureApp(document.getElementById('genesisApp'));</script>
@@ -1000,7 +1000,7 @@ function syncPreloadProgress(loaded,total){
  showBootProgress(activeBootGroup?groupStage(activeBootGroup):'Descargando archivos del juego','La barra avanza cuando cada recurso termina realmente de cargar.');
 }
 // Interfaces y visores se cargan mientras PlayCanvas prepara el mundo.
-const uiAssetsPromise=window.GenesisPreflight
+const uiAssetsPromise=window.__GENESIS_LITE_BOOT?Promise.resolve({report:{total:0,completed:0,failed:0}}):window.GenesisPreflight
   ? window.GenesisPreflight.preloadUi(report=>{
      bootProgress.ui=report.completed-report.failed;
      bootProgress.uiTotal=report.total;
@@ -1019,7 +1019,7 @@ try{
  await Promise.race([whenReady('#genesisApp'),new Promise((_,reject)=>appEl.addEventListener('error',e=>{if(e.target===appEl)reject(new Error(e?.message||'Fallo iniciando PlayCanvas.'))}))]);
  window.GenesisFPS.attach(appEl.app,document.getElementById('tech'));
  const modelEls=[...document.querySelectorAll('pc-model[asset]:not([data-route])')];
- const clipEls=window.GenesisDevice?.safePreviews?[]:[...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]'));
+ const clipEls=(window.__GENESIS_LITE_BOOT||window.GenesisDevice?.safePreviews)?[]:[...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]'));
  const prepItems=[...modelEls.map(el=>({kind:'modelo',label:el.getAttribute('name')||el.id||el.getAttribute('asset')||'modelo',el})),...clipEls.map(el=>({kind:'animación',label:el.getAttribute('name')||el.getAttribute('asset')||'clip',el}))];
  for(const item of prepItems){item.group=groupFor(item);bootGroups[item.group].total++}
  let prepared=0;const prepTotal=Math.max(1,prepItems.length);
@@ -1043,7 +1043,7 @@ try{
  // Animations are decorative during mobile boot: never block world admission.
  // WebKit may leave a clip readiness promise pending; attach components when ready.
  const coreAnimSelectors=['#playerAnim','#playerHeadAnim','#playerHairAnim','#ordanAnim','#ordanHeadAnim','#ordanHairAnim'];
- if(window.GenesisDevice?.safePreviews){
+ if(window.__GENESIS_LITE_BOOT||window.GenesisDevice?.safePreviews){
    [playerAnim,playerHeadAnim,playerHairAnim,ordanAnim,ordanHeadAnim,ordanHairAnim]=coreAnimSelectors.map(selector=>document.querySelector(selector));
    console.info('Genesis mobile: animation clips no longer gate world boot');
  }else{
@@ -1081,7 +1081,7 @@ try{
  activeBootGroup='arboles';showBootProgress(groupStage('arboles'),'Preparando los cuatro árboles aprobados.');
  village=await mountVillage(appEl.app,{
   shell:document.getElementById('villageShellSource').entity,
-  roof:document.getElementById('villageRoofSource').entity,
+  roof:document.getElementById('villageRoofSource')?.entity||null,
   door:document.getElementById('villageDoorSource').entity,
   onRootReady:installGenesisMarket,
   onPhase:group=>{activeBootGroup=group;showBootProgress(groupStage(group),'Esperando recursos del grupo '+group+'.')},
@@ -1757,7 +1757,7 @@ async function activateRouteGroups(prof,priority,onProgress){
  return{total,loaded,failed:0,timedOut:false,instances:models.length};
 }
 function refreshRouteBindings(prof){document.querySelectorAll(`pc-model[data-route="${prof}"]`).forEach(el=>el.contentEntity&&hideCollisionMeshes(el));if(prof==='Herrero'){tintModel(document.getElementById('ordanModel'),[.58,.52,.43],0);tintModel(document.getElementById('ordanHairModel'),[.62,.62,.60],0);const root=document.getElementById('chestModel')?.contentEntity;chestLid=root?.findByName?.('Lid')||null;if(chestLid){const e=chestLid.getLocalEulerAngles();chestLidBase={x:e.x,y:e.y,z:e.z}}if(forgeVisualBoundRoot!==forgeModelEl?.contentEntity){forgeVisualBoundRoot=forgeModelEl?.contentEntity||null;forgeHotMaterialPatched=false;forgeCoalMaterials=[]}igniteForgeVisual()}else{tintModel(document.getElementById('tannerMentorModel'),[.72,.54,.37],0);tintModel(document.getElementById('tannerMentorHairModel'),[.33,.24,.18],0);tannerChestClosed=chooseClip(tannerChestAnim,'Chest_Closed');tannerChestOpen=chooseClip(tannerChestAnim,'Chest_Open');tannerChestOpened=chooseClip(tannerChestAnim,'Chest_Opened');if(tannerChestClosed)tannerChestAnim?.transition?.(tannerChestClosed,.01);applyTannerVisualPass()}}
-async function prepareRoute(prof){
+async function prepareRoute(prof){if(window.__GENESIS_LITE_BOOT){routeReady.add(prof);setLoadUI(100,'Modo rescate','Escenario simple: decoración 3D desactivada.');return;}
  if(routeReady.has(prof))return;
  routeLoading=true;
  intro.style.display='none';loading.style.display='grid';
@@ -1808,7 +1808,7 @@ function frame(now){requestAnimationFrame(frame);village.trees?.update(px,pz);co
 }
 // Los visuales instalados por módulos independientes también son recursos de
 // arranque. Las promesas de red no bastan: deben existir los nodos en escena.
-async function waitVisualModulesBeforePlay(){
+async function waitVisualModulesBeforePlay(){if(window.__GENESIS_LITE_BOOT){bootProgress.externals=bootProgress.externalsTotal;return;}
  const deadline=performance.now()+120000;
  while(performance.now()<deadline){
   const smith=window.__genesisProductionHerreroV015;
