@@ -1,6 +1,6 @@
 import {Entity,StandardMaterial,Texture,Color,Mesh,MeshInstance,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
 import {mountVillageTrees} from './village_trees.js?v=0.15.001';
-import {mountArcanePortal} from './village_arcanist.js?v=0.14b';
+import {mountArcanePortal} from './village_arcanist.js?v=0.14b-mobile-boot-20261103';
 const ROOT='./assets/world/v0.11.004/';
 const MOBILE_TEXTURE_EDGE=1024;
 // Decode one full-resolution source at a time on touch devices, then keep only
