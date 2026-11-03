@@ -70,6 +70,7 @@ const server=http.createServer((req,res)=>{
     app:!!document.querySelector('#genesisApp')?.app
   })).catch(e=>({diagnosticError:String(e)}));
   fs.writeFileSync(path.join(out,'browser-error.json'),JSON.stringify({error:String(error),diag,errors:errors.slice(0,50)},null,2));
+  console.error('MARKET_BROWSER_DIAGNOSTIC',JSON.stringify({error:String(error),diag,errors:errors.slice(0,50)}));
   await page.screenshot({path:path.join(out,'market-browser-error.png'),timeout:10000}).catch(()=>{});
   throw error;
  }finally{await browser.close();}
