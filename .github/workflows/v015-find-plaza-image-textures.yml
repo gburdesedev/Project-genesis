@@ -1,0 +1,48 @@
+name: Find actual plaza JPG PNG PBR textures in Canvas history
+on:
+  push:
+    branches: [test/v0.15-v001-floor-characters]
+    paths: ['.github/workflows/v015-find-plaza-image-textures.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/v0.15-v001-floor-characters
+          fetch-depth: 0
+      - name: Inventory historical image files and image references
+        run: |
+          python3 - <<'PY'
+          import subprocess,pathlib,json,re,collections
+          names=subprocess.check_output(['git','log','--all','--name-only','--pretty=format:'],text=True,errors='replace').splitlines()
+          ext=re.compile(r'\.(?:png|jpe?g|webp|ktx2|tga|exr|hdr)$',re.I)
+          images=sorted(set(x for x in names if ext.search(x)))
+          pattern=re.compile(r'plaza|ground|terrain|floor|suelo|piso|arena|sand|grava|gravel|adoquin|cobble|pavement|road|stone|rough|normal|albedo|diffuse|pbr',re.I)
+          relevant=[x for x in images if pattern.search(x)]
+          commits=subprocess.check_output(['git','log','--all','--format=%H','--','index.html'],text=True).splitlines()
+          refs=collections.defaultdict(lambda:{'count':0,'example':None})
+          for sha in commits[:180]:
+            p=subprocess.run(['git','show',sha+':index.html'],capture_output=True,text=True,errors='replace')
+            if p.returncode:continue
+            for line in p.stdout.splitlines():
+              if not pattern.search(line):continue
+              for url in re.findall(r'[^\s"\x27<>]+\.(?:png|jpe?g|webp|ktx2)(?:\?[^\s"\x27<>]*)?',line,re.I):
+                if len(url)>300:continue
+                refs[url]['count']+=1
+                if refs[url]['example'] is None:refs[url]['example']=sha
+          out={'historical_image_count':len(images),'matching_image_files':relevant[:350],'historical_index_commits_checked':len(commits[:180]),'matching_image_references':[{'url':k,**v} for k,v in sorted(refs.items(),key=lambda x:-x[1]['count'])[:150]],'note':'Image inventory only; confirm PBR layers and actual plaza usage before approval'}
+          target=pathlib.Path('tests/v015-v001/PLAZA_IMAGE_TEXTURES.json')
+          target.parent.mkdir(parents=True,exist_ok=True)
+          target.write_text(json.dumps(out,ensure_ascii=False,indent=2))
+          print('Images',len(images),'relevant',len(relevant),'image refs',len(refs))
+          PY
+      - name: Commit image search report
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tests/v015-v001/PLAZA_IMAGE_TEXTURES.json
+          git diff --cached --quiet || (git commit -m "audit(v015): locate actual JPG PNG PBR plaza textures" && git push)
