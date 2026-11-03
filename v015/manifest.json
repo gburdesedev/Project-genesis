@@ -1,6 +1,6 @@
 {
-  "version": "0.15-v004",
-  "mode": "floor-and-characters",
+  "version": "0.15-v005",
+  "mode": "gui-path-selection",
   "floor": {
     "kind": "procedural",
     "width": 63,
