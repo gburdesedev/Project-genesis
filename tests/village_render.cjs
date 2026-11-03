@@ -23,12 +23,46 @@ const server=http.createServer((req,res)=>{const url=new URL(req.url,'http://loc
  const state=await page.evaluate(()=>({width:GenesisVillagePlan.bounds.maxX-GenesisVillagePlan.bounds.minX,closed:view.village.blocked(-15.5,16),count:view.village.root.children.filter(e=>e.name.includes('fachada cerrada')).length,scale:view.village.root.children.find(e=>e.name.includes('fachada cerrada')).getLocalScale().x,heightScale:view.village.root.children.find(e=>e.name.includes('fachada cerrada')).getLocalScale().y}));assert.equal(state.width,63);assert.equal(state.closed,true);assert.equal(state.count,5);assert.equal(state.scale,.75);assert.equal(state.heightScale,1);
  await page.close();
  const actual=await browser.newPage({viewport:{width:1280,height:800}});actual.setDefaultTimeout(60000);
- const errors=[];actual.on('pageerror',e=>errors.push(e.message));
+ const errors=[],requestsFailed=[],httpErrors=[],consoleErrors=[];
+ actual.on('pageerror',e=>errors.push(e.stack||e.message));
+ actual.on('requestfailed',r=>requestsFailed.push({url:r.url(),reason:r.failure()?.errorText||'unknown'}));
+ actual.on('response',r=>{if(r.status()>=400)httpErrors.push({status:r.status(),url:r.url()})});
+ actual.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())});
+ const inspectBoot=async phase=>{
+  const state=await actual.evaluate(()=>({
+   phase:document.querySelector('#loadState')?.textContent,
+   detail:document.querySelector('#loadDetail')?.textContent,
+   count:document.querySelector('#loadCount')?.textContent,
+   routeErrors:window.__genesisRouteAssetErrors||[],
+   ui:window.GenesisPreflight?.snapshot?.(),
+   trees:window.__genesisTreeStatus,
+   door:window.__genesisArcaneDoorStatus,
+   smith:window.__genesisProductionHerreroV015,
+   arcane:window.__genesisArcanistaFourWallsV006,
+   memory:window.GenesisMemoryProbe?.snapshot?.(),
+   stalledAssets:['forgeStation','barrelReal','mercHairBuzz10'].map(id=>{
+    const el=document.getElementById(id);
+    const models=[...document.querySelectorAll('pc-model[data-asset="'+id+'"]')];
+    const registry=document.querySelector('#genesisApp')?.app?.assets;
+    const registered=registry?.getByUrl?.(el?.getAttribute('src')||'');
+    return {id,assetPresent:!!el,src:el?.getAttribute('src'),
+      assetType:el?.getAttribute('type'),assetLoaded:el?.asset?.loaded,
+      registryLoaded:registered?.loaded,registryLoading:registered?.loading,
+      resourcePresent:!!registered?.resource,
+      models:models.map(m=>({name:m.getAttribute('name'),hasAsset:m.hasAttribute('asset'),asset:m.getAttribute('asset'),dataAsset:m.dataset.asset,content:!!m.contentEntity,connected:m.isConnected}))
+    };
+   })
+  })).catch(e=>({evaluationError:String(e)}));
+  console.log('VILLAGE_BOOT_DIAGNOSTIC '+JSON.stringify({phase,state,errors:errors.slice(-20),requestsFailed:requestsFailed.slice(-40),httpErrors:httpErrors.slice(-40),consoleErrors:consoleErrors.slice(-20)}));
+ };
+
  await actual.goto(`http://127.0.0.1:${server.address().port}/index.html`,{waitUntil:'domcontentloaded',timeout:120000});
  await actual.waitForFunction(()=>document.querySelector('#prototypeIntro')?.style.display==='grid'||document.querySelector('.loadingCard.failed'),{},{timeout:360000});
+ await inspectBoot('before-profession');
  assert.equal(await actual.locator('.loadingCard.failed').count(),0,await actual.locator('#loadState').textContent());
  await actual.locator('[data-profession="Herrero"]').click();
  await actual.waitForFunction(()=>document.querySelector('#loading')?.style.display==='none'||document.querySelector('.loadingCard.failed'),{},{timeout:360000});
+ await inspectBoot('after-profession');
  assert.equal(await actual.locator('.loadingCard.failed').count(),0,await actual.locator('#loadState').textContent());
  const scales=await actual.evaluate(()=>{const scale=id=>document.getElementById(id).entity.getWorldTransform().getScale();return {anvil:scale('anvilModel'),player:scale('playerModel'),shell:scale('workshopShellModel')}});
  assert(Math.abs(scales.anvil.x-scales.anvil.y)<.001&&Math.abs(scales.anvil.z-scales.anvil.y)<.001,'anvil proportions changed');
