@@ -65,9 +65,9 @@ print('index.html lightweight rescue ready',len(s))
 # Early-return geometry-only village, zero requests for tree LODs or 4K road maps.
 path=root/'village_world.js'
 s=path.read_text(encoding='utf-8')
-needle="export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{},onRootReady=()=>{}}){\n  stampVersion();"
+needle="export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{},onRootReady=()=>{}}){\n stampVersion();"
 if s.count(needle)!=1:raise RuntimeError('village stampVersion mark missing')
-replacement="""export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{},onRootReady=()=>{}}){\n  stampVersion();
+replacement="""export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{},onRootReady=()=>{}}){\n stampVersion();
   if(globalThis.__GENESIS_LITE_BOOT){
    const plan=globalThis.GenesisVillagePlan,root=new Entity('Project Genesis · Aldea básica modo rescate');
    app.root.addChild(root);
