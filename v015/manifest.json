@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v001",
+  "version": "0.15-v003",
   "mode": "floor-and-characters",
   "floor": {
     "kind": "procedural",
