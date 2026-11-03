@@ -51,9 +51,10 @@ def main():
     def replace_dynamic(filename,old,new,ids):
         file=root/filename
         data=file.read_text(encoding="utf-8")
-        if old not in data:
+        if old in data:
+            file.write_text(data.replace(old,new),encoding="utf-8")
+        elif new not in data:
             raise RuntimeError("Dynamic asset reference changed: "+filename+" :: "+old)
-        file.write_text(data.replace(old,new),encoding="utf-8")
         dynamic_done.update(ids)
     blacksmith={
       "walls":("blacksmithWallsV082","integration/herrero-v082-arched-doorway/public/models/blacksmith-v082-arched-portal/blacksmith_four_walls_arched_v082.glb"),
@@ -77,8 +78,12 @@ def main():
         if hits[items[id]["source"]] == 0:
             raise RuntimeError("Arcane GLB still has no local runtime reference: "+id)
         dynamic_done.add(id)
-    unused=[items[k]["id"] for k in items if hits[items[k]["source"]]==0 and k not in dynamic_done]
-    print("Local assets:",len(items),"references replaced:",sum(hits.values()),"unreferenced IDs:",unused)
+    # Report already-localized assets as present on repeat runs, not missing.
+    current_text="\n".join(path.read_text(encoding="utf-8") for path in paths if path.exists())
+    present={k for k in items if rewritten[items[k]["source"]] in current_text}
+    present.update(dynamic_done)
+    unused=[items[k]["id"] for k in items if k not in present]
+    print("Local assets:",len(items),"references replaced:",sum(hits.values()),"local references verified:",len(present),"unreferenced IDs:",unused)
     (root/"tools/playcanvas_localization_report.json").write_text(
         json.dumps({"schema":1,"mirrored":len(items),"replaced":sum(hits.values()),"unusedIds":unused,
           "localUrls":{items[k]["id"]:rewritten[items[k]["source"]] for k in items}},indent=2)+"\n",encoding="utf-8")
