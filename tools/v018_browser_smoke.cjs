@@ -61,15 +61,15 @@ const failures=[],records=[];
       assert(Math.abs(after.cameraControl.degreesPerPixel-.2)<.003,'Original 0.2 degree sensitivity lost');
       assert.equal(after.cameraControl.smoothed,true,'Smooth camera regression');
     }
-    // Capture the actual game view before triggering any modal dialogue.
-    try{await page.screenshot({path:out+'/v018-'+mode.name+'.png',timeout:35000});}
-    catch(e){console.warn('Screenshot diagnostic failed',mode.name,String(e));}
     await page.evaluate(()=>window.__GENESIS_V013_LEGACY__?.tryInteract());
     await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().legacy===1,null,{timeout:18000});
     await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().village?.doorAngle>60,null,{timeout:20000});
     const door=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.().village);
     assert(door.doorAngle>60&&door.doorAngle<=90.1,'Blacksmith door does not open inward');
     assert.equal(door.doorStates.Arcanista,'closed','Arcanista must remain shut');
+    // Screenshot is deliberately last: SwiftShader PNG capture may block game updates.
+    try{await page.screenshot({path:out+'/v018-'+mode.name+'.png',timeout:35000});}
+    catch(e){console.warn('Screenshot diagnostic failed',mode.name,String(e));}
     records.push({device:mode.name,loaded:true,models:audit.workshops.models,
       hdr:true,village:audit.village.count,lossless:true,questStep:after.legacy,
       hingeAngle:door.doorAngle,success:true});
