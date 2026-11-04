@@ -9,6 +9,8 @@ on:
       - 'v015/index.html'
       - 'v015/manifest.json'
       - 'v015/v017-workshop-preload.js'
+      - 'v015/v017-village.js'
+      - 'v015/v017-village.js'
       - 'assets/playcanvas/approved/workshops/**'
       - 'assets/playcanvas/candidates/workshops/**'
       - 'assets/playcanvas/approved/lighting/**'
