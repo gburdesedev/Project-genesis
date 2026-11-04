@@ -61,7 +61,7 @@ replace_once(
  const ROOF_OVERHANG=1.025; // only 2.5% visual overhang beyond plan footprint
 """)
 replace_once(
- "     shell.setLocalScale(HORIZONTAL,1,HORIZONTAL);",
+ "    shell.setLocalScale(HORIZONTAL,1,HORIZONTAL);",
  """     const bounds=WALL_BOUNDS[p.profession]||WALL_BOUNDS.Herrero;
      const wallScaleX=9/(bounds.width*plan.workshopScale);
      const wallScaleZ=7.875/(bounds.depth*plan.workshopScale);
@@ -69,31 +69,31 @@ replace_once(
      shell.setLocalPosition(0,0,-bounds.front*wallScaleZ);
      shell.setLocalScale(wallScaleX,1,wallScaleZ);""")
 replace_once(
- "     rooftop.setLocalScale(HORIZONTAL,1,HORIZONTAL);",
+ "    rooftop.setLocalScale(HORIZONTAL,1,HORIZONTAL);",
  """     const roofScaleX=9*ROOF_OVERHANG/(ROOF_BOUNDS.width*plan.workshopScale);
      const roofScaleZ=7.875*ROOF_OVERHANG/(ROOF_BOUNDS.depth*plan.workshopScale);
      rooftop.setLocalPosition(0,0,-ROOF_BOUNDS.front*roofScaleZ);
      rooftop.setLocalScale(roofScaleX,1,roofScaleZ);""")
-replace_once("   door.setLocalPosition(-1.10,0,.12);","   door.setLocalPosition(0,0,.12);")
+replace_once("  door.setLocalPosition(-1.10,0,.12);","   door.setLocalPosition(0,0,.12);")
 replace_once(
- "       hinge.setLocalPosition(-1.10,0,.12);",
+ "      hinge.setLocalPosition(-1.10,0,.12);",
  """       // V082-B geometry is [−.047,+1.208] around its actual GLB hinge.
        // Shift the centre to x=0 in the real masonry opening.
        hinge.setLocalPosition(-DOOR_HERRERO_X_CENTRE*wallScaleX,0,.12);""")
 replace_once(
- "       const door=addModel(resources,hinge,'door-herrero-v082-b','Herrero V082-B · hierro aprobado');",
+ "      const door=addModel(resources,hinge,'door-herrero-v082-b','Herrero V082-B · hierro aprobado');",
  "       const door=addModel(resources,hinge,'door-herrero-v082-b','Herrero V082-B · PBR sin pérdida experimental',[0,0,0],[wallScaleX,1,wallScaleZ]);"
 )
 replace_once(
- "       const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · puerta arcana iluminada aprobada');",
+ "      const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · puerta arcana iluminada aprobada');",
  """       // Unlike the Herrero, the actual V027 geometry ALREADY straddles x=0.
        // NEVER reuse the blacksmith GLB's .5805m offset here.
        const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · puerta arcana iluminada aprobada',[0,0,0],[wallScaleX,1,wallScaleZ]);"""
 )
-replace_once("    doorAngle=gate()>=1?-92:0;","    doorAngle=gate()>=1?INWARD_OPEN:0;")
-replace_once("      const desired=gate()>=1?-92:0;","      const desired=gate()>=1?INWARD_OPEN:0;")
+replace_once("   doorAngle=gate()>=1?-92:0;","    doorAngle=gate()>=1?INWARD_OPEN:0;")
+replace_once("     const desired=gate()>=1?-92:0;","      const desired=gate()>=1?INWARD_OPEN:0;")
 replace_once(
- "      doorOpenTrigger:'Ordan first dialogue: Q1 step 0 → 1'",
+ "     doorOpenTrigger:'Ordan first dialogue: Q1 step 0 → 1'",
  """      doorOpenTrigger:'Ordan first dialogue: Q1 step 0 → 1',
       layoutCorrections:{
         plan:'GenesisVillagePlan unchanged',workshopFootprint:[9,7.875],
