@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v014",
+  "version": "0.15-v016",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "original-village-pbr",
@@ -39,9 +39,9 @@
       "name": "Artesano",
       "file": "./assets/playcanvas/approved/characters/recovered/male_peasant.glb",
       "position": [
+        7,
         0,
-        0,
-        6.3
+        31
       ],
       "rotation": [
         0,
@@ -89,9 +89,14 @@
       "file": "./assets/playcanvas/approved/characters/merchant_v02_75962.glb",
       "bytes": 2049508,
       "position": [
-        8,
+        25.5,
         0,
-        7
+        36.3
+      ],
+      "rotation": [
+        0,
+        90,
+        0
       ]
     },
     {
@@ -100,9 +105,9 @@
       "file": "./assets/playcanvas/approved/characters/recovered/male_ranger.glb",
       "bytes": 1617696,
       "position": [
-        4,
-        0,
-        3
+        3.25,
+        -40,
+        3.1
       ],
       "rotation": [
         0,
@@ -141,7 +146,7 @@
       "kind": "animation"
     }
   ],
-  "note": "V014 restores exact original Canvas HUD control positions for landscape touch and desktop. Previous character, floor, NGE, tutorial, and approved inventory/preparation art unchanged.",
+  "note": "V016 SOLO reubica NPCs segun Canvas original (Ordan 1.72/1.90, mercader 25.5/36.3, mercenario en espera oculto) y anima llegada automatica hasta Ordan. Camara un poco alejada, viewport cinematografico 88% y controles ocultos hasta terminar. No altera modelos, mapa, materiales, talleres, fuente, árboles, menús ni lógica Q1-Q3.",
   "loadingStages": [
     {
       "id": "gui",
@@ -279,5 +284,49 @@
       }
     },
     "note": "Exact original Canvas HUD geometry; V013 gameplay, V012 floors and V011 characters/camera retained."
+  },
+  "cinematicArrival": {
+    "source": "./canvas-arrival-v016.js",
+    "entry": [
+      7,
+      0,
+      31
+    ],
+    "target": [
+      1.72,
+      0,
+      3.75
+    ],
+    "mentor": [
+      1.72,
+      0,
+      1.9
+    ],
+    "walking": "UAL1 Walk_Loop",
+    "resume": "Idle_Loop",
+    "speedMetersPerSecond": 3.2,
+    "viewportScale": 0.88,
+    "cameraZoomMultiplier": 1.3,
+    "controls": "hidden until arrival complete; no interaction during walk",
+    "restoredFeatures": "V014 approved original HUD and camera",
+    "mapChanges": "none; V012 original PBR terrain unchanged",
+    "npcPositions": {
+      "merchant": [
+        25.5,
+        0,
+        36.3
+      ],
+      "ordan": [
+        1.72,
+        0,
+        1.9
+      ],
+      "mercenary": [
+        3.25,
+        -40,
+        3.1
+      ]
+    },
+    "resumeSavedGame": "no cinematic if Q1 progress beyond greeting"
   }
 }
