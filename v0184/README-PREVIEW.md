@@ -1,0 +1,1 @@
+V018.4 experimental: Original 2.18m V082-B door width, -1.10 world hinge, -92 outward swing; GLB masters untouched; compare front historical +0.12 and ?v0184DoorMount=recessed. Pending human visual approval.
