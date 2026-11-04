@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "revision": "V017",
+  "updated_on": "2026-11-04",
+  "policy": "Only explicit user approvals in approved/: Herrero V082 and Arcanista V006 walls + Herrero V082-B and Arcanista V027 doors. Three other workshop facades remain generic.",
+  "professions": [
+    {
+      "profession": "Herrero",
+      "door": {
+        "version": "V082-B",
+        "status": "approved_by_user",
+        "path": "assets/playcanvas/approved/workshops/herrero/doors/v082-b/door-herrero-v082-b.glb",
+        "git_blob_sha": "eef69d28dd8d53b5934442279a8b027bdfbfa157",
+        "bytes": 15887816
+      },
+      "walls": {
+        "version": "V082",
+        "status": "approved_by_user",
+        "path": "assets/playcanvas/approved/workshops/herrero/walls/v082/blacksmith_four_walls_arched_v082.glb",
+        "git_blob_sha": "90e527e20dcfdb96da6071e176e72c2fffcd7453",
+        "bytes": 2253616
+      }
+    },
+    {
+      "profession": "Arcanista",
+      "door": {
+        "version": "V027",
+        "status": "approved_by_user",
+        "path": "assets/playcanvas/approved/workshops/arcanista/doors/v027/Arcanist_Door_V027_WebGL.glb",
+        "git_blob_sha": "60f94baf3c7d595338e4f16b862c7da863b48230",
+        "bytes": 4034004
+      },
+      "walls": {
+        "version": "V006",
+        "status": "approved_by_user",
+        "path": "assets/playcanvas/approved/workshops/arcanista/walls/v006/arcanista_four_walls_preview.glb",
+        "git_blob_sha": "d6cdd71c17a426321ec61838cbcca4b22b8faab4",
+        "bytes": 1026104
+      }
+    },
+    {
+      "profession": "Carpintero",
+      "door": {
+        "status": "generic_temporary",
+        "master_not_overwritten": true
+      },
+      "walls": {
+        "status": "generic_temporary",
+        "master_not_overwritten": true
+      }
+    },
+    {
+      "profession": "Curtidor",
+      "door": {
+        "status": "generic_temporary",
+        "master_not_overwritten": true
+      },
+      "walls": {
+        "status": "generic_temporary",
+        "master_not_overwritten": true
+      }
+    },
+    {
+      "profession": "Joyero",
+      "door": {
+        "status": "generic_temporary",
+        "master_not_overwritten": true
+      },
+      "walls": {
+        "status": "generic_temporary",
+        "master_not_overwritten": true
+      }
+    }
+  ],
+  "lighting": {
+    "name": "studio_small_09",
+    "source": "Poly Haven CC0",
+    "format": "HDR Radiance RGBE 32-bit",
+    "desktop": "assets/playcanvas/approved/lighting/studio_small_09/studio_small_09_2k.hdr",
+    "desktop_sha256": "36724313c0fc66dab126ff90f081b85a0b1ef47be65eda1417bd20b033f0573f",
+    "mobile": "assets/playcanvas/approved/lighting/studio_small_09/studio_small_09_1k.hdr",
+    "mobile_sha256": "e7cfda5f4e98e623db12b8bfd0184e048488e4855d9c83e2751fb44a32e80c45",
+    "source_workflow": "ProjectgenesisAssets/genesis-workshop-assets/.github/workflows/caprino-v019-hdri32-lightonly.yml"
+  },
+  "stage": "five_buildings_to_mount_before_reveal",
+  "scene_integration": "Five workshops required: two with approved geometry, three generic placeholders; V016 gameplay remains unchanged"
+}
