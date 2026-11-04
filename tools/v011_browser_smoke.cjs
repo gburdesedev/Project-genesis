@@ -86,7 +86,9 @@ const assert=require('node:assert/strict');
    assert(!afterContinue.paused&&!afterContinue.loaderVisible&&!afterContinue.pauseVisible,'Panels remain after continue');
    assert.equal(afterContinue.loadingHidden,false,'V017 scene must reveal only after successful loading continue');
    await page.keyboard.down('w');
-   await page.waitForTimeout(900);
+   // HDR/GLB shader compilation can stall headless software rendering; wait for
+   // the ACTUAL animation state, not an arbitrary wall-clock interval.
+   await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().rigs.artisan.parts.every(p=>p.state==='Walk_Loop'),null,{timeout:30000,polling:250});
    const walking=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
    assert(walking.rigs.artisan.parts.every(p=>p.state==='Walk_Loop'),'Not all artisan rigs transitioned to Walk_Loop');
    await page.keyboard.up('w');
