@@ -88,6 +88,10 @@ const errors=[],results=[];
     const conversation=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
     assert.equal(conversation.village.doorTarget,-92,'Ordan first conversation must open Herrero door');
     assert.equal(conversation.village.buildings.find(x=>x.profession==='Arcanista').door,'approved','Arcane door changed after mentor talk');
+    // The real first conversation opens a dialogue modal. Close it before testing WASD;
+    // the UI correctly blocks movement while Ordan is speaking.
+    await page.evaluate(()=>window.__GENESIS_V013_LEGACY__.close());
+    await page.waitForFunction(()=>!window.__GENESIS_V013_LEGACY__?.isModalOpen(),null,{timeout:10000});
     if(!mode.mobile){
       await page.keyboard.down('w');
       await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().rigs.artisan.parts.every(p=>p.state==='Walk_Loop'),null,{timeout:45000,polling:250});
