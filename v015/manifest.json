@@ -17,6 +17,11 @@
         0,
         0,
         6.3
+      ],
+      "rotation": [
+        0,
+        180,
+        0
       ]
     },
     {
@@ -28,7 +33,23 @@
         0,
         1.9
       ],
-      "bytes": 1617696
+      "bytes": 1617696,
+      "rotation": [
+        0,
+        -21,
+        0
+      ],
+      "scale": [
+        1.07,
+        1.07,
+        1.07
+      ]
+    },
+    {
+      "id": "ordan-head",
+      "name": "Cabeza de Ordan",
+      "file": "./assets/playcanvas/approved/characters/parts/male_head.glb",
+      "attachTo": "ordan"
     },
     {
       "id": "ordan-beard",
@@ -57,6 +78,11 @@
         4,
         0,
         3
+      ],
+      "rotation": [
+        0,
+        180,
+        0
       ]
     },
     {
@@ -90,7 +116,7 @@
       "kind": "animation"
     }
   ],
-  "note": "V011: reconstruct original 65-bone character animation assemblies, original camera parameters and material tints. Keep per-asset streaming and pause diagnostics.",
+  "note": "V011: original body/head/hair rigs restored for artisan, Ordan and mercenary; UAL1 tracks and original camera. Browser smoke verifies synchronized Head bones, movement and hidden loader.",
   "loadingStages": [
     {
       "id": "gui",
@@ -112,6 +138,7 @@
       "assets": [
         "artisan",
         "ordan",
+        "ordan-head",
         "ordan-beard",
         "artisan-head",
         "artisan-hair",
