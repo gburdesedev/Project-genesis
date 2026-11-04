@@ -8,12 +8,13 @@ const manifest=require('../v015/manifest.json');
 const approved=require('../assets/playcanvas/approved/workshops/registry-v017.json');
 const html=fs.readFileSync(path.join(root,'v015/index.html'),'utf8');
 const preload=fs.readFileSync(path.join(root,'v015/v017-workshop-preload.js'),'utf8');
+const village=fs.readFileSync(path.join(root,'v015/v017-village.js'),'utf8');
 const stages=manifest.loadingStages;
 assert.equal(manifest.version,'0.15-v017');
 assert.equal(approved.professions.length,5,'All 5 workshops need inventory status');
 const stageIds=stages.map(s=>s.id);
 assert.equal(new Set(stageIds).size,stages.length,'Each progress block must be unique');
-for(const id of ['gui','engine','gameplay','terrain','characters','animations','walls','doors','lighting','secondary']){
+for(const id of ['gui','engine','gameplay','terrain','characters','animations','walls','doors','roofs','lighting','village','secondary']){
  assert(stageIds.includes(id),'Missing real load block: '+id);
 }
 const charIds=new Set(manifest.characters.map(x=>x.id));
@@ -39,7 +40,7 @@ for(const id of ['roof-herrero-v013','chimney-herrero-v013'])assert(stages.find(
 assert(html.includes('<body class="genesis-v017-loading">'),'World must start hidden before JS startup');
 assert(html.includes('body.genesis-v017-loading canvas#app{visibility:hidden!important}'),'World must not flash during loading');
 assert(html.includes("if(worldLoadReady)document.body.classList.remove('genesis-v017-loading')"),'Scene reveal only after load');
-assert(html.includes('worldLoadReady=floorsResult.ok&&workshopLoad.ok&&missing.length===0'),'The load gate must require real model, HDR and PBR readiness');
+assert(html.includes('worldLoadReady=floorsResult.ok&&workshopLoad.ok&&villageResult?.status?.count===5'),'The gate must require 5 actual constructed buildings and HDR/PBR resources');
 assert(html.includes('Reserva')||html.includes('Reservado para PC'),'Mobile HQ fallback must remain explicit');
 assert(preload.includes('pc.EnvLighting.generateLightingSource')&&preload.includes('app.scene.envAtlas=atlas'),'Real HDR must light PBR materials via prefitered IBL');
 assert(!preload.includes('raw.githubusercontent.com')&&!preload.includes('cdn.jsdelivr.net'),'No external runtime assets');
@@ -47,7 +48,9 @@ const known={
  'door-herrero-v082-b':'assets/vendor/genesis/externals/blacksmithDoorV082/src/door-herrero-v082-b.glb',
  'door-arcanista-v027':'assets/vendor/genesis/externals/arcanistDoorV027/src/Arcanist_Door_V027_WebGL.glb',
  'wall-herrero-v082':'assets/vendor/genesis/externals/blacksmithWallsV082/src/blacksmith_four_walls_arched_v082.glb',
- 'wall-arcanista-v006':'assets/vendor/genesis/externals/arcanistWallsV006/src/arcanista_four_walls_preview.glb'
+ 'wall-arcanista-v006':'assets/vendor/genesis/externals/arcanistWallsV006/src/arcanista_four_walls_preview.glb',
+ 'roof-herrero-v013':'assets/vendor/genesis/externals/blacksmithRoofV013/src/blacksmith_roof_preview.glb',
+ 'chimney-herrero-v013':'assets/vendor/genesis/externals/blacksmithChimneyV013/src/blacksmith_chimney_candidate_preview.glb'
 };
 for(const asset of manifest.workshopAssets){
  const target=path.join(root,path.normalize(path.join('v015',asset.file)));
@@ -70,9 +73,12 @@ for(const size of ['1k','2k']){
  assert(header.includes('FORMAT=32-bit_rle_rgbe'),'HDR source was replaced by 8-bit LDR');
  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),hdrHashes[size],'Unexpected HDRI');
 }
+assert(village.includes("walls:'wall-herrero-v082',door:'door-herrero-v082-b'")&&village.includes("walls:'wall-arcanista-v006',door:'door-arcanista-v027'"),'Approved real assets must be mounted for both workshops');
+assert(village.includes('for(const p of plan.workshops)')&&village.includes('genericWoodDoor'),'The 3 generic shops must be visible in the original plan');
+assert(html.includes('GenesisVillageV017.install(app,resources,window.GenesisVillagePlan'),'The village must be created, not merely preloaded');
 assert(approved.professions.find(x=>x.profession==='Herrero').door.status==='approved_by_user');
 assert(approved.professions.find(x=>x.profession==='Arcanista').door.status==='approved_by_user');
 for(const prof of ['Herrero','Arcanista']){
  assert.equal(approved.professions.find(x=>x.profession===prof).walls.status,'approved_by_user');
 }
-console.log('PASS V017 · 10 honest load blocks, exact approved door GLBs, unmodified candidate walls, genuine local 32-bit HDRI 1K/2K, scene reveal gate');
+console.log('PASS V017 · 12 honest load blocks, 5 actual houses, four approved source-identical GLBs, genuine local HDRI 1K/2K, reveal gate');
