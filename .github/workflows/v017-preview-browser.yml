@@ -1,12 +1,13 @@
-name: V017 Independent Preview — Desktop + Mobile
+name: V017.1 Hotfix — Original Camera and Doors
 on:
   push:
-    branches: [preview/v017-playtest]
+    branches: [fix/v017-camera-ordan-door-v027]
     paths:
       - 'v017/**'
       - 'assets/playcanvas/approved/workshops/**'
       - 'assets/playcanvas/approved/lighting/**'
       - 'tools/v017_preview_browser_smoke.cjs'
+      - 'camera_mouse.js'
       - '.github/workflows/v017-preview-browser.yml'
   workflow_dispatch:
 permissions:
@@ -32,7 +33,7 @@ jobs:
           assert(fs.readFileSync('v015/canvas-legacy-logic.js','utf8').includes('project-genesis/canvas-original/v013'),'V016 original save key touched');
           const page=fs.readFileSync('v017/index.html','utf8');
           const manifest=JSON.parse(fs.readFileSync('v017/manifest.json','utf8'));
-          assert.equal(manifest.version,'0.15-v017');
+          assert.equal(manifest.version,'0.15-v017.1');
           for(const entry of manifest.workshopAssets){
             assert(fs.existsSync(require('node:path').resolve('v017',entry.file)),'Missing model '+entry.id);
           }
