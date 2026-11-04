@@ -1,0 +1,30 @@
+name: V015 original Canvas village and animated arrival
+on:
+  push:
+    branches: [main, feat/v015-original-village-arrival]
+    paths:
+      - '.github/workflows/v015-original-village.yml'
+      - 'tests/canvas_village_v015.cjs'
+      - 'v015/canvas-original-map-v015.js'
+      - 'v015/canvas-arrival-v015.js'
+      - 'v015/canvas-original-sources-v015.js'
+      - 'v015/index.html'
+  pull_request:
+    paths:
+      - '.github/workflows/v015-original-village.yml'
+      - 'tests/canvas_village_v015.cjs'
+      - 'v015/canvas-original-map-v015.js'
+      - 'v015/canvas-arrival-v015.js'
+      - 'v015/canvas-original-sources-v015.js'
+      - 'v015/index.html'
+  workflow_dispatch:
+jobs:
+  original-village:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/canvas_village_v015.cjs
