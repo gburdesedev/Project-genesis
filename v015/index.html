@@ -160,7 +160,7 @@ arrivalController=window.GenesisCanvasArrivalV015.create({
  diag?.block('v015-arrival','completed',{reason,position:artisan.getPosition().toString()});
  // Only the real automatic walk starts the heavy environment immediately.
  // Debug-only skip postpones it so simultaneous Playwright Chromium contexts stay responsive.
- setTimeout(()=>originalWorld?.startDecor(),reason==='arrived'?5000:60000);
+ if(reason==='arrived')setTimeout(()=>originalWorld?.startDecor(),5000);
 },
  speed:3.2
 });
