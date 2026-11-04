@@ -42,7 +42,9 @@ const assert=require('node:assert/strict');
    const walking=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
    assert(walking.rigs.artisan.parts.every(p=>p.state==='Walk_Loop'),'Not all artisan rigs transitioned to Walk_Loop');
    await page.keyboard.up('w');
-   await page.waitForTimeout(250);
+   // PBR shader compilation can delay a render frame in software Chromium.
+   // Verify the actual transition rather than sampling at a fixed 250 ms.
+   await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().rigs.artisan.parts.every(p=>p.state==='Idle_Loop'),null,{timeout:10000});
    const after=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
    console.log('AFTER',JSON.stringify(after));
    assert(delta(after.rigs.artisan.position,before.rigs.artisan.position)>.6,'Artisan did not move on W key');
