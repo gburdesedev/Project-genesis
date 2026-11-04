@@ -118,6 +118,10 @@ const assert=require('node:assert/strict');
    assert.equal(errors.length,0,'Original UI produced JS errors: '+errors.join('; '));
    console.log('V013 ORIGINAL MENUS PASS: inventory from real stock, close-to-advance, 39-layer preparation art');
 
+   // One software WebGL scene at a time: a second Chromium tab is not
+   // representative of real mobile play and can starve WebGL shader compilation.
+   await page.screenshot({path:'/tmp/v011-test/scene.png'});
+   await page.close();
    const mobile=await browser.newPage({viewport:{width:844,height:390},deviceScaleFactor:1,isMobile:true,hasTouch:true});
    mobile.on('pageerror',e=>{errors.push('mobile-pageerror:'+e.message);console.log('MOBILE-PAGEERROR',e.stack)});
    try{
