@@ -1,6 +1,3 @@
-# Talleres — revisiones técnicas pendientes de evaluación
+# Talleres — candidatos históricos
 
-- Herrero paredes V082: conserva el trabajo de mampostería y arco, candidato técnico; la puerta V082-B está **aprobada** independientemente.
-- Arcanista paredes V006: cuatro paredes y detalles azules; no sustituye el original aprobado del usuario sin evaluación final.
-
-Estas copias preservan exactamente los blobs que existían en `assets/vendor/genesis/externals/`; los originales no se modifican. Copiar no implica aprobación artística.
+Las paredes Herrero V082 y Arcanista V006 fueron **aprobadas expresamente el 4 de noviembre de 2026**, y sus GLB canónicos se encuentran ahora en `assets/playcanvas/approved/workshops/`. Esta carpeta conserva la distinción histórica, pero no duplica esos modelos. Los originales históricos permanecen intactos en `assets/vendor/genesis/externals/`.
