@@ -76,7 +76,10 @@ const assert=require('node:assert/strict');
      const x=b.x+b.width/2,y=b.y+b.height/2;
      await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y,id:1}]});
      await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y-30,id:1}]});
-     await mobile.waitForTimeout(850);
+     await mobile.waitForFunction(initial=>{
+       const pos=window.__GENESIS_V011_AUDIT__?.().rigs.artisan.position;
+       return pos && Math.hypot(pos[0]-initial[0],pos[1]-initial[1],pos[2]-initial[2])>.35;
+     },beforeMobile.rigs.artisan.position,{timeout:10000});
      const movingMobile=await mobile.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
      await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
      const mobileMove=delta(movingMobile.rigs.artisan.position,beforeMobile.rigs.artisan.position);
