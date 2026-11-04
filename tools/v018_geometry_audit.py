@@ -43,6 +43,13 @@ def main():
   g=json.loads(data[20:20+sz])
   mn,mx=bounds(g)
   result[k]={"size":len(data),"min":mn,"max":mx,"extent":[round(mx[i]-mn[i],4)for i in range(3)],"meshes":len(g["meshes"]),"nodes":len(g["nodes"])}
+  if k in ("herrero_roof","herrero_chimney"):
+   for node in g["nodes"]:
+    if "mesh" not in node:continue
+    primitives=g["meshes"][node["mesh"]]["primitives"]
+    coords=[g["accessors"][p["attributes"]["POSITION"]] for p in primitives]
+    print("V018 ROOF PART",json.dumps({"model":k,"name":node.get("name"),"translation":node.get("translation"),"scale":node.get("scale"),"rotation":node.get("rotation"),"mins":[c.get("min") for c in coords],"maxs":[c.get("max") for c in coords]},ensure_ascii=False))
+
  print("V018 GLB BOUNDS "+json.dumps(result,ensure_ascii=False,indent=2))
  Path("v018-geometry-audit.json").write_text(json.dumps(result,indent=2))
 if __name__=="__main__":main()
