@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v014",
+  "version": "0.15-v015",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "original-village-pbr",
@@ -39,9 +39,9 @@
       "name": "Artesano",
       "file": "./assets/playcanvas/approved/characters/recovered/male_peasant.glb",
       "position": [
+        7,
         0,
-        0,
-        6.3
+        31
       ],
       "rotation": [
         0,
@@ -89,9 +89,9 @@
       "file": "./assets/playcanvas/approved/characters/merchant_v02_75962.glb",
       "bytes": 2049508,
       "position": [
-        8,
+        25.5,
         0,
-        7
+        36.3
       ]
     },
     {
@@ -141,7 +141,7 @@
       "kind": "animation"
     }
   ],
-  "note": "V014 restores exact original Canvas HUD control positions for landscape touch and desktop. Previous character, floor, NGE, tutorial, and approved inventory/preparation art unchanged.",
+  "note": "V015 restores original 63m Canvas settlement positions, approved buildings/market/trees/fountain and animated autonomous player arrival to Ordan. Existing V011–V014 logic/art/camera retained. Secondary heavy environment assets load without blocking.",
   "loadingStages": [
     {
       "id": "gui",
@@ -178,9 +178,9 @@
     },
     {
       "id": "environment",
-      "name": "Plaza y entorno",
-      "kind": "pending",
-      "required": false,
+      "name": "Aldea original · talleres y mercado",
+      "kind": "runtime",
+      "required": true,
       "assets": []
     },
     {
@@ -279,5 +279,64 @@
       }
     },
     "note": "Exact original Canvas HUD geometry; V013 gameplay, V012 floors and V011 characters/camera retained."
+  },
+  "originalVillage": {
+    "source": "../village_plan.js",
+    "area": "63x63",
+    "bounds": [
+      -24.5,
+      38.5,
+      -14.5,
+      48.5
+    ],
+    "workshops": 5,
+    "roadCount": 9,
+    "plaza": [
+      7,
+      16
+    ],
+    "market": [
+      26,
+      36
+    ],
+    "merchant": [
+      25.5,
+      0,
+      36.3
+    ],
+    "stall": [
+      28.35,
+      0,
+      37.6
+    ],
+    "sourceMeshes": "./canvas-original-sources-v015.js",
+    "visuals": "./canvas-original-map-v015.js",
+    "approvedTrees": 14,
+    "fountain": "V011 HQ",
+    "forestLoading": "background",
+    "shopLoading": "background"
+  },
+  "autonomousArrival": {
+    "file": "./canvas-arrival-v015.js",
+    "startsAfterLoadingContinue": true,
+    "from": [
+      7,
+      0,
+      31
+    ],
+    "to": [
+      1.72,
+      0,
+      3.75
+    ],
+    "targetNpc": [
+      1.72,
+      0,
+      1.9
+    ],
+    "movement": "Walk_Loop",
+    "dialogueMode": "manual E after arrival",
+    "previousQuestLogic": "unchanged Q1–Q3",
+    "existingSavedGames": "skip automatic approach"
   }
 }

@@ -120,6 +120,7 @@ function mount({game,app,artisan,ordan,playOrdanAnimation}){
   refresh();
  }
  function tryInteract(){
+  if(globalThis.__GENESIS_V015_ARRIVAL__?.active)return;
   if(isModalOpen()||get('v011-pause')?.style.display==='block')return;
   const step=game.step(),goal=game.goal();
   if(step===9){openWorkspace('Inventario');return}
