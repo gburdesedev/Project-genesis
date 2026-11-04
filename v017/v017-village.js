@@ -83,7 +83,7 @@
   // Keep the V027 PBR textures and geometry; animate its original emissive masks
   // and two upward travelling light accents as in village_arcanist.js.
   const copies=new Map(),textures=[],lights=[];
-  const maskEdge=mobile?256:384;
+  const maskEdge=mobile?112:384; // preserve original V027 GLB; mobile only reduces mask upload size
   for(const renderer of visual.findComponents('render')){
    for(const mi of renderer.meshInstances||[]){
     const original=mi.material;
@@ -113,7 +113,7 @@
   const fill=new pc.Entity('Arcanista · luz frontal mineral suave V027');
   fill.addComponent('light',{type:'omni',color:new pc.Color(.76,.83,1),range:3.4,intensity:mobile?1.05:1.3,castShadows:false});
   fill.setLocalPosition(0,1.38,.91);parent.addChild(fill);
-  for(const x of [-.20,.23]){
+  for(const x of (mobile?[-.20]:[-.20,.23])){
    const beam=new pc.Entity('Arcanista · corriente luminosa ascendiente');
    beam.addComponent('light',{type:'omni',color:new pc.Color(.18,.62,1),range:1.8,intensity:1,castShadows:false});
    beam.setLocalPosition(x,.25,.45);parent.addChild(beam);lights.push(beam);
@@ -135,11 +135,13 @@
     light.setLocalPosition(i===0?-.2:.23,y,.43);
     light.light.intensity=(i===0?1.3:.75)*(.72+.28*Math.sin(elapsed*2.1+i));
    });
+   if(acc<(mobile?1/5:1/9))return;acc=0;
+   // Update PBR emissive intensity and source textures at bounded frame rate:
+   // no original model or material source is replaced.
    for(const [i,m] of [...copies.values()].entries()){
     m.emissiveIntensity=5.2*(.92+.08*Math.sin(elapsed*3.1+i*.8));
     m.update();
    }
-   if(acc<(mobile?1/6:1/9))return;acc=0;
    for(const item of textures){
     const {ctx,base,current,texture,phase}=item,data=current.data,size=maskEdge;
     for(let y=0;y<size;y++){
@@ -206,32 +208,32 @@
       const pivot=new pc.Entity('Arcanista · puerta mágica V027 · cerrada');
       pivot.setLocalPosition(0,0,.12);
       building.addChild(pivot);
-      if(resources.has('door-arcanista-v027')){
-        const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · litología aprobada');
-        animations.push(animateArcaneDoor(pc,app,pivot,visual,false));
-      }else{
-        // Existing V027 mobile rule: prevent 191-renderer GPU bottlenecks.
-        // A stable generic door is shown instead of an invisible hole.
-        genericWoodDoor(pc,building,p.profession);
-      }
+      // The approved V027 original must be visible on PC AND mobile.
+      // If its GLB cannot be decoded, fail the load gate rather than showing
+      // a visually unrelated wooden replacement as if it were the Arcanista.
+      const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · puerta arcana iluminada aprobada');
+      animations.push(animateArcaneDoor(pc,app,pivot,visual,!!options.mobile));
     }else{
       genericWoodDoor(pc,building,p.profession);
       inscription(pc,app,root,p.label,'Fachada provisional',p.x,p.z,p.yaw);
     }
-    buildings.push({profession:p.profession,entity:building,wallsId,doorKind:approvedChoice?
-      (p.profession==='Arcanista'&&!resources.has('door-arcanista-v027')?'generic-mobile-fallback':'approved'):
-      'generic-temporary',roofId:'roof-herrero-v013'});
+    buildings.push({profession:p.profession,entity:building,wallsId,doorKind:approvedChoice?'approved':'generic-temporary',roofId:'roof-herrero-v013',doorClosed:p.profession!=='Herrero'||gate()<1});
    }
    if(!doorHinge)throw Error('V017 Herrero hinge not built');
+   // Q1 starts at step 0: ALL five doors closed. The first talk with Ordan
+   // advances to step 1. Only THEN does Ordan open the blacksmith door.
+   // Saved progressed games restore the proper angle without replaying it.
+   doorAngle=gate()>=1?-92:0;
+   doorHinge.setLocalEulerAngles(0,doorAngle,0);
    const tick=dt=>{
-     const desired=gate()>=2?-92:0; // preserve Ordan door quest semantics
-     doorAngle+=(desired-doorAngle)*Math.min(1,Math.max(0,dt)*7);
+     const desired=gate()>=1?-92:0;
+     doorAngle+=(desired-doorAngle)*(1-Math.exp(-Math.max(0,dt)*5));
      doorHinge.setLocalEulerAngles(0,doorAngle,0);
    };
    app.on('update',tick);
    animations.push({stop:()=>app.off('update',tick)});
    const status={
-     installed:true,version:'V017',count:buildings.length,
+     installed:true,version:'V017.1',count:buildings.length,
      approval:{Herrero:'walls V082 / door V082-B',Arcanista:'walls V006 / door V027'},
      approved,generic,
      buildings:buildings.map(b=>({
@@ -241,7 +243,9 @@
      })),
      hdr32:!!app.scene.envAtlas,
      map:'GenesisVillagePlan / original workshop coordinates',
-     get doorAngle(){return doorAngle}
+     get doorAngle(){return doorAngle},
+     get doorStates(){return {Herrero:Math.abs(doorAngle)>1?'opening_or_open':'closed',Arcanista:'closed',Carpintero:'closed',Curtidor:'closed',Joyero:'closed'}},
+     doorOpenTrigger:'Ordan first dialogue: Q1 step 0 → 1'
    };
    if(status.count!==5||status.buildings.some(b=>b.renderers<4)||!status.hdr32)throw Error('V017 incomplete workshop scene assembly');
    globalThis.__GENESIS_V017_VILLAGE__=status;
