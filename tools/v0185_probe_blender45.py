@@ -37,13 +37,13 @@ for obj in bpy.data.objects:
       comps=[]
       for vv in groups.values():
         bbox=extent(vv);low,hi=bbox
-        front=hi[2]>-.35
+        front=low[1]<0.72 # Blender glTF front = -Y, height = Z
         centered=low[0]<2.7 and hi[0]>-2.7
         if front and centered:
           comp={"verts":len(vv),"bbox":bbox}
           comps.append(comp)
       comps.sort(key=lambda c:(-c["verts"],c["bbox"][0][0]))
-      info["components_front_center"]=comps[:65]
+      info["components_front_center"]=comps[:140]
       report["front_wood_parts"]+=comps
   report["objects"].append(info)
 Path("/tmp/v0185_probe.json").write_text(json.dumps(report,indent=2,ensure_ascii=False))
@@ -51,5 +51,5 @@ print("PROBE V0185 Blender",report["blender"])
 for ob in report["objects"]:
   print("NODE",ob["object"],"verts",ob["verts"],"bounds",ob["bbox"],"materials",ob["material"])
   if "components_front_center" in ob:
-    for p in ob["components_front_center"][:35]:
+    for p in ob["components_front_center"][:85]:
       print("FRONT OAK COMPONENT",p)
