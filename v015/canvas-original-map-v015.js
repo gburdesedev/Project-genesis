@@ -85,6 +85,15 @@
    root.addChild(pivot);
    const wall=usable(shell);wall.name=definition.profession+' · fachada original';pivot.addChild(wall);
    wall.setLocalPosition(0,0,0);
+   if(definition.profession==='Arcanista'){
+     // The original village_world.js tints only this facade, never all profession materials.
+     for(const render of wall.findComponents('render'))for(const mi of render.meshInstances||[]){
+       if(!mi.material?.clone)continue;
+       const mat=mi.material.clone();
+       if(mat.diffuse)mat.diffuse.set(mat.diffuse.r*.76,mat.diffuse.g*.81,mat.diffuse.b*.94);
+       mat.gloss=Math.min(mat.gloss??.35,.34);mat.update();mi.material=mat;
+     }
+   }
    const hinge=new pc.Entity(definition.profession+' · bisagra puerta original');
    hinge.setLocalPosition(-1.10,0,.12);pivot.addChild(hinge);
    const leaf=usable(door);leaf.name=definition.profession+' · hoja original';
@@ -93,6 +102,22 @@
      original:!!definition.existing,shell:wall,hinge,door:leaf,pivot};
    report.workshops.push({profession:item.profession,position:item.position,yaw:item.yaw,visible:true,originalSource:'root/index.html'});
    return item;
+ }
+ async function baseRoof(app,pc,workshops){
+   // Reuse a single approved V013 roof GLB for the five original roof anchors.
+   // This small 1.1 MB shared asset is part of the FIRST scene, never a heavy
+   // late asset. Fallback shells remain visible if it cannot load.
+   const asset=await remote(app,'original V013 roof',glbs.roof);
+   const boost=1.30*1.35;
+   for(const item of workshops.values()){
+     const roofBase=new pc.Entity(item.profession+' · tejado original aprobado V013');
+     roofBase.setLocalScale(12/7.875,1,12/7.875);
+     item.pivot.addChild(roofBase);
+     const roof=usable(asset);roofBase.addChild(roof);
+     roof.setLocalScale(1,boost,1);roof.setLocalPosition(0,-3.2*(boost-1),0);
+     item.roofFallback=roofBase;
+   }
+   report.originalAssets.roofs='5 original workshop roofs from one shared approved V013 GLB';
  }
  function marketStall(pc,world){
    // Exact approved provisional market stall footprint from genesis_market_v001.js.
@@ -136,6 +161,7 @@
      roof.setLocalScale(1,boost,1);roof.setLocalPosition(0,-3.2*(boost-1),0);
      chimney.setLocalScale(1,boost,1);chimney.setLocalPosition(0,-3.2*(boost-1),0);
      smith.shell.enabled=false;
+     if(smith.roofFallback)smith.roofFallback.enabled=false;
      report.originalAssets.herrero='approved V082/V013 with preserved original door hinge';
    }catch(e){issue('herrero approved walls-roof-chimney',e)}
 
@@ -253,6 +279,7 @@
      ]);
      const workshops=new Map();
      for(const p of plan.workshops)workshops.set(p.profession,placeWorkshop(app,pc,root,p,shell,door));
+     await baseRoof(app,pc,workshops).catch(e=>issue('original shared workshop roof',e));
      const merchant=people.get('merchant');
      if(merchant){
        // Original actual market coordinates, not the temporary V014 plaza test position.
