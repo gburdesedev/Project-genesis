@@ -22,19 +22,21 @@
  const DISTANCE_TO_ORDAN=Math.hypot(1.72-1.72,3.75-1.90);
  function create({artisan,game,playAnimation,announce=()=>{},speed=3.2,onFinish=()=>{}}){
    if(!artisan||!game?.step)throw Error('V015 arrival requires original artisan and Q1–Q3 state machine');
-   let state=game.step()===0?'arriving':'resumed',point=0,distance=0,elapsed=0,yaw=0;
+   let state=game.step()===0?'pending':'resumed',point=0,distance=0,elapsed=0,yaw=0;
    const startPos=START.slice(),position=()=>{const p=artisan.getPosition();return [p.x,p.y,p.z]};
-   if(state==='arriving'){
+   if(state==='pending'){
      artisan.setPosition(...START);artisan.setEulerAngles(0,180,0);
      announce('Llegada a la plaza · caminando hacia Ordan');
-   }
+   }else artisan.setPosition(0,0,6.3);
    function done(reason='arrived'){
      if(state!=='arriving')return false;
      state=reason;playAnimation?.('Idle_Loop');
      announce('Ordan te espera · acercate y pulsá E');
      onFinish(reason);return true;
    }
+   function begin(){if(state!=='pending')return false;state='arriving';return true}
    function update(dt){
+     if(state==='pending')return{active:true,state,yaw,animation:'Idle_Loop'};
      if(state!=='arriving')return{active:false,state};
      const step=Math.max(0,Math.min(.1,Number(dt)||0));
      if(!step)return{active:true,state,yaw,animation:'Walk_Loop'};
@@ -57,14 +59,15 @@
      return{active:true,state,waypoint:point,distance,yaw,animation:'Walk_Loop'};
    }
    function skip(){
+     if(state==='pending')begin();
      if(state!=='arriving')return false;
      const last=WAYPOINTS[WAYPOINTS.length-1];
      artisan.setPosition(last[0],0,last[1]);point=WAYPOINTS.length;
      return done('skipped');
    }
    return Object.freeze({
-     update,skip,position,
-     get active(){return state==='arriving'},
+     update,begin,skip,position,
+     get active(){return state==='pending'||state==='arriving'},
      get state(){return state},
      snapshot:()=>({state,point,totalWaypoints:WAYPOINTS.length,elapsed,distance,position:position(),ordanDistance:Math.hypot(position()[0]-1.72,position()[2]-1.90)})
    });
