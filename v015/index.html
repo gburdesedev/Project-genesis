@@ -2,7 +2,7 @@
 const diag=window.GenesisV015Diagnostics;diag?.block('runtime.playcanvas','starting');const status=document.getElementById('status'),rows=document.getElementById('rows');const pc=window.pc;if(!pc){status.textContent='FALTA MOTOR LOCAL: assets/vendor/playcanvas/playcanvas.min.js';throw Error('PlayCanvas local engine missing')}
 const canvas=document.getElementById('app');const app=new pc.Application(canvas,{graphicsDeviceOptions:{alpha:false,antialias:true}});app.start();app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);app.setCanvasResolution(pc.RESOLUTION_AUTO);window.addEventListener('resize',()=>app.resizeCanvas());
 app.scene.ambientLight=new pc.Color(.533,.478,.424);app.scene.exposure=1.18;
-const floor=new pc.Entity('Piso 63x63');floor.addComponent('render',{type:'box'});floor.setLocalScale(63,.2,63);floor.setPosition(0,-.1,0);const mat=new pc.StandardMaterial();mat.diffuse=new pc.Color(.72,.72,.72);mat.update();
+const floor=new pc.Entity('Piso 63x63');floor.addComponent('render',{type:'box'});floor.setLocalScale(63,.2,63);floor.setPosition(0,-.1,0);const mat=new pc.StandardMaterial();mat.diffuse=new pc.Color(.72,.72,.72);for(const prop of ['diffuseMapTiling','normalMapTiling','aoMapTiling'])mat[prop]=new pc.Vec2(12,12);mat.update();
 const texBase='./assets/playcanvas/approved/world/floors/plaza/cobblestone/';
 const textureFiles=[['diffuseMap','cobble_color.png'],['normalMap','cobble_normal.png'],['aoMap','cobble_ao.png']];
 for(const [property,file] of textureFiles){
