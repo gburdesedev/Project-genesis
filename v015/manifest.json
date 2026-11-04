@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v012",
+  "version": "0.15-v013",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "original-village-pbr",
@@ -141,7 +141,7 @@
       "kind": "animation"
     }
   ],
-  "note": "V012: original 63x63 village ground, cobbled plaza, nine traffic paths and market paving from approved PBR textures. V011 character rigs, animation and camera unchanged. Buildings and other scenery are NOT part of this step.",
+  "note": "V013: restored original Canvas NGE + Q1-Q3 full gameplay on approved V011 characters/V012 original PBR floors; preparation and inventory reuse original approved modules. Market, shields, updated eight quests deferred.",
   "loadingStages": [
     {
       "id": "gui",
@@ -153,6 +153,12 @@
       "id": "engine",
       "name": "Núcleo del juego",
       "kind": "runtime",
+      "required": true
+    },
+    {
+      "id": "gameplay",
+      "name": "Lógica original de Ordan · Q1–Q3",
+      "kind": "inline",
       "required": true
     },
     {
@@ -189,5 +195,33 @@
         "mercenary-hair"
       ]
     }
-  ]
+  ],
+  "canvasOriginal": {
+    "mode": "original-Q1-Q3-only",
+    "source": "../index.html",
+    "engine": "./canvas-legacy-nge.js",
+    "gameplay": "./canvas-legacy-logic.js",
+    "preparation": "./canvas-legacy-preparacion.js",
+    "inventory": "./canvas-legacy-inventario.js",
+    "operations": [
+      "speak-to-Ordan",
+      "open-workshop",
+      "clear-debris",
+      "check-anvil",
+      "repair-bellows",
+      "clear-flue",
+      "ignite-forge",
+      "receive-key",
+      "open-chest",
+      "inspect-inventory",
+      "prepare-iron",
+      "craft-first-sword",
+      "craft-second-sword",
+      "compare-and-select"
+    ],
+    "progressStore": "project-genesis/canvas-original/v013",
+    "futureMarketQuestChangesApplied": false,
+    "futureShieldRouteApplied": false,
+    "note": "Only original Canvas gameplay. New market/quest ordering deliberately excluded."
+  }
 }
