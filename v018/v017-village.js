@@ -275,7 +275,7 @@
         herreroHingeOffset:-DOOR_HERRERO_X_CENTRE*DOOR_FIT_X*(9/(WALL_BOUNDS.Herrero.width*plan.workshopScale)),
         experimentalDoorWidthFit:DOOR_FIT_X,
         herreroOpenDegrees:INWARD_OPEN,
-        arcanistaCentreX:0,
+        arcanistaCentreX:-1.10, // adjusted relative to V006 masonry opening in V018.1
         genericDoorsCentred:true,
         roofsAlignedToBuildingFootprint:true,
         originalVerticalRoofBoostPreserved:ROOF_BOOST
