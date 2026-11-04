@@ -147,6 +147,32 @@
       "git_blob_sha": "60f94baf3c7d595338e4f16b862c7da863b48230",
       "runtime_validation": "pending_V017_browser",
       "original_master_preserved": true
+    },
+    {
+      "id": "walls_herrero_v082",
+      "profession": "Herrero",
+      "category": "workshop_walls",
+      "version": "V082",
+      "approval": "approved_by_user_2026-11-04",
+      "current_status": "integrated_in_v017_scene",
+      "path": "assets/playcanvas/approved/workshops/herrero/walls/v082/blacksmith_four_walls_arched_v082.glb",
+      "format": "GLB",
+      "bytes": 2253616,
+      "git_blob_sha": "90e527e20dcfdb96da6071e176e72c2fffcd7453",
+      "original_master_preserved": true
+    },
+    {
+      "id": "walls_arcanista_v006",
+      "profession": "Arcanista",
+      "category": "workshop_walls",
+      "version": "V006",
+      "approval": "approved_by_user_2026-11-04",
+      "current_status": "integrated_in_v017_scene",
+      "path": "assets/playcanvas/approved/workshops/arcanista/walls/v006/arcanista_four_walls_preview.glb",
+      "format": "GLB",
+      "bytes": 1026104,
+      "git_blob_sha": "d6cdd71c17a426321ec61838cbcca4b22b8faab4",
+      "original_master_preserved": true
     }
   ],
   "approved_masters_pending_web_conversion": [
