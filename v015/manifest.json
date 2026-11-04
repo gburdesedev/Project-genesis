@@ -1,12 +1,37 @@
 {
-  "version": "0.15-v011",
+  "version": "0.15-v012",
   "mode": "gui-path-selection",
   "floor": {
-    "kind": "procedural",
+    "kind": "original-village-pbr",
     "width": 63,
     "depth": 63,
+    "center": [
+      7,
+      17
+    ],
     "collision": true,
-    "y": 0
+    "y": 0,
+    "source": "../village_plan.js",
+    "textures": "../assets/world/v0.11.004/",
+    "materialSets": [
+      "cobble",
+      "traffic"
+    ],
+    "channels": [
+      "color",
+      "normal",
+      "gloss",
+      "ao"
+    ],
+    "surfaces": [
+      "exterior",
+      "plaza",
+      "plaza-border",
+      "nine-roads",
+      "market"
+    ],
+    "mobileMaxTextureEdge": 1024,
+    "fallback": "temporary-floor"
   },
   "characters": [
     {
@@ -116,7 +141,7 @@
       "kind": "animation"
     }
   ],
-  "note": "V011: original body/head/hair rigs restored for artisan, Ordan and mercenary; UAL1 tracks and original camera. Browser smoke verifies synchronized Head bones, movement and hidden loader.",
+  "note": "V012: original 63x63 village ground, cobbled plaza, nine traffic paths and market paving from approved PBR textures. V011 character rigs, animation and camera unchanged. Buildings and other scenery are NOT part of this step.",
   "loadingStages": [
     {
       "id": "gui",
