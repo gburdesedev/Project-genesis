@@ -32,7 +32,7 @@ const errors=[],results=[];
     const data=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
     assert(data,'V017 browser audit not exposed');
     assert.equal(data.version,'V017.1');
-    assert.equal(data.cameraControl?.degreesPerPixel,0.2,'Default camera sensitivity must match original Canvas, not 6 degrees/pixel');
+    assert(Math.abs(data.cameraControl?.degreesPerPixel-0.2)<1e-6,'Default camera sensitivity must match original Canvas, not 6 degrees/pixel');
     assert.equal(data.cameraControl?.smoothed,true,'Frame rate independent camera smoothing missing');
     assert.equal(data.loadingHidden,true,'The village must not appear while the loading gate is open');
     assert.equal(data.workshops?.ok,true,'GLB preload/HDRI load failed');
