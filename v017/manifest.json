@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v017",
+  "version": "0.15-v017.1",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "original-village-pbr",
@@ -146,7 +146,7 @@
       "kind": "animation"
     }
   ],
-  "note": "V017: puertas y paredes Herrero/Arcanista expresamente aprobadas por usuario, piezas originales en assets/playcanvas/approved; 3 fachadas genéricas restantes. Mantiene V016 semilla, save/Q1-Q3, control y caminata; aldea invisible hasta su montaje y verificación con HDRI real. Ningún modelo de taller nuevo se atribuye como aprobado.",
+  "note": "V017.1 corrective patch, not new feature release. Same saved-game key, same assets/quest/NGE and five-workshop map as V017. Three other workshop doors remain shut; Arcanista V027 visible and shut on every device. Herrero remains shut through arrival and opens inward after successful first Ordan interaction.",
   "loadingStages": [
     {
       "id": "gui",
@@ -418,8 +418,8 @@
       "profession": "Arcanista",
       "version": "V027",
       "approval": "user_approved",
-      "mobilePolicy": "deferred",
-      "file": "../assets/playcanvas/approved/workshops/arcanista/doors/v027/Arcanist_Door_V027_WebGL.glb"
+      "file": "../assets/playcanvas/approved/workshops/arcanista/doors/v027/Arcanist_Door_V027_WebGL.glb",
+      "mobileRequirement": "approved_V027_original_all_devices"
     },
     {
       "id": "roof-herrero-v013",
@@ -467,5 +467,6 @@
     "preserveQuestAndSave": true,
     "walkCollision": "unchanged_v016",
     "stage": "village"
-  }
+  },
+  "patch": "V017.1 (fix-only) — original smooth camera and pointer lock; Herrero +Y inward door at Ordan first interaction; approved blue-lit V027 mandatory on mobile and desktop"
 }

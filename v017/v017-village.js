@@ -11,6 +11,10 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
  'use strict';
  const HORIZONTAL=12/7.875;
+ // V082-B GLB mesh leaf is centered at +0.603m from its genuine hinge.
+ // Wall opening center is x=0 and the masonry is scaled by HORIZONTAL.
+ const APPROVED_DOOR_HALF_HINGE_OFFSET=.603;
+ const HERRERO_OPEN_INWARD_DEG=90;
  const ROOF_BOOST=1.30*1.35; // exact original V013 roof, raised around wall-top pivot
  const NAMES=Object.freeze({
   Herrero:{walls:'wall-herrero-v082',door:'door-herrero-v082-b'},
@@ -170,6 +174,7 @@
   const gate=options.getStep||(()=>0);
   const animations=[];
   let doorHinge=null,doorAngle=0;
+  const mobile=matchMedia('(pointer:coarse)').matches;
   try{
    // Keep the entire village beneath one root; it is never visible until
    // the 32-bit HDR atlas, PBR floors, and all GLBs have settled.
@@ -198,34 +203,39 @@
         [0,-3.2*(ROOF_BOOST-1),0],[1,ROOF_BOOST,1]);
     if(p.profession==='Herrero'){
       const hinge=new pc.Entity('Herrero · bisagra izquierda original');
-      hinge.setLocalPosition(-1.10,0,.12);
+      // The GLB's DoorRoot is already a left-hand hinge at local x=0.
+      // Position it so the leaf center (.603 m) lands in the masonry opening.
+      hinge.setLocalPosition(-APPROVED_DOOR_HALF_HINGE_OFFSET*HORIZONTAL,0,.12);
       building.addChild(hinge);
-      const door=addModel(resources,hinge,'door-herrero-v082-b','Herrero V082-B · hierro aprobado');
+      const door=addModel(resources,hinge,'door-herrero-v082-b','Herrero V082-B · hierro aprobado',[0,0,0],[HORIZONTAL,1,HORIZONTAL]);
       doorHinge=hinge;
     }else if(p.profession==='Arcanista'){
       const pivot=new pc.Entity('Arcanista · puerta mágica V027 · cerrada');
-      pivot.setLocalPosition(0,0,.12);
+      // V027 has the same baked +0.603 m leaf-center offset.
+      pivot.setLocalPosition(-APPROVED_DOOR_HALF_HINGE_OFFSET*HORIZONTAL,0,.12);
       building.addChild(pivot);
       if(resources.has('door-arcanista-v027')){
-        const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · litología aprobada');
-        animations.push(animateArcaneDoor(pc,app,pivot,visual,false));
+        const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · litología aprobada',[0,0,0],[HORIZONTAL,1,HORIZONTAL]);
+        animations.push(animateArcaneDoor(pc,app,pivot,visual,mobile));
       }else{
-        // Existing V027 mobile rule: prevent 191-renderer GPU bottlenecks.
-        // A stable generic door is shown instead of an invisible hole.
-        genericWoodDoor(pc,building,p.profession);
+        // Missing an approved Arcanista V027 is a load error, never a wood substitute.
+        throw Error('Puerta Arcanista V027 aprobada no fue cargada: nunca reemplazar por madera');
       }
     }else{
       genericWoodDoor(pc,building,p.profession);
       inscription(pc,app,root,p.label,'Fachada provisional',p.x,p.z,p.yaw);
     }
-    buildings.push({profession:p.profession,entity:building,wallsId,doorKind:approvedChoice?
-      (p.profession==='Arcanista'&&!resources.has('door-arcanista-v027')?'generic-mobile-fallback':'approved'):
-      'generic-temporary',roofId:'roof-herrero-v013'});
+    buildings.push({profession:p.profession,entity:building,wallsId,doorKind:approvedChoice?'approved':'generic-temporary',roofId:'roof-herrero-v013'});
    }
    if(!doorHinge)throw Error('V017 Herrero hinge not built');
+   // Q1 step 0: the door is shut. The successful FIRST interaction with Ordan
+   // advances the original mentor goal to step 1 and opens the door INWARD.
+   // When continuing a saved game, restore the correct hinge angle immediately.
+   doorAngle=gate()>=1?HERRERO_OPEN_INWARD_DEG:0;
+   doorHinge.setLocalEulerAngles(0,doorAngle,0);
    const tick=dt=>{
-     const desired=gate()>=2?-92:0; // preserve Ordan door quest semantics
-     doorAngle+=(desired-doorAngle)*Math.min(1,Math.max(0,dt)*7);
+     const desired=gate()>=1?HERRERO_OPEN_INWARD_DEG:0;
+     doorAngle+=(desired-doorAngle)*(1-Math.exp(-Math.min(Math.max(dt,0),.2)*4.8));
      doorHinge.setLocalEulerAngles(0,doorAngle,0);
    };
    app.on('update',tick);
@@ -240,6 +250,8 @@
        renderers:b.entity.findComponents('render').length
      })),
      hdr32:!!app.scene.envAtlas,
+     herreroDoor:{hingeLocal:[-APPROVED_DOOR_HALF_HINGE_OFFSET*HORIZONTAL,0,.12],leafScale:[HORIZONTAL,1,HORIZONTAL],closedAngle:0,inwardAngle:HERRERO_OPEN_INWARD_DEG,trigger:'mentor interaction · step>=1',get angle(){return doorAngle}},
+     arcanistaDoor:{asset:'door-arcanista-v027',woodFallback:false,mobileHQ:true,closed:true},
      map:'GenesisVillagePlan / original workshop coordinates',
      get doorAngle(){return doorAngle}
    };

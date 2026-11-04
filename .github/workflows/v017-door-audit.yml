@@ -1,0 +1,14 @@
+name: V017 Door Geometry — audit approved GLB pivots
+on:
+  push:
+    branches: [fix/v017-camera-door-ordan]
+    paths: ['tools/v017_door_geometry_audit.py', '.github/workflows/v017-door-audit.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/v017_door_geometry_audit.py
