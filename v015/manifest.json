@@ -16,7 +16,7 @@
       "position": [
         0,
         0,
-        0
+        6.3
       ]
     },
     {
@@ -90,7 +90,7 @@
       "kind": "animation"
     }
   ],
-  "note": "V010 incremental: panel de carga oculto al continuar, movimiento y diagnóstico sin reinicio. No se incorporan escenarios nuevos.",
+  "note": "V011: reconstruct original 65-bone character animation assemblies, original camera parameters and material tints. Keep per-asset streaming and pause diagnostics.",
   "loadingStages": [
     {
       "id": "gui",
