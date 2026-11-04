@@ -44,6 +44,9 @@ assert(samples.every(p=>Math.hypot(p.x-7,p.z-16)>2.4),
 assert(transitions.includes('Walk_Loop')&&transitions.includes('Idle_Loop'),
  'V011 original rig must walk and return to idle');
 assert.deepEqual(completed,['arrived']);
+const savedStepZero=scene.create({artisan:actor,game:{step:()=>0},resumed:true});
+assert.equal(savedStepZero.state,'resumed','Saved Q1 step 0 must not replay intro on continue');
+assert.equal(savedStepZero.begin(),false,'Continuing an existing game must never restart the walk');
 const old=scene.create({artisan:actor,game:{step:()=>4}});
 assert.equal(old.state,'resumed','No intro replay once original Q1 has progressed');
 assert.deepEqual(old.position(),[0,0,6.3]);
@@ -57,6 +60,10 @@ assert(html.includes("document.body.classList.remove('genesis-v016-cinematic')")
  'Normal frame and original controls must return when arrival finishes');
 assert(html.includes("visibility:hidden!important;pointer-events:none!important"),
  'Controls must not be visible or clickable during cinema');
+assert(html.includes('resumedExistingSession=Boolean(legacyGame.resume())')&&html.includes('resumed:resumedExistingSession'),
+ 'Arrival must distinguish new game from a legitimately resumed V013 session');
+assert(html.includes('Continuar partida guardada · sin llegada cinematográfica')&&html.includes('ver llegada cinematográfica'),
+ 'Start menu must clearly distinguish the cinematic from the save-resume path');
 assert(html.includes("window.__GENESIS_V016_ARRIVAL__=cinematicArrival"),
  'Intro must be discoverable to gameplay and tests');
 assert(ui.includes("globalThis.__GENESIS_V016_ARRIVAL__?.active"),
