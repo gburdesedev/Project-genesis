@@ -3,7 +3,7 @@
   "project": "Project Genesis",
   "platform": "PlayCanvas / WebGL",
   "registry_root": "assets/playcanvas/approved",
-  "updated_on": "2026-10-31",
+  "updated_on": "2026-11-04",
   "policy": {
     "ship_only_approved": true,
     "no_unapproved_candidates": true,
@@ -119,6 +119,34 @@
       "load_policy": "desktop model-viewer; mobile/safePreviews transparent PNG",
       "game_version": "v0.14b",
       "game_build": "20261031.01"
+    },
+    {
+      "id": "door_herrero_v082_b",
+      "profession": "Herrero",
+      "category": "workshop_door",
+      "version": "V082-B",
+      "approval": "approved_by_user_2026-11-04",
+      "current_status": "preserved_in_V017_for_hdr_review",
+      "path": "assets/playcanvas/approved/workshops/herrero/doors/v082-b/door-herrero-v082-b.glb",
+      "format": "GLB",
+      "bytes": 15887816,
+      "git_blob_sha": "eef69d28dd8d53b5934442279a8b027bdfbfa157",
+      "runtime_validation": "pending_V017_browser",
+      "original_master_preserved": true
+    },
+    {
+      "id": "door_arcanista_v027",
+      "profession": "Arcanista",
+      "category": "workshop_door",
+      "version": "V027",
+      "approval": "approved_by_user",
+      "current_status": "preserved_in_V017_for_hdr_review",
+      "path": "assets/playcanvas/approved/workshops/arcanista/doors/v027/Arcanist_Door_V027_WebGL.glb",
+      "format": "GLB",
+      "bytes": 4034004,
+      "git_blob_sha": "60f94baf3c7d595338e4f16b862c7da863b48230",
+      "runtime_validation": "pending_V017_browser",
+      "original_master_preserved": true
     }
   ],
   "approved_masters_pending_web_conversion": [
@@ -151,5 +179,6 @@
       "smooth_return_to_front_on_leave": true,
       "static_slot_frame_and_counter": true
     }
-  }
+  },
+  "workshop_registry": "assets/playcanvas/approved/workshops/registry-v017.json"
 }
