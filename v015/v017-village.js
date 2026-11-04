@@ -118,10 +118,17 @@
    beam.addComponent('light',{type:'omni',color:new pc.Color(.18,.62,1),range:1.8,intensity:1,castShadows:false});
    beam.setLocalPosition(x,.25,.45);parent.addChild(beam);lights.push(beam);
   }
-  let elapsed=0,acc=0;
+  let elapsed=0,acc=0,visibleActive=false;
+  const camera=app.root.findByName('Camara');
   const update=dt=>{
    if(!parent.enabled||!visual.enabled)return;
-   elapsed+=Math.min(.08,Math.max(0,dt||0));acc+=dt||0;
+   // No CPU pixel recomputation/GPU texture upload for a portal outside the
+   // useful viewing distance. The original material remains static and intact.
+   const eye=camera?.getPosition(),doorPos=parent.getPosition();
+   const near=!eye||Math.hypot(eye.x-doorPos.x,eye.z-doorPos.z)<19;
+   if(visibleActive!==near){visibleActive=near;for(const light of lights)light.enabled=near}
+   if(!near)return;
+   elapsed+=Math.min(.12,Math.max(0,dt||0));acc+=dt||0;
    const rise=((elapsed*.74)%3.08)-.35;
    lights.forEach((light,i)=>{
     const y=Math.max(.12,Math.min(2.3,rise-i*.3));
