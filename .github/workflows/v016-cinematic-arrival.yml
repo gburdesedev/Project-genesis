@@ -1,0 +1,30 @@
+name: V016 Cinematic Arrival and NPC positions
+on:
+  push:
+    branches: [main, feat/v016-npc-cinematic-arrival]
+    paths:
+      - 'tests/canvas_intro_v016.cjs'
+      - 'v015/canvas-arrival-v016.js'
+      - 'v015/index.html'
+      - 'v015/manifest.json'
+      - 'v015/canvas-legacy-ui.js'
+      - '.github/workflows/v016-cinematic-arrival.yml'
+  pull_request:
+    paths:
+      - 'tests/canvas_intro_v016.cjs'
+      - 'v015/canvas-arrival-v016.js'
+      - 'v015/index.html'
+      - 'v015/manifest.json'
+      - 'v015/canvas-legacy-ui.js'
+      - '.github/workflows/v016-cinematic-arrival.yml'
+  workflow_dispatch:
+jobs:
+  cinematic-intro:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/canvas_intro_v016.cjs
