@@ -42,6 +42,8 @@
 #quest p{color:#b9c5ca}
 #npcTag{letter-spacing:.12em}
 #legacyDistance{display:block;margin-top:5px;font-size:9px;color:#c0cbd0;line-height:1.25}
+/* Preserve camera button clickability above V013 touch capture; no geometry changes. */
+#buttonsTop{z-index:60}
 #hud .uiBtn{cursor:pointer}
 #interact,#inventoryTouch,#zoomControls button{cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
 #interact:active,#inventoryTouch:active,#zoomControls button:active{filter:brightness(1.22)}
