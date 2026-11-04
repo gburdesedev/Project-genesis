@@ -146,7 +146,7 @@
       "kind": "animation"
     }
   ],
-  "note": "V017 sobre V016: se conserva jugabilidad, controles, semilla y secuencia de Ordan; se agrega escena oculta hasta carga final, etapas exactas por recurso, y GLB locales de talleres + HDRI Radiance RGBE para iluminación IBL. Los modelos de paredes V082/V006 se precargan para revisión técnica, NO se integran como arte aprobado.",
+  "note": "V017: puertas y paredes Herrero/Arcanista expresamente aprobadas por usuario, piezas originales en assets/playcanvas/approved; 3 fachadas genéricas restantes. Mantiene V016 semilla, save/Q1-Q3, control y caminata; aldea invisible hasta su montaje y verificación con HDRI real. Ningún modelo de taller nuevo se atribuye como aprobado.",
   "loadingStages": [
     {
       "id": "gui",
@@ -217,6 +217,16 @@
       ]
     },
     {
+      "id": "roofs",
+      "name": "Cubiertas y chimeneas de talleres",
+      "kind": "assets",
+      "required": true,
+      "assets": [
+        "roof-herrero-v013",
+        "chimney-herrero-v013"
+      ]
+    },
+    {
       "id": "lighting",
       "name": "Iluminación HDRI 32-bit · IBL PBR",
       "kind": "assets",
@@ -224,6 +234,13 @@
       "assets": [
         "lighting-hdri32"
       ]
+    },
+    {
+      "id": "village",
+      "name": "Montaje de la aldea · cinco talleres",
+      "kind": "tracked",
+      "required": true,
+      "assets": []
     },
     {
       "id": "secondary",
@@ -369,21 +386,21 @@
   "workshopAssets": [
     {
       "id": "wall-herrero-v082",
-      "name": "Paredes del Herrero V082 · prueba técnica",
+      "name": "Paredes del Herrero V082 · aprobadas",
       "kind": "wall",
       "profession": "Herrero",
       "version": "V082",
-      "approval": "pending_visual_review",
-      "file": "../assets/playcanvas/candidates/workshops/herrero/walls/v082/blacksmith_four_walls_arched_v082.glb"
+      "approval": "user_approved",
+      "file": "../assets/playcanvas/approved/workshops/herrero/walls/v082/blacksmith_four_walls_arched_v082.glb"
     },
     {
       "id": "wall-arcanista-v006",
-      "name": "Paredes del Arcanista V006 · prueba técnica",
+      "name": "Paredes del Arcanista V006 · aprobadas",
       "kind": "wall",
       "profession": "Arcanista",
       "version": "V006",
-      "approval": "pending_visual_review",
-      "file": "../assets/playcanvas/candidates/workshops/arcanista/walls/v006/arcanista_four_walls_preview.glb"
+      "approval": "user_approved",
+      "file": "../assets/playcanvas/approved/workshops/arcanista/walls/v006/arcanista_four_walls_preview.glb"
     },
     {
       "id": "door-herrero-v082-b",
@@ -403,6 +420,24 @@
       "approval": "user_approved",
       "mobilePolicy": "deferred",
       "file": "../assets/playcanvas/approved/workshops/arcanista/doors/v027/Arcanist_Door_V027_WebGL.glb"
+    },
+    {
+      "id": "roof-herrero-v013",
+      "name": "Cubierta de Herrero V013 · existente",
+      "kind": "roof",
+      "profession": "Herrero",
+      "version": "V013",
+      "approval": "existing_reviewed",
+      "file": "../assets/vendor/genesis/externals/blacksmithRoofV013/src/blacksmith_roof_preview.glb"
+    },
+    {
+      "id": "chimney-herrero-v013",
+      "name": "Chimenea Herrero V013 · existente",
+      "kind": "chimney",
+      "profession": "Herrero",
+      "version": "V013",
+      "approval": "existing_reviewed",
+      "file": "../assets/vendor/genesis/externals/blacksmithChimneyV013/src/blacksmith_chimney_candidate_preview.glb"
     }
   ],
   "lightingAsset": {
@@ -415,5 +450,22 @@
     "desktopFile": "studio_small_09_2k.hdr",
     "mobileFile": "studio_small_09_1k.hdr",
     "mode": "prefiltered scene IBL envAtlas; no replacement PNG/JPG"
+  },
+  "villageScene": {
+    "source": "./v017-village.js",
+    "layout": "../village_plan.js",
+    "approvedModelProfession": [
+      "Herrero",
+      "Arcanista"
+    ],
+    "genericFacadeProfessions": [
+      "Carpintero",
+      "Curtidor",
+      "Joyero"
+    ],
+    "requiredBuildings": 5,
+    "preserveQuestAndSave": true,
+    "walkCollision": "unchanged_v016",
+    "stage": "village"
   }
 }
