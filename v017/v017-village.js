@@ -233,7 +233,7 @@
    app.on('update',tick);
    animations.push({stop:()=>app.off('update',tick)});
    const status={
-     installed:true,version:'V017',count:buildings.length,
+     installed:true,version:'V017.1',count:buildings.length,
      approval:{Herrero:'walls V082 / door V082-B',Arcanista:'walls V006 / door V027'},
      approved,generic,
      buildings:buildings.map(b=>({
