@@ -34,11 +34,9 @@ fs.mkdirSync(OUT,{recursive:true});
     await page.addStyleTag({content:'#hud,#mobile,#orientation,#settings,#controls,#ui,#legacyQuest,#legacyPrompt,#prompt,#cameraGuide,#modalLayer{display:none!important}'});
     // Visual QA fixed camera: camera override only for screenshots in this browser tab.
     for(const shot of [
-      {name:'herrero-front',eye:[0,2.5,7.5],target:[0,2.0,-1.6]},
-      {name:'herrero-architecture',eye:[6,6,7.6],target:[0,3.0,-2.7]},
-      {name:'curtidor-front',eye:[14,2.5,7.5],target:[14,2,-1.6]},
       {name:'arcanista-front',eye:[17.1,2.8,16],target:[25.5625,2.0,16]},
-      {name:'arcanista-architecture',eye:[17.6,6.0,22.0],target:[25.5625,2.5,16]}
+      {name:'curtidor-front',eye:[14,2.5,7.5],target:[14,2,-1.6]},
+      {name:'herrero-front',eye:[0,2.5,7.5],target:[0,2.0,-1.6]}
     ]){
       await page.evaluate(({eye,target})=>{
         const app=window.pc.Application.getApplication?.()||window.pc.app;
@@ -49,9 +47,9 @@ fs.mkdirSync(OUT,{recursive:true});
         window.__GENESIS_V018_VISUAL_STOP__=()=>app.off('prerender',handler);
         handler();
       },shot);
-      await page.waitForTimeout(800);
+      await page.waitForTimeout(400);
       const filename=OUT+'/'+mode.name+'-'+shot.name+'.png';
-      await page.screenshot({path:filename,timeout:40000});
+      await page.screenshot({path:filename,timeout:60000});
       details.push({mode:mode.name,shot:shot.name,filename,eye:shot.eye,target:shot.target});
       console.log('CAPTURE',filename);
     }
