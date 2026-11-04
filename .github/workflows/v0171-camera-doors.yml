@@ -1,0 +1,44 @@
+name: V017.1 corrective camera + approved doors browser
+on:
+  push:
+    branches: [fix/v017-camera-doors-ordan]
+    paths:
+      - 'v017/**'
+      - 'tests/v0171_camera_doors.cjs'
+      - 'tools/v017_preview_browser_smoke.cjs'
+      - '.github/workflows/v0171-camera-doors.yml'
+  pull_request:
+    paths:
+      - 'v017/**'
+      - 'tests/v0171_camera_doors.cjs'
+      - 'tools/v017_preview_browser_smoke.cjs'
+      - '.github/workflows/v0171-camera-doors.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-v0171:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify correction scope / V016 unchanged
+        run: node tests/v0171_camera_doors.cjs
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Real WebGL PC/mobile — door V027, camera damping, Ordan opening and save
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v0171-http.log 2>&1 &
+          node tools/v017_preview_browser_smoke.cjs
+      - name: Preserve result evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0171-camera-doors-PC-mobile-browser-evidence
+          path: /tmp/v017-browser-qa
+          retention-days: 14
