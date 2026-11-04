@@ -45,8 +45,9 @@ const sources=fs.readFileSync(path.join(__dirname,'../v015/canvas-original-sourc
 assert(map.includes('plan.workshops')&&map.includes('plan.market'),'Village must read original plan');
 assert(map.includes('merchant.setPosition(25.5,0,36.3)'),'Original merchant must be located at approved market stall');
 assert(map.includes('marketStall(pc,root)'),'Approved original merchant stall missing');
-assert(map.includes("void addTrees(app,pc,root)")&&map.includes("void fountain(app,pc,root)"),
- 'Original heavy scenery must load separately from initial map');
+assert(map.includes("await addTrees(app,global.pc,root)")&&map.includes("await fountain(app,global.pc,root)"),
+ 'Original heavy scenery must load separately, sequentially after gameplay starts');
+assert(map.includes('function startDecor()'),'The staged environment loader must be callable only after arrival');
 assert(sources.includes('workshopShell')&&sources.includes('doorLeaf'),
  'Approved original embedded workshop source models missing');
 assert(html.includes('GenesisCanvasMapV015.mount'),'Original village not mounted');
