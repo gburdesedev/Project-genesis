@@ -31,7 +31,7 @@ const errors=[],results=[];
     },null,{timeout:150000,polling:250});
     const data=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
     assert(data,'V017 browser audit not exposed');
-    assert.equal(data.version,'V017');
+    assert.equal(data.version,'V017.1');
     assert.equal(data.loadingHidden,true,'The village must not appear while the loading gate is open');
     assert.equal(data.workshops?.ok,true,'GLB preload/HDRI load failed');
     assert.equal(data.workshops.hdr,true,'No actual HDRI atlas');
@@ -45,7 +45,11 @@ const errors=[],results=[];
     assert.equal(data.stages.animations,'Listo');
     for(const category of ['walls','doors','roofs','lighting','village'])assert.equal(data.stages[category],'Listo','Progress category '+category+' is premature/unfinished');
     assert.equal(data.village.buildings.find(b=>b.profession==='Arcanista').door,
-      mode.mobile?'generic-mobile-fallback':'approved','Unexpected Arcanista HQ mobile policy');
+      'approved','Arcanista V027 must never be replaced by a wooden door on mobile');
+    assert.equal(data.village.doorTarget,0,'Herrero must begin CLOSED until talking to Ordan');
+    assert(Math.abs(data.village.doorAngle)<1,'Herrero door is visibly open before talking to Ordan');
+    assert.equal(data.workshops.models,6,'All 6 GLBs including V027 must load on mobile and desktop');
+    assert(data.cameraControl===null||data.cameraControl.cameraRate===9,'Camera damping changed from original-profile fix');
     assert(data.rigs.artisan.controllers===3,'Original V011 animation rig missing');
     const pauseSeconds=(Date.now()-time0)/1000;
     await page.locator('#v011-pause button').first().click();
@@ -62,6 +66,28 @@ const errors=[],results=[];
     assert.equal(after.legacy,0,'The opening cinematic must not consume the first quest');
     assert(after.intro.ordanDistance<2.2,'Arrival skip must finish at Ordan');
     assert.equal(after.loaderVisible,false,'Loader overlay still obscures the view');
+    assert.equal(after.village.doorTarget,0,'Herrero door opened before first Ordan interaction');
+    assert.equal(after.cameraControl.cameraRate,9,'The camera must have framerate independent smoothing');
+    // A touch-look impulse must first change the target, not instantly snap
+    // the rendered camera. Run this in both PC and mobile simulated browsers.
+    const cameraImpulse=await page.evaluate(()=>{
+      const zone=document.getElementById('lookZone');
+      const prev=window.__GENESIS_V017_CAMERA__();
+      zone.dispatchEvent(new PointerEvent('pointerdown',{pointerId:911,pointerType:'touch',clientX:400,clientY:210,bubbles:true}));
+      window.dispatchEvent(new PointerEvent('pointermove',{pointerId:911,pointerType:'touch',clientX:660,clientY:210,bubbles:true}));
+      window.dispatchEvent(new PointerEvent('pointerup',{pointerId:911,pointerType:'touch',clientX:660,clientY:210,bubbles:true}));
+      return {prev,after:window.__GENESIS_V017_CAMERA__()};
+    });
+    assert(Math.abs(cameraImpulse.after.desiredYaw-cameraImpulse.prev.desiredYaw)>.4,'Camera no longer responds to original Canvas look gestures');
+    assert(Math.abs(cameraImpulse.after.renderedYaw-cameraImpulse.prev.renderedYaw)<.20,'Camera jumps instantly rather than smoothing');
+    await page.waitForFunction(()=>Math.abs(window.__GENESIS_V017_CAMERA__().renderedYaw)>.20,null,{timeout:25000,polling:250});
+    // First actual gameplay interaction must open Herrero only.
+    await page.evaluate(()=>window.__GENESIS_V013_LEGACY__.tryInteract());
+    await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().legacy===1,null,{timeout:15000,polling:250});
+    await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().village.doorAngle < -50,null,{timeout:20000,polling:250});
+    const conversation=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
+    assert.equal(conversation.village.doorTarget,-92,'Ordan first conversation must open Herrero door');
+    assert.equal(conversation.village.buildings.find(x=>x.profession==='Arcanista').door,'approved','Arcane door changed after mentor talk');
     if(!mode.mobile){
       await page.keyboard.down('w');
       await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().rigs.artisan.parts.every(p=>p.state==='Walk_Loop'),null,{timeout:45000,polling:250});
@@ -76,9 +102,9 @@ const errors=[],results=[];
        models:data.workshops.models,visibleWorkshops:data.village.count,
        approved:data.village.approved,generic:data.village.generic,
        arcanistDoor:data.village.buildings.find(b=>b.profession==='Arcanista').door,
-       hdr32:true,originalQuest:after.legacy,autonomousWalkDistance:moving.distance,
+       hdr32:true,originalQuest:after.legacy,afterOrdanStep:conversation.legacy,doorAngle:conversation.village.doorAngle,cameraSmooth:true,autonomousWalkDistance:moving.distance,
        noWorldBeforeLoad:data.loadingHidden});
-    console.log('PASS V017 '+mode.name.toUpperCase()+' · loading, HDRI, five workshops, animated entry and original controls',JSON.stringify(results[results.length-1]));
+    console.log('PASS V017.1 '+mode.name.toUpperCase()+' · loading, HDRI, five workshops, animated entry and original controls',JSON.stringify(results[results.length-1]));
    }finally{await page.close()}
   }
   assert.equal(errors.length,0,'JS page errors: '+errors.join('; '));
@@ -86,4 +112,4 @@ const errors=[],results=[];
    fs.writeFileSync(OUT+'/results.json',JSON.stringify({results,errors},null,2));
    await browser.close();
  }
-})().catch(e=>{console.error('V017 WEBGL QA FAIL',e.stack||String(e));process.exitCode=1});
+})().catch(e=>{console.error('V017.1 WEBGL QA FAIL',e.stack||String(e));process.exitCode=1});
