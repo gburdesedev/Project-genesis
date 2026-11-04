@@ -63,14 +63,14 @@
   const door=new pc.Entity(profession+' · puerta temporal de tablones');
   // Old world layout uses the hinge at -1.10, 0, .12; this is a noninteractive closed facade.
    door.setLocalPosition(0,0,.12);
-  for(let i=0;i<5;i++){
-   const x=(i-2)*.265;
+  for(let i=0;i<7;i++){ // 7 boards fill the arch without stretching wood grain
+   const x=(i-3)*.265;
    component(pc,door,'Tablón '+(i+1),'box',[x,1.11,0],[.268,2.22,.11],i%2?grain:wood);
   }
   for(const y of [.35,1.75]){
-   component(pc,door,'Pletina de herrería','box',[0,y,.071],[1.39,.075,.029],iron);
+   component(pc,door,'Pletina de herrería','box',[0,y,.071],[1.96,.075,.029],iron);
   }
-  component(pc,door,'Picaporte de hierro','box',[.45,1.05,.145],[.13,.10,.09],iron);
+  component(pc,door,'Picaporte de hierro','box',[.69,1.05,.145],[.13,.10,.09],iron);
   parent.addChild(door);
   return door;
  }
@@ -80,15 +80,15 @@
   ctx.fillStyle='#241b13';ctx.fillRect(0,0,512,160);
   ctx.strokeStyle='#9f7745';ctx.lineWidth=14;ctx.strokeRect(10,10,492,140);
   ctx.fillStyle='#dec89b';ctx.font='bold 46px Georgia';ctx.textAlign='center';
-  ctx.fillText(name,256,79);
-  ctx.font='25px Georgia';ctx.fillStyle='#b3a588';ctx.fillText(kind,256,123);
+  ctx.fillText(name,256,95);
+  // Small identification plaque; never show developer-only 'Fachada provisional' to players.
   const tx=new pc.Texture(app.graphicsDevice,{name:name+' cartel de madera',srgb:true,mipmaps:true});
   tx.setSource(cnv);
   const board=material(pc,name+' · letrero',[1,1,1],0,.07);
   board.diffuseMap=tx;board.emissive=new pc.Color(.04,.035,.028);board.update();
   const anchor=new pc.Entity(name+' · letrero temporal');
   anchor.setLocalPosition(x,0,z);anchor.setLocalEulerAngles(0,yaw,0);
-  component(pc,anchor,'Soporte de madera','box',[0,2.78,0],[2.65,.87,.13],board,{shadow:false});
+  component(pc,anchor,'Soporte de madera','box',[0,2.94,0],[2.00,.62,.13],board,{shadow:false});
   root.addChild(anchor);return anchor;
  }
  function animateArcaneDoor(pc,app,parent,visual,mobile){
@@ -228,7 +228,7 @@
       doorHinge=hinge;
     }else if(p.profession==='Arcanista'){
       const pivot=new pc.Entity('Arcanista · puerta mágica V027 · cerrada');
-      pivot.setLocalPosition(0,0,.12);
+      pivot.setLocalPosition(-1.10,0,.12); // measured V018.1 facade fit: V027 visible pixels shifted right by ~0.8m
       building.addChild(pivot);
       // The approved V027 original must be visible on PC AND mobile.
       // If its GLB cannot be decoded, fail the load gate rather than showing
