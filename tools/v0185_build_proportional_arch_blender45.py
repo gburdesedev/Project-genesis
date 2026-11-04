@@ -35,6 +35,22 @@ def solid_mesh(name, vertices, faces):
  mesh.update()
  obj=bpy.data.objects.new(name,mesh);bpy.context.collection.objects.link(obj)
  obj.data.materials.append(stone)
+ # Source GLB wall materials use UV textures; every new arch stone must carry
+ # nondegenerate UVs. Without this, reusing wall PBR produces flat grey blocks.
+ uv=obj.data.uv_layers.new(name='UVMap')
+ u0=.13+rng.uniform(.02,.58)
+ v0=.09+rng.uniform(.02,.45)
+ for poly in obj.data.polygons:
+  n=poly.normal
+  for loop_index in poly.loop_indices:
+   vert=obj.data.vertices[obj.data.loops[loop_index].vertex_index].co
+   if abs(n.y)>.62:
+    coord=(u0+vert.x*.36, v0+vert.z*.36)
+   elif abs(n.x)>.62:
+    coord=(u0+vert.y*.55, v0+vert.z*.34)
+   else:
+    coord=(u0+vert.x*.38, v0+vert.y*.52)
+   uv.data[loop_index].uv=coord
  for p in obj.data.polygons:p.use_smooth=False
  bevel=obj.modifiers.new("Edge-chip bevel realistic basalt","BEVEL")
  bevel.width=.013;bevel.segments=2
@@ -142,12 +158,13 @@ def scene_env():
  env=nodes.new('ShaderNodeTexEnvironment');env.image=bpy.data.images.load(str(HDR),check_existing=True)
  assert env.image.file_format=='HDR'
  links.new(env.outputs['Color'],bg.inputs['Color'])
- bg.inputs['Strength'].default_value=.85
+ bg.inputs['Strength'].default_value=1.20
  scene=bpy.context.scene;scene.render.engine='CYCLES'
  scene.cycles.samples=22;scene.cycles.use_denoising=True
  scene.render.resolution_x=870;scene.render.resolution_y=640;scene.render.resolution_percentage=100
  scene.render.image_settings.file_format='PNG'
  scene.view_settings.view_transform='AgX'
+ scene.view_settings.exposure=.35
  scene.render.film_transparent=False
 for kind in ('Herrero','Arcanista'):
  clear()
