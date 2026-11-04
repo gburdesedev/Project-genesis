@@ -90,7 +90,13 @@ const fmt=x=>x==null?'—':(x/1048576).toFixed(2)+' MB';function drawStages(){
   const failed=items.filter(x=>x.status.startsWith('ERROR')).length;
   const received=items.reduce((total,x)=>total+x.received,0);
   const size=items.reduce((total,x)=>total+(x.total||0),0);
-  const phase=stageStates.get(st.id)?.status||'En espera';
+  const tracked=stageStates.get(st.id);
+  if(st.kind==='assets'&&tracked){
+   tracked.status=failed?'ERROR '+failed:
+     items.length&&done+deferred===items.length?'Listo':
+     items.some(x=>x.status==='Descargando'||x.status.startsWith('Procesando'))?'Descargando':'En espera';
+  }
+  const phase=tracked?.status||'En espera';
   const complete=st.kind==='inline'||st.kind==='runtime'||
     (st.kind==='tracked'&&phase==='Listo')||
     (items.length>0&&done+deferred===items.length&&failed===0);
