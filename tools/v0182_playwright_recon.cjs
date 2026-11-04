@@ -30,7 +30,7 @@ const save=(name,value)=>fs.writeFileSync(OUT+'/'+name,JSON.stringify(value,null
   page=await browser.newPage({...options,deviceScaleFactor:1});
   page.on('pageerror',e=>log.pageErrors.push(String(e.stack||e)));
   page.on('console',msg=>{if(msg.type()==='error')log.consoleErrors.push(msg.text())});
-  await page.goto('http://127.0.0.1:8765/v0181/?audit='+mode,{waitUntil:'domcontentloaded',timeout:75000});
+  await page.goto('http://127.0.0.1:8765/v0182/?audit='+mode,{waitUntil:'domcontentloaded',timeout:75000});
   await page.locator('#start-blacksmith').click({timeout:25000});
   await page.waitForFunction(()=>document.getElementById('v011-pause')?.textContent.includes('Carga finalizada'),null,{timeout:180000,polling:300});
   const initial=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
@@ -76,6 +76,19 @@ const save=(name,value)=>fs.writeFileSync(OUT+'/'+name,JSON.stringify(value,null
         doorVisual:transform(herrero?.children?.[0]||arcane?.children?.[0]||null)};
     });
   });
+  // Geometry-derived regression: all three facades' door planes must share
+  // their parent masonry recess at Q1 step 0, independent of camera or device.
+  for(const entity of log.modelTransforms.filter(x=>['Herrero','Curtidor','Arcanista'].includes(x.profession))){
+    const door=entity.hinge||entity.arcanePivot||entity.temporaryDoor;
+    assert(door?.position&&entity.shell?.position,'Missing GLB or door '+entity.profession);
+    const dx=door.position[0]-entity.shell.position[0];
+    const dz=door.position[2]-entity.shell.position[2];
+    const depthMismatch=Math.hypot(dx,dz);
+    // Herrero has native hinge offset along x; only check facade-normal depth.
+    if(entity.profession==='Arcanista') assert(depthMismatch<.02,'Arcane door is floating in front of wall: '+depthMismatch);
+    if(entity.profession==='Curtidor') assert(Math.abs(dz)<.02,'Temporary door is floating away from wall: '+dz);
+    if(entity.profession==='Herrero') assert(Math.abs(dz)<.02,'Blacksmith door is floating away from wall: '+dz);
+  }
   save('actual-transforms.json',log.modelTransforms);
   // Camera override is used ONLY for screenshots after the actual game has loaded.
   await page.addStyleTag({content:'#hud,#mobile,#orientation,#settings,#controls,#ui,#legacyQuest,#legacyPrompt,#prompt,#cameraGuide,#modalLayer{display:none!important}'});
