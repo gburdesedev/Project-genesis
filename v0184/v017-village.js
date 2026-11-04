@@ -260,7 +260,7 @@
        // Shift the centre to x=0 in the real masonry opening.
        const doorLocalXScale=ORIGINAL_DOOR_BODY_WIDTH_M/(DOOR_BODY_NATIVE_WIDTH_M*plan.workshopScale);
        const doorMount=new URLSearchParams(location.search).get('v0184DoorMount');
-       const doorLocalZ=doorMount==='recessed'?-bounds.front*wallScaleZ:.12;
+       const doorLocalZ=doorMount==='historical'?.12:-bounds.front*wallScaleZ; // default = recess behind wood jambs
        hinge.setLocalPosition(DOOR_REFERENCE_HINGE_WORLD_X/plan.workshopScale,0,doorLocalZ);
       building.addChild(hinge);
        const door=addModel(resources,hinge,'door-herrero-v082-b','Herrero V082-B · restaurado a ancho original V018.4',[0,0,0],[doorLocalXScale,1,wallScaleZ]);
