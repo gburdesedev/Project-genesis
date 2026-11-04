@@ -1,0 +1,62 @@
+name: V017.1 Fix — Native Camera and Doors
+on:
+  push:
+    branches: [fix/v017-camera-door-ordan]
+    paths:
+      - 'v017/index.html'
+      - 'v017/manifest.json'
+      - 'v017/v017-village.js'
+      - 'tools/v017_1_browser_smoke.cjs'
+      - '.github/workflows/v017-1-fix-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  playcanvas-v017-1:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify V017.1 is a fix only and the separate existing save is unchanged
+        run: |
+          node - <<'NODE'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          const m=JSON.parse(fs.readFileSync('v017/manifest.json','utf8'));
+          const h=fs.readFileSync('v017/index.html','utf8');
+          const v=fs.readFileSync('v017/v017-village.js','utf8');
+          assert.equal(m.version,'0.15-v017.1');
+          assert(h.includes('project-genesis/canvas-original/v017-preview'));
+          assert(!h.includes("project-genesis/canvas-original/v013"));
+          assert(fs.readFileSync('v015/canvas-legacy-logic.js','utf8').includes('project-genesis/canvas-original/v013'));
+          assert(h.includes('../camera_mouse.js'),'Original native mouse module missing');
+          assert(h.includes('Math.exp(-t*10)'),'Camera rotation damping missing');
+          assert(h.includes('mouseCapture?.locked()'),'Mouse must use relative motion');
+          assert(v.includes("gate()>=1?HERRERO_OPEN_INWARD_DEG:0"),'Ordan must open door after first dialogue');
+          assert(v.includes('HERRERO_OPEN_INWARD_DEG=90'),'The approved door must open inward');
+          assert(v.includes("throw Error('Puerta Arcanista V027 aprobada no fue cargada"),'No generic wood door allowed on mobile');
+          assert(!m.workshopAssets.find(x=>x.id==='door-arcanista-v027').mobilePolicy);
+          console.log('PASS V017.1 corrective-only scope, original saves, camera and door transforms');
+          NODE
+          node --check v017/v017-village.js
+          node --check v017/v017-workshop-preload.js
+          node --check tools/v017_1_browser_smoke.cjs
+      - name: Install Chromium
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify original native mouse input
+        run: node tests/camera_mouse_browser.cjs
+      - name: Verify V017.1 five workshops, mobile V027, Ordan-triggered inward hinge, smooth camera
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v017-1-http.log 2>&1 &
+          node tools/v017_1_browser_smoke.cjs
+      - name: Save browser diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v017-1-browser-qa
+          path: /tmp/v017-browser-qa
+          retention-days: 14
