@@ -146,7 +146,7 @@
       "kind": "animation"
     }
   ],
-  "note": "V017: puertas y paredes Herrero/Arcanista expresamente aprobadas por usuario, piezas originales en assets/playcanvas/approved; 3 fachadas genéricas restantes. Mantiene V016 semilla, save/Q1-Q3, control y caminata; aldea invisible hasta su montaje y verificación con HDRI real. Ningún modelo de taller nuevo se atribuye como aprobado.",
+  "note": "V017 camera/pivot revision: official original native mouse capture, damped third-person follow, Herrero true hinge opens into workshop after first Ordan dialogue, Arcanista approved luminous V027 remains mandatory on desktop and mobile (never wood).",
   "loadingStages": [
     {
       "id": "gui",
@@ -418,8 +418,8 @@
       "profession": "Arcanista",
       "version": "V027",
       "approval": "user_approved",
-      "mobilePolicy": "deferred",
-      "file": "../assets/playcanvas/approved/workshops/arcanista/doors/v027/Arcanist_Door_V027_WebGL.glb"
+      "file": "../assets/playcanvas/approved/workshops/arcanista/doors/v027/Arcanist_Door_V027_WebGL.glb",
+      "mobileRequirement": "approved_V027_original_all_devices"
     },
     {
       "id": "roof-herrero-v013",
