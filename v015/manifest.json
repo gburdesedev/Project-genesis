@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v010",
+  "version": "0.15-v011",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "procedural",
