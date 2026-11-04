@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v013",
+  "version": "0.15-v014",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "original-village-pbr",
@@ -141,7 +141,7 @@
       "kind": "animation"
     }
   ],
-  "note": "V013: restored original Canvas NGE + Q1-Q3 full gameplay on approved V011 characters/V012 original PBR floors; preparation and inventory reuse original approved modules. Market, shields, updated eight quests deferred.",
+  "note": "V014 restores exact original Canvas HUD control positions for landscape touch and desktop. Previous character, floor, NGE, tutorial, and approved inventory/preparation art unchanged.",
   "loadingStages": [
     {
       "id": "gui",
@@ -223,5 +223,61 @@
     "futureMarketQuestChangesApplied": false,
     "futureShieldRouteApplied": false,
     "note": "Only original Canvas gameplay. New market/quest ordering deliberately excluded."
+  },
+  "originalCanvasControls": {
+    "source": "../index.html",
+    "styles": "./canvas-original-hud-v014.css",
+    "layout": "identical-sourced-css",
+    "preservedIds": [
+      "hud",
+      "brand",
+      "tech",
+      "buttonsTop",
+      "cameraSettingsBtn",
+      "quest",
+      "prompt",
+      "professionChip",
+      "materialsPanel",
+      "npcTag",
+      "interactMarker",
+      "desktopHelp",
+      "cameraGuide",
+      "mobile",
+      "lookZone",
+      "joy",
+      "joyKnob",
+      "lookHint",
+      "zoomControls",
+      "zoomIn",
+      "zoomOut",
+      "inventoryTouch",
+      "interact"
+    ],
+    "touchGeometry": {
+      "joystick": {
+        "width": 108,
+        "height": 108,
+        "left": "max(18px, safe-area-inset-left)",
+        "bottom": "max(22px, safe-area-inset-bottom)"
+      },
+      "interact": {
+        "width": 70,
+        "height": 70,
+        "right": "max(22px, safe-area-inset-right)",
+        "bottom": "max(28px, safe-area-inset-bottom)"
+      },
+      "inventory": {
+        "width": 58,
+        "height": 58,
+        "right": "max(104px, safe-area-inset-right + 104px)",
+        "bottom": "max(35px, safe-area-inset-bottom + 7px)"
+      },
+      "zoom": {
+        "width": 42,
+        "height": 42,
+        "right": "max(25px, safe-area-inset-right)"
+      }
+    },
+    "note": "Exact original Canvas HUD geometry; V013 gameplay, V012 floors and V011 characters/camera retained."
   }
 }
