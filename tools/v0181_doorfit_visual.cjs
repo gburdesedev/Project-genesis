@@ -54,22 +54,7 @@ fs.mkdirSync(OUT,{recursive:true});
       console.log('CAPTURE',filename);
     }
     await page.evaluate(()=>window.__GENESIS_V018_VISUAL_STOP__?.());
-    // Verify the original Ordan first-dialog interaction still opens the Herrero.
-    await page.evaluate(()=>window.__GENESIS_V013_LEGACY__?.tryInteract());
-    await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.()?.legacy===1,null,{timeout:20000});
-    await page.getByRole('button',{name:'Continuar',exact:true}).click({timeout:15000});
-    await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.()?.village?.doorAngle>85,null,{timeout:20000});
-    await page.evaluate(()=>{
-      const app=window.pc.Application.getApplication?.()||window.pc.app;
-      const cam=app.root.findByName('Camara');
-      const handler=()=>{cam.setPosition(0,2.5,7.5);cam.lookAt(0,2,-1.6)};
-      app.on('prerender',handler);
-      window.__GENESIS_V018_VISUAL_STOP__=()=>app.off('prerender',handler);
-    });
-    await page.waitForTimeout(750);
-    await page.screenshot({path:OUT+'/'+mode.name+'-herrero-open.png'});
-    details.push({mode:mode.name,shot:'herrero-open'});
-    await page.evaluate(()=>window.__GENESIS_V018_VISUAL_STOP__?.());
+    // Gameplay opening has its own existing V018 smoke test; this is fixed-angle art-only QA.
     if(errors.length)throw Error('JavaScript errors: '+errors.join('; ').slice(0,2000));
    } finally {await page.close()}
   }
