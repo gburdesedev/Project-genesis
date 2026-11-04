@@ -44,6 +44,8 @@
 #legacyDistance{display:block;margin-top:5px;font-size:9px;color:#c0cbd0;line-height:1.25}
 /* Preserve camera button clickability above V013 touch capture; no geometry changes. */
 #buttonsTop{z-index:60}
+/* The migrated V013 settings panel must not overlap the original top-44px camera button. */
+#settings{top:82px}
 #hud .uiBtn{cursor:pointer}
 #interact,#inventoryTouch,#zoomControls button{cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
 #interact:active,#inventoryTouch:active,#zoomControls button:active{filter:brightness(1.22)}
