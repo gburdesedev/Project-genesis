@@ -120,6 +120,7 @@ function mount({game,app,artisan,ordan,playOrdanAnimation}){
   refresh();
  }
  function tryInteract(){
+  if(globalThis.__GENESIS_V016_ARRIVAL__?.active)return;
   if(isModalOpen()||get('v011-pause')?.style.display==='block')return;
   const step=game.step(),goal=game.goal();
   if(step===9){openWorkspace('Inventario');return}
@@ -190,6 +191,7 @@ function mount({game,app,artisan,ordan,playOrdanAnimation}){
    event.preventDefault();get('interact').click();
  });
  const onKey=event=>{
+  if(globalThis.__GENESIS_V016_ARRIVAL__?.active){if(event.key==='Tab'||event.code==='KeyE')event.preventDefault();return}
   if(event.key==='Tab'){event.preventDefault();if(!isModalOpen())openWorkspace('Inventario');return}
   if(event.key==='Escape'&&isModalOpen()){event.preventDefault();dismiss();return}
   if((event.code==='KeyE'||event.key==='e'||event.key==='E')&&!event.repeat){event.preventDefault();tryInteract()}
