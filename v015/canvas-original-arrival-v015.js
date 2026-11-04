@@ -19,7 +19,7 @@ function create({start=SPAWN,waypoints=WAYPOINTS,speed=2.9}={}){
  const travelled=()=>meters;
  function step(dt){
   if(complete)return snapshot();
-  let remaining=Math.max(0,Math.min(.25,dt||0))*speed,iterations=0;
+  let remaining=Math.max(0,Math.min(1.25,dt||0))*speed,iterations=0;
   while(remaining>EPS&&target<points.length&&iterations++<=points.length+1){
    const [tx,tz]=points[target],dx=tx-x,dz=tz-z,dist=Math.hypot(dx,dz);
    if(dist<=EPS){x=tx;z=tz;target++;continue}
