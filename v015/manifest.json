@@ -90,7 +90,7 @@
       "kind": "animation"
     }
   ],
-  "note": "V010: identificación visible de versión y cierre forzado del cargador al continuar; diagnóstico y animaciones heredados de V009.",
+  "note": "V010 incremental: panel de carga oculto al continuar, movimiento y diagnóstico sin reinicio. No se incorporan escenarios nuevos.",
   "loadingStages": [
     {
       "id": "gui",
