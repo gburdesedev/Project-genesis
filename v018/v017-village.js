@@ -18,6 +18,8 @@
  });
  const ROOF_BOUNDS=Object.freeze({width:8.7841,depth:8.1652,front:.5598});
  const DOOR_HERRERO_X_CENTRE=(-.047+1.208)/2; // +.5805 m off-centre GLB pivot
+ // V018.1 experimental fit only. Original GLB remains byte-for-byte unmodified.
+ const DOOR_FIT_X=1.55;
  const INWARD_OPEN=90; // +Y turns the leaf toward -Z, into the interior
  const ROOF_OVERHANG=1.025; // only 2.5% visual overhang beyond plan footprint
 
@@ -220,9 +222,9 @@
       const hinge=new pc.Entity('Herrero · bisagra izquierda original');
        // V082-B geometry is [−.047,+1.208] around its actual GLB hinge.
        // Shift the centre to x=0 in the real masonry opening.
-       hinge.setLocalPosition(-DOOR_HERRERO_X_CENTRE*wallScaleX,0,.12);
+       hinge.setLocalPosition(-DOOR_HERRERO_X_CENTRE*wallScaleX*DOOR_FIT_X,0,.12);
       building.addChild(hinge);
-       const door=addModel(resources,hinge,'door-herrero-v082-b','Herrero V082-B · PBR sin pérdida experimental',[0,0,0],[wallScaleX,1,wallScaleZ]);
+       const door=addModel(resources,hinge,'door-herrero-v082-b','Herrero V082-B · ajuste ancho experimental V018.1',[0,0,0],[wallScaleX*DOOR_FIT_X,1,wallScaleZ]);
       doorHinge=hinge;
     }else if(p.profession==='Arcanista'){
       const pivot=new pc.Entity('Arcanista · puerta mágica V027 · cerrada');
@@ -233,7 +235,7 @@
       // a visually unrelated wooden replacement as if it were the Arcanista.
        // Unlike the Herrero, the actual V027 geometry ALREADY straddles x=0.
        // NEVER reuse the blacksmith GLB's .5805m offset here.
-       const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · puerta arcana iluminada aprobada',[0,0,0],[wallScaleX,1,wallScaleZ]);
+       const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · ajuste ancho experimental V018.1',[0,0,0],[wallScaleX*DOOR_FIT_X,1,wallScaleZ]);
       animations.push(animateArcaneDoor(pc,app,pivot,visual,!!options.mobile));
     }else{
       genericWoodDoor(pc,building,p.profession);
@@ -270,7 +272,8 @@
       doorOpenTrigger:'Ordan first dialogue: Q1 step 0 → 1',
       layoutCorrections:{
         plan:'GenesisVillagePlan unchanged',workshopFootprint:[9,7.875],
-        herreroHingeOffset:-DOOR_HERRERO_X_CENTRE*(9/(WALL_BOUNDS.Herrero.width*plan.workshopScale)),
+        herreroHingeOffset:-DOOR_HERRERO_X_CENTRE*DOOR_FIT_X*(9/(WALL_BOUNDS.Herrero.width*plan.workshopScale)),
+        experimentalDoorWidthFit:DOOR_FIT_X,
         herreroOpenDegrees:INWARD_OPEN,
         arcanistaCentreX:0,
         genericDoorsCentred:true,
