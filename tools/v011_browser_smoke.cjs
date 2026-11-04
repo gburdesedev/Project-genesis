@@ -62,11 +62,17 @@ const assert=require('node:assert/strict');
    // After the arrival, original WASD and Walk/Idle transitions must still work.
    const beforeWalk=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
    await page.keyboard.down('w');
-   await page.waitForTimeout(900);
+   // Shader compilation and the four approved species can stall headless frames.
+   // Sample an actual three-rig animation transition, not a fixed 900ms delay.
+   await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().rigs.artisan.parts.every(p=>p.state==='Walk_Loop'),null,{timeout:25000});
+   await page.waitForFunction(origin=>{
+     const p=window.__GENESIS_V011_AUDIT__?.().rigs.artisan.position;
+     return p&&Math.hypot(p[0]-origin[0],p[2]-origin[2])>.6;
+   },beforeWalk.rigs.artisan.position,{timeout:30000});
    const manual=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
    assert(manual.rigs.artisan.parts.every(p=>p.state==='Walk_Loop'),'Manual walk broken after auto arrival');
    await page.keyboard.up('w');
-   await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().rigs.artisan.parts.every(p=>p.state==='Idle_Loop'),null,{timeout:10000});
+   await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().rigs.artisan.parts.every(p=>p.state==='Idle_Loop'),null,{timeout:25000});
    const after=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
    assert(delta(after.rigs.artisan.position,beforeWalk.rigs.artisan.position)>.6,'Manual input no longer moves player after scripted arrival');
    assert(after.camera[1]>1.3&&after.camera[1]<5,'Camera original follow height outside bounds');
@@ -161,7 +167,7 @@ const assert=require('node:assert/strict');
      await mobile.waitForFunction(initial=>{
        const pos=window.__GENESIS_V011_AUDIT__?.().rigs.artisan.position;
        return pos && Math.hypot(pos[0]-initial[0],pos[1]-initial[1],pos[2]-initial[2])>.35;
-     },mobileReady.rigs.artisan.position,{timeout:10000});
+     },mobileReady.rigs.artisan.position,{timeout:25000});
      const movingMobile=await mobile.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
      await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
      const mobileMove=delta(movingMobile.rigs.artisan.position,mobileReady.rigs.artisan.position);
