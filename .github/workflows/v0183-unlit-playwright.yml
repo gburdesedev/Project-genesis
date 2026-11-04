@@ -1,0 +1,49 @@
+name: V018.3 V027 unlit PBR door QA (three workshops)
+on:
+  push:
+    branches: [experiment/v0183-arcane-door-unlit-three-workshops]
+    paths:
+      - 'tools/v0183_unlit_playwright_qa.cjs'
+      - '.github/workflows/v0183-unlit-playwright.yml'
+      - 'v0183/v017-village.js'
+      - 'v0183/manifest.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-v027-unlit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 19
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [desktop, landscape, portrait]
+    env:
+      GENESIS_AUDIT_MODE: ${{ matrix.mode }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check V018.3 isolated source and unchanged GLB asset references
+        run: |
+          node --check v0183/v017-village.js
+          node --check tools/v0183_unlit_playwright_qa.cjs
+          test -s assets/playcanvas/approved/workshops/arcanista/doors/v027/Arcanist_Door_V027_WebGL.glb
+          node -e "const m=require('./v0183/manifest.json');if(m.version!=='0.15-v0183'||m.villageScene.unlitV027DoorReuse?.length!==3)process.exit(1)"
+      - name: Install actual Chromium WebGL
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Run PlayCanvas + Playwright material zero-emission and visual QA
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v0183-http.log 2>&1 &
+          node tools/v0183_unlit_playwright_qa.cjs
+      - name: Upload material audit and screenshots (even if browser fails)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0183-unlit-v027-${{ matrix.mode }}-screenshots
+          path: /tmp/genesis-v0183-unlit/${{ matrix.mode }}/
+          retention-days: 14
+          if-no-files-found: warn
