@@ -1,0 +1,31 @@
+name: V015 original village and guided arrival
+on:
+  push:
+    branches: [main, feat/v015-original-village-and-arrival]
+    paths:
+      - '.github/workflows/v015-original-village.yml'
+      - 'tests/canvas_v015_world_arrival.cjs'
+      - 'v015/canvas-original-world-v015.js'
+      - 'v015/canvas-original-arrival-v015.js'
+      - 'v015/manifest.json'
+      - 'v015/index.html'
+  pull_request:
+    paths:
+      - '.github/workflows/v015-original-village.yml'
+      - 'tests/canvas_v015_world_arrival.cjs'
+      - 'v015/canvas-original-world-v015.js'
+      - 'v015/canvas-original-arrival-v015.js'
+      - 'v015/manifest.json'
+      - 'v015/index.html'
+  workflow_dispatch:
+jobs:
+  original-village:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify approved world anchors and animated Ordan approach
+        run: node tests/canvas_v015_world_arrival.cjs
