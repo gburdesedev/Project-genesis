@@ -109,6 +109,7 @@ function create(app,{merchant,logger=()=>{}}={}){
      const first=asset.resource.instantiateRenderEntity();
      if(!first?.findComponents('render')?.some(r=>(r.meshInstances||[]).length)){
       first?.destroy();reject(Error(key+': GLB without renderable meshes'));return}
+     first.__genesisContainerAsset=asset;
      resolve(first);
     }catch(e){reject(e)}
    });
@@ -219,8 +220,7 @@ function create(app,{merchant,logger=()=>{}}={}){
    root.addChild(model);model.setPosition(plan.plaza.x,0,plan.plaza.z);
    reported('fountain','ready');
    // Play all embedded GLB animation tracks when present.
-   const a=app.assets.findByUrl(ASSETS.fountain);
-   const tracks=a?.resource?.animations||[];
+   const tracks=model.__genesisContainerAsset?.resource?.animations||[];
    if(tracks.length){
     model.addComponent('anim',{activate:false});
     for(const [i,asset] of tracks.entries()){
