@@ -1,0 +1,53 @@
+name: V018 stand-alone public preview smoke (never touches Pages or main)
+on:
+  push:
+    branches: [v018-playtest]
+    paths:
+      - .github/workflows/v018-playtest-public-preview.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  external-playtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify public branch preview URL and source GLB can be downloaded
+        run: |
+          set -euo pipefail
+          URL='https://raw.githack.com/gburdesedev/Project-genesis/v018-playtest'
+          curl -fsSL --retry 2 --max-time 120 "$URL/v018/index.html" -o /tmp/v018-online.html
+          test -s /tmp/v018-online.html
+          grep -q 'Project Genesis 0.15 V018' /tmp/v018-online.html
+          curl -fsSL --retry 2 --max-time 120 \
+            "$URL/assets/playcanvas/candidates/workshops/herrero/doors/v082-b-lossless-v018/door-herrero-v082-b-lossless-webp.glb" \
+            -o /tmp/v018-online-door.glb
+          cmp /tmp/v018-online-door.glb \
+            assets/playcanvas/candidates/workshops/herrero/doors/v082-b-lossless-v018/door-herrero-v082-b-lossless-webp.glb
+          curl -fsSL --retry 2 --max-time 90 \
+            "$URL/v017/assets/vendor/playcanvas/playcanvas.min.js" \
+            -o /tmp/v018-online-playcanvas.js
+          test "$(wc -c </tmp/v018-online-playcanvas.js)" -gt 300000
+          echo 'PASS: external static host serves actual V018 page, exact approved source-derived door, local PlayCanvas engine'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Run original desktop/mobile smoke against the public preview URL
+        run: |
+          set -euo pipefail
+          sed "s#http://127.0.0.1:8765/v018/?qa=#https://raw.githack.com/gburdesedev/Project-genesis/v018-playtest/v018/?qa=#g" \
+            tools/v018_browser_smoke.cjs >/tmp/v018-public-smoke.cjs
+          cp /tmp/v018-public-smoke.cjs ./tools/v018-public-smoke-runtime.cjs
+          node tools/v018-public-smoke-runtime.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v018-public-remote-playtest-check
+          path: /tmp/genesis-v018-evidence/
+          retention-days: 7
+          if-no-files-found: warn
