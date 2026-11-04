@@ -31,7 +31,9 @@ const errors=[],results=[];
     },null,{timeout:150000,polling:250});
     const data=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
     assert(data,'V017 browser audit not exposed');
-    assert.equal(data.version,'V017');
+    assert.equal(data.version,'V017.1');
+    assert.equal(data.cameraControl?.degreesPerPixel,0.2,'Default camera sensitivity must match original Canvas, not 6 degrees/pixel');
+    assert.equal(data.cameraControl?.smoothed,true,'Frame rate independent camera smoothing missing');
     assert.equal(data.loadingHidden,true,'The village must not appear while the loading gate is open');
     assert.equal(data.workshops?.ok,true,'GLB preload/HDRI load failed');
     assert.equal(data.workshops.hdr,true,'No actual HDRI atlas');
@@ -44,8 +46,12 @@ const errors=[],results=[];
     assert.deepEqual(data.village.buildings.find(b=>b.profession==='Arcanista').x,25.5625);
     assert.equal(data.stages.animations,'Listo');
     for(const category of ['walls','doors','roofs','lighting','village'])assert.equal(data.stages[category],'Listo','Progress category '+category+' is premature/unfinished');
-    assert.equal(data.village.buildings.find(b=>b.profession==='Arcanista').door,
-      mode.mobile?'generic-mobile-fallback':'approved','Unexpected Arcanista HQ mobile policy');
+    assert.equal(data.village.buildings.find(b=>b.profession==='Arcanista').door,'approved',
+       'Original illuminated V027 door must be visible on mobile AND desktop');
+    assert.equal(data.workshops.models,6,'All 6 workshop GLBs including V027 must be loaded on mobile');
+    assert.deepEqual(data.village.doorStates,
+       {Herrero:'closed',Arcanista:'closed',Carpintero:'closed',Curtidor:'closed',Joyero:'closed'},
+       'All five doors must be closed before Ordan first dialogue');
     assert(data.rigs.artisan.controllers===3,'Original V011 animation rig missing');
     const pauseSeconds=(Date.now()-time0)/1000;
     await page.locator('#v011-pause button').first().click();
@@ -62,6 +68,16 @@ const errors=[],results=[];
     assert.equal(after.legacy,0,'The opening cinematic must not consume the first quest');
     assert(after.intro.ordanDistance<2.2,'Arrival skip must finish at Ordan');
     assert.equal(after.loaderVisible,false,'Loader overlay still obscures the view');
+    assert.equal(after.village.doorStates.Herrero,'closed','Blacksmith door opened before first talk with Ordan');
+    await page.evaluate(()=>window.__GENESIS_V013_LEGACY__.tryInteract());
+    await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().legacy===1,null,{timeout:12000,polling:200});
+    await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().village.doorStates.Herrero==='opening_or_open',null,{timeout:45000,polling:200});
+    const afterOrdan=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
+    for(const profession of ['Arcanista','Carpintero','Curtidor','Joyero'])
+      assert.equal(afterOrdan.village.doorStates[profession],'closed',
+          profession+' door opened during blacksmith Q1 tutorial');
+    await page.getByRole('button',{name:'Continuar',exact:true}).click({timeout:12000});
+    assert.equal(afterOrdan.legacy,1,'Ordan dialogue must move only to step 1');
     if(!mode.mobile){
       await page.keyboard.down('w');
       await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().rigs.artisan.parts.every(p=>p.state==='Walk_Loop'),null,{timeout:45000,polling:250});
@@ -77,8 +93,8 @@ const errors=[],results=[];
        approved:data.village.approved,generic:data.village.generic,
        arcanistDoor:data.village.buildings.find(b=>b.profession==='Arcanista').door,
        hdr32:true,originalQuest:after.legacy,autonomousWalkDistance:moving.distance,
-       noWorldBeforeLoad:data.loadingHidden});
-    console.log('PASS V017 '+mode.name.toUpperCase()+' · loading, HDRI, five workshops, animated entry and original controls',JSON.stringify(results[results.length-1]));
+       noWorldBeforeLoad:data.loadingHidden,doorStatesAfterOrdan:afterOrdan.village.doorStates,camera:after.cameraControl});
+    console.log('PASS V017.1 '+mode.name.toUpperCase()+' · original camera, V027 door on mobile, Ordan opens Herrero, 5 workshops',JSON.stringify(results[results.length-1]));
    }finally{await page.close()}
   }
   assert.equal(errors.length,0,'JS page errors: '+errors.join('; '));
