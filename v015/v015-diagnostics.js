@@ -46,7 +46,7 @@
   }
   window.addEventListener('error',e=>emit('runtime','uncaught','error',{message:e.message,stack:String(e.error?.stack||''),source:e.filename,line:e.lineno}));
   window.addEventListener('unhandledrejection',e=>emit('runtime','promise','error',{message:String(e.reason?.message||e.reason),stack:String(e.reason?.stack||'')}));
-  window.GenesisV015Diagnostics={block,asset,download,events,assets,blocks,exportJSON(){return JSON.stringify({build:'v0.15 V001',events,assets:Object.fromEntries(assets),blocks:Object.fromEntries(blocks)},null,2)}};
+  window.GenesisV015Diagnostics={block,asset,download,events,assets,blocks,exportJSON(){return JSON.stringify({build:'v0.15 V012',events,assets:Object.fromEntries(assets),blocks:Object.fromEntries(blocks)},null,2)}};
   document.addEventListener('DOMContentLoaded',()=>{if(new URLSearchParams(location.search).get('debug')==='1'){document.body.appendChild(panel);render()}});
   emit('block','bootstrap','started');
 })();
