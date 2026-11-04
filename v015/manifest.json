@@ -1,6 +1,6 @@
 {
-  "version": "0.15-v014",
-  "mode": "gui-path-selection",
+  "version": "0.15-v015",
+  "mode": "original-village-and-guided-arrival",
   "floor": {
     "kind": "original-village-pbr",
     "width": 63,
@@ -39,9 +39,9 @@
       "name": "Artesano",
       "file": "./assets/playcanvas/approved/characters/recovered/male_peasant.glb",
       "position": [
+        7,
         0,
-        0,
-        6.3
+        29
       ],
       "rotation": [
         0,
@@ -89,9 +89,14 @@
       "file": "./assets/playcanvas/approved/characters/merchant_v02_75962.glb",
       "bytes": 2049508,
       "position": [
-        8,
+        25.5,
         0,
-        7
+        36.3
+      ],
+      "rotation": [
+        0,
+        90,
+        0
       ]
     },
     {
@@ -141,7 +146,7 @@
       "kind": "animation"
     }
   ],
-  "note": "V014 restores exact original Canvas HUD control positions for landscape touch and desktop. Previous character, floor, NGE, tutorial, and approved inventory/preparation art unchanged.",
+  "note": "V015 restores original 63x63 village workshop and market coordinates, approved workshop GLBs, 14 tree sites and V011 dolphin fountain (non-blocking). The artisan enters plaza and walks automatically to Ordan. Existing original Q1-Q3, floors, rigs and V014 controls are preserved.",
   "loadingStages": [
     {
       "id": "gui",
@@ -178,9 +183,9 @@
     },
     {
       "id": "environment",
-      "name": "Plaza y entorno",
-      "kind": "pending",
-      "required": false,
+      "name": "Mapa original · 5 talleres y mercado",
+      "kind": "runtime",
+      "required": true,
       "assets": []
     },
     {
@@ -279,5 +284,118 @@
       }
     },
     "note": "Exact original Canvas HUD geometry; V013 gameplay, V012 floors and V011 characters/camera retained."
+  },
+  "originalVillage": {
+    "sourcePlan": "../village_plan.js",
+    "sourceScene": "../village_world.js",
+    "sourceMerchant": "../genesis_market_v001.js",
+    "sourceTrees": "../village_trees.js",
+    "sourceWorkshopAssets": "../genesis_workshop_live_v015.js",
+    "script": "./canvas-original-world-v015.js",
+    "dimensions": 63,
+    "plaza": [
+      7,
+      16
+    ],
+    "market": [
+      26,
+      36
+    ],
+    "merchant": [
+      25.5,
+      0,
+      36.3
+    ],
+    "marketStall": [
+      28.35,
+      0,
+      37.6
+    ],
+    "ordan": [
+      1.72,
+      0,
+      1.9
+    ],
+    "workshops": [
+      {
+        "profession": "Herrero",
+        "position": [
+          0,
+          0
+        ],
+        "playable": true
+      },
+      {
+        "profession": "Curtidor",
+        "position": [
+          14,
+          0
+        ],
+        "playable": false
+      },
+      {
+        "profession": "Carpintero",
+        "position": [
+          -11.5625,
+          16
+        ],
+        "playable": false
+      },
+      {
+        "profession": "Arcanista",
+        "position": [
+          25.5625,
+          16
+        ],
+        "playable": false
+      },
+      {
+        "profession": "Joyero",
+        "position": [
+          -11,
+          32.0625
+        ],
+        "playable": false
+      }
+    ],
+    "foliage": {
+      "species": 4,
+      "sites": 14,
+      "quality": "approved-v005-LOD2",
+      "startupBlocking": false
+    },
+    "fountain": {
+      "position": [
+        7,
+        0,
+        16
+      ],
+      "asset": "PG_Dolphin_Fountain_V011_PlayCanvas_HQ_Optimized.glb",
+      "startupBlocking": false
+    },
+    "requiredBuildings": [
+      "blacksmith_four_walls_arched_v082.glb",
+      "blacksmith_roof_preview.glb"
+    ],
+    "futureStoryReorderingApplied": false
+  },
+  "guidedArrival": {
+    "module": "./canvas-original-arrival-v015.js",
+    "start": [
+      7,
+      0,
+      29
+    ],
+    "destination": [
+      1.72,
+      0,
+      3.5
+    ],
+    "speedMetersPerSecond": 2.9,
+    "gameplayUnlock": "Reach Ordan; trigger existing original Q1 dialogue",
+    "onResume": "Skip cinematic if saved Q1-Q3 tutorial already advanced",
+    "skipButton": true,
+    "animation": "UAL1 Walk_Loop, Idle_Loop",
+    "camera": "Original V011 following camera"
   }
 }
