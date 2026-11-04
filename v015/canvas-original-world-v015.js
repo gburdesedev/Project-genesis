@@ -218,7 +218,45 @@ function create(app,{merchant,logger=()=>{}}={}){
    }
    const model=await getGLB('fountain',ASSETS.fountain);
    root.addChild(model);model.setPosition(plan.plaza.x,0,plan.plaza.z);
-   reported('fountain','ready');
+   // Preserve original dolphin V011 marble and PBR normal maps. The Canvas
+   // import sometimes displays water magenta; retint ONLY AGUA_* materials
+   // to the approved deep-blue basin and animate their original normal maps.
+   const water=[],replacements=new Map();
+   for(const component of model.findComponents('render'))for(const mi of component.meshInstances||[]){
+    const src=mi.material,name=String(src?.name||'');
+    if(!name.startsWith('AGUA_')||!src?.clone)continue;
+    let mat=replacements.get(src);
+    if(!mat){
+     mat=src.clone();
+     const pool=name.includes('Estanque');
+     mat.diffuse=new pc.Color(.045,.22,.32);
+     mat.diffuseMap=null;
+     mat.emissive=new pc.Color(.004,.019,.028);
+     mat.emissiveIntensity=.10;
+     mat.metalness=0;mat.useMetalness=false;
+     mat.gloss=.82;mat.opacity=pool?.86:.78;
+     mat.blendType=pc.BLEND_NORMAL;mat.depthWrite=false;
+     if(mat.normalMap)mat.normalMapTiling.set(pool?3.1:2.5,pool?3.1:2.5);
+     mat.update();replacements.set(src,mat);
+     water.push({material:mat,pool,name});
+    }
+    mi.material=mat;
+   }
+   snapshot.waterMaterials=water.map(x=>x.name);
+   if(water.length){
+    let elapsed=0,accum=0;
+    const waterUpdate=dt=>{
+     elapsed=(elapsed+Math.max(0,dt))%8;accum+=Math.max(0,dt);
+     if(accum<.08)return;accum=0;
+     for(const item of water){
+      const mat=item.material;if(!mat.normalMap)continue;
+      mat.normalMapOffset.set(item.pool?elapsed*.125:0,item.pool?-elapsed*.125:elapsed*.25);
+      mat.update();
+     }
+    };
+    app.on('update',waterUpdate);
+   }
+   reported('fountain','ready',{waterMaterials:water.length,position:[plan.plaza.x,0,plan.plaza.z]});
    // Play all embedded GLB animation tracks when present.
    const tracks=model.__genesisContainerAsset?.resource?.animations||[];
    if(tracks.length){
