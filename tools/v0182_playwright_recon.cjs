@@ -83,11 +83,20 @@ const save=(name,value)=>fs.writeFileSync(OUT+'/'+name,JSON.stringify(value,null
     assert(door?.position&&entity.shell?.position,'Missing GLB or door '+entity.profession);
     const dx=door.position[0]-entity.shell.position[0];
     const dz=door.position[2]-entity.shell.position[2];
-    const depthMismatch=Math.hypot(dx,dz);
-    // Herrero has native hinge offset along x; only check facade-normal depth.
-    if(entity.profession==='Arcanista') assert(depthMismatch<.02,'Arcane door is floating in front of wall: '+depthMismatch);
+    // Depth is Z for unrotated facades and X for the 90-degree Arcanista facade.
+    if(entity.profession==='Arcanista') assert(Math.abs(dx)<.02,'Arcane door is floating in front of wall: '+dx);
     if(entity.profession==='Curtidor') assert(Math.abs(dz)<.02,'Temporary door is floating away from wall: '+dz);
     if(entity.profession==='Herrero') assert(Math.abs(dz)<.02,'Blacksmith door is floating away from wall: '+dz);
+    // Critical: validate the **mesh actually displayed by PlayCanvas**, not its
+    // wrapper entity origin. The V027 prefab has an internal render-centre offset.
+    if(entity.profession==='Arcanista'||entity.profession==='Herrero'){
+      const leaf=entity.doorVisual?.meshes?.find(m=>m.node==='Door_arched_iron_body');
+      assert(leaf,'Visible door leaf mesh missing for '+entity.profession);
+      const component=entity.profession==='Arcanista'?2:0;
+      const mismatch=Math.abs(leaf.center[component]-entity.building.position[component]);
+      assert(mismatch<.085,'Visible '+entity.profession+' door mesh is NOT centered in arched opening: '+mismatch+'m');
+      console.log('REAL LEAF CENTER PASS',entity.profession,'error m=',mismatch.toFixed(3));
+    }
   }
   save('actual-transforms.json',log.modelTransforms);
   // Camera override is used ONLY for screenshots after the actual game has loaded.
