@@ -12,7 +12,7 @@ try{
  const camera=new Entity('camera');camera.addComponent('camera',{clearColor:new Color(.10,.13,.15),farClip:180,fov:64});app.root.addChild(camera);camera.setPosition(7,55,62);camera.lookAt(new Vec3(7,0,17));
  const light=new Entity('sun');light.addComponent('light',{type:'directional',color:new Color(1,.94,.84),intensity:1.8,castShadows:true,shadowDistance:100,shadowResolution:1024});app.root.addChild(light);light.setEulerAngles(45,25,0);
  const load=url=>new Promise((resolve,reject)=>app.assets.loadFromUrl(url,'container',(error,asset)=>error?reject(error):resolve(asset.resource.instantiateRenderEntity())));
- const [shell,door,roof]=await Promise.all([load('/test-shell.glb'),load('/test-door.glb'),load('https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Roof_RoundTiles_6x10.gltf')]);roof.setLocalScale(1.28,.55,.86);
+ const [shell,door,roof]=await Promise.all([load('/test-shell.glb'),load('/test-door.glb'),load('/assets/vendor/genesis/externals/roofReal086/src/Roof_RoundTiles_6x10.gltf')]);roof.setLocalScale(1.28,.55,.86);
  const village=await mountVillage(app,{shell,roof,door});window.view={app,village,camera,Vec3};window.ready=true;
 }catch(error){window.failure=error.stack||String(error)}
 </script></body></html>`;
