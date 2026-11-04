@@ -185,7 +185,9 @@ canvas.addEventListener('pointerdown',startCameraDrag);
 document.getElementById('lookZone').addEventListener('pointerdown',startCameraDrag);
 window.addEventListener('pointerup',()=>drag=false);
 function applyCameraLook(dx,dy){
- const gain=Number(sensitivity.value)||.2;
+ // Match approved original Canvas: default slider 6 = 0.20 degrees/pixel,
+ // NOT 6 degrees/pixel (the V017 regression that made the camera violent).
+ const gain=Math.max(.08,Math.min(.40,(Number(sensitivity.value)||6)/30));
  yaw-=dx*gain*Math.PI/180;
  pitch=Math.max(8*Math.PI/180,Math.min(54*Math.PI/180,
    pitch+dy*gain*.75*Math.PI/180*(invert.value==='inverted'?-1:1)));
@@ -212,7 +214,7 @@ if(modalForCamera)new MutationObserver(()=>mouseCapture?.refresh()).observe(moda
 // Short time-based damping removes hard camera jumps caused by direct setPosition
 // each frame. This follows the original 3rd-person orbit, pitch/zoom limits and
 // cinematic offset rather than replacing it with a new camera design.
-const cameraSmooth={initialized:false,yaw:0,pitch:24*Math.PI/180,zoom:4.7};
+const cameraSmooth={initialized:false,yaw:0,pitch:24*Math.PI/180,zoom:4.7,focusX:0,focusZ:0};
 function frameOriginalCamera(pos,dt=1/60){
  const t=Math.min(.12,Math.max(0,Number(dt)||0));
  const aRot=1-Math.exp(-t*10),aFollow=1-Math.exp(-t*12);
@@ -222,12 +224,14 @@ function frameOriginalCamera(pos,dt=1/60){
  const firstFrame=!cameraSmooth.initialized;
  if(firstFrame){
    cameraSmooth.yaw=intendedYaw;cameraSmooth.pitch=intendedPitch;
-   cameraSmooth.zoom=intendedZoom;cameraSmooth.initialized=true;
+   cameraSmooth.zoom=intendedZoom;cameraSmooth.focusX=pos.x;cameraSmooth.focusZ=pos.z;cameraSmooth.initialized=true;
  }
  const turn=Math.atan2(Math.sin(intendedYaw-cameraSmooth.yaw),Math.cos(intendedYaw-cameraSmooth.yaw));
  cameraSmooth.yaw+=turn*aRot;
  cameraSmooth.pitch+=(intendedPitch-cameraSmooth.pitch)*aRot;
  cameraSmooth.zoom+=(intendedZoom-cameraSmooth.zoom)*aRot;
+ cameraSmooth.focusX+=(pos.x-cameraSmooth.focusX)*aFollow;
+ cameraSmooth.focusZ+=(pos.z-cameraSmooth.focusZ)*aFollow;
  const h=Math.cos(cameraSmooth.pitch)*cameraSmooth.zoom,focusY=1.32;
  const tx=pos.x+Math.sin(cameraSmooth.yaw)*h;
  const ty=focusY+Math.sin(cameraSmooth.pitch)*cameraSmooth.zoom;
@@ -235,7 +239,7 @@ function frameOriginalCamera(pos,dt=1/60){
  const current=camera.getPosition();
  if(firstFrame)camera.setPosition(tx,ty,tz);
  else camera.setPosition(current.x+(tx-current.x)*aFollow,current.y+(ty-current.y)*aFollow,current.z+(tz-current.z)*aFollow);
- camera.lookAt(pos.x,focusY,pos.z);
+ camera.lookAt(cameraSmooth.focusX,focusY,cameraSmooth.focusZ);
 }
 camera.camera.fov=52;camera.camera.nearClip=.08;camera.camera.farClip=95;
 app.on('update',dt=>{
