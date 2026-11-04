@@ -20,9 +20,10 @@
    [1.72,3.75] // stop close to Ordan, in front of Herrero door
  ].map(x=>Object.freeze(x)));
  const DISTANCE_TO_ORDAN=Math.hypot(1.72-1.72,3.75-1.90);
- function create({artisan,game,playAnimation,announce=()=>{},speed=3.2,onFinish=()=>{}}){
+ function create({artisan,game,playAnimation,announce=()=>{},speed=3.2,resumed=false,onFinish=()=>{}}){
    if(!artisan||!game?.step)throw Error('V016 arrival requires original artisan and Q1–Q3 state machine');
-   let state=game.step()===0?'pending':'resumed',point=0,distance=0,elapsed=0;
+   // A saved game at step 0 is STILL a resumed session, not a new arrival.
+   let state=game.step()===0&&!resumed?'pending':'resumed',point=0,distance=0,elapsed=0;
    const position=()=>{const p=artisan.getPosition();return [p.x,p.y,p.z]};
    if(state==='pending'){
      artisan.setPosition(...START);artisan.setEulerAngles(0,180,0);
