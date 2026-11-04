@@ -65,6 +65,35 @@ const assert=require('node:assert/strict');
    await page.locator('#legacyDialogueContinue').click();
    assert.equal(await page.locator('#modalLayer').evaluate(el=>el.style.display),'none','Original dialogue did not close');
    console.log('V013 ORIGINAL GAMEPLAY PASS: walking to Ordan, E interaction, real original dialogue, Q1 advance');
+   // Exercise the approved real 16:9 inventory and preparation modules in-browser.
+   // Domain invariants and the entire Q1-Q3 route are separately tested by
+   // tests/canvas_legacy_v013.cjs; bypass distance only to reach these UI screens.
+   await page.evaluate(()=>{
+     const ui=window.__GENESIS_V013_LEGACY__,game=ui.game;
+     for(const id of ['door','debris','anvil','bellows','flue','forge','mentor-key','chest']){
+       const result=game.doAction(id);
+       if(!result.ok)throw Error('Cannot set up original menu test at '+id);
+     }
+     ui.refresh();
+   });
+   assert.equal(await page.evaluate(()=>window.__GENESIS_V013_LEGACY__.snapshot().step),9);
+   await page.keyboard.press('Tab');
+   await page.locator('#genInv').waitFor({state:'visible',timeout:10000});
+   assert(await page.locator('#genInv img').count()>0,'Original inventory art did not mount');
+   await page.waitForTimeout(500);
+   await page.screenshot({path:'/tmp/v011-test/original-inventory.png'});
+   await page.keyboard.press('Escape');
+   assert.equal(await page.evaluate(()=>window.__GENESIS_V013_LEGACY__.snapshot().step),10,'Inventory close did not advance original tutorial');
+   await page.evaluate(()=>window.__GENESIS_V013_LEGACY__.openWorkspace('Preparacion'));
+   await page.locator('.prepSkinScroll').waitFor({state:'visible',timeout:10000});
+   assert(await page.locator('.prepSkinPiece').count()>=20,'Original 39-layer preparation art not mounted');
+   await page.waitForTimeout(600);
+   await page.screenshot({path:'/tmp/v011-test/original-preparation.png'});
+   await page.keyboard.press('Escape');
+   assert.equal(await page.locator('#modalLayer').evaluate(el=>el.style.display),'none','Preparation did not close');
+   assert.equal(errors.length,0,'Original UI produced JS errors: '+errors.join('; '));
+   console.log('V013 ORIGINAL MENUS PASS: inventory from real stock, close-to-advance, 39-layer preparation art');
+
    const mobile=await browser.newPage({viewport:{width:844,height:390},deviceScaleFactor:1,isMobile:true,hasTouch:true});
    mobile.on('pageerror',e=>{errors.push('mobile-pageerror:'+e.message);console.log('MOBILE-PAGEERROR',e.stack)});
    try{
