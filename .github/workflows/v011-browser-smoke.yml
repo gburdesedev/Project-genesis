@@ -7,10 +7,16 @@ on:
       - 'v015/index.html'
       - 'v015/v012-floors.js'
       - 'v015/manifest.json'
+      - 'v015/v017-village.js'
+      - 'v015/v017-workshop-preload.js'
+      - 'v015/canvas-arrival-v016.js'
   pull_request:
     paths:
       - 'v015/index.html'
       - 'v015/manifest.json'
+      - 'v015/v017-village.js'
+      - 'v015/v017-workshop-preload.js'
+      - 'v015/canvas-arrival-v016.js'
       - 'v015/v012-floors.js'
       - 'tools/v011_browser_smoke.cjs'
   workflow_dispatch:
