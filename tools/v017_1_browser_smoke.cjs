@@ -77,14 +77,21 @@ const errors=[],results=[];
     assert(firstDialogue.village.buildings.filter(b=>b.door!=='approved').every(b=>b.door==='generic-temporary'),'Generic workshop doors changed unexpectedly');
     // The original modal dialogue must close before mouse capture/walking resumes.
     await page.locator('#legacyDialogueContinue').click();
+    await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().village?.doorAngle>80,null,{timeout:15000});
+    try{
+      await page.screenshot({path:OUT+'/v017-1-herrero-inward-'+mode.name+'.png',timeout:15000,animations:'disabled'});
+    }catch(error){console.warn('V017.1 visual capture optional:',String(error).slice(0,180))}
     if(!mode.mobile){
       const canvas=page.locator('#app');
       await canvas.click({position:{x:mode.width-85,y:mode.height-90},timeout:15000});
       await page.waitForFunction(()=>document.pointerLockElement?.id==='app',null,{timeout:12000});
       const captured=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
       assert(captured.cameraInput.locked,'Native mouse capture did not activate');
+      assert(Math.abs(captured.cameraInput.sensitivityDegreesPerPixel-.2)<.002,'Slider 6 must equal original 0.2° per pixel');
       await page.evaluate(()=>{const event=new MouseEvent('mousemove',{bubbles:true});Object.defineProperties(event,{movementX:{value:120},movementY:{value:12}});document.dispatchEvent(event)});
       await page.waitForFunction(()=>Math.abs(window.__GENESIS_V011_AUDIT__?.().cameraInput.yaw)>0.015,null,{timeout:12000});
+      const looking=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.().cameraInput);
+      assert(Math.abs(looking.targetYaw+120*.2*Math.PI/180)<.035,'A 120px mouse move must rotate ~24°, not 720°');
       await page.keyboard.press('Escape');
       await page.keyboard.down('w');
       await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().rigs.artisan.parts.every(p=>p.state==='Walk_Loop'),null,{timeout:45000,polling:250});
