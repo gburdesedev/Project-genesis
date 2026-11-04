@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v009",
+  "version": "0.15-v010",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "procedural",
@@ -90,7 +90,7 @@
       "kind": "animation"
     }
   ],
-  "note": "V009 incremental: personajes, piezas originales y biblioteca UAL1; pausa manual ante errores y al terminar; escenario V008 sin cambios.",
+  "note": "V010: identificación visible de versión y cierre forzado del cargador al continuar; diagnóstico y animaciones heredados de V009.",
   "loadingStages": [
     {
       "id": "gui",
