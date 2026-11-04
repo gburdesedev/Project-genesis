@@ -443,6 +443,13 @@
       "version": "V013",
       "approval": "existing_reviewed",
       "file": "../assets/vendor/genesis/externals/blacksmithChimneyV013/src/blacksmith_chimney_candidate_preview.glb"
+    },
+    {
+      "id": "portal-arch-v0185",
+      "name": "Arco de piedra proporcional · V018.5 Blender 4.5.13 LTS",
+      "file": "../assets/playcanvas/candidates/workshops/portals/v0185/portal_arch_v0185.glb",
+      "stage": "village",
+      "required": true
     }
   ],
   "lightingAsset": {
@@ -490,7 +497,14 @@
       "originalApprovedSource": true,
       "worldScale": 1.02,
       "xyzProportional": true
+    },
+    "portalArch": {
+      "id": "portal-arch-v0185",
+      "technicalSource": "Blender 4.5.13 Cycles HDRI32",
+      "innerOpeningMetres": 1.37,
+      "outerWidthMetres": 1.75,
+      "nonDestructive": true
     }
   },
-  "revision": "V018.5 experimental: proportional door XYZ and architectural portals to be rebuilt; NOT APPROVED"
+  "revision": "V018.5 experimental; native aspect doors plus Blender-built arches matched to actual stone walls"
 }
