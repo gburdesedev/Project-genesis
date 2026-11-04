@@ -218,7 +218,7 @@
   const root=new pc.Entity('Project Genesis V017 · aldeia cinco talleres');
   const buildings=[],approved=[],generic=[];
   const gate=options.getStep||(()=>0);
-  const animations=[],unlitDoorVariants=[];
+  const animations=[],unlitDoorVariants=[],portalFrames=[];
   let doorHinge=null,doorAngle=0;
   try{
    // Keep the entire village beneath one root; it is never visible until
@@ -240,7 +240,26 @@
      shell.setLocalPosition(0,0,-bounds.front*wallScaleZ);
      shell.setLocalScale(wallScaleX,1,wallScaleZ);
     building.addChild(shell);
-    addModel(resources,shell,wallsId,'Cuatro paredes completas · '+p.profession);
+    const wallVisual=addModel(resources,shell,wallsId,'Cuatro paredes completas · '+p.profession);
+    // V018.5 architecture: separate Blender-created chiseled stone arch.
+    // Original door mesh and approved wall meshes remain immutable.
+    const stonePattern=p.profession==='Arcanista'?/metamorphic slate|slate \/ subtle/i:/quarry basalt|basalt - mineral/i;
+    const stoneMaterial=wallVisual.findComponents('render')
+      .flatMap(render=>render.meshInstances||[])
+      .map(mi=>mi.material)
+      .find(mat=>mat&&stonePattern.test(mat.name||''));
+    if(!stoneMaterial)throw Error('V018.5 approved wall PBR material missing: '+p.profession);
+    const stoneArch=addModel(resources,shell,'portal-arch-v0185',
+      p.profession+' · dovelas de arco de piedra 3D V018.5',
+      [0,0,p.profession==='Arcanista'?-.13:0]);
+    let archMeshes=0;
+    for(const r of stoneArch.findComponents('render')){
+      for(const mi of r.meshInstances||[]){mi.material=stoneMaterial;archMeshes++;}
+    }
+    if(archMeshes<1)throw Error('V018.5 arch empty: '+p.profession);
+    portalFrames.push({profession:p.profession,meshInstances:archMeshes,
+      material:stoneMaterial.name,innerWidth:1.37,outerWidth:1.75,
+      source:'Blender4.5.13LTS GLB'});
     if(approvedChoice)approved.push(p.profession);
     else generic.push(p.profession);
     // Reuse original roofing mesh and its pivot/rise from Herrero V013.
@@ -305,7 +324,7 @@
    const status={
      installed:true,version:'V018.5',count:buildings.length,
      approval:{Herrero:'walls V082 / door V082-B',Arcanista:'walls V006 / door V027'},
-     approved,generic,unlitDoorVariants,
+     approved,generic,unlitDoorVariants,portalFrames,
      buildings:buildings.map(b=>({
        profession:b.profession,x:b.entity.getPosition().x,z:b.entity.getPosition().z,
        walls:b.wallsId,door:b.doorKind,roof:b.roofId,
@@ -321,6 +340,9 @@
         herreroHingeOffset:-DOOR_NATIVE_LEAF_CENTRE_X*(PORTAL_DOOR_WORLD_SCALE/plan.workshopScale),
         doorPhysicalBodyWidth:DOOR_BODY_NATIVE_WIDTH_M*PORTAL_DOOR_WORLD_SCALE,
         doorPhysicalBodyHeight:2.264*PORTAL_DOOR_WORLD_SCALE,
+        portalArchInnerOpening:1.37,
+        portalArchOuterWidth:1.75,
+        nativeDoorAspectPreserved:true,
         doorPivotWorldX:-DOOR_NATIVE_LEAF_CENTRE_X*PORTAL_DOOR_WORLD_SCALE,
         allDoorsBodyWidthMetres:DOOR_BODY_NATIVE_WIDTH_M*PORTAL_DOOR_WORLD_SCALE,
         allDoorFitVersion:'proportional door XYZ; new narrower portal arch candidate pending',
