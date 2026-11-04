@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v017",
+  "version": "0.15-v017.1",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "original-village-pbr",
@@ -468,5 +468,5 @@
     "walkCollision": "unchanged_v016",
     "stage": "village"
   },
-  "revision": "V017.1 camera / Ordan door / Arcanista V027"
+  "revision": "V017.1 · correcciones cámara, puertas y Ordan"
 }
