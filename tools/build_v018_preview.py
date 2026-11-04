@@ -110,6 +110,7 @@ replace_once(
         approval:'EXPERIMENTAL, visual and browser testing required'
       }"""
 )
+replace_once("bytesExpected:9043540","bytesExpected:"+str(CAND.stat().st_size))
 scene.write_text(s)
 # Make the v018 preview identifiable as v018 in the browser's loading screen.
 html=DST/"index.html"
