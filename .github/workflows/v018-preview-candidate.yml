@@ -1,0 +1,98 @@
+name: V018 isolated candidate — real 3D positioning and lossless door QA
+on:
+  push:
+    branches: [experiment/v018-workshop-positions-lossless-door]
+    paths:
+      - 'tools/build_v018_preview.py'
+      - 'tools/v018_browser_smoke.cjs'
+      - '.github/workflows/v018-preview-candidate.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build-and-browser-validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Prepare lossless WebP encoder
+        run: python -m pip install --quiet 'Pillow>=11.0,<13'
+      - name: Rebuild approved V082-B pixel-identical WebP candidate from pinned working optimizer
+        run: |
+          set -euo pipefail
+          OPTIMIZER="https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/c5eabb8d550b9e5603471bd4f288554fa3888ad1/scripts/herrero_v082b_lossless_optimizer.py"
+          curl --fail --location --retry 3 --max-time 120 "$OPTIMIZER" -o /tmp/herrero_lossless_optimizer.py
+          python -m py_compile /tmp/herrero_lossless_optimizer.py
+          mkdir -p /tmp/v018-candidate-source
+          python /tmp/herrero_lossless_optimizer.py \
+            assets/playcanvas/approved/workshops/herrero/doors/v082-b/door-herrero-v082-b.glb \
+            /tmp/v018-candidate-source
+          mkdir -p assets/playcanvas/candidates/workshops/herrero/doors/v082-b-lossless-v018
+          cp /tmp/v018-candidate-source/door-herrero-v082-b-lossless-webp-candidate.glb \
+            assets/playcanvas/candidates/workshops/herrero/doors/v082-b-lossless-v018/door-herrero-v082-b-lossless-webp.glb
+          cp /tmp/v018-candidate-source/report.json \
+            assets/playcanvas/candidates/workshops/herrero/doors/v082-b-lossless-v018/pixel-equivalence-report.json
+      - name: Build isolated V018 using measured GLB geometry (no V017 overwrites)
+        run: |
+          set -euo pipefail
+          python tools/build_v018_preview.py
+          node --check v018/v017-village.js
+          node --check v018/v017-workshop-preload.js
+          node --check v018/canvas-legacy-logic.js
+          node --check tools/v018_browser_smoke.cjs
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('v018/manifest.json');m=json.loads(p.read_text())
+          assert m['version']=='0.15-v018'
+          assert m['canvasOriginal']['progressStore']=='project-genesis/canvas-original/v018-preview'
+          door=next(x for x in m['workshopAssets'] if x['id']=='door-herrero-v082-b')
+          assert 'lossless-webp' in door['file']
+          assert door['approval']=='original_visual_only_experimental_encoding'
+          d=json.loads(Path('assets/playcanvas/candidates/workshops/herrero/doors/v082-b-lossless-v018/pixel-equivalence-report.json').read_text())
+          assert d['original_triangles']==d['candidate_triangles']==25720
+          assert d['texture_pixel_differences']==0
+          assert d['original_material_pbr_unchanged'] and d['vertex_index_buffers_byte_identical']
+          assert 35<d['reduction_pct']<50
+          assert not any(x in p.read_text() for x in ('project-genesis/canvas-original/v017-preview','0.15-v017.1'))
+          print('PASS V018 plan and original-master isolation, pixel-identical PBR', d['candidate_bytes'])
+          PY
+          git diff --exit-code -- v015/ v017/ assets/playcanvas/approved/
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install headless Chromium for real PlayCanvas/WebGL import
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Test V018 PC/mobile, original controls and quests, approved V027, optimized door
+        run: |
+          set -euo pipefail
+          python -m http.server 8765 --bind 127.0.0.1 >/tmp/v018-server.log 2>&1 &
+          node tools/v018_browser_smoke.cjs
+      - name: Archive diagnostic screenshots and exact texture equivalence report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v018-real-browser-and-pbr-qa
+          path: |
+            /tmp/genesis-v018-evidence/
+            /tmp/v018-candidate-source/report.json
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Commit generated V018 preview and candidate ONLY onto the experimental branch after tests pass
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "experiment/v018-workshop-positions-lossless-door"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v018/ assets/playcanvas/candidates/workshops/herrero/doors/v082-b-lossless-v018/
+          git diff --cached --stat
+          git diff --cached --quiet && exit 0
+          git commit -m 'V018 isolated candidate: measured workshop alignments and lossless V082-B [skip ci]'
+          git push origin "HEAD:$GITHUB_REF_NAME"
