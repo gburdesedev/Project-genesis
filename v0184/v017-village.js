@@ -23,6 +23,7 @@
  const DOOR_BODY_NATIVE_WIDTH_M=1.170; // main V082 GLB body measured
  const DOOR_REFERENCE_HINGE_WORLD_X=-1.10;
  const DOOR_PROFILE_OPEN_DEG=-92;
+ const V027_BODY_NATIVE_WIDTH_M=1.170; // measured approved V027 main arched leaf
  const INWARD_OPEN=DOOR_PROFILE_OPEN_DEG; // original outward opening
  const ROOF_OVERHANG=1.025; // only 2.5% visual overhang beyond plan footprint
 
@@ -266,22 +267,24 @@
       doorHinge=hinge;
     }else if(p.profession==='Arcanista'){
       const pivot=new pc.Entity('Arcanista · puerta mágica V027 · cerrada');
-      pivot.setLocalPosition(-.839,0,-bounds.front*wallScaleZ); // PlayCanvas instantiated V027 leaf is +.629 world along facade: -.839 * .75 compensates
+      const arcaneLocalXScale=ORIGINAL_DOOR_BODY_WIDTH_M/(V027_BODY_NATIVE_WIDTH_M*plan.workshopScale);
+       pivot.setLocalPosition(-V027_LEAF_CENTRE_X*arcaneLocalXScale,0,-bounds.front*wallScaleZ);
       building.addChild(pivot);
       // The approved V027 original must be visible on PC AND mobile.
       // If its GLB cannot be decoded, fail the load gate rather than showing
       // a visually unrelated wooden replacement as if it were the Arcanista.
        // Unlike the Herrero, the actual V027 geometry ALREADY straddles x=0.
        // NEVER reuse the blacksmith GLB's .5805m offset here.
-       const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · geometría encajada por planos GLB V018.2',[0,0,0],[wallScaleX,1,wallScaleZ]);
+       const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · ancho original 2.18m V018.4',[0,0,0],[arcaneLocalXScale,1,wallScaleZ]);
       animations.push(animateArcaneDoor(pc,app,pivot,visual,!!options.mobile));
     }else{
       // Carpintero, Curtidor and Joyero: static V027 geometry, zero emission.
       const pivot=new pc.Entity(p.profession+' · puerta V027 sin emisión');
-      pivot.setLocalPosition(-V027_LEAF_CENTRE_X*wallScaleX,0,-bounds.front*wallScaleZ);
+      const variantLocalXScale=ORIGINAL_DOOR_BODY_WIDTH_M/(V027_BODY_NATIVE_WIDTH_M*plan.workshopScale);
+       pivot.setLocalPosition(-V027_LEAF_CENTRE_X*variantLocalXScale,0,-bounds.front*wallScaleZ);
       building.addChild(pivot);
       const visual=addModel(resources,pivot,'door-arcanista-v027',
-       p.profession+' · V027 PBR sin emisión',[0,0,0],[wallScaleX,1,wallScaleZ]);
+       p.profession+' · V027 2.18m PBR sin emisión',[0,0,0],[variantLocalXScale,1,wallScaleZ]);
       unlitDoorVariants.push(unlitV027Materials(pc,visual,p.profession));
       inscription(pc,app,root,p.label,'Taller no jugable',p.x,p.z,p.yaw);
     }
@@ -320,8 +323,10 @@
         doorApprovedBodyWidthMetres:ORIGINAL_DOOR_BODY_WIDTH_M,
         doorSourceBodyWidthMetres:DOOR_BODY_NATIVE_WIDTH_M,
         doorPivotWorldX:DOOR_REFERENCE_HINGE_WORLD_X,
+        allDoorsBodyWidthMetres:ORIGINAL_DOOR_BODY_WIDTH_M,
+        allDoorFitVersion:'all-five restore original outer portal reference; GLBs immutable',
         herreroOpenDegrees:INWARD_OPEN,
-        arcanistaCentreX:-.839, // compensate measured instantiated V027 leaf mesh offset; center of stone arch stays 0
+        arcanistaCentreX:-V027_LEAF_CENTRE_X*(ORIGINAL_DOOR_BODY_WIDTH_M/(V027_BODY_NATIVE_WIDTH_M*plan.workshopScale)), // scaled V027 mesh center alignment
         genericDoorsCentred:true,
         roofsAlignedToBuildingFootprint:true,
         doorsRecessedToWallLocalZ:true,
