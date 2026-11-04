@@ -22,7 +22,7 @@ const assert=require('node:assert/strict');
    console.log('BEFORE',JSON.stringify(before));
    assert(reachedEnd,'No final loading pause');
    assert(before,'No runtime instrumentation');
-   assert.equal(before.version,'V014','Expected original Canvas HUD on V013 gameplay and original V012 floors');
+   assert.equal(before.version,'V016','Expected V014 HUD and V012 floors plus V016 cinematic intro');
    assert.equal(before.legacy,0,'Original Canvas tutorial not at first step');
    assert.equal(before.floors.status,'ready','Original village PBR floors did not finish loading');
    assert.equal(before.floors.surfaces,16,'Original 63x63 plaza, nine roads and market flooring is incomplete');
@@ -34,8 +34,43 @@ const assert=require('node:assert/strict');
    const delta=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
    console.log('BONE HEAD ALIGNMENT',pts.map(p=>delta(p,pts[0])));
    for(const id of ['artisan','ordan','mercenary']){const bones=before.rigs[id].parts.map(p=>p.rootBoneWorld);assert(bones.every(Boolean),id+' missing Head bones');assert(bones.every(p=>delta(p,bones[0])<.14),id+' Head/hair skeletons out of alignment')}
+   const introBefore=await page.evaluate(()=>window.__GENESIS_V016_ARRIVAL__?.snapshot());
+   assert.equal(introBefore?.state,'pending','New game must wait for player to dismiss loading pause');
+   assert.deepEqual(before.merchant.map(x=>Math.round(x*10)/10),[25.5,0,36.3],'Approved merchant must be in original market');
+   assert.deepEqual(before.rigs.ordan.position.map(x=>Math.round(x*100)/100),[1.72,0,1.9],'Ordan moved from original workshop entrance');
+   assert.equal(before.rigs.mercenary.position[1],-40,'Uncontracted mercenary must be hidden, not standing in plaza');
    await page.locator('#v011-pause button').first().click();
-   await page.waitForTimeout(400);
+   await page.waitForFunction(()=>window.__GENESIS_V016_ARRIVAL__?.state==='arriving',null,{timeout:10000});
+   const introView=await page.evaluate(()=>({
+     state:window.__GENESIS_V016_ARRIVAL__.state,
+     hud:getComputedStyle(document.getElementById('hud')).visibility,
+     joystick:getComputedStyle(document.getElementById('joy')).visibility,
+     viewport:document.getElementById('app').getBoundingClientRect().width/innerWidth,
+     classActive:document.body.classList.contains('genesis-v016-cinematic'),
+     step:window.__GENESIS_V013_LEGACY__?.snapshot()?.step
+   }));
+   assert.equal(introView.hud,'hidden','Original Canvas HUD must be hidden during cinematic');
+   assert(introView.classActive,'Cinematic letterbox class not applied');
+   assert.equal(introView.step,0,'Opening cinematic must not trigger first conversation');
+   await page.waitForTimeout(4000);
+   const movieFrame=await page.evaluate(()=>document.getElementById('app').getBoundingClientRect().width/innerWidth);
+   assert(Math.abs(movieFrame-.88)<.018,'Cinematic inset viewport must be approximately 88%, got '+movieFrame);
+   await page.screenshot({path:'/tmp/v011-test/cinematic-desktop.png'});
+   await page.waitForFunction(()=>window.__GENESIS_V016_ARRIVAL__?.state==='arrived',null,{timeout:90000});
+   const arrivalReady=await page.evaluate(()=>({
+     snapshot:window.__GENESIS_V016_ARRIVAL__.snapshot(),
+     hud:getComputedStyle(document.getElementById('hud')).visibility,
+     classActive:document.body.classList.contains('genesis-v016-cinematic'),
+     step:window.__GENESIS_V013_LEGACY__.snapshot().step
+   }));
+   assert(arrivalReady.snapshot.distance>20,'Intro did not walk across original plaza');
+   assert(arrivalReady.snapshot.ordanDistance<2.2,'Intro must leave player ready to interact with Ordan');
+   assert.equal(arrivalReady.hud,'visible','Original controls did not return at Ordan');
+   assert.equal(arrivalReady.classActive,false,'Cinematic frame remained after walk');
+   assert.equal(arrivalReady.step,0,'Intro must not automatically talk to Ordan');
+   await page.waitForTimeout(750);
+   await page.screenshot({path:'/tmp/v011-test/cinematic-ready-ordan.png'});
+   console.log('V016 DESKTOP CINEMATIC PASS',JSON.stringify({frame:movieFrame,start:introBefore.position,arrived:arrivalReady.snapshot.position,walked:arrivalReady.snapshot.distance,controlsRestored:true}));
    const afterContinue=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
    assert(!afterContinue.paused&&!afterContinue.loaderVisible&&!afterContinue.pauseVisible,'Panels remain after continue');
    await page.keyboard.down('w');
@@ -104,6 +139,9 @@ const assert=require('node:assert/strict');
    assert.equal(errors.length,0,'Original UI produced JS errors: '+errors.join('; '));
    console.log('V013 ORIGINAL MENUS PASS: inventory from real stock, close-to-advance, 39-layer preparation art');
 
+   // Close software-WebGL desktop context before launching the mobile renderer.
+   await page.screenshot({path:'/tmp/v011-test/scene.png'});
+   await page.close();
    const mobile=await browser.newPage({viewport:{width:844,height:390},deviceScaleFactor:1,isMobile:true,hasTouch:true});
    mobile.on('pageerror',e=>{errors.push('mobile-pageerror:'+e.message);console.log('MOBILE-PAGEERROR',e.stack)});
    try{
@@ -137,10 +175,27 @@ const assert=require('node:assert/strict');
      assert(approx(mobileHud.zoomIn.right,25)&&approx(mobileHud.zoomOut.right,25),'Zoom column right anchor changed');
      assert(approx(mobileHud.camera.right,12),'Original desktop/mobile camera button right anchor changed');
      assert(mobileHud.look.w>400,'Original right-hand camera look zone missing');
-     console.log('V014 MOBILE HUD PASS',JSON.stringify(mobileHud));
+     console.log('V014 MOBILE HUD GEOMETRY PASS',JSON.stringify(mobileHud));
+     await mobile.locator('#v011-pause button').first().click();
+     await mobile.waitForFunction(()=>window.__GENESIS_V016_ARRIVAL__?.state==='arriving',null,{timeout:10000});
+     assert.equal(await mobile.locator('#hud').evaluate(e=>getComputedStyle(e).visibility),'hidden','Touch HUD visible during automatic walk');
+     await mobile.waitForTimeout(3200);
+     const mobileIntroView=await mobile.evaluate(()=>({
+       viewport:document.getElementById('app').getBoundingClientRect().width/innerWidth,
+       intro:window.__GENESIS_V016_ARRIVAL__.snapshot(),
+       controls:getComputedStyle(document.getElementById('hud')).visibility
+     }));
+     assert(Math.abs(mobileIntroView.viewport-.88)<.018,'Mobile cinematic viewport must occupy 88% of landscape');
+     await mobile.screenshot({path:'/tmp/v011-test/cinematic-mobile.png'});
+     await mobile.waitForFunction(()=>window.__GENESIS_V016_ARRIVAL__?.state==='arrived',null,{timeout:90000});
+     const mobileArrival=await mobile.evaluate(()=>window.__GENESIS_V016_ARRIVAL__.snapshot());
+     assert(mobileArrival.ordanDistance<2.2,'Mobile arrived too far from Ordan');
+     assert(mobileArrival.distance>20,'Mobile artisan was teleported rather than animated');
+     assert.equal(await mobile.locator('#hud').evaluate(e=>getComputedStyle(e).visibility),'visible','Mobile controls did not return after arrival');
+     console.log('V016 MOBILE CINEMATIC PASS',JSON.stringify({inset:mobileIntroView.viewport,distance:mobileArrival.distance,ordan:mobileArrival.ordanDistance}));
+     const beforeJoystick=await mobile.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
      const b=await mobile.locator('#joy').boundingBox();
      assert(b&&b.width>60,'Touch joystick not visible');
-     await mobile.locator('#v011-pause button').first().click();
      const cdp=await mobile.context().newCDPSession(mobile);
      const x=b.x+b.width/2,y=b.y+b.height/2;
      await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y,id:1}]});
@@ -148,10 +203,10 @@ const assert=require('node:assert/strict');
      await mobile.waitForFunction(initial=>{
        const pos=window.__GENESIS_V011_AUDIT__?.().rigs.artisan.position;
        return pos && Math.hypot(pos[0]-initial[0],pos[1]-initial[1],pos[2]-initial[2])>.35;
-     },beforeMobile.rigs.artisan.position,{timeout:10000});
+     },beforeJoystick.rigs.artisan.position,{timeout:10000});
      const movingMobile=await mobile.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
      await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
-     const mobileMove=delta(movingMobile.rigs.artisan.position,beforeMobile.rigs.artisan.position);
+     const mobileMove=delta(movingMobile.rigs.artisan.position,beforeJoystick.rigs.artisan.position);
      assert(mobileMove>.35,'Mobile joystick did not move artisan: '+mobileMove);
      assert(movingMobile.rigs.artisan.parts.every(p=>p.state==='Walk_Loop'),'Mobile joystick did not start walking animation');
      assert(!movingMobile.loaderVisible&&!movingMobile.pauseVisible,'Mobile loader still visible');
