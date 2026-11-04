@@ -52,5 +52,5 @@ assert(sources.includes('workshopShell')&&sources.includes('doorLeaf'),
  'Approved original embedded workshop source models missing');
 assert(html.includes('GenesisCanvasMapV015.mount'),'Original village not mounted');
 assert(html.includes('GenesisCanvasArrivalV015.create'),'Original animated arrival not mounted');
-assert(html.includes("arrivalController?.begin()"),'Game start must begin automatic arrival after load');
+assert(html.includes("arrivalController.begin()"),'Game start must begin automatic arrival after load');
 console.log('PASS V015: exact original plan, local approved source meshes, market NPC/stall, 14 trees, and '+end.distance.toFixed(1)+'m autonomous animated Ordan arrival');
