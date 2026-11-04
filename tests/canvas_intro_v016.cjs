@@ -44,6 +44,13 @@ assert(samples.every(p=>Math.hypot(p.x-7,p.z-16)>2.4),
 assert(transitions.includes('Walk_Loop')&&transitions.includes('Idle_Loop'),
  'V011 original rig must walk and return to idle');
 assert.deepEqual(completed,['arrived']);
+// V017 regression: a software-renderer frame of 0.30s must advance at
+// its real elapsed duration rather than being truncated to the old 0.10s cap.
+const slowActor={...actor,p:{x:0,y:0,z:6.3}};
+const slowIntro=scene.create({artisan:slowActor,game:{step:()=>0},speed:3.2});
+assert(slowIntro.begin());
+slowIntro.update(.30);
+assert(Math.abs(slowIntro.snapshot().distance-.96)<.01,'V017 slow-WebGL frame must advance 0.96 m, not 0.32 m');
 const old=scene.create({artisan:actor,game:{step:()=>4}});
 assert.equal(old.state,'resumed','No intro replay once original Q1 has progressed');
 assert.deepEqual(old.position(),[0,0,6.3]);
