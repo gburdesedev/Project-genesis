@@ -1,0 +1,32 @@
+name: V011 browser character smoke
+on:
+  push:
+    paths:
+      - '.github/workflows/v011-browser-smoke.yml'
+      - 'tools/v011_browser_smoke.cjs'
+      - 'v015/index.html'
+      - 'v015/manifest.json'
+  workflow_dispatch:
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium and Playwright
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Run local Pages replica and browser test
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v011-http.log 2>&1 &
+          node tools/v011_browser_smoke.cjs
+      - name: Preserve screenshot and browser errors
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v011-browser-evidence
+          path: /tmp/v011-test
