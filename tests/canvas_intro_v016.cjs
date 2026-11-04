@@ -5,7 +5,7 @@ const plan=require('../village_plan.js');
 const manifest=require('../v015/manifest.json');
 const html=fs.readFileSync(path.join(__dirname,'../v015/index.html'),'utf8');
 const ui=fs.readFileSync(path.join(__dirname,'../v015/canvas-legacy-ui.js'),'utf8');
-assert.equal(manifest.version,'0.15-v016');
+assert.equal(manifest.version,'0.15-v017');
 const actors=Object.fromEntries(manifest.characters.map(x=>[x.id,x]));
 assert.deepEqual(actors.ordan.position,[1.72,0,1.9]);
 assert.deepEqual(actors.merchant.position,[25.5,0,36.3]);
