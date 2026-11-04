@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v017",
+  "version": "0.15-v017.1",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "original-village-pbr",
@@ -466,6 +466,9 @@
     "requiredBuildings": 5,
     "preserveQuestAndSave": true,
     "walkCollision": "unchanged_v016",
-    "stage": "village"
+    "stage": "village",
+    "version": "V017.1",
+    "doorRule": "All doors closed on entry; after initial Ordan conversation unlock and animate Herrero only; Arcanista V027 must be displayed on PC/mobile",
+    "cameraRule": "Original Canvas free-look sensitivity and damped follow, no snap; touchlook + PC pointer lock"
   }
 }
