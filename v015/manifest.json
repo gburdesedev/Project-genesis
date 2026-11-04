@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v008",
+  "version": "0.15-v009",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "procedural",
@@ -58,9 +58,39 @@
         0,
         3
       ]
+    },
+    {
+      "id": "artisan-head",
+      "name": "Cabeza del artesano",
+      "file": "./assets/playcanvas/approved/characters/parts/male_head.glb",
+      "attachTo": "artisan"
+    },
+    {
+      "id": "artisan-hair",
+      "name": "Cabello del artesano",
+      "file": "./assets/playcanvas/approved/characters/parts/hair_simpleparted.glb",
+      "attachTo": "artisan"
+    },
+    {
+      "id": "mercenary-head",
+      "name": "Cabeza del mercenario",
+      "file": "./assets/playcanvas/approved/characters/parts/male_head.glb",
+      "attachTo": "mercenary"
+    },
+    {
+      "id": "mercenary-hair",
+      "name": "Cabello del mercenario",
+      "file": "./assets/playcanvas/approved/characters/parts/hair_buzzed.glb",
+      "attachTo": "mercenary"
+    },
+    {
+      "id": "universal-animations",
+      "name": "Animaciones originales UAL1",
+      "file": "../assets/playcanvas/approved/animations/UAL1.glb",
+      "kind": "animation"
     }
   ],
-  "note": "V008: esquema de carga y controles táctiles; coordenadas y archivos de V007 preservados. La escena original completa y la cabeza del artesano requieren integración y no se declaran restauradas.",
+  "note": "V009 incremental: personajes, piezas originales y biblioteca UAL1; pausa manual ante errores y al terminar; escenario V008 sin cambios.",
   "loadingStages": [
     {
       "id": "gui",
@@ -82,7 +112,10 @@
       "assets": [
         "artisan",
         "ordan",
-        "ordan-beard"
+        "ordan-beard",
+        "artisan-head",
+        "artisan-hair",
+        "universal-animations"
       ]
     },
     {
@@ -99,7 +132,9 @@
       "required": false,
       "assets": [
         "merchant",
-        "mercenary"
+        "mercenary",
+        "mercenary-head",
+        "mercenary-hair"
       ]
     }
   ]
