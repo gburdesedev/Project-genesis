@@ -94,6 +94,16 @@ const failures=[],records=[];
     });
     await page.waitForTimeout(500);
     await page.screenshot({path:out+'/v0184-open-'+mode.name+'.png',timeout:60000});
+    await page.evaluate(()=>{
+      window.__GENESIS_OPEN_QA_UNHOOK__?.();
+      const app=window.pc.Application.getApplication?.()||window.pc.app;
+      const cam=app.root.findByName('Camara');
+      const side=()=>{cam.setPosition(-3.2,2.2,3.65);cam.lookAt(0,1.45,-.4)};
+      app.on('prerender',side);side();
+      window.__GENESIS_OPEN_QA_UNHOOK__=()=>app.off('prerender',side);
+    });
+    await page.waitForTimeout(450);
+    await page.screenshot({path:out+'/v0184-open-side-'+mode.name+'.png',timeout:60000});
     await page.evaluate(()=>window.__GENESIS_OPEN_QA_UNHOOK__?.());
     console.log('CAPTURE OPEN',mode.name,JSON.stringify(doorOpen));
     records.push({device:mode.name,loaded:true,models:audit.workshops.models,
