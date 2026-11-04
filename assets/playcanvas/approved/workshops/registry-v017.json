@@ -2,7 +2,7 @@
   "schema": 1,
   "revision": "V017",
   "updated_on": "2026-11-04",
-  "policy": "Only explicit user approvals in approved/; technical wall variants remain in candidates/ until visual review",
+  "policy": "Only explicit user approvals in approved/: Herrero V082 and Arcanista V006 walls + Herrero V082-B and Arcanista V027 doors. Three other workshop facades remain generic.",
   "professions": [
     {
       "profession": "Herrero",
@@ -15,8 +15,8 @@
       },
       "walls": {
         "version": "V082",
-        "status": "pending_visual_review",
-        "path": "assets/playcanvas/candidates/workshops/herrero/walls/v082/blacksmith_four_walls_arched_v082.glb",
+        "status": "approved_by_user",
+        "path": "assets/playcanvas/approved/workshops/herrero/walls/v082/blacksmith_four_walls_arched_v082.glb",
         "git_blob_sha": "90e527e20dcfdb96da6071e176e72c2fffcd7453",
         "bytes": 2253616
       }
@@ -32,8 +32,8 @@
       },
       "walls": {
         "version": "V006",
-        "status": "pending_visual_review",
-        "path": "assets/playcanvas/candidates/workshops/arcanista/walls/v006/arcanista_four_walls_preview.glb",
+        "status": "approved_by_user",
+        "path": "assets/playcanvas/approved/workshops/arcanista/walls/v006/arcanista_four_walls_preview.glb",
         "git_blob_sha": "d6cdd71c17a426321ec61838cbcca4b22b8faab4",
         "bytes": 1026104
       }
@@ -41,31 +41,34 @@
     {
       "profession": "Carpintero",
       "door": {
-        "status": "older_versions_in_production_branches_pending_exact_approved_glb_verification",
-        "branch": "production/door-carpintero"
+        "status": "generic_temporary",
+        "master_not_overwritten": true
       },
       "walls": {
-        "status": "no_final_model_verified"
+        "status": "generic_temporary",
+        "master_not_overwritten": true
       }
     },
     {
       "profession": "Curtidor",
       "door": {
-        "status": "older_versions_in_production_branches_pending_exact_approved_glb_verification",
-        "branch": "production/door-curtidor"
+        "status": "generic_temporary",
+        "master_not_overwritten": true
       },
       "walls": {
-        "status": "no_final_model_verified"
+        "status": "generic_temporary",
+        "master_not_overwritten": true
       }
     },
     {
       "profession": "Joyero",
       "door": {
-        "status": "older_versions_in_production_branches_pending_exact_approved_glb_verification",
-        "branch": "production/door-joyero"
+        "status": "generic_temporary",
+        "master_not_overwritten": true
       },
       "walls": {
-        "status": "no_final_model_verified"
+        "status": "generic_temporary",
+        "master_not_overwritten": true
       }
     }
   ],
@@ -79,6 +82,6 @@
     "mobile_sha256": "e7cfda5f4e98e623db12b8bfd0184e048488e4855d9c83e2751fb44a32e80c45",
     "source_workflow": "ProjectgenesisAssets/genesis-workshop-assets/.github/workflows/caprino-v019-hdri32-lightonly.yml"
   },
-  "stage": "preload_and_light_only_no_auto_mount",
-  "scene_integration": "Requires separate visual scene composition approval"
+  "stage": "five_buildings_to_mount_before_reveal",
+  "scene_integration": "Five workshops required: two with approved geometry, three generic placeholders; V016 gameplay remains unchanged"
 }
