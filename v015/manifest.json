@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v016",
+  "version": "0.15-v017",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "original-village-pbr",
@@ -146,17 +146,17 @@
       "kind": "animation"
     }
   ],
-  "note": "V016 SOLO reubica NPCs segun Canvas original (Ordan 1.72/1.90, mercader 25.5/36.3, mercenario en espera oculto) y anima llegada automatica hasta Ordan. Camara un poco alejada, viewport cinematografico 88% y controles ocultos hasta terminar. No altera modelos, mapa, materiales, talleres, fuente, árboles, menús ni lógica Q1-Q3.",
+  "note": "V017 sobre V016: se conserva jugabilidad, controles, semilla y secuencia de Ordan; se agrega escena oculta hasta carga final, etapas exactas por recurso, y GLB locales de talleres + HDRI Radiance RGBE para iluminación IBL. Los modelos de paredes V082/V006 se precargan para revisión técnica, NO se integran como arte aprobado.",
   "loadingStages": [
     {
       "id": "gui",
-      "name": "GUI y controles",
+      "name": "Interfaz y controles",
       "kind": "inline",
       "required": true
     },
     {
       "id": "engine",
-      "name": "Núcleo del juego",
+      "name": "Motor PlayCanvas",
       "kind": "runtime",
       "required": true
     },
@@ -167,8 +167,15 @@
       "required": true
     },
     {
-      "id": "blacksmith",
-      "name": "Camino del Herrero",
+      "id": "terrain",
+      "name": "Suelos, caminos y texturas PBR",
+      "kind": "tracked",
+      "required": true,
+      "assets": []
+    },
+    {
+      "id": "characters",
+      "name": "Personajes principales",
       "kind": "assets",
       "required": true,
       "assets": [
@@ -177,20 +184,50 @@
         "ordan-head",
         "ordan-beard",
         "artisan-head",
-        "artisan-hair",
+        "artisan-hair"
+      ]
+    },
+    {
+      "id": "animations",
+      "name": "Animaciones originales",
+      "kind": "assets",
+      "required": true,
+      "assets": [
         "universal-animations"
       ]
     },
     {
-      "id": "environment",
-      "name": "Plaza y entorno",
-      "kind": "pending",
-      "required": false,
-      "assets": []
+      "id": "walls",
+      "name": "Paredes de talleres · precarga de revisión",
+      "kind": "assets",
+      "required": true,
+      "assets": [
+        "wall-herrero-v082",
+        "wall-arcanista-v006"
+      ]
+    },
+    {
+      "id": "doors",
+      "name": "Puertas de talleres",
+      "kind": "assets",
+      "required": true,
+      "assets": [
+        "door-herrero-v082-b",
+        "door-arcanista-v027"
+      ]
+    },
+    {
+      "id": "lighting",
+      "name": "Iluminación HDRI 32-bit · IBL PBR",
+      "kind": "assets",
+      "required": true,
+      "assets": [
+        "lighting-hdri32"
+      ]
     },
     {
       "id": "secondary",
-      "name": "Contenido secundario",
+      "name": "Personajes secundarios",
       "kind": "assets",
       "required": false,
       "assets": [
@@ -328,5 +365,55 @@
       ]
     },
     "resumeSavedGame": "no cinematic if Q1 progress beyond greeting"
+  },
+  "workshopAssets": [
+    {
+      "id": "wall-herrero-v082",
+      "name": "Paredes del Herrero V082 · prueba técnica",
+      "kind": "wall",
+      "profession": "Herrero",
+      "version": "V082",
+      "approval": "pending_visual_review",
+      "file": "../assets/playcanvas/candidates/workshops/herrero/walls/v082/blacksmith_four_walls_arched_v082.glb"
+    },
+    {
+      "id": "wall-arcanista-v006",
+      "name": "Paredes del Arcanista V006 · prueba técnica",
+      "kind": "wall",
+      "profession": "Arcanista",
+      "version": "V006",
+      "approval": "pending_visual_review",
+      "file": "../assets/playcanvas/candidates/workshops/arcanista/walls/v006/arcanista_four_walls_preview.glb"
+    },
+    {
+      "id": "door-herrero-v082-b",
+      "name": "Puerta Herrero V082-B · aprobada",
+      "kind": "door",
+      "profession": "Herrero",
+      "version": "V082-B",
+      "approval": "user_approved",
+      "file": "../assets/playcanvas/approved/workshops/herrero/doors/v082-b/door-herrero-v082-b.glb"
+    },
+    {
+      "id": "door-arcanista-v027",
+      "name": "Puerta Arcanista V027 · aprobada",
+      "kind": "door",
+      "profession": "Arcanista",
+      "version": "V027",
+      "approval": "user_approved",
+      "mobilePolicy": "deferred",
+      "file": "../assets/playcanvas/approved/workshops/arcanista/doors/v027/Arcanist_Door_V027_WebGL.glb"
+    }
+  ],
+  "lightingAsset": {
+    "id": "lighting-hdri32",
+    "name": "Iluminación HDRI 32-bit · Studio Small 09",
+    "kind": "lighting",
+    "source": "Poly Haven studio_small_09 CC0",
+    "format": "Radiance RGBE HDR 32-bit",
+    "sourceSet": "../assets/playcanvas/approved/lighting/studio_small_09/",
+    "desktopFile": "studio_small_09_2k.hdr",
+    "mobileFile": "studio_small_09_1k.hdr",
+    "mode": "prefiltered scene IBL envAtlas; no replacement PNG/JPG"
   }
 }
