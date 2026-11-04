@@ -206,25 +206,26 @@
       const pivot=new pc.Entity('Arcanista · puerta mágica V027 · cerrada');
       pivot.setLocalPosition(0,0,.12);
       building.addChild(pivot);
-      if(resources.has('door-arcanista-v027')){
-        const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · litología aprobada');
-        animations.push(animateArcaneDoor(pc,app,pivot,visual,false));
-      }else{
-        // Existing V027 mobile rule: prevent 191-renderer GPU bottlenecks.
-        // A stable generic door is shown instead of an invisible hole.
-        genericWoodDoor(pc,building,p.profession);
-      }
+      // V027 is mandatory on ALL platforms: never substitute a wood door.
+      // The original emissive GLB remains untouched. Mobile reduces animation
+      // texture resolution/update frequency, not the approved visual identity.
+      if(!resources.has('door-arcanista-v027'))throw Error('Falta puerta aprobada Arcanista V027');
+      const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · litología aprobada');
+      animations.push(animateArcaneDoor(pc,app,pivot,visual,!!options.mobile));
     }else{
       genericWoodDoor(pc,building,p.profession);
       inscription(pc,app,root,p.label,'Fachada provisional',p.x,p.z,p.yaw);
     }
     buildings.push({profession:p.profession,entity:building,wallsId,doorKind:approvedChoice?
-      (p.profession==='Arcanista'&&!resources.has('door-arcanista-v027')?'generic-mobile-fallback':'approved'):
+      'approved':
       'generic-temporary',roofId:'roof-herrero-v013'});
    }
    if(!doorHinge)throw Error('V017 Herrero hinge not built');
    const tick=dt=>{
-     const desired=gate()>=2?-92:0; // preserve Ordan door quest semantics
+     // Canonical: the door is CLOSED on arrival; Ordan opens it immediately
+     // AFTER the first real conversation (mentor step 0 -> 1), not when
+     // the player uses the door or after a later objective.
+     const desired=gate()>=1?-92:0;
      doorAngle+=(desired-doorAngle)*Math.min(1,Math.max(0,dt)*7);
      doorHinge.setLocalEulerAngles(0,doorAngle,0);
    };
@@ -241,7 +242,9 @@
      })),
      hdr32:!!app.scene.envAtlas,
      map:'GenesisVillagePlan / original workshop coordinates',
-     get doorAngle(){return doorAngle}
+     get doorAngle(){return doorAngle},
+     get doorTarget(){return gate()>=1?-92:0},
+     get closedDoors(){return buildings.filter(b=>b.profession!=='Herrero').map(b=>b.profession)}
    };
    if(status.count!==5||status.buildings.some(b=>b.renderers<4)||!status.hdr32)throw Error('V017 incomplete workshop scene assembly');
    globalThis.__GENESIS_V017_VILLAGE__=status;
