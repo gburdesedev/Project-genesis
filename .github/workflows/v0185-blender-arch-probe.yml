@@ -1,0 +1,34 @@
+name: V018.5 Blender 4.5.13 inspect approved arch and oak beam references
+on:
+  push:
+    branches: [experiment/v0185-authentic-door-arches]
+    paths:
+      - 'tools/v0185_probe_blender45.py'
+      - '.github/workflows/v0185-blender-arch-probe.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  blender-probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 19
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download exact official Blender 4.5.13 LTS without changing source
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --max-time 450 -o /tmp/blender-4.5.13-linux-x64.tar.xz \
+            https://download.blender.org/release/Blender4.5/blender-4.5.13-linux-x64.tar.xz
+          tar -xJf /tmp/blender-4.5.13-linux-x64.tar.xz -C /tmp
+          /tmp/blender-4.5.13-linux-x64/blender --version | head -n 3
+      - name: Extract actual 3D wooden portal topology and material geometry
+        run: |
+          /tmp/blender-4.5.13-linux-x64/blender -b -t 2 --python-exit-code 1 --python tools/v0185_probe_blender45.py
+          test -s /tmp/v0185_probe.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v0185-original-arch-blender-geometry-report
+          path: /tmp/v0185_probe.json
+          if-no-files-found: warn
+          retention-days: 14
