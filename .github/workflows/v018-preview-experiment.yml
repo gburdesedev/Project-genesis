@@ -1,0 +1,118 @@
+name: V018 Experimental — aligned workshop doors and lossless textures
+on:
+  push:
+    branches: [feature/v018-door-align-optimized-preview]
+    paths:
+      - tools/build_v018_preview.py
+      - tools/v018_herrero_lossless_webp.py
+      - .github/workflows/v018-preview-experiment.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  v018-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install lossless texture encoder
+        run: python -m pip install --quiet Pillow
+      - name: Generate isolated V018 and inspect approved GLB integrity
+        run: |
+          set -euo pipefail
+          python tools/build_v018_preview.py
+          python - <<'PY'
+          import json,os,struct
+          root='v018'
+          m=json.load(open(root+'/manifest.json'))
+          assert m['version']=='0.15-v018-preview'
+          assert m['canvasOriginal']['progressStore'].endswith('/v018-preview')
+          for ent in m['workshopAssets']:
+              p=os.path.normpath(os.path.join(root,ent['file']))
+              assert os.path.exists(p),(ent['id'],p)
+          door=next(x for x in m['workshopAssets'] if x['id']=='door-herrero-v082-b')
+          p=os.path.join(root,door['file'])
+          g=open(p,'rb').read()
+          n=struct.unpack_from('<I',g,12)[0]
+          doc=json.loads(g[20:20+n])
+          assert 'EXT_texture_webp' in doc['extensionsRequired']
+          assert door['candidateBytes'] < 9050000
+          assert len(doc['images'])==15
+          assert all(x.get('mimeType') in ('image/jpeg','image/png','image/webp') for x in doc['images'])
+          print('PASS V018 generated candidate, GLB2 and source paths, 15 images, lossless extension')
+          PY
+          node --check v018/v017-village.js
+          node --check v018/v017-workshop-preload.js
+      - name: Create V018 browser regression from already-tested V017.1 harness
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          r=Path('tools/v017_preview_browser_smoke.cjs').read_text()
+          assert "assert.equal(data.version,'V017.1');" in r
+          r=r.replace('/tmp/v017-browser-qa','/tmp/v018-browser-qa')
+          r=r.replace('/v017/?qa=v017-preview-','/v018/?qa=v018-preview-')
+          r=r.replace("assert.equal(data.version,'V017.1');","assert.equal(data.version,'V018 · VISTA PREVIA');")
+          r=r.replace('V017 WEBGL QA FAIL','V018 WEBGL QA FAIL')
+          needle="    assert(data.rigs.artisan.controllers===3,'Original V011 animation rig missing');"
+          assert needle in r
+          extra="""
+    assert(Math.abs(data.village.roofBoost-1.2)<1e-5,'Roof must be +20% original, not 75%');
+    assert(Math.abs(data.village.herreroDoor.hingeLocal[0]+0.603*(12/7.875))<.0001,'Herrero hinge miscentered');
+    assert.equal(data.village.herreroDoor.inwardAngle,90,'Herrero opening must be inward +Y');
+    assert(Math.abs(data.village.arcanistaDoor.hingeLocal[0]+0.603*(12/7.875))<.0001,'Arcanista miscentered');
+    const textureAudit=await page.evaluate(()=>{
+      const asset=window.__GENESIS_V017_WORKSHOP_LOADER__?.assets?.get('door-herrero-v082-b');
+      if(!asset?.resource)return {error:'No experimental door resource'};
+      const model=asset.resource.instantiateRenderEntity();
+      const renderers=model.findComponents('render');
+      const meshes=renderers.flatMap(x=>x.meshInstances||[]);
+      const names=new Set(meshes.map(x=>x.material?.name));
+      const withMaps=meshes.filter(x=>{const m=x.material;return !!(m?.diffuseMap||m?.normalMap||m?.metalnessMap||m?.glossMap)}).length;
+      model.destroy();
+      return {renderers:renderers.length,meshes:meshes.length,materials:names.size,mappedMeshes:withMaps};
+    });
+    console.log('V018 WEBP RUNTIME MATERIALS',mode.name,JSON.stringify(textureAudit));
+    assert(textureAudit.mappedMeshes>0,'WebP extension textures missing in PlayCanvas runtime');
+    assert(textureAudit.materials>=3,'PBR materials missing in experimental door');
+"""
+          r=r.replace(needle,extra+needle)
+          Path('tools/v018_browser_smoke.cjs').write_text(r)
+          PY
+          node --check tools/v018_browser_smoke.cjs
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium for REAL PlayCanvas GLB import test
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Browser test — desktop and mobile, PBR maps, Ordan/door, unchanged cinematics
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v018-http.log 2>&1 &
+          node tools/v018_browser_smoke.cjs
+      - name: Upload QA reports for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v018-herrero-alignment-optimized-browser-qa
+          path: |
+            /tmp/v018-browser-qa/
+            v018/assets/experimental/herrero-v082-b-textures/report.json
+            v018/README-PREVIEW.md
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Save tested V018 preview on isolated feature branch, NOT main
+        if: success()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add v018/ tools/v018_browser_smoke.cjs
+          if ! git diff --cached --quiet; then
+            git commit -m 'V018 isolated PlayCanvas preview — tested alignment and WebP candidate [skip ci]'
+            git push origin HEAD:feature/v018-door-align-optimized-preview
+          fi
