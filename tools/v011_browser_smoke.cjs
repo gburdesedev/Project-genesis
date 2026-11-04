@@ -22,13 +22,13 @@ const assert=require('node:assert/strict');
    console.log('BEFORE',JSON.stringify(before));
    assert(reachedEnd,'No final loading pause');
    assert(before,'No runtime instrumentation');
-   assert.equal(before.rigs.artisan.controllers,3,'Artisan requires 3 independent rig animation controllers (body/head/hair)');
-   for(const part of before.rigs.artisan.parts)assert(part.playing&&part.hasAnim,'Missing playing animation on '+part.id);
+   for(const id of ['artisan','ordan','mercenary'])assert.equal(before.rigs[id].controllers,3,id+' requires 3 independent body/head/hair animation controllers');
+   for(const id of ['artisan','ordan','mercenary'])for(const part of before.rigs[id].parts)assert(part.playing&&part.hasAnim,'Missing playing animation on '+part.id);
    const pts=before.rigs.artisan.parts.map(p=>p.rootBoneWorld);
    assert(pts.every(Boolean),'Missing Head bones in body/head/hair');
    const delta=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
    console.log('BONE HEAD ALIGNMENT',pts.map(p=>delta(p,pts[0])));
-   assert(pts.every(p=>delta(p,pts[0])<.14),'Head/hair skeletons out of alignment');
+   for(const id of ['artisan','ordan','mercenary']){const bones=before.rigs[id].parts.map(p=>p.rootBoneWorld);assert(bones.every(Boolean),id+' missing Head bones');assert(bones.every(p=>delta(p,bones[0])<.14),id+' Head/hair skeletons out of alignment')}
    await page.locator('#v011-pause button').first().click();
    await page.waitForTimeout(400);
    const afterContinue=await page.evaluate(()=>window.__GENESIS_V011_AUDIT__?.());
