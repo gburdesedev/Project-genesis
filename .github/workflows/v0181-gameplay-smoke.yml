@@ -1,0 +1,40 @@
+name: V018.1 independent real gameplay smoke
+on:
+  push:
+    branches: [experiment/v0181-doorfit-and-placeholder-visuals]
+    paths:
+      - .github/workflows/v0181-gameplay-smoke.yml
+      - tools/v0181_gameplay_smoke.cjs
+      - v018/v017-village.js
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gameplay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify V018.1 script and available assets
+        run: |
+          node --check tools/v0181_gameplay_smoke.cjs
+          node --check v018/v017-village.js
+          test -s assets/playcanvas/candidates/workshops/herrero/doors/v082-b-lossless-v018/door-herrero-v082-b-lossless-webp.glb
+      - name: Chromium and WebGL
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Actual desktop and mobile game load - quest and door state
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v0181-smoke-server.log 2>&1 &
+          node tools/v0181_gameplay_smoke.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v0181-gameplay-browser-evidence
+          path: /tmp/genesis-v0181-evidence/
+          retention-days: 7
+          if-no-files-found: warn
