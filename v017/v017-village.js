@@ -11,6 +11,11 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
  'use strict';
  const HORIZONTAL=12/7.875;
+ // Both approved GLBs put their visible leaf centre 0.603 m to the right of
+ // their actual left-side hinge. The wall opening is centered at local X=0.
+ const HINGE_TO_LEAF_CENTRE=.603;
+ const INWARD_OPEN_DEGREES=90; // +Y takes +X leaf into negative Z (inside)
+
  const ROOF_BOOST=1.30*1.35; // exact original V013 roof, raised around wall-top pivot
  const NAMES=Object.freeze({
   Herrero:{walls:'wall-herrero-v082',door:'door-herrero-v082-b'},
@@ -200,18 +205,19 @@
         [0,-3.2*(ROOF_BOOST-1),0],[1,ROOF_BOOST,1]);
     if(p.profession==='Herrero'){
       const hinge=new pc.Entity('Herrero · bisagra izquierda original');
-      hinge.setLocalPosition(-1.10,0,.12);
+      // Scale together with V082 masonry and align the ACTUAL GLB hinge to the opening.
+      hinge.setLocalPosition(-HINGE_TO_LEAF_CENTRE*HORIZONTAL,0,.12);
       building.addChild(hinge);
-      const door=addModel(resources,hinge,'door-herrero-v082-b','Herrero V082-B · hierro aprobado');
+      const door=addModel(resources,hinge,'door-herrero-v082-b','Herrero V082-B · hierro aprobado',[0,0,0],[HORIZONTAL,1,HORIZONTAL]);
       doorHinge=hinge;
     }else if(p.profession==='Arcanista'){
       const pivot=new pc.Entity('Arcanista · puerta mágica V027 · cerrada');
-      pivot.setLocalPosition(0,0,.12);
+      pivot.setLocalPosition(-HINGE_TO_LEAF_CENTRE*HORIZONTAL,0,.12);
       building.addChild(pivot);
       // The approved V027 original must be visible on PC AND mobile.
       // If its GLB cannot be decoded, fail the load gate rather than showing
       // a visually unrelated wooden replacement as if it were the Arcanista.
-      const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · puerta arcana iluminada aprobada');
+      const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · puerta arcana iluminada aprobada',[0,0,0],[HORIZONTAL,1,HORIZONTAL]);
       animations.push(animateArcaneDoor(pc,app,pivot,visual,!!options.mobile));
     }else{
       genericWoodDoor(pc,building,p.profession);
@@ -223,10 +229,10 @@
    // Q1 starts at step 0: ALL five doors closed. The first talk with Ordan
    // advances to step 1. Only THEN does Ordan open the blacksmith door.
    // Saved progressed games restore the proper angle without replaying it.
-   doorAngle=gate()>=1?-92:0;
+   doorAngle=gate()>=1?INWARD_OPEN_DEGREES:0;
    doorHinge.setLocalEulerAngles(0,doorAngle,0);
    const tick=dt=>{
-     const desired=gate()>=1?-92:0;
+     const desired=gate()>=1?INWARD_OPEN_DEGREES:0;
      doorAngle+=(desired-doorAngle)*(1-Math.exp(-Math.max(0,dt)*5));
      doorHinge.setLocalEulerAngles(0,doorAngle,0);
    };
@@ -245,7 +251,8 @@
      map:'GenesisVillagePlan / original workshop coordinates',
      get doorAngle(){return doorAngle},
      get doorStates(){return {Herrero:Math.abs(doorAngle)>1?'opening_or_open':'closed',Arcanista:'closed',Carpintero:'closed',Curtidor:'closed',Joyero:'closed'}},
-     doorOpenTrigger:'Ordan first dialogue: Q1 step 0 → 1'
+     doorOpenTrigger:'Ordan first dialogue: Q1 step 0 → 1',
+     doorGeometry:{originalLeafCentre:.603,hingeX:-HINGE_TO_LEAF_CENTRE*HORIZONTAL,leafScale:HORIZONTAL,inwardAngle:INWARD_OPEN_DEGREES,closedAngle:0}
    };
    if(status.count!==5||status.buildings.some(b=>b.renderers<4)||!status.hdr32)throw Error('V017 incomplete workshop scene assembly');
    globalThis.__GENESIS_V017_VILLAGE__=status;
