@@ -23,9 +23,9 @@ const ASSETS={
 };
 const TREES=Object.freeze([
  ['oak',.4,10.7],['maple',11.8,11.7],['linden',2.2,20.3],['ash',11.8,20.3],
- ['ash',-19,-8],['oak',25,-8],['linden',-21,1],['ash',-21,26],
- ['maple',-12,45],['oak',-3,45],['maple',35,44],
- ['linden',22,6],['ash',-8,23],['maple',19,24]
+ ['linden',-19,-8],['ash',25,-8],['linden',-21,1],['maple',-21,26],
+ ['oak',-12,45],['maple',-3,45],['oak',35,44],
+ ['maple',22,6],['ash',-8,23],['ash',19,24]
 ]);
 const MERCHANT={x:25.5,y:0,z:36.3}, STALL={x:28.35,y:0,z:37.6};
 const snapshot={version:'V015',layout:'village_plan.js',bounds:plan?.bounds||null,
