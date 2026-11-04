@@ -9,17 +9,14 @@ function mount({game,app,artisan,ordan,playOrdanAnimation}){
  if(!game.snapshot())game.startOrResume();
  const pc=globalThis.pc;
  const get=id=>document.getElementById(id);
- const quest=document.createElement('aside');
- quest.id='legacyQuest';
- quest.innerHTML='<div class="legacyKicker">PROJECT GENESIS · Q1–Q3 · CANVAS ORIGINAL</div><strong id="legacyTitle"></strong><p id="legacyDescription"></p><small id="legacyDistance"></small>';
- document.body.appendChild(quest);
- const prompt=document.createElement('div');prompt.id='legacyPrompt';document.body.appendChild(prompt);
- const marker=document.createElement('div');marker.id='legacyMarker';marker.textContent='✦';document.body.appendChild(marker);
+ // V014: exact original Canvas HUD nodes, not duplicate floating controls.
+ const quest=get('quest'),prompt=get('prompt'),marker=get('interactMarker');
+ if(!quest||!prompt||!marker)throw Error('Approved original Canvas HUD is incomplete');
  const modalLayer=document.createElement('section');modalLayer.id='modalLayer';modalLayer.style.display='none';
  modalLayer.innerHTML='<div id="modal" class="modal" role="dialog" aria-modal="true"></div>';document.body.appendChild(modalLayer);
  const modalBox=get('modal');
- const invBtn=document.createElement('button');invBtn.id='legacyInventoryTouch';invBtn.textContent='INV';invBtn.type='button';
- invBtn.title='Inventario del artesano';get('actions')?.appendChild(invBtn);
+ const invBtn=get('inventoryTouch');
+ if(!invBtn)throw Error('Original Canvas INV control missing');
  const state={kind:null,selectedGoal:null,dialogueCount:0,followIndex:0,following:false,finishedFollow:false,returnToStep:null,lastStep:null};
  const ORIGINAL_FOLLOW=[{x:.465,z:.585},{x:.465,z:-.84},{x:1.29,z:-1.065}];
  const escape=s=>String(s??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
@@ -142,15 +139,27 @@ function mount({game,app,artisan,ordan,playOrdanAnimation}){
   const snap=game.snapshot();
   if(!snap)return;
   const step=snap.step,goal=snap.goal;
-  if(state.lastStep!==step){state.lastStep=step;quest.querySelector('.legacyKicker').textContent=(step<=9?'Q1 · TALLER E INVENTARIO':step<=11?'Q'+(step-8)+' · FABRICACIÓN':'Q3 · COMPARACIÓN')+' · CANVAS ORIGINAL'}
-  get('legacyTitle').textContent=goal.title;
-  get('legacyDescription').textContent=goal.hint;
+  if(state.lastStep!==step){state.lastStep=step;quest.querySelector('.ey').textContent=(step<=9?'Q1 · TALLER E INVENTARIO':step<=11?'Q'+(step-8)+' · FABRICACIÓN':'Q3 · COMPARACIÓN')+' · CANVAS ORIGINAL'}
+  get('questTitle').textContent=goal.title;
+  get('questText').textContent=goal.hint;
   const d=distance();
   get('legacyDistance').textContent=d===null?(step===9?'TAB / INV · Abrir inventario':step===12?'Comparar y elegir':''):'Distancia al objetivo: '+d.toFixed(1)+' m';
   const ready=d!==null&&d<=goal.radius;
   prompt.textContent=step===9?'TAB / INV · Inventario':step===12?'Comparar dos espadas':step===13?'Recorrido completado':ready?'E / ACCIÓN · '+goal.title:'';
   prompt.style.display=(ready||step===9||step===12)?'block':'none';
-  invBtn.disabled=step<9;
+  const locked=step<9;
+  invBtn.classList.toggle('locked',locked);
+  invBtn.classList.toggle('ready',!locked);
+  invBtn.setAttribute('aria-disabled',String(locked));
+  const materials=get('materialsPanel');
+  if(materials)materials.style.display=step>=9?'block':'none';
+  const stock=Object.entries(snap.inventory||{}).filter(([,qty])=>qty>0);
+  const count=stock.reduce((n,[,qty])=>n+qty,0);
+  const items=snap.items?.length||0;
+  const matText=get('materialsText');
+  if(matText&&step>=9)matText.textContent='TAB / INV · '+stock.length+' materiales · '+count+' unidades · '+items+' objetos fabricados';
+  const chip=get('professionChip');
+  if(chip){chip.style.display='block';chip.textContent='PROFESIÓN · HERRERO';}
   marker.style.display='none';
   if(goal.position&&d!==null&&d>goal.radius){
     const p=goalPosition();
@@ -171,7 +180,15 @@ function mount({game,app,artisan,ordan,playOrdanAnimation}){
  const gameView={camera:arguments[0]?.camera};
  // Always bind to the original camera from the caller.
  gameView.camera=arguments[0]?.camera||null;
- invBtn.onclick=()=>{if(!isModalOpen())openWorkspace('Inventario')};
+ invBtn.onclick=()=>{if(!isModalOpen()&&game.step()>=9)openWorkspace('Inventario')};
+ invBtn.addEventListener('keydown',event=>{
+   if(event.key!=='Enter'&&event.key!==' ')return;
+   event.preventDefault();invBtn.click();
+ });
+ get('interact')?.addEventListener('keydown',event=>{
+   if(event.key!=='Enter'&&event.key!==' ')return;
+   event.preventDefault();get('interact').click();
+ });
  const onKey=event=>{
   if(event.key==='Tab'){event.preventDefault();if(!isModalOpen())openWorkspace('Inventario');return}
   if(event.key==='Escape'&&isModalOpen()){event.preventDefault();dismiss();return}
