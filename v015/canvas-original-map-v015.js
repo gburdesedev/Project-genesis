@@ -138,6 +138,10 @@
      smith.shell.enabled=false;
      report.originalAssets.herrero='approved V082/V013 with preserved original door hinge';
    }catch(e){issue('herrero approved walls-roof-chimney',e)}
+
+ }
+ async function approvedSmithDoor(app,items){
+   const smith=items.get('Herrero');if(!smith)return;
    try{
      const asset=await remote(app,'herrero-door',glbs.doorSmith),leaf=usable(asset);
      smith.hinge.addChild(leaf);smith.door.enabled=false;smith.door=leaf;
@@ -219,6 +223,24 @@
    return false;
  }
  function mount({app,people,game,diag}) {
+   let decorStarted=false;
+   let decorPromise=null;
+   let prepared=null;
+   function startDecor(){
+     if(decorStarted)return decorPromise;
+     decorStarted=true;report.phase='loading-approved-scenery';
+     decorPromise=(async()=>{
+       const {root,workshops}=await ready;
+       await approvedSmith(app,workshops);
+       await arcaneDoor(app,workshops);
+       await addTrees(app,global.pc,root);
+       await fountain(app,global.pc,root);
+       await approvedSmithDoor(app,workshops);
+       report.phase='approved-scenery-settled';
+       diag?.block('v015-village','scenery-complete',{trees:report.trees,fountain:report.fountain,errors:report.errors});
+     })().catch(error=>{issue('deferred scenery',error);report.phase='scenery-partial'});
+     return decorPromise;
+   }
    if(!plan?.workshops||!plan.market||!ORIGINAL?.workshopShell||!ORIGINAL?.doorLeaf)throw Error('Missing exact original Canvas village specification/assets');
    const pc=global.pc;
    const root=new pc.Entity('ALDEA ORIGINAL · 63 × 63 · Canvas V015');
@@ -243,14 +265,12 @@
      updateDoor(app,workshops.get('Herrero'),()=>game?.step());
      report.phase='original-footprints-ready';
      diag?.block('v015-village','ready',{workshops:report.workshops.length,merchant:report.merchant,market:report.market});
-     // Full approved scenery is never a prerequisite for player controls.
-     void approvedSmith(app,workshops);
-     void arcaneDoor(app,workshops);
-     void addTrees(app,pc,root);
-     void fountain(app,pc,root);
+     // Heavy approved scenery loads AFTER interactive arrival, strictly one group
+     // at a time. This protects mobile browsers from simultaneous huge GLB
+     // decoding and guarantees the original 63x63 playable map appears first.
      return {root,workshops};
    })().catch(e=>{report.phase='error';issue('original map primary',e);throw e});
-   return Object.freeze({ready,blocked,report,treeSites});
+   return Object.freeze({ready,startDecor,blocked,report,treeSites});
  }
  global.GenesisCanvasMapV015=Object.freeze({mount,report,treeSites});
 })(globalThis);
