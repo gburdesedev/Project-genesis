@@ -14,7 +14,7 @@
   const VERSION='0.15-v013';
   const DEFINITIONS=Object.freeze([
     {id:'mentor',title:'Habla con Maese Ordan',hint:'El taller está abandonado. Escuchá las indicaciones de Ordan.',position:[1.72,1.90],radius:2.2},
-    {id:'door',title:'Entrá al taller',hint:'Abrí la puerta del Herrero siguiendo la indicación de Ordan.',position:[0,.12],radius:2.25},
+    {id:'door',title:'Entrá al taller',hint:'Ordan ya abrió la puerta de la herrería. Acercate al umbral y entrá.',position:[0,.12],radius:2.25},
     {id:'debris',title:'Retirá los escombros',hint:'Despejá la estación antes de tocar herramientas.',position:[-1.16,-1.43],radius:2.1},
     {id:'anvil',title:'Asegurá el yunque',hint:'La base de trabajo tiene que quedar firme.',position:[1.08,-4.91],radius:1.95},
     {id:'bellows',title:'Revisá el fuelle',hint:'El fuelle debe responder antes de encender la fragua.',position:[3.14,-5.42],radius:2.0},
@@ -31,7 +31,7 @@
 
   const copy=Object.freeze({
     mentor:'Este taller no vuelve a la vida porque abras una puerta. Vamos a recuperar primero la estación: escombros, yunque, fuelle, tiro y fragua. En ese orden.',
-    door:'Entrá vos primero. Yo voy detrás. Antes de trabajar, retirá los escombros que bloquean la estación.',
+    door:'Adelante, entrá al taller. Yo voy detrás. Primero retiraremos los escombros de la estación.',
     debris:'Ahora comprobá el yunque. Necesito una base firme.',
     anvil:'Bien. Revisá el fuelle; todavía no enciendas la fragua.',
     bellows:'Antes del fuego, limpiá el tiro y la entrada de aire.',
