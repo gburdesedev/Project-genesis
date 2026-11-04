@@ -41,6 +41,7 @@ scene.render.resolution_percentage=100
 scene.render.image_settings.file_format='PNG'
 scene.render.film_transparent=False
 scene.view_settings.view_transform='AgX'
+scene.view_settings.exposure=.4
 scene.render.image_settings.color_mode='RGBA'
 scene.render.engine='CYCLES'
 world=bpy.data.worlds.new('Studio Small 09 · Original 32-bit Radiance HDR')
@@ -52,7 +53,7 @@ out=nodes.new('ShaderNodeOutputWorld')
 bg=nodes.new('ShaderNodeBackground')
 tex=nodes.new('ShaderNodeTexEnvironment')
 tex.image=bpy.data.images.load(str(HDR),check_existing=True)
-bg.inputs['Strength'].default_value=.95
+bg.inputs['Strength'].default_value=1.10
 world.node_tree.links.new(tex.outputs['Color'],bg.inputs['Color'])
 world.node_tree.links.new(bg.outputs['Background'],out.inputs['Surface'])
 
@@ -62,6 +63,21 @@ bpy.context.collection.objects.link(cam)
 scene.camera=cam
 cam_data.type='ORTHO'
 cam_data.ortho_scale=max(span.x,span.z,span.y)*1.50
+# Neutral key/fill preserves the original HDRI. Extra soft area illumination ONLY
+# compensates for deep black forged iron in art review; not baked into the GLB.
+def add_fill(name,offset,power,size,color):
+    light=bpy.data.lights.new(name,'AREA')
+    light.energy=power
+    light.shape='DISK'
+    light.size=size
+    light.color=color
+    obj=bpy.data.objects.new(name,light)
+    bpy.context.collection.objects.link(obj)
+    obj.location=center+Vector(offset)
+    obj.rotation_euler=(center-obj.location).to_track_quat('-Z','Y').to_euler()
+    return obj
+add_fill('Review key · broad neutral softbox',(-2.7,-3.5,3.2),1150,4.6,(1.0,.95,.89))
+add_fill('Review rim · soft cold bounce',(2.4,2.6,3.4),650,3.8,(.88,.94,1.0))
 
 def render(name,direction):
     direction=Vector(direction).normalized()
@@ -90,6 +106,7 @@ report={
  'environment':'studio_small_09_2k.hdr',
  'environment_format':'Radiance HDR 32-bit RGBE',
  'environment_sha256':hashlib.sha256(hdr_bytes).hexdigest(),
+ 'lighting_note':'Same 32-bit HDRI, exposure +0.4 EV plus 2 neutral review-only soft area fills; no asset edits',
  'mesh_objects':len(meshes),
  'triangles':triangles,
  'materials':materials,
