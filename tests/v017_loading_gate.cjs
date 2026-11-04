@@ -34,6 +34,8 @@ for(const stage of stages){
 }
 for(const id of allIds)assert(assigned.has(id),'Asset missing from loading stages: '+id);
 assert(stages.find(s=>s.id==='terrain').kind==='tracked','Ground loading must reflect real floor completion');
+assert(stages.find(s=>s.id==='village').kind==='tracked','Five-workshop assembly must have its own real loading block');
+for(const id of ['roof-herrero-v013','chimney-herrero-v013'])assert(stages.find(s=>s.id==='roofs').assets.includes(id),'Existing roof/chimney must be tracked');
 assert(html.includes('<body class="genesis-v017-loading">'),'World must start hidden before JS startup');
 assert(html.includes('body.genesis-v017-loading canvas#app{visibility:hidden!important}'),'World must not flash during loading');
 assert(html.includes("if(worldLoadReady)document.body.classList.remove('genesis-v017-loading')"),'Scene reveal only after load');
@@ -71,6 +73,6 @@ for(const size of ['1k','2k']){
 assert(approved.professions.find(x=>x.profession==='Herrero').door.status==='approved_by_user');
 assert(approved.professions.find(x=>x.profession==='Arcanista').door.status==='approved_by_user');
 for(const prof of ['Herrero','Arcanista']){
- assert.equal(approved.professions.find(x=>x.profession===prof).walls.status,'pending_visual_review');
+ assert.equal(approved.professions.find(x=>x.profession===prof).walls.status,'approved_by_user');
 }
 console.log('PASS V017 · 10 honest load blocks, exact approved door GLBs, unmodified candidate walls, genuine local 32-bit HDRI 1K/2K, scene reveal gate');
