@@ -31,7 +31,6 @@ const errors=[],results=[];
     await page.waitForFunction(()=>window.__GENESIS_V011_AUDIT__?.().loadingHidden===false,null,{timeout:20000});
     const test=await page.evaluate(()=>{
       const app=pc.Application.getApplication('app')||pc.Application.getApplication();
-      assert_app=!!app;
       if(!app)throw Error('PlayCanvas app unavailable');
       const camera=app.root.findByName('Camara');
       if(!camera)throw Error('Camera entity missing');
