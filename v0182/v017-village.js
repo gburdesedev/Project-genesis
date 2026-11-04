@@ -228,7 +228,7 @@
       doorHinge=hinge;
     }else if(p.profession==='Arcanista'){
       const pivot=new pc.Entity('Arcanista · puerta mágica V027 · cerrada');
-      pivot.setLocalPosition(0,0,-bounds.front*wallScaleZ); // GLB V027 is centered at x≈0; align with masonry recess
+      pivot.setLocalPosition(-.839,0,-bounds.front*wallScaleZ); // PlayCanvas instantiated V027 leaf is +.629 world along facade: -.839 * .75 compensates
       building.addChild(pivot);
       // The approved V027 original must be visible on PC AND mobile.
       // If its GLB cannot be decoded, fail the load gate rather than showing
@@ -275,7 +275,7 @@
         herreroHingeOffset:-DOOR_HERRERO_X_CENTRE*DOOR_FIT_X*(9/(WALL_BOUNDS.Herrero.width*plan.workshopScale)),
         experimentalDoorWidthFit:DOOR_FIT_X,
         herreroOpenDegrees:INWARD_OPEN,
-        arcanistaCentreX:0, // actual V006 opening is centered on local x=0
+        arcanistaCentreX:-.839, // compensate measured instantiated V027 leaf mesh offset; center of stone arch stays 0
         genericDoorsCentred:true,
         roofsAlignedToBuildingFootprint:true,
         doorsRecessedToWallLocalZ:true,
