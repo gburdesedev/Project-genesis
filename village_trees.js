@@ -192,6 +192,8 @@ export function mountVillageTrees(app, villageRoot, options={}){
  const status=()=>({
   planned:nodes.length,plaza:TREE_SITES.filter(p=>p.region==='plaza').length,
   residentVariants:ready.size,failedVariants:failed.size,pendingVariants:queue.length+active,
+  initialCompleted:initiallySettled.size,initialTotal:Object.keys(TYPES).length,
+  initialPending:Object.keys(TYPES).filter(species=>!initiallySettled.has(species)),
   visible:nodes.filter(n=>n.visible&&n.visual).length,rendered:nodes.filter(n=>n.visible&&n.visual).length,
   mobile:safeMobile,windEnabled:windMaterials.size>0,windMaterials:windMaterials.size
  });
@@ -227,10 +229,17 @@ export function mountVillageTrees(app, villageRoot, options={}){
     }
     if(task.lod===2&&!initiallySettled.has(task.species)){
      initiallySettled.add(task.species);
-     if(ready.has(task.key))options.onResourceLoaded?.('tree:'+task.species+':lod2');
-     if(initiallySettled.size===Object.keys(TYPES).length)resolveInitial({loaded:Object.keys(TYPES).length-failed.size,failed:failed.size});
+     if(ready.has(task.key)){
+      // Telemetry must never be able to block the remaining tree jobs.
+      try{options.onResourceLoaded?.('tree:'+task.species+':lod2')}
+      catch(callbackError){console.warn('Genesis trees: diagnostic callback failed',task.key,callbackError)}
+     }
+     if(initiallySettled.size===Object.keys(TYPES).length)
+      resolveInitial({loaded:Object.keys(TYPES).length-failed.size,failed:failed.size});
     }
-    update(focusX,focusZ,true);
+    // One bad visual instance must not strand the download queue or the entire game.
+    try{update(focusX,focusZ,true)}
+    catch(updateError){console.warn('Genesis trees: visual update failed',task.key,updateError)}
     globalThis.__genesisTreeStatus=status();
     pump();
    }
