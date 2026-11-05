@@ -575,3 +575,72 @@
   box-shadow:0 0 10px 3px #e6a439a6,0 0 3px 1px #ffe3a9!important;
   pointer-events:none!important;
 }
+
+/* INVENTARIO · VISOR NEGRO Y HOVER ACOTADO · revisión 2026-11-05.
+ * Ajustes exclusivamente en la pantalla de inventario; se conservan las
+ * cuatro pestañas, su geometría canónica y todas las capas aprobadas. */
+.genInv .genInvViewer .genInvImageWrap{
+  width:72%!important;
+  max-width:100%!important;
+  margin:1% auto!important;
+  border:2px solid #926a37!important;
+  outline:1px solid #25190f;
+  outline-offset:-6px;
+  background:#000!important;
+  box-shadow:inset 0 0 0 4px #080604,inset 0 0 18px 6px #000b;
+  overflow:hidden!important;
+}
+.genInv .genInvImageWrap :is(model-viewer,canvas){
+  width:100%!important;height:100%!important;
+  max-width:100%!important;max-height:100%!important;
+  display:block;
+}
+.genInv .genInvImageWrap[data-preview-mode="material"] :is(img,model-viewer,canvas){
+  pointer-events:none!important;
+  user-select:none;
+}
+.genInv .genInvViewLabel{
+  flex:0 0 1.35cqw!important;
+  min-height:1.35cqw!important;
+  color:#e1bf86!important;
+}
+.genInv .genInvSlot>.genInvSlotArtwork{
+  position:relative!important;
+  display:grid!important;
+  place-items:center!important;
+  inset:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:88%!important;
+  height:80%!important;
+  max-width:88%!important;
+  max-height:80%!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  transform:perspective(280px) rotateY(var(--gen-slot-yaw,0deg))!important;
+  transform-origin:center center!important;
+  transform-style:preserve-3d;
+  transition:transform 170ms ease-out;
+  will-change:transform;
+  pointer-events:none!important;
+}
+.genInv .genInvSlot>.genInvSlotArtwork :is(img,model-viewer,canvas){
+  width:100%!important;height:100%!important;
+  max-width:100%!important;max-height:100%!important;
+  object-fit:contain!important;
+  pointer-events:none!important;
+}
+.genInv .genInvSlot>.genInvSlotQty{
+  position:absolute!important;
+  right:3%!important;bottom:2%!important;
+  width:auto!important;height:auto!important;
+  max-width:98%!important;
+  padding:0 2%!important;
+  background:#100d0bcc!important;
+  transform:none!important;
+  pointer-events:none!important;
+}
+@media(prefers-reduced-motion:reduce){
+  .genInv .genInvSlot>.genInvSlotArtwork{transition:none!important}
+}
