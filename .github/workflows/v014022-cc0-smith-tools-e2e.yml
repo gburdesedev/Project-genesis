@@ -1,0 +1,94 @@
+name: V014022 CC0 smith tools isolated gameplay check
+on:
+  push:
+    branches:
+      - experiment/v014022-cc0-smith-tools-e2e-20261105
+    paths:
+      - .github/workflows/v014022-cc0-smith-tools-e2e.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  recover-and-walk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 19
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+      - name: Confirm two public assets from pinned organization commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://raw.githack.com/ProjectgenesisAssets/genesis-workshop-assets/f9cc701a04f86d721f5630a294b63043961bf17f/assets/playcanvas/candidates/workshops/herrero/props/v014022-cc0-recovery/'
+          for name in bellows-double-cc0-v001.glb anvil-oak-stump-cc0-v001.glb; do
+            curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 100 "$URL$name" -o "/tmp/$name"
+            python3 - "$name" <<'PY'
+          import pathlib,sys,struct
+          p=pathlib.Path('/tmp')/sys.argv[1];b=p.read_bytes()
+          assert b[:4]==b'glTF' and struct.unpack_from('<I',b,8)[0]==len(b)
+          print('PUBLIC_ORG_ASSET_OK',p.name,len(b))
+          PY
+          done
+      - name: Replace only two broken original external references
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          html=p.read_text()
+          pairs={
+            'https://cdn.jsdelivr.net/gh/dustinc555/mygame@main/assets/vendor/quaternius/fantasy_props_megakit/gltf/Bellows.gltf':
+            'https://raw.githack.com/ProjectgenesisAssets/genesis-workshop-assets/f9cc701a04f86d721f5630a294b63043961bf17f/assets/playcanvas/candidates/workshops/herrero/props/v014022-cc0-recovery/bellows-double-cc0-v001.glb',
+            'https://cdn.jsdelivr.net/gh/dustinc555/mygame@main/assets/vendor/quaternius/fantasy_props_megakit/gltf/Anvil_Log.gltf':
+            'https://raw.githack.com/ProjectgenesisAssets/genesis-workshop-assets/f9cc701a04f86d721f5630a294b63043961bf17f/assets/playcanvas/candidates/workshops/herrero/props/v014022-cc0-recovery/anvil-oak-stump-cc0-v001.glb'
+          }
+          for old,new in pairs.items():
+            count=html.count(old);assert count==1,(old,count)
+            html=html.replace(old,new)
+          p.write_text(html)
+          print('Replaced two original 404 URLs, preserved all scene/gameplay logic')
+          PY
+      - name: Persist audited patch on experimental branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'genesis-e2e-actions[bot]'
+          git config user.email 'genesis-e2e-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'test(v014022): replace two broken props with pinned CC0 organization candidates'
+            git push origin HEAD:experiment/v014022-cc0-smith-tools-e2e-20261105
+          fi
+      - name: Install Playwright
+        run: npm install --prefix /tmp/ordan-playwright playwright@1.56.1
+      - name: Run original guided Ordan gameplay through Chromium PC
+        env:
+          NODE_PATH: /tmp/ordan-playwright/node_modules
+        run: |
+          node --check tests/v014022_ordan_full_e2e.cjs
+          node tests/v014022_ordan_full_e2e.cjs
+      - name: Collect evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v014022-cc0-props-ordan-e2e
+          path: previews/v014022-ordan-playwright
+          retention-days: 7
+      - name: Inspect whether original HTTP 404s are eliminated
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          p=pathlib.Path('previews/v014022-ordan-playwright/report.json')
+          if not p.exists():print('REPORT MISSING');raise SystemExit(1)
+          d=json.loads(p.read_text());bad=[r for r in d.get('failedRequests',[]) if ('Bellows.gltf' in r.get('url','') or 'Anvil_Log.gltf' in r.get('url',''))]
+          print('GAMEPLAY_QA_RESULT:',d['result'],'STATE_SNAPSHOTS:',len(d.get('states',[])))
+          print('OLD_ASSET_404_REFERENCES:',len(bad))
+          print('LAST_QUEST_STEP:',d.get('states',[{}])[-1].get('state',{}).get('step'))
+          assert not bad,'Original broken URLs should no longer be requested'
+          PY
