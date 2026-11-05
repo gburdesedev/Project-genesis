@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v0187",
+  "version": "0.15-v0188",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "original-village-pbr",
@@ -244,8 +244,40 @@
       ]
     },
     {
+      "id": "plaza-models",
+      "name": "Plaza original V14.022 · Fuente y árboles LOD2",
+      "kind": "assets",
+      "required": true,
+      "assets": [
+        "plaza-fountain-v011",
+        "plaza-tree-oak-lod2",
+        "plaza-tree-ash-lod2",
+        "plaza-tree-linden-lod2",
+        "plaza-tree-maple-lod2"
+      ]
+    },
+    {
+      "id": "plaza-hq",
+      "name": "Plaza · LOD1 original PC",
+      "kind": "assets",
+      "required": false,
+      "assets": [
+        "plaza-tree-oak-lod1",
+        "plaza-tree-ash-lod1",
+        "plaza-tree-linden-lod1",
+        "plaza-tree-maple-lod1"
+      ]
+    },
+    {
       "id": "village",
       "name": "Montaje de la aldea · cinco talleres",
+      "kind": "tracked",
+      "required": true,
+      "assets": []
+    },
+    {
+      "id": "plaza-assembly",
+      "name": "Montaje de plaza y mercado V14.022",
       "kind": "tracked",
       "required": true,
       "assets": []
@@ -533,7 +565,7 @@
       "nonDestructive": true
     }
   },
-  "revision": "camera-touch-PC-door-fit-v0187",
+  "revision": "v0188-plaza-original-v014022-retrofit",
   "herreroInterior": {
     "version": "V0186",
     "source": "./herrero-interior-v0186.js",
@@ -548,5 +580,183 @@
     "entrance": "arch +/-0.61m; closed at Q1 step0; opens only at Ordan step1",
     "originalQuestAndCraftPreserved": true,
     "anvilAndBellowsAssets": "pending independent asset audit, no stand-in"
+  },
+  "plazaAssets": [
+    {
+      "id": "plaza-fountain-v011",
+      "name": "Plaza · Fuente delfín HQ original V011 · 16.7 MB",
+      "kind": "fountain",
+      "file": "../assets/vendor/genesis/externals/genesisFountainV011HQAsset/src/PG_Dolphin_Fountain_V011_PlayCanvas_HQ_Optimized.glb",
+      "bytes": 16715688,
+      "approval": "original_v014022"
+    },
+    {
+      "id": "plaza-tree-oak-lod2",
+      "name": "Plaza · oak original V005 · LOD2",
+      "kind": "tree-lod",
+      "species": "oak",
+      "lod": 2,
+      "file": "../assets/vendor/genesis/externals/tree_v005_oak_lod2/src/lod2.glb",
+      "mobilePolicy": "required",
+      "approval": "original_v014022"
+    },
+    {
+      "id": "plaza-tree-oak-lod1",
+      "name": "Plaza · oak original V005 · LOD1",
+      "kind": "tree-lod",
+      "species": "oak",
+      "lod": 1,
+      "file": "../assets/vendor/genesis/externals/tree_v005_oak_lod1/src/lod1.glb",
+      "mobilePolicy": "deferred",
+      "approval": "original_v014022"
+    },
+    {
+      "id": "plaza-tree-ash-lod2",
+      "name": "Plaza · ash original V005 · LOD2",
+      "kind": "tree-lod",
+      "species": "ash",
+      "lod": 2,
+      "file": "../assets/vendor/genesis/externals/tree_v005_ash_lod2/src/lod2.glb",
+      "mobilePolicy": "required",
+      "approval": "original_v014022"
+    },
+    {
+      "id": "plaza-tree-ash-lod1",
+      "name": "Plaza · ash original V005 · LOD1",
+      "kind": "tree-lod",
+      "species": "ash",
+      "lod": 1,
+      "file": "../assets/vendor/genesis/externals/tree_v005_ash_lod1/src/lod1.glb",
+      "mobilePolicy": "deferred",
+      "approval": "original_v014022"
+    },
+    {
+      "id": "plaza-tree-linden-lod2",
+      "name": "Plaza · linden original V005 · LOD2",
+      "kind": "tree-lod",
+      "species": "linden",
+      "lod": 2,
+      "file": "../assets/vendor/genesis/externals/tree_v005_linden_lod2/src/lod2.glb",
+      "mobilePolicy": "required",
+      "approval": "original_v014022"
+    },
+    {
+      "id": "plaza-tree-linden-lod1",
+      "name": "Plaza · linden original V005 · LOD1",
+      "kind": "tree-lod",
+      "species": "linden",
+      "lod": 1,
+      "file": "../assets/vendor/genesis/externals/tree_v005_linden_lod1/src/lod1.glb",
+      "mobilePolicy": "deferred",
+      "approval": "original_v014022"
+    },
+    {
+      "id": "plaza-tree-maple-lod2",
+      "name": "Plaza · maple original V005 · LOD2",
+      "kind": "tree-lod",
+      "species": "maple",
+      "lod": 2,
+      "file": "../assets/vendor/genesis/externals/tree_v005_maple_lod2/src/lod2.glb",
+      "mobilePolicy": "required",
+      "approval": "original_v014022"
+    },
+    {
+      "id": "plaza-tree-maple-lod1",
+      "name": "Plaza · maple original V005 · LOD1",
+      "kind": "tree-lod",
+      "species": "maple",
+      "lod": 1,
+      "file": "../assets/vendor/genesis/externals/tree_v005_maple_lod1/src/lod1.glb",
+      "mobilePolicy": "deferred",
+      "approval": "original_v014022"
+    }
+  ],
+  "plazaRestoration": {
+    "sourceBranch": "experiment/legacy-v014022-approved-assets-loader-20261105",
+    "plan": "../village_plan.js",
+    "geometrySource": "original GLBs pinned locally (no conversion)",
+    "floor": {
+      "kind": "original-village-pbr",
+      "width": 63,
+      "depth": 63,
+      "center": [
+        7,
+        17
+      ],
+      "collision": true,
+      "y": 0,
+      "source": "../village_plan.js",
+      "textures": "../assets/world/v0.11.004/",
+      "materialSets": [
+        "cobble",
+        "traffic"
+      ],
+      "channels": [
+        "color",
+        "normal",
+        "gloss",
+        "ao"
+      ],
+      "surfaces": [
+        "exterior",
+        "plaza",
+        "plaza-border",
+        "nine-roads",
+        "market"
+      ],
+      "mobileMaxTextureEdge": 1024,
+      "fallback": "temporary-floor"
+    },
+    "center": [
+      7,
+      16
+    ],
+    "size": [
+      13,
+      13
+    ],
+    "fountain": [
+      7,
+      0,
+      16
+    ],
+    "stalls": [
+      [
+        28.35,
+        0,
+        37.6
+      ]
+    ],
+    "plazaTrees": [
+      [
+        0.4,
+        10.7
+      ],
+      [
+        11.8,
+        11.7
+      ],
+      [
+        2.2,
+        20.3
+      ],
+      [
+        11.8,
+        20.3
+      ]
+    ],
+    "totalTrees": 14,
+    "marketSign": [
+      21,
+      31
+    ],
+    "plazaSign": [
+      -0.5,
+      9.5
+    ],
+    "approvedForGame": false
+  },
+  "scene": {
+    "restoration": "V014022 plaza render, no change to original V0187 workshop layout or quest"
   }
 }
