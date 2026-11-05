@@ -86,7 +86,7 @@
      id:FORGE_ID,geometry:'original archive, 109 meshes, no procedural stand-in',
      worldPosition:FORGE_POS,realDimensionsMetres:[2.0934,3.2238,1.6742],
      repairedOnQuestStep:7, originalPbrPreserved:true,
-     get forgeHot(){return forgeHot},
+     get forgeHot(){update();return forgeHot},
      get questStep(){return game.step()},
      get renderMeshCount(){return meshes.length}
    };
