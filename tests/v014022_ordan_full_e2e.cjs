@@ -48,7 +48,7 @@ async function main(){
   const x=await snap();report.states.push({stage,...x});
   log('SNAP',{stage,step:x.state?.step,quest:x.state?.quest,player:x.state?.player,objective:x.state?.objective,
    interactable:x.state?.interactable,loader:x.loader,intro:x.intro,loadState:x.loadState,detail:x.loadDetail,count:x.count,assetErrors:x.assetErrors,stream:x.stream,buttons:x.modalButtons});
-  try{await page.screenshot({path:path.join(out,String(report.states.length).padStart(2,'0')+'-'+stage.replace(/[^a-z0-9-]/gi,'-')+'.png'),animations:'disabled',timeout:10000})}catch(e){log('SCREENSHOT_FAILED',e.message.slice(0,150))}
+  if(/^(intro|entered-game|final|exception|quest-(9|10|14|15|17|20|24)-)/.test(stage))try{await page.screenshot({path:path.join(out,String(report.states.length).padStart(2,'0')+'-'+stage.replace(/[^a-z0-9-]/gi,'-')+'.png'),animations:'disabled',timeout:3500})}catch(e){log('SCREENSHOT_FAILED',e.message.slice(0,150))}
   return x;
  }
  async function dialog(){
@@ -105,8 +105,21 @@ async function main(){
    if(!st?.started){report.result='GAME_STATE_LOST';break}
    if(st.step>=15){report.result='MERCENARY_REACHED';break}
    if(st.step===9){
-    await dialog();await page.keyboard.press('Tab');await delay(450);
-    if(await page.locator('#inventoryClose').isVisible().catch(()=>false)){await page.locator('#inventoryClose').click();await delay(330)}
+    // Q9 requires an actual inventory open-and-close, not a direct quest mutation.
+    await dialog();
+    const before=await page.evaluate(()=>({modal:document.getElementById('modalLayer')?.style.display,inventoryTab:window.GenesisPreparation?.activeTab?.()}));
+    await page.keyboard.press('Tab');await delay(700);
+    const opened=await page.evaluate(()=>({modal:document.getElementById('modalLayer')?.style.display,inventoryTab:window.GenesisPreparation?.activeTab?.(),closeButtons:[...document.querySelectorAll('#prepClose,#inventoryClose')].map(e=>({id:e.id,visible:getComputedStyle(e).display!=='none'}))}));
+    log('Q9_INVENTORY_OPEN',{before,opened});
+    if(opened.inventoryTab!=='Inventario'&&!await page.locator('#inventoryClose').count()){
+      report.result='INVENTORY_DID_NOT_OPEN';break;
+    }
+    const closeButton=page.locator('#prepClose:visible, #inventoryClose:visible').first();
+    if(await closeButton.count())await closeButton.click({force:true,timeout:8000});
+    else await page.keyboard.press('Escape');
+    await delay(550);
+    const closed=await page.evaluate(()=>({modal:document.getElementById('modalLayer')?.style.display,inventoryTab:window.GenesisPreparation?.activeTab?.()}));
+    log('Q9_INVENTORY_CLOSED',closed);
     await dialog();
    }else if([0,1,2,3,4,5,6,7,8,10,11,11.25,12,13].includes(st.step)){
     const path=await approach();log('APPROACH',{step:st.step,...path});
