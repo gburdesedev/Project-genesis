@@ -116,7 +116,7 @@
  async function install(app,manifest,onState,diag){
    const resources=new Map(),errors=[],results=[];
    const mobile=matchMedia('(pointer:coarse)').matches;
-   for(const entry of manifest.workshopAssets||[]){
+   for(const entry of [...(manifest.workshopAssets||[]),...(manifest.plazaAssets||[])]){ // same stable byte-progress loader, plaza as its own group
      try{
        if(mobile&&entry.mobilePolicy==='deferred'){
          onState(entry.id,{name:entry.name,status:'Reservado para PC',received:0,total:0});
