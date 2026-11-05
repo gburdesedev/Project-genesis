@@ -11,9 +11,15 @@
  const HDR_ROOT='../assets/playcanvas/approved/lighting/studio_small_09/';
  const HDR_NAME='studio_small_09';
  function hdrFile(mobile=false){return HDR_ROOT+HDR_NAME+'_'+(mobile?'1k':'2k')+'.hdr'}
+ // Whitelist ONLY this approved plaza pack pinned by immutable Git commit.
+ // All workshop models and HDRI remain strictly same-origin.
+ const APPROVED_PLAZA_SHA='0d00ea47993c0020b6ffb6bdaf20742387ec1abd';
+ const APPROVED_PLAZA_PREFIX='/ProjectgenesisAssets/genesis-workshop-assets/'+APPROVED_PLAZA_SHA+'/assets/approved/v0188/plaza/';
  function sameOrigin(file){
    const url=new URL(file,document.baseURI);
-   if(url.origin!==location.origin)throw Error('Recurso V017 fuera de este repositorio: '+file);
+   const approved=url.protocol==='https:'&&url.hostname==='raw.githubusercontent.com'&&
+     url.pathname.startsWith(APPROVED_PLAZA_PREFIX)&&/\.glb$/.test(url.pathname)&&url.search==='';
+   if(url.origin!==location.origin&&!approved)throw Error('Recurso fuera del pack de assets aprobados V0188: '+url.href);
    return url;
  }
  async function fetchWithProgress(file,emit){
