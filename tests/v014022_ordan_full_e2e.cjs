@@ -64,7 +64,7 @@ async function main(){
   const x=await snap();report.states.push({stage,...x});
   log('SNAP',{stage,step:x.state?.step,quest:x.state?.quest,player:x.state?.player,objective:x.state?.objective,
    interactable:x.state?.interactable,loader:x.loader,intro:x.intro,loadState:x.loadState,detail:x.loadDetail,count:x.count,assetErrors:x.assetErrors,stream:x.stream,buttons:x.modalButtons});
-  try{await page.screenshot({path:path.join(out,String(report.states.length).padStart(2,'0')+'-'+stage.replace(/[^a-z0-9-]/gi,'-')+'.png'),animations:'allow',timeout:3000})}catch(e){log('SCREENSHOT_FAILED',e.message.slice(0,150))}
+  try{await page.screenshot({path:path.join(out,String(report.states.length).padStart(2,'0')+'-'+stage.replace(/[^a-z0-9-]/gi,'-')+'.png'),animations:'disabled',timeout:16000})}catch(e){log('SCREENSHOT_FAILED',e.message.slice(0,150))}
   return x;
  }
  async function dialog(){
@@ -77,18 +77,50 @@ async function main(){
   }return false;
  }
  async function approach(){
-  for(let i=0;i<28;i++){
-   const st=(await snap()).state;if(!st?.started)return {ok:false,why:'not started'};
-   if(st.interactable)return {ok:true,id:st.interactable};
-   if(!st.objective)return {ok:false,why:'no objective'};
-   const dist=Math.hypot(st.player.x-st.objective.x,st.player.z-st.objective.z);
-   if(dist<1.35)return {ok:true,why:'close',dist};
+  // Diagnose physical navigation rather than assuming a failed W key is a collision.
+  // All changes below are genuine key events, and telemetry stays read-only.
+  const axes=['w','a','s','d'];
+  let lastDistance=Infinity,stalled=0;
+  for(let i=0;i<48;i++){
+   const s=(await snap()).state;
+   if(!s?.started)return {ok:false,why:'not started'};
+   if(s.interactable)return {ok:true,id:s.interactable,tries:i};
+   if(!s.objective)return {ok:false,why:'no objective'};
+   const pos=s.player;
+   const dist=p=>Math.hypot(p.x-s.objective.x,p.z-s.objective.z);
+   const before=dist(pos);
+   if(before<1.35)return {ok:true,why:'within interaction range',distance:before,tries:i};
    await page.keyboard.press('q');
-   const old=st.player;
-   await page.keyboard.down('w');await delay(430);await page.keyboard.up('w');
-   const next=(await snap()).state;
-   if(next?.player&&Math.hypot(next.player.x-old.x,next.player.z-old.z)<.02){return {ok:false,why:'blocked by collision',step:st.step,dist}}
-  }return {ok:false,why:'movement budget'};
+   const samples=[];
+   for(const k of axes){
+    const p0=(await snap()).state?.player;
+    if(!p0)break;
+    await page.keyboard.down(k);await delay(290);await page.keyboard.up(k);
+    const after=(await snap()).state;
+    if(after?.interactable)return {ok:true,id:after.interactable,tries:i,key:k};
+    if(!after?.player)break;
+    const moved=Math.hypot(after.player.x-p0.x,after.player.z-p0.z);
+    const d=dist(after.player);
+    samples.push({key:k,moved:+moved.toFixed(3),distance:+d.toFixed(3),position:after.player});
+   }
+   log('DIRECTIONAL_PROBE',{step:s.step,try:i,start:pos,target:s.objective,samples});
+   const now=(await snap()).state;
+   if(!now?.player)return {ok:false,why:'position lost',step:s.step};
+   const current=dist(now.player);
+   if(current<1.35)return {ok:true,why:'within interaction range',distance:current,tries:i};
+   const moving=samples.filter(x=>x.moved>.025);
+   if(!moving.length)return {ok:false,why:'no movement with W A S D',step:s.step,distance:current,samples};
+   // Prefer motion toward objective; if all four are worse, take a lateral detour.
+   moving.sort((a,b)=>a.distance-b.distance);
+   const preferred=moving[0];
+   await page.keyboard.down(preferred.key);await delay(500);await page.keyboard.up(preferred.key);
+   const now2=(await snap()).state;
+   const after=now2?.player?dist(now2.player):current;
+   if(after>=lastDistance-.025)stalled++;else stalled=0;
+   if(stalled>=8)return {ok:false,why:'physical navigation made no progress after directional probes',step:s.step,distance:after,samples};
+   lastDistance=after;
+  }
+  return {ok:false,why:'navigation budget exhausted'};
  }
  try{
   await page.goto('http://127.0.0.1:8765/index.html?qa=ordan-playwright',{waitUntil:'domcontentloaded',timeout:90000});
@@ -145,6 +177,7 @@ async function main(){
   report.finishedAt=new Date().toISOString();
   fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2));
   console.log('ORDAN_QA_FINAL',JSON.stringify({result:report.result,steps:report.states.map(x=>x.state?.step).filter(x=>x!=null),errors:report.errors.slice(-6),network:report.failedRequests.slice(-8),navigation:report.navigation}).slice(0,8500));
+  if(report.result!=='MERCENARY_REACHED')process.exitCode=1;
   await browser.close();
  }
 }
