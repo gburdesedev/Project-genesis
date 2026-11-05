@@ -1,0 +1,23 @@
+{
+  "file": "/tmp/v0185_candidate/portal_arch_v0185.blend45.glb",
+  "bytes": 296180,
+  "sha256": "21c74a7836b1f3cc4322ef566ae1824368f3ec6852add0220cb88554e722a5c6",
+  "blender": "4.5.13 LTS",
+  "triangles": 4212,
+  "units": "meters",
+  "innerOpeningWidth": 1.37,
+  "outerPortalWidth": 1.75,
+  "archSpringHeight": 1.716,
+  "topInner": 2.401,
+  "topOuter": 2.591,
+  "profilePreserved": true,
+  "GLBMastersModified": false,
+  "sourceWallSHA256": {
+    "Herrero": "f8bf44d2d54f75310b96bd0e73b9f762c82a2a842dc237bdc5c6a8fe0ed91cdf",
+    "Arcanista": "2e2a4c1156e99a828962fb96b17ca466b291cd2234bafca93d92369d8f20b1f2"
+  },
+  "sourceDoorSHA256": {
+    "Herrero": "929a7ac230bf309e68ae9e664f149f3b6759a5aef3ef7874f69bafb92d4420a1",
+    "Arcanista": "217db58b85f2b5bcf259fdc302dc9c8e6a8e2584bf5968bb4b737923c19ba894"
+  }
+}
