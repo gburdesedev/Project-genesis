@@ -1,11 +1,11 @@
-# Project Genesis V0186 — Herrero funcional · fase inicial de interior real
+# Project Genesis V018.7 — experimento aislado de cámara y puertas
 
-Base incremental: V018.5 Blender 4.5.13 LTS, cinco fachadas, arcos de piedra proporcionales, puertas y HDRI 32-bit sin modificación de masters.
+Origen incremental: V0186 publicada; no modifica originales, archivos maestros ni juego principal.
 
-**En rama experimental (no integrada a main):** monta el GLB original Forge V038 (19,220,220 bytes, 109 mallas, 2.0934 × 3.2238 × 1.6742 m) en el anclaje real de la fragua `[2.27,0,-6.36]`; apaga la emisión de los materiales de brasas hasta completar la etapa «Encendé la fragua» de Q1. Las superficies PBR se comparten y no se retocan ni se cambian por imágenes de 8-bit.
+- Cámara: entrada mouse libre con clic / Esc, modo derecho opcional, Q recentrado, sensibilidad táctil 2.65×, captura táctil por pointerId, configuración que libera mouse al abrirse.
+- Puertas: las cinco hojas se ensanchan 0.16 m; se adelantan 0.18 m hacia el frente del vano; los arcos de piedra se ensanchan horizontalmente 1.16× para conservar holgura. El GLB de pared, arco y puerta se conserva sin modificar.
+- Herrero: apertura Q1 +92° hacia el interior con pivote sobre la jamba izquierda y animación visible en aproximadamente un segundo.
+- Fragua: estado de iluminación sincronizado con el paso Q1 al consultar el estado de la escena.
+- Carga: queda como en V0186; se audita aparte para no introducir regresiones innecesarias.
 
-**Aberturas:** puerta Herrero V082-B y arco de piedra V018.5 se conservan. La prueba de navegación solo permite cruzar el muro frontal por el vano cuando Ordan abrió la hoja en la misión Q1 (paso 1), y evita entrar en el volumen de la fragua. No se integra Ammo ni se altera el HUD original.
-
-**No probado ni aprobado todavía:** colocación visual de la fragua en móvil/escritorio, paso libre por el arco, visibilidad y apagado real de las brasas, rendimiento de descarga V038. Yunque, fuelle, reparaciones, baúl y demás objetos del tutorial siguen pendientes de recuperar sus GLB genuinos; no se sustituyen por meshes genéricas.
-
-Grabado aislado: `project-genesis/canvas-original/v0186-preview`. V018.4 publicada y V018.5 experimental intactas.
+**Candidato NO aprobado.** Requiere pruebas PC/táctil y evaluación visual real antes de publicar o integrar.
