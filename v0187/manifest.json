@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v0186",
+  "version": "0.15-v0187",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "original-village-pbr",
@@ -146,7 +146,7 @@
       "kind": "animation"
     }
   ],
-  "note": "V018.1 quality fix: Herrero opens only when Ordan is first spoken to (Q1 step 0 ->1), all other workshop doors stay closed. Arcanista V027 original approved luminous door is loaded also on mobile, not a wood replacement. Correct V011 camera sensitivity units + damping; keep V016 demo/save separate.",
+  "note": "V018.1 quality fix: Herrero opens only when Ordan is first spoken to (Q1 step 0 ->1), all other workshop doors stay closed. Arcanista V027 original approved luminous door is loaded also on mobile, not a wood replacement. Correct V011 camera sensitivity units + damping; keep V016 demo/save separate. V0187: camera and five workshop doorway correction experiment; still unapproved.",
   "loadingStages": [
     {
       "id": "gui",
@@ -533,7 +533,7 @@
       "nonDestructive": true
     }
   },
-  "revision": "V0186 isolated: keep V018.5 Blender arch and original PBR doors, mount actual V038 forge with Q1 extinguished/lit states; no unapproved other assets or main changes",
+  "revision": "camera-touch-PC-door-fit-v0187",
   "herreroInterior": {
     "version": "V0186",
     "source": "./herrero-interior-v0186.js",
