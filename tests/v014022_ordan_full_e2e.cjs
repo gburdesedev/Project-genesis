@@ -58,6 +58,55 @@ async function main(){
    await page.locator('#dialogNext').click({force:true,timeout:8000});await delay(350);return true
   }return false;
  }
+ async function realButton(selector){
+   const b=page.locator(selector).first();
+   if(!await b.count()||!await b.isVisible().catch(()=>false)||await b.isDisabled().catch(()=>true))return false;
+   await b.click({force:true,timeout:8000});return true;
+ }
+ async function forgeAndCraft(){
+   // Only physical clicks/keys. Never write stock, recipe, quest or item state.
+   for(let batch=0;batch<5;batch++){
+     const ready=await realButton('#prepFabricate');
+     if(ready){log('CRAFT_DIRECT',{batch});break}
+     const goPrep=page.locator('.prepSkinTab[data-tab="Preparacion"]');
+     if(await goPrep.isVisible().catch(()=>false))await goPrep.click({force:true,timeout:8000});
+     if(await page.locator('#prepStart').count()&&!await page.locator('#prepStart').isDisabled().catch(()=>true)){
+       for(let j=0;j<28;j++){
+         if(!await realButton('#prepMore'))break;
+       }
+       if(!await realButton('#prepStart'))return {ok:false,why:'prepStart not clickable',batch};
+       log('THERMAL_GAME_STARTED',{batch});
+       for(let sample=0;sample<240;sample++){
+         if(await page.locator('#prepResultBack').isVisible().catch(()=>false))break;
+         const t=await page.evaluate(()=>{
+           const g=document.getElementById('prepHeatGauge');
+           const p=document.getElementById('prepCraftProgress');
+           return {temp:Number(g?.getAttribute('aria-valuenow')||NaN),goal:parseFloat(document.querySelector('.prepHeatTarget')?.style.left||'NaN'),progress:Number(p?.getAttribute('aria-valuenow')||NaN)}
+         });
+         if(sample%15===0)log('THERMAL_PROGRESS',{batch,sample,...t});
+         if(!Number.isFinite(t.temp)||!Number.isFinite(t.goal))return {ok:false,why:'no active thermal UI',batch};
+         if(t.temp<t.goal-7)await page.keyboard.press('2');
+         else if(t.temp<t.goal-2)await page.keyboard.press('1');
+         await delay(350);
+       }
+       if(!await realButton('#prepResultBack'))return {ok:false,why:'thermal minigame incomplete',batch};
+       log('THERMAL_PREPARED',{batch});
+     } else log('NO_RAW_PREPARATION_AVAILABLE',{batch});
+     const tab=page.locator('.prepSkinTab[data-tab="Fabricaciones"]');
+     if(await tab.isVisible().catch(()=>false))await tab.click({force:true,timeout:8000});
+     await delay(450);
+     if(await realButton('#prepStart.workspaceAction')){log('CRAFT_FROM_CATALOG',{batch});break}
+     // When materials are still insufficient, return to Preparation for the next batch.
+     const menuTab=page.locator('.prepSkinTab[data-tab="Preparacion"]');
+     if(await menuTab.isVisible().catch(()=>false))await menuTab.click({force:true,timeout:8000});
+   }
+   if(await page.locator('#resultContinue').isVisible().catch(()=>false)){
+     await realButton('#resultContinue');
+     log('CRAFT_RESULT_CONFIRMED',{});
+     return {ok:true};
+   }
+   return {ok:false,why:'no resultContinue after crafting'};
+ }
  async function approach(){
   let noProgress=0;
   for(let i=0;i<32;i++){
@@ -174,9 +223,14 @@ async function main(){
     if(!path.ok){report.result='CANNOT_REACH_OBJECTIVE_'+st.step;break}
     await page.keyboard.press('e');await delay(550);
     await dialog();
-    for(const id of ['confirmCraft','resultContinue','compareContinue']){
-     const button=page.locator('#'+id);
-     if(await button.isVisible().catch(()=>false)){await button.click();await delay(450)}
+    if([10,11,12,13].includes(st.step)){
+      const done=await forgeAndCraft();log('CRAFT_UI_OUTCOME',{step:st.step,...done});
+      if(!done.ok){report.result='CRAFT_UI_BLOCKED_'+st.step;break}
+    } else {
+      for(const id of ['confirmCraft','resultContinue','compareContinue']){
+       const button=page.locator('#'+id);
+       if(await button.isVisible().catch(()=>false)){await button.click({force:true});await delay(450)}
+      }
     }
     await dialog();
    }else if(st.step===11.5){
