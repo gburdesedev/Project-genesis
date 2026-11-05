@@ -124,6 +124,36 @@
     board.querySelectorAll('[data-select]').forEach(function(b){b.onclick=function(){
       state.selectedKey=visible[Number(b.dataset.select)]?.key;render(ctx,nav);
     }});
+    // Hover is local to each inventory cell. Never rotate the frame, labels,
+    // quantities or the selected-item viewer. Pointer position maps to ±45°.
+    // Static thumbnails tilt as 2D artwork; 3D model-viewer elements orbit.
+    board.querySelectorAll('.genInvSlot[data-select]').forEach(function(slot){
+      const visual=slot.querySelector('img,model-viewer,.genInvCreationGlyph');
+      if(!visual)return;
+      const isModel=visual.localName==='model-viewer';
+      const orbit=visual.getAttribute('camera-orbit');
+      const origin=orbit||'0deg 75deg auto';
+      function move(ev){
+        if(ev.pointerType==='touch')return;
+        const rect=slot.getBoundingClientRect();
+        if(!rect.width)return;
+        const t=Math.max(-1,Math.min(1,((ev.clientX-rect.left)/rect.width)*2-1));
+        const deg=t*45;
+        if(isModel){
+          visual.setAttribute('camera-orbit',deg.toFixed(1)+'deg 75deg auto');
+        }else{
+          visual.style.setProperty('--gen-slot-rotation',deg.toFixed(1)+'deg');
+        }
+      }
+      function reset(){
+        if(isModel)visual.setAttribute('camera-orbit',origin);
+        else visual.style.removeProperty('--gen-slot-rotation');
+      }
+      slot.addEventListener('pointermove',move);
+      slot.addEventListener('pointerleave',reset);
+      slot.addEventListener('pointercancel',reset);
+      slot.addEventListener('blur',reset);
+    });
     board.querySelector('#genInvPrev').onclick=function(){state.page--;state.selectedKey=null;render(ctx,nav)};
     board.querySelector('#genInvNext').onclick=function(){state.page++;state.selectedKey=null;render(ctx,nav)};
     const input=board.querySelector('#genInvFilter');

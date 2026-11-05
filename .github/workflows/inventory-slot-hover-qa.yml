@@ -1,0 +1,36 @@
+name: Inventory slot hover visual regression
+on:
+  push:
+    branches: [experiment/inventory-slot-hover-20261102]
+    paths:
+      - inventario_genesis_16x9.js
+      - inventario_genesis_16x9.css
+      - tests/inventario_16x9.cjs
+      - .github/workflows/inventory-slot-hover-qa.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  hover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser for real inventory hover check
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Validate syntax and run inventory in real browser
+        run: |
+          node --check inventario_genesis_16x9.js
+          node --test tests/inventario_16x9.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-inventory-slot-hover-qa
+          path: /tmp/genesis-responsive/
+          retention-days: 7
+          if-no-files-found: warn
