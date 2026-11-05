@@ -1,0 +1,801 @@
+{
+  "version": "0.15-v0188",
+  "mode": "gui-path-selection",
+  "floor": {
+    "kind": "original-village-pbr",
+    "width": 63,
+    "depth": 63,
+    "center": [
+      7,
+      17
+    ],
+    "collision": true,
+    "y": 0,
+    "source": "../village_plan.js",
+    "textures": "../assets/world/v0.11.004/",
+    "materialSets": [
+      "cobble",
+      "traffic"
+    ],
+    "channels": [
+      "color",
+      "normal",
+      "gloss",
+      "ao"
+    ],
+    "surfaces": [
+      "exterior",
+      "plaza",
+      "plaza-border",
+      "nine-roads",
+      "market"
+    ],
+    "mobileMaxTextureEdge": 1024,
+    "fallback": "temporary-floor"
+  },
+  "characters": [
+    {
+      "id": "artisan",
+      "name": "Artesano",
+      "file": "../v017/assets/playcanvas/approved/characters/recovered/male_peasant.glb",
+      "position": [
+        7,
+        0,
+        31
+      ],
+      "rotation": [
+        0,
+        180,
+        0
+      ]
+    },
+    {
+      "id": "ordan",
+      "name": "Ordan",
+      "file": "../v017/assets/playcanvas/approved/characters/ordan/ordanModel.glb",
+      "position": [
+        1.72,
+        0,
+        1.9
+      ],
+      "bytes": 1617696,
+      "rotation": [
+        0,
+        -21,
+        0
+      ],
+      "scale": [
+        1.07,
+        1.07,
+        1.07
+      ]
+    },
+    {
+      "id": "ordan-head",
+      "name": "Cabeza de Ordan",
+      "file": "../v017/assets/playcanvas/approved/characters/parts/male_head.glb",
+      "attachTo": "ordan"
+    },
+    {
+      "id": "ordan-beard",
+      "name": "Barba de Ordan",
+      "file": "../v017/assets/playcanvas/approved/characters/ordan/ordanHairModel.glb",
+      "bytes": 57584,
+      "attachTo": "ordan"
+    },
+    {
+      "id": "merchant",
+      "name": "Comerciante",
+      "file": "../v017/assets/playcanvas/approved/characters/merchant_v02_75962.glb",
+      "bytes": 2049508,
+      "position": [
+        25.5,
+        0,
+        36.3
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ]
+    },
+    {
+      "id": "mercenary",
+      "name": "Mercenario",
+      "file": "../v017/assets/playcanvas/approved/characters/recovered/male_ranger.glb",
+      "bytes": 1617696,
+      "position": [
+        3.25,
+        -40,
+        3.1
+      ],
+      "rotation": [
+        0,
+        180,
+        0
+      ]
+    },
+    {
+      "id": "artisan-head",
+      "name": "Cabeza del artesano",
+      "file": "../v017/assets/playcanvas/approved/characters/parts/male_head.glb",
+      "attachTo": "artisan"
+    },
+    {
+      "id": "artisan-hair",
+      "name": "Cabello del artesano",
+      "file": "../v017/assets/playcanvas/approved/characters/parts/hair_simpleparted.glb",
+      "attachTo": "artisan"
+    },
+    {
+      "id": "mercenary-head",
+      "name": "Cabeza del mercenario",
+      "file": "../v017/assets/playcanvas/approved/characters/parts/male_head.glb",
+      "attachTo": "mercenary"
+    },
+    {
+      "id": "mercenary-hair",
+      "name": "Cabello del mercenario",
+      "file": "../v017/assets/playcanvas/approved/characters/parts/hair_buzzed.glb",
+      "attachTo": "mercenary"
+    },
+    {
+      "id": "universal-animations",
+      "name": "Animaciones originales UAL1",
+      "file": "../assets/playcanvas/approved/animations/UAL1.glb",
+      "kind": "animation"
+    }
+  ],
+  "note": "V018.1 quality fix: Herrero opens only when Ordan is first spoken to (Q1 step 0 ->1), all other workshop doors stay closed. Arcanista V027 original approved luminous door is loaded also on mobile, not a wood replacement. Correct V011 camera sensitivity units + damping; keep V016 demo/save separate. V0187: camera and five workshop doorway correction experiment; still unapproved.",
+  "loadingStages": [
+    {
+      "id": "gui",
+      "name": "Interfaz y controles",
+      "kind": "inline",
+      "required": true
+    },
+    {
+      "id": "engine",
+      "name": "Motor PlayCanvas",
+      "kind": "runtime",
+      "required": true
+    },
+    {
+      "id": "gameplay",
+      "name": "Lógica original de Ordan · Q1–Q3",
+      "kind": "inline",
+      "required": true
+    },
+    {
+      "id": "terrain",
+      "name": "Suelos, caminos y texturas PBR",
+      "kind": "tracked",
+      "required": true,
+      "assets": []
+    },
+    {
+      "id": "characters",
+      "name": "Personajes principales",
+      "kind": "assets",
+      "required": true,
+      "assets": [
+        "artisan",
+        "ordan",
+        "ordan-head",
+        "ordan-beard",
+        "artisan-head",
+        "artisan-hair"
+      ]
+    },
+    {
+      "id": "animations",
+      "name": "Animaciones originales",
+      "kind": "assets",
+      "required": true,
+      "assets": [
+        "universal-animations"
+      ]
+    },
+    {
+      "id": "walls",
+      "name": "Paredes de talleres · precarga de revisión",
+      "kind": "assets",
+      "required": true,
+      "assets": [
+        "wall-herrero-v082",
+        "wall-arcanista-v006"
+      ]
+    },
+    {
+      "id": "doors",
+      "name": "Puertas de talleres",
+      "kind": "assets",
+      "required": true,
+      "assets": [
+        "door-herrero-v082-b",
+        "door-arcanista-v027"
+      ]
+    },
+    {
+      "id": "roofs",
+      "name": "Cubiertas y chimeneas de talleres",
+      "kind": "assets",
+      "required": true,
+      "assets": [
+        "roof-herrero-v013",
+        "chimney-herrero-v013"
+      ]
+    },
+    {
+      "id": "herrero-station",
+      "name": "Interior Herrero · fragua V038 original",
+      "kind": "assets",
+      "assets": [
+        "forge-station-v038"
+      ]
+    },
+    {
+      "id": "lighting",
+      "name": "Iluminación HDRI 32-bit · IBL PBR",
+      "kind": "assets",
+      "required": true,
+      "assets": [
+        "lighting-hdri32"
+      ]
+    },
+    {
+      "id": "plaza-models",
+      "name": "Plaza original V14.022 · Fuente y árboles LOD2",
+      "kind": "assets",
+      "required": true,
+      "assets": [
+        "plaza-fountain-v011",
+        "plaza-tree-oak-lod2",
+        "plaza-tree-ash-lod2",
+        "plaza-tree-linden-lod2",
+        "plaza-tree-maple-lod2"
+      ]
+    },
+    {
+      "id": "plaza-hq",
+      "name": "Plaza · LOD1 original PC",
+      "kind": "assets",
+      "required": false,
+      "assets": [
+        "plaza-tree-oak-lod1",
+        "plaza-tree-ash-lod1",
+        "plaza-tree-linden-lod1",
+        "plaza-tree-maple-lod1"
+      ]
+    },
+    {
+      "id": "village",
+      "name": "Montaje de la aldea · cinco talleres",
+      "kind": "tracked",
+      "required": true,
+      "assets": []
+    },
+    {
+      "id": "plaza-assembly",
+      "name": "Montaje de plaza y mercado V14.022",
+      "kind": "tracked",
+      "required": true,
+      "assets": []
+    },
+    {
+      "id": "secondary",
+      "name": "Personajes secundarios",
+      "kind": "assets",
+      "required": false,
+      "assets": [
+        "merchant",
+        "mercenary",
+        "mercenary-head",
+        "mercenary-hair"
+      ]
+    }
+  ],
+  "canvasOriginal": {
+    "mode": "original-Q1-Q3-only",
+    "source": "../index.html",
+    "engine": "./canvas-legacy-nge.js",
+    "gameplay": "./canvas-legacy-logic.js",
+    "preparation": "./canvas-legacy-preparacion.js",
+    "inventory": "./canvas-legacy-inventario.js",
+    "operations": [
+      "speak-to-Ordan",
+      "open-workshop",
+      "clear-debris",
+      "check-anvil",
+      "repair-bellows",
+      "clear-flue",
+      "ignite-forge",
+      "receive-key",
+      "open-chest",
+      "inspect-inventory",
+      "prepare-iron",
+      "craft-first-sword",
+      "craft-second-sword",
+      "compare-and-select"
+    ],
+    "progressStore": "project-genesis/canvas-original/v0185-preview",
+    "futureMarketQuestChangesApplied": false,
+    "futureShieldRouteApplied": false,
+    "note": "Only original Canvas gameplay. New market/quest ordering deliberately excluded."
+  },
+  "originalCanvasControls": {
+    "source": "../index.html",
+    "styles": "./canvas-original-hud-v014.css",
+    "layout": "identical-sourced-css",
+    "preservedIds": [
+      "hud",
+      "brand",
+      "tech",
+      "buttonsTop",
+      "cameraSettingsBtn",
+      "quest",
+      "prompt",
+      "professionChip",
+      "materialsPanel",
+      "npcTag",
+      "interactMarker",
+      "desktopHelp",
+      "cameraGuide",
+      "mobile",
+      "lookZone",
+      "joy",
+      "joyKnob",
+      "lookHint",
+      "zoomControls",
+      "zoomIn",
+      "zoomOut",
+      "inventoryTouch",
+      "interact"
+    ],
+    "touchGeometry": {
+      "joystick": {
+        "width": 108,
+        "height": 108,
+        "left": "max(18px, safe-area-inset-left)",
+        "bottom": "max(22px, safe-area-inset-bottom)"
+      },
+      "interact": {
+        "width": 70,
+        "height": 70,
+        "right": "max(22px, safe-area-inset-right)",
+        "bottom": "max(28px, safe-area-inset-bottom)"
+      },
+      "inventory": {
+        "width": 58,
+        "height": 58,
+        "right": "max(104px, safe-area-inset-right + 104px)",
+        "bottom": "max(35px, safe-area-inset-bottom + 7px)"
+      },
+      "zoom": {
+        "width": 42,
+        "height": 42,
+        "right": "max(25px, safe-area-inset-right)"
+      }
+    },
+    "note": "Exact original Canvas HUD geometry; V013 gameplay, V012 floors and V011 characters/camera retained."
+  },
+  "cinematicArrival": {
+    "source": "./canvas-arrival-v016.js",
+    "entry": [
+      7,
+      0,
+      31
+    ],
+    "target": [
+      1.72,
+      0,
+      3.75
+    ],
+    "mentor": [
+      1.72,
+      0,
+      1.9
+    ],
+    "walking": "UAL1 Walk_Loop",
+    "resume": "Idle_Loop",
+    "speedMetersPerSecond": 3.2,
+    "viewportScale": 0.88,
+    "cameraZoomMultiplier": 1.3,
+    "controls": "hidden until arrival complete; no interaction during walk",
+    "restoredFeatures": "V014 approved original HUD and camera",
+    "mapChanges": "none; V012 original PBR terrain unchanged",
+    "npcPositions": {
+      "merchant": [
+        25.5,
+        0,
+        36.3
+      ],
+      "ordan": [
+        1.72,
+        0,
+        1.9
+      ],
+      "mercenary": [
+        3.25,
+        -40,
+        3.1
+      ]
+    },
+    "resumeSavedGame": "no cinematic if Q1 progress beyond greeting"
+  },
+  "workshopAssets": [
+    {
+      "id": "wall-herrero-v082",
+      "name": "Paredes del Herrero V082 · aprobadas",
+      "kind": "wall",
+      "profession": "Herrero",
+      "version": "V082",
+      "approval": "user_approved",
+      "file": "../assets/playcanvas/approved/workshops/herrero/walls/v082/blacksmith_four_walls_arched_v082.glb"
+    },
+    {
+      "id": "wall-arcanista-v006",
+      "name": "Paredes del Arcanista V006 · aprobadas",
+      "kind": "wall",
+      "profession": "Arcanista",
+      "version": "V006",
+      "approval": "user_approved",
+      "file": "../assets/playcanvas/approved/workshops/arcanista/walls/v006/arcanista_four_walls_preview.glb"
+    },
+    {
+      "id": "door-herrero-v082-b",
+      "name": "Puerta Herrero V082-B · aprobada",
+      "kind": "door",
+      "profession": "Herrero",
+      "version": "V082-B",
+      "approval": "original_visual_only_experimental_encoding",
+      "file": "../assets/playcanvas/candidates/workshops/herrero/doors/v082-b-lossless-v018/door-herrero-v082-b-lossless-webp.glb",
+      "variant": "lossless-webp-9mb EXPERIMENTAL",
+      "sourceMaster": "assets/playcanvas/approved/workshops/herrero/doors/v082-b/door-herrero-v082-b.glb",
+      "pixelDifference": 0,
+      "integrationApproval": "pending_qa_and_user_visual",
+      "formatExtension": "EXT_texture_webp"
+    },
+    {
+      "id": "door-arcanista-v027",
+      "name": "Puerta Arcanista V027 · aprobada",
+      "kind": "door",
+      "profession": "Arcanista",
+      "version": "V027",
+      "approval": "user_approved",
+      "file": "../assets/playcanvas/approved/workshops/arcanista/doors/v027/Arcanist_Door_V027_WebGL.glb",
+      "mobileOptimization": "approved_v027_original_glb_reduced_dynamic_emissive_updates"
+    },
+    {
+      "id": "roof-herrero-v013",
+      "name": "Cubierta de Herrero V013 · existente",
+      "kind": "roof",
+      "profession": "Herrero",
+      "version": "V013",
+      "approval": "existing_reviewed",
+      "file": "../assets/vendor/genesis/externals/blacksmithRoofV013/src/blacksmith_roof_preview.glb"
+    },
+    {
+      "id": "chimney-herrero-v013",
+      "name": "Chimenea Herrero V013 · existente",
+      "kind": "chimney",
+      "profession": "Herrero",
+      "version": "V013",
+      "approval": "existing_reviewed",
+      "file": "../assets/vendor/genesis/externals/blacksmithChimneyV013/src/blacksmith_chimney_candidate_preview.glb"
+    },
+    {
+      "id": "portal-arch-v0185",
+      "name": "Arco de piedra proporcional · V018.5 Blender 4.5.13 LTS",
+      "file": "../assets/playcanvas/candidates/workshops/portals/v0185/portal_arch_v0185.glb",
+      "stage": "village",
+      "required": true
+    },
+    {
+      "id": "forge-station-v038",
+      "name": "Fragua del Herrero V038 · GLB real (Q1, apagada hasta encenderla)",
+      "kind": "forge-station",
+      "profession": "Herrero",
+      "version": "V038",
+      "approval": "existing_original_for_runtime_validation",
+      "file": "../assets/vendor/genesis/externals/forgeStation/src/Forge_V038_HeaderFixed_Preview.glb",
+      "bytes": 19220220,
+      "stage": "workshop",
+      "required": true,
+      "sourceMeshCount": 109,
+      "sourceBounds": [
+        2.0934,
+        3.2238,
+        1.6742
+      ],
+      "source": "existing V038 archive, geometry untouched"
+    }
+  ],
+  "lightingAsset": {
+    "id": "lighting-hdri32",
+    "name": "Iluminación HDRI 32-bit · Studio Small 09",
+    "kind": "lighting",
+    "source": "Poly Haven studio_small_09 CC0",
+    "format": "Radiance RGBE HDR 32-bit",
+    "sourceSet": "../assets/playcanvas/approved/lighting/studio_small_09/",
+    "desktopFile": "studio_small_09_2k.hdr",
+    "mobileFile": "studio_small_09_1k.hdr",
+    "mode": "prefiltered scene IBL envAtlas; no replacement PNG/JPG"
+  },
+  "villageScene": {
+    "source": "./v017-village.js",
+    "layout": "../village_plan.js",
+    "approvedModelProfession": [
+      "Herrero",
+      "Arcanista"
+    ],
+    "genericFacadeProfessions": [
+      "Carpintero",
+      "Curtidor",
+      "Joyero"
+    ],
+    "requiredBuildings": 5,
+    "preserveQuestAndSave": true,
+    "walkCollision": "unchanged_v016",
+    "stage": "village",
+    "positionCorrection": "Measured per-GLB dimensions, original 63x63 plan and positions preserved",
+    "unlitV027DoorReuse": [
+      "Carpintero",
+      "Curtidor",
+      "Joyero"
+    ],
+    "unlitMaterialRule": "Clone V027 materials for three non-playable workshop doors; clear emissiveMap, set emissive black and emissiveIntensity 0; no dynamic glow, no extra lights. Original approved Arcanista unaffected.",
+    "visualApproval": "not_approved",
+    "herreroDoorReference": {
+      "bodyWidthMetres": 2.18,
+      "hingeWorldX": -1.1,
+      "openDegrees": -92,
+      "masterUnchanged": true
+    },
+    "doorGeometry": {
+      "originalApprovedSource": true,
+      "worldScale": 1.02,
+      "xyzProportional": true
+    },
+    "portalArch": {
+      "id": "portal-arch-v0185",
+      "technicalSource": "Blender 4.5.13 Cycles HDRI32",
+      "innerOpeningMetres": 1.37,
+      "outerWidthMetres": 1.75,
+      "nonDestructive": true
+    }
+  },
+  "revision": "v0188-plaza-original-v014022-retrofit",
+  "herreroInterior": {
+    "version": "V0186",
+    "source": "./herrero-interior-v0186.js",
+    "forge": "forge-station-v038",
+    "forgeWorldAnchor": [
+      2.27,
+      0,
+      -6.36
+    ],
+    "forgeInitialState": "off",
+    "forgeTurnOnAfterQuestStep": 6,
+    "entrance": "arch +/-0.61m; closed at Q1 step0; opens only at Ordan step1",
+    "originalQuestAndCraftPreserved": true,
+    "anvilAndBellowsAssets": "pending independent asset audit, no stand-in"
+  },
+  "plazaAssets": [
+    {
+      "id": "plaza-fountain-v011",
+      "name": "Plaza · Fuente delfín HQ original V011 · 16.7 MB",
+      "kind": "fountain",
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/fountain/PG_Dolphin_Fountain_V011_PlayCanvas_HQ_Optimized.glb",
+      "bytes": 16715688,
+      "approval": "original_v014022",
+      "blobSha": "075fdd0457795dcadb853a8cbeadd20f58f7e097",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+    },
+    {
+      "id": "plaza-tree-oak-lod2",
+      "name": "Plaza · oak original V005 · LOD2",
+      "kind": "tree-lod",
+      "species": "oak",
+      "lod": 2,
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/oak/lod2.glb",
+      "mobilePolicy": "required",
+      "approval": "original_v014022",
+      "bytes": 5533288,
+      "blobSha": "b066d5dda048972ea0a07cf60ce4125f60125970",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+    },
+    {
+      "id": "plaza-tree-oak-lod1",
+      "name": "Plaza · oak original V005 · LOD1",
+      "kind": "tree-lod",
+      "species": "oak",
+      "lod": 1,
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/oak/lod1.glb",
+      "mobilePolicy": "deferred",
+      "approval": "original_v014022",
+      "bytes": 6995784,
+      "blobSha": "c2426117dafe7a4f5c2ed1f596ebb5ac13feb10d",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+    },
+    {
+      "id": "plaza-tree-ash-lod2",
+      "name": "Plaza · ash original V005 · LOD2",
+      "kind": "tree-lod",
+      "species": "ash",
+      "lod": 2,
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/ash/lod2.glb",
+      "mobilePolicy": "required",
+      "approval": "original_v014022",
+      "bytes": 5398940,
+      "blobSha": "d73c338f98b50cdb91f5bbc849f0954750875322",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+    },
+    {
+      "id": "plaza-tree-ash-lod1",
+      "name": "Plaza · ash original V005 · LOD1",
+      "kind": "tree-lod",
+      "species": "ash",
+      "lod": 1,
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/ash/lod1.glb",
+      "mobilePolicy": "deferred",
+      "approval": "original_v014022",
+      "bytes": 6861436,
+      "blobSha": "2b0353aacee89d5d2cd9102107d6f9c7648c6f89",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+    },
+    {
+      "id": "plaza-tree-linden-lod2",
+      "name": "Plaza · linden original V005 · LOD2",
+      "kind": "tree-lod",
+      "species": "linden",
+      "lod": 2,
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/linden/lod2.glb",
+      "mobilePolicy": "required",
+      "approval": "original_v014022",
+      "bytes": 5494068,
+      "blobSha": "1075db16e880b1a6dc0f5544cd5b1e014a0252e5",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+    },
+    {
+      "id": "plaza-tree-linden-lod1",
+      "name": "Plaza · linden original V005 · LOD1",
+      "kind": "tree-lod",
+      "species": "linden",
+      "lod": 1,
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/linden/lod1.glb",
+      "mobilePolicy": "deferred",
+      "approval": "original_v014022",
+      "bytes": 6956564,
+      "blobSha": "2768e5df917fb6bf1b4212bf1a46011a12d3ba23",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+    },
+    {
+      "id": "plaza-tree-maple-lod2",
+      "name": "Plaza · maple original V005 · LOD2",
+      "kind": "tree-lod",
+      "species": "maple",
+      "lod": 2,
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/maple/lod2.glb",
+      "mobilePolicy": "required",
+      "approval": "original_v014022",
+      "bytes": 5021964,
+      "blobSha": "4c19defb91df6430f35c7e04a48588b4f360e89f",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+    },
+    {
+      "id": "plaza-tree-maple-lod1",
+      "name": "Plaza · maple original V005 · LOD1",
+      "kind": "tree-lod",
+      "species": "maple",
+      "lod": 1,
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/maple/lod1.glb",
+      "mobilePolicy": "deferred",
+      "approval": "original_v014022",
+      "bytes": 6484460,
+      "blobSha": "05fd07404f8b3368a7848a678cf59ebefec2b267",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+    }
+  ],
+  "plazaRestoration": {
+    "sourceBranch": "experiment/legacy-v014022-approved-assets-loader-20261105",
+    "plan": "../village_plan.js",
+    "geometrySource": "original GLBs pinned locally (no conversion)",
+    "floor": {
+      "kind": "original-village-pbr",
+      "width": 63,
+      "depth": 63,
+      "center": [
+        7,
+        17
+      ],
+      "collision": true,
+      "y": 0,
+      "source": "../village_plan.js",
+      "textures": "../assets/world/v0.11.004/",
+      "materialSets": [
+        "cobble",
+        "traffic"
+      ],
+      "channels": [
+        "color",
+        "normal",
+        "gloss",
+        "ao"
+      ],
+      "surfaces": [
+        "exterior",
+        "plaza",
+        "plaza-border",
+        "nine-roads",
+        "market"
+      ],
+      "mobileMaxTextureEdge": 1024,
+      "fallback": "temporary-floor"
+    },
+    "center": [
+      7,
+      16
+    ],
+    "size": [
+      13,
+      13
+    ],
+    "fountain": [
+      7,
+      0,
+      16
+    ],
+    "stalls": [
+      [
+        28.35,
+        0,
+        37.6
+      ]
+    ],
+    "plazaTrees": [
+      [
+        0.4,
+        10.7
+      ],
+      [
+        11.8,
+        11.7
+      ],
+      [
+        2.2,
+        20.3
+      ],
+      [
+        11.8,
+        20.3
+      ]
+    ],
+    "totalTrees": 14,
+    "marketSign": [
+      21,
+      32
+    ],
+    "plazaSign": [
+      -0.5,
+      9.5
+    ],
+    "approvedForGame": false,
+    "approvedAssetsRepo": "ProjectgenesisAssets/genesis-workshop-assets",
+    "approvedAssetsCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd",
+    "approvedAssetsPrefix": "assets/approved/v0188/plaza/",
+    "localVendorFallback": false
+  },
+  "scene": {
+    "restoration": "V014022 plaza render, no change to original V0187 workshop layout or quest"
+  }
+}
