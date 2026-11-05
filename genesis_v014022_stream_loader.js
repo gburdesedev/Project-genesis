@@ -8,7 +8,7 @@
 const running=new Map(),ready=new Map(),queue=[];
 const audit=new Map();
 let active=0, maximum=3;
-let app=null, retryHandler=null;
+let app=null, retryHandler=null, route='';
 const idleLimit=120000;
 const absolute=url=>new URL(url,location.href).href;
 const stamp=()=>performance.now();
@@ -23,17 +23,39 @@ const notify=(url,state,received,total,error='')=>{
  render();
 };
 const human=n=>n==null?'—':n<1048576?(n/1024).toFixed(0)+' KB':(n/1048576).toFixed(2)+' MB';
+function requiredIds(){
+ const ids=new Set();
+ document.querySelectorAll('pc-model[data-genesis-boot-asset],pc-anim-clip[data-genesis-boot-asset]').forEach(el=>{
+  if(!el.closest('pc-model[data-route]'))ids.add(el.dataset.genesisBootAsset.replace(/^#/,''));
+ });
+ if(route){
+  document.querySelectorAll('pc-model[data-route="'+route+'"][data-priority="critical"]').forEach(el=>{
+   if(el.dataset.asset)ids.add(el.dataset.asset.replace(/^#/,''));
+  });
+ }
+ return ids;
+}
 function render(){
- const values=[...audit.values()],done=values.filter(x=>x.state==='recurso preparado').length;
+ const values=[...audit.values()],plan=requiredIds();
+ if(!plan.size)return;
+ const complete=[...plan].filter(id=>ready.has(id)).length;
+ let partial=0;
+ for(const id of plan){
+  if(ready.has(id))continue;
+  const el=document.getElementById(id),src=el?.getAttribute('src');
+  if(!src||/^data:/i.test(src))continue;
+  const rec=audit.get(absolute(src));
+  if(rec&&rec.total)partial+=Math.min(.95,rec.received/rec.total);
+ }
+ const pending=values.filter(x=>x.state==='descargando').length;
  const x=document.getElementById('loadCount');
- if(x)x.textContent=done+' / '+values.length+' archivos 3D preparados · '+values.filter(x=>x.state==='descargando').length+' descargando';
- const progress=document.getElementById('loadBarFill');
- const pct=document.getElementById('loadPercent');
+ if(x)x.textContent=complete+' de '+plan.size+' recursos necesarios preparados · '+pending+' descargando';
+ const pctValue=Math.max(0,Math.min(99,Math.floor(100*(complete+partial)/plan.size)));
+ const progress=document.getElementById('loadBarFill'),pct=document.getElementById('loadPercent');
+ if(progress)progress.style.width=pctValue+'%';
+ if(pct)pct.textContent=pctValue+'%';
  const total=values.reduce((sum,r)=>sum+(r.total||0),0);
  const bytes=values.reduce((sum,r)=>sum+Math.min(r.received,r.total||r.received),0);
- const percentage=values.length?Math.floor(100*(done+values.reduce((sum,r)=>sum+(r.state==='recurso preparado'?0:r.total?Math.min(.99,r.received/r.total):0),0))/values.length):0;
- if(progress)progress.style.width=Math.max(0,Math.min(99,percentage))+'%';
- if(pct)pct.textContent=Math.max(0,Math.min(99,percentage))+'%';
  const meta=document.getElementById('genesisTransportMeta');
  if(meta)meta.textContent='TRANSFERENCIA REAL · '+human(bytes)+' / '+(total?human(total):'tamaño por determinar')+' · simultáneos '+active+'/'+maximum;
 }
@@ -161,9 +183,10 @@ function prepare(id,{maxAttempts=Infinity}={}){
  const p=innerPrepare(clean,maxAttempts).then(asset=>{ready.set(clean,asset);return asset}).finally(()=>running.delete(clean));
  running.set(clean,p);return p;
 }
-function setApp(value){app=value}
+function setApp(value){app=value;render()}
+function trackRoute(prof){route=prof;render()}
 function setRetryHandler(value){retryHandler=value}
 function snapshot(){return{mode:'GENESIS STREAM V014022',active,queued:queue.length,assets:[...audit.values()]}}
-window.GenesisStreamLoader=Object.freeze({prepare,setApp,setRetryHandler,snapshot,render});
+window.GenesisStreamLoader=Object.freeze({prepare,setApp,setRetryHandler,trackRoute,snapshot,render});
 window.setInterval(render,600);
 })();
