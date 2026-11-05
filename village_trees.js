@@ -201,7 +201,8 @@ export function mountVillageTrees(app, villageRoot, options={}){
    const url=task.legacy
     ? './assets/vendor/genesis/externals/tree_v003_'+task.species+'_lod'+task.lod+'/src/lod'+task.lod+'.glb'
     : assetPath(task.species,task.lod);
-   app.assets.loadFromUrl(url,'container',(error,asset)=>{
+   window.GenesisStreamLoader.loadContainer(url,{maxAttempts:2}).then(asset=>finish(null,asset),error=>finish(error,null));
+   function finish(error,asset){
     active--;
     if(error||!asset?.resource){
      if(!task.legacy&&task.lod>=1){
@@ -232,7 +233,7 @@ export function mountVillageTrees(app, villageRoot, options={}){
     update(focusX,focusZ,true);
     globalThis.__genesisTreeStatus=status();
     pump();
-   });
+   }
   }
  }
  function request(species,lod){
