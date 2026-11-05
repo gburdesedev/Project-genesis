@@ -99,7 +99,11 @@ async function run(mode,browser) {
     return ui.tryInteract();
   });
   await page.waitForFunction(()=>window.__GENESIS_V013_LEGACY__?.game?.step()>=1,null,{timeout:15000});
-  await page.waitForTimeout(2200);
+  // Complete Ordan's actual first dialogue before checking the unobscured
+  // physical door animation. A suspended WebGL frame during a modal is not a swing.
+  await page.locator('#legacyDialogueContinue').click({timeout:12000});
+  await page.waitForFunction(()=>window.__GENESIS_V013_LEGACY__?.isModalOpen()===false,null,{timeout:10000});
+  await page.waitForTimeout(1100);
   const doorDebug=await page.evaluate(()=>({step:window.__GENESIS_V013_LEGACY__?.game?.step(),angle:window.__GENESIS_V017_VILLAGE__?.doorAngle,gate:window.__GENESIS_V017_VILLAGE__?.doorQuestGate,updateFrames:window.__GENESIS_V017_VILLAGE__?.doorTickFrames,latestDt:window.__GENESIS_V017_VILLAGE__?.doorLastDelta,appTimeScale:pc.Application.getApplication()?.timeScale,paused:window.__GENESIS_V011_AUDIT__?.()?.paused,panel:document.querySelector('#v011-pause')?.style.display,modal:window.__GENESIS_V013_LEGACY__?.isModalOpen(),errors:window.GenesisV015Diagnostics?.events?.slice(-3)}));
   console.log('V0187 DOOR DEBUG',JSON.stringify(doorDebug));
   await page.waitForFunction(()=>window.__GENESIS_V017_VILLAGE__?.doorAngle>85,null,{timeout:12000});
