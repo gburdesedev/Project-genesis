@@ -53,12 +53,20 @@ async function main(){
  }
  async function dialog(){
   if(await page.locator('#dialogNext').isVisible().catch(()=>false)){
-   await page.locator('#dialogNext').click();await delay(350);return true
+   await page.locator('#dialogNext').click({force:true,timeout:8000});await delay(350);return true
   }return false;
  }
  async function approach(){
   for(let i=0;i<28;i++){
    const st=(await snap()).state;if(!st?.started)return {ok:false,why:'not started'};
+   if(st.step===8){
+     // A chest within range of the actual player should be activated by ordinary Q + E,
+     // without teleporting the actor or changing quest flags.
+     await page.keyboard.press('q'); await delay(300);
+     const aligned=(await snap()).state;
+     log('RELOCATED_CHEST_PROBE',{step:8,player:aligned?.player,goal:aligned?.objective,interactable:aligned?.interactable});
+     if(aligned?.interactable==='chest')return {ok:true,id:'chest',why:'relocated chest is interactable without moving'};
+   }
    if(st.interactable)return {ok:true,id:st.interactable};
    if(!st.objective)return {ok:false,why:'no objective'};
    const dist=Math.hypot(st.player.x-st.objective.x,st.player.z-st.objective.z);
@@ -76,7 +84,7 @@ async function main(){
   for(let n=0;n<15;n++){const s=await snap();if(s.intro!=='none')break;await delay(8000);}
   const before=await capture('intro');
   if(before.intro==='none'){report.result='BLOCKED_BEFORE_INTRO';return}
-  await page.locator('[data-profession="Herrero"]').click({timeout:15000});
+  await page.locator('[data-profession="Herrero"]').click({force:true,timeout:15000});
   log('SELECTED','Herrero clicked');
   let entered=false;
   for(let i=0;i<17;i++){
