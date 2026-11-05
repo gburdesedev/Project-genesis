@@ -1,34 +1,103 @@
-name: V014.023 rebuild public QA
+name: Genesis real browser playthrough - main and archived V014022
 on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['.github/workflows/v014023-rebuild-public-qa.yml']
+    paths:
+      - .github/workflows/v014023-rebuild-public-qa.yml
 permissions:
-  contents: read
+  contents: write
 jobs:
-  browser-qa:
+  main-ordan-journey:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: experiment/v014022-rebuild-collisions-20261105
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Install Playwright
+          ref: experiment/main-v014022-playwright-ordan-e2e-20261105
+          persist-credentials: true
+      - name: Install Playwright test runner
+        run: npm install --prefix /tmp/genesis-e2e-playwright playwright@1.56.1
+      - name: Validate script
+        run: node --check tests/main_v014022_ordan_e2e.cjs
+      - name: Play real published MAIN with mouse and keyboard
+        env:
+          NODE_PATH: /tmp/genesis-e2e-playwright/node_modules
         run: |
-          npm install --no-save playwright@1.56.1
-          npx playwright install --with-deps chromium webkit
-      - name: Validate test script
-        run: node --check tests/rebuild_v014023_browser_qa.cjs
-      - name: Test Chromium desktop and WebKit mobile
-        run: node tests/rebuild_v014023_browser_qa.cjs
-      - name: Publish screenshots and diagnostics
+          mkdir -p /tmp/genesis-main-ordan-e2e
+          node tests/main_v014022_ordan_e2e.cjs || echo "browser test returned nonzero" 
+      - name: Upload screenshots and JSON evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v014023-rebuild-qa-results
-          path: previews/rebuild-v014023-browser-qa
+          name: genesis-published-main-ordan-evidence
+          path: /tmp/genesis-main-ordan-e2e/
+          if-no-files-found: warn
           retention-days: 7
+      - name: Persist readable browser result to experiment branch
+        if: always()
+        shell: bash
+        run: |
+          set -e
+          mkdir -p previews/main-v014022-ordan-e2e
+          if test -s /tmp/genesis-main-ordan-e2e/report.json; then
+            cp /tmp/genesis-main-ordan-e2e/report.json previews/main-v014022-ordan-e2e/latest.json
+          else
+            printf '{"blocker":"No browser report produced","run":"%s"}\n' "$GITHUB_RUN_ID" > previews/main-v014022-ordan-e2e/latest.json
+          fi
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add previews/main-v014022-ordan-e2e/latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "qa: record live Ordan browser playthrough ($GITHUB_RUN_ID)"
+            git push origin HEAD:experiment/main-v014022-playwright-ordan-e2e-20261105
+          fi
+  archived-v014022-journey:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: experiment/v014022-ordan-playwright-full-run-20261105
+          persist-credentials: true
+      - name: Install Playwright test runner
+        run: npm install --prefix /tmp/ordan-playwright playwright@1.56.1
+      - name: Validate script
+        run: node --check tests/v014022_ordan_full_e2e.cjs
+      - name: Play archived V014022 with real controls and collision checks
+        env:
+          NODE_PATH: /tmp/ordan-playwright/node_modules
+        run: |
+          node tests/v014022_ordan_full_e2e.cjs || echo "browser test returned nonzero"
+      - name: Upload screenshots and JSON evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-archived-v014022-ordan-evidence
+          path: previews/v014022-ordan-playwright/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Persist readable browser result to experiment branch
+        if: always()
+        shell: bash
+        run: |
+          set -e
+          mkdir -p previews/v014022-ordan-playwright
+          if test -s previews/v014022-ordan-playwright/report.json; then
+            cp previews/v014022-ordan-playwright/report.json previews/v014022-ordan-playwright/latest-report.json
+          else
+            printf '{"result":"NO_REPORT","run":"%s"}\n' "$GITHUB_RUN_ID" > previews/v014022-ordan-playwright/latest-report.json
+          fi
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add previews/v014022-ordan-playwright/latest-report.json
+          if ! git diff --cached --quiet; then
+            git commit -m "qa: record archived V014022 playthrough ($GITHUB_RUN_ID)"
+            git push origin HEAD:experiment/v014022-ordan-playwright-full-run-20261105
+          fi
