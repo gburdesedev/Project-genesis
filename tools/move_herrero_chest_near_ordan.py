@@ -13,7 +13,7 @@ changes=[
   ('[-4.08,-3.02,.76]', '[-1.80,-1.266666666667,.76]'),
   ("{x:center-4.02,y:0,z:-3.03}", "{x:center-1.35,y:0,z:-.95}"),
   ("{x:c-4.02,y:0,z:-3.03})}:{label:'Baúl de materiales'",
-   "{x:c-1.35,y:0,z:-.95})}:{label:'Baúl de materiales'")
+   "{x:c-1.80,y:0,z:-1.266666666667})}:{label:'Baúl de materiales'")
 ]
 for old,new in changes:
     n=s.count(old)
