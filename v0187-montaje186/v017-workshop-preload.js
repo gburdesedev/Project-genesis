@@ -58,26 +58,17 @@
        new DataView(result.bytes.buffer).getUint32(8,true)!==result.bytes.length)throw Error('GLB inválido: '+entry.id);
    emit('Procesando GLB',result.received,result.total);
    const pc=globalThis.pc;
-   // Workshop preview bug fix already verified in V0189: the previous Asset({url:remote},...,{buffer})
-   // caused PlayCanvas to issue a SECOND HTTP GET per GLB after fetchWithProgress.
-   // Decode ONLY the bytes already received, through an in-memory blob URL.
-   // This preserves the original GLBs and does not change WebGL materials.
-   const local=URL.createObjectURL(new Blob([result.bytes],{type:'model/gltf-binary'}));
-   let asset,renderers=0;
-   try{
-     asset=new pc.Asset(entry.name,'container',{url:local,filename:entry.id+'.glb'});
-     app.assets.add(asset);
-     await new Promise((resolve,reject)=>{
-       asset.once('load',resolve);asset.once('error',reject);app.assets.load(asset);
-     });
-     if(!asset.resource)throw Error('PlayCanvas no decodificó el GLB: '+entry.id);
-     const temporary=asset.resource.instantiateRenderEntity();
-     try{renderers=temporary.findComponents('render').length}finally{temporary.destroy()}
-     if(renderers<1)throw Error('Modelo sin geometría: '+entry.id);
-     resources.set(entry.id,asset);
-   }finally{
-     URL.revokeObjectURL(local);
-   }
+   const asset=new pc.Asset(entry.name,'container',
+     {url:result.url.href,filename:entry.id+'.glb'},null,{buffer:result.bytes.buffer});
+   app.assets.add(asset);
+   await new Promise((resolve,reject)=>{
+     asset.once('load',resolve);asset.once('error',reject);app.assets.load(asset);
+   });
+   const temporary=asset.resource.instantiateRenderEntity();
+   let renderers=0;
+   try{renderers=temporary.findComponents('render').length}finally{temporary.destroy()}
+   if(renderers<1)throw Error('Modelo sin geometría: '+entry.id);
+   resources.set(entry.id,asset);
    emit('Listo',result.received,result.total);
    return {id:entry.id,renderers,received:result.received,source:result.url.pathname};
  }
