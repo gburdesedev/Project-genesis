@@ -1,0 +1,2127 @@
+{
+  "runAt": "2026-11-05T20:01:34.911Z",
+  "mode": "V014022 as shipped, read-only QA probe",
+  "events": [
+    {
+      "event": "PROBE",
+      "data": {
+        "inserted": true
+      }
+    },
+    {
+      "event": "SNAP",
+      "data": {
+        "stage": "intro",
+        "step": -1,
+        "player": {
+          "x": 0,
+          "z": 6.3
+        },
+        "objective": null,
+        "interactable": null,
+        "loader": "none",
+        "intro": "grid",
+        "loadState": "Núcleo listo",
+        "detail": "Edric, cámara y controles preparados. El taller se cargará después de elegir profesión.",
+        "count": "35 de 35 recursos de Inicio preparados · 0 descargando",
+        "assetErrors": [],
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "traffic_ao.png",
+              "state": "imagen decodificada",
+              "error": "",
+              "received": 155848
+            },
+            {
+              "url": "lod2.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 5533288
+            },
+            {
+              "url": "lod1.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 6995784
+            },
+            {
+              "url": "lod2.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 5398940
+            },
+            {
+              "url": "lod1.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 6861436
+            },
+            {
+              "url": "lod2.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 5494068
+            },
+            {
+              "url": "lod1.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 6956564
+            },
+            {
+              "url": "lod2.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 5021964
+            },
+            {
+              "url": "lod1.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 6484460
+            },
+            {
+              "url": "Arcanist_Door_V027_WebGL.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4034004
+            },
+            {
+              "url": "arcanista_four_walls_preview.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1026104
+            },
+            {
+              "url": "merchant_v02_75962.glb?v=0.14.022",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 2049508
+            }
+          ]
+        },
+        "buttons": []
+      }
+    },
+    {
+      "event": "SCREENSHOT_FAILED",
+      "data": "page.screenshot: Timeout 10000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  -"
+    },
+    {
+      "event": "SELECTED",
+      "data": "Herrero clicked"
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 9,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "✓ wallWoodGrid2A",
+        "count": "1 de 17 recursos de Herrero preparados · 3 descargando",
+        "stream": {
+          "active": 3,
+          "queued": 1,
+          "notReady": [
+            {
+              "url": "T_Plaster_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3316410
+            },
+            {
+              "url": "T_Plaster_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2381579
+            },
+            {
+              "url": "Wall_UnevenBrick_Straight.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2768
+            },
+            {
+              "url": "T_WoodTrim_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3596501
+            },
+            {
+              "url": "T_WoodTrim_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2082310
+            },
+            {
+              "url": "T_WoodTrim_Roughness.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1697111
+            },
+            {
+              "url": "T_Plaster_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 4607606
+            },
+            {
+              "url": "T_Plaster_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3316410
+            },
+            {
+              "url": "T_Plaster_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2381579
+            },
+            {
+              "url": "T_UnevenBrick_Normal.png",
+              "state": "descargando",
+              "error": "",
+              "received": 0
+            },
+            {
+              "url": "T_UnevenBrick_BaseColor.png",
+              "state": "descargando",
+              "error": "",
+              "received": 0
+            },
+            {
+              "url": "T_UnevenBrick_Roughness.png",
+              "state": "descargando",
+              "error": "",
+              "received": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 18,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "✓ wallWoodGrid2A",
+        "count": "1 de 17 recursos de Herrero preparados · 3 descargando",
+        "stream": {
+          "active": 3,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "T_UnevenBrick_Roughness.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1246162
+            },
+            {
+              "url": "Wall_Plaster_Door_Round.gltf",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 5946
+            },
+            {
+              "url": "Wall_Plaster_Door_Round.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 8864
+            },
+            {
+              "url": "T_WoodTrim_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3596501
+            },
+            {
+              "url": "T_WoodTrim_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2082310
+            },
+            {
+              "url": "T_WoodTrim_Roughness.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1697111
+            },
+            {
+              "url": "T_Plaster_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 4607606
+            },
+            {
+              "url": "T_Plaster_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3316410
+            },
+            {
+              "url": "T_Plaster_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2381579
+            },
+            {
+              "url": "T_RockTrim_Normal.png",
+              "state": "descargando",
+              "error": "",
+              "received": 0
+            },
+            {
+              "url": "T_RockTrim_BaseColor.png",
+              "state": "descargando",
+              "error": "",
+              "received": 0
+            },
+            {
+              "url": "T_RockTrim_ORM.png",
+              "state": "descargando",
+              "error": "",
+              "received": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 27,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "✓ forgeStation",
+        "count": "7 de 17 recursos de Herrero preparados · 0 descargando",
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Wall_Plaster_Door_Round.gltf",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 5946
+            },
+            {
+              "url": "Wall_Plaster_Door_Round.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 8864
+            },
+            {
+              "url": "T_WoodTrim_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3596501
+            },
+            {
+              "url": "T_WoodTrim_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2082310
+            },
+            {
+              "url": "T_WoodTrim_Roughness.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1697111
+            },
+            {
+              "url": "T_Plaster_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 4607606
+            },
+            {
+              "url": "T_Plaster_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3316410
+            },
+            {
+              "url": "T_Plaster_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2381579
+            },
+            {
+              "url": "T_RockTrim_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3925938
+            },
+            {
+              "url": "T_RockTrim_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1908835
+            },
+            {
+              "url": "T_RockTrim_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1625807
+            },
+            {
+              "url": "Forge_V038_HeaderFixed_Preview.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 19220220
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 36,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "✓ benchReal",
+        "count": "14 de 17 recursos de Herrero preparados · 1 descargando",
+        "stream": {
+          "active": 1,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Bellows.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Anvil_Log.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Workbench.gltf",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4318
+            },
+            {
+              "url": "Workbench.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 63408
+            },
+            {
+              "url": "T_Trim_Furniture_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3485710
+            },
+            {
+              "url": "T_Trim_Furniture_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2232961
+            },
+            {
+              "url": "T_Trim_Furniture_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2064585
+            },
+            {
+              "url": "T_Trim_Metal_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3625541
+            },
+            {
+              "url": "T_Trim_Metal_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1361221
+            },
+            {
+              "url": "T_Trim_Metal_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1871475
+            },
+            {
+              "url": "male_ranger.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1617696
+            },
+            {
+              "url": "Hair_Beard.glb",
+              "state": "descargando",
+              "error": "",
+              "received": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 45,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "anvilReal086 · Anvil_Log.gltf · intento 1 · HTTP 404 · se reintentará en 3 s",
+        "count": "15 de 17 recursos de Herrero preparados · 0 descargando",
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Bellows.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Anvil_Log.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Workbench.gltf",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4318
+            },
+            {
+              "url": "Workbench.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 63408
+            },
+            {
+              "url": "T_Trim_Furniture_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3485710
+            },
+            {
+              "url": "T_Trim_Furniture_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2232961
+            },
+            {
+              "url": "T_Trim_Furniture_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2064585
+            },
+            {
+              "url": "T_Trim_Metal_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3625541
+            },
+            {
+              "url": "T_Trim_Metal_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1361221
+            },
+            {
+              "url": "T_Trim_Metal_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1871475
+            },
+            {
+              "url": "male_ranger.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1617696
+            },
+            {
+              "url": "Hair_Beard.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 57584
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 54,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "Herrero · modelos esenciales · 2 pendientes · intento 3 · bellowsReal086 · Tras 2 intentos: HTTP 404 | anvilReal086 · Tras 2 intentos: HTTP 404 · se reintentará en 7 s",
+        "count": "15 de 17 recursos de Herrero preparados · 0 descargando",
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Bellows.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Anvil_Log.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Workbench.gltf",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4318
+            },
+            {
+              "url": "Workbench.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 63408
+            },
+            {
+              "url": "T_Trim_Furniture_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3485710
+            },
+            {
+              "url": "T_Trim_Furniture_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2232961
+            },
+            {
+              "url": "T_Trim_Furniture_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2064585
+            },
+            {
+              "url": "T_Trim_Metal_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3625541
+            },
+            {
+              "url": "T_Trim_Metal_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1361221
+            },
+            {
+              "url": "T_Trim_Metal_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1871475
+            },
+            {
+              "url": "male_ranger.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1617696
+            },
+            {
+              "url": "Hair_Beard.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 57584
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 63,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "anvilReal086 · Anvil_Log.gltf · intento 1 · HTTP 404 · se reintentará en 3 s",
+        "count": "15 de 17 recursos de Herrero preparados · 0 descargando",
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Bellows.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Anvil_Log.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Workbench.gltf",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4318
+            },
+            {
+              "url": "Workbench.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 63408
+            },
+            {
+              "url": "T_Trim_Furniture_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3485710
+            },
+            {
+              "url": "T_Trim_Furniture_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2232961
+            },
+            {
+              "url": "T_Trim_Furniture_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2064585
+            },
+            {
+              "url": "T_Trim_Metal_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3625541
+            },
+            {
+              "url": "T_Trim_Metal_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1361221
+            },
+            {
+              "url": "T_Trim_Metal_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1871475
+            },
+            {
+              "url": "male_ranger.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1617696
+            },
+            {
+              "url": "Hair_Beard.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 57584
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 72,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "Herrero · modelos esenciales · 2 pendientes · intento 4 · bellowsReal086 · Tras 2 intentos: HTTP 404 | anvilReal086 · Tras 2 intentos: HTTP 404 · se reintentará en 11 s",
+        "count": "15 de 17 recursos de Herrero preparados · 0 descargando",
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Bellows.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Anvil_Log.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Workbench.gltf",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4318
+            },
+            {
+              "url": "Workbench.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 63408
+            },
+            {
+              "url": "T_Trim_Furniture_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3485710
+            },
+            {
+              "url": "T_Trim_Furniture_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2232961
+            },
+            {
+              "url": "T_Trim_Furniture_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2064585
+            },
+            {
+              "url": "T_Trim_Metal_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3625541
+            },
+            {
+              "url": "T_Trim_Metal_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1361221
+            },
+            {
+              "url": "T_Trim_Metal_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1871475
+            },
+            {
+              "url": "male_ranger.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1617696
+            },
+            {
+              "url": "Hair_Beard.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 57584
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 81,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "anvilReal086 · Anvil_Log.gltf · intento 1 · HTTP 404 · se reintentará en 3 s",
+        "count": "15 de 17 recursos de Herrero preparados · 0 descargando",
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Bellows.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Anvil_Log.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Workbench.gltf",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4318
+            },
+            {
+              "url": "Workbench.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 63408
+            },
+            {
+              "url": "T_Trim_Furniture_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3485710
+            },
+            {
+              "url": "T_Trim_Furniture_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2232961
+            },
+            {
+              "url": "T_Trim_Furniture_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2064585
+            },
+            {
+              "url": "T_Trim_Metal_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3625541
+            },
+            {
+              "url": "T_Trim_Metal_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1361221
+            },
+            {
+              "url": "T_Trim_Metal_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1871475
+            },
+            {
+              "url": "male_ranger.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1617696
+            },
+            {
+              "url": "Hair_Beard.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 57584
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 90,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "Herrero · modelos esenciales · 2 pendientes · intento 5 · bellowsReal086 · Tras 2 intentos: HTTP 404 | anvilReal086 · Tras 2 intentos: HTTP 404 · se reintentará en 17 s",
+        "count": "15 de 17 recursos de Herrero preparados · 0 descargando",
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Bellows.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Anvil_Log.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Workbench.gltf",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4318
+            },
+            {
+              "url": "Workbench.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 63408
+            },
+            {
+              "url": "T_Trim_Furniture_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3485710
+            },
+            {
+              "url": "T_Trim_Furniture_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2232961
+            },
+            {
+              "url": "T_Trim_Furniture_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2064585
+            },
+            {
+              "url": "T_Trim_Metal_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3625541
+            },
+            {
+              "url": "T_Trim_Metal_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1361221
+            },
+            {
+              "url": "T_Trim_Metal_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1871475
+            },
+            {
+              "url": "male_ranger.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1617696
+            },
+            {
+              "url": "Hair_Beard.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 57584
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 99,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "anvilReal086 · Anvil_Log.gltf · intento 1 · HTTP 404 · se reintentará en 3 s",
+        "count": "15 de 17 recursos de Herrero preparados · 0 descargando",
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Bellows.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Anvil_Log.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Workbench.gltf",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4318
+            },
+            {
+              "url": "Workbench.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 63408
+            },
+            {
+              "url": "T_Trim_Furniture_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3485710
+            },
+            {
+              "url": "T_Trim_Furniture_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2232961
+            },
+            {
+              "url": "T_Trim_Furniture_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2064585
+            },
+            {
+              "url": "T_Trim_Metal_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3625541
+            },
+            {
+              "url": "T_Trim_Metal_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1361221
+            },
+            {
+              "url": "T_Trim_Metal_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1871475
+            },
+            {
+              "url": "male_ranger.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1617696
+            },
+            {
+              "url": "Hair_Beard.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 57584
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 108,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "Herrero · modelos esenciales · 2 pendientes · intento 6 · bellowsReal086 · Tras 2 intentos: HTTP 404 | anvilReal086 · Tras 2 intentos: HTTP 404 · se reintentará en 20 s",
+        "count": "15 de 17 recursos de Herrero preparados · 0 descargando",
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Bellows.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Anvil_Log.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Workbench.gltf",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4318
+            },
+            {
+              "url": "Workbench.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 63408
+            },
+            {
+              "url": "T_Trim_Furniture_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3485710
+            },
+            {
+              "url": "T_Trim_Furniture_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2232961
+            },
+            {
+              "url": "T_Trim_Furniture_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2064585
+            },
+            {
+              "url": "T_Trim_Metal_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3625541
+            },
+            {
+              "url": "T_Trim_Metal_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1361221
+            },
+            {
+              "url": "T_Trim_Metal_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1871475
+            },
+            {
+              "url": "male_ranger.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1617696
+            },
+            {
+              "url": "Hair_Beard.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 57584
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 117,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "Herrero · modelos esenciales · 2 pendientes · intento 6 · bellowsReal086 · Tras 2 intentos: HTTP 404 | anvilReal086 · Tras 2 intentos: HTTP 404 · se reintentará en 20 s",
+        "count": "15 de 17 recursos de Herrero preparados · 0 descargando",
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Bellows.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Anvil_Log.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Workbench.gltf",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4318
+            },
+            {
+              "url": "Workbench.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 63408
+            },
+            {
+              "url": "T_Trim_Furniture_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3485710
+            },
+            {
+              "url": "T_Trim_Furniture_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2232961
+            },
+            {
+              "url": "T_Trim_Furniture_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2064585
+            },
+            {
+              "url": "T_Trim_Metal_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3625541
+            },
+            {
+              "url": "T_Trim_Metal_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1361221
+            },
+            {
+              "url": "T_Trim_Metal_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1871475
+            },
+            {
+              "url": "male_ranger.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1617696
+            },
+            {
+              "url": "Hair_Beard.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 57584
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 126,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "Herrero · modelos esenciales · 2 pendientes · intento 7 · anvilReal086 · Tras 2 intentos: HTTP 404 | bellowsReal086 · Tras 2 intentos: HTTP 404 · se reintentará en 20 s",
+        "count": "15 de 17 recursos de Herrero preparados · 0 descargando",
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Bellows.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Anvil_Log.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Workbench.gltf",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4318
+            },
+            {
+              "url": "Workbench.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 63408
+            },
+            {
+              "url": "T_Trim_Furniture_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3485710
+            },
+            {
+              "url": "T_Trim_Furniture_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2232961
+            },
+            {
+              "url": "T_Trim_Furniture_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2064585
+            },
+            {
+              "url": "T_Trim_Metal_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3625541
+            },
+            {
+              "url": "T_Trim_Metal_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1361221
+            },
+            {
+              "url": "T_Trim_Metal_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1871475
+            },
+            {
+              "url": "male_ranger.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1617696
+            },
+            {
+              "url": "Hair_Beard.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 57584
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 135,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "Herrero · modelos esenciales · 2 pendientes · intento 7 · anvilReal086 · Tras 2 intentos: HTTP 404 | bellowsReal086 · Tras 2 intentos: HTTP 404 · se reintentará en 20 s",
+        "count": "15 de 17 recursos de Herrero preparados · 0 descargando",
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Bellows.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Anvil_Log.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Workbench.gltf",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4318
+            },
+            {
+              "url": "Workbench.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 63408
+            },
+            {
+              "url": "T_Trim_Furniture_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3485710
+            },
+            {
+              "url": "T_Trim_Furniture_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2232961
+            },
+            {
+              "url": "T_Trim_Furniture_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2064585
+            },
+            {
+              "url": "T_Trim_Metal_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3625541
+            },
+            {
+              "url": "T_Trim_Metal_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1361221
+            },
+            {
+              "url": "T_Trim_Metal_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1871475
+            },
+            {
+              "url": "male_ranger.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1617696
+            },
+            {
+              "url": "Hair_Beard.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 57584
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 144,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "Herrero · modelos esenciales · 2 pendientes · intento 8 · bellowsReal086 · Tras 2 intentos: HTTP 404 | anvilReal086 · Tras 2 intentos: HTTP 404 · se reintentará en 20 s",
+        "count": "15 de 17 recursos de Herrero preparados · 0 descargando",
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Bellows.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Anvil_Log.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Workbench.gltf",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4318
+            },
+            {
+              "url": "Workbench.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 63408
+            },
+            {
+              "url": "T_Trim_Furniture_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3485710
+            },
+            {
+              "url": "T_Trim_Furniture_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2232961
+            },
+            {
+              "url": "T_Trim_Furniture_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2064585
+            },
+            {
+              "url": "T_Trim_Metal_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3625541
+            },
+            {
+              "url": "T_Trim_Metal_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1361221
+            },
+            {
+              "url": "T_Trim_Metal_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1871475
+            },
+            {
+              "url": "male_ranger.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1617696
+            },
+            {
+              "url": "Hair_Beard.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 57584
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "LOAD_SAMPLE",
+      "data": {
+        "seconds": 153,
+        "step": -1,
+        "started": false,
+        "loader": "grid",
+        "detail": "Herrero · modelos esenciales · 2 pendientes · intento 8 · bellowsReal086 · Tras 2 intentos: HTTP 404 | anvilReal086 · Tras 2 intentos: HTTP 404 · se reintentará en 20 s",
+        "count": "15 de 17 recursos de Herrero preparados · 0 descargando",
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Bellows.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Anvil_Log.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Workbench.gltf",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4318
+            },
+            {
+              "url": "Workbench.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 63408
+            },
+            {
+              "url": "T_Trim_Furniture_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3485710
+            },
+            {
+              "url": "T_Trim_Furniture_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2232961
+            },
+            {
+              "url": "T_Trim_Furniture_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2064585
+            },
+            {
+              "url": "T_Trim_Metal_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3625541
+            },
+            {
+              "url": "T_Trim_Metal_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1361221
+            },
+            {
+              "url": "T_Trim_Metal_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1871475
+            },
+            {
+              "url": "male_ranger.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1617696
+            },
+            {
+              "url": "Hair_Beard.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 57584
+            }
+          ]
+        }
+      }
+    },
+    {
+      "event": "SNAP",
+      "data": {
+        "stage": "blocked-after-selection",
+        "step": -1,
+        "player": {
+          "x": 0,
+          "z": 6.3
+        },
+        "objective": null,
+        "interactable": null,
+        "loader": "grid",
+        "intro": "none",
+        "loadState": "CARGA EN PAUSA · REINTENTO AUTOMÁTICO",
+        "detail": "Herrero · modelos esenciales · 2 pendientes · intento 8 · bellowsReal086 · Tras 2 intentos: HTTP 404 | anvilReal086 · Tras 2 intentos: HTTP 404 · se reintentará en 20 s",
+        "count": "15 de 17 recursos de Herrero preparados · 0 descargando",
+        "assetErrors": [],
+        "stream": {
+          "active": 0,
+          "queued": 0,
+          "notReady": [
+            {
+              "url": "Bellows.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Anvil_Log.gltf",
+              "state": "carga en pausa",
+              "error": "HTTP 404",
+              "received": 0
+            },
+            {
+              "url": "Workbench.gltf",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 4318
+            },
+            {
+              "url": "Workbench.bin",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 63408
+            },
+            {
+              "url": "T_Trim_Furniture_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3485710
+            },
+            {
+              "url": "T_Trim_Furniture_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2232961
+            },
+            {
+              "url": "T_Trim_Furniture_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 2064585
+            },
+            {
+              "url": "T_Trim_Metal_Normal.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 3625541
+            },
+            {
+              "url": "T_Trim_Metal_BaseColor.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1361221
+            },
+            {
+              "url": "T_Trim_Metal_ORM.png",
+              "state": "descargado · verificando",
+              "error": "",
+              "received": 1871475
+            },
+            {
+              "url": "male_ranger.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 1617696
+            },
+            {
+              "url": "Hair_Beard.glb",
+              "state": "recurso preparado",
+              "error": "",
+              "received": 57584
+            }
+          ]
+        },
+        "buttons": []
+      }
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "CONSOLE_ERROR",
+      "data": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "event": "SCREENSHOT_FAILED",
+      "data": "page.screenshot: Timeout 10000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  -"
+    }
+  ],
+  "states": [
+    {
+      "stage": "intro",
+      "time": 1793908962106,
+      "state": {
+        "step": -1,
+        "started": false,
+        "profession": null,
+        "player": {
+          "x": 0,
+          "z": 6.3
+        },
+        "objective": null,
+        "interactable": null,
+        "crafted": [],
+        "mercenaryState": "hidden",
+        "mentorState": "outside",
+        "marketWaypoint": 0,
+        "modal": ""
+      },
+      "loader": "none",
+      "intro": "grid",
+      "modal": "none",
+      "loadState": "Núcleo listo",
+      "loadDetail": "Edric, cámara y controles preparados. El taller se cargará después de elegir profesión.",
+      "count": "35 de 35 recursos de Inicio preparados · 0 descargando",
+      "loadingFailed": "",
+      "assetErrors": [],
+      "stream": {
+        "active": 0,
+        "queued": 0,
+        "notReady": [
+          {
+            "url": "traffic_ao.png",
+            "state": "imagen decodificada",
+            "error": "",
+            "received": 155848
+          },
+          {
+            "url": "lod2.glb",
+            "state": "recurso preparado",
+            "error": "",
+            "received": 5533288
+          },
+          {
+            "url": "lod1.glb",
+            "state": "recurso preparado",
+            "error": "",
+            "received": 6995784
+          },
+          {
+            "url": "lod2.glb",
+            "state": "recurso preparado",
+            "error": "",
+            "received": 5398940
+          },
+          {
+            "url": "lod1.glb",
+            "state": "recurso preparado",
+            "error": "",
+            "received": 6861436
+          },
+          {
+            "url": "lod2.glb",
+            "state": "recurso preparado",
+            "error": "",
+            "received": 5494068
+          },
+          {
+            "url": "lod1.glb",
+            "state": "recurso preparado",
+            "error": "",
+            "received": 6956564
+          },
+          {
+            "url": "lod2.glb",
+            "state": "recurso preparado",
+            "error": "",
+            "received": 5021964
+          },
+          {
+            "url": "lod1.glb",
+            "state": "recurso preparado",
+            "error": "",
+            "received": 6484460
+          },
+          {
+            "url": "Arcanist_Door_V027_WebGL.glb",
+            "state": "recurso preparado",
+            "error": "",
+            "received": 4034004
+          },
+          {
+            "url": "arcanista_four_walls_preview.glb",
+            "state": "recurso preparado",
+            "error": "",
+            "received": 1026104
+          },
+          {
+            "url": "merchant_v02_75962.glb?v=0.14.022",
+            "state": "recurso preparado",
+            "error": "",
+            "received": 2049508
+          }
+        ]
+      },
+      "modalButtons": []
+    },
+    {
+      "stage": "blocked-after-selection",
+      "time": 1793909266131,
+      "state": {
+        "step": -1,
+        "started": false,
+        "profession": null,
+        "player": {
+          "x": 0,
+          "z": 6.3
+        },
+        "objective": null,
+        "interactable": null,
+        "crafted": [],
+        "mercenaryState": "hidden",
+        "mentorState": "outside",
+        "marketWaypoint": 0,
+        "modal": ""
+      },
+      "loader": "grid",
+      "intro": "none",
+      "modal": "none",
+      "loadState": "CARGA EN PAUSA · REINTENTO AUTOMÁTICO",
+      "loadDetail": "Herrero · modelos esenciales · 2 pendientes · intento 8 · bellowsReal086 · Tras 2 intentos: HTTP 404 | anvilReal086 · Tras 2 intentos: HTTP 404 · se reintentará en 20 s",
+      "count": "15 de 17 recursos de Herrero preparados · 0 descargando",
+      "loadingFailed": "",
+      "assetErrors": [],
+      "stream": {
+        "active": 0,
+        "queued": 0,
+        "notReady": [
+          {
+            "url": "Bellows.gltf",
+            "state": "carga en pausa",
+            "error": "HTTP 404",
+            "received": 0
+          },
+          {
+            "url": "Anvil_Log.gltf",
+            "state": "carga en pausa",
+            "error": "HTTP 404",
+            "received": 0
+          },
+          {
+            "url": "Workbench.gltf",
+            "state": "recurso preparado",
+            "error": "",
+            "received": 4318
+          },
+          {
+            "url": "Workbench.bin",
+            "state": "descargado · verificando",
+            "error": "",
+            "received": 63408
+          },
+          {
+            "url": "T_Trim_Furniture_Normal.png",
+            "state": "descargado · verificando",
+            "error": "",
+            "received": 3485710
+          },
+          {
+            "url": "T_Trim_Furniture_BaseColor.png",
+            "state": "descargado · verificando",
+            "error": "",
+            "received": 2232961
+          },
+          {
+            "url": "T_Trim_Furniture_ORM.png",
+            "state": "descargado · verificando",
+            "error": "",
+            "received": 2064585
+          },
+          {
+            "url": "T_Trim_Metal_Normal.png",
+            "state": "descargado · verificando",
+            "error": "",
+            "received": 3625541
+          },
+          {
+            "url": "T_Trim_Metal_BaseColor.png",
+            "state": "descargado · verificando",
+            "error": "",
+            "received": 1361221
+          },
+          {
+            "url": "T_Trim_Metal_ORM.png",
+            "state": "descargado · verificando",
+            "error": "",
+            "received": 1871475
+          },
+          {
+            "url": "male_ranger.glb",
+            "state": "recurso preparado",
+            "error": "",
+            "received": 1617696
+          },
+          {
+            "url": "Hair_Beard.glb",
+            "state": "recurso preparado",
+            "error": "",
+            "received": 57584
+          }
+        ]
+      },
+      "modalButtons": []
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()",
+    "Failed to load resource: the server responded with a status of 404 ()"
+  ],
+  "failedRequests": [],
+  "navigation": [
+    "http://127.0.0.1:8765/index.html?qa=ordan-playwright"
+  ],
+  "result": "BLOCKED_AFTER_SELECTING_HERRERO",
+  "finishedAt": "2026-11-05T20:07:56.141Z"
+}
