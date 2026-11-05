@@ -1,0 +1,39 @@
+name: V018 focused HDRI screenshots and texture validation
+on:
+  push:
+    branches: [experiment/v018-workshop-positions-lossless-door]
+    paths:
+      - 'tools/v018_visual_evidence.cjs'
+      - '.github/workflows/v018-focused-visual.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify preview and script
+        run: |
+          test -s v018/manifest.json
+          test -s assets/playcanvas/candidates/workshops/herrero/doors/v082-b-lossless-v018/door-herrero-v082-b-lossless-webp.glb
+          node --check tools/v018_visual_evidence.cjs
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Capture in-engine Herrero and Arcanista front, 3/4 and detail at 32-bit HDRI
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v018-focused-http.log 2>&1 &
+          node tools/v018_visual_evidence.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v018-focused-workshop-pbr-review
+          path: /tmp/genesis-v018-focused-renders/
+          retention-days: 14
+          if-no-files-found: warn
