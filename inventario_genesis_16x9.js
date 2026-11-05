@@ -50,6 +50,13 @@
       '<span class="genInvEmptyPreview">'+esc(name)+'</span>';
   }
   // Sólo usar recursos reales de la sesión; no inventar GLB ni stats.
+  // Render APROBADO de la espada base V175-V12B (sin efectos).
+  // Copia de vista 2D; el preset PBR se aplicará al GLB sólo tras exportación.
+  // SHA pinneado: la referencia no cambia aunque se actualice la rama de Fuego.
+  const SWORD_V12B_RENDER='https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/98cb1c5d94effb206d75d6c94c0d526a5c97ddc8/public-previews/espada-v175-j-roughness-v12/V12_V175_Color_J_Rugosidad034_Hero.png';
+  function approvedSwordPoster(item){
+    return /^espada(?:s)?(?:\b|_)/i.test(String(item?.recipe||item?.family||''))?SWORD_V12B_RENDER:'';
+  }
   function creationPreview(item, ctx) {
     if (!item) return { html:'', interactive:false };
     const raw = [item.modelUrl, item.glbUrl, item.glb, item.model?.url]
@@ -68,7 +75,7 @@
       if (/<(?:model-viewer|canvas)\b/i.test(supplied)) return { html:supplied, interactive:true };
       if (/<img\b/i.test(supplied)) return { html:supplied, interactive:false };
     }
-    const poster = item.thumbnail || item.poster || item.previewImage;
+    const poster = item.thumbnail || item.poster || item.previewImage || approvedSwordPoster(item);
     return { html:poster ? '<img src="'+esc(poster)+'" alt="'+esc(item.name||'')+'" draggable="false">' : '',
       interactive:false };
   }
@@ -113,8 +120,8 @@
       if(!entry)return '<button class="genInvSlot" disabled aria-label="Casilla vacía"></button>';
       const selected=entry.key===state.selectedKey;
       const content=entry.material?materialArt(entry.name):
-        (entry.item.thumbnail || entry.item.poster
-          ? '<img src="'+esc(entry.item.thumbnail||entry.item.poster)+'" alt="" loading="lazy" draggable="false">'
+        (entry.item.thumbnail || entry.item.poster || approvedSwordPoster(entry.item)
+          ? '<img src="'+esc(entry.item.thumbnail||entry.item.poster||approvedSwordPoster(entry.item))+'" alt="" loading="lazy" draggable="false">'
           : '<span class="genInvCreationGlyph" aria-hidden="true"></span>');
       return '<button class="genInvSlot'+(selected?' selected':'')+'" data-select="'+i+'" aria-label="'+esc(entry.name)+'" aria-pressed="'+selected+'"><span class="genInvSlotArtwork">'+content+'</span><span class="genInvSlotQty">'+esc(entry.material?entry.qty:(entry.rarity||''))+'</span></button>';
     }).join('');
