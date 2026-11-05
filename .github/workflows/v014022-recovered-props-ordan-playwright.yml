@@ -23,6 +23,7 @@ jobs:
       - name: Verify script syntax
         run: node --check tests/v014022_ordan_full_e2e.cjs
       - name: Validate pinned organization-owned source HTTP response and GLB magic
+        shell: bash
         run: |
           set -euo pipefail
           ASSETS="https://cdn.jsdelivr.net/gh/ProjectgenesisAssets/genesis-workshop-assets@8696981a95113a34feec26100e761e9e164327de/production/game_v014022/herrero_recovery/v001"
