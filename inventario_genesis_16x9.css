@@ -701,39 +701,11 @@
   transform:none!important;
 }
 
-
-/* V12B 02: presentación sin bloque rectangular visible.
- * Screen neutraliza el fondo oscuro del render aprobado sobre el visor negro;
- * el marco y los demás paneles permanecen intactos. */
-.genInv .genInvImageWrap[data-preview-mode="static"]>img{
-  height:100%!important;
-  max-height:100%!important;
-  max-width:88%!important;
-  mix-blend-mode:screen!important;
-  filter:contrast(1.22) brightness(1.08)!important;
-  -webkit-mask-image:radial-gradient(ellipse 73% 77% at center, #000 58%, transparent 100%)!important;
-  mask-image:radial-gradient(ellipse 73% 77% at center, #000 58%, transparent 100%)!important;
-}
-.genInv .genInvSlotArtwork>img{
-  mix-blend-mode:screen!important;
-  filter:contrast(1.22) brightness(1.08)!important;
-  -webkit-mask-image:radial-gradient(ellipse 73% 77% at center, #000 58%, transparent 100%)!important;
-  mask-image:radial-gradient(ellipse 73% 77% at center, #000 58%, transparent 100%)!important;
-}
-
-
-/* Experimento V12B 03: presentación casi horizontal SOLO en el visor central.
- * Rotación visual de imagen, no transformación del asset aprobado. */
-.genInv .genInvImageWrap[data-preview-mode="static"]:has(>img[src*="V12_V175_Color_J_Rugosidad034_Hero.png"]){
-  overflow:hidden!important;
-}
+/* V12B: mantener el render original sin máscaras, mezcla de color ni rotación CSS. */
 .genInv .genInvImageWrap[data-preview-mode="static"]>img[src*="V12_V175_Color_J_Rugosidad034_Hero.png"]{
-  width:46%!important;
-  height:108%!important;
-  max-width:none!important;
-  max-height:none!important;
-  object-fit:contain!important;
-  transform:rotate(-75deg) scale(1.12)!important;
-  transform-origin:center center!important;
-  flex-shrink:0!important;
+  mix-blend-mode:normal!important;
+  filter:none!important;
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+  transform:none!important;
 }
