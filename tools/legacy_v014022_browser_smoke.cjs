@@ -19,6 +19,7 @@ fs.mkdirSync(folder,{recursive:true});
     const box=root.getBoundingClientRect(),style=getComputedStyle(root),loading=document.querySelector('#loading');
     return{url:location.pathname,visible:box.width>100&&box.height>50&&style.display!=='none',
       text:root.textContent.slice(0,550),rowCount:root.querySelectorAll('#genesisAssetRows > div').length,
+      structuredCards:root.querySelector('#genesisAssetRows > div')?.children.length>=3,
       assets:summary.records.filter(x=>/\\.(glb|gltf|png|jpg|bin|webp)(\\?|$)/i.test(x.url)).length,
       loadVisible:loading?.style.display!=='none',button:!!root.querySelector('#genesisCopyDiagnostic'),
       streamer:!!window.GenesisStreamLoader,legacyCategoriesHidden:getComputedStyle(document.getElementById('loadGroups')).display==='none',
@@ -29,6 +30,7 @@ fs.mkdirSync(folder,{recursive:true});
    assert(report.visible,'Diagnostic box not visible');
    assert(report.button,'Copy report button missing');
    assert(report.streamer,'New streamer not installed');
+   assert(report.structuredCards,'Download cards lack separate filename/bytes/bar');
    assert(report.legacyCategoriesHidden,'Old 6-category UI still visible');
    assert(report.bootDeferred>=1,'Boot models were not deferred / applied');
    assert(report.text.includes('V0.14.022'),'Wrong diagnostic version');
