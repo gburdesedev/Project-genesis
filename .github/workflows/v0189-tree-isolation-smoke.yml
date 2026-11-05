@@ -1,0 +1,36 @@
+name: V0189 phone zero-tree versus PC full-trees smoke
+on:
+  push:
+    branches: [experiment/v0189-no-trees-mobile-20261105]
+    paths:
+      - 'tools/v0189_tree_isolation_smoke.cjs'
+      - '.github/workflows/v0189-tree-isolation-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-webgl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node --check tools/v0189_tree_isolation_smoke.cjs
+          node --check v0189/v017-workshop-preload.js
+          node --check v0189/v014022-plaza-restoration.js
+      - run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Phone first (no tree GLBs); PC second (all original trees)
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v0189-smoke-http.log 2>&1 &
+          node tools/v0189_tree_isolation_smoke.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v0189-mobile-no-trees-vs-pc-full-trees
+          path: /tmp/v0189-tree-free-mobile-smoke/
+          retention-days: 14
