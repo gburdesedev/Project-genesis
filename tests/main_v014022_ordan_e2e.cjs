@@ -22,7 +22,7 @@ async function state(){
 }
 async function capture(label){
  const v=await state();const x={seconds:stamp(),label,...v};samples.push(x);log('snapshot',{label,s:x.seconds,visible:v.visible,stage:v.stage,detail:v.detail,count:v.count,quest:v.quest,person:v.person,errors:v.diagnostic?.errors,boot:v.boot});
- try{await page.screenshot({path:dir+'/'+String(samples.length).padStart(2,'0')+'-'+label.replace(/[^a-z0-9-]/gi,'_')+'.png',timeout:17000,animations:'disabled'});}catch(e){log('screenshot-error',{label,error:String(e)})}
+ try{await page.screenshot({path:dir+'/'+String(samples.length).padStart(2,'0')+'-'+label.replace(/[^a-z0-9-]/gi,'_')+'.png',timeout:6000,animations:'disabled'});}catch(e){log('screenshot-error',{label,error:String(e)})}
  return v;
 }
 async function keyboard(k,ms=1000){try{await page.keyboard.down(k);await page.waitForTimeout(ms);}finally{await page.keyboard.up(k)}}
@@ -74,7 +74,8 @@ async function moveToward(goal){
  }
  if(!result.blocker){
   let sel=page.locator('[data-profession="Herrero"]').first();
-  await sel.click({timeout:15000});
+  await sel.click({force:true,timeout:15000});
+  log('force-pointer-selection',{button:'Herrero',reason:'GPU-heavy canvas prevented Playwright stability wait'});
   log('selected-herrero',true);
   for(let i=0;i<28;i++){
    const q=await state();
