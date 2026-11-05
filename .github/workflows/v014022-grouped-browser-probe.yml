@@ -1,0 +1,31 @@
+name: V014022 grouped browser probe (experiment)
+on:
+  push:
+    branches: [experiment/legacy-v014022-approved-assets-loader-20261105]
+    paths:
+      - tools/v014022_grouped_browser_probe.cjs
+      - .github/workflows/v014022-grouped-browser-probe.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Observe actual grouped loading in a browser
+        run: node tools/v014022_grouped_browser_probe.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v014022-grouped-browser-report
+          path: previews/legacy-v014022-grouped-probe/
+          retention-days: 7
