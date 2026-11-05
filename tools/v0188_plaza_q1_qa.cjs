@@ -9,6 +9,19 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const out='/tmp/v0188-q1-e-interactions';
 fs.mkdirSync(out,{recursive:true});
+async function captureRealBrowserFrame(page,outputPath){
+  // Capture the actual Chromium compositor surface. Unlike Playwright's
+  // screenshot helper this does not wait for successive rAF ticks, which
+  // can stall with 65MB of real 3D assets in software WebGL.
+  const cdp=await page.context().newCDPSession(page);
+  try{
+    await cdp.send('Page.enable');
+    const result=await cdp.send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false});
+    if(!result?.data)throw Error('Chromium returned no screenshot pixels');
+    fs.writeFileSync(outputPath,Buffer.from(result.data,'base64'));
+  }finally{await cdp.detach()}
+}
+
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  const records=[];
@@ -89,7 +102,7 @@ fs.mkdirSync(out,{recursive:true});
     if(mode.mobile)await page.locator('#interact').click({force:true,timeout:15000});
     else await page.keyboard.press('e');
     await page.waitForFunction(()=>document.getElementById('modalLayer')?.style.display==='grid',null,{timeout:15000});
-    await page.screenshot({path:out+'/'+mode.name+'-inventory-open.png',timeout:30000});
+    await captureRealBrowserFrame(page,out+'/'+mode.name+'-inventory-open.png');
     if(errors.length)throw Error(errors.slice(0,3).join('; '));
     records.push({mode:mode.name,steps:eventRecord,summary,openedInventario16x9:true});
     console.log('PASS Q1 REAL E '+mode.name,JSON.stringify({steps:eventRecord.length,chest:summary.chestOpen,forge:summary.forgeHot}));
