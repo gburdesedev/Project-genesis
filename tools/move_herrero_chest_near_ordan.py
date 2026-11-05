@@ -7,6 +7,19 @@ parent local (0.266666666667,-2.2), world (0.2,-1.65) with workshopScale .75.
 from pathlib import Path
 p=Path('index.html')
 s=p.read_text(encoding='utf-8')
+# Handle the immediately previous experimental position. This keeps the patch
+# reversible/idempotent for both old V014022 and already-patched branches.
+previous=[
+ ('position="-1.80 0 -1.266666666667" scale="1.333333333333 1 1.333333333333">',
+  'position=".266666666667 0 -2.2" scale="1.333333333333 1 1.333333333333">'),
+ ('[-1.80,-1.266666666667,.76]', '[.266666666667,-2.2,.76]'),
+ ('{x:center-1.35,y:0,z:-.95}', '{x:center+.2,y:0,z:-1.65}'),
+ ('{x:c-1.80,y:0,z:-1.266666666667}', '{x:c+.266666666667,y:0,z:-2.2}')
+]
+for old,new in previous:
+    if old in s:
+        s=s.replace(old,new)
+        print('MIGRATED previous experiment',old[:70])
 changes=[
   ('position="-4.08 0 -3.02" scale="1.333333333333 1 1.333333333333">\n<pc-model id="chestModel"',
    'position=".266666666667 0 -2.2" scale="1.333333333333 1 1.333333333333">\n<pc-model id="chestModel"'),
