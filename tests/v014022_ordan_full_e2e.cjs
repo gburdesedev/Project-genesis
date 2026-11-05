@@ -25,7 +25,7 @@ async function main(){
  await page.route('**/index.html*',async route=>{
   const response=await route.fetch();let body=await response.text();
   const marker='requestAnimationFrame(frame);\n\nsetLoadUI';
-  const hook='requestAnimationFrame(frame);\nwindow.__ORDAN_QA_READONLY__=()=>({step:tutorialStep,started:gameStarted,profession:selectedProfession,player:{x:px,z:pz},quest:document.getElementById("questTitle")?.textContent,objective:objectiveTarget()?.pos||null,interactable:currentInteractable?.id||null,visibilityToObjective:tutorialStep===8?lineClearTo(objectiveTarget().pos):null,movementAllowed:gameStarted&&modalLayer.style.display!=="grid"&&intro.style.display!=="grid",crafted:craftedItems.map(x=>({recipe:x.recipe,name:x.name,rarity:x.rarity})),mercenaryState,mentorState:mentorFollowState,marketWaypoint:marketEscortWaypoint,nav:{ticks:window.__ORDAN_QA_TICKS__||0,keys:Array.from(keys),inputs:{x:moveX,y:moveY},canMove:gameStarted&&modalLayer.style.display!=="grid"&&intro.style.display!=="grid",modalDisplay:modalLayer.style.display,introDisplay:intro.style.display,camYaw,nearbyCollisions:{n:wallBlocked(px,pz-.1),s:wallBlocked(px,pz+.1),e:wallBlocked(px+.1,pz),w:wallBlocked(px-.1,pz)}},modal:document.getElementById("modal")?.textContent?.slice(0,220)||""});\nsetLoadUI';
+  const hook='requestAnimationFrame(frame);\nwindow.__ORDAN_QA_READONLY__=()=>({step:tutorialStep,started:gameStarted,profession:selectedProfession,player:{x:px,z:pz},quest:document.getElementById("questTitle")?.textContent,objective:objectiveTarget()?.pos||null,interactable:currentInteractable?.id||null,directInteractable:chooseInteractable()?.id||null,visibilityToObjective:tutorialStep===8?lineClearTo(objectiveTarget().pos):null,movementAllowed:gameStarted&&modalLayer.style.display!=="grid"&&intro.style.display!=="grid",crafted:craftedItems.map(x=>({recipe:x.recipe,name:x.name,rarity:x.rarity})),mercenaryState,mentorState:mentorFollowState,marketWaypoint:marketEscortWaypoint,nav:{ticks:window.__ORDAN_QA_TICKS__||0,keys:Array.from(keys),inputs:{x:moveX,y:moveY},canMove:gameStarted&&modalLayer.style.display!=="grid"&&intro.style.display!=="grid",modalDisplay:modalLayer.style.display,introDisplay:intro.style.display,camYaw,nearbyCollisions:{n:wallBlocked(px,pz-.1),s:wallBlocked(px,pz+.1),e:wallBlocked(px+.1,pz),w:wallBlocked(px-.1,pz)}},modal:document.getElementById("modal")?.textContent?.slice(0,220)||""});\nsetLoadUI';
   if(body.includes(marker)){body=body.replace(marker,hook);inserted=true;}
   const frameBegin='function frame(now){requestAnimationFrame(frame);';
   if(body.includes(frameBegin))body=body.replace(frameBegin,'function frame(now){window.__ORDAN_QA_TICKS__=(window.__ORDAN_QA_TICKS__||0)+1;requestAnimationFrame(frame);');
@@ -118,7 +118,15 @@ async function main(){
      log('RELOCATED_CHEST_PROBE',{step:8,distance:dist,interactable:t?.interactable,lineClear:t?.visibilityToObjective});
      if(t?.interactable==='chest')return {ok:true,id:'chest',distance:dist};
    }
-   if(state.interactable)return {ok:true,id:state.interactable,step:state.step,tries:i};
+   if(state.interactable||state.directInteractable)return {ok:true,id:state.interactable||state.directInteractable,step:state.step,tries:i};
+   const actionRadius={0:2.2,1:2.25,2:2.1,3:1.95,4:2.0,5:2.2,6:2.25,7:2.2,8:1.95,10:2,11:2,12:2,13:2,17:2.5,19:2.6,21:2.2,23:2}[state.step];
+   const actionDist=state.objective&&state.player?Math.hypot(state.player.x-state.objective.x,state.player.z-state.objective.z):Infinity;
+   if(actionRadius&&actionDist<actionRadius-.1){
+     await page.keyboard.press('q');await delay(250);
+     const actionable=(await snap()).state?.directInteractable;
+     log('DIRECT_INTERACTION_PROBE',{step:state.step,distance:actionDist,radius:actionRadius,actionable:actionable||null});
+     if(actionable)return {ok:true,id:actionable,why:'actual target available without waiting for a graphics frame'};
+   }
    if(!state.objective)return {ok:false,why:'no target',step:state.step};
    const dist=p=>Math.hypot(p.x-state.objective.x,p.z-state.objective.z);
    const d0=dist(state.player);
