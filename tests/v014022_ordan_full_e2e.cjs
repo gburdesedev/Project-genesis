@@ -24,6 +24,18 @@ async function main(){
  let inserted=false;
  await page.route('**/index.html*',async route=>{
   const response=await route.fetch();let body=await response.text();
+  const oldBase="https://cdn.jsdelivr.net/gh/dustinc555/mygame@main/assets/vendor/quaternius/fantasy_props_megakit/gltf/";
+  const recoveries={
+    'Anvil_Log.gltf':"https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/8696981a95113a34feec26100e761e9e164327de/production/game_v014022/herrero_recovery/v001/anvil_quaternius_cc0_original/Anvil_Log.gltf",
+    'Bellows.gltf':"https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/8696981a95113a34feec26100e761e9e164327de/production/game_v014022/herrero_recovery/v001/bellows_cc0_candidate/Bellows.glb"
+  };
+  for(const [original,replacement] of Object.entries(recoveries)){
+    const source=oldBase+original;
+    if(!body.includes(source)) throw Error('Missing original asset reference in archived V014022: '+original);
+    body=body.replace(source,replacement);
+    log('REPLACED_MISSING_ASSET_IN_BROWSER_TEST',{original,source,replacement});
+  }
+
   const marker='requestAnimationFrame(frame);\n\nsetLoadUI';
   const hook='requestAnimationFrame(frame);\nwindow.__ORDAN_QA_READONLY__=()=>({step:tutorialStep,started:gameStarted,profession:selectedProfession,player:{x:px,z:pz},quest:document.getElementById("questTitle")?.textContent,objective:objectiveTarget()?.pos||null,interactable:currentInteractable?.id||null,crafted:craftedItems.map(x=>({recipe:x.recipe,name:x.name,rarity:x.rarity})),mercenaryState,mentorState:mentorFollowState,marketWaypoint:marketEscortWaypoint,modal:document.getElementById("modal")?.textContent?.slice(0,220)||""});\nsetLoadUI';
   if(body.includes(marker)){body=body.replace(marker,hook);inserted=true;}
