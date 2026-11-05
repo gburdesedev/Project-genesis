@@ -720,3 +720,20 @@
   -webkit-mask-image:radial-gradient(ellipse 73% 77% at center, #000 58%, transparent 100%)!important;
   mask-image:radial-gradient(ellipse 73% 77% at center, #000 58%, transparent 100%)!important;
 }
+
+
+/* Experimento V12B 03: presentación casi horizontal SOLO en el visor central.
+ * Rotación visual de imagen, no transformación del asset aprobado. */
+.genInv .genInvImageWrap[data-preview-mode="static"]:has(>img[src*="V12_V175_Color_J_Rugosidad034_Hero.png"]){
+  overflow:hidden!important;
+}
+.genInv .genInvImageWrap[data-preview-mode="static"]>img[src*="V12_V175_Color_J_Rugosidad034_Hero.png"]{
+  width:46%!important;
+  height:108%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  transform:rotate(-75deg) scale(1.12)!important;
+  transform-origin:center center!important;
+  flex-shrink:0!important;
+}
