@@ -2,12 +2,12 @@
   "url": "https://gburdesedev.github.io/Project-genesis/",
   "branch": "main",
   "sourceCommit": "6ea1c5ecb0134f306ebc70394c8a5d8fe968038e",
-  "at": "2026-11-05T20:01:37.611Z",
+  "at": "2026-11-05T20:14:27.754Z",
   "stages": [],
   "errors": [],
-  "exception": "locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-profession=\"Herrero\"]').first()\n    - locator resolved to <button type=\"button\" class=\"professionCard\" data-profession=\"Herrero\">…</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n\n    at /__w/Project-genesis/Project-genesis/tests/main_v014022_ordan_e2e.cjs:77:13",
+  "blocker": "Route not entered after selecting Herrero",
   "final": {
-    "at": "2026-11-05T20:08:34.513Z",
+    "at": "2026-11-05T20:21:46.550Z",
     "url": "https://gburdesedev.github.io/Project-genesis/",
     "ready": "complete",
     "visible": {
@@ -50,6 +50,7 @@
       "error": null
     }
   },
+  "durationSeconds": 445,
   "events": [
     {
       "s": 0,
@@ -59,7 +60,7 @@
       }
     },
     {
-      "s": 1,
+      "s": 0,
       "kind": "navigate",
       "data": "https://gburdesedev.github.io/Project-genesis/"
     },
@@ -80,10 +81,10 @@
       }
     },
     {
-      "s": 165,
+      "s": 90,
       "kind": "boot-watch",
       "data": {
-        "sec": 165,
+        "sec": 90,
         "visible": {
           "intro": false,
           "loading": true,
@@ -91,15 +92,15 @@
           "modal": false
         },
         "stage": "Cargando ruta completa de Herrero",
-        "count": "4 de 24 modelos únicos · 40 instancias",
-        "detail": "forgeStation · descargando · bytes no informados · 0 / 120 s"
+        "count": "6 de 24 modelos únicos · 40 instancias",
+        "detail": "benchReal · descargando · bytes no informados · 0 / 120 s"
       }
     },
     {
-      "s": 296,
+      "s": 221,
       "kind": "boot-watch",
       "data": {
-        "sec": 296,
+        "sec": 221,
         "visible": {
           "intro": false,
           "loading": true,
@@ -107,32 +108,16 @@
           "modal": false
         },
         "stage": "Cargando ruta completa de Herrero",
-        "count": "18 de 24 modelos únicos · 40 instancias",
-        "detail": "mercHairBuzz10 · descargando · bytes no informados · 0 / 120 s"
+        "count": "21 de 24 modelos únicos · 40 instancias",
+        "detail": "mercHairLong10 · procesando modelo · 0.2 MiB · 46 / 120 s"
       }
     },
     {
-      "s": 378,
-      "kind": "boot-watch",
-      "data": {
-        "sec": 378,
-        "visible": {
-          "intro": false,
-          "loading": true,
-          "hud": true,
-          "modal": false
-        },
-        "stage": "Juego completo listo",
-        "count": "24 de 24 modelos únicos · 40 instancias",
-        "detail": "Herrero preparado antes de elegir profesión."
-      }
-    },
-    {
-      "s": 385,
+      "s": 233,
       "kind": "snapshot",
       "data": {
         "label": "intro-visible",
-        "s": 385,
+        "s": 233,
         "visible": {
           "intro": true,
           "loading": false,
@@ -164,24 +149,270 @@
       }
     },
     {
-      "s": 402,
+      "s": 244,
       "kind": "screenshot-error",
       "data": {
         "label": "intro-visible",
-        "error": "TimeoutError: page.screenshot: Timeout 17000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n"
+        "error": "TimeoutError: page.screenshot: Timeout 6000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n"
       }
     },
     {
-      "s": 417,
-      "kind": "exception",
-      "data": "locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-profession=\"Herrero\"]').first()\n    - locator resolved to <button type=\"button\" class=\"professionCard\" data-profession=\"Herrero\">…</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n\n    at /__w/Project-genesis/Project-genesis/tests/main_v014022_ordan_e2e.cjs:77:13"
+      "s": 244,
+      "kind": "force-pointer-selection",
+      "data": {
+        "button": "Herrero",
+        "reason": "GPU-heavy canvas prevented Playwright stability wait"
+      }
     },
     {
-      "s": 417,
+      "s": 244,
+      "kind": "selected-herrero",
+      "data": true
+    },
+    {
+      "s": 244,
+      "kind": "route-watch",
+      "data": {
+        "sec": 244,
+        "visible": {
+          "intro": true,
+          "loading": false,
+          "hud": true,
+          "modal": false
+        },
+        "stage": "Juego completo listo",
+        "count": "24 de 24 modelos únicos · 40 instancias",
+        "detail": "Herrero preparado antes de elegir profesión.",
+        "quest": ""
+      }
+    },
+    {
+      "s": 258,
+      "kind": "route-watch",
+      "data": {
+        "sec": 258,
+        "visible": {
+          "intro": true,
+          "loading": false,
+          "hud": true,
+          "modal": false
+        },
+        "stage": "Juego completo listo",
+        "count": "24 de 24 modelos únicos · 40 instancias",
+        "detail": "Herrero preparado antes de elegir profesión.",
+        "quest": ""
+      }
+    },
+    {
+      "s": 272,
+      "kind": "route-watch",
+      "data": {
+        "sec": 272,
+        "visible": {
+          "intro": true,
+          "loading": false,
+          "hud": true,
+          "modal": false
+        },
+        "stage": "Juego completo listo",
+        "count": "24 de 24 modelos únicos · 40 instancias",
+        "detail": "Herrero preparado antes de elegir profesión.",
+        "quest": ""
+      }
+    },
+    {
+      "s": 286,
+      "kind": "route-watch",
+      "data": {
+        "sec": 286,
+        "visible": {
+          "intro": true,
+          "loading": false,
+          "hud": true,
+          "modal": false
+        },
+        "stage": "Juego completo listo",
+        "count": "24 de 24 modelos únicos · 40 instancias",
+        "detail": "Herrero preparado antes de elegir profesión.",
+        "quest": ""
+      }
+    },
+    {
+      "s": 300,
+      "kind": "route-watch",
+      "data": {
+        "sec": 300,
+        "visible": {
+          "intro": true,
+          "loading": false,
+          "hud": true,
+          "modal": false
+        },
+        "stage": "Juego completo listo",
+        "count": "24 de 24 modelos únicos · 40 instancias",
+        "detail": "Herrero preparado antes de elegir profesión.",
+        "quest": ""
+      }
+    },
+    {
+      "s": 314,
+      "kind": "route-watch",
+      "data": {
+        "sec": 314,
+        "visible": {
+          "intro": true,
+          "loading": false,
+          "hud": true,
+          "modal": false
+        },
+        "stage": "Juego completo listo",
+        "count": "24 de 24 modelos únicos · 40 instancias",
+        "detail": "Herrero preparado antes de elegir profesión.",
+        "quest": ""
+      }
+    },
+    {
+      "s": 328,
+      "kind": "route-watch",
+      "data": {
+        "sec": 328,
+        "visible": {
+          "intro": true,
+          "loading": false,
+          "hud": true,
+          "modal": false
+        },
+        "stage": "Juego completo listo",
+        "count": "24 de 24 modelos únicos · 40 instancias",
+        "detail": "Herrero preparado antes de elegir profesión.",
+        "quest": ""
+      }
+    },
+    {
+      "s": 342,
+      "kind": "route-watch",
+      "data": {
+        "sec": 342,
+        "visible": {
+          "intro": true,
+          "loading": false,
+          "hud": true,
+          "modal": false
+        },
+        "stage": "Juego completo listo",
+        "count": "24 de 24 modelos únicos · 40 instancias",
+        "detail": "Herrero preparado antes de elegir profesión.",
+        "quest": ""
+      }
+    },
+    {
+      "s": 356,
+      "kind": "route-watch",
+      "data": {
+        "sec": 356,
+        "visible": {
+          "intro": true,
+          "loading": false,
+          "hud": true,
+          "modal": false
+        },
+        "stage": "Juego completo listo",
+        "count": "24 de 24 modelos únicos · 40 instancias",
+        "detail": "Herrero preparado antes de elegir profesión.",
+        "quest": ""
+      }
+    },
+    {
+      "s": 370,
+      "kind": "route-watch",
+      "data": {
+        "sec": 370,
+        "visible": {
+          "intro": true,
+          "loading": false,
+          "hud": true,
+          "modal": false
+        },
+        "stage": "Juego completo listo",
+        "count": "24 de 24 modelos únicos · 40 instancias",
+        "detail": "Herrero preparado antes de elegir profesión.",
+        "quest": ""
+      }
+    },
+    {
+      "s": 384,
+      "kind": "route-watch",
+      "data": {
+        "sec": 384,
+        "visible": {
+          "intro": true,
+          "loading": false,
+          "hud": true,
+          "modal": false
+        },
+        "stage": "Juego completo listo",
+        "count": "24 de 24 modelos únicos · 40 instancias",
+        "detail": "Herrero preparado antes de elegir profesión.",
+        "quest": ""
+      }
+    },
+    {
+      "s": 398,
+      "kind": "route-watch",
+      "data": {
+        "sec": 398,
+        "visible": {
+          "intro": true,
+          "loading": false,
+          "hud": true,
+          "modal": false
+        },
+        "stage": "Juego completo listo",
+        "count": "24 de 24 modelos únicos · 40 instancias",
+        "detail": "Herrero preparado antes de elegir profesión.",
+        "quest": ""
+      }
+    },
+    {
+      "s": 412,
+      "kind": "route-watch",
+      "data": {
+        "sec": 412,
+        "visible": {
+          "intro": true,
+          "loading": false,
+          "hud": true,
+          "modal": false
+        },
+        "stage": "Juego completo listo",
+        "count": "24 de 24 modelos únicos · 40 instancias",
+        "detail": "Herrero preparado antes de elegir profesión.",
+        "quest": ""
+      }
+    },
+    {
+      "s": 426,
+      "kind": "route-watch",
+      "data": {
+        "sec": 426,
+        "visible": {
+          "intro": true,
+          "loading": false,
+          "hud": true,
+          "modal": false
+        },
+        "stage": "Juego completo listo",
+        "count": "24 de 24 modelos únicos · 40 instancias",
+        "detail": "Herrero preparado antes de elegir profesión.",
+        "quest": ""
+      }
+    },
+    {
+      "s": 433,
       "kind": "snapshot",
       "data": {
-        "label": "exception",
-        "s": 417,
+        "label": "route-timeout",
+        "s": 433,
         "visible": {
           "intro": true,
           "loading": false,
@@ -213,19 +444,63 @@
       }
     },
     {
-      "s": 434,
+      "s": 439,
       "kind": "screenshot-error",
       "data": {
-        "label": "exception",
-        "error": "TimeoutError: page.screenshot: Timeout 17000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n"
+        "label": "route-timeout",
+        "error": "TimeoutError: page.screenshot: Timeout 6000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n"
+      }
+    },
+    {
+      "s": 439,
+      "kind": "snapshot",
+      "data": {
+        "label": "final",
+        "s": 439,
+        "visible": {
+          "intro": true,
+          "loading": false,
+          "hud": true,
+          "modal": false
+        },
+        "stage": "Juego completo listo",
+        "detail": "Herrero preparado antes de elegir profesión.",
+        "count": "24 de 24 modelos únicos · 40 instancias",
+        "quest": "",
+        "person": {
+          "player": [
+            0,
+            0,
+            6.3
+          ],
+          "ordan": [
+            1.72,
+            0,
+            1.9
+          ]
+        },
+        "errors": [],
+        "boot": {
+          "loaded": 4,
+          "total": 4,
+          "error": null
+        }
+      }
+    },
+    {
+      "s": 445,
+      "kind": "screenshot-error",
+      "data": {
+        "label": "final",
+        "error": "TimeoutError: page.screenshot: Timeout 6000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n"
       }
     }
   ],
   "samples": [
     {
-      "seconds": 385,
+      "seconds": 233,
       "label": "intro-visible",
-      "at": "2026-11-05T20:08:02.499Z",
+      "at": "2026-11-05T20:18:20.272Z",
       "url": "https://gburdesedev.github.io/Project-genesis/",
       "ready": "complete",
       "visible": {
@@ -269,9 +544,55 @@
       }
     },
     {
-      "seconds": 417,
-      "label": "exception",
-      "at": "2026-11-05T20:08:34.513Z",
+      "seconds": 433,
+      "label": "route-timeout",
+      "at": "2026-11-05T20:21:40.542Z",
+      "url": "https://gburdesedev.github.io/Project-genesis/",
+      "ready": "complete",
+      "visible": {
+        "intro": true,
+        "loading": false,
+        "hud": true,
+        "modal": false
+      },
+      "stage": "Juego completo listo",
+      "detail": "Herrero preparado antes de elegir profesión.",
+      "count": "24 de 24 modelos únicos · 40 instancias",
+      "percent": "100%",
+      "quest": "",
+      "questText": "",
+      "questEy": "PROTOTIPO · SELECCIÓN DE PROFESIÓN",
+      "prompt": "",
+      "modal": "",
+      "dialogNext": false,
+      "buttons": [],
+      "person": {
+        "player": [
+          0,
+          0,
+          6.3
+        ],
+        "ordan": [
+          1.72,
+          0,
+          1.9
+        ]
+      },
+      "diagnostic": {
+        "errors": [],
+        "count": 130
+      },
+      "runtime": [],
+      "boot": {
+        "loaded": 4,
+        "total": 4,
+        "error": null
+      }
+    },
+    {
+      "seconds": 439,
+      "label": "final",
+      "at": "2026-11-05T20:21:46.550Z",
       "url": "https://gburdesedev.github.io/Project-genesis/",
       "ready": "complete",
       "visible": {
