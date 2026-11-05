@@ -586,9 +586,12 @@
       "id": "plaza-fountain-v011",
       "name": "Plaza · Fuente delfín HQ original V011 · 16.7 MB",
       "kind": "fountain",
-      "file": "../assets/vendor/genesis/externals/genesisFountainV011HQAsset/src/PG_Dolphin_Fountain_V011_PlayCanvas_HQ_Optimized.glb",
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/fountain/PG_Dolphin_Fountain_V011_PlayCanvas_HQ_Optimized.glb",
       "bytes": 16715688,
-      "approval": "original_v014022"
+      "approval": "original_v014022",
+      "blobSha": "075fdd0457795dcadb853a8cbeadd20f58f7e097",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
     },
     {
       "id": "plaza-tree-oak-lod2",
@@ -596,9 +599,13 @@
       "kind": "tree-lod",
       "species": "oak",
       "lod": 2,
-      "file": "../assets/vendor/genesis/externals/tree_v005_oak_lod2/src/lod2.glb",
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/oak/lod2.glb",
       "mobilePolicy": "required",
-      "approval": "original_v014022"
+      "approval": "original_v014022",
+      "bytes": 5533288,
+      "blobSha": "b066d5dda048972ea0a07cf60ce4125f60125970",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
     },
     {
       "id": "plaza-tree-oak-lod1",
@@ -606,9 +613,13 @@
       "kind": "tree-lod",
       "species": "oak",
       "lod": 1,
-      "file": "../assets/vendor/genesis/externals/tree_v005_oak_lod1/src/lod1.glb",
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/oak/lod1.glb",
       "mobilePolicy": "deferred",
-      "approval": "original_v014022"
+      "approval": "original_v014022",
+      "bytes": 6995784,
+      "blobSha": "c2426117dafe7a4f5c2ed1f596ebb5ac13feb10d",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
     },
     {
       "id": "plaza-tree-ash-lod2",
@@ -616,9 +627,13 @@
       "kind": "tree-lod",
       "species": "ash",
       "lod": 2,
-      "file": "../assets/vendor/genesis/externals/tree_v005_ash_lod2/src/lod2.glb",
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/ash/lod2.glb",
       "mobilePolicy": "required",
-      "approval": "original_v014022"
+      "approval": "original_v014022",
+      "bytes": 5398940,
+      "blobSha": "d73c338f98b50cdb91f5bbc849f0954750875322",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
     },
     {
       "id": "plaza-tree-ash-lod1",
@@ -626,9 +641,13 @@
       "kind": "tree-lod",
       "species": "ash",
       "lod": 1,
-      "file": "../assets/vendor/genesis/externals/tree_v005_ash_lod1/src/lod1.glb",
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/ash/lod1.glb",
       "mobilePolicy": "deferred",
-      "approval": "original_v014022"
+      "approval": "original_v014022",
+      "bytes": 6861436,
+      "blobSha": "2b0353aacee89d5d2cd9102107d6f9c7648c6f89",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
     },
     {
       "id": "plaza-tree-linden-lod2",
@@ -636,9 +655,13 @@
       "kind": "tree-lod",
       "species": "linden",
       "lod": 2,
-      "file": "../assets/vendor/genesis/externals/tree_v005_linden_lod2/src/lod2.glb",
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/linden/lod2.glb",
       "mobilePolicy": "required",
-      "approval": "original_v014022"
+      "approval": "original_v014022",
+      "bytes": 5494068,
+      "blobSha": "1075db16e880b1a6dc0f5544cd5b1e014a0252e5",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
     },
     {
       "id": "plaza-tree-linden-lod1",
@@ -646,9 +669,13 @@
       "kind": "tree-lod",
       "species": "linden",
       "lod": 1,
-      "file": "../assets/vendor/genesis/externals/tree_v005_linden_lod1/src/lod1.glb",
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/linden/lod1.glb",
       "mobilePolicy": "deferred",
-      "approval": "original_v014022"
+      "approval": "original_v014022",
+      "bytes": 6956564,
+      "blobSha": "2768e5df917fb6bf1b4212bf1a46011a12d3ba23",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
     },
     {
       "id": "plaza-tree-maple-lod2",
@@ -656,9 +683,13 @@
       "kind": "tree-lod",
       "species": "maple",
       "lod": 2,
-      "file": "../assets/vendor/genesis/externals/tree_v005_maple_lod2/src/lod2.glb",
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/maple/lod2.glb",
       "mobilePolicy": "required",
-      "approval": "original_v014022"
+      "approval": "original_v014022",
+      "bytes": 5021964,
+      "blobSha": "4c19defb91df6430f35c7e04a48588b4f360e89f",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
     },
     {
       "id": "plaza-tree-maple-lod1",
@@ -666,9 +697,13 @@
       "kind": "tree-lod",
       "species": "maple",
       "lod": 1,
-      "file": "../assets/vendor/genesis/externals/tree_v005_maple_lod1/src/lod1.glb",
+      "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/maple/lod1.glb",
       "mobilePolicy": "deferred",
-      "approval": "original_v014022"
+      "approval": "original_v014022",
+      "bytes": 6484460,
+      "blobSha": "05fd07404f8b3368a7848a678cf59ebefec2b267",
+      "repository": "ProjectgenesisAssets/genesis-workshop-assets",
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
     }
   ],
   "plazaRestoration": {
@@ -754,7 +789,11 @@
       -0.5,
       9.5
     ],
-    "approvedForGame": false
+    "approvedForGame": false,
+    "approvedAssetsRepo": "ProjectgenesisAssets/genesis-workshop-assets",
+    "approvedAssetsCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd",
+    "approvedAssetsPrefix": "assets/approved/v0188/plaza/",
+    "localVendorFallback": false
   },
   "scene": {
     "restoration": "V014022 plaza render, no change to original V0187 workshop layout or quest"
