@@ -190,34 +190,44 @@ function render(){
  let root=document.getElementById('genesisAssetDetails');
  if(!root){
   root=document.createElement('section');root.id='genesisAssetDetails';
-  root.style.cssText='margin:12px auto 0;max-width:98%;border:1px solid #756039;border-radius:8px;padding:9px;text-align:left;font:12px/1.45 monospace;color:#d4dbe3;background:rgba(0,0,0,.3)';
-  root.innerHTML='<div style="font-weight:bold;color:#f3d38b;margin-bottom:6px">V0.14.022 · ARCHIVOS · DESCARGA INDIVIDUAL <button id="genesisCopyDiagnostic" style="float:right;padding:4px 8px;background:#2a4150;color:white;border:1px solid #c1a46e;border-radius:5px">COPIAR INFORME</button></div><div id="genesisAssetRows" style="max-height:210px;overflow:auto"></div>';
+  root.style.cssText='margin:7px auto 0;max-width:98%;border:1px solid #756039;border-radius:8px;padding:7px;text-align:left;font:12px/1.35 system-ui,sans-serif;color:#e0e9ed;background:rgba(0,0,0,.24)';
+  root.innerHTML='<div style="font-weight:bold;color:#f3d38b;margin-bottom:4px">V0.14.022 · ARCHIVOS · DESCARGA INDIVIDUAL <button id="genesisCopyDiagnostic" style="float:right;padding:4px 8px;background:#2a4150;color:white;border:1px solid #c1a46e;border-radius:5px">COPIAR INFORME</button></div><div id="genesisAssetRows" style="max-height:250px;overflow:auto"></div>';
   (document.getElementById('loadDetail')?.parentElement||document.body).appendChild(root);
   root.querySelector('button').addEventListener('click',()=>{
-   const text=JSON.stringify(snapshot(),null,2);
-   navigator.clipboard?.writeText(text).catch(()=>{});
-   const box=document.createElement('textarea');box.value=text;box.style.cssText='width:100%;height:130px';root.appendChild(box);box.select();
+   const txt=JSON.stringify(snapshot(),null,2);
+   navigator.clipboard?.writeText(txt).catch(()=>{});
+   const box=document.createElement('textarea');box.value=txt;box.style.cssText='width:100%;height:130px';root.appendChild(box);box.select();
   });
  }
  const rows=[...records.values()].filter(r=>/\.(glb|gltf|bin|png|jpg|jpeg|webp|ktx2|mp3|ogg|wav)(\?|$)/i.test(r.url));
- const priority=r=>/error|timeout|cancelado/.test(r.state)?0:/descargando|solicitado|respuesta/.test(r.state)?1:/pendiente/.test(r.state)?2:3;
+ const priority=r=>/error|timeout|cancelado|carga en pausa/.test(r.state)?0:/descargando|solicitado|respuesta|verificando/.test(r.state)?1:/pendiente/.test(r.state)?2:3;
  rows.sort((a,b)=>priority(a)-priority(b)||a.created-b.created);
  const container=document.getElementById('genesisAssetRows');
  if(!container)return;
  container.replaceChildren();
  const active=rows.filter(r=>priority(r)<3);
- const shown=[...active.slice(0,70),...rows.filter(r=>priority(r)===3).slice(-7)];
+ const shown=[...active.slice(0,65),...rows.filter(r=>priority(r)===3).slice(-7)];
  for(const r of shown){
   const line=document.createElement('div');
-  const short=new URL(r.url).pathname.split('/').slice(-3).join('/');
-  const stale=/descargando|solicitado|respuesta/.test(r.state)&&performance.now()-r.lastChange>limit;
-  line.textContent=(stale?'SIN AVANCE · ':'')+(r.assetId?'['+r.assetId+'] ':'')+short+' · '+human(r.received)+' / '+human(r.total)+' · '+r.state+(r.error?' · '+r.error:'');
-  line.style.cssText='border-bottom:1px solid #283743;padding:3px 0;overflow-wrap:anywhere;color:'+(/error|timeout/.test(r.state)?'#ff988c':stale?'#ffcf8e':'inherit');
-  container.appendChild(line);
+  const basename=new URL(r.url).pathname.split('/').pop()||r.url;
+  const stale=/descargando|solicitado|respuesta|verificando/.test(r.state)&&performance.now()-r.lastChange>limit;
+  const ratio=r.total?Math.min(100,Math.floor(100*r.received/r.total)):/^(descargado|recurso preparado)/.test(r.state)?100:0;
+  const isBad=/error|timeout|carga en pausa/.test(r.state);
+  const first=document.createElement('div');
+  first.textContent=(r.assetId?r.assetId+' · ':'')+decodeURIComponent(basename);
+  first.title=r.url;
+  first.style.cssText='font-weight:700;color:#e7eaf0;font-size:11px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+  const second=document.createElement('div');
+  second.textContent=human(r.received)+' / '+human(r.total)+' · '+(stale?'SIN AVANCE':r.state)+(r.error?' · '+r.error:'');
+  second.title=second.textContent;
+  second.style.cssText='font:10px/1.2 ui-monospace,monospace;color:'+(isBad?'#ff988c':stale?'#ffce86':'#a6c2cb')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+  const track=document.createElement('div');track.style.cssText='height:4px;border-radius:5px;background:#07111b;margin-top:3px;overflow:hidden';
+  const fill=document.createElement('div');fill.style.cssText='height:100%;width:'+ratio+'%;background:'+(isBad?'#c96a5f':'#d7ad65');
+  track.appendChild(fill);line.append(first,second,track);container.appendChild(line);
  }
  if(!shown.length)container.textContent='Esperando solicitudes de recursos…';
  const heading=root.firstElementChild;
- heading.firstChild.textContent='V0.14.022 · ARCHIVOS · '+rows.length+' detectados · '+rows.filter(r=>priority(r)===3).length+' completados · '+active.length+' pendientes ';
+ heading.firstChild.textContent='V0.14.022 · '+rows.length+' archivos detectados · '+rows.filter(r=>priority(r)===3).length+' completos · '+active.length+' pendientes ';
 }
 function snapshot(){
  return{build:document.querySelector('.protoKicker')?.textContent||'',elapsedSeconds:Math.round((performance.now()-started)/1000),location:location.pathname,records:[...records.values()].map(r=>({...r,ageSeconds:Math.round((performance.now()-r.lastChange)/1000)})),errors};
