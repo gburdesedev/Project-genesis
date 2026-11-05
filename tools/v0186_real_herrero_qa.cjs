@@ -37,7 +37,7 @@ const results=[];
           if(!interior||!model)throw Error('V038 real station not mounted');
           return {
             meshCount:interior.renderMeshCount,
-            lightsOff:interior.forgeHot===false,
+            lightsOff:interior.forgeHot===false&&!interior.fireLightEnabled,
             worldPosition:interior.worldPosition,
             modelWorldPosition:[model.getPosition().x,model.getPosition().z],
             closed:api.canWalk({x:0,z:.16},{x:0,z:-.16},0)===false,
@@ -88,8 +88,8 @@ const results=[];
         // door uses eased continuous movement. Verify the completed swing,
         // not the first partially-open animation frame.
         await page.waitForFunction(()=>window.__GENESIS_V017_VILLAGE__?.doorAngle<-85,null,{timeout:25000});
-        const now=await page.evaluate(()=>({step:window.__GENESIS_V013_LEGACY__.game.step(),hot:window.__GENESIS_V0186_INTERIOR__.forgeHot,door:window.__GENESIS_V017_VILLAGE__.doorAngle}));
-        assert.equal(now.step,7);assert(now.hot);assert(now.door< -60,'Original -92° swing missing');
+        const now=await page.evaluate(()=>({step:window.__GENESIS_V013_LEGACY__.game.step(),hot:window.__GENESIS_V0186_INTERIOR__.forgeHot,fireLight:window.__GENESIS_V0186_INTERIOR__.fireLightEnabled,door:window.__GENESIS_V017_VILLAGE__.doorAngle}));
+        assert.equal(now.step,7);assert(now.hot&&now.fireLight,'Source forge + warm omni light must activate together');assert(now.door< -60,'Original -92° swing missing');
         await page.waitForTimeout(850);
         await page.screenshot({path:out+'/'+mode.name+'-forge-lit.png',timeout:50000});
         await page.evaluate(()=>window.__V0186_QA_CAM_DISPOSE__?.());
