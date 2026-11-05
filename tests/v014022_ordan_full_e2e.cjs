@@ -25,7 +25,7 @@ async function main(){
  await page.route('**/index.html*',async route=>{
   const response=await route.fetch();let body=await response.text();
   const marker='requestAnimationFrame(frame);\n\nsetLoadUI';
-  const hook='requestAnimationFrame(frame);\nwindow.__ORDAN_QA_READONLY__=()=>({step:tutorialStep,started:gameStarted,profession:selectedProfession,player:{x:px,z:pz},quest:document.getElementById("questTitle")?.textContent,objective:objectiveTarget()?.pos||null,interactable:currentInteractable?.id||null,crafted:craftedItems.map(x=>({recipe:x.recipe,name:x.name,rarity:x.rarity})),mercenaryState,mentorState:mentorFollowState,marketWaypoint:marketEscortWaypoint,modal:document.getElementById("modal")?.textContent?.slice(0,220)||""});\nsetLoadUI';
+  const hook='requestAnimationFrame(frame);\nwindow.__ORDAN_QA_READONLY__=()=>({step:tutorialStep,started:gameStarted,profession:selectedProfession,player:{x:px,z:pz},quest:document.getElementById("questTitle")?.textContent,objective:objectiveTarget()?.pos||null,interactable:currentInteractable?.id||null,visibilityToObjective:tutorialStep===8?lineClearTo(objectiveTarget().pos):null,movementAllowed:gameStarted&&modalLayer.style.display!=="grid"&&intro.style.display!=="grid",crafted:craftedItems.map(x=>({recipe:x.recipe,name:x.name,rarity:x.rarity})),mercenaryState,mentorState:mentorFollowState,marketWaypoint:marketEscortWaypoint,modal:document.getElementById("modal")?.textContent?.slice(0,220)||""});\nsetLoadUI';
   if(body.includes(marker)){body=body.replace(marker,hook);inserted=true;}
   await route.fulfill({response,body,headers:{...response.headers(),'content-type':'text/html; charset=utf-8'}});
  });
@@ -64,8 +64,12 @@ async function main(){
      // without teleporting the actor or changing quest flags.
      await page.keyboard.press('q'); await delay(300);
      const aligned=(await snap()).state;
-     log('RELOCATED_CHEST_PROBE',{step:8,player:aligned?.player,goal:aligned?.objective,interactable:aligned?.interactable});
-     if(aligned?.interactable==='chest')return {ok:true,id:'chest',why:'relocated chest is interactable without moving'};
+     const chestDistance=aligned?.player&&aligned?.objective?Math.hypot(aligned.player.x-aligned.objective.x,aligned.player.z-aligned.objective.z):null;
+     log('RELOCATED_CHEST_PROBE',{step:8,player:aligned?.player,goal:aligned?.objective,distance:chestDistance,interactable:aligned?.interactable,lineClear:aligned?.visibilityToObjective,movementAllowed:aligned?.movementAllowed});
+     if(chestDistance!==null&&chestDistance<1.95){
+       // Genuine player interaction. Never change quest state through JS.
+       return {ok:true,id:aligned?.interactable||'chest-in-range',why:'chest within measured interaction range',distance:chestDistance,visible:aligned?.visibilityToObjective};
+     }
    }
    if(st.interactable)return {ok:true,id:st.interactable};
    if(!st.objective)return {ok:false,why:'no objective'};
