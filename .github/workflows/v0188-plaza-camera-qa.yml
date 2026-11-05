@@ -1,0 +1,53 @@
+name: V0188 camera and workshop doors real PlayCanvas QA
+on:
+  push:
+    branches: [experiment/v0188-plaza-original-v014022-20261105]
+    paths:
+      - 'v0188/**'
+      - 'tools/v0188_plaza_camera_door_qa.cjs'
+      - '.github/workflows/v0188-camera-door-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate experimental source, isolated saves and original assets
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib
+          j=json.loads(pathlib.Path('v0188/manifest.json').read_text())
+          assert j['version']=='0.15-v0188'
+          assert j['lightingAsset']['format']=='Radiance RGBE HDR 32-bit'
+          w={x['id']:x for x in j['workshopAssets']}
+          assert 'door-herrero-v082-b' in w and 'portal-arch-v0185' in w
+          assert 'forge-station-v038' in w
+          print('V0188 manifest, original GLBs and HDRI pinned')
+          PY
+          node --check v0188/v017-village.js
+          node --check v0188/herrero-interior-v0186.js
+          node --check v0188/v014022-plaza-restoration.js
+          node --check v0188/v017-workshop-preload.js
+          node --check tools/v0188_plaza_camera_door_qa.cjs
+      - name: Install Chromium Playwright with software WebGL
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Test PC pointer-lock, mobile camera, animated door, real GLBs, loading
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v0188-http.log 2>&1 &
+          node tools/v0188_plaza_camera_door_qa.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v0188-original-camera-and-door-PC-mobile
+          path: /tmp/genesis-v0188-camera-door/
+          retention-days: 14
+          if-no-files-found: warn
