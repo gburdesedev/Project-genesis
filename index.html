@@ -1134,6 +1134,21 @@ try{
  });
 }catch(err){failLoading(err.message,'La aldea no terminó de cargar. Reintentá.');throw err}
 window.__genesisVillage=village;
+/* V014022 GATED AUXILIARY ASSETS: other modules may not start standalone downloads. */
+bootGroups.paredes.total++;
+activeBootGroup='paredes';
+showBootProgress('Cargando estructuras','Preparando paredes del Arcanista V006 desde la misma cola.');
+try{
+ let begin=globalThis.GenesisBeginArcanistaWallsV006;
+ for(let i=0;i<40&&!begin;i++){await new Promise(resolve=>setTimeout(resolve,250));begin=globalThis.GenesisBeginArcanistaWallsV006}
+ if(!begin)throw Error('No se inició el módulo de Arcanista');
+ await begin();
+ bootGroups.paredes.ready++;
+ showBootProgress('Estructuras listas','Paredes del Arcanista terminadas.');
+}catch(error){
+ bootGroups.paredes.ready++;bootGroups.paredes.failed=(bootGroups.paredes.failed||0)+1;
+ showBootProgress('Estructura de Arcanista: respaldo','Se conserva la fachada anterior: '+String(error?.message||error));
+}
 let genesisMarket=null;
 try {
  genesisMarket=mountGenesisMarket({
@@ -1153,6 +1168,13 @@ try {
      }
    }
  });
+ bootGroups.objetos.total++;
+ activeBootGroup='objetos';
+ showBootProgress('Cargando personajes y objetos','Preparando mercader aprobado, sin carga diferida.');
+ await genesisMarket.initialReady;
+ bootGroups.objetos.ready++;
+ if(genesisMarket.visual.phase!=='ready')bootGroups.objetos.failed=(bootGroups.objetos.failed||0)+1;
+ showBootProgress('Mercado preparado','Mercader: '+genesisMarket.visual.phase);
 } catch (error) { console.error('Mercado V001 no pudo instalarse',error); }
 
 function hideCollisionMeshes(modelEl){const root=modelEl?.contentEntity;if(!root)return;const stack=[root];while(stack.length){const node=stack.pop();const n=(node.name||'').toLowerCase();let collisionLike=n.includes('convcolonly')||n.startsWith('collision_')||n==='collision';const meshes=node.render?.meshInstances||[];if(meshes.length&&meshes.every(mi=>(mi.material?.name||'').toLowerCase().includes('collision')))collisionLike=true;if(collisionLike)node.enabled=false;for(const child of node.children||[])stack.push(child)}}
@@ -1784,7 +1806,9 @@ async function prepareRoute(prof){
  // No post-start streaming: both groups must finish before startRoute().
  for(const [priority,id] of [['critical','herreroCritico'],['stream','herreroEscena']]){
   const group=bootGroups[id],description=priority==='critical'?'modelos esenciales':'taller y decoración';
-  group.total=groupRouteModels(routeModels(prof,priority)).length;
+  const overlayCount=(priority==='stream'&&prof==='Herrero')?4:0;
+  const coreTotal=groupRouteModels(routeModels(prof,priority)).length;
+  group.total=coreTotal+overlayCount;
   group.ready=0;group.failed=0;activeBootGroup=id;
   showBootProgress('Cargando '+prof+' · '+description,'Preparando '+group.total+' assets; sin carga diferida.');
   let attempt=0;
@@ -1793,17 +1817,38 @@ async function prepareRoute(prof){
    const already=Math.max(0,group.total-missing);
    group.ready=already;group.failed=0;
    const report=await activateRouteGroups(prof,priority,(done,total,label)=>{
-    group.ready=Math.min(group.total,already+done);
+    group.ready=Math.min(coreTotal,already+done);
     showBootProgress('Cargando '+prof+' · '+description,label);
    });
    if(report.failed===0){
-    group.ready=group.total;group.failed=0;
-    showBootProgress(prof+' · '+description+' preparado','Todos los assets de este grupo están instanciados.');
+    group.ready=coreTotal;group.failed=0;
+    showBootProgress(prof+' · '+description+' preparado','Modelos de ruta instanciados.');
     break;
    }
    group.failed=report.failed;attempt++;
    showBootProgress(prof+' · grupo en pausa',report.errors.slice(0,3).join(' | '));
    await loaderRetryDelay(prof+' · '+description+' · '+report.failed+' pendientes',attempt,report.errors.slice(0,3).join(' | '));
+  }
+  if(overlayCount){
+   const extraReady=new Set();
+   showBootProgress('Cargando herrería · geometría aprobada','Paredes, techo, chimenea y puerta; se integran antes de jugar.');
+   try{
+    let begin=globalThis.GenesisBeginHerreroV015;
+    for(let i=0;i<40&&!begin;i++){await sleep(250);begin=globalThis.GenesisBeginHerreroV015}
+    if(!begin)throw Error('Módulo visual de herrería no disponible');
+    await begin(name=>{
+     if(extraReady.has(name))return;
+     extraReady.add(name);group.ready=coreTotal+extraReady.size;
+     showBootProgress('Cargando herrería · geometría aprobada',name+' · '+extraReady.size+' de 4');
+    });
+    group.ready=group.total;group.failed=0;
+    showBootProgress('Herrería completa','Los cuatro modelos visuales también están listos.');
+   }catch(error){
+    // The original workshop geometry stays intact. No unbounded task remains
+    // in the background, and the exact failed module stays visible.
+    group.failed=Math.max(1,overlayCount-extraReady.size);
+    showBootProgress('Herrería · visual de respaldo','No se modificó el taller original: '+String(error?.message||error));
+   }
   }
  }
  try{refreshRouteBindings(prof)}catch(err){console.warn('Bindings de ruta:',err)}
