@@ -187,14 +187,15 @@ async function loadContainer(url,{maxAttempts=2}={}){
  const job=(async()=>{
   let attempt=0;
   while(true){
-   const {contents,links}=await staged(id).catch(async error=>{
+   const stagedData=await staged(id).catch(async error=>{
     attempt++;
     notify(id,'carga en pausa',null,null,error?.message||String(error));
     if(attempt>=maxAttempts)throw error;
     await pause(nameOf(id),attempt,error?.message||String(error));
     return null;
    });
-   if(!contents)continue;
+   if(!stagedData)continue;
+   const {contents,links}=stagedData;
    // A blob here is deliberately only an in-memory handoff. The actual
    // network download and glTF dependencies already passed our queue.
    const root=URL.createObjectURL(new Blob([contents],{
