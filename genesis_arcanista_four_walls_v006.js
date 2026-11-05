@@ -22,19 +22,17 @@ function findArcane(app){
  const item=app?.root?.findByName('Arcanista · fachada cerrada');
  return item?.parent?item:null;
 }
-function loadGlb(app){
- return new Promise((resolve,reject)=>{
-  app.assets.loadFromUrl(MODEL_URL,'container',(err,asset)=>{
-   if(err||!asset?.resource)return reject(Error('Arcane four walls: '+String(err||'Empty glTF')));
-   const mesh=asset.resource.instantiateRenderEntity();
-   const components=mesh.findComponents('render');
-   if(!components?.length){mesh.destroy();return reject(Error('Arcanista GLB empty'))}
-   for(const c of components){c.castShadows=true;c.receiveShadows=true}
-   state.modelMeshes=components.reduce((n,c)=>n+(c.meshInstances?.length||0),0);
-   resolve(mesh);
-  });
- });
+async function loadGlb(app){
+ const asset=await window.GenesisStreamLoader.loadContainer(MODEL_URL,{maxAttempts:2});
+ if(!asset?.resource)throw Error('Arcane four walls: empty glTF');
+ const mesh=asset.resource.instantiateRenderEntity();
+ const components=mesh.findComponents('render');
+ if(!components?.length){mesh.destroy();throw Error('Arcanista GLB empty');}
+ for(const c of components){c.castShadows=true;c.receiveShadows=true}
+ state.modelMeshes=components.reduce((n,c)=>n+(c.meshInstances?.length||0),0);
+ return mesh;
 }
+
 async function mount(){
  for(let step=0;step<1200;step++){
   const app=findApp();
@@ -82,5 +80,12 @@ async function mount(){
  }
  state.phase='village-unavailable-after-15min';
 }
-mount().catch(error=>{state.phase='error';state.error=String(error?.stack||error);
- console.error('[GENESIS_ARCANISTA_V006]',error)});
+let pendingMount=null;
+globalThis.GenesisBeginArcanistaWallsV006=()=>{
+ // Wait for the initial 'Estructuras' stage. Never start autonomous network work.
+ if(!pendingMount)pendingMount=mount().catch(error=>{
+  state.phase='error';state.error=String(error?.stack||error);
+  pendingMount=null;console.error('[GENESIS_ARCANISTA_V006]',error);throw error;
+ });
+ return pendingMount;
+};
