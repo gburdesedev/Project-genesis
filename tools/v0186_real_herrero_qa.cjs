@@ -84,6 +84,10 @@ const results=[];
           return record;
         });
         await page.waitForFunction(()=>window.__GENESIS_V0186_INTERIOR__?.forgeHot===true,null,{timeout:25000});
+        // Q1 gate and forge fire update on the first frame; the original -92°
+        // door uses eased continuous movement. Verify the completed swing,
+        // not the first partially-open animation frame.
+        await page.waitForFunction(()=>window.__GENESIS_V017_VILLAGE__?.doorAngle<-85,null,{timeout:25000});
         const now=await page.evaluate(()=>({step:window.__GENESIS_V013_LEGACY__.game.step(),hot:window.__GENESIS_V0186_INTERIOR__.forgeHot,door:window.__GENESIS_V017_VILLAGE__.doorAngle}));
         assert.equal(now.step,7);assert(now.hot);assert(now.door< -60,'Original -92° swing missing');
         await page.waitForTimeout(850);
