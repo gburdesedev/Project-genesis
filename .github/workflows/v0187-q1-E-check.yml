@@ -3,6 +3,7 @@ on:
   push:
     branches: [experiment/v0187-camera-door-gameplay-fix]
     paths:
+      - 'v0187/**'
       - 'tools/v0187_q1_e_key_qa.cjs'
       - '.github/workflows/v0187-q1-E-check.yml'
   workflow_dispatch:
