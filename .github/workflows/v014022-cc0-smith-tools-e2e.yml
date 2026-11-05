@@ -33,36 +33,19 @@ jobs:
           print('PUBLIC_ORG_ASSET_OK',p.name,len(b))
           PY
           done
-      - name: Replace only two broken original external references
+      - name: Verify patched runtime source points at immutable organization artifacts
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('index.html')
-          html=p.read_text()
-          pairs={
-            'https://cdn.jsdelivr.net/gh/dustinc555/mygame@main/assets/vendor/quaternius/fantasy_props_megakit/gltf/Bellows.gltf':
-            'https://raw.githack.com/ProjectgenesisAssets/genesis-workshop-assets/f9cc701a04f86d721f5630a294b63043961bf17f/assets/playcanvas/candidates/workshops/herrero/props/v014022-cc0-recovery/bellows-double-cc0-v001.glb',
-            'https://cdn.jsdelivr.net/gh/dustinc555/mygame@main/assets/vendor/quaternius/fantasy_props_megakit/gltf/Anvil_Log.gltf':
-            'https://raw.githack.com/ProjectgenesisAssets/genesis-workshop-assets/f9cc701a04f86d721f5630a294b63043961bf17f/assets/playcanvas/candidates/workshops/herrero/props/v014022-cc0-recovery/anvil-oak-stump-cc0-v001.glb'
-          }
-          for old,new in pairs.items():
-            count=html.count(old);assert count==1,(old,count)
-            html=html.replace(old,new)
-          p.write_text(html)
-          print('Replaced two original 404 URLs, preserved all scene/gameplay logic')
+          s=Path('index.html').read_text()
+          root='https://raw.githack.com/ProjectgenesisAssets/genesis-workshop-assets/f9cc701a04f86d721f5630a294b63043961bf17f/assets/playcanvas/candidates/workshops/herrero/props/v014022-cc0-recovery/'
+          for f in ['bellows-double-cc0-v001.glb','anvil-oak-stump-cc0-v001.glb']:
+            assert s.count(root+f)==1, f
+          assert 'dustinc555/mygame@main/assets/vendor/quaternius/fantasy_props_megakit/gltf/Bellows.gltf' not in s
+          assert 'dustinc555/mygame@main/assets/vendor/quaternius/fantasy_props_megakit/gltf/Anvil_Log.gltf' not in s
+          print('PATCH_VERIFIED',len(s))
           PY
-      - name: Persist audited patch on experimental branch only
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name 'genesis-e2e-actions[bot]'
-          git config user.email 'genesis-e2e-actions[bot]@users.noreply.github.com'
-          git add index.html
-          if ! git diff --cached --quiet; then
-            git commit -m 'test(v014022): replace two broken props with pinned CC0 organization candidates'
-            git push origin HEAD:experiment/v014022-cc0-smith-tools-e2e-20261105
-          fi
       - name: Install Playwright
         run: npm install --prefix /tmp/ordan-playwright playwright@1.56.1
       - name: Run original guided Ordan gameplay through Chromium PC
