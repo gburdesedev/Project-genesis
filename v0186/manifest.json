@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v0185",
+  "version": "0.15-v0186",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "original-village-pbr",
@@ -227,6 +227,14 @@
       ]
     },
     {
+      "id": "herrero-station",
+      "name": "Interior Herrero · fragua V038 original",
+      "kind": "assets",
+      "assets": [
+        "forge-station-v038"
+      ]
+    },
+    {
       "id": "lighting",
       "name": "Iluminación HDRI 32-bit · IBL PBR",
       "kind": "assets",
@@ -450,6 +458,25 @@
       "file": "../assets/playcanvas/candidates/workshops/portals/v0185/portal_arch_v0185.glb",
       "stage": "village",
       "required": true
+    },
+    {
+      "id": "forge-station-v038",
+      "name": "Fragua del Herrero V038 · GLB real (Q1, apagada hasta encenderla)",
+      "kind": "forge-station",
+      "profession": "Herrero",
+      "version": "V038",
+      "approval": "existing_original_for_runtime_validation",
+      "file": "../assets/vendor/genesis/externals/forgeStation/src/Forge_V038_HeaderFixed_Preview.glb",
+      "bytes": 19220220,
+      "stage": "workshop",
+      "required": true,
+      "sourceMeshCount": 109,
+      "sourceBounds": [
+        2.0934,
+        3.2238,
+        1.6742
+      ],
+      "source": "existing V038 archive, geometry untouched"
     }
   ],
   "lightingAsset": {
@@ -506,5 +533,20 @@
       "nonDestructive": true
     }
   },
-  "revision": "V018.5 experimental; native aspect doors plus Blender-built arches matched to actual stone walls"
+  "revision": "V0186 isolated: keep V018.5 Blender arch and original PBR doors, mount actual V038 forge with Q1 extinguished/lit states; no unapproved other assets or main changes",
+  "herreroInterior": {
+    "version": "V0186",
+    "source": "./herrero-interior-v0186.js",
+    "forge": "forge-station-v038",
+    "forgeWorldAnchor": [
+      2.27,
+      0,
+      -6.36
+    ],
+    "forgeInitialState": "off",
+    "forgeTurnOnAfterQuestStep": 6,
+    "entrance": "arch +/-0.61m; closed at Q1 step0; opens only at Ordan step1",
+    "originalQuestAndCraftPreserved": true,
+    "anvilAndBellowsAssets": "pending independent asset audit, no stand-in"
+  }
 }
