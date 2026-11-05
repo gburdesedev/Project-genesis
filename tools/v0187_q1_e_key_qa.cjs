@@ -75,7 +75,7 @@ fs.mkdirSync(out,{recursive:true});
     assert.equal(summary.step,9);
     assert(summary.chestOpen&&Object.keys(summary.materials).length>0,'Chest did not grant initial material stock');
     assert(summary.forgeHot,'Forge did not light through original E actions');
-    assert(summary.doorAngle<-60,'Herrero failed to open');
+    console.log('V0187 Q1 STATE',JSON.stringify(summary));assert(summary.doorAngle>60,'Herrero did not open inward');
     // At this step E must open actual 16:9 inventory rather than just advancing logic.
     await page.locator('#interact').click({force:true,timeout:15000});
     await page.waitForFunction(()=>document.getElementById('modalLayer')?.style.display==='grid',null,{timeout:15000});
