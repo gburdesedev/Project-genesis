@@ -287,8 +287,11 @@ function textMaterial(app,title,subtitle){
 function sign(app,parent,title,subtitle,x,z,yaw,height=2.9,width=3.8){
  const signRoot=new Entity(title+' cartel');parent.addChild(signRoot);
  signRoot.setPosition(x,0,z);signRoot.setEulerAngles(0,yaw,0);
- const e=box(signRoot,title,0,height,.30,width,1,.95,textMaterial(app,title,subtitle),false);
- e.setLocalEulerAngles(90,0,0);
+ // Original V014022 used a plane (not an improvised thick box).
+ const e=new Entity(title);
+ e.addComponent('render',{type:'plane',material:textMaterial(app,title,subtitle),castShadows:false,receiveShadows:true});
+ e.setLocalPosition(0,height,.30);e.setLocalScale(width,1,.95);
+ e.setLocalEulerAngles(90,0,0);signRoot.addChild(e);
  return signRoot;
 }
 function water(app,visual){
