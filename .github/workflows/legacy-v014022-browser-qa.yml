@@ -8,6 +8,7 @@ on:
       - 'index.html'
       - 'tools/patch_v014022_recoverable_loader.py'
       - 'device_policy.js'
+      - 'genesis_v014022_stream_loader.js'
       - 'village_world.js'
   workflow_dispatch:
 permissions:
