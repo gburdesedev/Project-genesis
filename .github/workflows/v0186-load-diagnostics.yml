@@ -1,0 +1,37 @@
+name: Compare V0186 and V0186.1 boot (diagnostic only)
+on:
+  push:
+    branches:
+      - experiment/v0186-1-compare-loader-diagnostics-20261105
+    paths:
+      - tests/v0186_load_compare.cjs
+      - .github/workflows/v0186-load-diagnostics.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-boot:
+    name: WebKit iPhone V0186 vs V0186.1
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Playwright runner
+        run: npm install --prefix /tmp/genesis-v0186-qa playwright@1.56.1
+      - name: Compare deployed V0186 and V0186.1 without changing gameplay
+        env:
+          NODE_PATH: /tmp/genesis-v0186-qa/node_modules
+          DIAGNOSTICS_DIR: /tmp/genesis-v0186-compare
+        run: node tests/v0186_load_compare.cjs
+      - name: Preserve screenshots, events, progress and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v0186-v01861-webkit-boot
+          path: /tmp/genesis-v0186-compare
+          if-no-files-found: warn
+          retention-days: 7
