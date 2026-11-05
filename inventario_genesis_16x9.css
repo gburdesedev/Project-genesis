@@ -663,3 +663,40 @@
 .genInv .genInvInfo .genInvInfoMore{
   margin:.6% 0 0!important;
 }
+
+
+/* V12B: el render de referencia NO es un GLB. Mantenerlo completamente
+   contenido hasta disponer de la exportación autorizada del modelo. */
+.genInv .genInvImageWrap[data-preview-mode="static"]{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:1.4%!important;
+  box-sizing:border-box!important;
+  isolation:isolate;
+}
+.genInv .genInvImageWrap[data-preview-mode="static"]>img{
+  display:block!important;
+  position:static!important;
+  width:auto!important;
+  height:90%!important;
+  max-width:72%!important;
+  max-height:90%!important;
+  min-width:0!important;
+  min-height:0!important;
+  margin:auto!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  transform:none!important;
+  box-shadow:none!important;
+}
+.genInv .genInvSlotArtwork>img{
+  width:auto!important;
+  height:auto!important;
+  max-width:72%!important;
+  max-height:85%!important;
+  margin:auto!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  transform:none!important;
+}
