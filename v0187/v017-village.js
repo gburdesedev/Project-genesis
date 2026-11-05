@@ -324,7 +324,7 @@
    let tickFrames=0,lastDelta=null,rafId=0,running=true;
    let lastClock=performance.now(),lastGate=gate();
    function stepDoor(now){
-     const elapsed=Math.min(.15,Math.max(0,(now-lastClock)/1000));
+     const elapsed=Math.min(3,Math.max(0,(now-lastClock)/1000)); // wall-clock: never slow animation due low FPS
      lastClock=now;
      lastDelta=elapsed;
      tickFrames++;
