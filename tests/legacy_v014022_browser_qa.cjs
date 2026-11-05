@@ -21,24 +21,24 @@ async function run(engine,name,mobile){
  let result={engine:name,mobile,start:Date.now(),intro:false,selected:false,gameEntered:false,diagnostic:false,navigation:[],errors:[],network:[]};
  try{
   await page.goto(origin+'index.html?genesis_qa=v014022',{waitUntil:'domcontentloaded',timeout:60000});
-  await page.waitForFunction(()=>Boolean(window.GenesisAssetDiag),{timeout:15000});
+  await page.waitForFunction(()=>Boolean(window.GenesisAssetDiag),null,{timeout:15000});
   result.diagnostic=true;
   await page.waitForFunction(()=>{
     const intro=document.getElementById('prototypeIntro');
     const loading=document.getElementById('loading');
     return intro?.style.display==='grid'||intro?.style.display==='flex'||loading?.style.display==='none';
-  },{timeout:180000}).catch(()=>null);
+  },null,{timeout:180000}).catch(()=>null);
   result.intro=await page.locator('#prototypeIntro').evaluate(el=>getComputedStyle(el).display!=='none').catch(()=>false);
   result.before=await page.evaluate(()=>({stage:document.getElementById('loadState')?.textContent,loader:document.getElementById('loadCount')?.textContent,diagnostics:window.GenesisAssetDiag?.snapshot?.()}));
-  await page.screenshot({path:out+'/'+name+'-before.png',fullPage:false,timeout:30000});
+  await page.screenshot({path:out+'/'+name+'-before.png',fullPage:false,timeout:10000}).catch(e=>errors.push('SCREENSHOT before '+e.message));
   if(result.intro){
    const selector=page.locator('[data-profession="Herrero"]');
    await selector.click({timeout:15000});
    result.selected=true;
-   await page.waitForFunction(()=>document.getElementById('loading')?.style.display==='none' && document.getElementById('hud')!=null,{timeout:180000}).catch(()=>null);
+   await page.waitForFunction(()=>document.getElementById('loading')?.style.display==='none' && document.getElementById('hud')!=null,null,{timeout:180000}).catch(()=>null);
    result.gameEntered=await page.locator('#loading').evaluate(el=>getComputedStyle(el).display==='none').catch(()=>false);
    result.after=await page.evaluate(()=>({stage:document.getElementById('loadState')?.textContent,loader:document.getElementById('loadCount')?.textContent,diagnostics:window.GenesisAssetDiag?.snapshot?.()}));
-   await page.screenshot({path:out+'/'+name+'-after.png',fullPage:false,timeout:30000});
+   await page.screenshot({path:out+'/'+name+'-after.png',fullPage:false,timeout:10000}).catch(e=>errors.push('SCREENSHOT after '+e.message));
   }
  }catch(e){result.testError=e.stack||String(e)}
  finally{
@@ -52,6 +52,7 @@ async function run(engine,name,mobile){
 (async()=>{
  await sleep(2500);
  const results=[];
+ try{
  try{results.push(await run(chromium,'chromium-desktop',false));}
  catch(e){results.push({engine:'chromium-desktop',testError:String(e)})}
  try{results.push(await run(webkit,'webkit-mobile',true));}
