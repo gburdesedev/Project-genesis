@@ -4,6 +4,7 @@ on:
     branches: [experiment/legacy-v014022-approved-assets-loader-20261105]
     paths:
       - tools/patch_v014022_grouped_no_deferred.py
+      - tools/patch_v014022_gate_module_assets.py
       - .github/workflows/v014022-grouped-no-deferred.yml
   workflow_dispatch:
 permissions:
@@ -26,11 +27,21 @@ jobs:
           else
             python3 tools/patch_v014022_grouped_no_deferred.py
           fi
+      - name: Gate existing visual modules before the player can start
+        run: |
+          if grep -q 'V014022 GATED AUXILIARY ASSETS' index.html; then
+            echo 'Auxiliary gates already present'
+          else
+            python3 tools/patch_v014022_gate_module_assets.py
+          fi
       - name: Validate actual staged loader, no post-start asset streaming
         run: |
           node --check genesis_v014022_stream_loader.js
           node --check village_trees.js
           node --check village_world.js
+          node --check genesis_market_v001.js
+          node --check genesis_workshop_live_v015.js
+          node --check genesis_arcanista_four_walls_v006.js
           node tests/v014022_transport_contract.cjs
           python3 - <<'PY'
           from pathlib import Path
@@ -42,6 +53,13 @@ jobs:
           assert "['critical','herreroCritico']" in s
           assert "['stream','herreroEscena']" in s
           assert 'setGroupPlan' in s
+          assert 'V014022 GATED AUXILIARY ASSETS' in s
+          assert 'genesisMarket.initialReady' in s
+          assert 'GenesisBeginHerreroV015' in s
+          assert 'GenesisBeginArcanistaWallsV006' in s
+          for name in ['genesis_market_v001.js','genesis_workshop_live_v015.js','genesis_arcanista_four_walls_v006.js']:
+            code=Path(name).read_text()
+            assert 'app.assets.loadFromUrl(' not in code, name+' bypasses the controlled queue'
           assert s.index('await prepareRoute(prof);') < s.index('startRoute(prof);')
           tree=Path('village_trees.js').read_text()
           assert 'initialTargets' in tree and 'if(!initialTargets.has(key))return' in tree
