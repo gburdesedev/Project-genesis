@@ -27,8 +27,12 @@ const fetch=async url=>{
  if(url==='https://test.local/a.glb'&&failOnce){failOnce=false;throw new Error('test: lost connection')}
  const bytes=data.get(url);
  if(!bytes)return{ok:false,status:404};
+ let done=false;
  return{ok:true,headers:{get(key){return key==='content-length'?String(bytes.byteLength):null}},
-  body:{getReader(){let done=false;return{async read(){if(done)return{done:true};done=true;return{done:false,value:bytes}}}}}}
+  body:{getReader(){return{async read(){
+   if(done)return{done:true};
+   done=true;return{done:false,value:bytes};
+  }}}}}
  };
 };
 const assets=new Map();
