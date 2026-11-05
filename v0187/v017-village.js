@@ -19,12 +19,15 @@
  const ROOF_BOUNDS=Object.freeze({width:8.7841,depth:8.1652,front:.5598});
  const DOOR_HERRERO_X_CENTRE=(-.047+1.208)/2; // +.5805 m off-centre GLB pivot
  // V018.2 GLB geometry fit, measured actual entrance plane. Original GLB remains byte-for-byte unmodified.
- const PORTAL_DOOR_WORLD_SCALE=1.02; // proportional XYZ instead of 1.85X / 1.0Y squash
+ const PORTAL_DOOR_WORLD_SCALE=1.02; // keep source GLB, original height/depth
+ const EXTRA_DOOR_WIDTH_METRES=.16; // >15cm added to all five door bodies
+ const DOOR_FORWARD_METRES=.18; // +Z toward outside (less embedded)
+ const ARCH_X_STRETCH=1.16; // arch width clears widened door
  const DOOR_BODY_NATIVE_WIDTH_M=1.170; // main V082 GLB body measured
  const DOOR_NATIVE_LEAF_CENTRE_X=0.603; // GLB V082 body 0.018..1.188; PlayCanvas offset
- const DOOR_PROFILE_OPEN_DEG=-92; // original Q1 outward swing
+ const DOOR_PROFILE_OPEN_DEG=92; // inward Q1 swing: leaf folds into workshop
  const V027_BODY_NATIVE_WIDTH_M=1.170; // measured approved V027 main arched leaf
- const INWARD_OPEN=DOOR_PROFILE_OPEN_DEG; // original outward opening
+ const INWARD_OPEN=DOOR_PROFILE_OPEN_DEG; // intentional positive inward swing
  const ROOF_OVERHANG=1.025; // only 2.5% visual overhang beyond plan footprint
 
  const ROOF_BOOST=1.30*1.35; // exact original V013 roof, raised around wall-top pivot
@@ -252,13 +255,14 @@
     const stoneArch=addModel(resources,shell,'portal-arch-v0185',
       p.profession+' · dovelas de arco de piedra 3D V018.5',
       [0,0,p.profession==='Arcanista'?-.13:0]);
-    let archMeshes=0;
+    stoneArch.setLocalScale(ARCH_X_STRETCH,1,1); // preserve authored GLB; widen stone arch to fit leaf
+     let archMeshes=0;
     for(const r of stoneArch.findComponents('render')){
       for(const mi of r.meshInstances||[]){mi.material=stoneMaterial;archMeshes++;}
     }
     if(archMeshes<1)throw Error('V018.5 arch empty: '+p.profession);
     portalFrames.push({profession:p.profession,meshInstances:archMeshes,
-      material:stoneMaterial.name,innerWidth:1.37,outerWidth:1.75,
+      material:stoneMaterial.name,innerWidth:1.37*ARCH_X_STRETCH,outerWidth:1.75*ARCH_X_STRETCH,
       source:'Blender4.5.13LTS GLB'});
     if(approvedChoice)approved.push(p.profession);
     else generic.push(p.profession);
@@ -277,16 +281,16 @@
       const hinge=new pc.Entity('Herrero · bisagra izquierda original');
        // V082-B geometry is [−.047,+1.208] around its actual GLB hinge.
        // Shift the centre to x=0 in the real masonry opening.
-       const doorLocalXScale=PORTAL_DOOR_WORLD_SCALE/plan.workshopScale;
-       const doorLocalZ=-bounds.front*wallScaleZ;
+       const doorLocalXScale=(PORTAL_DOOR_WORLD_SCALE+EXTRA_DOOR_WIDTH_METRES/DOOR_BODY_NATIVE_WIDTH_M)/plan.workshopScale;
+       const doorLocalZ=-bounds.front*wallScaleZ+DOOR_FORWARD_METRES/plan.workshopScale;
        hinge.setLocalPosition(-DOOR_NATIVE_LEAF_CENTRE_X*doorLocalXScale,0,doorLocalZ);
       building.addChild(hinge);
        const door=addModel(resources,hinge,'door-herrero-v082-b','Herrero V082-B · proporción natural XYZ V018.5',[0,0,0],[doorLocalXScale,PORTAL_DOOR_WORLD_SCALE,doorLocalXScale]);
       doorHinge=hinge;
     }else if(p.profession==='Arcanista'){
       const pivot=new pc.Entity('Arcanista · puerta mágica V027 · cerrada');
-      const arcaneLocalXScale=PORTAL_DOOR_WORLD_SCALE/plan.workshopScale;
-       pivot.setLocalPosition(-V027_LEAF_CENTRE_X*arcaneLocalXScale,0,-bounds.front*wallScaleZ);
+      const arcaneLocalXScale=(PORTAL_DOOR_WORLD_SCALE+EXTRA_DOOR_WIDTH_METRES/V027_BODY_NATIVE_WIDTH_M)/plan.workshopScale;
+       pivot.setLocalPosition(-V027_LEAF_CENTRE_X*arcaneLocalXScale,0,-bounds.front*wallScaleZ+DOOR_FORWARD_METRES/plan.workshopScale);
       building.addChild(pivot);
       // The approved V027 original must be visible on PC AND mobile.
       // If its GLB cannot be decoded, fail the load gate rather than showing
@@ -298,8 +302,8 @@
     }else{
       // Carpintero, Curtidor and Joyero: static V027 geometry, zero emission.
       const pivot=new pc.Entity(p.profession+' · puerta V027 sin emisión');
-      const variantLocalXScale=PORTAL_DOOR_WORLD_SCALE/plan.workshopScale;
-       pivot.setLocalPosition(-V027_LEAF_CENTRE_X*variantLocalXScale,0,-bounds.front*wallScaleZ);
+      const variantLocalXScale=(PORTAL_DOOR_WORLD_SCALE+EXTRA_DOOR_WIDTH_METRES/V027_BODY_NATIVE_WIDTH_M)/plan.workshopScale;
+       pivot.setLocalPosition(-V027_LEAF_CENTRE_X*variantLocalXScale,0,-bounds.front*wallScaleZ+DOOR_FORWARD_METRES/plan.workshopScale);
       building.addChild(pivot);
       const visual=addModel(resources,pivot,'door-arcanista-v027',
        p.profession+' · V027 PBR original proporcional',[0,0,0],[variantLocalXScale,PORTAL_DOOR_WORLD_SCALE,variantLocalXScale]);
@@ -316,7 +320,7 @@
    doorHinge.setLocalEulerAngles(0,doorAngle,0);
    const tick=dt=>{
       const desired=gate()>=1?INWARD_OPEN:0;
-     doorAngle+=(desired-doorAngle)*(1-Math.exp(-Math.max(0,dt)*5));
+     doorAngle+=(desired-doorAngle)*(1-Math.exp(-Math.max(0,dt)*2.8)); // visible inward animation
      doorHinge.setLocalEulerAngles(0,doorAngle,0);
    };
    app.on('update',tick);
@@ -338,20 +342,20 @@
       layoutCorrections:{
         plan:'GenesisVillagePlan unchanged',workshopFootprint:[9,7.875],
         herreroHingeOffset:-DOOR_NATIVE_LEAF_CENTRE_X*(PORTAL_DOOR_WORLD_SCALE/plan.workshopScale),
-        doorPhysicalBodyWidth:DOOR_BODY_NATIVE_WIDTH_M*PORTAL_DOOR_WORLD_SCALE,
+        doorPhysicalBodyWidth:DOOR_BODY_NATIVE_WIDTH_M*PORTAL_DOOR_WORLD_SCALE+EXTRA_DOOR_WIDTH_METRES,
         doorPhysicalBodyHeight:2.264*PORTAL_DOOR_WORLD_SCALE,
-        portalArchInnerOpening:1.37,
-        portalArchOuterWidth:1.75,
-        nativeDoorAspectPreserved:true,
-        doorPivotWorldX:-DOOR_NATIVE_LEAF_CENTRE_X*PORTAL_DOOR_WORLD_SCALE,
-        allDoorsBodyWidthMetres:DOOR_BODY_NATIVE_WIDTH_M*PORTAL_DOOR_WORLD_SCALE,
-        allDoorFitVersion:'proportional door XYZ; new narrower portal arch candidate pending',
+        portalArchInnerOpening:1.37*ARCH_X_STRETCH,
+        portalArchOuterWidth:1.75*ARCH_X_STRETCH,
+        nativeDoorAspectPreserved:false,doorWidthIncreaseMetres:EXTRA_DOOR_WIDTH_METRES,
+        doorPivotWorldX:-DOOR_NATIVE_LEAF_CENTRE_X*(PORTAL_DOOR_WORLD_SCALE+EXTRA_DOOR_WIDTH_METRES/DOOR_BODY_NATIVE_WIDTH_M),
+        allDoorsBodyWidthMetres:DOOR_BODY_NATIVE_WIDTH_M*PORTAL_DOOR_WORLD_SCALE+EXTRA_DOOR_WIDTH_METRES,
+        allDoorFitVersion:'V0187 +16cm width; +18cm forward; matching widened arches',
         herreroOpenDegrees:INWARD_OPEN,
-        arcanistaCentreX:-V027_LEAF_CENTRE_X*(PORTAL_DOOR_WORLD_SCALE/plan.workshopScale), // V027 rendered centre compensation
+        arcanistaCentreX:-V027_LEAF_CENTRE_X*((PORTAL_DOOR_WORLD_SCALE+EXTRA_DOOR_WIDTH_METRES/V027_BODY_NATIVE_WIDTH_M)/plan.workshopScale), // V027 rendered centre compensation
         genericDoorsCentred:true,
         roofsAlignedToBuildingFootprint:true,
-        doorsRecessedToWallLocalZ:true,
-        doorRecessFormula:'-bounds.front*wallScaleZ',
+        doorsRecessedToWallLocalZ:false,doorForwardMetres:DOOR_FORWARD_METRES,archXStretch:ARCH_X_STRETCH,
+        doorRecessFormula:'-bounds.front*wallScaleZ + 0.18/plan.workshopScale',
         unlitV027LeafCentreCompensation:V027_LEAF_CENTRE_X,
         originalVerticalRoofBoostPreserved:ROOF_BOOST
       },
