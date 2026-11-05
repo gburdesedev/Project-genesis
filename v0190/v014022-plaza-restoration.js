@@ -373,7 +373,12 @@ function install(app,resources,plan,{player,mobile=matchMedia('(pointer:coarse)'
      status:()=>({planned:0,plaza:0,loaded:0,visible:0,windEnabled:false,
        sites:[],skippedOriginalTrees:14,skippedTreeGlbs:8,policy:'mobile-no-trees'})
    }:mountTrees(app,r,resources,player||{x:7,z:16});
-   const waterworks=fountain(app,r,resources);
+   // Mobile experiment V0190: no fountain entity, water material, animation,
+   // Draco-decoded mesh or GPU buffer. Original approved V011 is untouched on desktop.
+   const waterworks=mobile?{
+     visual:null,renderers:0,animated:false,tracks:0,
+     water:{count:0,dispose(){}}
+   }:fountain(app,r,resources);
    const marketStall=stall(r);
    const market=p.market;
    const marketSign={x:market.x-market.w/2+1,z:market.z-market.d/2+1};
@@ -393,18 +398,18 @@ function install(app,resources,plan,{player,mobile=matchMedia('(pointer:coarse)'
    bounce.addComponent('light',{type:'directional',color:new pc.Color(.84,.79,.73),intensity:.43,castShadows:false});
    bounce.setLocalEulerAngles(28,145,0);r.addChild(bounce);
    const report=Object.freeze({
-     version:'V018.9',source:'V014.022 originals',mobile,treesDisabledOnMobile:mobile,center:[7,16],floorSource:'V012 identical PBR cobble and traffic',
-     fountainPosition:[CENTER.x,0,CENTER.z],fountainRenderers:waterworks.renderers,
+     version:'V019.0',source:'V014.022 originals',mobile,treesDisabledOnMobile:mobile,fountainDisabledOnMobile:mobile,center:[7,16],floorSource:'V012 identical PBR cobble and traffic',
+     fountainPosition:mobile?null:[CENTER.x,0,CENTER.z],fountainRenderers:waterworks.renderers,
      fountainAnimation:waterworks.animated,fountainTracks:waterworks.tracks,waterMaterials:waterworks.water.count,
      stallPosition:[STALL.x,STALL.y,STALL.z],marketSign:[marketSign.x,0,marketSign.z],plazaSign:[plazaSign.x,0,plazaSign.z],
      get trees(){return trees.status()},get positions(){return trees.status().sites},
      get installed(){return r.enabled},get renderers(){return r.findComponents('render').length},
      get layoutMatchesOriginal(){return (mobile?trees.nodes.length===0:trees.nodes.length===14&&trees.nodes.filter(n=>n.site.region==='plaza').length===4)&&p.roads.length===9}
    });
-   root.__GENESIS_V0189_PLAZA__=report;
+   root.__GENESIS_V0190_PLAZA__=report;
    return {root:r,report,trees,waterworks,stall:marketStall,
      dispose(){trees.dispose();waterworks.water.dispose();r.destroy()}};
  }catch(error){r.destroy();throw error}
 }
-root.GenesisOriginalPlazaV0189=Object.freeze({install,TREE_SITES});
+root.GenesisOriginalPlazaV0190=Object.freeze({install,TREE_SITES});
 })(typeof globalThis!=='undefined'?globalThis:this);
