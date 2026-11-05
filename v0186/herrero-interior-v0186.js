@@ -21,10 +21,9 @@
  function canWalk(from,to,step){
    if(!Number.isFinite(to.x)||!Number.isFinite(to.z))return false;
    const oldInside=inRoom(from),newInside=inRoom(to);
-   const oldNear=inRoom(from,-PLAYER_R),newNear=inRoom(to,-PLAYER_R);
-   // Only validate movements that touch the smithy perimeter; other village
-   // movement and other five original locations are unchanged.
-   if(oldInside!==newInside||oldNear!==newNear){
+   // Only validate the actual masonry boundary, not an outer padded shell:
+   // that outer margin would block reaching the opening at all.
+   if(oldInside!==newInside){
      const dz=to.z-from.z;
      const crossesFront=dz!==0&&((from.z>=INTERIOR.front&&to.z<INTERIOR.front)||
        (from.z<=INTERIOR.front&&to.z>INTERIOR.front));
