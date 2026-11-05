@@ -100,7 +100,7 @@ async function run(mode,browser) {
   });
   await page.waitForFunction(()=>window.__GENESIS_V013_LEGACY__?.game?.step()>=1,null,{timeout:15000});
   await page.waitForTimeout(2200);
-  const doorDebug=await page.evaluate(()=>({step:window.__GENESIS_V013_LEGACY__?.game?.step(),angle:window.__GENESIS_V017_VILLAGE__?.doorAngle,appTimeScale:pc.Application.getApplication()?.timeScale,paused:window.__GENESIS_V011_AUDIT__?.()?.paused,panel:document.querySelector('#v011-pause')?.style.display,modal:window.__GENESIS_V013_LEGACY__?.isModalOpen(),errors:window.GenesisV015Diagnostics?.events?.slice(-3)}));
+  const doorDebug=await page.evaluate(()=>({step:window.__GENESIS_V013_LEGACY__?.game?.step(),angle:window.__GENESIS_V017_VILLAGE__?.doorAngle,gate:window.__GENESIS_V017_VILLAGE__?.doorQuestGate,updateFrames:window.__GENESIS_V017_VILLAGE__?.doorTickFrames,latestDt:window.__GENESIS_V017_VILLAGE__?.doorLastDelta,appTimeScale:pc.Application.getApplication()?.timeScale,paused:window.__GENESIS_V011_AUDIT__?.()?.paused,panel:document.querySelector('#v011-pause')?.style.display,modal:window.__GENESIS_V013_LEGACY__?.isModalOpen(),errors:window.GenesisV015Diagnostics?.events?.slice(-3)}));
   console.log('V0187 DOOR DEBUG',JSON.stringify(doorDebug));
   await page.waitForFunction(()=>window.__GENESIS_V017_VILLAGE__?.doorAngle>85,null,{timeout:12000});
   const after=await page.evaluate(()=>{
