@@ -147,14 +147,16 @@ function stampVersion(){
 export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{}}){
  stampVersion();
  const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14c');app.root.addChild(root);
- // Begin tree transfers before road PBR maps: four species are part of the initial scene.
- const trees=mountVillageTrees(app,root,{onResourceLoaded});
- onPhase('arboles');
+ // Physical stage gates: ground textures finish, then every runtime tree LOD.
+ // Never overlap these world groups or continue fetching missing LODs during play.
  const mobile=globalThis.GenesisDevice?.safePreviews===true;
  onPhase('suelos');
  const [cobble,traffic]=mobile
   ? [await maps(app,'cobble',true,onResourceLoaded),await maps(app,'traffic',true,onResourceLoaded)]
   : await Promise.all([maps(app,'cobble',false,onResourceLoaded),maps(app,'traffic',false,onResourceLoaded)]);
+ onPhase('arboles');
+ const trees=mountVillageTrees(app,root,{onResourceLoaded});
+ await trees.initialReady;
  // Gentle opposing sky bounce prevents near-black backsides without flattening PBR.
  const bounce=new Entity('Rebote celeste cálido · sin sombras');
  bounce.addComponent('light',{type:'directional',color:new Color(.84,.79,.73),intensity:.43,castShadows:false});
@@ -205,10 +207,8 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
  const fixedObstacles=[{x:marketSign.x,z:marketSign.z,r:.2},{x:plazaSign.x,z:plazaSign.z,r:.18},
   // v0.14.019: comerciante y mesa. Son obstáculos físicos, no hitboxes gigantes.
   {x:25.5,z:36.3,r:.34},{x:28.35,z:37.6,r:1.02}];
- // Do not enable movement until each baseline LOD2 has loaded or explicitly failed.
- // Failed variants have no collision; the scene never contains invisible trunks.
- onPhase('arboles');
- await trees.initialReady;
+ // Ground, trees and portal geometry settle before the player can move.
+ // Failed variants never create invisible collision geometry.
  onPhase('puertas');
  await Promise.all(arcanePortals.map(portal=>portal.initialReady));
  return Object.freeze({root,plan,trees,arcanePortals,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
