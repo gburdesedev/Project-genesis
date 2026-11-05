@@ -1,4 +1,4 @@
-name: MAIN V014022 - Ordan player-journey Playwright diagnostic
+name: MAIN V014022 - Ordan real-browser diagnostic with readable report
 on:
   push:
     branches:
@@ -8,22 +8,26 @@ on:
       - tests/main_v014022_ordan_e2e.cjs
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   desktop:
-    runs-on: ubuntu-latest
-    timeout-minutes: 17
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
       - uses: actions/checkout@v4
-      - name: Install browser runner only
+      - name: Install browser runner
         run: npm install --prefix /tmp/genesis-e2e-playwright playwright@1.56.1
-      - name: Test real published MAIN (do not change main or gameplay)
+      - name: Validate test JavaScript
+        run: node --check tests/main_v014022_ordan_e2e.cjs
+      - name: Play published game with real mouse and keyboard
+        id: journey
+        continue-on-error: true
         env:
           NODE_PATH: /tmp/genesis-e2e-playwright/node_modules
         run: node tests/main_v014022_ordan_e2e.cjs
-      - name: Keep screenshots, full diagnostics, and blocking stage
+      - name: Upload screenshot and JSON evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -31,3 +35,25 @@ jobs:
           path: /tmp/genesis-main-ordan-e2e/
           if-no-files-found: warn
           retention-days: 7
+      - name: Save report on isolated experiment branch for direct inspection
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p previews/main-v014022-ordan-e2e
+          if test -f /tmp/genesis-main-ordan-e2e/report.json; then
+            cp /tmp/genesis-main-ordan-e2e/report.json previews/main-v014022-ordan-e2e/latest.json
+          else
+            printf '{"blocker":"Playwright did not produce report.json","job":"%s","run":"%s","testOutcome":"%s"}\n' "$GITHUB_JOB" "$GITHUB_RUN_ID" "${{ steps.journey.outcome }}" > previews/main-v014022-ordan-e2e/latest.json
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add previews/main-v014022-ordan-e2e/latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "qa: save verified Ordan browser test report ($GITHUB_RUN_ID)"
+            git push origin HEAD:experiment/main-v014022-playwright-ordan-e2e-20261105
+          fi
+      - name: Require real journey test success
+        if: always()
+        env:
+          TEST_OUTCOME: ${{ steps.journey.outcome }}
+        run: test "$TEST_OUTCOME" = success
