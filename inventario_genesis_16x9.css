@@ -700,3 +700,23 @@
   object-position:center center!important;
   transform:none!important;
 }
+
+
+/* V12B 02: presentación sin bloque rectangular visible.
+ * Screen neutraliza el fondo oscuro del render aprobado sobre el visor negro;
+ * el marco y los demás paneles permanecen intactos. */
+.genInv .genInvImageWrap[data-preview-mode="static"]>img{
+  height:100%!important;
+  max-height:100%!important;
+  max-width:88%!important;
+  mix-blend-mode:screen!important;
+  filter:contrast(1.22) brightness(1.08)!important;
+  -webkit-mask-image:radial-gradient(ellipse 73% 77% at center, #000 58%, transparent 100%)!important;
+  mask-image:radial-gradient(ellipse 73% 77% at center, #000 58%, transparent 100%)!important;
+}
+.genInv .genInvSlotArtwork>img{
+  mix-blend-mode:screen!important;
+  filter:contrast(1.22) brightness(1.08)!important;
+  -webkit-mask-image:radial-gradient(ellipse 73% 77% at center, #000 58%, transparent 100%)!important;
+  mask-image:radial-gradient(ellipse 73% 77% at center, #000 58%, transparent 100%)!important;
+}
