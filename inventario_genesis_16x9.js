@@ -49,6 +49,30 @@
     return poster ? '<img src="'+esc(poster)+'" alt="'+esc(name)+'" draggable="false">' :
       '<span class="genInvEmptyPreview">'+esc(name)+'</span>';
   }
+  // Sólo usar recursos reales de la sesión; no inventar GLB ni stats.
+  function creationPreview(item, ctx) {
+    if (!item) return { html:'', interactive:false };
+    const raw = [item.modelUrl, item.glbUrl, item.glb, item.model?.url]
+      .find(v => typeof v === 'string' && v.trim());
+    const url = typeof raw === 'string' ? raw.trim() : '';
+    const safeModel = /^(?:https?:\/\/|\/|assets\/|\.\/|\.\.\/)/i.test(url) && /\.glb(?:[?#]|$)/i.test(url);
+    if (safeModel && window.customElements?.get('model-viewer')) {
+      return {
+        html:'<model-viewer src="'+esc(url)+'" camera-controls interaction-prompt="none" '+
+          'shadow-intensity="0.7" camera-orbit="0deg 75deg auto" alt="'+esc(item.name||'Creación')+'"></model-viewer>',
+        interactive:true
+      };
+    }
+    if (typeof ctx.renderAsset === 'function') {
+      const supplied = String(ctx.renderAsset(item) || '');
+      if (/<(?:model-viewer|canvas)\b/i.test(supplied)) return { html:supplied, interactive:true };
+      if (/<img\b/i.test(supplied)) return { html:supplied, interactive:false };
+    }
+    const poster = item.thumbnail || item.poster || item.previewImage;
+    return { html:poster ? '<img src="'+esc(poster)+'" alt="'+esc(item.name||'')+'" draggable="false">' : '',
+      interactive:false };
+  }
+
   function render(ctx, nav) {
     const inventory=ctx.inventory || {};
     const allItems=familyItems(ctx);
@@ -74,16 +98,15 @@
       return '<button class="genInvFamily" data-family="'+esc(f)+'" aria-pressed="'+(f===state.family)+'"><span class="genInvFamIcon">'+icon+'</span><span>'+esc(f)+'</span></button>';
     }).join('');
     const item=chosen?.item;
-    const viewer=chosen?(materialMode?materialArt(chosen.name):
-      (typeof ctx.renderAsset==='function'?ctx.renderAsset(item):'<span class="genInvEmptyPreview">'+esc(chosen.name)+'</span>')) :
-      '<p class="genInvEmptyPreview">La familia seleccionada no contiene objetos</p>';
+    const preview=chosen&&!materialMode?creationPreview(item,ctx):null;
+    const viewer=chosen?(materialMode?materialArt(chosen.name):preview.html):'';
     const title=chosen?esc(chosen.name):'Seleccioná un objeto';
-    const facts=chosen?(materialMode?
+    const facts=chosen?('<div class="genInvInfoLine"><span>Nombre</span><b>'+esc(chosen.name)+'</b></div>'+(materialMode?
       '<div class="genInvInfoLine"><span>Familia</span><b>Materiales</b></div><div class="genInvInfoLine"><span>Cantidad</span><b>'+chosen.qty+'</b></div>':
       '<div class="genInvInfoLine"><span>Familia</span><b>'+esc(state.family)+'</b></div><div class="genInvInfoLine"><span>Rareza</span><b>'+esc(item.rarity||'')+'</b></div>'+
       '<h3 class="genInvSubhead">CANALES DEL OBJETO</h3>'+
       '<div class="genInvChannels" role="list">'+channelSummary(item)+'</div>'+
-      '<h3 class="genInvSubhead">RELATO NGE</h3>'+storySummary(item)) : '';
+      '<h3 class="genInvSubhead">RELATO NGE</h3>'+storySummary(item))) : '';
 
     const slots=Array.from({length:20},function(_,i){
       const entry=visible[i];
@@ -93,14 +116,15 @@
         (entry.item.thumbnail || entry.item.poster
           ? '<img src="'+esc(entry.item.thumbnail||entry.item.poster)+'" alt="" loading="lazy" draggable="false">'
           : '<span class="genInvCreationGlyph" aria-hidden="true"></span>');
-      return '<button class="genInvSlot'+(selected?' selected':'')+'" data-select="'+i+'" aria-label="'+esc(entry.name)+'" aria-pressed="'+selected+'">'+content+'<span>'+esc(entry.material?entry.qty:(entry.rarity||''))+'</span></button>';
+      return '<button class="genInvSlot'+(selected?' selected':'')+'" data-select="'+i+'" aria-label="'+esc(entry.name)+'" aria-pressed="'+selected+'"><span class="genInvSlotArtwork">'+content+'</span><span class="genInvSlotQty">'+esc(entry.material?entry.qty:(entry.rarity||''))+'</span></button>';
     }).join('');
     const html='<div class="genInv" id="genInv">'+
       '<header class="genInvNav">'+navMarkup+'</header>'+
       '<main class="genInvMain">'+
         '<aside class="genInvFamilies"><h2 class="genInvHead">FAMILIAS</h2>'+familiesMarkup+
           '</aside>'+
-        '<section class="genInvViewer"><p class="genInvViewerTitle">'+title+'</p><div class="genInvImageWrap">'+viewer+'</div><p class="genInvViewLabel">'+(materialMode?'Vista fija · material':'Objeto fabricado · visor 360°')+'</p></section>'+
+        '<section class="genInvViewer"><p class="genInvViewerTitle">'+title+'</p><div class="genInvImageWrap" data-preview-mode="'+(materialMode?'material':(preview?.interactive?'3d':'static'))+'">'+viewer+'</div>'+
+          (chosen&&!materialMode&&preview?.interactive?'<p class="genInvViewLabel" aria-label="Inspección 360 grados">◀ 360° ▶</p>':'<p class="genInvViewLabel" aria-hidden="true"></p>')+'</section>'+
         '<aside class="genInvInfo"><h2 class="genInvInfoTitle">INFORMACIÓN</h2>'+facts+
           (chosen&&!materialMode?'<button class="genInvInfoMore" id="genInvDetails"><span>CONSULTAR FICHA DEL OBJETO</span></button>':'')+
           '</aside>'+
@@ -124,6 +148,21 @@
     board.querySelectorAll('[data-select]').forEach(function(b){b.onclick=function(){
       state.selectedKey=visible[Number(b.dataset.select)]?.key;render(ctx,nav);
     }});
+    // La inclinación afecta sólo la miniatura, jamás el marco ni el contador.
+    // El eje horizontal del puntero recorre exactamente -45° a +45°.
+    board.querySelectorAll('.genInvSlot[data-select]').forEach(function(button){
+      const art=button.querySelector('.genInvSlotArtwork');
+      if(!art)return;
+      button.onpointermove=function(event){
+        const rect=button.getBoundingClientRect();
+        if(!rect.width)return;
+        const p=Math.max(0,Math.min(1,(event.clientX-rect.left)/rect.width));
+        art.style.setProperty('--gen-slot-yaw',(-45+90*p).toFixed(2)+'deg');
+      };
+      const reset=function(){art.style.setProperty('--gen-slot-yaw','0deg')};
+      button.onpointerleave=reset;
+      button.onblur=reset;
+    });
     board.querySelector('#genInvPrev').onclick=function(){state.page--;state.selectedKey=null;render(ctx,nav)};
     board.querySelector('#genInvNext').onclick=function(){state.page++;state.selectedKey=null;render(ctx,nav)};
     const input=board.querySelector('#genInvFilter');
