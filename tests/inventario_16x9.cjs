@@ -61,6 +61,19 @@ assert(geometries.slot.width/geometries.slot.height>=.8&&geometries.slot.width/g
 assert(geometries.heroImg.bottom < geometries.heroWrap.bottom+1,'preview image must remain inside its viewer');
 assert(!geometries.viewerBg.includes('FondoVisorHerreria'),'no baked anvil under the inventory item');
 assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),2);
+assert.equal(await page.locator('.genInvImageWrap').getAttribute('data-preview-mode'),'material');
+assert.equal(await page.locator('.genInvViewLabel').innerText(),'','materials must not suggest rotating the central preview');
+assert((await page.locator('.genInvInfoLine').first().innerText()).includes('Lingote de hierro'),'material information name is dynamic');
+const hoverSlot=page.locator('.genInvSlot:not(:disabled)').first();
+const hoverBox=await hoverSlot.boundingBox();
+await page.mouse.move(hoverBox.x+1,hoverBox.y+hoverBox.height/2);
+const leftYaw=await hoverSlot.locator('.genInvSlotArtwork').evaluate(el=>el.style.getPropertyValue('--gen-slot-yaw'));
+assert(Number.parseFloat(leftYaw)<-40,'left hover should approach -45 degrees');
+await page.mouse.move(hoverBox.x+hoverBox.width-1,hoverBox.y+hoverBox.height/2);
+const rightYaw=await hoverSlot.locator('.genInvSlotArtwork').evaluate(el=>el.style.getPropertyValue('--gen-slot-yaw'));
+assert(Number.parseFloat(rightYaw)>40,'right hover should approach +45 degrees');
+await page.mouse.move(0,0);
+assert.equal(await hoverSlot.locator('.genInvSlotArtwork').evaluate(el=>el.style.getPropertyValue('--gen-slot-yaw')),'0deg','leaving a slot returns its miniature to zero');
 await page.evaluate(()=>{stock={};items=[];openLive()});
 assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),0,'empty live inventory must show twenty empty slots');
 assert.equal(await page.locator('[data-family="Espadas"]').count(),0,'no invented family without actual creations');
@@ -74,7 +87,12 @@ await page.evaluate(()=>{
   openLive();
 });
 assert.equal(await page.locator('.genInvFamily').count(),3);
+await page.locator('[data-family="Escudos"]').click();
+assert.equal(await page.locator('.genInvViewerTitle').innerText(),'Escudo de hierro');
+assert((await page.locator('.genInvInfoLine').first().innerText()).includes('Escudo de hierro'),'title and information must agree');
 await page.locator('[data-family="Espadas"]').click();
+assert.equal(await page.locator('.genInvViewerTitle').innerText(),'Espada de hierro');
+assert((await page.locator('.genInvInfoLine').first().innerText()).includes('Espada de hierro'),'name must follow selected creation');
 assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),1);
 assert.equal(await page.locator('.genInvInfoTitle').innerText(),'INFORMACIÓN');
 assert.equal(await page.locator('.genInvChannel').count(),1,'Actual channel entries only');
@@ -94,7 +112,8 @@ const fit=await page.evaluate(()=>{
  return rows.map(el=>({name:el.className,top:el.getBoundingClientRect().top,bottom:el.getBoundingClientRect().bottom,limit:parent.bottom}));
 });
 assert(fit.every(r=>r.top>=0&&r.bottom<=r.limit+1),'NGE, channels and button must fit entirely inside info panel');
-assert.equal(await page.locator('.genInvViewer .genInvViewLabel').innerText(),'Objeto fabricado · visor 360°');
+assert.equal(await page.locator('.genInvImageWrap').getAttribute('data-preview-mode'),'static','do not falsely claim 360 when fabricated item has no GLB');
+assert.equal(await page.locator('.genInvViewLabel').innerText(),'','3D controls appear only when a real model is connected');
 await page.waitForFunction(()=>Array.from(document.querySelectorAll('.genInvTab img')).length===4&&Array.from(document.querySelectorAll('.genInvTab img')).every(i=>i.complete&&i.naturalWidth>0));
 await page.screenshot({path:out+'/inventario-16x9-espadas.png',fullPage:false});
 // Comparación de TAMAÑOS reales: las pestañas originales de Preparación y
