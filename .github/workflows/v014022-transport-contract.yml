@@ -1,0 +1,32 @@
+name: Legacy V0.14.022 byte-owned transport contract
+on:
+  push:
+    branches: [experiment/legacy-v014022-approved-assets-loader-20261105]
+    paths:
+      - 'genesis_v014022_stream_loader.js'
+      - 'village_world.js'
+      - 'village_trees.js'
+      - 'village_arcanist.js'
+      - 'tests/v014022_transport_contract.cjs'
+      - '.github/workflows/v014022-transport-contract.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate engine and delegated consumers
+        run: |
+          node --check genesis_v014022_stream_loader.js
+          node --check village_trees.js
+          node --check village_arcanist.js
+          node --check village_world.js
+          node --check tests/v014022_transport_contract.cjs
+      - name: Verify actual transport and retry, not UI counters
+        run: node tests/v014022_transport_contract.cjs
