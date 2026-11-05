@@ -10,7 +10,7 @@
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  const KEY='project-genesis/canvas-original/v018-preview';
+  const KEY='project-genesis/canvas-original/v0186-preview';
   const VERSION='0.15-v013';
   const DEFINITIONS=Object.freeze([
     {id:'mentor',title:'Habla con Maese Ordan',hint:'El taller está abandonado. Escuchá las indicaciones de Ordan.',position:[1.72,1.90],radius:2.2},
