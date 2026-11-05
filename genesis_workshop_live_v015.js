@@ -24,17 +24,18 @@ const status={version:'v0.17.014-herrero-v082b',phase:'waiting',assets:{},instal
 globalThis.__genesisProductionHerreroV015=status;
 const report=()=>{globalThis.__genesisProductionHerreroV015=status;};
 const sleep=t=>new Promise(done=>setTimeout(done,t));
-function acquire(app,url,name){
- return new Promise((resolve,reject)=>app.assets.loadFromUrl(url,'container',(error,asset)=>{
-  if(error||!asset?.resource){reject(Error(name+': '+String(error||'No GLB asset')));return;}
-  const visual=asset.resource.instantiateRenderEntity();
-  const renderers=visual.findComponents('render');
-  if(!renderers.length){visual.destroy();reject(Error(name+': no geometry'));return;}
-  for(const r of renderers){r.receiveShadows=true;r.castShadows=name==='walls'||name==='door';}
-  status.assets[name]={ready:true,renderers:renderers.length};
-  resolve(visual);
- }));
+async function acquire(app,url,name){
+ // No background PlayCanvas HTTP: the experimental v014 route requests this group.
+ const asset=await window.GenesisStreamLoader.loadContainer(url,{maxAttempts:2});
+ if(!asset?.resource)throw Error(name+': No GLB asset');
+ const visual=asset.resource.instantiateRenderEntity();
+ const renderers=visual.findComponents('render');
+ if(!renderers.length){visual.destroy();throw Error(name+': no geometry');}
+ for(const r of renderers){r.receiveShadows=true;r.castShadows=name==='walls'||name==='door';}
+ status.assets[name]={ready:true,renderers:renderers.length};
+ return visual;
 }
+
 const installed=new Map();
 const ROOF_BOOST=1.30*1.35; // 35% higher roof rise than the CURRENT V012, eave pivot at 3.20m
 function install(app,root,kind,sources,{tutorial=false}={}){
@@ -132,7 +133,7 @@ function restore(){
  }
  installed.clear();
 }
-async function init(){
+async function init(onAssetReady=()=>{}){
  const host=document.getElementById('genesisApp')||document.querySelector('pc-app');
  let app=host?.app||host?.application;
  for(let i=0;i<160&&!app;i++){await sleep(250);app=host?.app||host?.application;}
@@ -141,7 +142,7 @@ async function init(){
  // Parallel resource loading; renderer instances share immutable geometry
  // but each workshop gets its own render entity transforms.
  const src={};
- await Promise.all(Object.entries(GLBS).map(async ([key,url])=>{src[key]=await acquire(app,url,key);}));
+ await Promise.all(Object.entries(GLBS).map(async ([key,url])=>{src[key]=await acquire(app,url,key);onAssetReady(key);}));
  status.phase='installing';report();
  attemptMount(app,src);
  const check=setInterval(()=>{
@@ -157,4 +158,13 @@ async function init(){
  window.addEventListener('pagehide',()=>{clearInterval(check);app.off('update',update);restore()}, {once:true});
  status.phase='running';report();
 }
-init().catch(e=>{status.phase='error';status.errors.push(String(e?.stack||e));report();console.error('Genesis blacksmith install',e)});
+let pendingInstall=null;
+globalThis.GenesisBeginHerreroV015=onAssetReady=>{
+ // The 4 approved visuals start only when the selected Herrero load group runs.
+ if(!pendingInstall)pendingInstall=init(onAssetReady).catch(e=>{
+  status.phase='error';status.errors.push(String(e?.stack||e));
+  report();console.error('Genesis blacksmith install',e);
+  pendingInstall=null;throw e;
+ });
+ return pendingInstall;
+};
