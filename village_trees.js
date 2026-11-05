@@ -187,13 +187,15 @@ export function mountVillageTrees(app, villageRoot, options={}){
  let active=0,focusX=0,focusZ=0,lastUpdate=0;
  const maxConcurrent=safeMobile?2:4;
  const initiallySettled=new Set();
+ // Every runtime LOD is loaded before player input: no background asset fetches.
+ const initialTargets=new Set(Object.keys(TYPES).flatMap(species=>safeMobile?[species+':2']:[species+':2',species+':1']));
  let resolveInitial;
  const initialReady=new Promise(resolve=>{resolveInitial=resolve;});
  const status=()=>({
   planned:nodes.length,plaza:TREE_SITES.filter(p=>p.region==='plaza').length,
   residentVariants:ready.size,failedVariants:failed.size,pendingVariants:queue.length+active,
-  initialCompleted:initiallySettled.size,initialTotal:Object.keys(TYPES).length,
-  initialPending:Object.keys(TYPES).filter(species=>!initiallySettled.has(species)),
+  initialCompleted:initiallySettled.size,initialTotal:initialTargets.size,
+  initialPending:[...initialTargets].filter(key=>!initiallySettled.has(key)),
   visible:nodes.filter(n=>n.visible&&n.visual).length,rendered:nodes.filter(n=>n.visible&&n.visual).length,
   mobile:safeMobile,windEnabled:windMaterials.size>0,windMaterials:windMaterials.size
  });
@@ -227,15 +229,13 @@ export function mountVillageTrees(app, villageRoot, options={}){
       failed.add(task.key);console.warn('Genesis trees: GLB inválido',task.key,err);
      }
     }
-    if(task.lod===2&&!initiallySettled.has(task.species)){
-     initiallySettled.add(task.species);
-     if(ready.has(task.key)){
-      // Telemetry must never be able to block the remaining tree jobs.
-      try{options.onResourceLoaded?.('tree:'+task.species+':lod2')}
-      catch(callbackError){console.warn('Genesis trees: diagnostic callback failed',task.key,callbackError)}
-     }
-     if(initiallySettled.size===Object.keys(TYPES).length)
-      resolveInitial({loaded:Object.keys(TYPES).length-failed.size,failed:failed.size});
+    if(initialTargets.has(task.key)&&!initiallySettled.has(task.key)){
+     initiallySettled.add(task.key);
+     // Each requested LOD closes its group slot even on error; distinguish failures.
+     try{options.onResourceLoaded?.('tree:'+task.species+':lod'+task.lod,{ok:ready.has(task.key)})}
+     catch(callbackError){console.warn('Genesis trees: diagnostic callback failed',task.key,callbackError)}
+     if(initiallySettled.size===initialTargets.size)
+      resolveInitial({loaded:initialTargets.size-failed.size,failed:failed.size,total:initialTargets.size});
     }
     // One bad visual instance must not strand the download queue or the entire game.
     try{update(focusX,focusZ,true)}
@@ -249,6 +249,7 @@ export function mountVillageTrees(app, villageRoot, options={}){
   if(safeMobile&&lod!==2)return;
   if(lod===0)return; // Approved master kept offline: no 4K hero GLB in the village runtime.
   const key=species+':'+lod;
+  if(!initialTargets.has(key))return; // never introduce new downloads during gameplay
   if(ready.has(key)||requested.has(key)||failed.has(key))return;
   requested.add(key);queue.push({key,species,lod});pump();
  }
@@ -303,8 +304,11 @@ export function mountVillageTrees(app, villageRoot, options={}){
   }
   globalThis.__genesisTreeStatus=status();
  }
- // Fetch one visible baseline with full-approved master leaves per species before navigation.
- for(const species of Object.keys(TYPES))request(species,2);
+ // Preload every runtime tree LOD as one bounded group before navigation.
+ for(const species of Object.keys(TYPES)){
+  request(species,2);
+  if(!safeMobile)request(species,1);
+ }
  update(0,0,true);
  return Object.freeze({
   root:treeRoot,sites:TREE_SITES,update,status,initialReady,
