@@ -318,15 +318,44 @@
    // Saved progressed games restore the proper angle without replaying it.
     doorAngle=gate()>=1?INWARD_OPEN:0;
    doorHinge.setLocalEulerAngles(0,doorAngle,0);
-   let tickFrames=0,lastDelta=null;
-    const tick=dt=>{
-      tickFrames++;lastDelta=dt;
-      const desired=gate()>=1?INWARD_OPEN:0;
-     doorAngle+=(desired-doorAngle)*(1-Math.exp(-Math.max(0,dt)*2.8)); // visible inward animation
+   // Quest interaction can open an HTML dialogue between two PlayCanvas frames.
+   // Keep the actual GLB hinge animated from the browser frame clock as well,
+   // independent of game-timeScale, pauses and overloaded WebGL frame cadence.
+   let tickFrames=0,lastDelta=null,rafId=0,running=true;
+   let lastClock=performance.now(),lastGate=gate();
+   function stepDoor(now){
+     const elapsed=Math.min(.15,Math.max(0,(now-lastClock)/1000));
+     lastClock=now;
+     lastDelta=elapsed;
+     tickFrames++;
+     const questStep=gate();
+     const desired=questStep>=1?INWARD_OPEN:0;
+     if(questStep!==lastGate){lastGate=questStep;}
+     const delta=desired-doorAngle;
+     if(Math.abs(delta)>0.03){
+       doorAngle+=delta*(1-Math.exp(-elapsed*3.4));
+     }else{doorAngle=desired;}
      doorHinge.setLocalEulerAngles(0,doorAngle,0);
+     // PlayCanvas normally redraws every frame. Request a redraw if the
+     // engine temporarily entered on-demand render mode during a dialogue.
+     if(Math.abs(desired-doorAngle)>0.03)app.renderNextFrame=true;
+   }
+   const tick=()=>{
+     if(!running)return;
+     stepDoor(performance.now());
+   };
+   const animationFrame=now=>{
+     if(!running)return;
+     stepDoor(now);
+     rafId=requestAnimationFrame(animationFrame);
    };
    app.on('update',tick);
-   animations.push({stop:()=>app.off('update',tick)});
+   rafId=requestAnimationFrame(animationFrame);
+   animations.push({stop:()=>{
+     running=false;
+     cancelAnimationFrame(rafId);
+     app.off('update',tick);
+   }});
    const status={
      installed:true,version:'V018.5',count:buildings.length,
      approval:{Herrero:'walls V082 / door V082-B',Arcanista:'walls V006 / door V027'},
@@ -339,7 +368,7 @@
      hdr32:!!app.scene.envAtlas,
      map:'GenesisVillagePlan / original workshop coordinates',
      get doorAngle(){return doorAngle},
-      get doorQuestGate(){return gate()},get doorTickFrames(){return tickFrames},get doorLastDelta(){return lastDelta},
+      get doorQuestGate(){return gate()},get doorTickFrames(){return tickFrames},get doorLastDelta(){return lastDelta},get doorLastQuestStep(){return lastGate},
      get doorStates(){return {Herrero:Math.abs(doorAngle)>1?'opening_or_open':'closed',Arcanista:'closed',Carpintero:'closed',Curtidor:'closed',Joyero:'closed'}},
       doorOpenTrigger:'Ordan first dialogue: Q1 step 0 → 1',
       layoutCorrections:{
