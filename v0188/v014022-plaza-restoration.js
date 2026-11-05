@@ -373,6 +373,11 @@ function install(app,resources,plan,{player}={}){
    const marketSign={x:market.x-market.w/2+1,z:market.z-market.d/2+1};
    sign(app,r,'MERCADO','Área reservada · puestos pendientes',marketSign.x,marketSign.z,-90,2.1,5);
    const marker=mat('Referencia mercado',.55,.42,.22);
+   // Same four footprint borders as village_world.js V014.022, not new art.
+   for(const x of [market.x-market.w/2,market.x+market.w/2])
+     box(r,'Borde de referencia mercado',x,.025,market.z,.12,.05,market.d,marker);
+   for(const z of [market.z-market.d/2,market.z+market.d/2])
+     box(r,'Borde de referencia mercado',market.x,.025,z,market.w,.05,.12,marker);
    box(r,'Poste cartel mercado',marketSign.x,.8,marketSign.z,.18,1.6,.18,marker);
    const plazaSign={x:p.plaza.x-p.plaza.w/2-1,z:p.plaza.z-p.plaza.d/2};
    sign(app,r,'PLAZA CENTRAL','Aldea de los artesanos',plazaSign.x,plazaSign.z,0,1.9,4.4);
