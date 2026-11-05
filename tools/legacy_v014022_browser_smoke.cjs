@@ -12,7 +12,7 @@ fs.mkdirSync(folder,{recursive:true});
    page.on('pageerror',e=>errors.push('pageerror:'+e.message));
    page.on('console',m=>{if(m.type()==='error')errors.push('console:'+m.text().slice(0,260))});
    await page.goto(target,{waitUntil:'commit',timeout:45000});
-   await page.waitForFunction(()=>Boolean(window.GenesisAssetDiag)&&Boolean(document.querySelector('#genesisAssetDetails #genesisAssetRows')),null,{timeout:45000});
+   await page.waitForFunction(()=>Boolean(window.GenesisAssetDiag)&&Boolean(window.GenesisStreamLoader)&&Boolean(document.querySelector('#genesisAssetDetails #genesisAssetRows')),null,{timeout:45000});
    await page.waitForTimeout(2500);
    const report=await page.evaluate(()=>{
     const root=document.getElementById('genesisAssetDetails'),summary=window.GenesisAssetDiag.snapshot();
@@ -21,12 +21,19 @@ fs.mkdirSync(folder,{recursive:true});
       text:root.textContent.slice(0,550),rowCount:root.querySelectorAll('#genesisAssetRows > div').length,
       assets:summary.records.filter(x=>/\\.(glb|gltf|png|jpg|bin|webp)(\\?|$)/i.test(x.url)).length,
       loadVisible:loading?.style.display!=='none',button:!!root.querySelector('#genesisCopyDiagnostic'),
+      streamer:!!window.GenesisStreamLoader,legacyCategoriesHidden:getComputedStyle(document.getElementById('loadGroups')).display==='none',
+      bootDeferred:document.querySelectorAll('pc-model[data-genesis-boot-asset]').length,
+      bytesSnapshot:window.GenesisStreamLoader.snapshot(),
       memoryKey:'legacy-v014022',errorCount:summary.errors.length};
    });
    assert(report.visible,'Diagnostic box not visible');
    assert(report.button,'Copy report button missing');
+   assert(report.streamer,'New streamer not installed');
+   assert(report.legacyCategoriesHidden,'Old 6-category UI still visible');
+   assert(report.bootDeferred>=1,'Boot models were not deferred / applied');
    assert(report.text.includes('V0.14.022'),'Wrong diagnostic version');
    assert(report.rowCount>=1,'No per-file diagnostic lines');
+   assert(report.text.includes('ARCHIVOS'),'Per-file stream overview not displayed');
    const file=folder+'/loading-'+targetView.name+'.png';
    fs.writeFileSync(folder+'/result-'+targetView.name+'.json',JSON.stringify({...report,browserErrors:errors.slice(0,25)},null,2));
    console.log('V014022 DIAGNOSTIC',targetView.name,JSON.stringify({...report,browserErrors:errors.slice(0,5)}));
