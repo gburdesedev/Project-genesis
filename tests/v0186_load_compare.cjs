@@ -65,7 +65,15 @@ async function one(version, engine, deviceName) {
           await resume.click({timeout:12000});
           await page.waitForTimeout(6000);
           samples.push(await sample(page,version,Math.round((Date.now()-started)/1000)));
-          console.log('BOOT_CONTINUED',JSON.stringify({id,status:samples.at(-1).status,visible:samples.at(-1).visible,bodyClass:samples.at(-1).bodyClass}));
+          console.log('BOOT_CONTINUED',JSON.stringify({id,status:samples.at(-1).status,visible:samples.at(-1).visible,bodyClass:samples.at(-1).bodyClass,intro:samples.at(-1).audit?.intro}));
+          for(let j=0;j<10;j++) {
+            if(!samples.at(-1).bodyClass?.includes('genesis-v016-cinematic')) break;
+            await page.waitForTimeout(5000);
+            const continuation=await sample(page,version,Math.round((Date.now()-started)/1000));
+            samples.push(continuation);
+            console.log('BOOT_CINEMATIC',JSON.stringify({id,seconds:continuation.elapsed,bodyClass:continuation.bodyClass,visible:continuation.visible,intro:continuation.audit?.intro,rigs:continuation.audit?.rigs?.artisan?.position,paused:continuation.audit?.paused}));
+          }
+          if(samples.at(-1).bodyClass?.includes('genesis-v016-cinematic'))events.push({name:'cinematic-stall',detail:'Intro remains active after 50s following resume'});
         }
         break;
       }
