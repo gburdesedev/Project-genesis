@@ -1,0 +1,50 @@
+name: Legacy V014022 no-progress watchdog
+on:
+  push:
+    branches: [experiment/legacy-v014022-approved-assets-loader-20261105]
+    paths:
+      - tools/patch_v014022_idle_watchdog.py
+      - .github/workflows/v014022-idle-watchdog.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch-and-verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply no-progress watchdog only on isolated legacy 0.14.022
+        run: python3 tools/patch_v014022_idle_watchdog.py
+      - name: Parse the game JavaScript and guard the retry policy
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          s=Path('index.html').read_text()
+          assert 'Project Genesis v0.14.022' in s
+          assert 'V014022 IDLE WATCHDOG' in s
+          assert 'Sin avance durante 120 s' in s
+          assert 'const guard=sleep(6500)' not in s
+          assert "REINTENTAR AHORA · SIN RECARGAR" in s
+          assert "routeReady.add(prof)" in s
+          modules=[m for m in re.findall(r'<script\b[^>]*type="module"[^>]*>(.*?)</script\s*>',s,re.S|re.I) if len(m)>1000]
+          assert modules
+          Path('/tmp/legacy-v014022-script.mjs').write_text(modules[-1])
+          PY
+          node --check /tmp/legacy-v014022-script.mjs
+          git diff --check
+      - name: Commit without touching main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'experiment(v014022): retry assets after 120 seconds without byte progress'
+            git push
+          fi
