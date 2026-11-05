@@ -1,0 +1,21 @@
+name: V0186 real forge GLB bounds audit
+on:
+  push:
+    branches: [experiment/v0186-herrero-functional-interior]
+    paths:
+      - 'tools/v0186_forge_bounds_audit.py'
+      - '.github/workflows/v0186-forge-bounds.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect-original-forge:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect source V038 geometry with strict GLB parsing
+        run: python3 tools/v0186_forge_bounds_audit.py | tee /tmp/v0186-forge-bounds.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v0186-original-forge-geometric-bounds
+          path: /tmp/v0186-forge-bounds.json
