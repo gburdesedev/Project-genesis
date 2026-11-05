@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - experiment/v014022-ordan-playwright-full-run-20261105
+      - experiment/v014022-recover-anvil-bellows-20261105
     paths:
       - tests/v014022_ordan_full_e2e.cjs
       - .github/workflows/v014022-ordan-full-playwright.yml
