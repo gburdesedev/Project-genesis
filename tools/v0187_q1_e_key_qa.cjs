@@ -75,7 +75,16 @@ fs.mkdirSync(out,{recursive:true});
     assert.equal(summary.step,9);
     assert(summary.chestOpen&&Object.keys(summary.materials).length>0,'Chest did not grant initial material stock');
     assert(summary.forgeHot,'Forge did not light through original E actions');
-    console.log('V0187 Q1 STATE',JSON.stringify(summary));assert(summary.doorAngle>60,'Herrero did not open inward');
+    // Q1 gameplay E actions can complete before the physical door tween.
+    // Wait until the real PlayCanvas hinge reaches the opened state.
+    await page.waitForFunction(()=>window.__GENESIS_V017_VILLAGE__?.doorAngle>85,null,{timeout:20000});
+    const doorState=await page.evaluate(()=>({
+      angle:window.__GENESIS_V017_VILLAGE__?.doorAngle,
+      gate:window.__GENESIS_V017_VILLAGE__?.doorQuestGate,
+      updateFrames:window.__GENESIS_V017_VILLAGE__?.doorTickFrames
+    }));
+    console.log('V0187 Q1 STATE',JSON.stringify({...summary,doorState}));
+    assert(doorState.angle>85,'Herrero did not open inward');
     // At this step E must open actual 16:9 inventory rather than just advancing logic.
     await page.locator('#interact').click({force:true,timeout:15000});
     await page.waitForFunction(()=>document.getElementById('modalLayer')?.style.display==='grid',null,{timeout:15000});
