@@ -25,8 +25,10 @@ async function main(){
  await page.route('**/index.html*',async route=>{
   const response=await route.fetch();let body=await response.text();
   const marker='requestAnimationFrame(frame);\n\nsetLoadUI';
-  const hook='requestAnimationFrame(frame);\nwindow.__ORDAN_QA_READONLY__=()=>({step:tutorialStep,started:gameStarted,profession:selectedProfession,player:{x:px,z:pz},quest:document.getElementById("questTitle")?.textContent,objective:objectiveTarget()?.pos||null,interactable:currentInteractable?.id||null,visibilityToObjective:tutorialStep===8?lineClearTo(objectiveTarget().pos):null,movementAllowed:gameStarted&&modalLayer.style.display!=="grid"&&intro.style.display!=="grid",crafted:craftedItems.map(x=>({recipe:x.recipe,name:x.name,rarity:x.rarity})),mercenaryState,mentorState:mentorFollowState,marketWaypoint:marketEscortWaypoint,modal:document.getElementById("modal")?.textContent?.slice(0,220)||""});\nsetLoadUI';
+  const hook='requestAnimationFrame(frame);\nwindow.__ORDAN_QA_READONLY__=()=>({step:tutorialStep,started:gameStarted,profession:selectedProfession,player:{x:px,z:pz},quest:document.getElementById("questTitle")?.textContent,objective:objectiveTarget()?.pos||null,interactable:currentInteractable?.id||null,visibilityToObjective:tutorialStep===8?lineClearTo(objectiveTarget().pos):null,movementAllowed:gameStarted&&modalLayer.style.display!=="grid"&&intro.style.display!=="grid",crafted:craftedItems.map(x=>({recipe:x.recipe,name:x.name,rarity:x.rarity})),mercenaryState,mentorState:mentorFollowState,marketWaypoint:marketEscortWaypoint,nav:{ticks:window.__ORDAN_QA_TICKS__||0,keys:Array.from(keys),inputs:{x:moveX,y:moveY},canMove:gameStarted&&modalLayer.style.display!=="grid"&&intro.style.display!=="grid",modalDisplay:modalLayer.style.display,introDisplay:intro.style.display,camYaw,nearbyCollisions:{n:wallBlocked(px,pz-.1),s:wallBlocked(px,pz+.1),e:wallBlocked(px+.1,pz),w:wallBlocked(px-.1,pz)}},modal:document.getElementById("modal")?.textContent?.slice(0,220)||""});\nsetLoadUI';
   if(body.includes(marker)){body=body.replace(marker,hook);inserted=true;}
+  const frameBegin='function frame(now){requestAnimationFrame(frame);';
+  if(body.includes(frameBegin))body=body.replace(frameBegin,'function frame(now){window.__ORDAN_QA_TICKS__=(window.__ORDAN_QA_TICKS__||0)+1;requestAnimationFrame(frame);');
   await route.fulfill({response,body,headers:{...response.headers(),'content-type':'text/html; charset=utf-8'}});
  });
  async function snap(){
@@ -57,30 +59,60 @@ async function main(){
   }return false;
  }
  async function approach(){
-  for(let i=0;i<28;i++){
-   const st=(await snap()).state;if(!st?.started)return {ok:false,why:'not started'};
-   if(st.step===8){
-     // A chest within range of the actual player should be activated by ordinary Q + E,
-     // without teleporting the actor or changing quest flags.
-     await page.keyboard.press('q'); await delay(300);
-     const aligned=(await snap()).state;
-     const chestDistance=aligned?.player&&aligned?.objective?Math.hypot(aligned.player.x-aligned.objective.x,aligned.player.z-aligned.objective.z):null;
-     log('RELOCATED_CHEST_PROBE',{step:8,player:aligned?.player,goal:aligned?.objective,distance:chestDistance,interactable:aligned?.interactable,lineClear:aligned?.visibilityToObjective,movementAllowed:aligned?.movementAllowed});
-     if(chestDistance!==null&&chestDistance<1.95){
-       // Genuine player interaction. Never change quest state through JS.
-       return {ok:true,id:aligned?.interactable||'chest-in-range',why:'chest within measured interaction range',distance:chestDistance,visible:aligned?.visibilityToObjective};
-     }
+  let noProgress=0;
+  for(let i=0;i<32;i++){
+   const state=(await snap()).state;
+   if(!state?.started)return {ok:false,why:'game not started'};
+   if(state.step===8){
+     await page.keyboard.press('q');await delay(250);
+     const t=(await snap()).state,dist=t?.objective&&t?.player?Math.hypot(t.player.x-t.objective.x,t.player.z-t.objective.z):Infinity;
+     log('RELOCATED_CHEST_PROBE',{step:8,distance:dist,interactable:t?.interactable,lineClear:t?.visibilityToObjective});
+     if(t?.interactable==='chest')return {ok:true,id:'chest',distance:dist};
    }
-   if(st.interactable)return {ok:true,id:st.interactable};
-   if(!st.objective)return {ok:false,why:'no objective'};
-   const dist=Math.hypot(st.player.x-st.objective.x,st.player.z-st.objective.z);
-   if(dist<1.35)return {ok:true,why:'close',dist};
-   await page.keyboard.press('q');
-   const old=st.player;
-   await page.keyboard.down('w');await delay(430);await page.keyboard.up('w');
-   const next=(await snap()).state;
-   if(next?.player&&Math.hypot(next.player.x-old.x,next.player.z-old.z)<.02){return {ok:false,why:'blocked by collision',step:st.step,dist}}
-  }return {ok:false,why:'movement budget'};
+   if(state.interactable)return {ok:true,id:state.interactable,step:state.step,tries:i};
+   if(!state.objective)return {ok:false,why:'no target',step:state.step};
+   const dist=p=>Math.hypot(p.x-state.objective.x,p.z-state.objective.z);
+   const d0=dist(state.player);
+   if(d0<1.35)return {ok:true,why:'within radius',distance:d0,step:state.step};
+   await page.keyboard.press('q');await delay(250);
+   const probes=[];
+   let closer=false,lateral=false;
+   for(const key of ['w','a','d','s']){
+    const b=(await snap()).state;
+    await page.keyboard.down(key);
+    await delay(key==='w'?1150:650);
+    const held=(await snap()).state;
+    await page.keyboard.up(key);
+    await delay(150);
+    const a=(await snap()).state;
+    const movement=b?.player&&a?.player?Math.hypot(a.player.x-b.player.x,a.player.z-b.player.z):0;
+    const distance=a?.player?dist(a.player):Infinity;
+    const trace={key,from:b?.player,to:a?.player,dx:movement,dist:distance,frames:b?.nav&&held?.nav?held.nav.ticks-b.nav.ticks:null,keyRegistered:held?.nav?.keys,allowed:held?.nav?.canMove,collisions:held?.nav?.nearbyCollisions};
+    probes.push(trace);
+    if(a?.interactable){log('REAL_MOVEMENT_REACHED_TARGET',{step:state.step,trace});return {ok:true,id:a.interactable,key,tries:i}}
+    if(movement>.035&&distance<d0-.035){closer=true;break}
+    if(movement>.035){lateral=true;break}
+   }
+   log('REAL_MOVEMENT_PROBES',{step:state.step,try:i,target:state.objective,start:state.player,probes});
+   if(closer||lateral){noProgress=0;continue}
+   // Try the player's actual on-screen joystick when keyboard focus is unresponsive.
+   const joy=page.locator('#joy'),rect=await joy.boundingBox().catch(()=>null);
+   if(rect&&rect.width>=20&&rect.height>=20){
+     const cx=rect.x+rect.width/2,cy=rect.y+rect.height/2;
+     const b=(await snap()).state;
+     await page.mouse.move(cx,cy);await page.mouse.down();
+     await page.mouse.move(cx,cy-31,{steps:3});await delay(1000);
+     const held=(await snap()).state;
+     await page.mouse.up();
+     const a=(await snap()).state;
+     const d=b?.player&&a?.player?Math.hypot(a.player.x-b.player.x,a.player.z-b.player.z):0;
+     log('REAL_JOYSTICK_PROBE',{step:state.step,delta:d,frameDelta:held?.nav?.ticks-b?.nav?.ticks,inputs:held?.nav?.inputs});
+     if(d>.035){noProgress=0;continue}
+   }
+   noProgress++;
+   if(noProgress>=2)return {ok:false,why:'WASD and joystick could not move player',step:state.step,distance:d0,probes};
+  }
+  return {ok:false,why:'navigation exhausted'};
  }
  try{
   await page.goto('http://127.0.0.1:8765/index.html?qa=ordan-playwright',{waitUntil:'domcontentloaded',timeout:90000});
