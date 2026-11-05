@@ -1,5 +1,5 @@
 {
-  "version": "0.15-v0188",
+  "version": "0.15-v0189",
   "mode": "gui-path-selection",
   "floor": {
     "kind": "original-village-pbr",
@@ -245,7 +245,7 @@
     },
     {
       "id": "plaza-models",
-      "name": "Plaza original V14.022 · Fuente y árboles LOD2",
+      "name": "Plaza V14.022 · Fuente HQ y árboles LOD2 solo PC",
       "kind": "assets",
       "required": true,
       "assets": [
@@ -258,7 +258,7 @@
     },
     {
       "id": "plaza-hq",
-      "name": "Plaza · LOD1 original PC",
+      "name": "Plaza · Árboles LOD1 originales solo PC",
       "kind": "assets",
       "required": false,
       "assets": [
@@ -565,7 +565,7 @@
       "nonDestructive": true
     }
   },
-  "revision": "v0188-plaza-original-v014022-retrofit",
+  "revision": "v0189-mobile-no-trees-original-plaza",
   "herreroInterior": {
     "version": "V0186",
     "source": "./herrero-interior-v0186.js",
@@ -600,12 +600,13 @@
       "species": "oak",
       "lod": 2,
       "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/oak/lod2.glb",
-      "mobilePolicy": "required",
+      "mobilePolicy": "skip-all-on-mobile",
       "approval": "original_v014022",
       "bytes": 5533288,
       "blobSha": "b066d5dda048972ea0a07cf60ce4125f60125970",
       "repository": "ProjectgenesisAssets/genesis-workshop-assets",
-      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd",
+      "desktopPolicy": "retain-original-lod1-and-lod2"
     },
     {
       "id": "plaza-tree-oak-lod1",
@@ -614,12 +615,13 @@
       "species": "oak",
       "lod": 1,
       "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/oak/lod1.glb",
-      "mobilePolicy": "deferred",
+      "mobilePolicy": "skip-all-on-mobile",
       "approval": "original_v014022",
       "bytes": 6995784,
       "blobSha": "c2426117dafe7a4f5c2ed1f596ebb5ac13feb10d",
       "repository": "ProjectgenesisAssets/genesis-workshop-assets",
-      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd",
+      "desktopPolicy": "retain-original-lod1-and-lod2"
     },
     {
       "id": "plaza-tree-ash-lod2",
@@ -628,12 +630,13 @@
       "species": "ash",
       "lod": 2,
       "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/ash/lod2.glb",
-      "mobilePolicy": "required",
+      "mobilePolicy": "skip-all-on-mobile",
       "approval": "original_v014022",
       "bytes": 5398940,
       "blobSha": "d73c338f98b50cdb91f5bbc849f0954750875322",
       "repository": "ProjectgenesisAssets/genesis-workshop-assets",
-      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd",
+      "desktopPolicy": "retain-original-lod1-and-lod2"
     },
     {
       "id": "plaza-tree-ash-lod1",
@@ -642,12 +645,13 @@
       "species": "ash",
       "lod": 1,
       "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/ash/lod1.glb",
-      "mobilePolicy": "deferred",
+      "mobilePolicy": "skip-all-on-mobile",
       "approval": "original_v014022",
       "bytes": 6861436,
       "blobSha": "2b0353aacee89d5d2cd9102107d6f9c7648c6f89",
       "repository": "ProjectgenesisAssets/genesis-workshop-assets",
-      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd",
+      "desktopPolicy": "retain-original-lod1-and-lod2"
     },
     {
       "id": "plaza-tree-linden-lod2",
@@ -656,12 +660,13 @@
       "species": "linden",
       "lod": 2,
       "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/linden/lod2.glb",
-      "mobilePolicy": "required",
+      "mobilePolicy": "skip-all-on-mobile",
       "approval": "original_v014022",
       "bytes": 5494068,
       "blobSha": "1075db16e880b1a6dc0f5544cd5b1e014a0252e5",
       "repository": "ProjectgenesisAssets/genesis-workshop-assets",
-      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd",
+      "desktopPolicy": "retain-original-lod1-and-lod2"
     },
     {
       "id": "plaza-tree-linden-lod1",
@@ -670,12 +675,13 @@
       "species": "linden",
       "lod": 1,
       "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/linden/lod1.glb",
-      "mobilePolicy": "deferred",
+      "mobilePolicy": "skip-all-on-mobile",
       "approval": "original_v014022",
       "bytes": 6956564,
       "blobSha": "2768e5df917fb6bf1b4212bf1a46011a12d3ba23",
       "repository": "ProjectgenesisAssets/genesis-workshop-assets",
-      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd",
+      "desktopPolicy": "retain-original-lod1-and-lod2"
     },
     {
       "id": "plaza-tree-maple-lod2",
@@ -684,12 +690,13 @@
       "species": "maple",
       "lod": 2,
       "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/maple/lod2.glb",
-      "mobilePolicy": "required",
+      "mobilePolicy": "skip-all-on-mobile",
       "approval": "original_v014022",
       "bytes": 5021964,
       "blobSha": "4c19defb91df6430f35c7e04a48588b4f360e89f",
       "repository": "ProjectgenesisAssets/genesis-workshop-assets",
-      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd",
+      "desktopPolicy": "retain-original-lod1-and-lod2"
     },
     {
       "id": "plaza-tree-maple-lod1",
@@ -698,12 +705,13 @@
       "species": "maple",
       "lod": 1,
       "file": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/trees/maple/lod1.glb",
-      "mobilePolicy": "deferred",
+      "mobilePolicy": "skip-all-on-mobile",
       "approval": "original_v014022",
       "bytes": 6484460,
       "blobSha": "05fd07404f8b3368a7848a678cf59ebefec2b267",
       "repository": "ProjectgenesisAssets/genesis-workshop-assets",
-      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd"
+      "sourceCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd",
+      "desktopPolicy": "retain-original-lod1-and-lod2"
     }
   ],
   "plazaRestoration": {
@@ -793,7 +801,10 @@
     "approvedAssetsRepo": "ProjectgenesisAssets/genesis-workshop-assets",
     "approvedAssetsCommit": "0d00ea47993c0020b6ffb6bdaf20742387ec1abd",
     "approvedAssetsPrefix": "assets/approved/v0188/plaza/",
-    "localVendorFallback": false
+    "localVendorFallback": false,
+    "treePolicyMobile": "NO tree GLB requested or decoded, NO trees mounted; all 14 original positions reserved",
+    "treePolicyDesktop": "All V005 original tree GLBs and 14 original tree instances; no changes",
+    "reason": "isolate restart on phone without changing fountain or other assets"
   },
   "scene": {
     "restoration": "V014022 plaza render, no change to original V0187 workshop layout or quest"
