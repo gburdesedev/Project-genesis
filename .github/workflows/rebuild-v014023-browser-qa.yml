@@ -1,0 +1,38 @@
+name: Rebuild V014.023 browser QA
+on:
+  push:
+    branches:
+      - experiment/v014022-rebuild-collisions-20261105
+    paths:
+      - '.github/workflows/rebuild-v014023-browser-qa.yml'
+      - 'tests/rebuild_v014023_browser_qa.cjs'
+      - 'index.html'
+      - 'village_world.js'
+      - 'village_trees.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright browsers
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Check script syntax
+        run: node --check tests/rebuild_v014023_browser_qa.cjs
+      - name: Test desktop and mobile startup
+        run: node tests/rebuild_v014023_browser_qa.cjs
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rebuild-v014023-browser-qa
+          path: previews/rebuild-v014023-browser-qa
+          retention-days: 7
