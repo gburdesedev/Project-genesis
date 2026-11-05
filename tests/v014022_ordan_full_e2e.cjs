@@ -64,12 +64,16 @@ async function main(){
   const x=await snap();report.states.push({stage,...x});
   log('SNAP',{stage,step:x.state?.step,quest:x.state?.quest,player:x.state?.player,objective:x.state?.objective,
    interactable:x.state?.interactable,loader:x.loader,intro:x.intro,loadState:x.loadState,detail:x.loadDetail,count:x.count,assetErrors:x.assetErrors,stream:x.stream,buttons:x.modalButtons});
-  try{await page.screenshot({path:path.join(out,String(report.states.length).padStart(2,'0')+'-'+stage.replace(/[^a-z0-9-]/gi,'-')+'.png'),animations:'disabled',timeout:10000})}catch(e){log('SCREENSHOT_FAILED',e.message.slice(0,150))}
+  try{await page.screenshot({path:path.join(out,String(report.states.length).padStart(2,'0')+'-'+stage.replace(/[^a-z0-9-]/gi,'-')+'.png'),animations:'allow',timeout:3000})}catch(e){log('SCREENSHOT_FAILED',e.message.slice(0,150))}
   return x;
  }
  async function dialog(){
   if(await page.locator('#dialogNext').isVisible().catch(()=>false)){
-   await page.locator('#dialogNext').click();await delay(350);return true
+   const btn=page.locator('#dialogNext');
+   const label=await btn.textContent();
+   await btn.click({force:true,timeout:8000});
+   log('DIALOG_BUTTON_CLICKED',{label:label?.trim(),method:'Playwright force physical pointer click'});
+   await delay(350);return true
   }return false;
  }
  async function approach(){
