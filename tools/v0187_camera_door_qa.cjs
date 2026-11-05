@@ -99,7 +99,10 @@ async function run(mode,browser) {
     return ui.tryInteract();
   });
   await page.waitForFunction(()=>window.__GENESIS_V013_LEGACY__?.game?.step()>=1,null,{timeout:15000});
-  await page.waitForFunction(()=>window.__GENESIS_V017_VILLAGE__?.doorAngle>85,null,{timeout:18000});
+  await page.waitForTimeout(2200);
+  const doorDebug=await page.evaluate(()=>({step:window.__GENESIS_V013_LEGACY__?.game?.step(),angle:window.__GENESIS_V017_VILLAGE__?.doorAngle,appTimeScale:pc.Application.getApplication()?.timeScale,paused:window.__GENESIS_V011_AUDIT__?.()?.paused,panel:document.querySelector('#v011-pause')?.style.display,modal:window.__GENESIS_V013_LEGACY__?.isModalOpen(),errors:window.GenesisV015Diagnostics?.events?.slice(-3)}));
+  console.log('V0187 DOOR DEBUG',JSON.stringify(doorDebug));
+  await page.waitForFunction(()=>window.__GENESIS_V017_VILLAGE__?.doorAngle>85,null,{timeout:12000});
   const after=await page.evaluate(()=>{
     const v=window.__GENESIS_V017_VILLAGE__,app=pc.Application.getApplication(),hinge=app.root.findByName('Herrero · bisagra izquierda original');
     return {step:window.__GENESIS_V013_LEGACY__.game.step(),angle:v.doorAngle,pivot:hinge?.getPosition().toString(),euler:hinge?.getEulerAngles().toString()};
