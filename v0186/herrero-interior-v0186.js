@@ -70,23 +70,11 @@
      mi.material=mat;
    }
    app.root.addChild(real);
-   // A local point light makes Q1 lighting a real scene event; the old forge
-   // remains physically unlit until Ordan's repair sequence reaches "forge".
-   // This does NOT change the door's HDRI, exposure or the V038 master GLB.
-   const fireLight=new pc.Entity('Herrero V038 · luz cálida del fuego (Q1)');
-   fireLight.addComponent('light',{
-     type:'omni',color:new pc.Color(1,.47,.22),
-     range:3.05,intensity:2.0,castShadows:false
-   });
-   fireLight.setPosition(FORGE_POS[0],1.06,FORGE_POS[2]+.26);
-   app.root.addChild(fireLight);
-   fireLight.enabled=false;
    let forgeHot=null;
    const update=()=>{
      const hot=game.step()>=7;  // Q1 forge action (step 6) was completed.
      if(hot===forgeHot)return;
      forgeHot=hot;
-     fireLight.enabled=hot;
      for(const material of emberMaterials.values()){
        material.emissiveIntensity=hot?2.1:0;
        material.update();
@@ -99,13 +87,12 @@
      worldPosition:FORGE_POS,realDimensionsMetres:[2.0934,3.2238,1.6742],
      repairedOnQuestStep:7, originalPbrPreserved:true,
      get forgeHot(){return forgeHot},
-     get fireLightEnabled(){return fireLight.enabled},
      get questStep(){return game.step()},
      get renderMeshCount(){return meshes.length}
    };
    globalThis.__GENESIS_V0186_INTERIOR__=publicStatus;
    return Object.freeze({real,status:publicStatus,canWalk:(from,to)=>canWalk(from,to,game.step()),
-     dispose(){app.off('update',update);fireLight.destroy();real.destroy();for(const m of emberMaterials.values())m.destroy?.()}});
+     dispose(){app.off('update',update);real.destroy();for(const m of emberMaterials.values())m.destroy?.()}});
  }
  return Object.freeze({install,canWalk,FORGE_POS,INTERIOR});
 });
