@@ -1,0 +1,34 @@
+name: V014.023 rebuild public QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/v014023-rebuild-public-qa.yml']
+permissions:
+  contents: read
+jobs:
+  browser-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: experiment/v014022-rebuild-collisions-20261105
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Validate test script
+        run: node --check tests/rebuild_v014023_browser_qa.cjs
+      - name: Test Chromium desktop and WebKit mobile
+        run: node tests/rebuild_v014023_browser_qa.cjs
+      - name: Publish screenshots and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v014023-rebuild-qa-results
+          path: previews/rebuild-v014023-browser-qa
+          retention-days: 7
