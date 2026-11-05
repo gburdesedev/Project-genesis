@@ -86,6 +86,28 @@ async function main(){
    if(!s?.started)return {ok:false,why:'not started'};
    if(s.interactable)return {ok:true,id:s.interactable,tries:i};
    if(!s.objective)return {ok:false,why:'no objective'};
+   if(s.step===8&&i===0){
+    const focus=()=>page.evaluate(()=>({
+      hasFocus:document.hasFocus(),activeTag:document.activeElement?.tagName,
+      activeId:document.activeElement?.id,pointerLockTag:document.pointerLockElement?.tagName||null,
+      pointerLockId:document.pointerLockElement?.id||null,
+      modalDisplay:getComputedStyle(document.getElementById('modalLayer')).display,
+      centerTarget:document.elementFromPoint(innerWidth/2,innerHeight/2)?.id||null,
+      canvasCount:document.querySelectorAll('canvas').length
+    }));
+    const beforeFocus=await focus();
+    let clickResult='no canvas';
+    const canvas=page.locator('canvas').first();
+    if(await canvas.count()){
+      try{
+        const bounds=await canvas.boundingBox();
+        if(bounds){await page.mouse.click(bounds.x+bounds.width*.5,bounds.y+bounds.height*.5);clickResult='real mouse click at canvas center';}
+        else clickResult='canvas has no bounding box';
+      }catch(e){clickResult='pointer click failed: '+String(e).slice(0,160)}
+    }
+    await delay(250);
+    log('FOCUS_PROBE',{step:s.step,before:beforeFocus,clickResult,after:await focus()});
+   }
    const pos=s.player;
    const dist=p=>Math.hypot(p.x-s.objective.x,p.z-s.objective.z);
    const before=dist(pos);
