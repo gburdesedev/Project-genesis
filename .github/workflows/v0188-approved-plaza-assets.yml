@@ -1,0 +1,46 @@
+name: V0188 approved plaza asset-pack integrity
+on:
+  push:
+    branches: [experiment/v0188-plaza-original-v014022-20261105]
+    paths:
+      - 'v0188/manifest.json'
+      - '.github/workflows/v0188-approved-plaza-assets.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-immutable-assets:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify remote source, size, git blob SHA and CORS for ALL nine originals
+        run: |
+          python3 - <<'PY'
+          import json, hashlib, urllib.request, sys
+          entries=json.load(open('v0188/manifest.json',encoding='utf-8'))['plazaAssets']
+          assert len(entries)==9, len(entries)
+          assert all(e['file'].startswith('https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/0d00ea47993c0020b6ffb6bdaf20742387ec1abd/assets/approved/v0188/plaza/') for e in entries)
+          total=0
+          for e in entries:
+              expected=e['bytes']
+              h=hashlib.sha1(b'blob '+str(expected).encode()+b'\x00')
+              req=urllib.request.Request(e['file'],headers={'User-Agent':'ProjectGenesis-V0188-Approved-Asset-Integrity/1.0'})
+              with urllib.request.urlopen(req,timeout=120) as response:
+                  assert response.status==200,(e['id'],response.status)
+                  cors=response.headers.get('access-control-allow-origin')
+                  print('CORS',e['id'],cors)
+                  assert cors in ('*','https://gburdesedev.github.io'),(e['id'],cors)
+                  received=0
+                  while True:
+                      data=response.read(1048576)
+                      if not data: break
+                      received+=len(data)
+                      h.update(data)
+              digest=h.hexdigest()
+              assert received==expected,(e['id'],received,expected)
+              assert digest==e['blobSha'],(e['id'],digest,e['blobSha'])
+              total+=received
+              print('PASS',e['id'],'bytes',received,'gitBlobSha',digest)
+          print('V0188 ASSET PACK PASS',len(entries),'original files',total,'verified bytes')
+          PY
