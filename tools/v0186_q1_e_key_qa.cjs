@@ -60,7 +60,8 @@ fs.mkdirSync(out,{recursive:true});
          player.setPosition(goal.position[0]+.25,0,goal.position[1]+.32);
         }
       });
-      await page.locator('#interact').click({force:true,timeout:15000});
+      if(mode.mobile)await page.locator('#interact').click({force:true,timeout:15000});
+      else await page.keyboard.press('e');
       await page.waitForFunction(step=>window.__GENESIS_V013_LEGACY__?.game.step()===step+1,prior.step,{timeout:14000});
       if(await page.locator('#legacyDialogueContinue').count()){
         await page.locator('#legacyDialogueContinue').click({force:true,timeout:13000});
