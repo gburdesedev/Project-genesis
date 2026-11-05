@@ -18,7 +18,26 @@ async function run(mode,browser) {
   const qs='?qa=camera-door-'+mode.name;
   await page.goto('http://127.0.0.1:8765/v0188/'+qs,{waitUntil:'domcontentloaded',timeout:75000});
   await page.locator('#start-blacksmith').click({timeout:35000});
-  await page.waitForFunction(()=>document.getElementById('v011-pause')?.textContent.includes('Carga finalizada'),null,{timeout:200000,polling:400});
+  page.on('requestfailed',req=>console.error('V0188 NETWORK FAILED',req.url(),req.failure()));
+  try{
+    await page.waitForFunction(()=>document.getElementById('v011-pause')?.textContent.includes('Carga finalizada'),null,{timeout:95000,polling:400});
+  }catch(failure){
+    let debug={};
+    try{
+      debug=await page.evaluate(()=>({
+        status:document.querySelector('#status')?.textContent,
+        pause:document.querySelector('#v011-pause')?.textContent?.slice(0,1300),
+        assets:[...document.querySelectorAll('#rows .asset')].map(x=>x.textContent?.slice(0,160)).filter(Boolean),
+        loadText:document.querySelector('#loadCount')?.textContent,
+        errors:window.__GENESIS_V017_WORKSHOP_LOADER__?.errors,
+        plaza:window.__GENESIS_V0188_PLAZA__||null,
+        diagnostics:window.GenesisV015Diagnostics?.snapshot?.()
+      }));
+      await page.screenshot({path:out+'/'+mode.name+'-loading-failure.png',timeout:18000});
+    }catch(e){debug.inspectionError=String(e)}
+    console.error('V0188 LOAD DEBUG',JSON.stringify(debug).slice(0,14500));
+    throw failure;
+  }
   const loaded=await page.evaluate(()=>({
    a:window.__GENESIS_V011_AUDIT__?.(),
    cameraReady:!!window.__GENESIS_V0188_CAMERA__,
