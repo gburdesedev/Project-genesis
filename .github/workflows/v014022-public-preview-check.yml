@@ -1,0 +1,39 @@
+name: V014022 public GitHack preview verification (isolated)
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - experiment/legacy-v014022-approved-assets-loader-20261105
+    paths:
+      - .github/workflows/v014022-public-preview-check.yml
+permissions:
+  contents: read
+jobs:
+  check-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify experimental version over publicly reachable HTTPS without touching Pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://raw.githack.com/gburdesedev/Project-genesis/${GITHUB_SHA}"
+          echo "Preview: ${URL}/index.html"
+          for path in index.html genesis_v014022_stream_loader.js device_policy.js village_world.js village_trees.js assets/vendor/genesis/externals/blacksmithDoorV082/src/door-herrero-v082-b.glb; do
+            hdr=$(mktemp)
+            data=$(mktemp)
+            curl --fail --location --retry 2 --retry-all-errors --connect-timeout 15 --max-time 100 -D "$hdr" -o "$data" "${URL}/${path}"
+            size=$(wc -c < "$data")
+            ctype=$(grep -i '^content-type:' "$hdr" | tail -1 | tr -d '\r' || true)
+            test "$size" -gt 100 || { echo "File too small: $path"; exit 1; }
+            case "$path" in
+              index.html) grep -q 'Project Genesis v0.14.022' "$data";;
+              *.js) grep -q 'Genesis' "$data";;
+              *.glb) test "$size" -gt 100000;;
+            esac
+            echo "$path: ${size} bytes ${ctype}"
+            rm -f "$hdr" "$data"
+          done
+          echo "### Public test link" >> "$GITHUB_STEP_SUMMARY"
+          echo "${URL}/index.html" >> "$GITHUB_STEP_SUMMARY"
