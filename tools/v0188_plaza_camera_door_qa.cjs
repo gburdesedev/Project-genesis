@@ -5,6 +5,19 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const out='/tmp/genesis-v0188-camera-door';
 fs.mkdirSync(out,{recursive:true});
+async function captureRealBrowserFrame(page,outputPath){
+  // Capture the actual Chromium compositor surface. Unlike Playwright's
+  // screenshot helper this does not wait for successive rAF ticks, which
+  // can stall with 65MB of real 3D assets in software WebGL.
+  const cdp=await page.context().newCDPSession(page);
+  try{
+    await cdp.send('Page.enable');
+    const result=await cdp.send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false});
+    if(!result?.data)throw Error('Chromium returned no screenshot pixels');
+    fs.writeFileSync(outputPath,Buffer.from(result.data,'base64'));
+  }finally{await cdp.detach()}
+}
+
 const results=[];
 async function run(mode,browser) {
  const page=await browser.newPage({
@@ -33,7 +46,7 @@ async function run(mode,browser) {
         plaza:window.__GENESIS_V0188_PLAZA__||null,
         diagnostics:window.GenesisV015Diagnostics?.snapshot?.()
       }));
-      await page.screenshot({path:out+'/'+mode.name+'-loading-failure.png',timeout:18000});
+      await captureRealBrowserFrame(page,out+'/'+mode.name+'-loading-failure.png');
     }catch(e){debug.inspectionError=String(e)}
     console.error('V0188 LOAD DEBUG',JSON.stringify(debug).slice(0,14500));
     throw failure;
@@ -110,7 +123,7 @@ async function run(mode,browser) {
     await page.keyboard.press('Escape');
     await page.waitForFunction(()=>window.__GENESIS_V0188_CAMERA__?.mouseLocked===false,null,{timeout:10000});
   }
-  await page.screenshot({path:out+'/'+mode.name+'-camera-play.png',timeout:40000});
+  await captureRealBrowserFrame(page,out+'/'+mode.name+'-camera-play.png');
 
   // Source gameplay: fresh Q1 step 0, real Ordan interaction should animate inward.
   const before=await page.evaluate(()=>({
@@ -150,14 +163,14 @@ async function run(mode,browser) {
     app.on('prerender',fix);fix();
   });
   await page.waitForTimeout(900);
-  await page.screenshot({path:out+'/'+mode.name+'-door-open-inward.png',timeout:40000});
+  await captureRealBrowserFrame(page,out+'/'+mode.name+'-door-open-inward.png');
   await page.evaluate(()=>{
     const app=pc.Application.getApplication(),cam=app.root.findByName('Camara');
     const show=()=>{cam.setPosition(7,24,34);cam.lookAt(7,0,16)};
     app.on('prerender',show);show();
   });
   await page.waitForTimeout(1100);
-  await page.screenshot({path:out+'/'+mode.name+'-original-plaza-overview.png',timeout:40000});
+  await captureRealBrowserFrame(page,out+'/'+mode.name+'-original-plaza-overview.png');
   results.push({device:mode.name,cameraYawBefore:cameraBefore,door:loaded.door,doorAngle:after.angle,pivot:after.pivot,loading:loaded.a.workshops,forgeMeshes:loaded.interior,passed:true});
   console.log('PASS V0188 '+mode.name,JSON.stringify({doorAngle:after.angle,camera:cameraBefore,forgeMeshes:loaded.interior}));
  }finally{await page.close()}
