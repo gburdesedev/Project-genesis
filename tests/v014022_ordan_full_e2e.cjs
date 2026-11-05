@@ -27,7 +27,11 @@ async function main(){
   const oldBase="https://cdn.jsdelivr.net/gh/dustinc555/mygame@main/assets/vendor/quaternius/fantasy_props_megakit/gltf/";
   const recoveries={
     'Anvil_Log.gltf':"https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/8696981a95113a34feec26100e761e9e164327de/production/game_v014022/herrero_recovery/v001/anvil_quaternius_cc0_original/Anvil_Log.gltf",
-    'Bellows.gltf':"https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/8696981a95113a34feec26100e761e9e164327de/production/game_v014022/herrero_recovery/v001/bellows_cc0_candidate/Bellows.glb"
+    'Bellows.gltf':"https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/8696981a95113a34feec26100e761e9e164327de/production/game_v014022/herrero_recovery/v001/bellows_cc0_candidate/Bellows.glb",
+    'Hammer_Rack.gltf':"https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/f33ff16f25c7f05d294665b9be1049773721cbd9/production/game_v014022/herrero_recovery/v001/blacksmith_decor_fallback/Hammer_Rack.gltf",
+    'Sign_Blacksmith.gltf':"https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/f33ff16f25c7f05d294665b9be1049773721cbd9/production/game_v014022/herrero_recovery/v001/blacksmith_decor_fallback/Sign_Blacksmith.glb",
+    'Barrel_Dark.gltf':"https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/f33ff16f25c7f05d294665b9be1049773721cbd9/production/game_v014022/herrero_recovery/v001/blacksmith_decor_fallback/Barrel_Dark.gltf",
+    'Bucket_Wooden_2.gltf':"https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/f33ff16f25c7f05d294665b9be1049773721cbd9/production/game_v014022/herrero_recovery/v001/blacksmith_decor_fallback/Bucket_Wooden_2.gltf"
   };
   for(const [original,replacement] of Object.entries(recoveries)){
     const source=oldBase+original;
