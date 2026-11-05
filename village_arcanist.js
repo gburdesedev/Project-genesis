@@ -116,7 +116,8 @@ export function mountArcanePortal(app,building,fallbackDoor,options={}){
  const settle=()=>{globalThis.__genesisArcaneDoorStatus=report();if(phase==='ready')options.onResourceLoaded?.('door:arcane:V027');resolveInitial(report());};
  const report=()=>({version:'V027',phase,detail,url:ARCANE_DOOR_SOURCE});
  globalThis.__genesisArcaneDoorStatus=report();
- app.assets.loadFromUrl(ARCANE_DOOR_SOURCE,'container',(error,asset)=>{
+ window.GenesisStreamLoader.loadContainer(ARCANE_DOOR_SOURCE,{maxAttempts:2}).then(asset=>settlePortal(null,asset),error=>settlePortal(error,null));
+ function settlePortal(error,asset){
   if(error||!asset?.resource){
    phase='fallback';detail=String(error||'GLB sin recurso');
    console.warn('Arcanista V027: se conserva la puerta anterior:',detail);
@@ -138,6 +139,6 @@ export function mountArcanePortal(app,building,fallbackDoor,options={}){
    console.warn('Arcanista V027: falla de importación:',detail);
   }
   settle();
- });
+ }
  return Object.freeze({pivot,status:report,initialReady});
 }
