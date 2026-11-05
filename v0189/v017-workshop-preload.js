@@ -124,6 +124,13 @@
    const mobile=matchMedia('(pointer:coarse)').matches;
    for(const entry of [...(manifest.workshopAssets||[]),...(manifest.plazaAssets||[])]){ // same stable byte-progress loader, plaza as its own group
      try{
+       if(mobile&&entry.kind==='tree-lod'){
+         // Diagnostic isolation: zero tree HTTP requests and zero GPU decoding on phones.
+         // Approved V005 GLBs remain immutable and fully available on desktop.
+         onState(entry.id,{name:entry.name,status:'Reservado para PC',received:0,total:0});
+         diag?.asset(entry.id,'skipped-mobile-no-tree-request',{reason:'V0189 isolate tree-caused restarts on phones; no LOD requested',received:0});
+         continue;
+       }
        if(mobile&&entry.mobilePolicy==='deferred'){
          onState(entry.id,{name:entry.name,status:'Reservado para PC',received:0,total:0});
          diag?.asset(entry.id,'deferred-mobile',{reason:'HQ WebGL memory safety'});
