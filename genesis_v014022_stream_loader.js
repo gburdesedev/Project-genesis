@@ -112,7 +112,7 @@ function awaitEngine(asset,timeout=120000){
   try{app.assets.load(asset)}catch(error){finish(error)}
  });
 }
-async function innerPrepare(id){
+async function innerPrepare(id,maxAttempts=Infinity){
  const el=document.getElementById(id);
  if(!el||el.localName!=='pc-asset')throw new Error('pc-asset no encontrado: '+id);
  await el.ready();
@@ -121,12 +121,12 @@ async function innerPrepare(id){
  if(!asset)throw new Error('pc-asset sin registro: '+id);
  const src=el.getAttribute('src')||asset.file?.url;
  if(!src)throw new Error('Asset sin URL: '+id);
- if(asset.resource){notify(src,'recurso preparado',null,null);return asset}
+ if(asset.resource){if(!/^data:/i.test(src))notify(src,'recurso preparado',null,null);return asset}
  const url=absolute(src);
  let attempt=0;
  while(true){
   try{
-   if(asset.resource){notify(src,'recurso preparado',null,null);return asset}
+   if(asset.resource){if(!/^data:/i.test(src))notify(src,'recurso preparado',null,null);return asset}
    if(asset.loaded&&!asset.resource)asset.unload?.();
    if(/^data:/i.test(src)){
     await awaitEngine(asset);
@@ -142,23 +142,23 @@ async function innerPrepare(id){
     await awaitEngine(asset);
    }
    if(!asset.resource)throw new Error('Asset sin recurso decodificado');
-   notify(url,'recurso preparado',null,null);
+   if(!/^data:/i.test(src))notify(url,'recurso preparado',null,null);
    return asset;
   }catch(error){
    attempt++;
    const reason=error?.message||String(error);
    try{asset.unload?.()}catch(_){}
-   audit.get(url)&&(audit.get(url).attempts=attempt);
-   notify(url,'carga en pausa',null,null,reason);
-   await pause(id+' · '+url.split('/').pop(),attempt,reason);
+   if(!/^data:/i.test(src)){audit.get(url)&&(audit.get(url).attempts=attempt);notify(url,'carga en pausa',null,null,reason);}
+   if(attempt>=maxAttempts)throw new Error('Tras '+attempt+' intentos: '+reason);
+   await pause(id+' · '+(url.startsWith('data:')?'modelo interno':url.split('/').pop()),attempt,reason);
   }
  }
 }
-function prepare(id){
+function prepare(id,{maxAttempts=Infinity}={}){
  const clean=String(id||'').replace(/^#/,'');
  if(ready.has(clean))return Promise.resolve(ready.get(clean));
  if(running.has(clean))return running.get(clean);
- const p=innerPrepare(clean).then(asset=>{ready.set(clean,asset);return asset}).finally(()=>running.delete(clean));
+ const p=innerPrepare(clean,maxAttempts).then(asset=>{ready.set(clean,asset);return asset}).finally(()=>running.delete(clean));
  running.set(clean,p);return p;
 }
 function setApp(value){app=value}
