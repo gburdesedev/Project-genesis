@@ -644,3 +644,22 @@
 @media(prefers-reduced-motion:reduce){
   .genInv .genInvSlot>.genInvSlotArtwork{transition:none!important}
 }
+
+/* Evitar que el relato NGE colapse a cero cuando se muestra el nombre real.
+ * No desplazar la acción ni tapar las estadísticas del objeto. */
+.genInv .genInvInfo .genInvChannels{
+  flex:0 1 auto!important;
+  max-height:23%!important;
+}
+.genInv .genInvInfo .genInvNgeText{
+  flex:0 0 1.6cqw!important;
+  min-height:1.6cqw!important;
+  max-height:1.6cqw!important;
+  overflow-y:auto!important;
+  font-size:.84cqw!important;
+  line-height:1.2!important;
+  margin:0 0 .4%!important;
+}
+.genInv .genInvInfo .genInvInfoMore{
+  margin:.6% 0 0!important;
+}
