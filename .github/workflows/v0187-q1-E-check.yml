@@ -1,0 +1,38 @@
+name: V0187 real Ordan and E-key quest regression
+on:
+  push:
+    branches: [experiment/v0187-camera-door-gameplay-fix]
+    paths:
+      - 'tools/v0187_q1_e_key_qa.cjs'
+      - '.github/workflows/v0187-q1-E-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-quest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate authentic quest scripts
+        run: |
+          node --check tools/v0187_q1_e_key_qa.cjs
+          node --check v0187/herrero-interior-v0186.js
+      - name: Install Chromium WebGL
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Actual E key and touch through all Q1 stages
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v0187-q1-server.log 2>&1 &
+          node tools/v0187_q1_e_key_qa.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v0187-Q1-original-E-inventory-PC-mobile
+          path: /tmp/v0187-q1-e-interactions/
+          retention-days: 14
+          if-no-files-found: warn
