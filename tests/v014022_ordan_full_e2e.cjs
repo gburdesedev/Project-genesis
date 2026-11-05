@@ -14,7 +14,7 @@ function log(event,data){report.events.push({event,data});console.log('ORDAN_QA'
 async function main(){
  await delay(1100);
  const browser=await chromium.launch({headless:true,args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
- const context=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1,acceptDownloads:true});
+ const context=await browser.newContext({viewport:{width:800,height:450},deviceScaleFactor:1,acceptDownloads:true});
  const page=await context.newPage();page.setDefaultTimeout(13000);
  page.on('pageerror',e=>{report.errors.push(String(e.stack||e));log('PAGE_ERROR',String(e).slice(0,500))});
  page.on('console',m=>{if(m.type()==='error'){report.errors.push(m.text().slice(0,600));log('CONSOLE_ERROR',m.text().slice(0,200))}});
@@ -80,7 +80,7 @@ async function main(){
    for(const key of ['w','a','d','s']){
     const b=(await snap()).state;
     await page.keyboard.down(key);
-    await delay(key==='w'?1150:650);
+    await delay(key==='w'?2100:1300);
     const held=(await snap()).state;
     await page.keyboard.up(key);
     await delay(150);
