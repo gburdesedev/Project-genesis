@@ -4,7 +4,7 @@
  */
 import {Entity,Color,Texture,FILTER_LINEAR} from 'playcanvas';
 
-export const ARCANE_DOOR_SOURCE = 'https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/588de60f6888c7e3d4db20e31ee60b3e19918968/deliverables/door_v027/webgl/Arcanist_Door_V027_WebGL.glb';
+export const ARCANE_DOOR_SOURCE = './assets/vendor/genesis/externals/arcanistDoorV027/src/Arcanist_Door_V027_WebGL.glb';
 
 
 // Animate the emissive masks themselves: the light climbs through the original

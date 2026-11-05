@@ -111,7 +111,7 @@ function classifyAndTune(prototype,mobile,windMaterials) {
 
 const assetPath = (species,lod) => lod===0
  ? ORIGINALS+TYPES[species].master
- : REPO+'assets/tree_webgl_v005/'+species+'/lod'+lod+'.glb';
+ : './assets/vendor/genesis/externals/tree_v005_'+species+'_lod'+lod+'/src/lod'+lod+'.glb';
 function boundsOf(entity){
  const stack=[entity];let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
  entity.syncHierarchy();
@@ -199,7 +199,7 @@ export function mountVillageTrees(app, villageRoot, options={}){
   while(active<maxConcurrent&&queue.length){
    const task=queue.shift();active++;
    const url=task.legacy
-    ? ORIGINALS+'assets/tree_webgl_v003/'+task.species+'/lod'+task.lod+'.glb'
+    ? './assets/vendor/genesis/externals/tree_v003_'+task.species+'_lod'+task.lod+'/src/lod'+task.lod+'.glb'
     : assetPath(task.species,task.lod);
    app.assets.loadFromUrl(url,'container',(error,asset)=>{
     active--;

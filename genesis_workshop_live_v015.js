@@ -5,10 +5,10 @@
  */
 const ASSETS='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/';
 const GLBS={
- walls:ASSETS+'integration/herrero-v082-arched-doorway/public/models/blacksmith-v082-arched-portal/blacksmith_four_walls_arched_v082.glb',
- roof:ASSETS+'feature/blacksmith-workshop-windows-flue-v013/public/models/blacksmith-structural-v013/batched/blacksmith_roof_preview.glb',
- chimney:ASSETS+'feature/blacksmith-workshop-windows-flue-v013/public/models/blacksmith-structural-v013/batched/blacksmith_chimney_candidate_preview.glb',
- door:ASSETS+'production/door-herrero-v082-subtle-forging/public/models/door-herrero-v082-b/door-herrero-v082-b.glb'
+ walls:'./assets/vendor/genesis/externals/blacksmithWallsV082/src/blacksmith_four_walls_arched_v082.glb',
+ roof:'./assets/vendor/genesis/externals/blacksmithRoofV013/src/blacksmith_roof_preview.glb',
+ chimney:'./assets/vendor/genesis/externals/blacksmithChimneyV013/src/blacksmith_chimney_candidate_preview.glb',
+ door:'./assets/vendor/genesis/externals/blacksmithDoorV082/src/door-herrero-v082-b.glb'
 };
 const status={version:'v0.17.014-herrero-v082b',phase:'waiting',assets:{},installed:[],
  doorVisual:'V082-B',doorProfile:'arched',doorHinge:'left',doorHandle:'right',
