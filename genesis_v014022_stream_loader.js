@@ -9,6 +9,7 @@ const running=new Map(),ready=new Map(),queue=[];
 const audit=new Map();
 let active=0, maximum=3;
 let app=null, retryHandler=null, route='';
+let groupPlan=null;
 const idleLimit=120000;
 const absolute=url=>new URL(url,location.href).href;
 const stamp=()=>performance.now();
@@ -36,28 +37,37 @@ function requiredIds(){
  return ids;
 }
 function render(){
- const values=[...audit.values()],plan=requiredIds();
- if(!plan.size)return;
- const complete=[...plan].filter(id=>ready.has(id)).length;
- let partial=0;
- for(const id of plan){
-  if(ready.has(id))continue;
-  const el=document.getElementById(id),src=el?.getAttribute('src');
-  if(!src||/^data:/i.test(src))continue;
-  const rec=audit.get(absolute(src));
-  if(rec&&rec.total)partial+=Math.min(.95,rec.received/rec.total);
- }
- const pending=values.filter(x=>x.state==='descargando').length;
- const x=document.getElementById('loadCount');
- if(x)x.textContent=complete+' de '+plan.size+' recursos necesarios preparados · '+pending+' descargando';
- const pctValue=Math.max(0,Math.min(99,Math.floor(100*(complete+partial)/plan.size)));
+ const values=[...audit.values()];
+ const activeTransfers=values.filter(x=>x.state==='descargando').length;
+ const count=document.getElementById('loadCount');
  const progress=document.getElementById('loadBarFill'),pct=document.getElementById('loadPercent');
- if(progress)progress.style.width=pctValue+'%';
- if(pct)pct.textContent=pctValue+'%';
- const total=values.reduce((sum,r)=>sum+(r.total||0),0);
+ if(groupPlan){
+  const ids=groupPlan.phase==='Herrero'
+   ? ['herreroCritico','herreroEscena']
+   : ['paredes','objetos','animaciones','suelos','arboles','puertas'];
+  const values=ids.map(id=>groupPlan.groups[id]).filter(Boolean);
+  const total=values.reduce((sum,g)=>sum+Math.max(0,g.total||0),0);
+  const complete=values.reduce((sum,g)=>sum+Math.min(g.total||0,g.ready||0),0);
+  const percent=total?Math.floor(100*complete/total):0;
+  if(count)count.textContent=complete+' de '+total+' recursos de '+groupPlan.phase+' preparados · '+activeTransfers+' descargando';
+  if(progress)progress.style.width=percent+'%';
+  if(pct)pct.textContent=percent+'%';
+ }else{
+  const plan=requiredIds(),complete=[...plan].filter(id=>ready.has(id)).length;
+  if(count)count.textContent=complete+' de '+plan.size+' archivos iniciales preparados · '+activeTransfers+' descargando';
+  const percent=plan.size?Math.floor(100*complete/plan.size):0;
+  if(progress)progress.style.width=percent+'%';
+  if(pct)pct.textContent=percent+'%';
+ }
+ const totalBytes=values.reduce((sum,r)=>sum+(r.total||0),0);
  const bytes=values.reduce((sum,r)=>sum+Math.min(r.received,r.total||r.received),0);
  const meta=document.getElementById('genesisTransportMeta');
- if(meta)meta.textContent='TRANSFERENCIA REAL · '+human(bytes)+' / '+(total?human(total):'tamaño por determinar')+' · simultáneos '+active+'/'+maximum;
+ if(meta)meta.textContent='TRANSFERENCIA REAL · '+human(bytes)+' / '+(totalBytes?human(totalBytes):'tamaño por determinar')+' · simultáneos '+active+'/'+maximum;
+}
+function setGroupPlan(phase,groups){
+ // Snapshot the concrete execution plan; never use the old 8-file count as world progress.
+ groupPlan={phase,groups:Object.fromEntries(Object.entries(groups).map(([key,val])=>[key,{ready:val.ready||0,total:val.total||0}]))};
+ render();
 }
 async function acquire(){
  if(active<maximum){active++;return}
@@ -306,6 +316,6 @@ function setApp(value){app=value;render()}
 function trackRoute(prof){route=prof;render()}
 function setRetryHandler(value){retryHandler=value}
 function snapshot(){return{mode:'GENESIS STREAM V014022',active,queued:queue.length,assets:[...audit.values()]}}
-window.GenesisStreamLoader=Object.freeze({prepare,loadContainer,loadImage,setApp,setRetryHandler,trackRoute,snapshot,render});
+window.GenesisStreamLoader=Object.freeze({prepare,loadContainer,loadImage,setApp,setRetryHandler,trackRoute,setGroupPlan,snapshot,render});
 window.setInterval(render,600);
 })();
