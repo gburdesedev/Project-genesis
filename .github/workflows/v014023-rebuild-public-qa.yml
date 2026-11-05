@@ -23,11 +23,13 @@ jobs:
       - name: Validate script
         run: node --check tests/main_v014022_ordan_e2e.cjs
       - name: Play real published MAIN with mouse and keyboard
+        id: play_main
+        continue-on-error: true
         env:
           NODE_PATH: /tmp/genesis-e2e-playwright/node_modules
         run: |
           mkdir -p /tmp/genesis-main-ordan-e2e
-          node tests/main_v014022_ordan_e2e.cjs || echo "browser test returned nonzero" 
+          node tests/main_v014022_ordan_e2e.cjs
       - name: Upload screenshots and JSON evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -55,6 +57,11 @@ jobs:
             git commit -m "qa: record live Ordan browser playthrough ($GITHUB_RUN_ID)"
             git push origin HEAD:experiment/main-v014022-playwright-ordan-e2e-20261105
           fi
+      - name: Require actual published-game traversal success
+        if: always()
+        env:
+          PLAY_OUTCOME: ${{ steps.play_main.outcome }}
+        run: test "$PLAY_OUTCOME" = success
   archived-v014022-journey:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -70,10 +77,12 @@ jobs:
       - name: Validate script
         run: node --check tests/v014022_ordan_full_e2e.cjs
       - name: Play archived V014022 with real controls and collision checks
+        id: play_archived
+        continue-on-error: true
         env:
           NODE_PATH: /tmp/ordan-playwright/node_modules
         run: |
-          node tests/v014022_ordan_full_e2e.cjs || echo "browser test returned nonzero"
+          node tests/v014022_ordan_full_e2e.cjs
       - name: Upload screenshots and JSON evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -101,3 +110,9 @@ jobs:
             git commit -m "qa: record archived V014022 playthrough ($GITHUB_RUN_ID)"
             git push origin HEAD:experiment/v014022-ordan-playwright-full-run-20261105
           fi
+
+      - name: Require actual archived V014022 traversal success
+        if: always()
+        env:
+          PLAY_OUTCOME: ${{ steps.play_archived.outcome }}
+        run: test "$PLAY_OUTCOME" = success
