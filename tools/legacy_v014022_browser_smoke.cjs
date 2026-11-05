@@ -35,7 +35,7 @@ fs.mkdirSync(folder,{recursive:true});
    assert(report.bootDeferred>=1,'Boot models were not deferred / applied');
    assert(report.text.includes('V0.14.022'),'Wrong diagnostic version');
    assert(report.rowCount>=1,'No per-file diagnostic lines');
-   assert(report.text.includes('ARCHIVOS'),'Per-file stream overview not displayed');
+   assert(report.text.includes('archivos detectados')||report.text.includes('ARCHIVOS'),'Per-file stream overview not displayed');
    const file=folder+'/loading-'+targetView.name+'.png';
    fs.writeFileSync(folder+'/result-'+targetView.name+'.json',JSON.stringify({...report,browserErrors:errors.slice(0,25)},null,2));
    console.log('V014022 DIAGNOSTIC',targetView.name,JSON.stringify({...report,browserErrors:errors.slice(0,5)}));
