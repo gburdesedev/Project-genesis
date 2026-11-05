@@ -86,7 +86,8 @@ fs.mkdirSync(out,{recursive:true});
     console.log('V0187 Q1 STATE',JSON.stringify({...summary,doorState}));
     assert(doorState.angle>85,'Herrero did not open inward');
     // At this step E must open actual 16:9 inventory rather than just advancing logic.
-    await page.locator('#interact').click({force:true,timeout:15000});
+    if(mode.mobile)await page.locator('#interact').click({force:true,timeout:15000});
+    else await page.keyboard.press('e');
     await page.waitForFunction(()=>document.getElementById('modalLayer')?.style.display==='grid',null,{timeout:15000});
     await page.screenshot({path:out+'/'+mode.name+'-inventory-open.png',timeout:30000});
     if(errors.length)throw Error(errors.slice(0,3).join('; '));
