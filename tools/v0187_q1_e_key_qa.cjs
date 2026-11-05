@@ -70,7 +70,7 @@ fs.mkdirSync(out,{recursive:true});
     }
     const summary=await page.evaluate(()=>{
       const g=window.__GENESIS_V013_LEGACY__.game;
-      return {step:g.step(),chestOpen:g.snapshot().chestOpen,materials:g.inventory(),forgeHot:window.__GENESIS_V0187_INTERIOR__.forgeHot,doorAngle:window.__GENESIS_V017_VILLAGE__.doorAngle};
+      return {step:g.step(),chestOpen:g.snapshot().chestOpen,materials:g.inventory(),forgeHot:window.__GENESIS_V0186_INTERIOR__.forgeHot,doorAngle:window.__GENESIS_V017_VILLAGE__.doorAngle};
     });
     assert.equal(summary.step,9);
     assert(summary.chestOpen&&Object.keys(summary.materials).length>0,'Chest did not grant initial material stock');
