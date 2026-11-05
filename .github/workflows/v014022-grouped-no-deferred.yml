@@ -1,0 +1,64 @@
+name: V014022 grouped no-deferred loading - isolated experiment
+on:
+  push:
+    branches: [experiment/legacy-v014022-approved-assets-loader-20261105]
+    paths:
+      - tools/patch_v014022_grouped_no_deferred.py
+      - .github/workflows/v014022-grouped-no-deferred.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch-grouped-loader:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Patch experimental V014022 only
+        run: |
+          if grep -q 'V014022 GROUPED NO DEFERRED' index.html; then
+            echo 'Grouped patch already present'
+          else
+            python3 tools/patch_v014022_grouped_no_deferred.py
+          fi
+      - name: Validate actual staged loader, no post-start asset streaming
+        run: |
+          node --check genesis_v014022_stream_loader.js
+          node --check village_trees.js
+          node --check village_world.js
+          node tests/v014022_transport_contract.cjs
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text()
+          assert 'V014022 GROUPED NO DEFERRED' in s
+          assert '#loadGroups{display:none!important}' not in s
+          assert 'streamRouteDecor(prof)' not in s or 'function streamRouteDecor(prof)' not in s
+          assert "['critical','herreroCritico']" in s
+          assert "['stream','herreroEscena']" in s
+          assert 'setGroupPlan' in s
+          assert s.index('await prepareRoute(prof);') < s.index('startRoute(prof);')
+          tree=Path('village_trees.js').read_text()
+          assert 'initialTargets' in tree and 'if(!initialTargets.has(key))return' in tree
+          world=Path('village_world.js').read_text()
+          assert world.index("onPhase('suelos')")<world.index("onPhase('arboles')")<world.index('await trees.initialReady')<world.index("onPhase('puertas')")
+          modules=[m for m in re.findall(r'<script\b[^>]*type="module"[^>]*>(.*?)</script\s*>',s,re.S|re.I) if len(m)>1000]
+          assert modules
+          Path('/tmp/legacy_grouped_game_module.mjs').write_text(modules[-1])
+          PY
+          node --check /tmp/legacy_grouped_game_module.mjs
+          git diff --check
+      - name: Commit patch to experiment branch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'experiment(v014022): stage grouped assets and disable post-start deferred loading'
+            git push
+          fi
