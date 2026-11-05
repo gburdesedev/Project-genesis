@@ -134,6 +134,118 @@ function awaitEngine(asset,timeout=120000){
   try{app.assets.load(asset)}catch(error){finish(error)}
  });
 }
+
+/* V014022 transport v2: byte-owner for declared containers, trees, doors and PBR images.
+ * No PlayCanvas HTTP request to the original GLB/glTF after the verified transfer.
+ * glTF external .bin and image dependencies are streamed through this same queue.
+ */
+const urlAssets=new Map(),urlRunning=new Map();
+const nameOf=url=>decodeURIComponent(new URL(url,location.href).pathname.split('/').pop()||'asset.glb');
+const mimeOf=url=>/\.png(?:\?|$)/i.test(url)?'image/png':/\.webp(?:\?|$)/i.test(url)?'image/webp':/\.jpe?g(?:\?|$)/i.test(url)?'image/jpeg':'application/octet-stream';
+async function staged(url){
+ const original=absolute(url);
+ const raw=await download(original);
+ const links=[];
+ if(!/\.gltf(?:\?|$)/i.test(original))return {contents:raw,links};
+ const json=JSON.parse(new TextDecoder().decode(raw));
+ const deps=[...(json.buffers||[]),...(json.images||[])].filter(x=>x.uri&&!/^(?:data:|blob:)/i.test(x.uri));
+ try{
+  await Promise.all(deps.map(async dep=>{
+   const child=absolute(new URL(dep.uri,original).href);
+   const bytes=await download(child,{validate:false});
+   const objectUrl=URL.createObjectURL(new Blob([bytes],{type:mimeOf(child)}));
+   links.push(objectUrl);
+   dep.uri=objectUrl;
+  }));
+  return {contents:new TextEncoder().encode(JSON.stringify(json)).buffer,links};
+ }catch(error){for(const link of links)URL.revokeObjectURL(link);throw error}
+}
+function releaseStaged(links){for(const link of links)URL.revokeObjectURL(link)}
+async function loadDeclaredAsset(asset,url){
+ const originalFile=asset.file||{};
+ const {contents,links}=await staged(url);
+ try{
+  // Asset.file.contents is a supported PlayCanvas container fast path:
+  // prevents its ResourceLoader from downloading this file a second time.
+  asset.file={url:originalFile.url||url,filename:originalFile.filename||nameOf(url),
+    hash:originalFile.hash,size:originalFile.size,opt:originalFile.opt,contents};
+  await awaitEngine(asset);
+  if(!asset.resource)throw new Error('PlayCanvas no decodificó '+nameOf(url));
+  notify(url,'recurso preparado',null,null);
+  return asset;
+ }finally{
+  // Drop the temporary binary once PlayCanvas owns the decoded resource.
+  if(asset.file)asset.file.contents=null;
+  releaseStaged(links);
+ }
+}
+async function loadContainer(url,{maxAttempts=2}={}){
+ if(!app)throw new Error('PlayCanvas no está listo');
+ const id=absolute(url);
+ if(urlAssets.get(id)?.resource)return urlAssets.get(id);
+ if(urlRunning.has(id))return urlRunning.get(id);
+ const job=(async()=>{
+  let attempt=0;
+  while(true){
+   const {contents,links}=await staged(id).catch(async error=>{
+    attempt++;
+    notify(id,'carga en pausa',null,null,error?.message||String(error));
+    if(attempt>=maxAttempts)throw error;
+    await pause(nameOf(id),attempt,error?.message||String(error));
+    return null;
+   });
+   if(!contents)continue;
+   // A blob here is deliberately only an in-memory handoff. The actual
+   // network download and glTF dependencies already passed our queue.
+   const root=URL.createObjectURL(new Blob([contents],{
+    type:/\.gltf(?:\?|$)/i.test(id)?'model/gltf+json':'model/gltf-binary'}));
+   try{
+    const asset=await new Promise((resolve,reject)=>{
+     app.assets.loadFromUrlAndFilename(root,nameOf(id),'container',(error,loaded)=>{
+      error?reject(error instanceof Error?error:new Error(String(error))):resolve(loaded);
+     });
+    });
+    if(!asset?.resource)throw new Error('Contenedor sin recurso: '+nameOf(id));
+    urlAssets.set(id,asset);
+    notify(id,'recurso preparado',null,null);
+    return asset;
+   }catch(error){
+    attempt++;
+    notify(id,'carga en pausa',null,null,error?.message||String(error));
+    if(attempt>=maxAttempts)throw error;
+    await pause(nameOf(id),attempt,error?.message||String(error));
+   }finally{
+    URL.revokeObjectURL(root);
+    releaseStaged(links);
+   }
+  }
+ })().finally(()=>urlRunning.delete(id));
+ urlRunning.set(id,job);
+ return job;
+}
+async function loadImage(url,{maxAttempts=Infinity}={}){
+ const id=absolute(url);
+ let attempt=0;
+ while(true){
+  let objectUrl=null;
+  try{
+   const bytes=await download(id,{validate:false});
+   objectUrl=URL.createObjectURL(new Blob([bytes],{type:mimeOf(id)}));
+   const img=new Image();
+   img.decoding='async';
+   img.src=objectUrl;
+   await img.decode();
+   notify(id,'imagen decodificada',null,null);
+   return img;
+  }catch(error){
+   attempt++;
+   notify(id,'carga en pausa',null,null,error?.message||String(error));
+   if(attempt>=maxAttempts)throw error;
+   await pause(nameOf(id),attempt,error?.message||String(error));
+  }finally{if(objectUrl)URL.revokeObjectURL(objectUrl)}
+ }
+}
+
 async function innerPrepare(id,maxAttempts=Infinity){
  const el=document.getElementById(id);
  if(!el||el.localName!=='pc-asset')throw new Error('pc-asset no encontrado: '+id);
@@ -152,15 +264,11 @@ async function innerPrepare(id,maxAttempts=Infinity){
    if(asset.loaded&&!asset.resource)asset.unload?.();
    if(/^data:/i.test(src)){
     await awaitEngine(asset);
-   }else if(/\.glb(?:\?|$)/i.test(url)){
-    const bytes=await download(url);
-    asset.options=Object.assign({},asset.options||{},{buffer:bytes});
-    await awaitEngine(asset);
-    asset.options.buffer=null;
+   }else if(/\.(?:glb|gltf)(?:\?|$)/i.test(url)){
+    await loadDeclaredAsset(asset,url);
    }else{
-    // Non-GLB glTF assets have relative .bin and texture URLs. Preserve the
-    // native dependency resolver, but queue, verify and retry the source file.
-    await download(url);
+    // Keep only non-container legacy formats on the native handler.
+    await download(url,{validate:false});
     await awaitEngine(asset);
    }
    if(!asset.resource)throw new Error('Asset sin recurso decodificado');
@@ -187,6 +295,6 @@ function setApp(value){app=value;render()}
 function trackRoute(prof){route=prof;render()}
 function setRetryHandler(value){retryHandler=value}
 function snapshot(){return{mode:'GENESIS STREAM V014022',active,queued:queue.length,assets:[...audit.values()]}}
-window.GenesisStreamLoader=Object.freeze({prepare,setApp,setRetryHandler,trackRoute,snapshot,render});
+window.GenesisStreamLoader=Object.freeze({prepare,loadContainer,loadImage,setApp,setRetryHandler,trackRoute,snapshot,render});
 window.setInterval(render,600);
 })();
