@@ -924,9 +924,27 @@ function setLoadUI(pct,state,detail=''){
  const value=clamp(Math.round(pct),0,100);loadBarFill.style.width=value+'%';loadPercent.textContent=value+'%';
  if(state)loadState.textContent=state;if(detail)loadDetail.textContent=detail;
 }
+/* V014022 REPEATABLE LOADER: never automatically reload after an asset failure. */
 function failLoading(message,detail=''){
- loadingCard.classList.add('failed');loadState.textContent='ERROR DE CARGA';loadDetail.textContent=detail||message;
- loadRetry.style.display='inline-block';loadRetry.onclick=()=>location.reload();console.error('Genesis loading:',message);
+ loadingCard.classList.add('failed');loadState.textContent='ERROR CRÍTICO · JUEGO EN PAUSA';loadDetail.textContent=detail||message;
+ loadRetry.textContent='REINICIAR SOLO SI FALLÓ WEBGL';
+ loadRetry.style.display='inline-block';
+ loadRetry.onclick=()=>location.reload(); // only a deliberate, explicitly labeled user action
+ console.error('Genesis loading:',message);
+}
+function loaderRetryDelay(label,attempt=1,detail=''){
+ return new Promise(resolve=>{
+  const ms=Math.min(20000,Math.max(2500,3000*Math.pow(1.55,Math.min(attempt-1,5))));
+  let done=false;
+  const finish=()=>{if(done)return;done=true;clearTimeout(timer);loadRetry.onclick=null;loadRetry.style.display='none';loadingCard.classList.remove('failed');resolve();};
+  const timer=setTimeout(finish,ms);
+  loading.style.display='grid';loadingCard.classList.add('failed');
+  loadState.textContent='CARGA EN PAUSA · REINTENTO AUTOMÁTICO';
+  loadDetail.textContent=label+' · intento '+attempt+' · '+detail+' · se reintentará en '+Math.round(ms/1000)+' s';
+  loadRetry.textContent='REINTENTAR AHORA · SIN RECARGAR';
+  loadRetry.style.display='inline-block';loadRetry.onclick=finish;
+  window.GenesisAssetDiag?.save?.();
+ });
 }
 function toast(msg,ms=1700){toastEl.textContent=msg;toastEl.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(()=>toastEl.style.display='none',ms)}
 function modal(html,extraClass=''){modalBox.className='modal'+(extraClass?' '+extraClass:'');modalBox.innerHTML=html;modalLayer.style.display='grid';document.documentElement.classList.add('modalOpen');document.body.classList.add('modalOpen');clearMovementInput();if(document.pointerLockElement)document.exitPointerLock?.()}
@@ -1011,7 +1029,33 @@ try{
  const prepItems=[...modelEls.map(el=>({kind:'modelo',label:el.getAttribute('name')||el.id||el.getAttribute('asset')||'modelo',el})),...clipEls.map(el=>({kind:'animación',label:el.getAttribute('name')||el.getAttribute('asset')||'clip',el}))];
  for(const item of prepItems){item.group=groupFor(item);bootGroups[item.group].total++}
  let prepared=0;const prepTotal=Math.max(1,prepItems.length);
- const bootWait=(promise,label,timeout=18000)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('Tiempo agotado preparando '+label)),timeout))]);
+ const bootWait=(promise,label,timeout=120000)=>new Promise((resolve,reject)=>{
+  const timer=setTimeout(()=>reject(new Error('Tiempo agotado preparando '+label)),timeout);
+  Promise.resolve(promise).then(value=>{clearTimeout(timer);resolve(value)},error=>{clearTimeout(timer);reject(error)});
+ });
+ async function bootPrepareItem(item){
+  let attempt=0;
+  while(true){
+   try{
+    await bootWait(item.el.ready(),item.label);
+    if(item.kind==='modelo'&&!item.el.contentEntity)throw new Error('No pudo instanciarse: '+item.label);
+    return;
+   }catch(error){
+    attempt++;
+    await loaderRetryDelay(item.label,attempt,error?.message||String(error));
+    const assetRef=item.el.getAttribute('asset');
+    const assetEl=assetRef?.startsWith('#')?document.getElementById(assetRef.slice(1)):null;
+    try{
+     if(assetEl?.asset&&!assetEl.asset.loaded&&!assetEl.asset.loading)appEl.app?.assets?.load(assetEl.asset);
+     if(item.kind==='modelo'&&assetRef){
+      item.el.removeAttribute('asset');
+      await new Promise(resolve=>setTimeout(resolve,70));
+      item.el.setAttribute('asset',assetRef);
+     }
+    }catch(retryError){console.warn('Genesis: siguiente reintento',item.label,retryError)}
+   }
+  }
+ }
  // Each group has a truthful, independently counted stage. Resources still
  // download concurrently; these gates verify they are actually instantiated.
  for(const group of ['paredes','puertas','suelos','objetos','animaciones']){
@@ -1019,11 +1063,14 @@ try{
   if(!tasks.length)continue;
   activeBootGroup=group;
   showBootProgress(groupStage(group),bootGroups[group].ready+' de '+bootGroups[group].total+' '+group+' listos');
-  await Promise.all(tasks.map(async item=>{
-   await bootWait(item.el.ready(),item.label);
-   if(item.kind==='modelo'&&!item.el.contentEntity)throw new Error('No pudo instanciarse: '+item.label);
-   prepared++;bootProgress.prepared=prepared;bootGroups[group].ready++;
-   showBootProgress(groupStage(group),item.label+' · '+bootGroups[group].ready+' de '+bootGroups[group].total);
+  let next=0;
+  await Promise.all(Array.from({length:Math.min(3,tasks.length)},async()=>{
+   while(next<tasks.length){
+    const item=tasks[next++];
+    await bootPrepareItem(item);
+    prepared++;bootProgress.prepared=prepared;bootGroups[group].ready++;
+    showBootProgress(groupStage(group),item.label+' · '+bootGroups[group].ready+' de '+bootGroups[group].total);
+   }
   }));
  }
  const [p,o,c]=await Promise.all([bootWait(whenReady('#playerModel'),'Edric cuerpo'),bootWait(whenReady('#ordanModel'),'Ordan'),bootWait(whenReady('#cameraRig'),'cámara')]);
@@ -1635,13 +1682,67 @@ let routeLoading=false;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function routeModels(prof,priority){return[...document.querySelectorAll(`pc-model[data-route="${prof}"][data-priority="${priority}"]`)].filter(el=>el.dataset.asset&&!el.contentEntity)}
 function groupRouteModels(models){const map=new Map();for(const el of models){const asset=el.dataset.asset;if(!map.has(asset))map.set(asset,[]);map.get(asset).push(el)}return[...map.entries()]}
-function loadDeferredModelAsset(el,asset,timeout=12000){return new Promise((resolve,reject)=>{let done=false;const label=el.getAttribute('name')||el.id||asset;const finish=(ok,msg)=>{if(done)return;done=true;clearTimeout(timer);el.removeEventListener('load',onLoad);el.removeEventListener('error',onError);if(!ok&&!el.contentEntity){try{el.removeAttribute('asset')}catch(_){}}ok?resolve(el):reject(new Error(msg||('No pudo cargarse '+label+' ['+asset+']')))};const onLoad=()=>finish(!!el.contentEntity,el.contentEntity?'':'El modelo terminó sin contenido: '+label+' ['+asset+']');const onError=e=>finish(false,(e?.message||'Falló la carga')+' · '+label+' ['+asset+']');const timer=setTimeout(()=>finish(false,'Tiempo agotado cargando '+label+' ['+asset+']'),timeout);el.addEventListener('load',onLoad,{once:true});el.addEventListener('error',onError,{once:true});if(el.getAttribute('asset')!==asset)el.setAttribute('asset',asset);else if(!el.contentEntity){el.removeAttribute('asset');requestAnimationFrame(()=>el.setAttribute('asset',asset))}if(el.contentEntity)finish(true)})}
-async function activateDeferredModel(el,timeout=12000){if(el.contentEntity)return el;const primary=el.dataset.asset;if(!primary)return el;const fallback=el.dataset.fallbackAsset;try{return await loadDeferredModelAsset(el,primary,timeout)}catch(primaryError){if(!fallback)throw primaryError;console.warn('Genesis asset fallback:',primaryError.message,'→',fallback);try{return await loadDeferredModelAsset(el,fallback,Math.min(timeout,8000))}catch(fallbackError){throw new Error(primaryError.message+' | Fallback '+fallback+' también falló: '+fallbackError.message)}}}
-async function activateRouteGroups(prof,priority,onProgress){const groups=groupRouteModels(routeModels(prof,priority));if(!groups.length){onProgress?.(1,1,'Ruta ya preparada');return{total:0,loaded:0,failed:0,timedOut:false}}let complete=0,loaded=0,failed=0;const jobs=groups.map(([asset,els])=>Promise.allSettled(els.map(el=>activateDeferredModel(el,12000))).then(results=>{const ok=results.some(r=>r.status==='fulfilled'&&r.value?.contentEntity);if(ok)loaded++;else failed++;complete++;onProgress?.(loaded,groups.length,(ok?'✓ ':'↻ ')+asset);if(ok){try{refreshRouteBindings(prof)}catch(_){}}return ok}));const all=Promise.allSettled(jobs);const guard=sleep(6500).then(()=>null);const result=await Promise.race([all,guard]);const timedOut=result===null;if(timedOut){onProgress?.(loaded,groups.length,'Entrada habilitada · los modelos restantes continúan cargando')}return{total:groups.length,loaded,failed,timedOut}}
+function loadDeferredModelAsset(el,asset,timeout=120000){return new Promise((resolve,reject)=>{let done=false;const label=el.getAttribute('name')||el.id||asset;const finish=(ok,msg)=>{if(done)return;done=true;clearTimeout(timer);el.removeEventListener('load',onLoad);el.removeEventListener('error',onError);if(!ok&&!el.contentEntity){try{el.removeAttribute('asset')}catch(_){}}ok?resolve(el):reject(new Error(msg||('No pudo cargarse '+label+' ['+asset+']')))};const onLoad=()=>finish(!!el.contentEntity,el.contentEntity?'':'El modelo terminó sin contenido: '+label+' ['+asset+']');const onError=e=>finish(false,(e?.message||'Falló la carga')+' · '+label+' ['+asset+']');const timer=setTimeout(()=>finish(false,'Tiempo agotado cargando '+label+' ['+asset+']'),timeout);el.addEventListener('load',onLoad,{once:true});el.addEventListener('error',onError,{once:true});if(el.getAttribute('asset')!==asset)el.setAttribute('asset',asset);else if(!el.contentEntity){el.removeAttribute('asset');requestAnimationFrame(()=>el.setAttribute('asset',asset))}if(el.contentEntity)finish(true)})}
+async function activateDeferredModel(el,timeout=120000){if(el.contentEntity)return el;const primary=el.dataset.asset;if(!primary)return el;const fallback=el.dataset.fallbackAsset;try{return await loadDeferredModelAsset(el,primary,timeout)}catch(primaryError){if(!fallback)throw primaryError;console.warn('Genesis asset fallback:',primaryError.message,'→',fallback);try{return await loadDeferredModelAsset(el,fallback,Math.min(timeout,8000))}catch(fallbackError){throw new Error(primaryError.message+' | Fallback '+fallback+' también falló: '+fallbackError.message)}}}
+async function activateRouteGroups(prof,priority,onProgress){
+ const groups=groupRouteModels(routeModels(prof,priority));
+ if(!groups.length){onProgress?.(1,1,'Ruta ya preparada');return{total:0,loaded:0,failed:0,timedOut:false,errors:[]}}
+ let next=0,loaded=0,failed=0;const errors=[];
+ async function worker(){
+  while(next<groups.length){
+   const [asset,els]=groups[next++];
+   const results=await Promise.allSettled(els.map(el=>activateDeferredModel(el,120000)));
+   const ok=els.some(el=>!!el.contentEntity);
+   if(ok){loaded++;try{refreshRouteBindings(prof)}catch(_){}}
+   else{
+    failed++;
+    const reason=results.filter(r=>r.status==='rejected').map(r=>r.reason?.message||String(r.reason)).join(' | ');
+    errors.push(asset+' · '+(reason||'sin modelo instanciado'));
+   }
+   onProgress?.(loaded,groups.length,(ok?'✓ ':'ERROR · ')+asset);
+  }
+ }
+ await Promise.all(Array.from({length:Math.min(2,groups.length)},worker));
+ return{total:groups.length,loaded,failed,timedOut:false,errors};
+}
 function refreshRouteBindings(prof){document.querySelectorAll(`pc-model[data-route="${prof}"]`).forEach(el=>el.contentEntity&&hideCollisionMeshes(el));if(prof==='Herrero'){tintModel(document.getElementById('ordanModel'),[.58,.52,.43],0);tintModel(document.getElementById('ordanHairModel'),[.62,.62,.60],0);const root=document.getElementById('chestModel')?.contentEntity;chestLid=root?.findByName?.('Lid')||null;if(chestLid){const e=chestLid.getLocalEulerAngles();chestLidBase={x:e.x,y:e.y,z:e.z}}if(forgeVisualBoundRoot!==forgeModelEl?.contentEntity){forgeVisualBoundRoot=forgeModelEl?.contentEntity||null;forgeHotMaterialPatched=false;forgeCoalMaterials=[]}igniteForgeVisual()}else{tintModel(document.getElementById('tannerMentorModel'),[.72,.54,.37],0);tintModel(document.getElementById('tannerMentorHairModel'),[.33,.24,.18],0);tannerChestClosed=chooseClip(tannerChestAnim,'Chest_Closed');tannerChestOpen=chooseClip(tannerChestAnim,'Chest_Open');tannerChestOpened=chooseClip(tannerChestAnim,'Chest_Opened');if(tannerChestClosed)tannerChestAnim?.transition?.(tannerChestClosed,.01);applyTannerVisualPass()}}
-async function prepareRoute(prof){if(routeReady.has(prof))return;routeLoading=true;intro.style.display='none';loading.style.display='grid';loadRetry.style.display='none';const planned=groupRouteModels(routeModels(prof,'critical')).length;loadCount.textContent='0 de '+planned+' assets del '+prof;setLoadUI(0,'Preparando '+prof,'Los modelos se cargan en paralelo. Los que falten seguirán en segundo plano.');const report=await activateRouteGroups(prof,'critical',(done,total,label)=>{setLoadUI(100*done/Math.max(1,total),'Preparando '+prof,label);loadCount.textContent=done+' de '+total+' assets del '+prof+' cargados'});try{refreshRouteBindings(prof)}catch(err){console.warn('Bindings parciales de ruta:',err)}routeReady.add(prof);if(!report?.timedOut&&report?.failed===0)setLoadUI(100,prof+' listo','Ruta preparada. El decorado secundario continuará en segundo plano.');else setLoadUI(100*report.loaded/Math.max(1,report.total),prof+' disponible',''+report.loaded+' de '+report.total+' assets listos; los restantes seguirán en segundo plano.');loadCount.textContent=report.loaded+' de '+report.total+' assets del '+prof+' cargados';await sleep(90)}
+async function prepareRoute(prof){
+ if(routeReady.has(prof))return;
+ routeLoading=true;intro.style.display='none';loading.style.display='grid';
+ loadRetry.style.display='none';loadingCard.classList.remove('failed');
+ let attempt=0;
+ while(true){
+  const report=await activateRouteGroups(prof,'critical',(done,total,label)=>{
+   setLoadUI(100*done/Math.max(1,total),'Preparando '+prof,label);
+   loadCount.textContent=done+' de '+total+' assets críticos del '+prof+' listos';
+  });
+  if(report.failed===0)break;
+  attempt++;
+  const err=report.errors.slice(0,3).join(' | ');
+  console.warn('Ruta pausada; reintento sin reload:',prof,err);
+  await loaderRetryDelay('Herrero · '+report.failed+' modelos críticos pendientes',attempt,err);
+ }
+ try{refreshRouteBindings(prof)}catch(err){console.warn('Bindings de ruta:',err)}
+ routeReady.add(prof);
+ loadingCard.classList.remove('failed');loadRetry.style.display='none';
+ setLoadUI(100,prof+' listo','Todos los modelos críticos instanciados. Decoración restante en segundo plano.');
+ await sleep(90);
+}
 function streamRouteDecor(prof){const models=routeModels(prof,'stream');let index=0;const pump=()=>{if(index>=models.length)return;const batch=models.slice(index,index+4);index+=4;for(const el of batch)activateDeferredModel(el,45000).then(()=>{hideCollisionMeshes(el);if(prof==='Curtidor'){applyTannerVisualPass()}}).catch(err=>console.warn('Decoración diferida:',err.message));setTimeout(pump,180)};(window.requestIdleCallback?requestIdleCallback(()=>pump(),{timeout:420}):setTimeout(pump,160))}
-async function chooseProfessionRoute(prof){if(routeLoading||gameStarted)return;const buttons=[...document.querySelectorAll('[data-profession]')];buttons.forEach(b=>b.disabled=true);try{await prepareRoute(prof);startRoute(prof);loading.style.display='none';streamRouteDecor(prof)}catch(err){console.error(err);failLoading(err?.message||String(err),'No se habilitó la ruta. Reintentá; el resto del prototipo no se cargó.');intro.style.display='none'}finally{routeLoading=false;buttons.forEach(b=>b.disabled=false)}}
+async function chooseProfessionRoute(prof){
+ if(routeLoading||gameStarted)return;
+ const buttons=[...document.querySelectorAll('[data-profession]')];buttons.forEach(b=>b.disabled=true);
+ try{
+  await prepareRoute(prof);
+  startRoute(prof);loading.style.display='none';streamRouteDecor(prof);
+ }catch(err){
+  console.error(err);
+  failLoading(err?.message||String(err),'Ruta en pausa; reintento sin reiniciar la página.');
+  loadRetry.textContent='REINTENTAR RUTA · SIN RECARGAR';
+  loadRetry.onclick=()=>{routeLoading=false;loadingCard.classList.remove('failed');chooseProfessionRoute(prof)};
+  intro.style.display='none';
+ }finally{routeLoading=false;buttons.forEach(b=>b.disabled=false)}
+}
 
 function startRoute(prof){village.setProfession(prof);selectedProfession=prof;activeRoute=ROUTES[prof];const engine=window.GenesisPrototypeEngines;if(!engine){toast('Motor NGE Alpha no disponible.',1600);return}craftSession=engine.generateSession(prof);gameStarted=true;tutorialStep=0;workshopKey=false;debrisCleared=false;auxCleared=false;chestOpen=false;playerInventory={};inventoryOpen=false;inventoryTutorialOpened=false;craftedItems=[];usedItemNames=new Set();resetMercenaryExtension();forgeHot=false;tannerOperational=false;igniteForgeVisual();if(tannerWorkLight)tannerWorkLight.intensity=.72;doorAngle=doorTarget=tannerDoorAngle=tannerDoorTarget=0;if(doorLeafEntity)doorLeafEntity.setEulerAngles(0,0,0);if(tannerDoorLeafEntity)tannerDoorLeafEntity.setEulerAngles(0,0,0);const center=activeRoute.center;px=center;pz=6.3;player.setPosition(px,0,pz);camera.setPosition(center,3,10);camYaw=0;camPitch=24;camDist=cameraSolvedDist=4.7;const mentor=activeRoute.mentor();mentor.setPosition(center+1.72*WORKSHOP_SCALE,0,1.90*WORKSHOP_SCALE);mentorYaw=-21;mentor.setEulerAngles(0,mentorYaw,0);mentorFollowState='outside';mentorFollowDelay=0;mentorPath=[];mentorWaypoint=0;marketEscortWaypoint=0;marketEscortWaiting=false;setMentorAnim(activeRoute.mentorIdle,.01);npcTag.textContent=activeRoute.mentorName.toUpperCase();professionChip.textContent=`PROFESIÓN · ${prof.toUpperCase()} · 2 FAMILIAS · 4 FABRICACIONES`;professionChip.style.display='block';materialsPanel.style.display='none';if(inventoryTouch){inventoryTouch.classList.add('locked');inventoryTouch.classList.remove('ready')}intro.style.display='none';mouseCapture.refresh();const fastSetup=applyDevFastTestState();restoreKnownLightingProfile();if(forgeHot){igniteForgeVisual();pulseForge(.10)}if(!fastSetup){setTutorialStep(0);toast(`Recorrido ${prof} iniciado.`,1500);mentorGestureAt=performance.now()+4800;mentorGestureReturn=0}}
 document.querySelectorAll('[data-profession]').forEach(btn=>btn.addEventListener('click',()=>{getAudio();uiTick();chooseProfessionRoute(btn.dataset.profession)}));
