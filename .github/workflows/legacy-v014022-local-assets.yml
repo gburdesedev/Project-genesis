@@ -1,0 +1,67 @@
+name: Legacy V0.14.022 - local assets experiment
+on:
+  push:
+    branches: [experiment/legacy-v014022-approved-assets-loader-20261105]
+    paths:
+      - '.github/workflows/legacy-v014022-local-assets.yml'
+      - 'tools/localize_runtime_assets_v014022.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  localize_and_verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download pinned signed-off mirror manifest and lock
+        run: |
+          mkdir -p /tmp/genesis-legacy
+          curl -fL --retry 3 --connect-timeout 30 'https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/48ec244e6aa95854fc456aa66e2b657bfddb757a/playcanvas-runtime/manifest.json' -o /tmp/genesis-legacy/manifest.json
+          curl -fL --retry 3 --connect-timeout 30 'https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/48ec244e6aa95854fc456aa66e2b657bfddb757a/playcanvas-runtime/lock.json' -o /tmp/genesis-legacy/lock.json
+      - name: Check original V0.14.022 and diagnostic JavaScript
+        run: |
+          node --check device_policy.js
+          python -m py_compile tools/localize_runtime_assets_v014022.py
+          grep -q 'v0.14.022' index.html
+          grep -q 'legacy-v014022' device_policy.js
+      - name: Replace only remote model URLs after verifying every mirrored byte
+        run: |
+          python tools/localize_runtime_assets_v014022.py --manifest /tmp/genesis-legacy/manifest.json --lock /tmp/genesis-legacy/lock.json --asset-root assets/vendor/genesis/externals
+      - name: Validate all local model paths and dependent files
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          root=pathlib.Path('.')
+          data=json.loads((root/'tools/playcanvas_localization_report.json').read_text())
+          urls=data['localUrls']
+          assert len(urls)==42, f'Expected 42 mirror IDs; got {len(urls)}'
+          assert data['unusedIds']==[], f'Unreferenced IDs: {data["unusedIds"]}'
+          for key,url in urls.items():
+              assert url.startswith('./assets/vendor/genesis/externals/'), (key,url)
+              path=root/url[2:]
+              assert path.is_file(), (key,url)
+              if path.suffix=='.glb': assert path.read_bytes()[:4]==b'glTF', str(path)
+              if path.suffix=='.gltf':
+                  gltf=json.loads(path.read_text())
+                  for obj in gltf.get('buffers',[])+gltf.get('images',[]):
+                      uri=obj.get('uri','')
+                      assert not uri or uri.startswith('data:') or (path.parent/uri).is_file(), (key,uri)
+          assert 'v0.14.022' in (root/'index.html').read_text(), 'Game version changed'
+          print('VERIFIED 42 model URLs and dependencies; original game label retained')
+          PY
+          git diff --check
+      - name: Commit only verified path changes into experimental branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html ./*.js ./*.css tools/playcanvas_localization_report.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'experiment(v014022): use hash-verified local WebGL models only'
+            git push
+          fi
