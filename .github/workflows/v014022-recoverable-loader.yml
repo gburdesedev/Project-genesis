@@ -1,0 +1,58 @@
+name: V014022 loader pause-and-retry experiment
+on:
+  push:
+    branches: [experiment/legacy-v014022-approved-assets-loader-20261105]
+    paths:
+      - tools/patch_v014022_recoverable_loader.py
+      - .github/workflows/v014022-recoverable-loader.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch-and-static-verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply exact-anchor patch to legacy-only index
+        run: python3 tools/patch_v014022_recoverable_loader.py
+      - name: Assert the original game version and recoverable critical-asset gate
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text()
+          assert 'Project Genesis v0.14.022' in s
+          assert 'V014022 REPEATABLE LOADER' in s
+          assert 'const guard=sleep(6500)' not in s
+          assert "routeReady.add(prof);" in s
+          assert "if(report.failed===0)break;" in s
+          assert "REINTENTAR AHORA · SIN RECARGAR" in s
+          assert 'loadRetry.onclick=()=>location.reload()' in s, 'only explicit fatal WebGL reload'
+          assert s.count('function loaderRetryDelay(')==1
+          assert s.count('function bootPrepareItem(')==1
+          assert s.count('async function activateRouteGroups(')==1
+          assert s.count('async function prepareRoute(')==1
+          print('Confirmed original tutorial, route ready gate and no-reset retry controls')
+          scripts=re.findall(r'<script\b[^>]*type="module"[^>]*>(.*?)</script\s*>',s,re.S|re.I)
+          scripts=[item for item in scripts if len(item)>1000]
+          assert scripts, 'No embedded game module located'
+          Path('/tmp/genesis_v014022_module.mjs').write_text(scripts[-1])
+          PY
+          node --check /tmp/genesis_v014022_module.mjs
+          node --check device_policy.js
+          git diff --check
+      - name: Commit experimental loader changes, never main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "experiment(v014022): pause and retry missing critical models without reload"
+            git push
+          fi
