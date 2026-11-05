@@ -1,0 +1,36 @@
+name: Legacy V0.14.022 isolated desktop and WebKit browser QA
+on:
+  push:
+    branches: [experiment/legacy-v014022-approved-assets-loader-20261105]
+    paths:
+      - '.github/workflows/legacy-v014022-browser-qa.yml'
+      - 'tests/legacy_v014022_browser_qa.cjs'
+      - 'index.html'
+      - 'device_policy.js'
+      - 'village_world.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser_qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright Chromium and WebKit
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Check smoke test syntax
+        run: node --check tests/legacy_v014022_browser_qa.cjs
+      - name: Test isolated original V0.14.022 boot and Herrero selection
+        run: node tests/legacy_v014022_browser_qa.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-legacy-v014022-browser-results
+          path: previews/legacy-v014022-browser-qa
+          retention-days: 4
