@@ -360,13 +360,19 @@ function fountain(app,root,resources){
  }catch(error){console.warn('V0188 original fountain animation unavailable',String(error));}
  return {visual,water:ripples,renderers:visual.findComponents('render').length,animated,tracks:tracks.length};
 }
-function install(app,resources,plan,{player}={}){
+function install(app,resources,plan,{player,mobile=matchMedia('(pointer:coarse)').matches}={}){
  const p=plan||root.GenesisVillagePlan;
  if(!p||p.roads?.length!==9||p.plaza?.x!==7||p.plaza?.z!==16||p.plaza?.w!==13||p.plaza?.d!==13)throw Error('V014022 exact plaza plan mismatch');
  const r=new Entity('Plaza V014.022 original · restablecida en V0188');
  app.root.addChild(r);
  try{
-   const trees=mountTrees(app,r,resources,player||{x:7,z:16});
+   // Mobile isolation experiment: no tree requests, GPU buffers, meshes, instances,
+   // wind shader, update listener, shadows or trunk colliders. Desktop is unchanged.
+   const trees=mobile?{
+     nodes:[],dispose(){},
+     status:()=>({planned:0,plaza:0,loaded:0,visible:0,windEnabled:false,
+       sites:[],skippedOriginalTrees:14,skippedTreeGlbs:8,policy:'mobile-no-trees'})
+   }:mountTrees(app,r,resources,player||{x:7,z:16});
    const waterworks=fountain(app,r,resources);
    const marketStall=stall(r);
    const market=p.market;
@@ -387,18 +393,18 @@ function install(app,resources,plan,{player}={}){
    bounce.addComponent('light',{type:'directional',color:new pc.Color(.84,.79,.73),intensity:.43,castShadows:false});
    bounce.setLocalEulerAngles(28,145,0);r.addChild(bounce);
    const report=Object.freeze({
-     version:'V018.8',source:'V014.022 originals',center:[7,16],floorSource:'V012 identical PBR cobble and traffic',
+     version:'V018.9',source:'V014.022 originals',mobile,treesDisabledOnMobile:mobile,center:[7,16],floorSource:'V012 identical PBR cobble and traffic',
      fountainPosition:[CENTER.x,0,CENTER.z],fountainRenderers:waterworks.renderers,
      fountainAnimation:waterworks.animated,fountainTracks:waterworks.tracks,waterMaterials:waterworks.water.count,
      stallPosition:[STALL.x,STALL.y,STALL.z],marketSign:[marketSign.x,0,marketSign.z],plazaSign:[plazaSign.x,0,plazaSign.z],
      get trees(){return trees.status()},get positions(){return trees.status().sites},
      get installed(){return r.enabled},get renderers(){return r.findComponents('render').length},
-     get layoutMatchesOriginal(){return trees.nodes.length===14&&trees.nodes.filter(n=>n.site.region==='plaza').length===4&&p.roads.length===9}
+     get layoutMatchesOriginal(){return (mobile?trees.nodes.length===0:trees.nodes.length===14&&trees.nodes.filter(n=>n.site.region==='plaza').length===4)&&p.roads.length===9}
    });
-   root.__GENESIS_V0188_PLAZA__=report;
+   root.__GENESIS_V0189_PLAZA__=report;
    return {root:r,report,trees,waterworks,stall:marketStall,
      dispose(){trees.dispose();waterworks.water.dispose();r.destroy()}};
  }catch(error){r.destroy();throw error}
 }
-root.GenesisOriginalPlazaV0188=Object.freeze({install,TREE_SITES});
+root.GenesisOriginalPlazaV0189=Object.freeze({install,TREE_SITES});
 })(typeof globalThis!=='undefined'?globalThis:this);
