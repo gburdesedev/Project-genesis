@@ -6,6 +6,7 @@ on:
       - '.github/workflows/legacy-v014022-browser-qa.yml'
       - 'tests/legacy_v014022_browser_qa.cjs'
       - 'index.html'
+      - 'tools/patch_v014022_recoverable_loader.py'
       - 'device_policy.js'
       - 'village_world.js'
   workflow_dispatch:
