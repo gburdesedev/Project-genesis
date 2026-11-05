@@ -22,27 +22,30 @@ const data=new Map([
  ['https://test.local/texture.png',new Uint8Array([137,80,78,71,1])],
 ]);
 let failOnce=true;
-const fetch=async url=>{
- requests.push(url);
- if(url==='https://test.local/a.glb'&&failOnce){failOnce=false;throw new Error('test: lost connection')}
- const bytes=data.get(url);
- if(!bytes)return{ok:false,status:404};
- let done=false;
- return {
-  ok:true,
-  headers: {get: key=>key==='content-length'?String(bytes.byteLength):null},
-  body: {
-   getReader: ()=>{
-    return {
-     read: async ()=>{
-      if(done)return {done:true};
-      done=true;
-      return {done:false,value:bytes};
-     }
-    };
-   }
+const fetch=async url => {
+  requests.push(url);
+  if (url === 'https://test.local/a.glb' && failOnce) {
+    failOnce = false;
+    throw new Error('test: lost connection');
   }
- };
+  const bytes = data.get(url);
+  if (!bytes) return {ok:false,status:404};
+  let done = false;
+  return {
+    ok: true,
+    headers: {get(key) {return key === 'content-length' ? String(bytes.byteLength) : null;}},
+    body: {
+      getReader() {
+        return {
+          async read() {
+            if (done) return {done:true};
+            done = true;
+            return {done:false,value:bytes};
+          }
+        };
+      }
+    }
+  };
 };
 const assets=new Map();
 function assetFor(id,url){
