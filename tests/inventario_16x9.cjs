@@ -13,6 +13,7 @@ const raw=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const cleaned=raw.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<link\b[^>]*>/gi,'');
 await page.route('**/*',async route=>{
   const url=new URL(route.request().url());
+  if(url.hostname==='raw.githubusercontent.com' && url.pathname.includes('ProjectGenesisAssets2/genesis-equipment-assets/')) return route.continue();
   if(url.pathname==='/'||url.pathname==='/index.html') return route.fulfill({status:200,contentType:'text/html',body:cleaned});
   const p=path.resolve(root,'.'+decodeURIComponent(url.pathname));
   if(!p.startsWith(root+path.sep)||!fs.existsSync(p)||!fs.statSync(p).isFile())return route.abort();
@@ -93,6 +94,9 @@ assert((await page.locator('.genInvInfoLine').first().innerText()).includes('Esc
 await page.locator('[data-family="Espadas"]').click();
 assert.equal(await page.locator('.genInvViewerTitle').innerText(),'Espada de hierro');
 assert((await page.locator('.genInvInfoLine').first().innerText()).includes('Espada de hierro'),'name must follow selected creation');
+const approvedV12B=await page.locator('.genInvImageWrap img').getAttribute('src');
+assert(approvedV12B?.includes('V12_V175_Color_J_Rugosidad034_Hero.png'),'only the V175-V12B approved sword render is displayed');
+assert.equal(await page.locator('.genInvSlot:not(:disabled) .genInvSlotArtwork img').count(),1,'the same approved sword is in the lower slot');
 assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),1);
 assert.equal(await page.locator('.genInvInfoTitle').innerText(),'INFORMACIÓN');
 assert.equal(await page.locator('.genInvChannel').count(),1,'Actual channel entries only');
