@@ -41,8 +41,11 @@ async function main(){
   }
 
   const marker='requestAnimationFrame(frame);\n\nsetLoadUI';
-  const hook='requestAnimationFrame(frame);\nwindow.__ORDAN_QA_READONLY__=()=>({step:tutorialStep,started:gameStarted,profession:selectedProfession,player:{x:px,z:pz},quest:document.getElementById("questTitle")?.textContent,objective:objectiveTarget()?.pos||null,interactable:currentInteractable?.id||null,crafted:craftedItems.map(x=>({recipe:x.recipe,name:x.name,rarity:x.rarity})),mercenaryState,mentorState:mentorFollowState,marketWaypoint:marketEscortWaypoint,modal:document.getElementById("modal")?.textContent?.slice(0,220)||""});\nsetLoadUI';
+  const hook='requestAnimationFrame(frame);\nwindow.__ORDAN_QA_READONLY__=()=>({step:tutorialStep,started:gameStarted,profession:selectedProfession,player:{x:px,z:pz},quest:document.getElementById("questTitle")?.textContent,objective:objectiveTarget()?.pos||null,interactable:currentInteractable?.id||null,crafted:craftedItems.map(x=>({recipe:x.recipe,name:x.name,rarity:x.rarity})),mercenaryState,mentorState:mentorFollowState,marketWaypoint:marketEscortWaypoint,nav:{frameTicks:window.__ORDAN_QA_FRAME_TICKS__||0,keys:[...keys],canMove:gameStarted&&modalLayer.style.display!=='grid'&&intro.style.display!=='grid',modalDisplay:modalLayer.style.display,introDisplay:intro.style.display,inventoryOpen,camYaw,wallSamples:Object.fromEntries([['W',[px,pz-.2]],['S',[px,pz+.2]],['A',[px-.2,pz]],['D',[px+.2,pz]]].map(([k,p])=>[k,{blocked:wallBlocked(p[0],p[1]),village:village.blocked(p[0],p[1],.33),portal:doorwayPortalFree(p[0],p[1],0,.33)}]))},modal:document.getElementById("modal")?.textContent?.slice(0,220)||""});\nsetLoadUI';
   if(body.includes(marker)){body=body.replace(marker,hook);inserted=true;}
+  const frameMarker='function frame(now){requestAnimationFrame(frame);';
+  if(body.includes(frameMarker)) body=body.replace(frameMarker,'function frame(now){window.__ORDAN_QA_FRAME_TICKS__=(window.__ORDAN_QA_FRAME_TICKS__||0)+1;requestAnimationFrame(frame);');
+
   await route.fulfill({response,body,headers:{...response.headers(),'content-type':'text/html; charset=utf-8'}});
  });
  async function snap(){
@@ -117,13 +120,13 @@ async function main(){
    for(const k of axes){
     const p0=(await snap()).state?.player;
     if(!p0)break;
-    await page.keyboard.down(k);await delay(290);await page.keyboard.up(k);
+    await page.keyboard.down(k);await delay(290);const held=(await snap()).state;await page.keyboard.up(k);
     const after=(await snap()).state;
     if(after?.interactable)return {ok:true,id:after.interactable,tries:i,key:k};
     if(!after?.player)break;
     const moved=Math.hypot(after.player.x-p0.x,after.player.z-p0.z);
     const d=dist(after.player);
-    samples.push({key:k,moved:+moved.toFixed(3),distance:+d.toFixed(3),position:after.player});
+    samples.push({key:k,moved:+moved.toFixed(3),distance:+d.toFixed(3),position:after.player,heldNav:held?.nav,afterNav:after?.nav});
    }
    log('DIRECTIONAL_PROBE',{step:s.step,try:i,start:pos,target:s.objective,samples});
    const now=(await snap()).state;
