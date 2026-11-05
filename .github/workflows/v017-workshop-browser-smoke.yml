@@ -1,0 +1,46 @@
+name: V017 Browser Proof — Five Workshops + HDRI
+on:
+  push:
+    branches: [feat/v017-assets-loader-hdri]
+    paths:
+      - 'tools/v017_workshop_browser_smoke.cjs'
+      - '.github/workflows/v017-workshop-browser-smoke.yml'
+      - 'v015/index.html'
+      - 'v015/manifest.json'
+      - 'v015/v017-village.js'
+      - 'v015/v017-workshop-preload.js'
+      - 'v015/canvas-arrival-v016.js'
+  pull_request:
+    paths:
+      - 'tools/v017_workshop_browser_smoke.cjs'
+      - '.github/workflows/v017-workshop-browser-smoke.yml'
+      - 'v015/index.html'
+      - 'v015/manifest.json'
+      - 'v015/v017-village.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  focused-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Set up Chromium and Playwright
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Prove five visible workshop facades + HDRI / loader on desktop and mobile
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v017-http.log 2>&1 &
+          node tools/v017_workshop_browser_smoke.cjs
+      - name: Preserve actual browser results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v017-workshop-browser-results
+          path: /tmp/v017-browser-qa
+          retention-days: 14

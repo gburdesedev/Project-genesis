@@ -1,0 +1,40 @@
+name: V017 Local Assets, HDRI and Loading Gate
+on:
+  push:
+    branches: [feat/v017-assets-loader-hdri]
+    paths:
+      - '.github/workflows/v017-asset-loader-gate.yml'
+      - 'tests/v017_loading_gate.cjs'
+      - 'tests/canvas_intro_v016.cjs'
+      - 'v015/index.html'
+      - 'v015/manifest.json'
+      - 'v015/v017-workshop-preload.js'
+      - 'v015/canvas-arrival-v016.js'
+      - 'v015/v017-village.js'
+      - 'assets/playcanvas/approved/workshops/**'
+      - 'assets/playcanvas/candidates/workshops/**'
+      - 'assets/playcanvas/approved/lighting/**'
+  pull_request:
+    paths:
+      - 'tests/v017_loading_gate.cjs'
+      - 'v015/index.html'
+      - 'v015/manifest.json'
+      - 'v015/v017-workshop-preload.js'
+      - 'v015/canvas-arrival-v016.js'
+      - 'assets/playcanvas/approved/workshops/**'
+      - 'assets/playcanvas/candidates/workshops/**'
+      - 'assets/playcanvas/approved/lighting/**'
+  workflow_dispatch:
+jobs:
+  validate-v017:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate V016 cinematic preservation
+        run: node tests/canvas_intro_v016.cjs
+      - name: Verify local GLBs, 32-bit HDRI and real loading-stage contract
+        run: node tests/v017_loading_gate.cjs

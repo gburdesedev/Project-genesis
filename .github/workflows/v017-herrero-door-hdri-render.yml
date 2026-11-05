@@ -1,0 +1,36 @@
+name: V017 Herrero Approved Door 4.5.13 HDRI32 Render Review
+on:
+  push:
+    branches: [feat/v017-assets-loader-hdri]
+    paths:
+      - '.github/workflows/v017-herrero-door-hdri-render.yml'
+      - 'tools/v017_render_herrero_door.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  hdr-review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download exact Blender 4.5.13 LTS distribution and check checksum
+        run: |
+          set -euo pipefail
+          curl --fail -L --retry 3 --max-time 700 https://download.blender.org/release/Blender4.5/blender-4.5.13-linux-x64.tar.xz -o /tmp/blender-4.5.13-linux-x64.tar.xz
+          curl --fail -L --retry 3 --max-time 60 https://download.blender.org/release/Blender4.5/blender-4.5.13.sha256 -o /tmp/blender-4.5.13.sha256
+          grep 'blender-4.5.13-linux-x64.tar.xz' /tmp/blender-4.5.13.sha256 | (cd /tmp && sha256sum -c -)
+          mkdir -p /tmp/blender-v017
+          tar -xf /tmp/blender-4.5.13-linux-x64.tar.xz -C /tmp/blender-v017 --strip-components=1
+          /tmp/blender-v017/blender -b --version | head -n 3
+      - name: Render original approved V082-B door under same 32-bit HDRI, four directions
+        run: |
+          set -euo pipefail
+          /tmp/blender-v017/blender -b -t 4 --python-exit-code 1 --python tools/v017_render_herrero_door.py
+      - name: Upload evidence for human visual inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v017-herrero-v082b-blender4513-hdri32-four-views
+          path: reports/v017-herrero-door-hdri32/
+          retention-days: 30
