@@ -51,7 +51,7 @@ def lazy_asset(match):
     assets+=1
     return tag[:-1]+' lazy>'
 src=re.sub(r'<pc-asset\b[^>]*>',lazy_asset,src)
-if assets<40 or assets>70:raise RuntimeError("Unexpected pc-asset count "+str(assets))
+if assets!=5:raise RuntimeError("Expected 5 original eager pc-assets, found "+str(assets))
 
 # Preserve entire original PC model hierarchy and all transforms. Only defer
 # the attribute that makes the browser automatically request the model.
