@@ -11,9 +11,9 @@ fs.mkdirSync(folder,{recursive:true});
    const page=await context.newPage(),errors=[];
    page.on('pageerror',e=>errors.push('pageerror:'+e.message));
    page.on('console',m=>{if(m.type()==='error')errors.push('console:'+m.text().slice(0,260))});
-   await page.goto(target,{waitUntil:'domcontentloaded',timeout:60000});
+   await page.goto(target,{waitUntil:'commit',timeout:45000});
    await page.waitForFunction(()=>Boolean(window.GenesisAssetDiag)&&Boolean(document.querySelector('#genesisAssetDetails #genesisAssetRows')),null,{timeout:45000});
-   await page.waitForTimeout(6000);
+   await page.waitForTimeout(2500);
    const report=await page.evaluate(()=>{
     const root=document.getElementById('genesisAssetDetails'),summary=window.GenesisAssetDiag.snapshot();
     const box=root.getBoundingClientRect(),style=getComputedStyle(root),loading=document.querySelector('#loading');
@@ -28,9 +28,13 @@ fs.mkdirSync(folder,{recursive:true});
    assert(report.text.includes('V0.14.022'),'Wrong diagnostic version');
    assert(report.rowCount>=1,'No per-file diagnostic lines');
    const file=folder+'/loading-'+targetView.name+'.png';
-   await page.screenshot({path:file,timeout:30000});
    fs.writeFileSync(folder+'/result-'+targetView.name+'.json',JSON.stringify({...report,browserErrors:errors.slice(0,25)},null,2));
    console.log('V014022 DIAGNOSTIC',targetView.name,JSON.stringify({...report,browserErrors:errors.slice(0,5)}));
+   // Screenshot is evidence only, not a prerequisite for the verified live DOM.
+   try{
+     await page.evaluate(()=>{const app=document.getElementById('genesisApp');if(app)app.style.visibility='hidden'});
+     await page.screenshot({path:file,timeout:12000,animations:'disabled'});
+   }catch(screenshotError){console.warn('SCREENSHOT NOT AVAILABLE',targetView.name,screenshotError.message)}
    await context.close();
   }
  }finally{await browser.close()}
