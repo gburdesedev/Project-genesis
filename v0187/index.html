@@ -209,6 +209,7 @@ window.addEventListener('pointermove',e=>{
  const dx=e.clientX-px,dy=e.clientY-py;px=e.clientX;py=e.clientY;
  applyCameraLook(dx,dy,e.pointerType==='touch'?'touch':profile.value==='trackpad'?'trackpad':e.pointerType);
 });
+window.addEventListener('keydown',e=>{if(e.code==='Escape'&&mouseCapture.locked())mouseCapture.release()});
 window.__GENESIS_V0187_CAMERA__=Object.freeze({get yaw(){return yaw},get pitch(){return pitch},get zoom(){return zoom},get input(){return profile.value},get mouseLocked(){return mouseCapture.locked()},get blocked(){return !!cameraBlocked()},reset(){yaw=0;pitch=24*Math.PI/180;}});
 window.addEventListener('keydown',e=>{if(e.code==='KeyQ'&&!cameraBlocked(e)&&!e.repeat){yaw=0;pitch=24*Math.PI/180;}});
 function frameOriginalCamera(pos,dt){
