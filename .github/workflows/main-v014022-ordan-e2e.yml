@@ -1,0 +1,33 @@
+name: MAIN V014022 - Ordan player-journey Playwright diagnostic
+on:
+  push:
+    branches:
+      - experiment/main-v014022-playwright-ordan-e2e-20261105
+    paths:
+      - .github/workflows/main-v014022-ordan-e2e.yml
+      - tests/main_v014022_ordan_e2e.cjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  desktop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser runner only
+        run: npm install --prefix /tmp/genesis-e2e-playwright playwright@1.56.1
+      - name: Test real published MAIN (do not change main or gameplay)
+        env:
+          NODE_PATH: /tmp/genesis-e2e-playwright/node_modules
+        run: node tests/main_v014022_ordan_e2e.cjs
+      - name: Keep screenshots, full diagnostics, and blocking stage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-main-v014022-ordan-playwright-evidence
+          path: /tmp/genesis-main-ordan-e2e/
+          if-no-files-found: warn
+          retention-days: 7
