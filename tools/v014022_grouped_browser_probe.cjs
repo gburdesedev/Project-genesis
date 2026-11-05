@@ -36,11 +36,11 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await page.goto('http://127.0.0.1:8765/index.html?qa=grouped',{waitUntil:'domcontentloaded',timeout:40000});
   await page.waitForFunction(()=>!!window.GenesisStreamLoader&&document.querySelectorAll('#loadGroups>.loadGroup').length===8,null,{timeout:25000});
   await capture(0);
-  for(let i=1;i<=6;i++){await sleep(12000);await capture(i*12)}
+  for(let i=1;i<=10;i++){await sleep(12000);await capture(i*12)}
   const visible=await page.locator('#prototypeIntro').isVisible();
   if(visible){
     await page.locator('[data-profession="Herrero"]').click({timeout:10000,force:true});
-    for(let i=1;i<=4;i++){await sleep(12000);await capture(72+i*12)}
+    for(let i=1;i<=4;i++){await sleep(12000);await capture(120+i*12)}
   }
   await page.screenshot({path:out+'/last.png',timeout:10000,animations:'disabled'}).catch(()=>{});
  }catch(e){errors.push('PROBE: '+e.stack)}
@@ -50,5 +50,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   server.kill('SIGTERM');
  }
  if(!samples.some(x=>x.state?.groups?.length===8))process.exitCode=1;
+ // Mark an incomplete boot as a real failure rather than calling UI visibility a pass.
+ if(!samples.some(x=>x.state?.intro&&x.state.intro!=='none'))process.exitCode=1;
  if(errors.some(x=>x.startsWith('PROBE:')))process.exitCode=1;
 })().catch(e=>{console.error(e);server.kill('SIGTERM');process.exitCode=1});
