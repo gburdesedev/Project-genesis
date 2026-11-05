@@ -61,7 +61,7 @@ function assetFor(id,url){
 }
 const app={assets:{
  load(asset){
-  assert(asset.file.contents instanceof ArrayBuffer,'native loader must receive bytes, not re-fetch');
+  assert.equal(Object.prototype.toString.call(asset.file.contents),'[object ArrayBuffer]','native loader must receive bytes, not re-fetch');
   setImmediate(()=>{asset.resource={decoded:true};asset.loaded=true;asset.emit('load',asset)})
  },
  loadFromUrlAndFilename(url,name,type,cb){
