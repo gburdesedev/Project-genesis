@@ -28,11 +28,20 @@ const fetch=async url=>{
  const bytes=data.get(url);
  if(!bytes)return{ok:false,status:404};
  let done=false;
- return{ok:true,headers:{get(key){return key==='content-length'?String(bytes.byteLength):null}},
-  body:{getReader(){return{async read(){
-   if(done)return{done:true};
-   done=true;return{done:false,value:bytes};
-  }}}}}
+ return {
+  ok:true,
+  headers: {get: key=>key==='content-length'?String(bytes.byteLength):null},
+  body: {
+   getReader: ()=>{
+    return {
+     read: async ()=>{
+      if(done)return {done:true};
+      done=true;
+      return {done:false,value:bytes};
+     }
+    };
+   }
+  }
  };
 };
 const assets=new Map();
