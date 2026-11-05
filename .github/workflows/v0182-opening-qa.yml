@@ -1,0 +1,39 @@
+name: V018.2 gameplay QA - real Ordan opening and player views
+on:
+  push:
+    branches: [experiment/v0182-playwright-wall-door-audit]
+    paths:
+      - 'tools/v0182_actual_opening_qa.cjs'
+      - '.github/workflows/v0182-opening-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  door-opening:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source and Playwright JS
+        run: |
+          node --check tools/v0182_actual_opening_qa.cjs
+          node --check v0182/v017-village.js
+          node -e "const m=require('./v0182/manifest.json');if(m.version!=='0.15-v0182')process.exit(1)"
+      - name: Install Chromium with WebGL
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify in-game Ordan interaction and OPEN Herrero door (PC/mobile)
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v0182-qa-server.log 2>&1 &
+          node tools/v0182_actual_opening_qa.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v0182-ordan-open-actual-browser
+          path: /tmp/genesis-v0182-open-qa/
+          retention-days: 14
+          if-no-files-found: warn

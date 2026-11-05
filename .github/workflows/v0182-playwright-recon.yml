@@ -1,0 +1,47 @@
+name: V018.2 Playwright exploration - real doors and placeholder Curtidor
+on:
+  push:
+    branches: [experiment/v0182-playwright-wall-door-audit]
+    paths:
+      - 'tools/v0182_playwright_recon.cjs'
+      - '.github/workflows/v0182-playwright-recon.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-recon:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 19
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [desktop, portrait, landscape]
+    env:
+      GENESIS_AUDIT_MODE: ${{ matrix.mode }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check source baseline and inspect script
+        run: |
+          node --check tools/v0182_playwright_recon.cjs
+          test -s v0181/manifest.json
+          test -s v0181/v017-village.js
+          node -e "const m=require('./v0181/manifest.json');if(m.version!=='0.15-v0181')process.exit(1)"
+      - name: Install Chromium Playwright with actual WebGL
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Playwright inspect CLOSED doors, Curtidor and player-height views
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v0182-server.log 2>&1 &
+          node tools/v0182_playwright_recon.cjs
+      - name: Upload visual and geometry evidence even on errors
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0182-playwright-${{ matrix.mode }}-evidence
+          path: /tmp/genesis-v0182-inspection/${{ matrix.mode }}/
+          retention-days: 14
+          if-no-files-found: warn
