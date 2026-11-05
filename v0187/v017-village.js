@@ -318,7 +318,9 @@
    // Saved progressed games restore the proper angle without replaying it.
     doorAngle=gate()>=1?INWARD_OPEN:0;
    doorHinge.setLocalEulerAngles(0,doorAngle,0);
-   const tick=dt=>{
+   let tickFrames=0,lastDelta=null;
+    const tick=dt=>{
+      tickFrames++;lastDelta=dt;
       const desired=gate()>=1?INWARD_OPEN:0;
      doorAngle+=(desired-doorAngle)*(1-Math.exp(-Math.max(0,dt)*2.8)); // visible inward animation
      doorHinge.setLocalEulerAngles(0,doorAngle,0);
@@ -337,6 +339,7 @@
      hdr32:!!app.scene.envAtlas,
      map:'GenesisVillagePlan / original workshop coordinates',
      get doorAngle(){return doorAngle},
+      get doorQuestGate(){return gate()},get doorTickFrames(){return tickFrames},get doorLastDelta(){return lastDelta},
      get doorStates(){return {Herrero:Math.abs(doorAngle)>1?'opening_or_open':'closed',Arcanista:'closed',Carpintero:'closed',Curtidor:'closed',Joyero:'closed'}},
       doorOpenTrigger:'Ordan first dialogue: Q1 step 0 → 1',
       layoutCorrections:{
