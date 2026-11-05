@@ -128,6 +128,36 @@
     report.surfaces.push(name);
   }
 
+  // V14.022 original low stone perimeter edges. Four procedural boxes only:
+  // no external GLB, texture fetch, new prop, gameplay logic or collision.
+  function addVillagePerimeter(root,plan) {
+    const pc=globalThis.pc;
+    const b=plan.bounds;
+    if (!b || b.minX!==-24.5 || b.maxX!==38.5 ||
+        b.minZ!==-14.5 || b.maxZ!==48.5) {
+      throw Error('Original V14.022 perimeter bounds mismatch');
+    }
+    const trim=new pc.StandardMaterial();
+    trim.name='Piedra de borde';
+    trim.diffuse=new pc.Color(.35,.34,.29);
+    trim.gloss=.15;
+    trim.update();
+    const add=(name,x,y,z,w,h,d)=>{
+      const entity=new pc.Entity(name);
+      entity.addComponent('render',{
+        type:'box',material:trim,castShadows:false,receiveShadows:true
+      });
+      entity.setLocalPosition(x,y,z);
+      entity.setLocalScale(w,h,d);
+      root.addChild(entity);
+      report.surfaces.push(name);
+    };
+    for (const x of [b.minX,b.maxX])
+      add('Límite de aldea',x,.12,17,.25,.24,63);
+    for (const z of [b.minZ,b.maxZ])
+      add('Límite de aldea',7,.12,z,63,.24,.25);
+  }
+
   function edgeMask(app) {
     const pc=globalThis.pc;
     const canvas=document.createElement('canvas');
@@ -182,6 +212,8 @@
         m.update();
         addPlane(root,road.name,road.x,.006,road.z,road.w,road.d,m);
       }
+      // Identical original V14.022 stone floor boundaries; no new downloads.
+      addVillagePerimeter(root,plan);
       const market=plan.market;
       addPlane(root,'Mercado · área de referencia',market.x,-.006,market.z,market.w,market.d,
         material('Adoquín · mercado',cobble,market.w,market.d));
