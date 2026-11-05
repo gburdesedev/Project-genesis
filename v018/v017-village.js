@@ -18,6 +18,8 @@
  });
  const ROOF_BOUNDS=Object.freeze({width:8.7841,depth:8.1652,front:.5598});
  const DOOR_HERRERO_X_CENTRE=(-.047+1.208)/2; // +.5805 m off-centre GLB pivot
+ // V018.1 experimental fit only. Original GLB remains byte-for-byte unmodified.
+ const DOOR_FIT_X=1.55;
  const INWARD_OPEN=90; // +Y turns the leaf toward -Z, into the interior
  const ROOF_OVERHANG=1.025; // only 2.5% visual overhang beyond plan footprint
 
@@ -61,14 +63,14 @@
   const door=new pc.Entity(profession+' · puerta temporal de tablones');
   // Old world layout uses the hinge at -1.10, 0, .12; this is a noninteractive closed facade.
    door.setLocalPosition(0,0,.12);
-  for(let i=0;i<5;i++){
-   const x=(i-2)*.265;
+  for(let i=0;i<7;i++){ // 7 boards fill the arch without stretching wood grain
+   const x=(i-3)*.265;
    component(pc,door,'Tablón '+(i+1),'box',[x,1.11,0],[.268,2.22,.11],i%2?grain:wood);
   }
   for(const y of [.35,1.75]){
-   component(pc,door,'Pletina de herrería','box',[0,y,.071],[1.39,.075,.029],iron);
+   component(pc,door,'Pletina de herrería','box',[0,y,.071],[1.96,.075,.029],iron);
   }
-  component(pc,door,'Picaporte de hierro','box',[.45,1.05,.145],[.13,.10,.09],iron);
+  component(pc,door,'Picaporte de hierro','box',[.69,1.05,.145],[.13,.10,.09],iron);
   parent.addChild(door);
   return door;
  }
@@ -78,15 +80,15 @@
   ctx.fillStyle='#241b13';ctx.fillRect(0,0,512,160);
   ctx.strokeStyle='#9f7745';ctx.lineWidth=14;ctx.strokeRect(10,10,492,140);
   ctx.fillStyle='#dec89b';ctx.font='bold 46px Georgia';ctx.textAlign='center';
-  ctx.fillText(name,256,79);
-  ctx.font='25px Georgia';ctx.fillStyle='#b3a588';ctx.fillText(kind,256,123);
+  ctx.fillText(name,256,95);
+  // Small identification plaque; never show developer-only 'Fachada provisional' to players.
   const tx=new pc.Texture(app.graphicsDevice,{name:name+' cartel de madera',srgb:true,mipmaps:true});
   tx.setSource(cnv);
   const board=material(pc,name+' · letrero',[1,1,1],0,.07);
   board.diffuseMap=tx;board.emissive=new pc.Color(.04,.035,.028);board.update();
   const anchor=new pc.Entity(name+' · letrero temporal');
   anchor.setLocalPosition(x,0,z);anchor.setLocalEulerAngles(0,yaw,0);
-  component(pc,anchor,'Soporte de madera','box',[0,2.78,0],[2.65,.87,.13],board,{shadow:false});
+  component(pc,anchor,'Soporte de madera','box',[0,2.94,0],[2.00,.62,.13],board,{shadow:false});
   root.addChild(anchor);return anchor;
  }
  function animateArcaneDoor(pc,app,parent,visual,mobile){
@@ -220,20 +222,20 @@
       const hinge=new pc.Entity('Herrero · bisagra izquierda original');
        // V082-B geometry is [−.047,+1.208] around its actual GLB hinge.
        // Shift the centre to x=0 in the real masonry opening.
-       hinge.setLocalPosition(-DOOR_HERRERO_X_CENTRE*wallScaleX,0,.12);
+       hinge.setLocalPosition(-DOOR_HERRERO_X_CENTRE*wallScaleX*DOOR_FIT_X,0,.12);
       building.addChild(hinge);
-       const door=addModel(resources,hinge,'door-herrero-v082-b','Herrero V082-B · PBR sin pérdida experimental',[0,0,0],[wallScaleX,1,wallScaleZ]);
+       const door=addModel(resources,hinge,'door-herrero-v082-b','Herrero V082-B · ajuste ancho experimental V018.1',[0,0,0],[wallScaleX*DOOR_FIT_X,1,wallScaleZ]);
       doorHinge=hinge;
     }else if(p.profession==='Arcanista'){
       const pivot=new pc.Entity('Arcanista · puerta mágica V027 · cerrada');
-      pivot.setLocalPosition(0,0,.12);
+      pivot.setLocalPosition(-1.10,0,.12); // measured V018.1 facade fit: V027 visible pixels shifted right by ~0.8m
       building.addChild(pivot);
       // The approved V027 original must be visible on PC AND mobile.
       // If its GLB cannot be decoded, fail the load gate rather than showing
       // a visually unrelated wooden replacement as if it were the Arcanista.
        // Unlike the Herrero, the actual V027 geometry ALREADY straddles x=0.
        // NEVER reuse the blacksmith GLB's .5805m offset here.
-       const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · puerta arcana iluminada aprobada',[0,0,0],[wallScaleX,1,wallScaleZ]);
+       const visual=addModel(resources,pivot,'door-arcanista-v027','Arcanista V027 · ajuste ancho experimental V018.1',[0,0,0],[wallScaleX*DOOR_FIT_X,1,wallScaleZ]);
       animations.push(animateArcaneDoor(pc,app,pivot,visual,!!options.mobile));
     }else{
       genericWoodDoor(pc,building,p.profession);
@@ -270,9 +272,10 @@
       doorOpenTrigger:'Ordan first dialogue: Q1 step 0 → 1',
       layoutCorrections:{
         plan:'GenesisVillagePlan unchanged',workshopFootprint:[9,7.875],
-        herreroHingeOffset:-DOOR_HERRERO_X_CENTRE*(9/(WALL_BOUNDS.Herrero.width*plan.workshopScale)),
+        herreroHingeOffset:-DOOR_HERRERO_X_CENTRE*DOOR_FIT_X*(9/(WALL_BOUNDS.Herrero.width*plan.workshopScale)),
+        experimentalDoorWidthFit:DOOR_FIT_X,
         herreroOpenDegrees:INWARD_OPEN,
-        arcanistaCentreX:0,
+        arcanistaCentreX:-1.10, // adjusted relative to V006 masonry opening in V018.1
         genericDoorsCentred:true,
         roofsAlignedToBuildingFootprint:true,
         originalVerticalRoofBoostPreserved:ROOF_BOOST
