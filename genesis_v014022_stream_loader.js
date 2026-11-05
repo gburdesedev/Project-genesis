@@ -201,10 +201,20 @@ async function loadContainer(url,{maxAttempts=2}={}){
    const root=URL.createObjectURL(new Blob([contents],{
     type:/\.gltf(?:\?|$)/i.test(id)?'model/gltf+json':'model/gltf-binary'}));
    try{
+    notify(id,'decodificando árbol / contenedor',null,null);
+    // Native PlayCanvas parsing is not covered by the download's 120s idle watchdog.
+    // A parser that never calls back must not hold trees.initialReady forever.
     const asset=await new Promise((resolve,reject)=>{
-     app.assets.loadFromUrlAndFilename(root,nameOf(id),'container',(error,loaded)=>{
-      error?reject(error instanceof Error?error:new Error(String(error))):resolve(loaded);
-     });
+     let finished=false;
+     const end=(error,value)=>{
+      if(finished)return;
+      finished=true;clearTimeout(timer);
+      error?reject(error instanceof Error?error:new Error(String(error))):resolve(value);
+     };
+     const timer=setTimeout(()=>end(new Error('Decodificación sin respuesta durante 120 s: '+nameOf(id))),120000);
+     try{
+      app.assets.loadFromUrlAndFilename(root,nameOf(id),'container',(error,loaded)=>end(error,loaded));
+     }catch(error){end(error)}
     });
     if(!asset?.resource)throw new Error('Contenedor sin recurso: '+nameOf(id));
     urlAssets.set(id,asset);
