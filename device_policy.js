@@ -117,7 +117,7 @@ const absolute=u=>{try{return new URL(u,location.href).href}catch(_){return Stri
 const key=u=>absolute(u);
 function touch(url,state,loaded=null,total=null,reason=''){
  if(!url)return;
- const id=key(url),r=records.get(id)||{url:id,created:performance.now(),received:0,total:null,state:'pendiente',lastChange:performance.now(),error:''};
+ const id=key(url),r=records.get(id)||{url:id,created:performance.now(),received:0,total:null,state:'catalogado',lastChange:performance.now(),error:''};
  if(total>0)r.total=total;
  if(loaded!=null&&loaded>r.received){r.received=loaded;r.lastChange=performance.now()}
  if(state)r.state=state;
@@ -200,13 +200,14 @@ function render(){
   });
  }
  const rows=[...records.values()].filter(r=>/\.(glb|gltf|bin|png|jpg|jpeg|webp|ktx2|mp3|ogg|wav)(\?|$)/i.test(r.url));
- const priority=r=>/error|timeout|cancelado|carga en pausa/.test(r.state)?0:/descargando|solicitado|respuesta|verificando/.test(r.state)?1:/pendiente/.test(r.state)?2:3;
+ const priority=r=>/error|timeout|cancelado|carga en pausa/.test(r.state)?0:/descargando|solicitado|respuesta|verificando/.test(r.state)?1:/^(?:catalogado|pendiente)$/.test(r.state)?4:3;
  rows.sort((a,b)=>priority(a)-priority(b)||a.created-b.created);
  const container=document.getElementById('genesisAssetRows');
  if(!container)return;
  container.replaceChildren();
- const active=rows.filter(r=>priority(r)<3);
- const shown=[...active.slice(0,65),...rows.filter(r=>priority(r)===3).slice(-7)];
+ const observed=rows.filter(r=>priority(r)!==4);
+ const active=observed.filter(r=>priority(r)<3);
+ const shown=[...active.slice(0,65),...observed.filter(r=>priority(r)===3).slice(-7)];
  for(const r of shown){
   const line=document.createElement('div');
   const basename=new URL(r.url).pathname.split('/').pop()||r.url;
@@ -227,7 +228,7 @@ function render(){
  }
  if(!shown.length)container.textContent='Esperando solicitudes de recursos…';
  const heading=root.firstElementChild;
- heading.firstChild.textContent='V0.14.022 · '+rows.length+' archivos detectados · '+rows.filter(r=>priority(r)===3).length+' completos · '+active.length+' pendientes ';
+ heading.firstChild.textContent='V0.14.022 · '+observed.length+' solicitados · '+observed.filter(r=>priority(r)===3).length+' terminados · '+active.length+' en curso · '+(rows.length-observed.length)+' sin solicitar ';
 }
 function snapshot(){
  return{build:document.querySelector('.protoKicker')?.textContent||'',elapsedSeconds:Math.round((performance.now()-started)/1000),location:location.pathname,records:[...records.values()].map(r=>({...r,ageSeconds:Math.round((performance.now()-r.lastChange)/1000)})),errors};
@@ -247,14 +248,15 @@ if(previousRun?.runId!==runId&&Date.now()-(previousRun?.at||0)<30*60*1000){
 }
 function compactReport(){
  const all=[...records.values()];
- const unfinished=all.filter(r=>!/^(descargado|recurso preparado)$/.test(r.state));
+ const attempted=all.filter(r=>r.state!=='catalogado');
+ const unfinished=attempted.filter(r=>!/^(descargado|recurso preparado|imagen decodificada)$/.test(r.state));
  const failed=unfinished.filter(r=>/error|timeout|cancelado/i.test(r.state));
  const recent=all.filter(r=>r.received>0).sort((a,b)=>b.updated-a.updated).slice(0,8);
  const selected=[...new Set([...failed,...unfinished.slice(-22),...recent])].slice(0,40);
  const models=[...document.querySelectorAll('pc-model[data-route="Herrero"]')];
  return {schema:2,runId,at:Date.now(),seconds:Math.round((performance.now()-started)/1000),
   count:document.getElementById('loadCount')?.textContent||'',stage:document.getElementById('loadState')?.textContent||'',
-  detail:document.getElementById('loadDetail')?.textContent||'',totalObserved:all.length,finished:all.length-unfinished.length,
+  detail:document.getElementById('loadDetail')?.textContent||'',totalObserved:attempted.length,catalogedNotRequested:all.length-attempted.length,finished:attempted.length-unfinished.length,
   herreroModels:models.length,herreroInstantiated:models.filter(el=>!!el.contentEntity).length,
   errors:errors.slice(-5),files:selected.map(r=>({id:r.assetId||'',file:r.url.replace(location.origin,'').slice(-200),state:r.state,received:r.received,total:r.total,error:r.error||'',idleSeconds:Math.round((performance.now()-r.lastChange)/1000)}))};
 }
