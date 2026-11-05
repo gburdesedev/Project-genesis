@@ -39,7 +39,7 @@ const RAW_SITES = [
  ['linden',2.2,20.3,'plaza'],['ash',11.8,20.3,'plaza'],
  ...EXTERIOR_SPOTS.map(([x,z,region],i)=>[EXTERIOR_SPECIES[i],x,z,region])
 ];
-export const TREE_SITES = Object.freeze(RAW_SITES.map((item,index)=>Object.freeze({
+const TREE_SITES = Object.freeze(RAW_SITES.map((item,index)=>Object.freeze({
  id: index+1, species: item[0], x:item[1], z:item[2], region:item[3],
  rotation: (index*137.508)%360, size: 0.90+((index*7)%9)*0.025,
  trunkRadius: 0.43 // safe fallback only; actual collision is derived from bark geometry
