@@ -125,6 +125,7 @@ async function main(){
   report.finishedAt=new Date().toISOString();
   fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2));
   console.log('ORDAN_QA_FINAL',JSON.stringify({result:report.result,steps:report.states.map(x=>x.state?.step).filter(x=>x!=null),errors:report.errors.slice(-6),network:report.failedRequests.slice(-8),navigation:report.navigation}).slice(0,8500));
+  if(report.result!=='MERCENARY_REACHED') process.exitCode=1;
   await browser.close();
  }
 }
