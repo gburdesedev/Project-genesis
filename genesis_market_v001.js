@@ -127,72 +127,49 @@ function buildMerchant(world,source){
  * only after the real GLB has valid renderable mesh instances.
  */
 const MERCHANT_V02_GLB='./assets/playcanvas/approved/characters/merchant_v02_75962.glb?v=0.14.022';
-function loadMerchantV02(app,merchantRoot,visual){
-  visual.phase='loading';
-  visual.assetUrl=MERCHANT_V02_GLB;
-  try{
-    app.assets.loadFromUrl(MERCHANT_V02_GLB,'container',(error,asset)=>{
-      if(error||!asset?.resource){
-        visual.phase='fallback';
-        visual.error=String(error||'GLB container missing');
-        console.warn('Genesis merchant V02: keeping fallback',visual.error);
-        return;
-      }
-      let model;
-      try{
-        model=asset.resource.instantiateRenderEntity();
-        if(!model)throw new Error('GLB container provided no render entity');
-        model.name='Mercader V02 · Meshoptimizer 75962 tri';
-        // The asset faces local -Z; parent +90 degrees turns toward the west
-        // market access. No borrowed humanoid, apron cubes or rig animations.
-        model.setLocalPosition(0,0,0);
-        model.setLocalEulerAngles(0,0,0);
-        merchantRoot.addChild(model);
-        const components=model.findComponents('render');
-        const instances=components.flatMap(r=>r.meshInstances||[]);
-        if(!instances.length)throw new Error('GLB has no renderable mesh instances');
-        function extents(){
-          let minY=Infinity,maxY=-Infinity;
-          for(const mi of instances){
-            const box=mi.aabb;if(!box)continue;
-            minY=Math.min(minY,box.getMin().y);
-            maxY=Math.max(maxY,box.getMax().y);
-          }
-          return {minY,maxY};
-        }
-        const initial=extents();
-        const originalHeight=initial.maxY-initial.minY;
-        if(!Number.isFinite(originalHeight)||originalHeight<=.1)
-          throw new Error('Invalid model height / bounds');
-        const scale=1.84/originalHeight;
-        if(!Number.isFinite(scale)||scale<.05||scale>30)
-          throw new Error('Unreasonable merchant model scale '+scale);
-        model.setLocalScale(scale,scale,scale);
-        const scaled=extents();
-        if(!Number.isFinite(scaled.minY))throw new Error('Model floor bounds unavailable');
-        model.setLocalPosition(0,merchantRoot.getPosition().y-scaled.minY,0);
-        // Remove placeholder only AFTER a complete successful import.
-        for(const old of [...merchantRoot.children]){
-          if(old!==model)old.destroy();
-        }
-        visual.phase='ready';
-        visual.modelName=model.name;
-        visual.meshInstances=instances.length;
-        visual.renderComponents=components.length;
-        visual.heightMeters=1.84;
-        visual.triangles=75962;
-        visual.error=null;
-      }catch(cause){
-        if(model?.parent)model.destroy();
-        visual.phase='fallback';
-        visual.error=String(cause);
-        console.warn('Genesis merchant V02: model setup failed',cause);
-      }
-    });
-  }catch(error){
-    visual.phase='fallback';visual.error=String(error);
-    console.warn('Genesis merchant V02: loading unavailable',error);
+async function loadMerchantV02(app,merchantRoot,visual){
+ visual.phase='loading';visual.assetUrl=MERCHANT_V02_GLB;
+ let model=null;
+ try{
+  // Merchant now belongs to the initial 'Personajes y objetos' group.
+  // Do not start an independent request during gameplay.
+  const asset=await window.GenesisStreamLoader.loadContainer(MERCHANT_V02_GLB,{maxAttempts:2});
+  if(!asset?.resource)throw Error('GLB container missing');
+  model=asset.resource.instantiateRenderEntity();
+  if(!model)throw Error('GLB container provided no render entity');
+  model.name='Mercader V02 · Meshoptimizer 75962 tri';
+  model.setLocalPosition(0,0,0);model.setLocalEulerAngles(0,0,0);
+  merchantRoot.addChild(model);
+  const components=model.findComponents('render');
+  const instances=components.flatMap(r=>r.meshInstances||[]);
+  if(!instances.length)throw Error('GLB has no renderable mesh instances');
+  function extents(){
+   let minY=Infinity,maxY=-Infinity;
+   for(const mi of instances){
+    const box=mi.aabb;if(!box)continue;
+    minY=Math.min(minY,box.getMin().y);
+    maxY=Math.max(maxY,box.getMax().y);
+   }
+   return {minY,maxY};
   }
+  const initial=extents(),height=initial.maxY-initial.minY;
+  if(!Number.isFinite(height)||height<=.1)throw Error('Invalid model height / bounds');
+  const scale=1.84/height;
+  if(!Number.isFinite(scale)||scale<.05||scale>30)throw Error('Unreasonable merchant scale '+scale);
+  model.setLocalScale(scale,scale,scale);
+  const scaled=extents();
+  if(!Number.isFinite(scaled.minY))throw Error('Model floor bounds unavailable');
+  model.setLocalPosition(0,merchantRoot.getPosition().y-scaled.minY,0);
+  for(const old of [...merchantRoot.children])if(old!==model)old.destroy();
+  visual.phase='ready';visual.modelName=model.name;
+  visual.meshInstances=instances.length;visual.renderComponents=components.length;
+  visual.heightMeters=1.84;visual.triangles=75962;visual.error=null;
+ }catch(error){
+  if(model?.parent)model.destroy();
+  visual.phase='fallback';visual.error=String(error);
+  console.warn('Genesis merchant V02: loaded original fallback before gameplay',error);
+ }
+ return visual;
 }
 
 export function mountGenesisMarket(options){
@@ -205,7 +182,7 @@ export function mountGenesisMarket(options){
   const stall=buildStall(village.root);
   const npc=buildMerchant(village.root,character);
   const visual={phase:'initializing',assetUrl:null,triangles:75962,meshInstances:0,error:null};
-  loadMerchantV02(app,npc.entity,visual);
+  const initialReady=loadMerchantV02(app,npc.entity,visual);
   const chosen=Object.create(null);
   let lastMessage='';
   const toRawStock=window.GenesisPreparation?.rawStock;
@@ -275,5 +252,5 @@ export function mountGenesisMarket(options){
     center:POS,stall:STALL,seedBound:true,freePurchase:true};
   // Diagnóstico público de solo lectura: el test usa el mismo catálogo y ventana del juego.
   window.__genesisMarket=Object.freeze({...status,catalog,open,visual});
-  return Object.freeze({interactable,open,catalog,stall,npc:npc.entity,status});
+  return Object.freeze({interactable,open,catalog,stall,npc:npc.entity,status,visual,initialReady});
 }
