@@ -1,0 +1,47 @@
+name: V014022 recovered props + real Ordan Playwright desktop (experimental)
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - experiment/v014022-recovered-anvil-bellows-20261105
+    paths:
+      - index.html
+      - tests/v014022_ordan_full_e2e.cjs
+      - .github/workflows/v014022-recovered-props-ordan-playwright.yml
+permissions:
+  contents: read
+jobs:
+  browser-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Playwright runner
+        run: npm install --prefix /tmp/genesis-playwright playwright@1.56.1
+      - name: Verify script syntax
+        run: node --check tests/v014022_ordan_full_e2e.cjs
+      - name: Validate pinned organization-owned source HTTP response and GLB magic
+        run: |
+          set -euo pipefail
+          ASSETS="https://cdn.jsdelivr.net/gh/ProjectgenesisAssets/genesis-workshop-assets@8696981a95113a34feec26100e761e9e164327de/production/game_v014022/herrero_recovery/v001"
+          curl -fL --retry 4 --connect-timeout 20 --max-time 80 "$ASSETS/anvil_quaternius_cc0_original/Anvil_Log.gltf" -o /tmp/Anvil_Log.gltf
+          curl -fL --retry 4 --connect-timeout 20 --max-time 80 "$ASSETS/anvil_quaternius_cc0_original/Anvil_Log.bin" -o /tmp/Anvil_Log.bin
+          curl -fL --retry 4 --connect-timeout 20 --max-time 80 "$ASSETS/bellows_cc0_candidate/Bellows.glb" -o /tmp/Bellows.glb
+          python3 -c 'import json,struct,pathlib; p=pathlib.Path("/tmp/Bellows.glb").read_bytes(); assert p[:4]==b"glTF" and struct.unpack_from("<I",p,8)[0]==len(p); g=json.load(open("/tmp/Anvil_Log.gltf")); assert g["asset"]["version"]=="2.0"; assert len(pathlib.Path("/tmp/Anvil_Log.bin").read_bytes())==g["buffers"][0]["byteLength"]; print("PASS pinned asset URLs and GLB/GLTF basics")'
+      - name: Play V014022 from Herrero selection through Ordan stages
+        env:
+          NODE_PATH: /tmp/genesis-playwright/node_modules
+        run: node tests/v014022_ordan_full_e2e.cjs
+      - name: Report whether actual game started
+        if: always()
+        run: |
+          node -e 'const fs=require("fs");const p="previews/v014022-ordan-playwright/report.json";if(!fs.existsSync(p))process.exit(2);const r=JSON.parse(fs.readFileSync(p));const gameReached=r.states.some(s=>s.state?.started===true&&s.loader==="none");const steps=[...new Set(r.states.map(s=>s.state?.step).filter(x=>x>=0))];console.log(JSON.stringify({result:r.result,gameReached,questSteps:steps,errorCount:r.errors.length,networkFailures:r.failedRequests.length},null,2));if(!gameReached)process.exit(1)'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v014022-recovered-props-ordan-playwright-qa
+          path: previews/v014022-ordan-playwright
+          if-no-files-found: warn
+          retention-days: 7
