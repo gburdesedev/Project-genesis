@@ -57,7 +57,7 @@
       if(dist(artisan.pos,guide.pos)>1.55)advancePoint(artisan,guide.pos,2.40*dt,true);
       if(!failure&&dist(artisan.pos,guide.pos)<=1.55)phase='walk';
     }
-    if(phase==='walk'&&!failure){
+    else if(phase==='walk'&&!failure){
       advanceTrack(guide,2.40*dt,false);
       const gap=dist(artisan.pos,guide.pos);
       advanceTrack(artisan,clamp(2.40+(gap-2.1)*.30,1.80,3.15)*dt,true);
