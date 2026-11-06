@@ -67,7 +67,10 @@
   function materialArt(name, hero) {
     const poster=posters[name];
     const model=models[name];
-    if(hero&&model){
+    // GenesisDevice intentionally avoids model-viewer on mobile to protect the
+    // shared PlayCanvas WebGL budget. Preserve the real model on desktop,
+    // and show the registered static poster instead of a blank mobile viewport.
+    if(hero&&model&&!window.GenesisDevice?.safePreviews){
       // Camera closeup only: the approved meshes, UVs and PBR remain byte-identical.
       // 50% camera radius magnifies the source GLB within the established ORA window.
       const heroOrbit='0deg 75deg 50%';
@@ -163,7 +166,7 @@
       const art=button.querySelector('.genInvSlotArtwork');
       const entry=visible[Number(button.dataset.select)];
       const source=entry?.material ? models[entry.name] : null;
-      if(!art||!source)return;
+      if(!art||!source||window.GenesisDevice?.safePreviews)return;
       const initial=art.innerHTML;
       const originalOrbit='0deg 75deg auto';
       function ensure3D(){
