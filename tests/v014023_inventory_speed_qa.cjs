@@ -90,7 +90,7 @@ async function main(){
 
       caseData.materialImages.push({name,src,...dims,heroFit,hover:{left,right,reset}});
       if(!manifest.materialImages[name]){
-        const slug=name.normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase();
+        const slug=String(palette.indexOf(name)+1).padStart(2,'0')+'-'+name.toLowerCase().replace(/[^a-z0-9]+/g,'-');
         const file='material-'+slug+'.png';
         await page.screenshot({path:path.join(out,file),timeout:30000,animations:'disabled'});
         manifest.materialImages[name]={src,...dims,screenshot:file,seed:row.seed};
