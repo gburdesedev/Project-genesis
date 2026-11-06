@@ -20,6 +20,19 @@
     'Cordel de cáñamo':'assets/playcanvas/approved/materials/hemp/v018/cordel_canamo_v018_poster.jpg',
     'Hilo de lino':'assets/playcanvas/approved/materials/linen/v021/hilo_lino_v021_poster.jpg'
   };
+  // GLB de las mismas versiones aprobadas o referenciadas en el inventario.
+  // Roble/fresno/cueros: candidatas aisladas hasta validación visual y runtime.
+  // Lingote V175 mantiene poster hasta disponer del GLB final aprobado.
+  const models = Object.freeze({
+    'Mineral de hierro':'assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_55k_pbr1536_v007.glb',
+    'Carbón vegetal':'assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_final_3_piezas_web.glb',
+    'Madera seca de roble':'assets/playcanvas/approved/materials/oak/v004/roble_seco_v004_candidate.glb',
+    'Madera seca de fresno':'assets/playcanvas/approved/materials/ash/v004/fresno_seco_v004_candidate.glb',
+    'Cuero bovino curtido':'assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_candidate.glb',
+    'Cuero caprino curtido':'assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_candidate.glb',
+    'Cordel de cáñamo':'assets/playcanvas/approved/materials/cordel_canamo/v018/cordel_canamo_v018.glb',
+    'Hilo de lino':'assets/playcanvas/approved/materials/hilo_lino/v021/hilo_lino_v021.glb'
+  });
   function esc(x) {
     return String(x == null ? '' : x).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]});
   }
@@ -53,6 +66,14 @@
   }
   function materialArt(name, hero) {
     const poster=posters[name];
+    const model=models[name];
+    if(hero&&model){
+      // El visor renderiza geometría 3D, NO una perspectiva CSS sobre un JPG.
+      // Las fibras no muestran el JPG opaco ni siquiera como póster de carga.
+      const fallbackPoster=/^(Cordel de cáñamo|Hilo de lino)$/.test(name)?'':(poster?' poster="'+esc(poster)+'"':'');
+      return '<model-viewer class="genInvMaterialHeroModel" data-material-name="'+esc(name)+'" src="'+esc(model)+'"'+fallbackPoster+
+        ' loading="eager" reveal="auto" camera-controls interaction-prompt="none" camera-orbit="0deg 75deg auto" field-of-view="30deg" environment-image="neutral" shadow-intensity="0" exposure="1.22" alt="'+esc(name)+'"></model-viewer>';
+    }
     return poster ? '<img class="'+(hero?'genInvMaterialHero':'genInvMaterialThumb')+'" src="'+esc(poster)+'" alt="'+esc(name)+'" draggable="false">' :
       '<span class="genInvEmptyPreview">'+esc(name)+'</span>';
   }
@@ -132,30 +153,76 @@
       state.selectedKey=visible[Number(b.dataset.select)]?.key;render(ctx,nav);
     }});
 
-    // Recuperado del hover aprobado de la rama experimental anterior.
-    // Sólo la obra se inclina ±45º; el marco PNG y el contador permanecen inmóviles.
+    // Solo la geometría REAL gira dentro de la casilla ±45 grados.
+    // Un poster estático jamás se simula como objeto 3D; modelos de las casillas
+    // se montan bajo demanda, evitando ocho contextos WebGL al abrir inventario.
     board.querySelectorAll('.genInvSlot[data-select]').forEach(function(button){
       const art=button.querySelector('.genInvSlotArtwork');
-      if(!art)return;
-      const visual=art.querySelector('model-viewer');
-      const origin=visual?.getAttribute('camera-orbit')||'0deg 75deg auto';
+      const entry=visible[Number(button.dataset.select)];
+      const source=entry?.material ? models[entry.name] : null;
+      if(!art||!source)return;
+      const initial=art.innerHTML;
+      const originalOrbit='0deg 75deg auto';
+      function ensure3D(){
+        if(art.querySelector('model-viewer')||art.dataset.glbError)return;
+        if(!window.customElements?.get('model-viewer')){
+          art.dataset.glbError='viewer-library-unavailable';
+          return;
+        }
+        const visual=document.createElement('model-viewer');
+        visual.className='genInvMaterialSlotModel';
+        visual.src=source;
+        visual.setAttribute('loading','eager');
+        visual.setAttribute('reveal','auto');
+        visual.setAttribute('interaction-prompt','none');
+        visual.setAttribute('camera-orbit',originalOrbit);
+        visual.setAttribute('field-of-view','30deg');
+        visual.setAttribute('environment-image','neutral');
+        visual.setAttribute('shadow-intensity','0');
+        visual.setAttribute('exposure','1.22');
+        visual.setAttribute('alt',entry.name);
+        visual.addEventListener('load',function(){art.dataset.glbLoaded='true';},{once:true});
+        visual.addEventListener('error',function(){
+          art.dataset.glbError='failed-to-load';
+          art.innerHTML=initial;
+        },{once:true});
+        art.style.setProperty('--gen-slot-yaw','0deg');
+        art.replaceChildren(visual);
+      }
+      button.addEventListener('pointerenter',function(e){
+        if(e.pointerType!=='touch')ensure3D();
+      });
       button.addEventListener('pointermove',function(event){
         if(event.pointerType==='touch')return;
+        ensure3D();
+        const visual=art.querySelector('model-viewer');
+        if(!visual)return;
         const rect=button.getBoundingClientRect();
         if(!rect.width)return;
         const p=Math.max(0,Math.min(1,(event.clientX-rect.left)/rect.width));
         const angle=(-45+90*p).toFixed(1)+'deg';
-        if(visual)visual.setAttribute('camera-orbit',angle+' 75deg auto');
-        else art.style.setProperty('--gen-slot-yaw',angle);
+        visual.setAttribute('camera-orbit',angle+' 75deg auto');
       });
       const reset=function(){
-        if(visual)visual.setAttribute('camera-orbit',origin);
+        const visual=art.querySelector('model-viewer');
+        if(visual)visual.setAttribute('camera-orbit',originalOrbit);
         art.style.setProperty('--gen-slot-yaw','0deg');
       };
       button.addEventListener('pointerleave',reset);
       button.addEventListener('pointercancel',reset);
       button.addEventListener('blur',reset);
     });
+
+    const heroModel=board.querySelector('.genInvImageWrap model-viewer.genInvMaterialHeroModel');
+    if(heroModel){
+      heroModel.addEventListener('load',function(){heroModel.dataset.glbLoaded='true';},{once:true});
+      heroModel.addEventListener('error',function(){
+        const material=heroModel.getAttribute('data-material-name');
+        const poster=posters[material];
+        heroModel.outerHTML=poster?'<img class="genInvMaterialHero" data-model-error="load" src="'+esc(poster)+'" alt="'+esc(material)+'">':
+          '<span class="genInvEmptyPreview">Error al cargar el modelo 3D</span>';
+      },{once:true});
+    }
 
     // Autoencuadre no destructivo del póster en el expositor. Únicamente
     // cambia la escala de presentación, no los PNG/JPG originales aprobados.
@@ -221,5 +288,5 @@
       pane.querySelector('#genInvCloseDetails').onclick=function(){pane.remove()};
     };
   }
-  window.GenesisInventory16={render:render,version:'INVENTARIO_FINAL_APROBADO_16x9_V014023_HOVER_HERO',dataSource:'session.inventory + session.getItems'};
+  window.GenesisInventory16={render:render,version:'INVENTARIO_16x9_V014024_GLB_REAL_EXPERIMENTAL',dataSource:'session.inventory + session.getItems'};
 })();
