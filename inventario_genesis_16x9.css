@@ -626,3 +626,24 @@
     transform:none!important;transition:none!important;will-change:auto!important;
   }
 }
+
+/* V014.024 experimental | GLB real, art ORA original intact. */
+.genInv .genInvImageWrap[data-preview-mode="material"] model-viewer.genInvMaterialHeroModel{
+  display:block!important;
+  width:100%!important;height:100%!important;
+  max-width:100%!important;max-height:100%!important;
+  min-height:0!important;
+  background:transparent!important;
+  opacity:1!important;
+  touch-action:pan-y!important;
+}
+.genInv .genInvSlot>.genInvSlotArtwork model-viewer.genInvMaterialSlotModel{
+  display:block!important;
+  width:100%!important;height:100%!important;
+  max-width:100%!important;max-height:100%!important;
+  background:transparent!important;
+  pointer-events:none!important;
+}
+.genInv .genInvSlot>.genInvSlotArtwork:has(model-viewer.genInvMaterialSlotModel){
+  transform:none!important;
+}
