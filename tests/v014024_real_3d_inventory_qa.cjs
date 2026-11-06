@@ -19,7 +19,7 @@ for(const r of source.assets){
   assert.equal(crypto.createHash('sha256').update(d).digest('hex'),r.sha256,'Wrong source SHA: '+r.path);
 }
 const html=fs.readFileSync('index.html','utf8');
-const embedded=html.match(/<script\\b[^>]*\\bid=["']genesis-prototype-engines["'][^>]*>([\\s\\S]*?)<\\/script>/i);
+const embedded=html.match(/<script\b[^>]*\bid=["']genesis-prototype-engines["'][^>]*>([\s\S]*?)<\/script>/i);
 assert(embedded,'Cannot extract real GenesisPrototypeEngines');
 const scope={window:{},console,Date,Math,performance:{now:()=>100}};
 vm.runInNewContext(embedded[1],scope,{timeout:30000});
@@ -109,7 +109,7 @@ async function main(){
   }
   assert.equal(tested.size,8,'Failed to get 8 real seed materials');
   assert.equal(Object.keys(result.loaded).length,8,'Not all 8 displayed as real GLB');
-  assert(!result.failedRequests.some(x=>/\\.glb($|\\?)/.test(x.url)),'A GLB network transfer failed');
+  assert(!result.failedRequests.some(x=>/\.glb($|\?)/.test(x.url)),'A GLB network transfer failed');
   assert(result.screenshots.length>=1,'Chromium could not produce a real GLB screenshot');
   result.result='PASS_REAL_GLB_8_8';
   console.log('3D_RUNTIME_PASS_8_OF_8',JSON.stringify({screenshots:result.screenshots.length,seeds:examples.size}));
