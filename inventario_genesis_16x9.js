@@ -68,11 +68,14 @@
     const poster=posters[name];
     const model=models[name];
     if(hero&&model){
+      // Camera closeup only: the approved meshes, UVs and PBR remain byte-identical.
+      // 50% camera radius magnifies the source GLB within the established ORA window.
+      const heroOrbit='0deg 75deg 50%';
       // El visor renderiza geometría 3D, NO una perspectiva CSS sobre un JPG.
       // Las fibras no muestran el JPG opaco ni siquiera como póster de carga.
       const fallbackPoster=/^(Cordel de cáñamo|Hilo de lino)$/.test(name)?'':(poster?' poster="'+esc(poster)+'"':'');
       return '<model-viewer class="genInvMaterialHeroModel" data-material-name="'+esc(name)+'" src="'+esc(model)+'"'+fallbackPoster+
-        ' loading="eager" reveal="auto" camera-controls interaction-prompt="none" camera-orbit="0deg 75deg auto" field-of-view="30deg" environment-image="neutral" shadow-intensity="0" exposure="1.22" alt="'+esc(name)+'"></model-viewer>';
+        ' loading="eager" reveal="auto" camera-controls interaction-prompt="none" camera-orbit="' + heroOrbit + '" field-of-view="30deg" environment-image="neutral" shadow-intensity="0" exposure="1.22" alt="'+esc(name)+'"></model-viewer>';
     }
     return poster ? '<img class="'+(hero?'genInvMaterialHero':'genInvMaterialThumb')+'" src="'+esc(poster)+'" alt="'+esc(name)+'" draggable="false">' :
       '<span class="genInvEmptyPreview">'+esc(name)+'</span>';
@@ -128,7 +131,7 @@
       '<main class="genInvMain">'+
         '<aside class="genInvFamilies"><h2 class="genInvHead">FAMILIAS</h2>'+familiesMarkup+
           '</aside>'+
-        '<section class="genInvViewer"><p class="genInvViewerTitle">'+title+'</p><div class="genInvImageWrap" data-preview-mode="'+(materialMode?'material':'object')+'">'+viewer+'</div><p class="genInvViewLabel">'+(materialMode?'Vista del material aprobado':'Objeto fabricado · visor 360°')+'</p></section>'+
+        '<section class="genInvViewer"><p class="genInvViewerTitle">'+title+'</p><div class="genInvImageWrap" data-preview-mode="'+(materialMode?'material':'object')+'">'+viewer+'</div><p class="genInvViewLabel">'+(materialMode?'Vista 3D del material':'Objeto fabricado · visor 360°')+'</p></section>'+
         '<aside class="genInvInfo"><h2 class="genInvInfoTitle">INFORMACIÓN</h2>'+facts+
           (chosen&&!materialMode?'<button class="genInvInfoMore" id="genInvDetails"><span>CONSULTAR FICHA DEL OBJETO</span></button>':'')+
           '</aside>'+
