@@ -6,7 +6,7 @@ const {chromium}=require('playwright');
 const out='previews/v014024-material-3d';
 fs.mkdirSync(out,{recursive:true});
 const html=fs.readFileSync('index.html','utf8');
-const m=html.match(/<script\\b[^>]*\\bid=["']genesis-prototype-engines["'][^>]*>([\\s\\S]*?)<\\/script>/i);
+const m=html.match(/<script\b[^>]*\bid=["']genesis-prototype-engines["'][^>]*>([\s\S]*?)<\/script>/i);
 assert(m,'Original game engine missing');
 const sandbox={window:{},console,Date,Math,performance:{now:()=>100}};
 vm.runInNewContext(m[1],sandbox,{timeout:30000});
