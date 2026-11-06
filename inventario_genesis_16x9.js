@@ -26,10 +26,10 @@
   const models = Object.freeze({
     'Mineral de hierro':'assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_55k_pbr1536_v007.glb',
     'Carbón vegetal':'assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_final_3_piezas_web.glb',
-    'Madera seca de roble':'assets/playcanvas/approved/materials/oak/v004/roble_seco_v004_candidate.glb',
-    'Madera seca de fresno':'assets/playcanvas/approved/materials/ash/v004/fresno_seco_v004_candidate.glb',
-    'Cuero bovino curtido':'assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_candidate.glb',
-    'Cuero caprino curtido':'assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_candidate.glb',
+    'Madera seca de roble':'assets/playcanvas/candidates/materials/oak/v004/roble_seco_v004_candidate.glb',
+    'Madera seca de fresno':'assets/playcanvas/candidates/materials/ash/v004/fresno_seco_v004_candidate.glb',
+    'Cuero bovino curtido':'assets/playcanvas/candidates/materials/leather_bovine/v003/cuero_bovino_v003_candidate.glb',
+    'Cuero caprino curtido':'assets/playcanvas/candidates/materials/leather_caprine/v003/cuero_caprino_v003_candidate.glb',
     'Cordel de cáñamo':'assets/playcanvas/approved/materials/cordel_canamo/v018/cordel_canamo_v018.glb',
     'Hilo de lino':'assets/playcanvas/approved/materials/hilo_lino/v021/hilo_lino_v021.glb'
   });
