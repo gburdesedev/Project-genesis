@@ -6,6 +6,7 @@ on:
       - .github/workflows/v014024-escort-cinematic-qa.yml
       - scripts/v014024_install_market_cinematic.py
       - scripts/v014024_fix_cinematic_boot_tdz.py
+      - scripts/v014024_fix_cinematic_walk_animation.py
       - genesis_market_cinematic_v001.js
       - tests/v014024_market_cinematic_route_contract.cjs
       - tests/v014024_market_cinematic_real_e2e.cjs
@@ -26,6 +27,8 @@ jobs:
           python3 scripts/v014024_install_market_cinematic.py
           python3 scripts/v014024_fix_cinematic_boot_tdz.py
           python3 scripts/v014024_fix_cinematic_boot_tdz.py
+          python3 scripts/v014024_fix_cinematic_walk_animation.py
+          python3 scripts/v014024_fix_cinematic_walk_animation.py
           python3 - <<'PY'
           import json
           m=json.load(open('previews/v014024-market-cinematic/patch-receipt.json'))
