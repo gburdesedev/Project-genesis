@@ -3,7 +3,8 @@
 import json,pathlib,re
 p=pathlib.Path("index.html");before=p.read_text(encoding="utf-8")
 s=before
-s=re.sub(r"\b[Vv]014\.023\b","V014.024",s)\ns=re.sub(r"\b[Vv]0\.14\.023\b","v0.14.024",s)
+s=re.sub(r"\b[Vv]014\.023\b","V014.024",s)
+s=re.sub(r"\b[Vv]0\.14\.023\b","v0.14.024",s)
 for filename in ("preparacion_control.js","inventario_genesis_16x9.js","inventario_genesis_16x9.css"):
     s,n=re.subn(re.escape(filename)+r"(?:\?v=[\w.\-]+)?",filename+"?v=0.14.024",s)
     if filename=="preparacion_control.js" and n<1:raise SystemExit("Missing preparation script reference: "+filename)
