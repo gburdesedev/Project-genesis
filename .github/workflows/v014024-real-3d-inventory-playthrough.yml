@@ -1,0 +1,104 @@
+name: V014.024 real GLB inventory and actual Ordan playthrough
+on:
+  push:
+    branches:
+      - experiment/v014024-real-materials-3d-ordan-20261106
+    paths:
+      - scripts/vendor_v014024_real_material_glbs.py
+      - inventario_genesis_16x9.js
+      - inventario_genesis_16x9.css
+      - preparacion_control.js
+      - tests/v014024_real_3d_inventory_qa.cjs
+      - .github/workflows/v014024-real-3d-inventory-playthrough.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  real-materials:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 26
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vendor six immutable GLBs from our public asset organization and inspect 3D internals
+        run: |
+          python3 scripts/vendor_v014024_real_material_glbs.py
+          python3 scripts/vendor_v014024_real_material_glbs.py --verify-only
+      - name: Install pinned Chromium + actual model-viewer WebGL component
+        run: |
+          npm install --prefix /tmp/genesis-real3d playwright@1.56.1 @google/model-viewer@4.1.0
+          ln -s /tmp/genesis-real3d/node_modules node_modules
+      - name: Check the original game sources and new QA syntax
+        run: |
+          node --check inventario_genesis_16x9.js
+          node --check preparacion_control.js
+          node --check tests/v014024_real_3d_inventory_qa.cjs
+          python3 -m py_compile scripts/vendor_v014024_real_material_glbs.py
+      - name: Render genuine GLBs in browser, click actual seed materials, test model orbit and source images
+        env:
+          NODE_PATH: /tmp/genesis-real3d/node_modules
+        timeout-minutes: 15
+        run: node tests/v014024_real_3d_inventory_qa.cjs
+      - name: Upload 3D screenshots, source hashes and exact browser diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014024-real-3d-materials
+          path: |
+            previews/v014024-real-materials-3d/
+          if-no-files-found: warn
+          retention-days: 8
+      - name: Keep verified 3D model bytes on the experiment branch without touching main
+        if: success()
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/playcanvas/approved/materials/cordel_canamo/ assets/playcanvas/approved/materials/hilo_lino/ assets/playcanvas/candidates/materials/oak/ assets/playcanvas/candidates/materials/ash/ assets/playcanvas/candidates/materials/leather_bovine/ assets/playcanvas/candidates/materials/leather_caprine/ previews/v014024-real-materials-3d/glb-manifest.json previews/v014024-real-materials-3d/runtime-audit.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'experiment(v014024): pin and render the original material GLBs (3D WebGL QA)'
+            git push origin HEAD:experiment/v014024-real-materials-3d-ordan-20261106
+          fi
+  actual-ordan-playthrough:
+    needs: real-materials
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: experiment/v014024-real-materials-3d-ordan-20261106
+      - name: Verify all six committed 3D files
+        run: |
+          python3 scripts/vendor_v014024_real_material_glbs.py --verify-only
+          node --check tests/v014022_ordan_full_e2e.cjs
+      - name: Setup pinned real browser
+        run: npm install --prefix /tmp/genesis-real-play playwright@1.56.1
+      - name: Derive an unmodified gameplay probe with its own evidence folder
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('tests/v014022_ordan_full_e2e.cjs').read_text()
+          old="const out='previews/v014022-ordan-playwright';"
+          assert s.count(old)==1
+          s=s.replace(old,"const out='previews/v014024-real-ordan-playthrough';")
+          s=s.replace("mode:'V014022 as shipped, read-only QA probe'","mode:'V014.024 real game; original player input; read-only diagnostics'")
+          s=s.replace("log('THERMAL_GAME_STARTED',{batch});","log('THERMAL_GAME_STARTED',{batch,startedAt:Date.now()});")
+          s=s.replace("log('THERMAL_PREPARED',{batch});","log('THERMAL_PREPARED',{batch,finishedAt:Date.now()});")
+          Path('tests/v014024_real_ordan_e2e.cjs').write_text(s)
+          PY
+      - name: Play from Ordan in real PlayCanvas, press actual controls, craft sword and shield
+        env:
+          NODE_PATH: /tmp/genesis-real-play/node_modules
+        timeout-minutes: 18
+        run: node tests/v014024_real_ordan_e2e.cjs
+      - name: Preserve all real quest states and failure receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014024-real-ordan-playthrough
+          path: previews/v014024-real-ordan-playthrough/
+          if-no-files-found: warn
+          retention-days: 8
