@@ -181,6 +181,40 @@ async function main(){
    }
    return {ok:false,why:'unlocked center route exceeded real WASD trials'};
  }
+ // Ordan must traverse all actual escort waypoints; step 11.5 persists.
+ // Only real keyboard keys; never edit quest flags or character positions.
+ async function escortOrdanToMarket(){
+   const start=Date.now();let lastWaypoint=-1,waypointStalled=0,lastFrame=-1,frameStalled=0;
+   const observations=[];
+   for(let i=0;i<330;i++){
+     const state=(await snap()).state;
+     if(state?.step===11.75||state?.step>=12)
+       return {ok:true,step:state.step,iterations:i,seconds:(Date.now()-start)/1000,waypoint:state.marketWaypoint,observations:observations.slice(-12)};
+     if(!state?.started||state.step!==11.5||!state.objective||!state.player)
+       return {ok:false,why:'escort state unexpectedly changed',step:state?.step};
+     const distance=Math.hypot(state.objective.x-state.player.x,state.objective.z-state.player.z);
+     const wp=state.marketWaypoint||0,frames=state.nav?.ticks||0;
+     if(wp>lastWaypoint){lastWaypoint=wp;waypointStalled=0;}else waypointStalled++;
+     if(frames>lastFrame){lastFrame=frames;frameStalled=0;}else frameStalled++;
+     if(i%8===0||wp>=8){
+       const sample={i,wp,distance,mentor:{x:state.objective.x,z:state.objective.z},player:state.player,frames,waiting:state.mentorState};
+       observations.push(sample);log('ORDAN_REAL_MARKET_ESCORT',sample);
+     }
+     // Ordan pauses when the player is >6.75m away. Approach the real NPC
+     // using camera-targeting Q and normal W / Shift sprint keys.
+     if(distance>3.0){
+       await page.keyboard.press('q');await delay(140);
+       const sprint=distance>4.7;
+       if(sprint)await page.keyboard.down('Shift');
+       await page.keyboard.down('w');await delay(distance>4.2?1750:1100);
+       await page.keyboard.up('w');
+       if(sprint)await page.keyboard.up('Shift');
+     }else await delay(1250);
+     if(waypointStalled>90||frameStalled>60)
+       return {ok:false,why:frameStalled>60?'browser frames stalled':'mentor waypoint stalled',i,wp,frames,distance,observations:observations.slice(-15)};
+   }
+   return {ok:false,why:'escort exceeded physical trial budget',seconds:(Date.now()-start)/1000,waypoint:lastWaypoint,observations:observations.slice(-15)};
+ }
  async function approach(){
   let noProgress=0;
   let attemptedPhysicalForgeRoute=false;
@@ -347,10 +381,10 @@ async function main(){
     }
     await dialog();
    }else if(st.step===11.5){
-    const path=await approach();log('FOLLOW_ORDAN',path);
+    const path=await escortOrdanToMarket();
+    log('FOLLOW_ORDAN_FULL_MARKET_ESCORT',path);
     if(!path.ok){report.result='MARKET_ESCORT_BLOCKED';break}
-    await delay(1000);
-    }else if(st.step===11.75){
+   }else if(st.step===11.75){
     // Interact with genuine NPC and click genuine free-purchase buttons.
     const route=await approach();
     log('MARKET_REAL_APPROACH',route);
