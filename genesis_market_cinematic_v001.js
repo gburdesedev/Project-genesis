@@ -28,11 +28,26 @@
     return {x:a.x+dx*t01,z:a.z+dz*t01,yaw:Math.atan2(dx,dz)*180/Math.PI,segment:i,
       fraction:t01,complete:d>=t.total-.0001};
   }
+  function routeAroundPlazaFountain(waypoints){
+    // El sendero aprobado cruza por (7,16), donde está la fuente 3D V011.
+    // Sólo esta cinemática rodea la fuente por el lado este, entre árboles,
+    // sin cambiar el trayecto canónico de Ordan ni la geometría de la plaza.
+    let replaced=0;
+    const result=[];
+    for(const p of waypoints){
+      if(Math.abs(p.x-7)<.01&&Math.abs(p.z-16)<.01){
+        replaced++;
+        result.push({x:7,z:10.5},{x:10,z:13},{x:10,z:19},{x:7,z:23});
+      }else result.push(copy(p));
+    }
+    if(replaced!==1)throw Error('No se encontró el cruce original de la fuente para rodearlo');
+    return result;
+  }
   function create(playerStart,mentorStart,waypoints){
     if(!valid(playerStart)||!valid(mentorStart)||!Array.isArray(waypoints)||waypoints.length<2)
       throw Error('Faltan las posiciones y los hitos de Ordan');
     const p=copy(playerStart),m=copy(mentorStart);
-    const goals=waypoints.map(copy);
+    const goals=routeAroundPlazaFountain(waypoints);
     const mentor=track([m,...goals]);
     // El artesano empieza donde realmente terminó la comparación. Se incorpora
     // detrás de Ordan y recorre después EXACTAMENTE los mismos hitos.
@@ -46,7 +61,7 @@
     return {mentor:sample(tracks.mentor,d),player:sample(tracks.player,d),
       fraction:d/tracks.player.total,complete:d>=tracks.player.total-.0001};
   }
-  const api=Object.freeze({version:'GENESIS_ORDAN_MARKET_CINEMATIC_V001',create,sample,pose,speedMetersPerSecond:3.55});
+  const api=Object.freeze({version:'GENESIS_ORDAN_MARKET_CINEMATIC_V001',create,sample,pose,routeAroundPlazaFountain,speedMetersPerSecond:3.55});
   root.GenesisMarketCinematic=api;
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window==='undefined'?globalThis:window);
