@@ -1,0 +1,42 @@
+name: V014.024 | Ordan market escort with real collision-aware WASD checkpoints
+on:
+  push:
+    branches:
+      - experiment/v014024-escort-route-physical-20261106
+    paths:
+      - tests/v014024_escort_waypoints_replay.cjs
+      - .github/workflows/v014024-escort-route-physical.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-player-market-escort:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check no approved game assets or actual collision physics were changed
+        run: |
+          python3 scripts/v014024_relocate_chest_side_aisle.py
+          python3 scripts/v014024_relocate_chest_side_aisle.py
+          node --check tests/v014024_escort_waypoints_replay.cjs
+      - name: Install pinned Playwright (Chrome real keyboard)
+        run: npm install --prefix /tmp/genesis-physical-escort playwright@1.56.1
+      - name: Play real first sword, second sword, return to Ordan and follow through market roads
+        env:
+          NODE_PATH: /tmp/genesis-physical-escort/node_modules
+          GENESIS_RETRY_SCREENSHOTS: '0'
+        timeout-minutes: 26
+        run: node tests/v014024_escort_waypoints_replay.cjs
+      - name: Upload quest events, physical player route and failure details
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014024-escort-waypoints-real-game
+          path: |
+            previews/v014024-escort-route-physical/
+            previews/v014024-chest-side-aisle/static-geometry-audit.json
+          if-no-files-found: warn
+          retention-days: 10
