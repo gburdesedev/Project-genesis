@@ -1,0 +1,57 @@
+name: Real V014022 approved 16x9 material inventory screenshots
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - experiment/v014022-inventory-materials-capture-20261105
+    paths:
+      - tests/capture_v014022_material_inventory.cjs
+      - .github/workflows/capture-v014022-material-inventory.yml
+permissions:
+  contents: write
+jobs:
+  material-inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Playwright runner (Chromium already in container)
+        run: npm install --prefix /tmp/genesis-inventory-capture playwright@1.56.1
+      - name: Verify screenshot test code
+        run: node --check tests/capture_v014022_material_inventory.cjs
+      - name: Open real Herrero inventory and screenshot each material
+        id: capture
+        continue-on-error: true
+        env:
+          NODE_PATH: /tmp/genesis-inventory-capture/node_modules
+        run: node tests/capture_v014022_material_inventory.cjs
+      - name: Upload screenshots as public GitHub Action artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014022-inventory-materials-real-screenshots
+          path: previews/inventory-materials-v014022/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Publish material screenshots and JSON audit on isolated branch
+        if: always()
+        shell: bash
+        run: |
+          set -e
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if test -s previews/inventory-materials-v014022/manifest.json; then
+            git add previews/inventory-materials-v014022/
+            if ! git diff --cached --quiet; then
+              git commit -m "qa: real screenshot evidence of every Herrero starter material ($GITHUB_RUN_ID)"
+              git push origin HEAD:experiment/v014022-inventory-materials-capture-20261105
+            fi
+          fi
+      - name: Require screenshots actually captured
+        if: always()
+        env:
+          RESULT: ${{ steps.capture.outcome }}
+        run: test "$RESULT" = success
