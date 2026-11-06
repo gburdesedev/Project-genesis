@@ -1,0 +1,28 @@
+name: V0186 Q1 actual E interactions and inventory smoke (PC / touch)
+on:
+  push:
+    branches: [experiment/v0186-herrero-functional-interior]
+    paths: ['tools/v0186_q1_e_key_qa.cjs','.github/workflows/v0186-q1-E-check.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  original-quest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v0186-quest-server.log 2>&1 &
+          node tools/v0186_q1_e_key_qa.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v0186-original-Ordan-E-inventory-Q1
+          path: /tmp/v0186-q1-e-interactions/
+          retention-days: 14
+          if-no-files-found: warn

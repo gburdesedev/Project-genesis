@@ -1,0 +1,54 @@
+name: V018.5 original-ratio stone portals | Blender 4.5.13 + HDRI32
+on:
+  push:
+    branches: [experiment/v0185-authentic-door-arches]
+    paths:
+      - 'tools/v0185_build_proportional_arch_blender45.py'
+      - '.github/workflows/v0185-build-portal-blender45.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  Blender45-arch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Blender 4.5.13 LTS exact official archive (never substitute apt version)
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --max-time 450 -o /tmp/blender-4.5.13-linux-x64.tar.xz \
+            https://download.blender.org/release/Blender4.5/blender-4.5.13-linux-x64.tar.xz
+          tar -xJf /tmp/blender-4.5.13-linux-x64.tar.xz -C /tmp
+          /tmp/blender-4.5.13-linux-x64/blender --version | grep '4.5.13'
+          test -s assets/playcanvas/approved/lighting/studio_small_09/studio_small_09_2k.hdr
+      - name: Produce new separate arch GLB and actual Cycles HDRI32 comparison renders
+        run: |
+          set -euo pipefail
+          /tmp/blender-4.5.13-linux-x64/blender -b -t 3 --python-exit-code 1 --python tools/v0185_build_proportional_arch_blender45.py
+          test -s /tmp/v0185_candidate/portal_arch_v0185.blend45.glb
+          test -s /tmp/v0185_candidate/technical.json
+          test -s /tmp/v0185_candidate/previews/herrero-front.png
+          test -s /tmp/v0185_candidate/previews/arcanista-oblique.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v0185-Blender45-Cycles-HDRI32-portal-proportions
+          path: /tmp/v0185_candidate/
+          retention-days: 21
+          if-no-files-found: warn
+      - name: Publish ONLY candidate portal GLB in experimental branch for PlayCanvas
+        run: |
+          set -euo pipefail
+          mkdir -p assets/playcanvas/candidates/workshops/portals/v0185/
+          cp /tmp/v0185_candidate/portal_arch_v0185.blend45.glb \
+            assets/playcanvas/candidates/workshops/portals/v0185/portal_arch_v0185.glb
+          cp /tmp/v0185_candidate/technical.json \
+            assets/playcanvas/candidates/workshops/portals/v0185/technical.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/playcanvas/candidates/workshops/portals/v0185/
+          git commit -m 'candidate V018.5: GLB arched stone jambs Blender 4.5.13, four HDRI32 Cycles reviews [skip ci]'
+          git push origin "HEAD:${GITHUB_REF_NAME}"

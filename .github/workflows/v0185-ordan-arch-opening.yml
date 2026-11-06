@@ -1,0 +1,39 @@
+name: V018.5 Ordan door opening - original proportions under Blender stone arch
+on:
+  push:
+    branches: [experiment/v0185-authentic-door-arches]
+    paths:
+      - 'tools/v0185_ordan_arch_open_qa.cjs'
+      - '.github/workflows/v0185-ordan-arch-opening.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  door-open:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Source and asset invariant checks
+        run: |
+          node --check v0185/v017-village.js
+          node --check tools/v0185_ordan_arch_open_qa.cjs
+          test -s assets/playcanvas/candidates/workshops/portals/v0185/portal_arch_v0185.glb
+      - name: Install Chromium with actual WebGL
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Trigger Ordan quest opening and inspect metal leaf clearance from two angles PC + mobile
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v0185-ordan-server.log 2>&1 &
+          node tools/v0185_ordan_arch_open_qa.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v0185-proportional-arch-ordan-open-qa
+          path: /tmp/genesis-v0185-open-qa/
+          retention-days: 14
+          if-no-files-found: warn
