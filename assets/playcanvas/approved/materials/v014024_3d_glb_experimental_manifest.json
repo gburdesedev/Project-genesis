@@ -4,7 +4,7 @@
   "assets": [
     {
       "name": "Madera seca de roble",
-      "path": "assets/playcanvas/approved/materials/oak/v004/roble_seco_v004_candidate.glb",
+      "path": "assets/playcanvas/candidates/materials/oak/v004/roble_seco_v004_candidate.glb",
       "sha256": "731f25759fc86df4bbe60603c0ad0f415791ecc8a3627286da2036102cbb28e8",
       "git_blob_sha": "f97b3e6d4cc86103a4f8f23d68fac21f671bfefc",
       "bytes": 14938336,
@@ -18,7 +18,7 @@
     },
     {
       "name": "Madera seca de fresno",
-      "path": "assets/playcanvas/approved/materials/ash/v004/fresno_seco_v004_candidate.glb",
+      "path": "assets/playcanvas/candidates/materials/ash/v004/fresno_seco_v004_candidate.glb",
       "sha256": "cbda8b584e058a3f7cee91b790a5456cecb0a4755abfa35e95f26396d615eb3f",
       "git_blob_sha": "f5c3f99ef50b191e5ee90cceac66353e29aa9142",
       "bytes": 19783932,
@@ -32,7 +32,7 @@
     },
     {
       "name": "Cuero bovino curtido",
-      "path": "assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_candidate.glb",
+      "path": "assets/playcanvas/candidates/materials/leather_bovine/v003/cuero_bovino_v003_candidate.glb",
       "sha256": "cb2aafa34173a327d5614ffd5e5a1b877a83635dc10cbd8410b9dba742a2b7b2",
       "git_blob_sha": "1aba58417c9f8a7a09f085a34e665bce237137e6",
       "bytes": 9450628,
@@ -46,7 +46,7 @@
     },
     {
       "name": "Cuero caprino curtido",
-      "path": "assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_candidate.glb",
+      "path": "assets/playcanvas/candidates/materials/leather_caprine/v003/cuero_caprino_v003_candidate.glb",
       "sha256": "9b39d0a64c4fa8bbc25a0daa00be5d974cf79e936f77308c97164751b35e879b",
       "git_blob_sha": "202f4e973efcbb306940f2f20be2c3705efc5581",
       "bytes": 9455460,
