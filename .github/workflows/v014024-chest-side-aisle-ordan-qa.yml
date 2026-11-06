@@ -1,0 +1,52 @@
+name: V014.024 | chest-side aisle physical collision and Ordan full replay
+on:
+  push:
+    branches: [experiment/v014024-chest-side-aisle-20261106]
+    paths:
+      - .github/workflows/v014024-chest-side-aisle-ordan-qa.yml
+      - scripts/v014024_relocate_chest_side_aisle.py
+      - tests/v014024_replayed_ordan_e2e.cjs
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  chest-real-game:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch only chest placement + matching collision + two quest fallback positions
+        run: |
+          python3 scripts/v014024_relocate_chest_side_aisle.py
+          python3 scripts/v014024_relocate_chest_side_aisle.py
+          node --check tests/v014024_replayed_ordan_e2e.cjs
+      - name: Stage verified placement only on experiment, never on main
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html previews/v014024-chest-side-aisle/static-geometry-audit.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'experiment(v014024): relocate material chest to side while preserving quest-8 reach [skip ci]'
+            git pull --rebase origin experiment/v014024-chest-side-aisle-20261106
+            git push origin HEAD:experiment/v014024-chest-side-aisle-20261106
+          fi
+      - name: Install pinned real Playwright
+        run: npm install --prefix /tmp/genesis-chest-qa playwright@1.56.1
+      - name: Actual PlayCanvas player, Ordan talk and chest, inventory, thermal forging and next quests
+        env:
+          NODE_PATH: /tmp/genesis-chest-qa/node_modules
+        timeout-minutes: 24
+        run: node tests/v014024_replayed_ordan_e2e.cjs
+      - name: Preserve collision audit and real quest logs and screenshots on either outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014024-chest-side-aisle-real-play
+          path: |
+            previews/v014024-chest-side-aisle/
+            previews/v014024-replayed-ordan/
+          if-no-files-found: warn
+          retention-days: 14
