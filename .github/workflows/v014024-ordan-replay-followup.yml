@@ -1,0 +1,39 @@
+name: V014.024 | actual gameplay replay after 3D integration (quest 11 fix)
+on:
+  push:
+    branches: [experiment/v014024-real-materials-3d-ordan-20261106]
+    paths:
+      - .github/workflows/v014024-ordan-replay-followup.yml
+      - tests/v014024_replayed_ordan_e2e.cjs
+      - preparacion_control.js
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-ordan-gameplay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 26
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact 3D sources staged in game and test syntax
+        run: |
+          python3 scripts/vendor_v014024_real_material_glbs.py --verify-only
+          node --check preparacion_control.js
+          node --check tests/v014024_replayed_ordan_e2e.cjs
+      - name: Install pinned Playwright into the test container
+        run: npm install --prefix /tmp/genesis-replay playwright@1.56.1
+      - name: Play Herrero quests with real click, movement, furnace and crafting UI
+        env:
+          NODE_PATH: /tmp/genesis-replay/node_modules
+        timeout-minutes: 22
+        run: node tests/v014024_replayed_ordan_e2e.cjs
+      - name: Preserve actual progress, errors, failed requests and browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014024-real-ordan-quest11-replay
+          path: previews/v014024-replayed-ordan/
+          if-no-files-found: warn
+          retention-days: 14
