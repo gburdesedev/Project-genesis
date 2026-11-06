@@ -1,0 +1,42 @@
+name: Genesis V014022 genuine NGE seed materials 512-test audit
+on:
+  push:
+    branches: [experiment/v014022-seed-material-sweep-20261105]
+    paths:
+      - .github/workflows/v014022-seed-material-audit.yml
+      - tests/v014022_seed_material_sweep.cjs
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  seeds:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate test
+        run: node --check tests/v014022_seed_material_sweep.cjs
+      - name: Generate 512 actual independent Herrero sessions
+        run: node tests/v014022_seed_material_sweep.cjs
+      - name: Upload source-linked audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-512-seeds-material-distribution
+          path: previews/v014022-seed-material-sweep/
+          retention-days: 14
+      - name: Publish readable results to isolated branch
+        if: always()
+        run: |
+          if test -f previews/v014022-seed-material-sweep/summary.json; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add previews/v014022-seed-material-sweep/
+            if ! git diff --cached --quiet; then
+              git commit -m "qa: verified actual Herrero seed material distributions"
+              git push origin HEAD:experiment/v014022-seed-material-sweep-20261105
+            fi
+          fi
