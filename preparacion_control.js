@@ -759,7 +759,8 @@
     bind('prepLess', () => { ctx.count = Math.max(1, ctx.count - 1); renderMenu(); });
     bind('prepMore', () => { ctx.count = Math.min(raw, ctx.count + 1); renderMenu(); });
     bind('prepStart', start);
-    bind('prepFabricate', craft);
+    // «Ir a fabricar» abre el catálogo: confirmar la receta ocurre allí.
+    bind('prepFabricate', () => renderWorkspace('Fabricaciones'));
   }
 
   function craft() {
