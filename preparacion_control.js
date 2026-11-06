@@ -49,12 +49,12 @@
       poster: 'assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png',
       model: 'assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_final_3_piezas_web.glb'
     }),
-    'Madera seca de roble': Object.freeze({ poster: 'assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png' }),
-    'Madera seca de fresno': Object.freeze({ poster: 'assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png' }),
-    'Cuero bovino curtido': Object.freeze({ poster: 'assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_poster.png' }),
-    'Cuero caprino curtido': Object.freeze({ poster: 'assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_poster.png' }),
-    'Cordel de cáñamo': Object.freeze({ poster: 'assets/playcanvas/approved/materials/hemp/v018/cordel_canamo_v018_poster.jpg' }),
-    'Hilo de lino': Object.freeze({ poster: 'assets/playcanvas/approved/materials/linen/v021/hilo_lino_v021_poster.jpg' })
+    'Madera seca de roble': Object.freeze({ poster: 'assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png', model: 'assets/playcanvas/candidates/materials/oak/v004/roble_seco_v004_candidate.glb' }),
+    'Madera seca de fresno': Object.freeze({ poster: 'assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png', model: 'assets/playcanvas/candidates/materials/ash/v004/fresno_seco_v004_candidate.glb' }),
+    'Cuero bovino curtido': Object.freeze({ poster: 'assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_poster.png', model: 'assets/playcanvas/candidates/materials/leather_bovine/v003/cuero_bovino_v003_candidate.glb' }),
+    'Cuero caprino curtido': Object.freeze({ poster: 'assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_poster.png', model: 'assets/playcanvas/candidates/materials/leather_caprine/v003/cuero_caprino_v003_candidate.glb' }),
+    'Cordel de cáñamo': Object.freeze({ poster: 'assets/playcanvas/approved/materials/hemp/v018/cordel_canamo_v018_poster.jpg', model: 'assets/playcanvas/approved/materials/cordel_canamo/v018/cordel_canamo_v018.glb' }),
+    'Hilo de lino': Object.freeze({ poster: 'assets/playcanvas/approved/materials/linen/v021/hilo_lino_v021_poster.jpg', model: 'assets/playcanvas/approved/materials/hilo_lino/v021/hilo_lino_v021.glb' })
   });
   // Perfil térmico por material. Solo el hierro tiene cifras DEMO: aún no
   // existen umbrales canónicos aprobados para cobre, estaño o bronce.
