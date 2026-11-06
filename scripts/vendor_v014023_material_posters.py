@@ -27,10 +27,10 @@ for name, source_commit, source_path, expected_git_blob, target_path in ITEMS:
         request = urllib.request.Request(url, headers={"User-Agent": "Project-Genesis-v014023-asset-vendor"})
         with urllib.request.urlopen(request, timeout=90) as response:
             data = response.read()
-    git_blob_sha = hashlib.sha1(f"blob {len(data)}\\0".encode("ascii") + data).hexdigest()
+    git_blob_sha = hashlib.sha1(f"blob {len(data)}\0".encode("ascii") + data).hexdigest()
     if git_blob_sha != expected_git_blob:
         raise SystemExit(f"Blob SHA mismatch: {name} expected {expected_git_blob}, got {git_blob_sha}")
-    expected_signature = b"\\x89PNG\\r\\n\\x1a\\n" if target.suffix.lower() == ".png" else b"\\xff\\xd8\\xff"
+    expected_signature = b"\x89PNG\r\n\x1a\n" if target.suffix.lower() == ".png" else b"\xff\xd8\xff"
     if not data.startswith(expected_signature):
         raise SystemExit(f"Incorrect image signature: {name}")
     if not target.exists():
@@ -40,5 +40,5 @@ for name, source_commit, source_path, expected_git_blob, target_path in ITEMS:
     print("VERIFIED", name, len(data), git_blob_sha, flush=True)
 manifest_path = pathlib.Path("assets/playcanvas/approved/materials/v014023_material_poster_manifest.json")
 manifest_path.parent.mkdir(parents=True, exist_ok=True)
-manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\\n",encoding="utf-8")
+manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
 print("SUCCESS:",len(manifest["assets"]),"pinned previews verified; approved master assets unmodified.")
