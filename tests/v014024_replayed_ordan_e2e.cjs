@@ -261,19 +261,18 @@ async function main(){
    await capture('quest-'+String(st?.step)+'-'+i);
    if(!st?.started){report.result='GAME_STATE_LOST';break}
    if(st.step>=10&&!renderBoosted){
-     // Test-runner-only: keep the real PlayCanvas update loop and actual input,
-     // but avoid CPU-only SwiftShader's expensive redraws after the UI screenshot.
-     // This does not mutate gameplay, objective, collision, item or quest state.
+     // Actual PlayCanvas gameplay must keep its original update/render loop.
+     // Earlier headless QA set app.autoRender=false at Q10 and then saw zero
+     // update ticks: this made physical movement intermittently impossible.
+     // Read-only diagnostics only, NEVER change app engine settings.
      const diagnostic=await page.evaluate(()=>{
        const app=document.querySelector('#genesisApp')?.app;
-       if(!app)return {available:false};
-       const before={autoRender:app.autoRender,renderNextFrame:app.renderNextFrame};
-       if(typeof app.autoRender==='boolean'){app.autoRender=false;app.renderNextFrame=false;return {available:true,disabled:true,before,after:{autoRender:app.autoRender,renderNextFrame:app.renderNextFrame}}}
-       return {available:true,disabled:false,before};
+       if(!app)return {available:false,changed:false};
+       return {available:true,changed:false,autoRender:app.autoRender,renderNextFrame:app.renderNextFrame};
      });
      renderBoosted=true;
      report.testOnlyRenderSetting=diagnostic;
-     log('HEADLESS_RENDER_UPDATE_DIAGNOSTIC',diagnostic);
+     log('HEADLESS_RENDER_LOOP_PRESERVED',diagnostic);
    }
    if(st.step>=15){report.result='MERCENARY_REACHED';break}
    if(st.step===9){
