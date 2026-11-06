@@ -201,7 +201,9 @@ async function main(){
    await page.keyboard.press('q');await delay(250);
    const probes=[];
    let closer=false,lateral=false;
-   for(const key of (state.step===11.25?['s','d','a','w']:['w','a','d','s'])){
+   // Q always turns the real camera toward the current objective. W moves
+   // forward; S would WALK AWAY from Ordan and caused the prior false failure.
+   for(const key of ['w','a','d','s']){
     const b=(await snap()).state;
     await page.keyboard.down(key);
     await delay(key==='w'?2100:1300);
