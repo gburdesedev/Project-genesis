@@ -66,7 +66,29 @@ async function main(){
       const dims=await image.evaluate(img=>({naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight,complete:img.complete}));
       assert(dims.naturalWidth>0,'Failed material image '+name+' from '+src+' seed '+row.seed);
       assert(palette.includes(name),'Unexpected seed material '+name);
-      caseData.materialImages.push({name,src,...dims});
+
+      assert.equal((await page.locator('#genInv .genInvViewerTitle').textContent()).trim(),name,'Clicked material is not in central viewer');
+      await page.waitForFunction(()=>{
+        const im=document.querySelector('#genInv .genInvImageWrap img.genInvMaterialHero');
+        return im&&im.dataset.zoom;
+      },null,{timeout:5000});
+      const heroFit=await image.evaluate(im=>({zoom:Number(im.dataset.zoom),source:im.dataset.fitSource,transform:getComputedStyle(im).transform}));
+      assert(heroFit.zoom>=1,'Selected material did not receive full-size viewer fitting: '+name);
+      // Test actual ±45º pointer hover inside the ORIGINAL slot, never moving the frame.
+      const rect=await slot.boundingBox();
+      assert(rect,'Missing painted slot frame');
+      await page.mouse.move(rect.x+rect.width*.02,rect.y+rect.height*.5);
+      const left=await slot.locator('.genInvSlotArtwork').evaluate(el=>el.style.getPropertyValue('--gen-slot-yaw'));
+      await page.mouse.move(rect.x+rect.width*.98,rect.y+rect.height*.5);
+      const right=await slot.locator('.genInvSlotArtwork').evaluate(el=>el.style.getPropertyValue('--gen-slot-yaw'));
+      assert(parseFloat(left)<-39&&parseFloat(right)>39,'Slot hover not rotating artwork from -45º to +45º: '+name+' '+left+' '+right);
+      await page.mouse.move(rect.x+rect.width+12,rect.y+rect.height+12);
+      const reset=await slot.locator('.genInvSlotArtwork').evaluate(el=>el.style.getPropertyValue('--gen-slot-yaw'));
+      assert.equal(reset,'0deg','Slot artwork did not reset on pointer leave: '+name);
+      // Do not change selected material. Frame art must remain the same element.
+      assert(await slot.evaluate(el=>getComputedStyle(el).backgroundImage.includes('Casilla_Basicos_01.png')));
+
+      caseData.materialImages.push({name,src,...dims,heroFit,hover:{left,right,reset}});
       if(!manifest.materialImages[name]){
         const slug=name.normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase();
         const file='material-'+slug+'.png';
