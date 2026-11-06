@@ -134,11 +134,60 @@ async function main(){
    log('CRAFT_RESULT_MISSING_DIAGNOSTIC',{buttons:await page.locator('#modalLayer button').allTextContents().catch(()=>[]),recipeChoices:await page.locator('.workspaceRecipeChoice').allTextContents().catch(()=>[])});
    return {ok:false,why:'no resultContinue after crafting'};
  }
+ // Real-input route recovered from successful action run 42213249938:
+ // walk to the workshop wall; sidestep east at z ~ -1; then enter along -Z.
+ // No teleport, quest writes, collision overrides or game-engine patching.
+ async function approachForgeByEastPassage(){
+   const measure=async()=>{const p=(await snap()).state;return {p,dist:p?.objective&&p?.player?Math.hypot(p.objective.x-p.player.x,p.objective.z-p.player.z):Infinity}};
+   async function move(key,ms,phase){
+     const before=await measure();
+     await page.keyboard.down(key);await delay(ms);await page.keyboard.up(key);await delay(180);
+     const after=await measure();
+     log('Q10_REAL_INPUT_EAST_ROUTE',{phase,key,ms,from:before.p?.player,to:after.p?.player,distance:after.dist,
+       nearby:after.p?.nav?.nearbyCollisions,frames:(after.p?.nav?.ticks||0)-(before.p?.nav?.ticks||0)});
+     return after;
+   }
+   let state=await measure();
+   if(!state.p?.objective||!state.p?.player)return {ok:false,why:'missing target'};
+   // Phase one: approach the door wall but do not stay pressed against it.
+   for(let i=0;i<4&&state.p.player.z>-.85;i++){
+     state=await move('w',2000,'approach-outer-wall');
+     if(state.p.interactable||state.p.directInteractable)return {ok:true,id:'craft',via:'east-pass'};
+   }
+   // If the player has passed the wall's northern edge in front of a closed
+   // segment, retreat slightly before the lateral traverse.
+   if(state.p.player.z < -1.6 && state.p.player.x<1.0)
+     state=await move('s',1300,'leave-front-wall');
+   // Phase two: the documented side passage is x ~= 3.7, not x ~= 0.
+   for(let i=0;i<5&&state.p.player.x<3.3;i++){
+     const before=state.p.player.x;
+     state=await move('d',1250,'sidestep-east');
+     if(Math.abs(state.p.player.x-before)<.04){
+       state=await move('s',850,'clear-east-approach');
+     }
+     if(state.p.interactable||state.p.directInteractable)return {ok:true,id:'craft',via:'east-pass'};
+   }
+   // Phase three: walk into the open interior along the exterior passage.
+   for(let i=0;i<5;i++){
+     state=await move('w',2000,'enter-forge');
+     if(state.p.interactable||state.p.directInteractable||state.dist<1.65)
+       return {ok:true,id:state.p.interactable||state.p.directInteractable||'craft',via:'east-pass',distance:state.dist};
+     if((state.p.nav?.ticks||0)===0)break;
+   }
+   return {ok:false,why:'east passage route did not reach actual craft interaction',position:state.p.player,distance:state.dist};
+ }
  async function approach(){
   let noProgress=0;
+  let attemptedPhysicalForgeRoute=false;
   for(let i=0;i<32;i++){
    const state=(await snap()).state;
    if(!state?.started)return {ok:false,why:'game not started'};
+   if(state.step===10 && !attemptedPhysicalForgeRoute){
+     attemptedPhysicalForgeRoute=true;
+     const east=await approachForgeByEastPassage();
+     log('Q10_EAST_PASSAGE_OUTCOME',east);
+     if(east.ok)return east;
+   }
    if(state.step===8){
      await page.keyboard.press('q');await delay(250);
      const t=(await snap()).state,dist=t?.objective&&t?.player?Math.hypot(t.player.x-t.objective.x,t.player.z-t.objective.z):Infinity;
@@ -161,7 +210,7 @@ async function main(){
    await page.keyboard.press('q');await delay(250);
    const probes=[];
    let closer=false,lateral=false;
-   for(const key of ['w','a','d','s']){
+   for(const key of (state.step===11.25?['s','d','a','w']:['w','a','d','s'])){
     const b=(await snap()).state;
     await page.keyboard.down(key);
     await delay(key==='w'?2100:1300);
