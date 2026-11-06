@@ -137,44 +137,35 @@ async function main(){
  // Real-input route recovered from successful action run 42213249938:
  // walk to the workshop wall; sidestep east at z ~ -1; then enter along -Z.
  // No teleport, quest writes, collision overrides or game-engine patching.
+ // Navigation validation after chest relocation: never manipulate game position.
+ // Q is the ACTUAL player key that points the camera at the objective, then
+ // held W navigates its physically collidable path through the open doorway.
  async function approachForgeByEastPassage(){
-   const measure=async()=>{const p=(await snap()).state;return {p,dist:p?.objective&&p?.player?Math.hypot(p.objective.x-p.player.x,p.objective.z-p.player.z):Infinity}};
-   async function move(key,ms,phase){
-     const before=await measure();
-     await page.keyboard.down(key);await delay(ms);await page.keyboard.up(key);await delay(180);
-     const after=await measure();
-     log('Q10_REAL_INPUT_EAST_ROUTE',{phase,key,ms,from:before.p?.player,to:after.p?.player,distance:after.dist,
-       nearby:after.p?.nav?.nearbyCollisions,frames:(after.p?.nav?.ticks||0)-(before.p?.nav?.ticks||0)});
-     return after;
+   let noMovement=0;
+   for(let i=0;i<18;i++){
+     const before=(await snap()).state;
+     if(!before?.started||!before.objective)return {ok:false,why:'objective unavailable',try:i};
+     if(before.interactable||before.directInteractable)return {ok:true,id:before.interactable||before.directInteractable,try:i};
+     const dist0=Math.hypot(before.player.x-before.objective.x,before.player.z-before.objective.z);
+     if(dist0<1.35)return {ok:true,why:'in genuine interaction radius',dist:dist0,try:i};
+     await page.keyboard.press('q');await delay(300);
+     await page.keyboard.down('w');
+     await delay(1750);
+     const held=(await snap()).state;
+     await page.keyboard.up('w');await delay(170);
+     const after=(await snap()).state;
+     const dist1=after?.objective&&after?.player?Math.hypot(after.player.x-after.objective.x,after.player.z-after.objective.z):Infinity;
+     const travel=after?.player&&before?.player?Math.hypot(after.player.x-before.player.x,after.player.z-before.player.z):0;
+     const frames=(held?.nav?.ticks||0)-(before.nav?.ticks||0);
+     log('Q10_CHEST_RELOCATED_REAL_WALK',{i,from:before.player,to:after?.player,dist0,dist1,travel,frames,
+       collisions:after?.nav?.nearbyCollisions,canMove:after?.nav?.canMove});
+     if(after?.interactable||after?.directInteractable)return {ok:true,id:after.interactable||after.directInteractable,via:'reopened-center-aisle',try:i};
+     if(dist1<1.40)return {ok:true,why:'within physical distance',dist:dist1,try:i};
+     if(travel<.02){noMovement++;await delay(500);}
+     else noMovement=0;
+     if(noMovement>=7)return {ok:false,why:'no physical progress after chest was moved',dist:dist1,frames,collisions:after?.nav?.nearbyCollisions};
    }
-   let state=await measure();
-   if(!state.p?.objective||!state.p?.player)return {ok:false,why:'missing target'};
-   // Phase one: approach the door wall but do not stay pressed against it.
-   for(let i=0;i<4&&state.p.player.z>-.85;i++){
-     state=await move('w',2000,'approach-outer-wall');
-     if(state.p.interactable||state.p.directInteractable)return {ok:true,id:'craft',via:'east-pass'};
-   }
-   // If the player has passed the wall's northern edge in front of a closed
-   // segment, retreat slightly before the lateral traverse.
-   if(state.p.player.z < -1.6 && state.p.player.x<1.0)
-     state=await move('s',1300,'leave-front-wall');
-   // Phase two: the documented side passage is x ~= 3.7, not x ~= 0.
-   for(let i=0;i<5&&state.p.player.x<3.3;i++){
-     const before=state.p.player.x;
-     state=await move('d',1250,'sidestep-east');
-     if(Math.abs(state.p.player.x-before)<.04){
-       state=await move('s',850,'clear-east-approach');
-     }
-     if(state.p.interactable||state.p.directInteractable)return {ok:true,id:'craft',via:'east-pass'};
-   }
-   // Phase three: walk into the open interior along the exterior passage.
-   for(let i=0;i<5;i++){
-     state=await move('w',2000,'enter-forge');
-     if(state.p.interactable||state.p.directInteractable||state.dist<1.65)
-       return {ok:true,id:state.p.interactable||state.p.directInteractable||'craft',via:'east-pass',distance:state.dist};
-     if((state.p.nav?.ticks||0)===0)break;
-   }
-   return {ok:false,why:'east passage route did not reach actual craft interaction',position:state.p.player,distance:state.dist};
+   return {ok:false,why:'unlocked center route exceeded real WASD trials'};
  }
  async function approach(){
   let noProgress=0;
