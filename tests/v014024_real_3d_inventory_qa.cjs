@@ -8,7 +8,7 @@ const out='previews/v014024-real-materials-3d';
 fs.mkdirSync(out,{recursive:true});
 const known=['Mineral de hierro','Carbón vegetal','Madera seca de roble','Madera seca de fresno',
   'Cuero bovino curtido','Cuero caprino curtido','Cordel de cáñamo','Hilo de lino'];
-const manifestPath=path.join(out,'glb-manifest.json');
+const manifestPath='assets/playcanvas/approved/materials/v014024_3d_glb_experimental_manifest.json';
 assert(fs.existsSync(manifestPath),'Missing 3D source manifest from vendor script');
 const source=JSON.parse(fs.readFileSync(manifestPath,'utf8'));
 assert.equal(source.assets.length,6,'Expected exactly six original source files');
