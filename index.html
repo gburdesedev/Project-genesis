@@ -1268,6 +1268,7 @@ window.__GENESIS_RUNTIME_ERRORS=[];addEventListener('error',e=>{window.__GENESIS
 const HERRERO_WORKSHOP_SETUP_REQUIRED=false; // Build de prueba: false = taller del Herrero ya operativo para validar crafting → mercenarios.
 const DIRECT_MERCENARY_AFTER_CRAFTS=true; // Build de prueba: tras la segunda familia salta directo a mercenarios.
 let gameStarted=false,selectedProfession=null,activeRoute=null,tutorialStep=-1,currentInteractable=null;
+let marketEscortCinematic=null,marketEscortCinemaNow=0;
 let px=0,pz=6.3,camYaw=0,camPitch=24,camDist=4.7,cameraSolvedDist=4.7,moveX=0,moveY=0,walking=false,running=false,lastT=performance.now();const keys=new Set();
 const MOVEMENT_KEYS=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowLeft','ArrowDown','ArrowRight','ShiftLeft','ShiftRight']);const NOTEBOOK_CAMERA_KEYS=new Set(['KeyI','KeyJ','KeyK','KeyL','KeyU','KeyO']);
 function setWalking(on,sprint=false){sprint=on&&sprint;if(on===walking&&sprint===running)return;walking=on;running=sprint;const clip=on?(sprint?runClip:walkClip):idleClip;if(clip)playerAnimGroup.forEach(a=>a.transition(clip,.18))}
@@ -1304,7 +1305,7 @@ const ROUTES={
  Curtidor:{profession:'Curtidor',center:14,mentorName:'Mentor Curtidor',mentor:()=>tannerMentor,mentorAnims:tannerMentorAnimGroup,mentorIdle:tannerIdle,mentorWalk:tannerWalk,mentorGesture:tannerGesture,recipes:['armadura_cuero','botas_cuero'],stationName:'Mesa de corte',stationPos:()=>{const p=tannerTableEntity?.getPosition?.()||{x:10.28,y:0,z:-8.42};return{x:p.x,y:1.15,z:p.z}},craftPrompt:'Trabajar en la mesa de corte'}
 };
 let workshopKey=false,debrisCleared=false,auxCleared=false,chestOpen=false,craftedItems=[],usedItemNames=new Set(),craftSession=null,playerInventory={},inventoryOpen=false,inventoryTutorialOpened=false,mentorYaw=-21,mentorGestureAt=0,mentorGestureReturn=0,mentorFollowState='outside',mentorFollowDelay=0,mentorPath=[],mentorWaypoint=0;
-let marketEscortWaypoint=0,marketEscortWaiting=false,marketEscortCinematic=null,marketEscortCinemaNow=0;
+let marketEscortWaypoint=0,marketEscortWaiting=false;
 // v0.11 · Epílogo de demo. Estas muestras NO son materiales canonizados ni otorgan propiedades mecánicas.
 const DEMO_DISCOVERY_MATERIALS=Object.freeze([
  {id:'ferruginosa',unknown:'Muestra ferruginosa desconocida',prepared:'Muestra ferruginosa estabilizada',color:'#d88756',glyph:'◆',effect:'Resplandor ferruginoso'},
