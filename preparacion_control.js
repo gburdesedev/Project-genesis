@@ -529,7 +529,7 @@
         style.rel='stylesheet';style.href='inventario_genesis_16x9.css?v=0.1.003-head-50036d1';
         document.head.append(style);
         const loader=document.createElement('script');
-        loader.src='inventario_genesis_16x9.js?v=0.1.001';
+        loader.src='inventario_genesis_16x9.js?v=0.14.023';
         loader.onload=()=>renderWorkspace('Inventario');
         loader.onerror=()=>{window.__GenesisInv16Loading=false;style.remove();};
         document.head.append(loader);
