@@ -11,22 +11,22 @@ SOURCES=[
     "name":"Madera seca de roble","commit":"28fa3d583227485940ad7db023c9f7544ba9bd86",
     "source":"production/tutorial_materials/generated/roble_seco/roble_seco_v004_candidate.glb",
     "git_blob":"f97b3e6d4cc86103a4f8f23d68fac21f671bfefc","size":14938336,
-    "target":"assets/playcanvas/approved/materials/oak/v004/roble_seco_v004_candidate.glb","visual_status":"CANDIDATE_ONLY"
+    "target":"assets/playcanvas/candidates/materials/oak/v004/roble_seco_v004_candidate.glb","visual_status":"CANDIDATE_ONLY"
   },{
     "name":"Madera seca de fresno","commit":"4d22dee5e05933a8787d5e9a3ca8d7986bea332d",
     "source":"production/tutorial_materials/generated/fresno_seco/fresno_seco_v004_candidate.glb",
     "git_blob":"f5c3f99ef50b191e5ee90cceac66353e29aa9142","size":19783932,
-    "target":"assets/playcanvas/approved/materials/ash/v004/fresno_seco_v004_candidate.glb","visual_status":"CANDIDATE_ONLY"
+    "target":"assets/playcanvas/candidates/materials/ash/v004/fresno_seco_v004_candidate.glb","visual_status":"CANDIDATE_ONLY"
   },{
     "name":"Cuero bovino curtido","commit":"8499e3c01d7d0575095169a69dbeac04eea72501",
     "source":"production/tutorial_materials/generated/cuero_bovino/cuero_bovino_v003_candidate.glb",
     "git_blob":"1aba58417c9f8a7a09f085a34e665bce237137e6","size":9450628,
-    "target":"assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_candidate.glb","visual_status":"CANDIDATE_ONLY"
+    "target":"assets/playcanvas/candidates/materials/leather_bovine/v003/cuero_bovino_v003_candidate.glb","visual_status":"CANDIDATE_ONLY"
   },{
     "name":"Cuero caprino curtido","commit":"5819c40f0114ea476d99ddfe68526cac36f823ea",
     "source":"production/tutorial_materials/generated/cuero_caprino/cuero_caprino_v003_candidate.glb",
     "git_blob":"202f4e973efcbb306940f2f20be2c3705efc5581","size":9455460,
-    "target":"assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_candidate.glb","visual_status":"CANDIDATE_ONLY"
+    "target":"assets/playcanvas/candidates/materials/leather_caprine/v003/cuero_caprino_v003_candidate.glb","visual_status":"CANDIDATE_ONLY"
   },{
     "name":"Cordel de cáñamo","commit":"34e206bd7ec51b676a03bb0f295061687a0a7b2e",
     "source":"production/approved_fibers_experimental/cordel_canamo/v018/cordel_canamo_v018.glb",
