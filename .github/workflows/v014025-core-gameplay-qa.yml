@@ -34,7 +34,13 @@ jobs:
       - name: Existing market and equipment domain regressions
         run: |
           node tests/mercenary_equipment_domain_v001.cjs
-          node --test tests/genesis_market_domain_v001.cjs tests/genesis_market_integration_v001.cjs
+          node --test tests/genesis_market_domain_v001.cjs
+          # v014019's old published-version test requires v014022 for all modules,
+          # whereas the V014025 game intentionally retains unchanged v014022 modules.
+          # Run its behavioral integration checks; the version check is replaced
+          # by a current-release contract below.
+          node --test --test-name-pattern='merchant attached|existing inventory' tests/genesis_market_integration_v001.cjs
+          node --test tests/v014025_release_links.cjs
       - name: Keep exact audit report even on failed assertion
         if: always()
         uses: actions/upload-artifact@v4
