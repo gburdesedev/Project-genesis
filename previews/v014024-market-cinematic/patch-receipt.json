@@ -1,0 +1,25 @@
+{
+  "version": "V014.024-cinematic-experimental",
+  "modified_file": "index.html",
+  "applied_changes": [
+    "load local cinematic director before game module",
+    "isolated cinematic variables",
+    "ignore user key commands while cinematic plays",
+    "freeze manual camera input during cinematic",
+    "disable interaction only while cinematic plays",
+    "cinematic teardown when starting a fresh game",
+    "prevent manual WASD from overriding scripted motion",
+    "start cinematic after approved Ordan dialogue",
+    "script both real rigged actors along original route and finish at merchant",
+    "switch camera to non-interactive wide cinematic view",
+    "keep both animated characters in a wider cinematic camera"
+  ],
+  "source_chars": 2492248,
+  "patched_chars": 2497715,
+  "master_asset_changes": 0,
+  "main_changed": false,
+  "scripted_path": "GenesisMarketQuest.escortPath",
+  "game_quest_transition": "11.25 -> 11.5 cinematic -> 11.75 merchant",
+  "player_collision_checks": "every 0.12m via actual wallBlocked",
+  "visual": "two 7.5% letterbox bars; existing real rig animations; wide camera"
+}
