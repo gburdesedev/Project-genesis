@@ -1,6 +1,6 @@
 {
   "release": "V014.023",
-  "runAt": "2026-11-06T00:34:50.176Z",
+  "runAt": "2026-11-06T00:55:21.871Z",
   "source": "genuine GenesisPrototypeEngines.generateSession + actual GenesisInventory16.render",
   "thermal": {
     "progressPerSecond": 4.5,
@@ -296,52 +296,68 @@
       "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
       "naturalWidth": 640,
       "naturalHeight": 640,
-      "complete": true
+      "complete": true,
+      "screenshot": "material-arbo-n-vegetal.png",
+      "seed": 1
     },
     "Cuero caprino curtido": {
       "src": "assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_poster.png",
       "naturalWidth": 640,
       "naturalHeight": 640,
-      "complete": true
+      "complete": true,
+      "screenshot": "material-ero-caprino-crtido.png",
+      "seed": 1
     },
     "Madera seca de fresno": {
       "src": "assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png",
       "naturalWidth": 640,
       "naturalHeight": 640,
-      "complete": true
+      "complete": true,
+      "screenshot": "material-adera-seca-de-resno.png",
+      "seed": 1
     },
     "Mineral de hierro": {
       "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
       "naturalWidth": 1000,
       "naturalHeight": 1000,
-      "complete": true
+      "complete": true,
+      "screenshot": "material-ineral-de-hierro.png",
+      "seed": 1
     },
     "Cuero bovino curtido": {
       "src": "assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_poster.png",
       "naturalWidth": 640,
       "naturalHeight": 640,
-      "complete": true
+      "complete": true,
+      "screenshot": "material-ero-bovino-crtido.png",
+      "seed": 2
     },
     "Madera seca de roble": {
       "src": "assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png",
       "naturalWidth": 640,
       "naturalHeight": 640,
-      "complete": true
+      "complete": true,
+      "screenshot": "material-adera-seca-de-roble.png",
+      "seed": 4
     },
     "Hilo de lino": {
       "src": "assets/playcanvas/approved/materials/linen/v021/hilo_lino_v021_poster.jpg",
       "naturalWidth": 900,
       "naturalHeight": 900,
-      "complete": true
+      "complete": true,
+      "screenshot": "material-ilo-de-lino.png",
+      "seed": 5
     },
     "Cordel de cáñamo": {
       "src": "assets/playcanvas/approved/materials/hemp/v018/cordel_canamo_v018_poster.jpg",
       "naturalWidth": 900,
       "naturalHeight": 900,
-      "complete": true
+      "complete": true,
+      "screenshot": "material-ordel-de-ca-n-amo.png",
+      "seed": 9
     }
   },
   "failures": [],
   "result": "PASS",
-  "finishedAt": "2026-11-06T00:34:58.115Z"
+  "finishedAt": "2026-11-06T00:55:30.093Z"
 }
