@@ -206,7 +206,11 @@ async function main(){
          return {ok:false,why:'cinematic progress went backwards',lastProgress,current:cine.progress};
        if(lastPose){
          const walk=Math.hypot(cine.player.x-lastPose.x,cine.player.z-lastPose.z);
-         if(walk>1.75)return {ok:false,why:'apprentice jumped rather than walking',walk,at:i};
+         const routeTravel=cine.progress-lastProgress;
+         // CI's SwiftShader can stall screenshots for several seconds.
+         // Movement is continuous if physical displacement never exceeds
+         // the route arclength advanced between these two observations.
+         if(walk>routeTravel+.10)return {ok:false,why:'apprentice left the continuous arc',walk,routeTravel,at:i};
        }
        if(!cine.controlLocked)return {ok:false,why:'player controls remained active during cinematic'};
        lastProgress=cine.progress;lastPose=cine.player;
