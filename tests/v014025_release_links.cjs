@@ -14,7 +14,7 @@ test('the visible game release, meta and HUD describe the same revision',()=>{
  const [,version,build]=title;
  const meta=html.match(/<meta name="genesis-game-version" content="V(\d+)\.(\d+)"/);
  assert(meta,'missing meta revision');
- assert.equal(version.replace(/\D/g,''),'0'+meta[1]+meta[2].padStart(3,'0'));
+ assert.equal(version,'v0.'+Number(meta[1])+'.'+meta[2],'title/meta revision mismatch');
  assert(html.includes('PROJECT GENESIS · '+version+' · BUILD '+build),'HUD version drift');
  assert(html.includes('PLAYCANVAS 2.22.1 · CAMINO AL VERTICAL SLICE · '+version+' · BUILD '+build),'game hardware version drift');
  assert(html.includes('genesis-build'),'unmarked build');
