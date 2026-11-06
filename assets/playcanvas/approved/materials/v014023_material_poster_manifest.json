@@ -1,0 +1,59 @@
+{
+  "release": "V014.023",
+  "assets": [
+    {
+      "material": "Madera seca de roble",
+      "path": "assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png",
+      "bytes": 212187,
+      "sha256": "f30cc7a33e26eb5214cd02ec7894548e93a226d58b51c57605cf33fa8efe25e3",
+      "git_blob_sha": "1be586e46fd6834a262cb5c033517fcd5c56f7f8",
+      "source_commit": "28fa3d583227485940ad7db023c9f7544ba9bd86",
+      "source_path": "production/tutorial_materials/generated/roble_seco/inventory_poster_rgba.png"
+    },
+    {
+      "material": "Madera seca de fresno",
+      "path": "assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png",
+      "bytes": 263748,
+      "sha256": "e40d7a88ac213932b84f229d1b607cd5be6b7de590a5974930ca35a0432bfa43",
+      "git_blob_sha": "d80ddb7d9eff6f88948a747c03b97bd7afd640d9",
+      "source_commit": "4d22dee5e05933a8787d5e9a3ca8d7986bea332d",
+      "source_path": "production/tutorial_materials/generated/fresno_seco/inventory_poster_rgba.png"
+    },
+    {
+      "material": "Cuero bovino curtido",
+      "path": "assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_poster.png",
+      "bytes": 169806,
+      "sha256": "5789f25d97471e35f9fb0af8accb93c3e1cbf4594c6799bcab002c42933db857",
+      "git_blob_sha": "d72efeb9fea088cb7c5104f20779ade240703fea",
+      "source_commit": "8499e3c01d7d0575095169a69dbeac04eea72501",
+      "source_path": "production/tutorial_materials/generated/cuero_bovino/inventory_poster_rgba.png"
+    },
+    {
+      "material": "Cuero caprino curtido",
+      "path": "assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_poster.png",
+      "bytes": 173975,
+      "sha256": "be89b7c158ab83e04fb197c8454a9df3705026acb8ae91433c561045afe9a01b",
+      "git_blob_sha": "5cbca0d82104e376231207cef3cdb383607472a5",
+      "source_commit": "5819c40f0114ea476d99ddfe68526cac36f823ea",
+      "source_path": "production/tutorial_materials/generated/cuero_caprino/inventory_poster_rgba.png"
+    },
+    {
+      "material": "Cordel de cáñamo",
+      "path": "assets/playcanvas/approved/materials/hemp/v018/cordel_canamo_v018_poster.jpg",
+      "bytes": 49748,
+      "sha256": "119985ce8e275c4ea134119301b4cf020a5f415163b43ae47107109b558baa12",
+      "git_blob_sha": "50db57a4f75526d21bd0d5192ffa499be19bb255",
+      "source_commit": "3a60d0bda542c2206148571f02427421403f0270",
+      "source_path": "evaluation/hemp-cord/v018/three_quarter.jpg"
+    },
+    {
+      "material": "Hilo de lino",
+      "path": "assets/playcanvas/approved/materials/linen/v021/hilo_lino_v021_poster.jpg",
+      "bytes": 49469,
+      "sha256": "101421ccf96fcbeb0af26950c9d3de0ced48aa0e7c638320940f6253e95bcaa5",
+      "git_blob_sha": "41327c7a609a7d5c34452c7cc68a619d9ed47159",
+      "source_commit": "3e375e67106e553615a54d591e2c0ec87e365a1b",
+      "source_path": "evaluation/linen-thread/v021/three_quarter.jpg"
+    }
+  ]
+}

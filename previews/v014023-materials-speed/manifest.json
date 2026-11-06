@@ -1,0 +1,347 @@
+{
+  "release": "V014.023",
+  "runAt": "2026-11-06T00:34:50.176Z",
+  "source": "genuine GenesisPrototypeEngines.generateSession + actual GenesisInventory16.render",
+  "thermal": {
+    "progressPerSecond": 4.5,
+    "coolingPerSecond": 0.765,
+    "idealSecondsFor100": 22.22222222222222,
+    "baseIdealSecondsFor100": 33.333333333333336,
+    "oldCoolingPerSecond": 0.45
+  },
+  "seedCases": [
+    {
+      "seed": 1,
+      "combo": "Cuero caprino curtido | Madera seca de fresno",
+      "materialImages": [
+        {
+          "name": "Carbón vegetal",
+          "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Cuero caprino curtido",
+          "src": "assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Madera seca de fresno",
+          "src": "assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Mineral de hierro",
+          "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
+          "naturalWidth": 1000,
+          "naturalHeight": 1000,
+          "complete": true
+        }
+      ],
+      "screenshot": "seed-001.png"
+    },
+    {
+      "seed": 2,
+      "combo": "Cuero bovino curtido | Madera seca de fresno",
+      "materialImages": [
+        {
+          "name": "Carbón vegetal",
+          "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Cuero bovino curtido",
+          "src": "assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Madera seca de fresno",
+          "src": "assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Mineral de hierro",
+          "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
+          "naturalWidth": 1000,
+          "naturalHeight": 1000,
+          "complete": true
+        }
+      ],
+      "screenshot": "seed-002.png"
+    },
+    {
+      "seed": 4,
+      "combo": "Cuero caprino curtido | Madera seca de roble",
+      "materialImages": [
+        {
+          "name": "Carbón vegetal",
+          "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Cuero caprino curtido",
+          "src": "assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Madera seca de roble",
+          "src": "assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Mineral de hierro",
+          "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
+          "naturalWidth": 1000,
+          "naturalHeight": 1000,
+          "complete": true
+        }
+      ],
+      "screenshot": "seed-004.png"
+    },
+    {
+      "seed": 5,
+      "combo": "Hilo de lino | Madera seca de fresno",
+      "materialImages": [
+        {
+          "name": "Carbón vegetal",
+          "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Hilo de lino",
+          "src": "assets/playcanvas/approved/materials/linen/v021/hilo_lino_v021_poster.jpg",
+          "naturalWidth": 900,
+          "naturalHeight": 900,
+          "complete": true
+        },
+        {
+          "name": "Madera seca de fresno",
+          "src": "assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Mineral de hierro",
+          "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
+          "naturalWidth": 1000,
+          "naturalHeight": 1000,
+          "complete": true
+        }
+      ],
+      "screenshot": "seed-005.png"
+    },
+    {
+      "seed": 6,
+      "combo": "Hilo de lino | Madera seca de roble",
+      "materialImages": [
+        {
+          "name": "Carbón vegetal",
+          "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Hilo de lino",
+          "src": "assets/playcanvas/approved/materials/linen/v021/hilo_lino_v021_poster.jpg",
+          "naturalWidth": 900,
+          "naturalHeight": 900,
+          "complete": true
+        },
+        {
+          "name": "Madera seca de roble",
+          "src": "assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Mineral de hierro",
+          "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
+          "naturalWidth": 1000,
+          "naturalHeight": 1000,
+          "complete": true
+        }
+      ],
+      "screenshot": "seed-006.png"
+    },
+    {
+      "seed": 9,
+      "combo": "Cordel de cáñamo | Madera seca de fresno",
+      "materialImages": [
+        {
+          "name": "Carbón vegetal",
+          "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Cordel de cáñamo",
+          "src": "assets/playcanvas/approved/materials/hemp/v018/cordel_canamo_v018_poster.jpg",
+          "naturalWidth": 900,
+          "naturalHeight": 900,
+          "complete": true
+        },
+        {
+          "name": "Madera seca de fresno",
+          "src": "assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Mineral de hierro",
+          "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
+          "naturalWidth": 1000,
+          "naturalHeight": 1000,
+          "complete": true
+        }
+      ],
+      "screenshot": "seed-009.png"
+    },
+    {
+      "seed": 10,
+      "combo": "Cuero bovino curtido | Madera seca de roble",
+      "materialImages": [
+        {
+          "name": "Carbón vegetal",
+          "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Cuero bovino curtido",
+          "src": "assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Madera seca de roble",
+          "src": "assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Mineral de hierro",
+          "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
+          "naturalWidth": 1000,
+          "naturalHeight": 1000,
+          "complete": true
+        }
+      ],
+      "screenshot": "seed-010.png"
+    },
+    {
+      "seed": 16,
+      "combo": "Cordel de cáñamo | Madera seca de roble",
+      "materialImages": [
+        {
+          "name": "Carbón vegetal",
+          "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Cordel de cáñamo",
+          "src": "assets/playcanvas/approved/materials/hemp/v018/cordel_canamo_v018_poster.jpg",
+          "naturalWidth": 900,
+          "naturalHeight": 900,
+          "complete": true
+        },
+        {
+          "name": "Madera seca de roble",
+          "src": "assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png",
+          "naturalWidth": 640,
+          "naturalHeight": 640,
+          "complete": true
+        },
+        {
+          "name": "Mineral de hierro",
+          "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
+          "naturalWidth": 1000,
+          "naturalHeight": 1000,
+          "complete": true
+        }
+      ],
+      "screenshot": "seed-016.png"
+    }
+  ],
+  "materialImages": {
+    "Carbón vegetal": {
+      "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
+      "naturalWidth": 640,
+      "naturalHeight": 640,
+      "complete": true
+    },
+    "Cuero caprino curtido": {
+      "src": "assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_poster.png",
+      "naturalWidth": 640,
+      "naturalHeight": 640,
+      "complete": true
+    },
+    "Madera seca de fresno": {
+      "src": "assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png",
+      "naturalWidth": 640,
+      "naturalHeight": 640,
+      "complete": true
+    },
+    "Mineral de hierro": {
+      "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
+      "naturalWidth": 1000,
+      "naturalHeight": 1000,
+      "complete": true
+    },
+    "Cuero bovino curtido": {
+      "src": "assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_poster.png",
+      "naturalWidth": 640,
+      "naturalHeight": 640,
+      "complete": true
+    },
+    "Madera seca de roble": {
+      "src": "assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png",
+      "naturalWidth": 640,
+      "naturalHeight": 640,
+      "complete": true
+    },
+    "Hilo de lino": {
+      "src": "assets/playcanvas/approved/materials/linen/v021/hilo_lino_v021_poster.jpg",
+      "naturalWidth": 900,
+      "naturalHeight": 900,
+      "complete": true
+    },
+    "Cordel de cáñamo": {
+      "src": "assets/playcanvas/approved/materials/hemp/v018/cordel_canamo_v018_poster.jpg",
+      "naturalWidth": 900,
+      "naturalHeight": 900,
+      "complete": true
+    }
+  },
+  "failures": [],
+  "result": "PASS",
+  "finishedAt": "2026-11-06T00:34:58.115Z"
+}

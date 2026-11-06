@@ -1,0 +1,18 @@
+{
+  "target": "V014.023",
+  "before": {
+    "V014.022": 0,
+    "v0.14.022": 10,
+    "V0.14.022": 10,
+    "V014022": 12
+  },
+  "prepScriptMatches": 2,
+  "inventoryScriptMatches": 0,
+  "sourceSize": 2492196,
+  "updatedSize": 2492244,
+  "changedPrefixBytesApprox": 2040147,
+  "titleAfter": [
+    "Project Genesis v0.14.023 · Build 20261102.04 — Camino al Vertical Slice · Powered by NGE Alpha"
+  ],
+  "originalReleaseFound": true
+}
