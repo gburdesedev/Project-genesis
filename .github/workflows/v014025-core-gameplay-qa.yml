@@ -5,6 +5,8 @@ on:
     paths:
       - .github/workflows/v014025-core-gameplay-qa.yml
       - tests/v014025_functional_core.cjs
+      - tests/v014025_release_links.cjs
+      - inventario_genesis_16x9.js
       - mercenary_equipment_domain_v001.js
       - genesis_market_domain_v001.js
       - genesis_market_quest_v001.js
@@ -25,6 +27,8 @@ jobs:
       - name: Verify critical source and test syntax
         run: |
           node --check tests/v014025_functional_core.cjs
+          node --check tests/v014025_release_links.cjs
+          node --check inventario_genesis_16x9.js
           node --check mercenary_equipment_domain_v001.js
           node --check genesis_market_quest_v001.js
           node --check genesis_market_domain_v001.js
