@@ -190,8 +190,8 @@ async function main(){
  async function escortOrdanToMarket(){
    const started=Date.now();
    const checkpoints=[
-     {x:.55,z:-1.40,name:'inside-to-center-door'},
-     {x:.55,z:1.15,name:'cross-door-threshold'},
+     {x:.18,z:-1.40,name:'inside-to-center-door'},
+     {x:.18,z:1.15,name:'cross-door-threshold'},
      {x:.75,z:3.45,name:'exterior-east-road'},
      {x:7,z:3.60,name:'first-east-junction'},
      {x:7,z:16,name:'market-road-1'},
