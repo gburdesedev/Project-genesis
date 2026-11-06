@@ -32,12 +32,23 @@ let browser, server;
 let page;
 async function take(name) {
   const file = name + '.png';
-  await page.screenshot({
-    path: path.join(output, file),
-    animations: 'disabled',
-    timeout: 30000
-  });
+  const full = path.join(output, file);
+  try {
+    // Raw Chromium DevTools capture avoids Playwright's GPU-heavy animation/stability wait.
+    const session=await page.context().newCDPSession(page);
+    try{
+      const shot=await session.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false,fromSurface:true,optimizeForSpeed:true});
+      fs.writeFileSync(full,Buffer.from(shot.data,'base64'));
+    }finally{
+      await session.detach().catch(()=>{});
+    }
+  }catch(e){
+    report('CDP_CAPTURE_FALLBACK',{file,error:String(e).slice(0,200)});
+    await page.screenshot({path:full,animations:'allow',timeout:60000});
+  }
+  const bytes=fs.statSync(full).size;
   manifest.images.push(file);
+  report('SCREENSHOT_SAVED',{file,bytes});
   return file;
 }
 async function readGameState() {
@@ -154,7 +165,7 @@ async function run() {
     return {available:true,autoRenderDisabled:false};
   });
   await page.setViewportSize({width:1600,height:900});
-  await pause(1000);
+  await pause(2600);
   await page.evaluate(() => document.fonts?.ready).catch(()=>{});
   const stock=(await readGameState()).game?.actualStock || [];
   manifest.initialStock = stock;
