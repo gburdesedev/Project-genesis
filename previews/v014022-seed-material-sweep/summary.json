@@ -1,0 +1,713 @@
+{
+  "runAt": "2026-11-06T00:18:50.919Z",
+  "provenance": "Unmodified embedded GenesisPrototypeEngines from index.html",
+  "mode": "512 independent deterministic new Herrero seeds",
+  "trials": 512,
+  "uniqueStarterCombos": 8,
+  "materialCounts": {
+    "Carbón vegetal": 512,
+    "Cuero caprino curtido": 114,
+    "Madera seca de fresno": 247,
+    "Mineral de hierro": 512,
+    "Cuero bovino curtido": 152,
+    "Madera seca de roble": 265,
+    "Hilo de lino": 113,
+    "Cordel de cáñamo": 133
+  },
+  "comboCounts": {
+    "Cuero caprino curtido + Madera seca de fresno": 59,
+    "Cuero bovino curtido + Madera seca de fresno": 72,
+    "Cuero caprino curtido + Madera seca de roble": 55,
+    "Hilo de lino + Madera seca de fresno": 56,
+    "Hilo de lino + Madera seca de roble": 57,
+    "Cordel de cáñamo + Madera seca de fresno": 60,
+    "Cuero bovino curtido + Madera seca de roble": 80,
+    "Cordel de cáñamo + Madera seca de roble": 73
+  },
+  "examples": [
+    {
+      "seed": 1,
+      "session": "HER-00000001",
+      "materialNames": [
+        "Carbón vegetal",
+        "Cuero caprino curtido",
+        "Madera seca de fresno",
+        "Mineral de hierro"
+      ],
+      "chest": {
+        "Carbón vegetal": 2,
+        "Cuero caprino curtido": 4,
+        "Madera seca de fresno": 2,
+        "Mineral de hierro": 6
+      },
+      "recipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 3
+        },
+        {
+          "role": "proceso",
+          "material": "Carbón vegetal",
+          "qty": 1
+        },
+        {
+          "role": "secundario",
+          "material": "Cuero caprino curtido",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de fresno",
+          "qty": 1
+        }
+      ],
+      "shieldRecipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de roble",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Cuero bovino curtido",
+          "qty": 1
+        }
+      ],
+      "combo": "Cuero caprino curtido + Madera seca de fresno"
+    },
+    {
+      "seed": 2,
+      "session": "HER-00000002",
+      "materialNames": [
+        "Carbón vegetal",
+        "Cuero bovino curtido",
+        "Madera seca de fresno",
+        "Mineral de hierro"
+      ],
+      "chest": {
+        "Carbón vegetal": 4,
+        "Cuero bovino curtido": 4,
+        "Madera seca de fresno": 2,
+        "Mineral de hierro": 6
+      },
+      "recipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 3
+        },
+        {
+          "role": "proceso",
+          "material": "Carbón vegetal",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Cuero bovino curtido",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de fresno",
+          "qty": 1
+        }
+      ],
+      "shieldRecipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 3
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de roble",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Cordel de cáñamo",
+          "qty": 1
+        }
+      ],
+      "combo": "Cuero bovino curtido + Madera seca de fresno"
+    },
+    {
+      "seed": 3,
+      "session": "HER-00000003",
+      "materialNames": [
+        "Carbón vegetal",
+        "Cuero caprino curtido",
+        "Madera seca de fresno",
+        "Mineral de hierro"
+      ],
+      "chest": {
+        "Carbón vegetal": 2,
+        "Cuero caprino curtido": 2,
+        "Madera seca de fresno": 2,
+        "Mineral de hierro": 4
+      },
+      "recipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 2
+        },
+        {
+          "role": "proceso",
+          "material": "Carbón vegetal",
+          "qty": 1
+        },
+        {
+          "role": "secundario",
+          "material": "Cuero caprino curtido",
+          "qty": 1
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de fresno",
+          "qty": 1
+        }
+      ],
+      "shieldRecipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de fresno",
+          "qty": 3
+        },
+        {
+          "role": "secundario",
+          "material": "Hilo de lino",
+          "qty": 2
+        }
+      ],
+      "combo": "Cuero caprino curtido + Madera seca de fresno"
+    },
+    {
+      "seed": 4,
+      "session": "HER-00000004",
+      "materialNames": [
+        "Carbón vegetal",
+        "Cuero caprino curtido",
+        "Madera seca de roble",
+        "Mineral de hierro"
+      ],
+      "chest": {
+        "Carbón vegetal": 4,
+        "Cuero caprino curtido": 4,
+        "Madera seca de roble": 2,
+        "Mineral de hierro": 4
+      },
+      "recipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 2
+        },
+        {
+          "role": "proceso",
+          "material": "Carbón vegetal",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Cuero caprino curtido",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de roble",
+          "qty": 1
+        }
+      ],
+      "shieldRecipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de fresno",
+          "qty": 3
+        },
+        {
+          "role": "secundario",
+          "material": "Hilo de lino",
+          "qty": 1
+        }
+      ],
+      "combo": "Cuero caprino curtido + Madera seca de roble"
+    },
+    {
+      "seed": 5,
+      "session": "HER-00000005",
+      "materialNames": [
+        "Carbón vegetal",
+        "Hilo de lino",
+        "Madera seca de fresno",
+        "Mineral de hierro"
+      ],
+      "chest": {
+        "Carbón vegetal": 2,
+        "Hilo de lino": 4,
+        "Madera seca de fresno": 2,
+        "Mineral de hierro": 4
+      },
+      "recipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 2
+        },
+        {
+          "role": "proceso",
+          "material": "Carbón vegetal",
+          "qty": 1
+        },
+        {
+          "role": "secundario",
+          "material": "Hilo de lino",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de fresno",
+          "qty": 1
+        }
+      ],
+      "shieldRecipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de roble",
+          "qty": 3
+        },
+        {
+          "role": "secundario",
+          "material": "Cuero bovino curtido",
+          "qty": 2
+        }
+      ],
+      "combo": "Hilo de lino + Madera seca de fresno"
+    },
+    {
+      "seed": 6,
+      "session": "HER-00000006",
+      "materialNames": [
+        "Carbón vegetal",
+        "Hilo de lino",
+        "Madera seca de roble",
+        "Mineral de hierro"
+      ],
+      "chest": {
+        "Carbón vegetal": 4,
+        "Hilo de lino": 4,
+        "Madera seca de roble": 2,
+        "Mineral de hierro": 4
+      },
+      "recipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 2
+        },
+        {
+          "role": "proceso",
+          "material": "Carbón vegetal",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Hilo de lino",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de roble",
+          "qty": 1
+        }
+      ],
+      "shieldRecipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de fresno",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Cordel de cáñamo",
+          "qty": 1
+        }
+      ],
+      "combo": "Hilo de lino + Madera seca de roble"
+    },
+    {
+      "seed": 7,
+      "session": "HER-00000007",
+      "materialNames": [
+        "Carbón vegetal",
+        "Cuero bovino curtido",
+        "Madera seca de fresno",
+        "Mineral de hierro"
+      ],
+      "chest": {
+        "Carbón vegetal": 2,
+        "Cuero bovino curtido": 2,
+        "Madera seca de fresno": 2,
+        "Mineral de hierro": 6
+      },
+      "recipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 3
+        },
+        {
+          "role": "proceso",
+          "material": "Carbón vegetal",
+          "qty": 1
+        },
+        {
+          "role": "secundario",
+          "material": "Cuero bovino curtido",
+          "qty": 1
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de fresno",
+          "qty": 1
+        }
+      ],
+      "shieldRecipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 3
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de roble",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Cuero bovino curtido",
+          "qty": 1
+        }
+      ],
+      "combo": "Cuero bovino curtido + Madera seca de fresno"
+    },
+    {
+      "seed": 8,
+      "session": "HER-00000008",
+      "materialNames": [
+        "Carbón vegetal",
+        "Hilo de lino",
+        "Madera seca de fresno",
+        "Mineral de hierro"
+      ],
+      "chest": {
+        "Carbón vegetal": 4,
+        "Hilo de lino": 4,
+        "Madera seca de fresno": 2,
+        "Mineral de hierro": 6
+      },
+      "recipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 3
+        },
+        {
+          "role": "proceso",
+          "material": "Carbón vegetal",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Hilo de lino",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de fresno",
+          "qty": 1
+        }
+      ],
+      "shieldRecipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 3
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de fresno",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Cordel de cáñamo",
+          "qty": 1
+        }
+      ],
+      "combo": "Hilo de lino + Madera seca de fresno"
+    },
+    {
+      "seed": 9,
+      "session": "HER-00000009",
+      "materialNames": [
+        "Carbón vegetal",
+        "Cordel de cáñamo",
+        "Madera seca de fresno",
+        "Mineral de hierro"
+      ],
+      "chest": {
+        "Carbón vegetal": 2,
+        "Cordel de cáñamo": 4,
+        "Madera seca de fresno": 2,
+        "Mineral de hierro": 6
+      },
+      "recipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 3
+        },
+        {
+          "role": "proceso",
+          "material": "Carbón vegetal",
+          "qty": 1
+        },
+        {
+          "role": "secundario",
+          "material": "Cordel de cáñamo",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de fresno",
+          "qty": 1
+        }
+      ],
+      "shieldRecipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de roble",
+          "qty": 3
+        },
+        {
+          "role": "secundario",
+          "material": "Hilo de lino",
+          "qty": 2
+        }
+      ],
+      "combo": "Cordel de cáñamo + Madera seca de fresno"
+    },
+    {
+      "seed": 10,
+      "session": "HER-0000000A",
+      "materialNames": [
+        "Carbón vegetal",
+        "Cuero bovino curtido",
+        "Madera seca de roble",
+        "Mineral de hierro"
+      ],
+      "chest": {
+        "Carbón vegetal": 2,
+        "Cuero bovino curtido": 4,
+        "Madera seca de roble": 2,
+        "Mineral de hierro": 4
+      },
+      "recipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 2
+        },
+        {
+          "role": "proceso",
+          "material": "Carbón vegetal",
+          "qty": 1
+        },
+        {
+          "role": "secundario",
+          "material": "Cuero bovino curtido",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de roble",
+          "qty": 1
+        }
+      ],
+      "shieldRecipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 4
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de fresno",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Cuero bovino curtido",
+          "qty": 1
+        }
+      ],
+      "combo": "Cuero bovino curtido + Madera seca de roble"
+    },
+    {
+      "seed": 11,
+      "session": "HER-0000000B",
+      "materialNames": [
+        "Carbón vegetal",
+        "Hilo de lino",
+        "Madera seca de roble",
+        "Mineral de hierro"
+      ],
+      "chest": {
+        "Carbón vegetal": 4,
+        "Hilo de lino": 2,
+        "Madera seca de roble": 2,
+        "Mineral de hierro": 6
+      },
+      "recipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 3
+        },
+        {
+          "role": "proceso",
+          "material": "Carbón vegetal",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Hilo de lino",
+          "qty": 1
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de roble",
+          "qty": 1
+        }
+      ],
+      "shieldRecipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de roble",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Hilo de lino",
+          "qty": 1
+        }
+      ],
+      "combo": "Hilo de lino + Madera seca de roble"
+    },
+    {
+      "seed": 12,
+      "session": "HER-0000000C",
+      "materialNames": [
+        "Carbón vegetal",
+        "Hilo de lino",
+        "Madera seca de fresno",
+        "Mineral de hierro"
+      ],
+      "chest": {
+        "Carbón vegetal": 4,
+        "Hilo de lino": 4,
+        "Madera seca de fresno": 2,
+        "Mineral de hierro": 4
+      },
+      "recipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 2
+        },
+        {
+          "role": "proceso",
+          "material": "Carbón vegetal",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Hilo de lino",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de fresno",
+          "qty": 1
+        }
+      ],
+      "shieldRecipe": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 3
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de roble",
+          "qty": 2
+        },
+        {
+          "role": "secundario",
+          "material": "Cuero bovino curtido",
+          "qty": 1
+        }
+      ],
+      "combo": "Hilo de lino + Madera seca de fresno"
+    }
+  ],
+  "knownCatalogMaterials": [
+    "Mineral de hierro",
+    "Lingote de hierro",
+    "Carbón vegetal",
+    "Cuero bovino curtido",
+    "Cuero caprino curtido",
+    "Cordel de cáñamo",
+    "Hilo de lino",
+    "Madera seca de fresno",
+    "Madera seca de roble"
+  ],
+  "failures": []
+}
