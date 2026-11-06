@@ -1,0 +1,45 @@
+name: V014.025 | vertical slice gameplay logic contracts
+on:
+  push:
+    branches: [experiment/v014025-logic-complete-qa-20261106]
+    paths:
+      - .github/workflows/v014025-core-gameplay-qa.yml
+      - tests/v014025_functional_core.cjs
+      - mercenary_equipment_domain_v001.js
+      - genesis_market_domain_v001.js
+      - genesis_market_quest_v001.js
+      - preparacion_control.js
+      - index.html
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-logic-core:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify critical source and test syntax
+        run: |
+          node --check tests/v014025_functional_core.cjs
+          node --check mercenary_equipment_domain_v001.js
+          node --check genesis_market_quest_v001.js
+          node --check genesis_market_domain_v001.js
+          node --check preparacion_control.js
+      - name: Exercise 1024 real seeded NGE to swords, market, shields and mercenary equipment
+        run: node --test tests/v014025_functional_core.cjs
+      - name: Existing market and equipment domain regressions
+        run: |
+          node tests/mercenary_equipment_domain_v001.cjs
+          node --test tests/genesis_market_domain_v001.cjs tests/genesis_market_integration_v001.cjs
+      - name: Keep exact audit report even on failed assertion
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014025-real-gameplay-contracts
+          path: previews/v014025-logic-complete-qa/core-summary.json
+          if-no-files-found: warn
+          retention-days: 7
