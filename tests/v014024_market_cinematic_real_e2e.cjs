@@ -188,7 +188,7 @@ async function main(){
    // Ordan and the artisan must traverse the original ten-waypoint route
    // through the game's newly installed cinematic director.
    const start=Date.now(),samples=[],visited=new Set();
-   let seenActive=false,maxTravel=0,firstPlayer=null,frameStall=0,lastFrame=-1;
+   let seenActive=false,maxTravel=0,firstPlayer=null,frameStall=0,lastFrame=-1,walkingSamples=0;
    for(let i=0;i<440;i++){
      const state=(await snap()).state;
      const cine=await page.evaluate(()=>{
@@ -196,7 +196,7 @@ async function main(){
        const bars=document.getElementById('genesisMarketCinemaBars');
        return {data,letterboxVisible:bars?.style.display==='block',
          classActive:document.documentElement.classList.contains('genesis-market-cinematic'),
-         rigWalk:document.getElementById('playerAnim')?.getAttribute('clip'),
+         rigWalkState:data?.activeAnimationState||null,
          merchantReady:!!window.__genesisMarket?.catalog};
      });
      if(cine.data?.active){
@@ -205,14 +205,16 @@ async function main(){
        if(cine.data?.state?.blocked)return {ok:false,why:'actual world collision',detail:cine.data.state.blocked};
        visited.add(cine.data.state?.mentorWaypoint);
        maxTravel=Math.max(maxTravel,cine.data?.state?.playerTravel||0);
+       if(cine.data?.state?.phase==='walk'&&cine.data?.state?.playerTravel>2&&cine.data.walking)walkingSamples++;
      }
      if(!firstPlayer&&state?.player)firstPlayer=state.player;
      if(state?.step===11.75||state?.step>=12){
        const merchant=await page.evaluate(()=>window.__genesisMarket?.center||{x:25.5,z:36.3});
        const distance=state.player?Math.hypot(state.player.x-merchant.x,state.player.z-merchant.z):Infinity;
-       const result={ok:seenActive&&!cine.data?.active&&distance<2.85&&maxTravel>30,step:state.step,
+       const result={ok:seenActive&&!cine.data?.active&&!cine.data?.walking&&distance<2.85&&maxTravel>30&&walkingSamples>=4,step:state.step,
          distance,waypoints:visited.size,maxTravel,frames:state.nav?.ticks||0,letterboxRestored:!cine.classActive,
-         seconds:(Date.now()-start)/1000,player:state.player,merchant,animation:cine.rigWalk,merchantReady:cine.merchantReady};
+         seconds:(Date.now()-start)/1000,player:state.player,merchant,walkingSamples,riggedWalkClip:cine.data?.walkClip,
+         activeLayerOnFinish:cine.rigWalkState,merchantReady:cine.merchantReady};
        log('CINEMATIC_ARRIVAL_PHYSICAL',result);
        return {...result,observations:samples.slice(-12)};
      }
@@ -225,7 +227,7 @@ async function main(){
        const sample={i,frames:currentFrames,mentorWaypoint:cine.data.state?.mentorWaypoint,
          playerWaypoint:cine.data.state?.playerWaypoint,position:state.player,
          actorDistance:cine.data.state?.distance,actorPhase:cine.data.state?.phase,
-         playerTravel:cine.data.state?.playerTravel,rigWalk:cine.rigWalk};
+         playerTravel:cine.data.state?.playerTravel,playerWalking:!!cine.data?.walking,activeLayer:cine.rigWalkState};
        samples.push(sample);
        log('CINEMATIC_MOTION_EVIDENCE',sample);
      }
