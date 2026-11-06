@@ -48,7 +48,13 @@
     [CHARCOAL]: Object.freeze({
       poster: 'assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png',
       model: 'assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_final_3_piezas_web.glb'
-    })
+    }),
+    'Madera seca de roble': Object.freeze({ poster: 'assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png' }),
+    'Madera seca de fresno': Object.freeze({ poster: 'assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png' }),
+    'Cuero bovino curtido': Object.freeze({ poster: 'assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_poster.png' }),
+    'Cuero caprino curtido': Object.freeze({ poster: 'assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_poster.png' }),
+    'Cordel de cáñamo': Object.freeze({ poster: 'assets/playcanvas/approved/materials/hemp/v018/cordel_canamo_v018_poster.jpg' }),
+    'Hilo de lino': Object.freeze({ poster: 'assets/playcanvas/approved/materials/linen/v021/hilo_lino_v021_poster.jpg' })
   });
   // Perfil térmico por material. Solo el hierro tiene cifras DEMO: aún no
   // existen umbrales canónicos aprobados para cobre, estaño o bronce.
@@ -57,10 +63,10 @@
   const MATERIAL_PROFILES = Object.freeze({
     [PREPARED]: Object.freeze({
       target: 72, baseTolerance: 11, initialGap: 17,
-      coolingPerSecond: 0.45, heatResponse: 1, processingSpeed: 1
+      coolingPerSecond: 0.765, heatResponse: 1, processingSpeed: 1
     })
   });
-  const BASE_PROGRESS_PER_SECOND = 3; // Velocidad demostrativa; NO es un cronómetro límite.
+  const BASE_PROGRESS_PER_SECOND = 4.5; // V014.023: +50 % de avance; sin cronómetro límite.
   const MASS_COOLING_ADJUSTMENT = 0.02; // Diferencia suave entre tamaños dentro de un mismo tramo de dificultad.
   const THERMAL_TICK_MS = 125;
   const BELLOWS = Object.freeze([
