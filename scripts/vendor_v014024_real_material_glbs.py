@@ -68,7 +68,7 @@ def main():
         size=len(blob)
         if size!=row["size"]: raise ValueError(f'{row["name"]}: wrong bytes {size} != {row["size"]}')
         sha=hashlib.sha256(blob).hexdigest()
-        git=hashlib.sha1(f"blob {size}\\0".encode()+blob).hexdigest()
+        git=hashlib.sha1(f"blob {size}\0".encode()+blob).hexdigest()
         if row.get("sha256") and sha!=row["sha256"]: raise ValueError(row["name"]+": SHA256 mismatch")
         if row.get("git_blob") and git!=row["git_blob"]: raise ValueError(row["name"]+": Git blob SHA mismatch")
         details=audit_glb(blob,row["name"])
