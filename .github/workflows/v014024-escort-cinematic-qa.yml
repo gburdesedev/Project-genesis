@@ -1,0 +1,78 @@
+name: V014.024 | cinemática real de Ordan y artesano hasta el mercader
+on:
+  push:
+    branches: [experiment/v014024-escort-cinematic-20261106]
+    paths:
+      - .github/workflows/v014024-escort-cinematic-qa.yml
+      - scripts/v014024_install_market_cinematic.py
+      - genesis_market_cinematic_v001.js
+      - tests/v014024_market_cinematic_route_contract.cjs
+      - tests/v014024_market_cinematic_real_e2e.cjs
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  cinematic-actual-gameplay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 23
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply minimal cinematic hooks to existing actual game
+        run: |
+          python3 scripts/v014024_install_market_cinematic.py
+          python3 scripts/v014024_install_market_cinematic.py
+          python3 - <<'PY'
+          import json
+          m=json.load(open('previews/v014024-market-cinematic/patch-receipt.json'))
+          assert len(m['applied_changes'])==11
+          assert m['master_asset_changes']==0
+          assert m['game_quest_transition'].startswith('11.25 ->')
+          print('PATCH_RECEIPT_VALID',m['applied_changes'])
+          PY
+      - name: Audit real route physics and validate code syntax
+        run: |
+          node --check genesis_market_cinematic_v001.js
+          node --check tests/v014024_market_cinematic_route_contract.cjs
+          node --check tests/v014024_market_cinematic_real_e2e.cjs
+          node tests/v014024_market_cinematic_route_contract.cjs
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text()
+          candidates=re.findall(r'<script type="module">([\s\S]*?)</script>',s)
+          assert len(candidates)>=1
+          match=next((x for x in candidates if 'function startOrdanMarketEscort()' in x),None)
+          assert match,'actual game module not found'
+          Path('/tmp/genesis-v014024-market-cinematic-syntax.mjs').write_text(match)
+          PY
+          node --check /tmp/genesis-v014024-market-cinematic-syntax.mjs
+      - name: Commit only experimental source and audit
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html previews/v014024-market-cinematic/patch-receipt.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'experiment: actual animated Ordan and artisan walk to merchant [skip ci]'
+            git pull --rebase origin experiment/v014024-escort-cinematic-20261106
+            git push origin HEAD:experiment/v014024-escort-cinematic-20261106
+          fi
+      - name: Install pinned real browser
+        run: npm install --prefix /tmp/pg-genesis-cinematic playwright@1.56.1
+      - name: Complete real game to two swords and automatically guide both characters to the market
+        env:
+          NODE_PATH: /tmp/pg-genesis-cinematic/node_modules
+          GENESIS_RETRY_SCREENSHOTS: '0'
+        timeout-minutes: 19
+        run: node tests/v014024_market_cinematic_real_e2e.cjs
+      - name: Preserve real quest and cinematic evidence, even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014024-cinematic-market-actual-gameplay
+          path: |
+            previews/v014024-market-cinematic/
+          if-no-files-found: warn
+          retention-days: 14
