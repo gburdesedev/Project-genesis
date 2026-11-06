@@ -226,7 +226,7 @@ async function main(){
      // Ordan waits beyond 6.75m; never go farther ahead once the leash is tight.
      const target={...checkpoint};
      const goalMentorDist=Math.hypot(target.x-mentor.x,target.z-mentor.z);
-     if(distToMentor>5.55 && goalMentorDist>distToMentor+.35){
+     if(waypoint>=3 && distToMentor>5.55 && goalMentorDist>distToMentor+.35){
        target.x=mentor.x;target.z=mentor.z;target.name='return-inside-mentor-leash';
      }
      const dx=target.x-p.x,dz=target.z-p.z,dist=Math.hypot(dx,dz);
