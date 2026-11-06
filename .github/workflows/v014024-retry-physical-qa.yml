@@ -1,0 +1,50 @@
+name: V014.024 | reintento jugable real con WebGL liviano solo en CI
+on:
+  push:
+    branches:
+      - experiment/v014024-retry-physical-qa-20261106
+    paths:
+      - .github/workflows/v014024-retry-physical-qa.yml
+      - tests/v014024_retry_lowgpu_ordan_e2e.cjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  functional-playthrough:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 23
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert original geometry and collision audit remain unchanged
+        run: |
+          python3 scripts/v014024_relocate_chest_side_aisle.py
+          python3 scripts/v014024_relocate_chest_side_aisle.py
+          node --check tests/v014024_retry_lowgpu_ordan_e2e.cjs
+          python3 - <<'PY'
+          import json
+          j=json.load(open('previews/v014024-chest-side-aisle/static-geometry-audit.json'))
+          assert j['original_entrance_collision_reproduced']
+          assert j['new_collision_free_centerline_samples']==68
+          assert j['quest8_distance'] < j['quest8_interaction_radius']
+          print('STATIC_COLLISION_AUDIT_PASSED')
+          PY
+      - name: Install pinned Playwright browser driver
+        run: npm install --prefix /tmp/pg-genesis-retry playwright@1.56.1
+      - name: Real game from Ordan to swords, comparison, return and market using normal input
+        env:
+          NODE_PATH: /tmp/pg-genesis-retry/node_modules
+          GENESIS_RETRY_SCREENSHOTS: '0'
+        timeout-minutes: 19
+        run: node tests/v014024_retry_lowgpu_ordan_e2e.cjs
+      - name: Preserve real quest states and all error diagnostics even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014024-retry-real-physical-gameplay
+          path: |
+            previews/v014024-retry-physical-qa/
+            previews/v014024-chest-side-aisle/static-geometry-audit.json
+          if-no-files-found: warn
+          retention-days: 10
