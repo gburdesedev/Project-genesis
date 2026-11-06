@@ -23,7 +23,7 @@ test('cinematic interpolates both real characters continuously without teleports
  const route=scene.create(sampleStart,mentorStart,quest.escortPath), speed=scene.speedMetersPerSecond;
  let prev=scene.pose(route,0);
  let maxStep=0,frames=0;
- for(let p=1;p<route.player.total;p+=.15){
+ for(let p=.15;p<route.player.total;p+=.15){
    const current=scene.pose(route,p);
    for(const name of ['player','mentor']){
      const distance=Math.hypot(current[name].x-prev[name].x,current[name].z-prev[name].z);
