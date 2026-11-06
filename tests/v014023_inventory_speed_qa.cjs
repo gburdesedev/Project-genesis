@@ -67,7 +67,13 @@ async function main(){
       assert(dims.naturalWidth>0,'Failed material image '+name+' from '+src+' seed '+row.seed);
       assert(palette.includes(name),'Unexpected seed material '+name);
       caseData.materialImages.push({name,src,...dims});
-      manifest.materialImages[name]={src,...dims};
+      if(!manifest.materialImages[name]){
+        const slug=name.normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase();
+        const file='material-'+slug+'.png';
+        await page.screenshot({path:path.join(out,file),timeout:30000,animations:'disabled'});
+        manifest.materialImages[name]={src,...dims,screenshot:file,seed:row.seed};
+        console.log('MATERIAL_PHOTO_CAPTURED',name,'seed',row.seed,file);
+      }
     }
     const file='seed-'+String(row.seed).padStart(3,'0')+'.png';
     await page.screenshot({path:path.join(out,file),timeout:30000,animations:'disabled'});
