@@ -1,6 +1,6 @@
 {
   "release": "V014.023",
-  "runAt": "2026-11-06T00:55:21.871Z",
+  "runAt": "2026-11-06T00:56:52.230Z",
   "source": "genuine GenesisPrototypeEngines.generateSession + actual GenesisInventory16.render",
   "thermal": {
     "progressPerSecond": 4.5,
@@ -19,28 +19,68 @@
           "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.517,
+            "source": "alpha",
+            "transform": "matrix(1.517, 0, 0, 1.517, 61.1297, -14.69)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Cuero caprino curtido",
           "src": "assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.217,
+            "source": "alpha",
+            "transform": "matrix(1.217, 0, 0, 1.217, -7.35104, -5.88483)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Madera seca de fresno",
           "src": "assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1,
+            "source": "alpha",
+            "transform": "matrix(1, 0, 0, 1, 0, -0.685827)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Mineral de hierro",
           "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
           "naturalWidth": 1000,
           "naturalHeight": 1000,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.578,
+            "source": "alpha",
+            "transform": "matrix(1.578, 0, 0, 1.578, 3.15966, -8.73876)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         }
       ],
       "screenshot": "seed-001.png"
@@ -54,28 +94,68 @@
           "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.517,
+            "source": "alpha",
+            "transform": "matrix(1.517, 0, 0, 1.517, 61.1297, -14.69)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Cuero bovino curtido",
           "src": "assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.358,
+            "source": "alpha",
+            "transform": "matrix(1.358, 0, 0, 1.358, -13.6704, -2.80968)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Madera seca de fresno",
           "src": "assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1,
+            "source": "alpha",
+            "transform": "matrix(1, 0, 0, 1, 0, -0.685827)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Mineral de hierro",
           "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
           "naturalWidth": 1000,
           "naturalHeight": 1000,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.578,
+            "source": "alpha",
+            "transform": "matrix(1.578, 0, 0, 1.578, 3.15966, -8.73876)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         }
       ],
       "screenshot": "seed-002.png"
@@ -89,28 +169,68 @@
           "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.517,
+            "source": "alpha",
+            "transform": "matrix(1.517, 0, 0, 1.517, 61.1297, -14.69)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Cuero caprino curtido",
           "src": "assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.217,
+            "source": "alpha",
+            "transform": "matrix(1.217, 0, 0, 1.217, -7.35104, -5.88483)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Madera seca de roble",
           "src": "assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1,
+            "source": "alpha",
+            "transform": "matrix(1, 0, 0, 1, 1.99897, 0.685827)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Mineral de hierro",
           "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
           "naturalWidth": 1000,
           "naturalHeight": 1000,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.578,
+            "source": "alpha",
+            "transform": "matrix(1.578, 0, 0, 1.578, 3.15966, -8.73876)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         }
       ],
       "screenshot": "seed-004.png"
@@ -124,28 +244,68 @@
           "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.517,
+            "source": "alpha",
+            "transform": "matrix(1.517, 0, 0, 1.517, 61.1297, -14.69)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Hilo de lino",
           "src": "assets/playcanvas/approved/materials/linen/v021/hilo_lino_v021_poster.jpg",
           "naturalWidth": 900,
           "naturalHeight": 900,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.092,
+            "source": "corner-color",
+            "transform": "matrix(1.092, 0, 0, 1.092, 4.38483, 2.25659)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Madera seca de fresno",
           "src": "assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1,
+            "source": "alpha",
+            "transform": "matrix(1, 0, 0, 1, 0, -0.685827)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Mineral de hierro",
           "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
           "naturalWidth": 1000,
           "naturalHeight": 1000,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.578,
+            "source": "alpha",
+            "transform": "matrix(1.578, 0, 0, 1.578, 3.15966, -8.73876)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         }
       ],
       "screenshot": "seed-005.png"
@@ -159,28 +319,68 @@
           "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.517,
+            "source": "alpha",
+            "transform": "matrix(1.517, 0, 0, 1.517, 61.1297, -14.69)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Hilo de lino",
           "src": "assets/playcanvas/approved/materials/linen/v021/hilo_lino_v021_poster.jpg",
           "naturalWidth": 900,
           "naturalHeight": 900,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.092,
+            "source": "corner-color",
+            "transform": "matrix(1.092, 0, 0, 1.092, 4.38483, 2.25659)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Madera seca de roble",
           "src": "assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1,
+            "source": "alpha",
+            "transform": "matrix(1, 0, 0, 1, 1.99897, 0.685827)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Mineral de hierro",
           "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
           "naturalWidth": 1000,
           "naturalHeight": 1000,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.578,
+            "source": "alpha",
+            "transform": "matrix(1.578, 0, 0, 1.578, 3.15966, -8.73876)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         }
       ],
       "screenshot": "seed-006.png"
@@ -194,28 +394,68 @@
           "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.517,
+            "source": "alpha",
+            "transform": "matrix(1.517, 0, 0, 1.517, 61.1297, -14.69)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Cordel de cáñamo",
           "src": "assets/playcanvas/approved/materials/hemp/v018/cordel_canamo_v018_poster.jpg",
           "naturalWidth": 900,
           "naturalHeight": 900,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.081,
+            "source": "corner-color",
+            "transform": "matrix(1.081, 0, 0, 1.081, 10.8976, 6.72552)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Madera seca de fresno",
           "src": "assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1,
+            "source": "alpha",
+            "transform": "matrix(1, 0, 0, 1, 0, -0.685827)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Mineral de hierro",
           "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
           "naturalWidth": 1000,
           "naturalHeight": 1000,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.578,
+            "source": "alpha",
+            "transform": "matrix(1.578, 0, 0, 1.578, 3.15966, -8.73876)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         }
       ],
       "screenshot": "seed-009.png"
@@ -229,28 +469,68 @@
           "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.517,
+            "source": "alpha",
+            "transform": "matrix(1.517, 0, 0, 1.517, 61.1297, -14.69)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Cuero bovino curtido",
           "src": "assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.358,
+            "source": "alpha",
+            "transform": "matrix(1.358, 0, 0, 1.358, -13.6704, -2.80968)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Madera seca de roble",
           "src": "assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1,
+            "source": "alpha",
+            "transform": "matrix(1, 0, 0, 1, 1.99897, 0.685827)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Mineral de hierro",
           "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
           "naturalWidth": 1000,
           "naturalHeight": 1000,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.578,
+            "source": "alpha",
+            "transform": "matrix(1.578, 0, 0, 1.578, 3.15966, -8.73876)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         }
       ],
       "screenshot": "seed-010.png"
@@ -264,28 +544,68 @@
           "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.517,
+            "source": "alpha",
+            "transform": "matrix(1.517, 0, 0, 1.517, 61.1297, -14.69)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Cordel de cáñamo",
           "src": "assets/playcanvas/approved/materials/hemp/v018/cordel_canamo_v018_poster.jpg",
           "naturalWidth": 900,
           "naturalHeight": 900,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.081,
+            "source": "corner-color",
+            "transform": "matrix(1.081, 0, 0, 1.081, 10.8976, 6.72552)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Madera seca de roble",
           "src": "assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png",
           "naturalWidth": 640,
           "naturalHeight": 640,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1,
+            "source": "alpha",
+            "transform": "matrix(1, 0, 0, 1, 1.99897, 0.685827)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         },
         {
           "name": "Mineral de hierro",
           "src": "assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png",
           "naturalWidth": 1000,
           "naturalHeight": 1000,
-          "complete": true
+          "complete": true,
+          "heroFit": {
+            "zoom": 1.578,
+            "source": "alpha",
+            "transform": "matrix(1.578, 0, 0, 1.578, 3.15966, -8.73876)"
+          },
+          "hover": {
+            "left": "-43.2deg",
+            "right": "43.2deg",
+            "reset": "0deg"
+          }
         }
       ],
       "screenshot": "seed-016.png"
@@ -359,5 +679,5 @@
   },
   "failures": [],
   "result": "PASS",
-  "finishedAt": "2026-11-06T00:55:30.093Z"
+  "finishedAt": "2026-11-06T00:57:01.639Z"
 }
