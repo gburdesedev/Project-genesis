@@ -1,0 +1,52 @@
+name: V014.023 real Ordan forge playthrough (Chromium)
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - experiment/v014023-speed-approved-inventory-20261105
+    paths:
+      - .github/workflows/v014023-real-ordan-thermal-playthrough.yml
+      - tests/v014022_ordan_full_e2e.cjs
+permissions:
+  contents: read
+jobs:
+  actual-gameplay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify committed images and audited version
+        run: |
+          python3 scripts/vendor_v014023_material_posters.py --verify-only
+          test -f previews/v014023-materials-speed/manifest.json
+          node --check tests/v014022_ordan_full_e2e.cjs
+      - name: Set up headless Playwright in pinned browser container
+        run: npm install --prefix /tmp/genesis-real-play playwright@1.56.1
+      - name: Isolate evidence directory and capture real duration of each forge batch
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('tests/v014022_ordan_full_e2e.cjs').read_text()
+          a="const out='previews/v014022-ordan-playwright';"
+          assert s.count(a)==1
+          s=s.replace(a,"const out='previews/v014023-ordan-playwright';")
+          s=s.replace("mode:'V014022 as shipped, read-only QA probe'","mode:'V014.023 actual gameplay with real player input'")
+          s=s.replace("log('THERMAL_GAME_STARTED',{batch});","log('THERMAL_GAME_STARTED',{batch,startedAtMs:Date.now()});")
+          s=s.replace("log('THERMAL_PREPARED',{batch});","log('THERMAL_PREPARED',{batch,finishedAtMs:Date.now()});")
+          Path('tests/v014023_ordan_thermal_e2e.cjs').write_text(s)
+          PY
+      - name: Play actual Herrero with keyboard and fuelle, do not patch game logic or quest state
+        env:
+          NODE_PATH: /tmp/genesis-real-play/node_modules
+        timeout-minutes: 18
+        run: node tests/v014023_ordan_thermal_e2e.cjs
+      - name: Upload unchanged quest-state diagnostics, real forge timings and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v014023-real-ordan-thermal-playthrough
+          path: previews/v014023-ordan-playwright/
+          if-no-files-found: warn
+          retention-days: 14
