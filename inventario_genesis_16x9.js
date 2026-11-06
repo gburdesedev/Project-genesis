@@ -51,9 +51,9 @@
     const all=typeof ctx.getItems==='function' ? (ctx.getItems() || []) : [];
     return all.filter(Boolean);
   }
-  function materialArt(name) {
+  function materialArt(name, hero) {
     const poster=posters[name];
-    return poster ? '<img src="'+esc(poster)+'" alt="'+esc(name)+'" draggable="false">' :
+    return poster ? '<img class="'+(hero?'genInvMaterialHero':'genInvMaterialThumb')+'" src="'+esc(poster)+'" alt="'+esc(name)+'" draggable="false">' :
       '<span class="genInvEmptyPreview">'+esc(name)+'</span>';
   }
   function render(ctx, nav) {
@@ -81,7 +81,7 @@
       return '<button class="genInvFamily" data-family="'+esc(f)+'" aria-pressed="'+(f===state.family)+'"><span class="genInvFamIcon">'+icon+'</span><span>'+esc(f)+'</span></button>';
     }).join('');
     const item=chosen?.item;
-    const viewer=chosen?(materialMode?materialArt(chosen.name):
+    const viewer=chosen?(materialMode?materialArt(chosen.name,true):
       (typeof ctx.renderAsset==='function'?ctx.renderAsset(item):'<span class="genInvEmptyPreview">'+esc(chosen.name)+'</span>')) :
       '<p class="genInvEmptyPreview">La familia seleccionada no contiene objetos</p>';
     const title=chosen?esc(chosen.name):'Seleccioná un objeto';
@@ -96,18 +96,18 @@
       const entry=visible[i];
       if(!entry)return '<button class="genInvSlot" disabled aria-label="Casilla vacía"></button>';
       const selected=entry.key===state.selectedKey;
-      const content=entry.material?materialArt(entry.name):
+      const content=entry.material?materialArt(entry.name,false):
         (entry.item.thumbnail || entry.item.poster
           ? '<img src="'+esc(entry.item.thumbnail||entry.item.poster)+'" alt="" loading="lazy" draggable="false">'
           : '<span class="genInvCreationGlyph" aria-hidden="true"></span>');
-      return '<button class="genInvSlot'+(selected?' selected':'')+'" data-select="'+i+'" aria-label="'+esc(entry.name)+'" aria-pressed="'+selected+'">'+content+'<span>'+esc(entry.material?entry.qty:(entry.rarity||''))+'</span></button>';
+      return '<button class="genInvSlot'+(selected?' selected':'')+'" data-select="'+i+'" aria-label="'+esc(entry.name)+'" aria-pressed="'+selected+'"><span class="genInvSlotArtwork">'+content+'</span><span class="genInvSlotQty">'+esc(entry.material?entry.qty:(entry.rarity||''))+'</span></button>';
     }).join('');
     const html='<div class="genInv" id="genInv">'+
       '<header class="genInvNav">'+navMarkup+'</header>'+
       '<main class="genInvMain">'+
         '<aside class="genInvFamilies"><h2 class="genInvHead">FAMILIAS</h2>'+familiesMarkup+
           '</aside>'+
-        '<section class="genInvViewer"><p class="genInvViewerTitle">'+title+'</p><div class="genInvImageWrap">'+viewer+'</div><p class="genInvViewLabel">'+(materialMode?'Vista fija · material':'Objeto fabricado · visor 360°')+'</p></section>'+
+        '<section class="genInvViewer"><p class="genInvViewerTitle">'+title+'</p><div class="genInvImageWrap" data-preview-mode="'+(materialMode?'material':'object')+'">'+viewer+'</div><p class="genInvViewLabel">'+(materialMode?'Vista del material aprobado':'Objeto fabricado · visor 360°')+'</p></section>'+
         '<aside class="genInvInfo"><h2 class="genInvInfoTitle">INFORMACIÓN</h2>'+facts+
           (chosen&&!materialMode?'<button class="genInvInfoMore" id="genInvDetails"><span>CONSULTAR FICHA DEL OBJETO</span></button>':'')+
           '</aside>'+
@@ -131,6 +131,75 @@
     board.querySelectorAll('[data-select]').forEach(function(b){b.onclick=function(){
       state.selectedKey=visible[Number(b.dataset.select)]?.key;render(ctx,nav);
     }});
+
+    // Recuperado del hover aprobado de la rama experimental anterior.
+    // Sólo la obra se inclina ±45º; el marco PNG y el contador permanecen inmóviles.
+    board.querySelectorAll('.genInvSlot[data-select]').forEach(function(button){
+      const art=button.querySelector('.genInvSlotArtwork');
+      if(!art)return;
+      const visual=art.querySelector('model-viewer');
+      const origin=visual?.getAttribute('camera-orbit')||'0deg 75deg auto';
+      button.addEventListener('pointermove',function(event){
+        if(event.pointerType==='touch')return;
+        const rect=button.getBoundingClientRect();
+        if(!rect.width)return;
+        const p=Math.max(0,Math.min(1,(event.clientX-rect.left)/rect.width));
+        const angle=(-45+90*p).toFixed(1)+'deg';
+        if(visual)visual.setAttribute('camera-orbit',angle+' 75deg auto');
+        else art.style.setProperty('--gen-slot-yaw',angle);
+      });
+      const reset=function(){
+        if(visual)visual.setAttribute('camera-orbit',origin);
+        art.style.setProperty('--gen-slot-yaw','0deg');
+      };
+      button.addEventListener('pointerleave',reset);
+      button.addEventListener('pointercancel',reset);
+      button.addEventListener('blur',reset);
+    });
+
+    // Autoencuadre no destructivo del póster en el expositor. Únicamente
+    // cambia la escala de presentación, no los PNG/JPG originales aprobados.
+    const hero=board.querySelector('.genInvImageWrap[data-preview-mode="material"] img.genInvMaterialHero');
+    if(hero){
+      const fit=function(){
+        if(!hero.naturalWidth||!hero.naturalHeight)return;
+        const canvas=document.createElement('canvas');
+        const d=160, sx=hero.naturalWidth/d, sy=hero.naturalHeight/d;
+        canvas.width=d;canvas.height=d;
+        const ctx2=canvas.getContext('2d',{willReadFrequently:true});
+        if(!ctx2)return;
+        ctx2.drawImage(hero,0,0,d,d);
+        const rgba=ctx2.getImageData(0,0,d,d).data;
+        let transparent=0;
+        for(let i=3;i<rgba.length;i+=4)if(rgba[i]<230)transparent++;
+        const hasAlpha=transparent>rgba.length/4*0.015;
+        // Para JPG, estimar sólo el recorte de exposición a partir del
+        // fondo cercano a las esquinas; nunca reescribir los píxeles.
+        let base=[0,0,0],corners=[0,d-1,d*(d-1),d*d-1];
+        corners.forEach(idx=>{for(let k=0;k<3;k++)base[k]+=rgba[4*idx+k]/4});
+        let xmin=d,ymin=d,xmax=0,ymax=0,found=0;
+        for(let y=0;y<d;y++)for(let x=0;x<d;x++){
+          const i=4*(y*d+x),a=rgba[i+3];
+          const delta=Math.hypot(rgba[i]-base[0],rgba[i+1]-base[1],rgba[i+2]-base[2]);
+          const filled=hasAlpha?a>52:delta>52;
+          if(!filled)continue;
+          xmin=Math.min(xmin,x);xmax=Math.max(xmax,x);
+          ymin=Math.min(ymin,y);ymax=Math.max(ymax,y);found++;
+        }
+        if(found<30)return;
+        const occupancy=Math.max((xmax-xmin+1)/d,(ymax-ymin+1)/d);
+        const zoom=Math.max(1,Math.min(4.6,0.73/Math.max(0.12,occupancy)));
+        const ox=((xmin+xmax)/2/d-.5);
+        const oy=((ymin+ymax)/2/d-.5);
+        hero.style.setProperty('--gen-hero-zoom',zoom.toFixed(3));
+        hero.style.setProperty('--gen-hero-offset-x',(-ox*zoom*100).toFixed(2)+'%');
+        hero.style.setProperty('--gen-hero-offset-y',(-oy*zoom*100).toFixed(2)+'%');
+        hero.dataset.fitSource=hasAlpha?'alpha':'corner-color';
+        hero.dataset.zoom=zoom.toFixed(3);
+      };
+      if(hero.complete)fit();else hero.addEventListener('load',fit,{once:true});
+    }
+
     board.querySelector('#genInvPrev').onclick=function(){state.page--;state.selectedKey=null;render(ctx,nav)};
     board.querySelector('#genInvNext').onclick=function(){state.page++;state.selectedKey=null;render(ctx,nav)};
     const input=board.querySelector('#genInvFilter');
@@ -152,5 +221,5 @@
       pane.querySelector('#genInvCloseDetails').onclick=function(){pane.remove()};
     };
   }
-  window.GenesisInventory16={render:render,version:'INVENTARIO_FINAL_APROBADO_16x9_V014023',dataSource:'session.inventory + session.getItems'};
+  window.GenesisInventory16={render:render,version:'INVENTARIO_FINAL_APROBADO_16x9_V014023_HOVER_HERO',dataSource:'session.inventory + session.getItems'};
 })();
