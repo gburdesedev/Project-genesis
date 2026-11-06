@@ -16,8 +16,8 @@ function family(item){
  for(const raw of [item.recipe,item.recipeFamily,item.family,item.category]){
    if(typeof raw!=='string')continue;
    const v=raw.trim().toLowerCase();
-   if(/^espada(s)?(?:\\b|_)/.test(v))return 'Espadas';
-   if(/^escudo(s)?(?:\\b|_)/.test(v))return 'Escudos';
+   if(v==='espada'||v==='espadas'||v.startsWith('espada_'))return 'Espadas';
+   if(v==='escudo'||v==='escudos'||v.startsWith('escudo_'))return 'Escudos';
  }
  return null;
 }
