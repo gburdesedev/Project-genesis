@@ -4,11 +4,12 @@ const scene=require('../genesis_market_cinematic_v001.js');
 const quest=require('../genesis_market_quest_v001.js');
 const plan=require('../village_plan.js');
 const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const preparation=fs.readFileSync(path.join(__dirname,'..','preparacion_control.js'),'utf8');
 const sampleStart={x:.81,z:-2.85},mentorStart={x:1.29,z:-1.06};
 test('uses unchanged original ten Ordan escort waypoints to real merchant',()=>{
  assert.equal(quest.escortPath.length,10);
  const route=scene.create(sampleStart,mentorStart,quest.escortPath);
- assert(route.mentor.total>65&&route.mentor.total<105,'Expected real 63m village route');
+ assert(route.mentor.total>55&&route.mentor.total<75,'Expected existing original market waypoint route');
  assert(route.player.total>route.mentor.total);
  assert(Math.abs(route.player.total-route.mentor.total-route.entry)<.000001);
  assert(route.entry<2.3,'The cinematic starts after actually talking to Ordan');
@@ -54,5 +55,5 @@ test('16:9 approved UI and all core game contracts retained; only quest 11.5 cin
  assert(!html.includes('distanceToPlayer>6.75'),'Old pause-by-distance should be replaced');
  assert(html.includes('function wallBlocked(')&&html.includes('function updateMercenaryDeparture('));
  assert(html.includes('genesis_market_quest_v001.js?v=0.14.022'));
- assert(html.includes('inventario_genesis_16x9.js?v=0.14.024'));
+ assert(preparation.includes('inventario_genesis_16x9.js?v=0.14.024'));
 });
