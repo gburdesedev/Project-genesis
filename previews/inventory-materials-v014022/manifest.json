@@ -1,0 +1,79 @@
+{
+  "version": "V014.022 recovered, experimental chest location",
+  "capturedAt": "2026-11-06T00:06:19.038Z",
+  "method": "Real Chromium game; Ordan step 7 > key > chest > actual TAB inventory; physical clicks per material",
+  "source": "actual session playerInventory, no invented materials",
+  "state": "ERROR",
+  "materials": [],
+  "images": [
+    "99-error-screen.png"
+  ],
+  "errors": [
+    "page.screenshot: Timeout 30000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n\n    at take (/__w/Project-genesis/Project-genesis/tests/capture_v014022_material_inventory.cjs:35:14)\n    at run (/__w/Project-genesis/Project-genesis/tests/capture_v014022_material_inventory.cjs:169:9)\n    at async /__w/Project-genesis/Project-genesis/tests/capture_v014022_material_inventory.cjs:196:9"
+  ],
+  "browserErrors": [],
+  "expectedCatalogMaterials": [
+    "Mineral de hierro",
+    "Lingote de hierro",
+    "Carbón vegetal",
+    "Madera seca de roble",
+    "Madera seca de fresno",
+    "Cuero caprino curtido",
+    "Cuero bovino curtido",
+    "Cordel de cáñamo",
+    "Hilo de lino",
+    "Tela de lino"
+  ],
+  "probeInserted": true,
+  "renderOptimization": {
+    "available": true,
+    "autoRenderDisabled": true
+  },
+  "initialStock": [
+    [
+      "Carbón vegetal",
+      4
+    ],
+    [
+      "Cuero caprino curtido",
+      4
+    ],
+    [
+      "Madera seca de roble",
+      2
+    ],
+    [
+      "Mineral de hierro",
+      4
+    ]
+  ],
+  "inventorySlots": [
+    {
+      "index": 0,
+      "name": "Carbón vegetal",
+      "qty": "Carbón vegetal"
+    },
+    {
+      "index": 1,
+      "name": "Cuero caprino curtido",
+      "qty": "Cuero caprino curtido"
+    },
+    {
+      "index": 2,
+      "name": "Madera seca de roble",
+      "qty": "Madera seca de roble"
+    },
+    {
+      "index": 3,
+      "name": "Mineral de hierro",
+      "qty": "4"
+    }
+  ],
+  "slotNames": [
+    "Carbón vegetal",
+    "Cuero caprino curtido",
+    "Madera seca de roble",
+    "Mineral de hierro"
+  ],
+  "finishedAt": "2026-11-06T00:11:57.784Z"
+}
