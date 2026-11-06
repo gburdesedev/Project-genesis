@@ -1,0 +1,62 @@
+name: V014.023 thermal pacing and approved inventory QA
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - experiment/v014023-speed-approved-inventory-20261105
+    paths:
+      - scripts/vendor_v014023_material_posters.py
+      - scripts/bump_v014023_legacy_release.py
+      - preparacion_control.js
+      - inventario_genesis_16x9.js
+      - tests/v014023_inventory_speed_qa.cjs
+      - .github/workflows/v014023-materials-speed-qa.yml
+permissions:
+  contents: write
+jobs:
+  browser-inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch only owned/pinned approved material previews, check exact blob hashes
+        run: python3 scripts/vendor_v014023_material_posters.py
+      - name: Update version visible in original legacy game without changing layout
+        run: python3 scripts/bump_v014023_legacy_release.py
+      - name: Install identical Playwright API for container browsers
+        run: npm install --prefix /tmp/genesis-v014023 playwright@1.56.1
+      - name: Validate QA JavaScript syntax
+        run: |
+          node --check tests/v014023_inventory_speed_qa.cjs
+          node --check preparacion_control.js
+          node --check inventario_genesis_16x9.js
+      - name: Check 512 genuine game seeds
+        run: node tests/v014022_seed_material_sweep.cjs
+      - name: Load approved images in real browser for eight distinct game seeds and evaluate thermal speed
+        env:
+          NODE_PATH: /tmp/genesis-v014023/node_modules
+        run: node tests/v014023_inventory_speed_qa.cjs
+      - name: Store browser screenshots, seed results and version audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v014023-thermal-inventory-8-seeds
+          path: |
+            previews/v014023-materials-speed/
+            previews/v014022-seed-material-sweep/summary.json
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Preserve verified approved material copies and bumped game on isolated branch
+        if: success()
+        shell: bash
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/playcanvas/approved/materials/ previews/v014023-materials-speed/manifest.json previews/v014023-materials-speed/version-audit.json
+          if ! git diff --cached --quiet; then
+            git commit -m "release(v014023): verified images for eight real seed combos, faster minigame and forge cooling"
+            git push origin HEAD:experiment/v014023-speed-approved-inventory-20261105
+          fi
