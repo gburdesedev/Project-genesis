@@ -182,7 +182,7 @@ assert s.count('genesis-market-cinematic-director-v001')==0
 assert 'window.__GenesisMarketCinematicReadOnly' in s
 assert s.count('if(marketEscortCinematic){')>=2
 assert s.count('genesis_market_cinematic_v001.js?v=0.14.024')==1
-assert len(changes)==10,changes
+assert len(changes)==11,changes
 s=s.replace(
  '// Only the black bars and input visibility are new; no approved ORA artwork',
  '// genesis-market-cinematic-director-v001\n// Only the black bars and input visibility are new; no approved ORA artwork')
