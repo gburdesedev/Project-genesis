@@ -21,8 +21,8 @@ preview=pathlib.Path("previews/v014023-materials-speed")
 preview.mkdir(parents=True,exist_ok=True)
 info={"target":"V014.023","before":before,"prepScriptMatches":prep_refs,"inventoryScriptMatches":inv_refs,"sourceSize":len(original),"updatedSize":len(s),"changedPrefixBytesApprox":changed,"titleAfter":re.findall(r"<title[^>]*>(.*?)</title>",s,flags=re.I|re.S)[:1],"originalReleaseFound":bool(before["V014.022"]+before["v0.14.022"]+before["V0.14.022"])}
 preview.joinpath("version-audit.json").write_text(json.dumps(info,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-if not info["originalReleaseFound"]:
-    raise SystemExit("Legacy HTML did not contain expected V014.022 visible version. Refusing blind publish; inspect audit.")
+if not info["originalReleaseFound"] and not re.search(r"v0?14\\.023",original,re.I):
+    raise SystemExit("HTML contains neither V014.022 nor V014.023; inspect version audit.")
 if prep_refs<1:
     raise SystemExit("No known preparation JS script reference found; refusing uncached release.")
 p.write_text(s,encoding="utf-8")
