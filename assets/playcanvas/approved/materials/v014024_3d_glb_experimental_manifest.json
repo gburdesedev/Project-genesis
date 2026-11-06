@@ -1,0 +1,90 @@
+{
+  "release": "V014.024",
+  "scope": "experimental 3D QA; NOT approved to main",
+  "assets": [
+    {
+      "name": "Madera seca de roble",
+      "path": "assets/playcanvas/approved/materials/oak/v004/roble_seco_v004_candidate.glb",
+      "sha256": "731f25759fc86df4bbe60603c0ad0f415791ecc8a3627286da2036102cbb28e8",
+      "git_blob_sha": "f97b3e6d4cc86103a4f8f23d68fac21f671bfefc",
+      "bytes": 14938336,
+      "visual_status": "CANDIDATE_ONLY",
+      "source_commit": "28fa3d583227485940ad7db023c9f7544ba9bd86",
+      "source": "production/tutorial_materials/generated/roble_seco/roble_seco_v004_candidate.glb",
+      "meshes": 1,
+      "materials": 3,
+      "images": 9,
+      "extensions": []
+    },
+    {
+      "name": "Madera seca de fresno",
+      "path": "assets/playcanvas/approved/materials/ash/v004/fresno_seco_v004_candidate.glb",
+      "sha256": "cbda8b584e058a3f7cee91b790a5456cecb0a4755abfa35e95f26396d615eb3f",
+      "git_blob_sha": "f5c3f99ef50b191e5ee90cceac66353e29aa9142",
+      "bytes": 19783932,
+      "visual_status": "CANDIDATE_ONLY",
+      "source_commit": "4d22dee5e05933a8787d5e9a3ca8d7986bea332d",
+      "source": "production/tutorial_materials/generated/fresno_seco/fresno_seco_v004_candidate.glb",
+      "meshes": 1,
+      "materials": 3,
+      "images": 9,
+      "extensions": []
+    },
+    {
+      "name": "Cuero bovino curtido",
+      "path": "assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_candidate.glb",
+      "sha256": "cb2aafa34173a327d5614ffd5e5a1b877a83635dc10cbd8410b9dba742a2b7b2",
+      "git_blob_sha": "1aba58417c9f8a7a09f085a34e665bce237137e6",
+      "bytes": 9450628,
+      "visual_status": "CANDIDATE_ONLY",
+      "source_commit": "8499e3c01d7d0575095169a69dbeac04eea72501",
+      "source": "production/tutorial_materials/generated/cuero_bovino/cuero_bovino_v003_candidate.glb",
+      "meshes": 1,
+      "materials": 1,
+      "images": 3,
+      "extensions": []
+    },
+    {
+      "name": "Cuero caprino curtido",
+      "path": "assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_candidate.glb",
+      "sha256": "9b39d0a64c4fa8bbc25a0daa00be5d974cf79e936f77308c97164751b35e879b",
+      "git_blob_sha": "202f4e973efcbb306940f2f20be2c3705efc5581",
+      "bytes": 9455460,
+      "visual_status": "CANDIDATE_ONLY",
+      "source_commit": "5819c40f0114ea476d99ddfe68526cac36f823ea",
+      "source": "production/tutorial_materials/generated/cuero_caprino/cuero_caprino_v003_candidate.glb",
+      "meshes": 1,
+      "materials": 1,
+      "images": 3,
+      "extensions": []
+    },
+    {
+      "name": "Cordel de cáñamo",
+      "path": "assets/playcanvas/approved/materials/cordel_canamo/v018/cordel_canamo_v018.glb",
+      "sha256": "843cba9d3181cffe544ba9a0799c7dbf2d77d4304e08a75ff931308b8a1af46f",
+      "git_blob_sha": "18065b6dff2e9e6b56742a0e98eb395912a44958",
+      "bytes": 3916368,
+      "visual_status": "OWNER_APPROVED",
+      "source_commit": "34e206bd7ec51b676a03bb0f295061687a0a7b2e",
+      "source": "production/approved_fibers_experimental/cordel_canamo/v018/cordel_canamo_v018.glb",
+      "meshes": 80,
+      "materials": 1,
+      "images": 3,
+      "extensions": []
+    },
+    {
+      "name": "Hilo de lino",
+      "path": "assets/playcanvas/approved/materials/hilo_lino/v021/hilo_lino_v021.glb",
+      "sha256": "2a0018a6354113662f535a19aef2bdf1c4e8659bc1e23649d7b5eca163b7ac0d",
+      "git_blob_sha": "8eeb8dbef754910bb03389cf4eb16b71acdb4b69",
+      "bytes": 7010672,
+      "visual_status": "OWNER_APPROVED",
+      "source_commit": "34e206bd7ec51b676a03bb0f295061687a0a7b2e",
+      "source": "production/approved_fibers_experimental/hilo_lino/v021/hilo_lino_v021.glb",
+      "meshes": 11,
+      "materials": 2,
+      "images": 6,
+      "extensions": []
+    }
+  ]
+}
