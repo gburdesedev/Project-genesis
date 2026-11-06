@@ -253,7 +253,30 @@ async function main(){
     const closed=await page.evaluate(()=>({modal:document.getElementById('modalLayer')?.style.display,inventoryTab:window.GenesisPreparation?.activeTab?.()}));
     log('Q9_INVENTORY_CLOSED',closed);
     await dialog();
-   }else if([0,1,2,3,4,5,6,7,8,10,11,11.25,12,13].includes(st.step)){
+   }else if(st.step===11.25){
+    // The compare screen really opens after the second item. Before walking
+    // back to Ordan, close it with the original UI's X, not with altered state.
+    const before=await snap();
+    log('Q11_25_COMPARE_VISIBLE',{modal:before.modal,buttons:before.modalButtons,
+      panel:before.state?.modal,canMove:before.state?.nav?.canMove});
+    if(before.modal==='grid'){
+      if(!await realButton('#prepClose')){
+        if(!await realButton('.prepSkinClose'))await page.keyboard.press('Escape');
+      }
+      await delay(500);
+    }
+    let after=await snap();
+    log('Q11_25_COMPARE_CLOSED',{modal:after.modal,canMove:after.state?.nav?.canMove,
+      step:after.state?.step});
+    if(after.state?.step===11.25){
+      if(!after.state.nav?.canMove){report.result='COMPARISON_STILL_BLOCKING_MOVEMENT';break}
+      const path=await approach();log('APPROACH_AFTER_COMPARE',{step:st.step,...path});
+      if(!path.ok){report.result='CANNOT_REACH_ORDAN_AFTER_COMPARE';break}
+      await page.keyboard.press('e');await delay(550);
+      await dialog();
+      await delay(350);
+    }
+   }else if([0,1,2,3,4,5,6,7,8,10,11,12,13].includes(st.step)){
     const path=await approach();log('APPROACH',{step:st.step,...path});
     if(!path.ok){report.result='CANNOT_REACH_OBJECTIVE_'+st.step;break}
     await page.keyboard.press('e');await delay(550);
