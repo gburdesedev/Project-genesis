@@ -188,7 +188,7 @@
         }
         if(found<30)return;
         const occupancy=Math.max((xmax-xmin+1)/d,(ymax-ymin+1)/d);
-        const zoom=Math.max(1,Math.min(4.6,0.73/Math.max(0.12,occupancy)));
+        const zoom=Math.max(1.5,Math.min(5.2,1.30/Math.max(0.12,occupancy)));
         const ox=((xmin+xmax)/2/d-.5);
         const oy=((ymin+ymax)/2/d-.5);
         hero.style.setProperty('--gen-hero-zoom',zoom.toFixed(3));
