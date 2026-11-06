@@ -1,0 +1,49 @@
+name: V014.025 | original ORA inventory and mercenary UI functional browser checks
+on:
+  push:
+    branches: [experiment/v014025-logic-complete-qa-20261106]
+    paths:
+      - .github/workflows/v014025-panels-ui-qa.yml
+      - inventario_genesis_16x9.js
+      - mercenary_equipment_canvas_v001.js
+      - mercenary_equipment_domain_v001.js
+      - preparacion_control.js
+      - tests/inventario_16x9.cjs
+      - tests/mercenary_canvas_integration.cjs
+      - tests/functional_menus.cjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-panel-functions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Playwright runner using preinstalled Chromium
+        run: |
+          npm install --prefix /tmp/genesis-v014025-ui playwright@1.56.1
+          ln -s /tmp/genesis-v014025-ui/node_modules node_modules
+      - name: Validate approved 16:9 inventory, slots and real interactions
+        env:
+          NODE_PATH: /tmp/genesis-v014025-ui/node_modules
+        run: node tests/inventario_16x9.cjs
+      - name: Validate mercenary 16:9 slots, real values, comparison, equipment and interaction
+        env:
+          NODE_PATH: /tmp/genesis-v014025-ui/node_modules
+        run: node tests/mercenary_canvas_integration.cjs
+      - name: Validate original thermal/fabrication menu interactions
+        env:
+          NODE_PATH: /tmp/genesis-v014025-ui/node_modules
+        run: node tests/functional_menus.cjs
+      - name: Export only exact browser QA artifacts if present
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014025-ui-real-ora
+          path: |
+            previews/v014025-logic-complete-qa/
+          if-no-files-found: ignore
+          retention-days: 7
