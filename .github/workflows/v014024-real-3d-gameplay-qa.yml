@@ -1,0 +1,82 @@
+name: V014.024 | immutable material GLBs and actual Ordan replay
+on:
+  push:
+    branches: [experiment/v014024-real-materials-3d-ordan-20261106]
+    paths:
+      - .github/workflows/v014024-real-3d-gameplay-qa.yml
+      - scripts/vendor_v014024_real_material_glbs.py
+      - scripts/bump_v014024_3d_release.py
+      - inventario_genesis_16x9.js
+      - inventario_genesis_16x9.css
+      - tests/v014024_real_materials_3d_qa.cjs
+      - tests/v014022_ordan_full_e2e.cjs
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  material-glb-qa-and-gameplay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 36
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify six pinned models and glTF2 scene/material structure (no rerender)
+        run: |
+          python3 -m py_compile scripts/vendor_v014024_real_material_glbs.py
+          python3 scripts/vendor_v014024_real_material_glbs.py
+          python3 scripts/vendor_v014024_real_material_glbs.py --verify-only
+      - name: Bump visible game version without modifying artwork or approved source
+        run: python3 scripts/bump_v014024_3d_release.py
+      - name: Validate JavaScript
+        run: |
+          node --check inventario_genesis_16x9.js
+          node --check tests/v014024_real_materials_3d_qa.cjs
+          node --check tests/v014022_ordan_full_e2e.cjs
+      - name: Stage exact immutable GLBs on experimental game branch only
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/playcanvas/approved/materials/ 
+          if ! git diff --cached --quiet; then
+            git commit -m 'experiment(v014024): stage six source-verified GLBs for browser QA [skip ci]'
+            git push origin HEAD:experiment/v014024-real-materials-3d-ordan-20261106
+          fi
+      - name: Install pinned Playwright using existing headless Chromium image
+        run: npm install --prefix /tmp/genesis-3d playwright@1.56.1
+      - name: Verify actual GLB WebGL loads, selection and hover ±45° for eight materials
+        env:
+          NODE_PATH: /tmp/genesis-3d/node_modules
+        timeout-minutes: 12
+        run: node tests/v014024_real_materials_3d_qa.cjs
+      - name: Replay real Herrero through Ordan quests and thermal forge
+        env:
+          NODE_PATH: /tmp/genesis-3d/node_modules
+        timeout-minutes: 18
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tests/v014022_ordan_full_e2e.cjs')
+          s=p.read_text()
+          before="const out='previews/v014022-ordan-playwright';"
+          assert s.count(before)==1
+          s=s.replace(before,"const out='previews/v014024-real-ordan-playwright';")
+          s=s.replace("mode:'V014022 as shipped, read-only QA probe'","mode:'V014.024 real GLB inventory: full game unmodified Ordan player input'")
+          s=s.replace("log('THERMAL_GAME_STARTED',{batch});","log('THERMAL_GAME_STARTED',{batch,startedAtMs:Date.now()});")
+          s=s.replace("log('THERMAL_PREPARED',{batch});","log('THERMAL_PREPARED',{batch,finishedAtMs:Date.now()});")
+          Path('tests/v014024_real_ordan_e2e.cjs').write_text(s)
+          PY
+          node tests/v014024_real_ordan_e2e.cjs
+      - name: Keep failure diagnostics and real screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014024-real-glb-and-ordan
+          path: |
+            assets/playcanvas/approved/materials/v014024_3d_glb_experimental_manifest.json
+            previews/v014024-material-3d/
+            previews/v014024-real-ordan-playwright/
+          if-no-files-found: warn
+          retention-days: 14
