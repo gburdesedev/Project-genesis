@@ -1,0 +1,57 @@
+name: V014.026 | Ordan cinematic route and actual game-to-merchant QA
+on:
+  push:
+    branches:
+      - experiment/v014026-ordan-market-cinematic-20261106
+    paths:
+      - .github/workflows/v014026-market-cinematic-qa.yml
+      - genesis_market_cinematic_v001.js
+      - genesis_market_cinematic_v001.css
+      - index.html
+      - tests/v014026_ordan_market_cinematic_paths.cjs
+      - tests/v014026_ordan_market_cinematic_browser.cjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  route-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax, actual legacy route and unmodified ORA/mercenary contracts
+        run: |
+          node --check genesis_market_cinematic_v001.js
+          node --check tests/v014026_ordan_market_cinematic_paths.cjs
+          node --check tests/v014026_ordan_market_cinematic_browser.cjs
+          node --test tests/v014026_ordan_market_cinematic_paths.cjs
+  actual-gameplay:
+    needs: route-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 27
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keep original geometry/chest, published models and 16:9 ORA UI unchanged
+        run: |
+          python3 scripts/v014024_relocate_chest_side_aisle.py
+          node --check tests/v014026_ordan_market_cinematic_browser.cjs
+      - name: Install pinned real browser
+        run: npm install --prefix /tmp/pg-cine-qa playwright@1.56.1
+      - name: Play two first swords, talk to Ordan, watch cinematic, reach and buy from merchant
+        env:
+          NODE_PATH: /tmp/pg-cine-qa/node_modules
+          GENESIS_RETRY_SCREENSHOTS: '1'
+        timeout-minutes: 25
+        run: node tests/v014026_ordan_market_cinematic_browser.cjs
+      - name: Preserve verified route states, captures, market and error data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014026-ordan-market-real-cinematic
+          path: |
+            previews/v014026-market-cinematic-qa/
+            previews/v014024-chest-side-aisle/static-geometry-audit.json
+          if-no-files-found: warn
+          retention-days: 12
