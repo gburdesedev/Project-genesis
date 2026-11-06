@@ -8,7 +8,19 @@
 const FAMILY={sword:'Espadas',shield:'Escudos'};
 const CHANNELS=['Base','Luz','Sombra','Fuego','Hielo','Naturaleza','Tierra','Rayo'];
 function identifier(item){return item && (item.id||item.uuid||item.instanceId);}
-function family(item){const v=String(item&&(item.family||item.recipeFamily||item.recipe||item.category)||'').toLowerCase();return /^espada(s)?\b/.test(v)?'Espadas':/^escudo(s)?\b/.test(v)?'Escudos':null;}
+function family(item){
+ // GenesisPrototypeEngines presents family as 1/2 and recipe as
+ // 'espada_hierro'/'escudo_hierro'. Check canonical recipe first, then older
+ // literal family/category labels. Never treat numeric family as type.
+ if(!item)return null;
+ for(const raw of [item.recipe,item.recipeFamily,item.family,item.category]){
+   if(typeof raw!=='string')continue;
+   const v=raw.trim().toLowerCase();
+   if(/^espada(s)?(?:\\b|_)/.test(v))return 'Espadas';
+   if(/^escudo(s)?(?:\\b|_)/.test(v))return 'Escudos';
+ }
+ return null;
+}
 function channelEntries(item){
   const arr=Array.isArray(item&&item.channels)?item.channels:[];
   return arr.map(function(c,i){
