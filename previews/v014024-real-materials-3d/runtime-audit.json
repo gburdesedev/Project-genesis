@@ -1,6 +1,6 @@
 {
   "version": "V014.024",
-  "at": "2026-11-06T12:02:08.697Z",
+  "at": "2026-11-06T12:05:46.421Z",
   "source": "genuine game seed + real GLB + Chromium model-viewer 4.1.0",
   "assets": [
     {
@@ -177,7 +177,7 @@
       "loaded": true,
       "properties": {
         "loaded": true,
-        "modelIsVisible": false,
+        "modelIsVisible": true,
         "meshCount": 1,
         "tag": "MODEL-VIEWER",
         "src": "assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_final_3_piezas_web.glb"
@@ -285,7 +285,7 @@
       "loaded": true,
       "properties": {
         "loaded": true,
-        "modelIsVisible": true,
+        "modelIsVisible": false,
         "meshCount": 2,
         "tag": "MODEL-VIEWER",
         "src": "assets/playcanvas/approved/materials/hilo_lino/v021/hilo_lino_v021.glb"
