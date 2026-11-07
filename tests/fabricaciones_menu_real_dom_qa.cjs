@@ -105,10 +105,18 @@ window.__GENESIS_MENU_QA__={
      exists:!!document.querySelector('.prepArtboard[data-active-tab="Fabricaciones"]'),
      family:[...document.querySelectorAll('.workspaceRecipeFamily')].map(e=>({name:e.querySelector('h4')?.textContent,locked:e.classList.contains('is-locked')})),
      pt:[...document.querySelectorAll('.fabricationDemoBar')].map(e=>({name:e.dataset.ptName,value:e.querySelector('b')?.textContent})),
-     image:document.querySelector('.workspaceRecipeHero img')?.getAttribute('data-approved-src')||document.querySelector('.workspaceRecipeHero img')?.currentSrc?.slice(0,180),
+     image:document.querySelector('.approvedFabArt')?.currentSrc,
+     artVersion:document.querySelector('.approvedFabV04')?.dataset.artVersion,
+     artLoaded:document.querySelector('.approvedFabArt')?.naturalWidth===1672,
+     materialCards:document.querySelectorAll('.approvedFabMaterial').length,
+     noRotatingViewer:!document.querySelector('.approvedFabV04 model-viewer'),
+
      imageLoaded:document.querySelector('.workspaceRecipeHero img')?.naturalWidth>0,
      canCraft:!!document.getElementById('prepStart')&&!document.getElementById('prepStart').disabled
    }));
+   assert.equal(report.menu.artVersion,'V04','Expected approved V04, not legacy menu');
+   assert.equal(report.menu.artLoaded,true,'Approved V04 image must load at original 1672px width');
+   assert.equal(report.menu.noRotatingViewer,true);
    assert.equal(report.menu.tab,'Fabricaciones');
    assert.equal(report.menu.exists,true);
    assert.equal(report.menu.canCraft,true);
