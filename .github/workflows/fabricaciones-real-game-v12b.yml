@@ -1,0 +1,37 @@
+name: "Genesis | Real Herrero game fabrication and result screenshot"
+on:
+  push:
+    branches: [experiment/fabricacion-en-juego-v12b-20261107]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-game:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve exact approved V175 V12B render from public asset repo (static reference)
+        run: |
+          mkdir -p previews/fabricaciones-real-game
+          curl -fLsS --retry 3 --max-time 60 'https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/98cb1c5d94effb206d75d6c94c0d526a5c97ddc8/public-previews/espada-v175-j-roughness-v12/V12_V175_Color_J_Rugosidad034_Hero.png' -o previews/fabricaciones-real-game/V12B_reference.png
+          test $(wc -c < previews/fabricaciones-real-game/V12B_reference.png) -gt 100000
+          file previews/fabricaciones-real-game/V12B_reference.png
+          sha256sum previews/fabricaciones-real-game/V12B_reference.png
+      - name: Install pinned Playwright
+        run: npm install --prefix /tmp/genesis-fab-real playwright@1.56.1
+      - name: Run real PlayCanvas game with experimental quest skip and genuine NGE
+        env:
+          NODE_PATH: /tmp/genesis-fab-real/node_modules
+        run: node tests/fabricaciones_real_game_qa.cjs
+        timeout-minutes: 16
+      - name: Preserve screenshots and diagnostics even on failure
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fabricacion-real-game-v12b-screenshots
+          path: previews/fabricaciones-real-game/
+          if-no-files-found: warn
+          retention-days: 15
