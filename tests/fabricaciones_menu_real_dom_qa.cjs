@@ -21,7 +21,7 @@ async function shot(name){await page.screenshot({path:path.join(out,name+'.png')
    const old='function itemIcon(recipeId){return ITEM_GLYPHS[recipeKind(recipeId)]||ITEM_GLYPHS.Espada}';
    assert.equal(body.split(old).length-1,1);
    body=body.replace(old,"function itemIcon(recipeId){if(recipeId==='espada_hierro')return './previews/fabricaciones-real-game/V12B_reference.png';return ITEM_GLYPHS[recipeKind(recipeId)]||ITEM_GLYPHS.Espada}");
-   const hook=String.raw\`
+   const hook=String.raw`
 window.__GENESIS_MENU_QA__={
   setup:()=>{
     const engine=window.GenesisPrototypeEngines;
@@ -49,7 +49,7 @@ window.__GENESIS_MENU_QA__={
   },
   state:()=>({step:tutorialStep,created:craftedItems.map(i=>({name:i.name,recipe:i.recipe,rarity:i.rarity})),inventory:{...playerInventory},selected:selectedProfession})
 };
-\`;
+`;
    body=body.replace(anchor,hook+'\n'+anchor);
    await route.fulfill({response:res,body,headers:{...res.headers(),'content-type':'text/html; charset=utf-8'}});
  });
