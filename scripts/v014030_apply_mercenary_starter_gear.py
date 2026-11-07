@@ -78,6 +78,12 @@ s=s.replace(onDraft,"onDraft:(which,item)=>{\n        if(!editing)return; // Kee
 back="mercSwordItem=mercShieldItem=mercArmorItem=mercBootsItem=null;\n        return showMercenaryCandidates();"
 assert s.count(back)==1,'Back handler changed'
 s=s.replace(back,"mercSwordItem=mercStarterGear?.sword||null;mercShieldItem=mercStarterGear?.shield||null;\n        mercArmorItem=mercBootsItem=null;\n        return showMercenaryCandidates();",1)
+# The game previously loaded an obsolete duplicate of the V09 module.
+# Route the real game to the canonical approved V09 implementation, whose
+# comparison and equipment-button fixes were already tested independently.
+old_module='mercenary_equipment_canvas_v001.js'
+assert s.count(old_module)==1,'Expected exactly one legacy V001 UI script reference'
+s=s.replace(old_module,'mercenary_equipment_canvas_v09.js',1)
 p.write_text(s,encoding='utf8')
 assert marker in p.read_text('utf8')
 print('V014030_PATCHED_INDEX',len(s),'starter baseline separate; NGE two actual rarities; candidate binding; no player inventory edits')
