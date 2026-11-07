@@ -1,0 +1,24 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const code=fs.readFileSync(path.resolve(__dirname,'../preparacion_control.js'),'utf8');
+const win={GenesisDevice:{safePreviews:true}};
+const sandbox={window:win,addEventListener(){},requestAnimationFrame(){return 1},console};
+vm.runInNewContext(code,sandbox,{filename:'preparacion_control.js'});
+const {recipeEligibility,advanceDemoPT}=win.GenesisPreparation;
+assert.equal(typeof recipeEligibility,'function');
+assert.equal(typeof advanceDemoPT,'function');
+const entry={id:'espada',family:'Espadas',subfamily:'Espada de hierro',formula:{materials:[{material:'Lingote de hierro',qty:2}]}};
+function state(inventory,can,extras={}){return recipeEligibility({...entry,...extras},{inventory,canCraftRecipe:()=>can});}
+assert.equal(state({'Lingote de hierro':2},true).available,true,'Ready recipe available');
+assert.equal(state({'Lingote de hierro':1},true).reason,'materials','Missing material locks recipe');
+assert.equal(state({'Lingote de hierro':2},false).reason,'progress','Quest/progression gate locks recipe');
+assert.equal(state({'Lingote de hierro':2},true,{questLocked:true}).reason,'quest','Quest flag locks recipe');
+assert.equal(state({'Lingote de hierro':2},true,{lockedByQuest:true}).reason,'quest','Alternative quest flag');
+assert.equal(recipeEligibility(entry,{inventory:{'Lingote de hierro':2},canCraftRecipe:()=>true,isRecipeQuestLocked:()=>true}).reason,'quest','Runtime quest lock');
+const base={global:96,fabricacion:20,refinamiento:5,reciclaje:10,conocimiento:13,nivelGlobal:1,nivelFabricacion:1};
+const result=advanceDemoPT(base,{global:10,fabricacion:12,refinamiento:88,conocimiento:50});
+assert.deepEqual(JSON.parse(JSON.stringify(result)),{...base,global:100,fabricacion:32},'Only Global/Fabricación can grow, hard cap 100, no level-ups');
+assert.equal(base.global,96,'Base must not be mutated');
+assert.equal(advanceDemoPT(base,{global:-10,fabricacion:0}).global,96,'No negative gains');
+console.log('PASS: lock by quest/material/progression; Global/Fabricación only; frozen other bars; no levels; capped at 100.');
