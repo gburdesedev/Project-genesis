@@ -8,30 +8,33 @@ const report={mode:'Original Project Genesis HTML + actual Fabricaciones control
 const server=spawn('python3',['-m','http.server','8765','--bind','127.0.0.1'],{stdio:'ignore'});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));let browser,page;
 const save=()=>fs.writeFileSync(path.join(out,'menu-qa-report.json'),JSON.stringify(report,null,2));
+let snapshotBrowser;
 async function shot(name){
- const dst=path.join(out,name+'.png');
- let captured=false;
- // Prefer Chrome's direct tab capture. Playwright's screenshot method previously timed out
- // after fonts loaded while advancing page animations in this 3D game document.
- let session;
- try {
-   session=await page.context().newCDPSession(page);
-   const img=await Promise.race([
-     session.send('Page.captureScreenshot',{format:'png',fromSurface:false,captureBeyondViewport:false}),
-     new Promise((_,reject)=>setTimeout(()=>reject(Error('CDP screenshot 18000ms timeout')),18000))
-   ]);
-   if(!img?.data)throw Error('CDP returned empty image');
-   fs.writeFileSync(dst,Buffer.from(img.data,'base64'));
-   captured=true;
- } catch(error) {
-   report.errors.push('CDP screenshot '+name+': '+String(error));
-   try {
-     await page.screenshot({path:dst,timeout:18000,animations:'allow',caret:'hide'});
-     captured=true;
-   }catch(fallbackError){report.errors.push('Playwright screenshot '+name+': '+String(fallbackError));}
- } finally {if(session)try{await session.detach()}catch{}}
- if(!captured)throw Error('Both screenshot capture methods failed: '+name);
- report.captured.push(name);
+  // Capture exactly the DOM assembled by the actual Genesis game controller.
+  // A separate lightweight Chromium page isolates screenshots from the original
+  // game page's continuous WebGL/compositor (which hung both screenshot APIs).
+  const snapshot=await page.evaluate(()=>({
+    css:[...document.head.querySelectorAll('link[rel="stylesheet"],style')].map(x=>x.outerHTML).join('\n'),
+    markup:document.querySelector('#modalLayer')?.outerHTML,
+    bodyClass:document.body.className,
+    bodyStyle:document.body.getAttribute('style')||''
+  }));
+  if(!snapshot.markup)throw Error('Real game modalLayer missing');
+  const html='<!doctype html><html><head><meta charset="utf-8"><base href="http://127.0.0.1:8765/">'+snapshot.css+
+    '<style>html,body{width:100%;min-height:100%;margin:0;}canvas{display:none!important}</style></head>'+
+    '<body class="'+snapshot.bodyClass+'" style="'+snapshot.bodyStyle+'">'+snapshot.markup+'</body></html>';
+  fs.writeFileSync(path.join(out,name+'.dom-snapshot.html'),html);
+  if(!snapshotBrowser)snapshotBrowser=await chromium.launch({headless:true,args:['--disable-gpu','--disable-dev-shm-usage','--no-sandbox']});
+  const visual=await snapshotBrowser.newPage({viewport:{width:1600,height:900},deviceScaleFactor:1});
+  try {
+    await visual.setContent(html,{waitUntil:'domcontentloaded',timeout:25000});
+    await visual.waitForTimeout(700);
+    await visual.screenshot({path:path.join(out,name+'.png'),timeout:25000,animations:'disabled'});
+    report.captured.push(name);
+  }catch(error){
+    report.errors.push('Isolated DOM screenshot '+name+': '+String(error));
+    throw error;
+  }finally{await visual.close().catch(()=>{});}
 }
 (async()=>{
  await sleep(1400);
@@ -113,5 +116,5 @@ window.__GENESIS_MENU_QA__={
    await shot('03-resultados-espada-motor-NGE');
    report.status='PASS_MENU_AND_CRAFT_REAL_ENGINE_NO_3D_VILLAGE';console.log('FAB_MENU_QA_PASS',JSON.stringify(report));save();
  }catch(e){report.status='FAILED';report.errors.push(String(e.stack||e));try{await shot('99-diagnostic')}catch{}save();throw e;}
- finally{save();await browser.close();server.kill();}
+ finally{save();if(snapshotBrowser)await snapshotBrowser.close().catch(()=>{});await browser.close();server.kill();}
 })().catch(e=>{console.error('FAB_MENU_QA_FAIL',e);process.exitCode=1});
