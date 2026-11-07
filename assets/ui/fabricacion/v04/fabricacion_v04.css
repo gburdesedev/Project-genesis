@@ -1,0 +1,119 @@
+/* Project Genesis — Fabricación V04 · fiel al arte aprobado 1672×941.
+   Sólo Fabricaciones. El resto de menús usa sus capas originales. */
+.modal.preparationModal.fabV04Modal{
+ width:min(1672px,calc(100vw - 10px));max-width:100%;
+ max-height:calc(100dvh - 10px);overflow:auto;padding:0!important;
+ border:0!important;background:#090705;box-shadow:0 16px 80px #000e;
+}
+.fabV04Board{
+ position:relative;width:100%;min-width:760px;aspect-ratio:1672/941;
+ isolation:isolate;container-type:inline-size;overflow:hidden;
+ color:#ecd6b4;font-family:Georgia,'Times New Roman',serif;
+}
+.fabV04Board *{box-sizing:border-box}
+.fabV04Base{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;user-select:none}
+.fabV04Board button{font:inherit;color:inherit;cursor:pointer}
+.fabV04Board button:focus-visible{outline:2px solid #f5c171;outline-offset:2px}
+.fabV04Panel{position:absolute;z-index:2}
+.fabV04Tabs{position:absolute;left:1.7%;top:1%;width:96.4%;height:6.9%;display:grid;grid-template-columns:repeat(4,1fr);z-index:4}
+.fabV04Tabs button{border:0;background:transparent;color:transparent}
+.fabV04Tabs button:disabled{cursor:default}
+.fabV04Tabs button:not(:disabled):hover{background:#df9d3222}
+.fabV04Close{position:absolute;z-index:8;right:.7%;top:8.3%;width:2.5%;aspect-ratio:1;background:#140d09df;border:1px solid #c08c55;border-radius:3px;font-size:1.5cqw!important;color:#ead5b2!important;opacity:.65}
+.fabV04Close:hover{opacity:1}
+.fabV04Recipes{
+ left:2.15%;top:17.65%;width:23.8%;height:66.6%;padding:.45cqw .5cqw;
+ background:linear-gradient(180deg,#100e0deF,#0b0a0af0 82%,#0c0b0bee);
+ overflow:auto;scrollbar-width:thin;scrollbar-color:#8a5b32 #110e0c;
+}
+.fabV04RecipeFamily{margin-bottom:1.05cqw}
+.fabV04RecipeFamily h3{
+ margin:0 0 .35cqw;padding:.55cqw .75cqw;background:linear-gradient(#25201a,#15130f);
+ border:1px solid #62442b;font-size:1.3cqw;font-weight:normal;letter-spacing:.025em;
+}
+.fabV04RecipeFamily .fabV04Subtype{font-size:1.01cqw;color:#cfb99c;margin:.4cqw 0 .35cqw 1.5cqw}
+.fabV04RecipeChoice{
+ display:block;width:calc(100% - 1.45cqw);margin:.4cqw .2cqw .35cqw 1.4cqw;
+ background:linear-gradient(90deg,#21190f,#17120d);
+ border:1px solid #6d4d30;padding:.65cqw .3cqw;
+ text-align:left;font-size:1.07cqw!important;
+}
+.fabV04RecipeChoice[aria-pressed="true"]{
+ border-color:#c59047;box-shadow:inset 0 0 10px #ba7f283b;
+ background:linear-gradient(90deg,#5b3719,#2b1c0e)
+}
+.fabV04RecipeChoice:disabled{opacity:.67;cursor:not-allowed}
+.fabV04RecipeChoice small{display:block;font-size:.73cqw;color:#cdaf82}
+.fabV04RecipeEmpty{font-size:1.05cqw;color:#cbb79a;padding:1.2cqw .6cqw}
+.fabV04Header{
+ left:69.6%;top:12.5%;width:27.3%;height:10.7%;
+ display:flex;align-items:center;justify-content:center;flex-direction:column;
+ background:linear-gradient(90deg,#0e0a08ef,#120d0bee,#100b09ee);text-align:center
+}
+.fabV04Header h2{margin:0;font-size:2.03cqw;letter-spacing:.045em;font-weight:normal;text-transform:uppercase;color:#f0d3a0}
+.fabV04Header small{font-size:1.05cqw;color:#cdbcae;margin-top:.3cqw}
+.fabV04Materials{
+ left:69.35%;top:31.3%;width:27.3%;height:30.2%;
+ display:flex;flex-direction:column;gap:.3cqw;overflow:auto;
+ scrollbar-width:thin;scrollbar-color:#7d5430 #0a0908;
+ padding:.3cqw .1cqw;background:#110d0cea
+}
+.fabV04Material{
+ display:flex;align-items:center;gap:.8cqw;min-height:5.8cqw;
+ padding:.45cqw .5cqw;background:linear-gradient(90deg,#17130e,#15110dcc);
+ border:1px solid #6e4a27;color:#e8d4b9
+}
+.fabV04MaterialImage{flex:0 0 5.8cqw;width:5.8cqw;height:4.9cqw;object-fit:contain}
+.fabV04MaterialMissingIcon{display:flex;align-items:center;justify-content:center;flex:0 0 5.8cqw;color:#ab7d49;font-size:2.5cqw}
+.fabV04MaterialBody{min-width:0;flex:1}
+.fabV04MaterialName{font-size:1.15cqw;color:#f1ddb7}
+.fabV04MaterialQty{font-size:.9cqw;color:#bdb3aa;display:flex;justify-content:space-between;gap:.5cqw}
+.fabV04MaterialQty b{font-weight:normal;color:#eae1cf}
+.fabV04MaterialQty.isMissing b{color:#f28f81}
+.fabV04MaterialsEmpty{font-size:1.05cqw;color:#d1baa0;padding:1cqw}
+.fabV04Status{
+ left:77.1%;top:64.3%;width:16.6%;height:5%;
+ display:flex;align-items:center;justify-content:center;
+ background:#0d0c0bef;font-size:1.18cqw;color:#8fe7a5;white-space:nowrap
+}
+.fabV04Status.isMissing{color:#e8a378}
+.fabV04Craft{
+ position:absolute;z-index:5;left:70.1%;top:71.7%;width:25.2%;height:9.4%;
+ background:transparent;border:0;border-radius:4px;font-size:0!important
+}
+.fabV04Craft:disabled{background:#0706058c;cursor:not-allowed}
+.fabV04Craft:not(:disabled):hover{box-shadow:inset 0 0 30px #df992a88}
+.fabV04OverlayFoot{
+ left:28.2%;top:79%;width:36.7%;height:7%;
+ background:linear-gradient(90deg,#110d0cEE,#0b0b0ced,#100c0aeb);
+ display:flex;align-items:center;justify-content:center;
+ font-size:1.0cqw;letter-spacing:.03em;color:#e6cfab
+}
+.fabV04Preview{
+ left:28.4%;top:10.4%;width:36.6%;height:66.8%;z-index:3;
+ display:flex;justify-content:center;align-items:center;
+ pointer-events:none;background:linear-gradient(90deg,#121518e8,#11161bec,#111519e8);
+ border-radius:2px;overflow:hidden
+}
+.fabV04Preview img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
+.fabV04Preview .fabV04PreviewEmpty{font-size:1.3cqw;color:#c3b2a2;text-align:center;padding:2cqw}
+.fabV04Bars{
+ position:absolute;z-index:4;left:1.2%;top:89%;height:8.3%;width:97.6%;
+ display:grid;grid-template-columns:repeat(5,1fr);align-items:start;gap:.25cqw
+}
+.fabV04Bar{
+ background:linear-gradient(90deg,#0c0b0be8,#100d0cee);
+ min-width:0;min-height:5.6cqw;padding:.45cqw .5cqw;
+ font-size:1.0cqw;border:1px solid #66452a4b
+}
+.fabV04BarHead{display:flex;align-items:center;justify-content:space-between;gap:.2cqw}
+.fabV04BarHead b{font-size:.9cqw;font-weight:normal;color:#e3c9a6}
+.fabV04BarTrack{height:.7cqw;border-radius:2cqw;background:#151414;border:1px solid #745634;overflow:hidden;margin-top:.25cqw}
+.fabV04BarFill{display:block;height:100%;background:linear-gradient(90deg,#88612d,#d7ad6a)}
+.fabV04Bar[data-pt-name="Reciclaje"] .fabV04BarHead b,
+.fabV04Bar[data-pt-name="Refinamiento"] .fabV04BarHead b,
+.fabV04Bar[data-pt-name="Conocimiento"] .fabV04BarHead b{color:#dbcfc0}
+@media(max-width:800px){
+ .modal.preparationModal.fabV04Modal{width:calc(100vw - 6px)}
+ .fabV04Board{min-width:850px}
+}
