@@ -84,6 +84,8 @@ window.__GENESIS_MENU_QA__={
    await page.goto('http://127.0.0.1:8765/index.html?qa=fabricaciones-menu',{waitUntil:'domcontentloaded',timeout:90000});
    await page.waitForFunction(()=>!!window.__GENESIS_MENU_QA__&&!!window.GenesisPreparation&&!!window.GenesisPrototypeEngines,null,{timeout:70000});
    report.session=await page.evaluate(()=>window.__GENESIS_MENU_QA__.setup());
+   // Allow local approved V12B poster to finish color-key composition before DOM snapshot.
+   await sleep(1300);
    report.domImmediately=await page.evaluate(()=>({
      modalClass:document.getElementById('modal')?.className,
      modalHTML:document.getElementById('modal')?.innerHTML?.slice(0,600),
@@ -103,7 +105,7 @@ window.__GENESIS_MENU_QA__={
      exists:!!document.querySelector('.prepArtboard[data-active-tab="Fabricaciones"]'),
      family:[...document.querySelectorAll('.workspaceRecipeFamily')].map(e=>({name:e.querySelector('h4')?.textContent,locked:e.classList.contains('is-locked')})),
      pt:[...document.querySelectorAll('.fabricationDemoBar')].map(e=>({name:e.dataset.ptName,value:e.querySelector('b')?.textContent})),
-     image:document.querySelector('.workspaceRecipeHero img')?.currentSrc,
+     image:document.querySelector('.workspaceRecipeHero img')?.getAttribute('data-approved-src')||document.querySelector('.workspaceRecipeHero img')?.currentSrc?.slice(0,180),
      imageLoaded:document.querySelector('.workspaceRecipeHero img')?.naturalWidth>0,
      canCraft:!!document.getElementById('prepStart')&&!document.getElementById('prepStart').disabled
    }));
