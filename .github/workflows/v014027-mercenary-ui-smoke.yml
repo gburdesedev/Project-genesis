@@ -1,0 +1,34 @@
+name: V014.027 | Mercenary approved 16:9 UI interaction smoke
+on:
+  push:
+    branches:
+      - experiment/v014027-demo-full-e2e-20261107
+    paths:
+      - .github/workflows/v014027-mercenary-ui-smoke.yml
+      - mercenary_equipment_canvas_v001.js
+      - mercenary_equipment_canvas_v001.css
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mercenary-ui-physical-clicks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Playwright
+        run: npm install --prefix /tmp/genesis-mercenary-ui playwright@1.56.1
+      - name: Test approved 16:9 inventory slots, real buttons, per-item channel comparisons and equip callbacks
+        env:
+          NODE_PATH: /tmp/genesis-mercenary-ui/node_modules
+        run: node tests/mercenary_canvas_integration.cjs
+      - name: Preserve mercenary approved UI screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014027-mercenary-approved-ui
+          path: /tmp/mercenary-concept-16x9.png
+          if-no-files-found: warn
+          retention-days: 14
