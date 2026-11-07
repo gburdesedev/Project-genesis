@@ -1,7 +1,7 @@
-name: "Genesis | Real Herrero game fabrication and result screenshot"
+name: "Genesis | Real Herrero UI-only QA: skip full village preload"
 on:
   push:
-    branches: [experiment/fabricacion-en-juego-v12b-20261107]
+    branches: [experiment/fabricacion-directa-ui-qa-20261107]
   workflow_dispatch:
 permissions:
   contents: read
