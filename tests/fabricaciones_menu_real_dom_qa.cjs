@@ -8,7 +8,7 @@ const report={mode:'Original Project Genesis HTML + actual Fabricaciones control
 const server=spawn('python3',['-m','http.server','8765','--bind','127.0.0.1'],{stdio:'ignore'});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));let browser,page;
 const save=()=>fs.writeFileSync(path.join(out,'menu-qa-report.json'),JSON.stringify(report,null,2));
-async function shot(name){await page.screenshot({path:path.join(out,name+'.png'),timeout:30000,animations:'disabled'});report.captured.push(name);}
+async function shot(name){await page.screenshot({path:path.join(out,name+'.png'),timeout:60000,animations:'allow'});report.captured.push(name);}
 (async()=>{
  await sleep(1400);
  browser=await chromium.launch({headless:true,args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
@@ -51,6 +51,10 @@ window.__GENESIS_MENU_QA__={
 };
 `;
    body=body.replace(anchor,hook+'\n'+anchor);
+   // Only for screenshot capture: stop WebGL game loop so Chromium can snapshot the modal.
+   const loop='function frame(now){requestAnimationFrame(frame);';
+   assert.equal(body.split(loop).length-1,1,'Expected single game animation loop');
+   body=body.replace(loop,'function frame(now){/* Screenshot-only: freeze background 3D rendering */');
    await route.fulfill({response:res,body,headers:{...res.headers(),'content-type':'text/html; charset=utf-8'}});
  });
  try{
@@ -58,6 +62,7 @@ window.__GENESIS_MENU_QA__={
    await page.waitForFunction(()=>!!window.__GENESIS_MENU_QA__&&!!window.GenesisPreparation&&!!window.GenesisPrototypeEngines,null,{timeout:70000});
    report.session=await page.evaluate(()=>window.__GENESIS_MENU_QA__.setup());
    report.renderDiagnostic=await page.evaluate(()=>({modalCount:document.querySelectorAll('.prepArtboard').length,activeTab:window.GenesisPreparation?.activeTab?.(),modalLayer:document.getElementById('modalLayer')?.style.display,modalClass:document.getElementById('modal')?.className,modalOuter:document.getElementById('modal')?.outerHTML.slice(0,320),loading:document.getElementById('loading')?.style.display,screen:innerWidth+'x'+innerHeight,htmlErrors:document.body?.innerText?.slice(-500)}));save();console.log('FABRICACIONES_RENDER_DIAG',JSON.stringify(report.renderDiagnostic));
+   await page.evaluate(()=>{ const a=document.getElementById('genesisApp');if(a)a.style.visibility='hidden'; });
    await shot('00-menu-diagnostico-inmediato');
    await page.waitForSelector('.prepArtboard[data-active-tab="Fabricaciones"]',{state:'attached',timeout:20000});
    await page.waitForFunction(()=>{const e=document.querySelector('.workspaceRecipeHero img');return e?.complete&&e.naturalWidth>0},null,{timeout:25000});
