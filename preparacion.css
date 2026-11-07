@@ -580,3 +580,156 @@
 .prepArtboard[data-active-tab="Fabricaciones"] .fabricationDemoBar[data-pt-name="Conocimiento"]{
   opacity:.5;filter:grayscale(1);
 }
+
+
+/* FABRICACIÓN V04 — diseño aprobado 1672×941 integrado 1:1 en el juego.
+   Fondo aprobado intacto; las zonas de datos se redibujan sólo como overlays funcionales. */
+.modal.preparationModal.prepApprovedV04Modal {
+  box-sizing:border-box!important;
+  width:min(98vw,1672px,calc((100dvh - 14px) * 1672 / 941))!important;
+  max-height:calc(100dvh - 14px)!important;min-width:0!important;
+  padding:0!important;border:0!important;border-radius:0!important;
+  overflow:hidden!important;background:#080605!important;
+}
+.approvedFabV04.prepArtboard {
+  min-width:0!important;width:100%!important;
+  aspect-ratio:1672 / 941!important;position:relative!important;
+  isolation:isolate;container-type:inline-size;overflow:hidden!important;
+  background:#070504!important;line-height:1.2!important;
+  color:#f1d9b2!important;font-family:Georgia,'Times New Roman',serif!important;
+}
+.approvedFabV04 * {box-sizing:border-box}
+.approvedFabV04 .approvedFabArt {
+  position:absolute;inset:0;display:block;width:100%;height:100%;
+  object-fit:fill;pointer-events:none;user-select:none;z-index:0;
+}
+.approvedFabV04 .approvedFabRecipes {
+  position:absolute;z-index:3;left:2%;top:18.1%;width:24.1%;height:64.8%;
+  overflow-y:auto;padding:.6% .65% 1.2%;
+  background:linear-gradient(115deg,#0b0908f9,#100e0dfd 76%,#080706fc);
+  scrollbar-width:thin;scrollbar-color:#8a6538 #100b08;
+}
+.approvedFabV04 .approvedFabFamily {margin:0 0 1.1cqw;border:0;background:transparent}
+.approvedFabV04 .approvedFabFamily h4 {
+  font:500 1.34cqw Georgia,serif;letter-spacing:.03em;color:#f0dfc4;
+  padding:.55cqw .35cqw;margin:0 0 .35cqw;
+  border-bottom:1px solid #795735;text-transform:none;
+}
+.approvedFabV04 .approvedFabRecipe {
+  display:block;position:relative;width:100%;min-height:2.95cqw;
+  padding:.48cqw .8cqw .48cqw 1.15cqw;margin:.22cqw 0;
+  background:#12100ddc;color:#e9d2ae;border:1px solid #4a3928;
+  text-align:left;font:normal 1.08cqw Georgia,serif;
+  cursor:pointer;overflow-wrap:anywhere;
+}
+.approvedFabV04 .approvedFabRecipe[aria-pressed="true"] {
+  border-color:#dca65e;background:linear-gradient(100deg,#624022,#2e1d10d9);
+  color:#ffe7bd;box-shadow:inset .2cqw 0 #f6be79;
+}
+.approvedFabV04 .approvedFabRecipe.is-locked {
+  filter:grayscale(1);opacity:.6;cursor:not-allowed;
+}
+.approvedFabV04 .approvedFabRecipe:hover:not(:disabled) {border-color:#ffce83}
+.approvedFabV04 .approvedFabMaterials {
+  position:absolute;z-index:3;left:68.8%;top:31.5%;width:27.3%;height:28.8%;
+  display:flex;flex-direction:column;gap:.32cqw;overflow-y:auto;
+  background:linear-gradient(130deg,#100d0bf9,#11100eff);
+  padding:.4cqw .58cqw;
+  scrollbar-width:thin;scrollbar-color:#8d653b #080706;
+}
+.approvedFabV04 .approvedFabMaterial {
+  flex:0 0 auto;min-height:4.25cqw;display:flex;align-items:center;
+  gap:.72cqw;padding:.25cqw .45cqw;background:#17120fcc;
+  border:1px solid #6a4c2c;box-shadow:inset 0 0 1cqw #090706;
+}
+.approvedFabV04 .approvedFabMaterialIcon {
+  display:flex;align-items:center;justify-content:center;flex:0 0 3.4cqw;
+  width:3.4cqw;height:3.4cqw;overflow:hidden;
+}
+.approvedFabV04 .approvedFabMaterialIcon img {max-height:95%;max-width:95%;object-fit:contain}
+.approvedFabV04 .approvedFabMaterialGlyph {font-size:2.3cqw;color:#a78355}
+.approvedFabV04 .approvedFabMaterialText {
+  min-width:0;display:flex;flex-direction:column;gap:.24cqw;flex:1;
+}
+.approvedFabV04 .approvedFabMaterialText b {
+  color:#e9cfa3;font:500 1.05cqw/1.12 Georgia,serif;overflow-wrap:anywhere;
+}
+.approvedFabV04 .approvedFabMaterialText small {
+  color:#c5b5a0;font:normal .78cqw/1.2 Georgia,serif;
+}
+.approvedFabV04 .approvedFabMaterialCheck {color:#75b980;font-size:1.35cqw}
+.approvedFabV04 .approvedFabMaterial.insufficient .approvedFabMaterialCheck {color:#c88470}
+.approvedFabV04 .approvedFabNoRecipe {
+  color:#d2b994;font:normal 1.04cqw Georgia,serif;padding:1cqw;
+}
+.approvedFabV04 .approvedFabAlternate {
+  position:absolute;z-index:2;left:28%;top:10%;width:38%;height:76%;
+  background:radial-gradient(ellipse at center,#2f2118 5%,#100b08 83%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.approvedFabV04 .approvedFabAlternate img {max-width:95%;max-height:81%;object-fit:contain}
+.approvedFabV04 .approvedFabAlternate p {font-size:1.2cqw;margin:0;color:#edcb99}
+.approvedFabV04 .approvedFabDynamicTitle {display:none}
+.approvedFabV04:has(.approvedFabAlternate) .approvedFabDynamicTitle {
+  position:absolute;z-index:5;display:flex;left:68.5%;top:11.8%;width:28%;height:10.5%;
+  justify-content:center;align-items:center;text-align:center;
+  background:linear-gradient(180deg,#0d0b09fa,#1c150efc);
+  color:#efcca0;font:small-caps 2.0cqw Georgia,serif;
+}
+.approvedFabV04 .approvedFabState {
+  position:absolute;z-index:4;left:78.3%;top:65.2%;width:15.6%;height:5%;
+  display:flex;align-items:center;justify-content:center;
+  background:#100d0bf9;font:500 1.35cqw Georgia,serif;
+}
+.approvedFabV04 .approvedFabState.ready {color:#94dfa4}
+.approvedFabV04 .approvedFabState.unready {color:#d3a27d;font-size:1.04cqw}
+.approvedFabV04 #prepStart.approvedFabCraft {
+  position:absolute;z-index:5;left:69.9%;top:71.4%;width:25.3%;height:10.8%;
+  cursor:pointer;border:0;background:transparent;
+}
+.approvedFabV04 #prepStart.approvedFabCraft:not(:disabled):hover {
+  background:#eab45e16;box-shadow:inset 0 0 1.4cqw #ffa9547f;
+}
+.approvedFabV04 #prepStart.approvedFabCraft:disabled {
+  background:#0e0c0a85;cursor:not-allowed;
+}
+.approvedFabV04 .approvedFabFooterText {
+  position:absolute;z-index:3;left:28.4%;top:80.6%;width:10.1%;height:5.2%;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(90deg,#0c0a09f8,#100c08e8);
+  font:normal .9cqw Georgia,serif;color:#dfcab3;
+  pointer-events:none;
+}
+.approvedFabV04 .approvedFabProgressLabels {position:absolute;inset:0;pointer-events:none;z-index:3}
+.approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar {
+  position:absolute;top:90.5%;width:4.35%;height:2.75%;
+  display:flex;align-items:center;justify-content:center;
+  background:#0b0a09;white-space:nowrap;
+  border:0;opacity:1;filter:none;
+  font:normal 1.06cqw Georgia,serif;color:#ebddc5;
+}
+.approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar b {font-weight:normal;color:inherit}
+.approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(1){left:17.1%}
+.approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(2){left:35.5%}
+.approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(3){left:53.7%}
+.approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(4){left:72.9%}
+.approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(5){left:91.0%}
+.approvedFabV04 .approvedFabProgressFill {
+  position:absolute;z-index:3;top:94.0%;height:1.0%;
+  width:calc(var(--fab-progress) * .123);
+  max-width:12.3%;min-width:0;
+  background:linear-gradient(90deg,#89512a,#f0b66b);
+  pointer-events:none;box-shadow:0 0 .4cqw #b98b56;
+}
+.approvedFabV04 .approvedFabProgressFill.global{left:6.5%}
+.approvedFabV04 .approvedFabProgressFill.fabricacion{left:25.15%}
+.approvedFabV04 .approvedFabNav {
+  position:absolute;z-index:6;top:.9%;height:7%;border:0;
+  background:transparent;cursor:pointer;
+}
+.approvedFabV04 .approvedFabNav:hover:not([aria-current]) {background:#e2a84c19}
+.approvedFabV04 .approvedFabNav.inventario{left:27.8%;width:18.1%}
+.approvedFabV04 .approvedFabNav.preparacion{left:46.2%;width:19.1%}
+.approvedFabV04 .approvedFabNav.fabricaciones{left:65.4%;width:17.6%}
+.approvedFabV04 .approvedFabNav.comparacion{left:82.9%;width:16.7%}
+.approvedFabV04 button:focus-visible {outline:2px solid #efd19a;outline-offset:-2px}
