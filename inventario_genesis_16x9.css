@@ -647,3 +647,14 @@
 .genInv .genInvSlot>.genInvSlotArtwork:has(model-viewer.genInvMaterialSlotModel){
   transform:none!important;
 }
+
+
+/* V014.027 experimental · static fallback poster bounded to approved viewer. */
+.genInv .genInvImageWrap[data-preview-mode="material"] img.genInvMaterialHero{
+ position:absolute!important;
+ left:4%!important;top:4%!important;
+ width:92%!important;height:92%!important;
+ max-width:92%!important;max-height:92%!important;
+ margin:0!important;transform:none!important;
+ object-fit:contain!important;object-position:center!important;
+}
