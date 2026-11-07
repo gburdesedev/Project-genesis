@@ -6,7 +6,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
 const {spawn}=require('node:child_process'),{chromium}=require('playwright');
 const folder=path.resolve('previews/fabricaciones-real-game');
 fs.mkdirSync(folder,{recursive:true});
-const report={mode:'real PlayCanvas app / genuine NGE fabrication / QA quest shortcut',runAt:new Date().toISOString(),steps:[],errors:[],failures:[],assets:[],status:'RUNNING'};
+const report={mode:'real PlayCanvas app / genuine NGE fabrication / QA direct start, full model route preload deliberately skipped',runAt:new Date().toISOString(),steps:[],errors:[],failures:[],assets:[],status:'RUNNING'};
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const server=spawn('python3',['-m','http.server','8765','--bind','127.0.0.1'],{stdio:'ignore'});
 let browser, page;
@@ -39,7 +39,7 @@ window.__GENESIS_FAB_QA__={
     currentRecipe:gameStarted?currentRecipe():null,ready:!!craftSession,
     craftedCount:craftedItems.length,crafted:craftedItems.map(x=>({name:x.name,recipe:x.recipe,rarity:x.rarity})),
     stock:{...playerInventory},loader:loading.style.display}),
-  start:()=>{const before={routeLoading,gameStarted};void chooseProfessionRoute('Herrero');return {before,after:{routeLoading,gameStarted}};},
+  start:()=>{const before={routeLoading,gameStarted};startRoute('Herrero');loading.style.display='none';intro.style.display='none';return {before,after:{routeLoading,gameStarted},assetRoutePreloadSkipped:true};},
   enter:()=>{
     if(!gameStarted||selectedProfession!=='Herrero'||!craftSession)throw Error('Route not ready');
     const recipe=activeRoute.recipes[0],formula=craftSession.formulas[recipe];
@@ -72,6 +72,7 @@ window.__GENESIS_FAB_QA__={
    await page.waitForFunction(()=>{const a=document.getElementById('prototypeIntro');return a&&getComputedStyle(a).display!=='none'},null,{timeout:150000,polling:1500});
    await capture('00-inicio-del-juego');
    report.routeStart=await page.evaluate(()=>window.__GENESIS_FAB_QA__.start());
+   report.visualLimitation='World model route was not fully preloaded; this is a UI and NGE integration QA, not an asset-loading validation';
    await wait(1800);report.routeInitial=await page.evaluate(()=>window.__GENESIS_FAB_QA__.state());
    await capture('01-carga-de-herrero');
    await page.waitForFunction(()=>{const q=window.__GENESIS_FAB_QA__?.state?.();return q?.gameStarted&&getComputedStyle(document.querySelector('#loading')).display==='none'},null,{timeout:220000,polling:1500});
