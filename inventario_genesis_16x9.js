@@ -323,5 +323,5 @@
       pane.querySelector('#genInvCloseDetails').onclick=function(){pane.remove()};
     };
   }
-  window.GenesisInventory16={render:render,version:'INVENTARIO_16x9_V014030_ORA_APROBADO_1A1',dataSource:'session.inventory + session.getItems'};
+  window.GenesisInventory16={render:render,version:'INVENTARIO_16x9_V014031_ORA_APROBADO_1A1',dataSource:'session.inventory + session.getItems'};
 })();
