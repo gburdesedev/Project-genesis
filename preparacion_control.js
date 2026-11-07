@@ -656,11 +656,11 @@
       '<img class="fabV04Base" src="assets/ui/fabricacion/v04/Genesis_Fabricacion_V04_Original_Barras.png" alt="" draggable="false">' +
       '<nav class="fabV04Tabs" aria-label="Menús de Project Genesis">' + tabMarkup + '</nav>' +
       '<button id="prepClose" class="fabV04Close" aria-label="Cerrar">×</button>' +
-      '<div class="fabV04Recipes fabV04Panel workspaceRecipeTree" aria-label="Recetas conocidas">' + familyMarkup + '</div>' +
+      '<div class="fabV04Recipes fabV04Panel" aria-label="Recetas conocidas">' + familyMarkup + '</div>' +
       '<div class="fabV04Header fabV04Panel"><h2>' + escape(selectedName) + '</h2>' +
       '<small>Receta conocida</small></div>' +
       '<div class="fabV04Preview fabV04Panel workspaceRecipeHero" aria-label="Vista estática del objeto">' + preview + '</div>' +
-      '<div class="fabV04Materials fabV04Panel workspaceIngredients" aria-label="Materiales de la receta seleccionada">' + materials + '</div>' +
+      '<div class="fabV04Materials fabV04Panel" aria-label="Materiales de la receta seleccionada">' + materials + '</div>' +
       '<div class="fabV04Status fabV04Panel' + (enabled ? '' : ' isMissing') + '" role="status">' + escape(statusText) + '</div>' +
       '<button id="prepStart" class="fabV04Craft workspaceAction" aria-label="Confirmar fabricación" ' +
       (enabled ? '' : 'disabled') + '>FABRICAR</button>' +
