@@ -1,0 +1,27 @@
+name: V014.026 | Inspect Ordan rig and source Walk_Loop compatibility
+on:
+  push:
+    branches:
+      - experiment/v014026-cinematic-visual-validation-20261106
+    paths:
+      - scripts/v014026_ordan_rig_compatibility_audit.py
+      - .github/workflows/v014026-rig-compatibility-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare-rig-tracks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode original GLB headers, skin names and animation channels
+        run: python3 scripts/v014026_ordan_rig_compatibility_audit.py
+      - name: Keep detailed real rig report for verification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014026-ordan-original-rig-audit
+          path: previews/v014026-rig-compatibility-audit/rig-report.json
+          if-no-files-found: warn
+          retention-days: 12
