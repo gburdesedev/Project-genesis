@@ -1,0 +1,59 @@
+{
+  "mode": "Original Project Genesis HTML + actual Fabricaciones controller + real NGE session, 3D village load bypassed",
+  "captured": [],
+  "errors": [
+    "CDP screenshot 01-diagnostico-tras-abrir-menu: Error: CDP screenshot 18000ms timeout",
+    "Playwright screenshot 01-diagnostico-tras-abrir-menu: TimeoutError: page.screenshot: Timeout 18000ms exceeded.\nCall log:\n  - taking page screenshot\n",
+    "Error: Both screenshot capture methods failed: 01-diagnostico-tras-abrir-menu\n    at shot (/__w/Project-genesis/Project-genesis/tests/fabricaciones_menu_real_dom_qa.cjs:33:21)\n    at async /__w/Project-genesis/Project-genesis/tests/fabricaciones_menu_real_dom_qa.cjs:95:4",
+    "CDP screenshot 99-diagnostic: Error: CDP screenshot 18000ms timeout",
+    "Playwright screenshot 99-diagnostic: TimeoutError: page.screenshot: Timeout 18000ms exceeded.\nCall log:\n  - taking page screenshot\n"
+  ],
+  "status": "FAILED",
+  "session": {
+    "recipe": "espada_hierro",
+    "formula": {
+      "id": "espada_hierro",
+      "sessionSeed": 989665631,
+      "materials": [
+        {
+          "role": "principal",
+          "material": "Lingote de hierro",
+          "qty": 2
+        },
+        {
+          "role": "proceso",
+          "material": "Carbón vegetal",
+          "qty": 1
+        },
+        {
+          "role": "secundario",
+          "material": "Cuero bovino curtido",
+          "qty": 1
+        },
+        {
+          "role": "secundario",
+          "material": "Madera seca de fresno",
+          "qty": 1
+        }
+      ],
+      "signature": "principal:Lingote de hierro:2|proceso:Carbón vegetal:1|secundario:Cuero bovino curtido:1|secundario:Madera seca de fresno:1"
+    },
+    "stock": {
+      "Lingote de hierro": 4,
+      "Carbón vegetal": 2,
+      "Cuero bovino curtido": 2,
+      "Madera seca de fresno": 2
+    }
+  },
+  "domImmediately": {
+    "modalClass": "modal preparationModal prepSkinModal",
+    "modalHTML": "<div class=\"prepSkinScroll\" style=\"--prep-layout-width: 1536px; --prep-layout-height: 864px; --prep-scale: 0.84375;\"><div class=\"prepArtboard\" data-stage=\"workspace\" data-active-tab=\"Fabricaciones\">\n      <img class=\"prepSkinPiece\" data-role=\"fondo_marco_principal\" data-state=\"\" data-hover=\"\" src=\"assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png\" alt=\"\" aria-hidden=\"true\" draggable=\"false\" style=\"left:0.0000%;top:0.0000%;width:100.0000%;height:100.0000%\"><img class=\"prepSkinPiece\" data-role=\"pestana\" data-state=\"\" data-hover=\"\" src=\"assets/ui/preparacion/01_Capas/Pestanas/Pestana_Inve",
+    "modalLayerStyle": "grid",
+    "modalLayerComputed": "grid",
+    "artboardCount": 1,
+    "artboardActive": "Fabricaciones",
+    "prepRootCount": 0,
+    "scriptReady": "function",
+    "bodyClasses": "modalOpen"
+  }
+}
