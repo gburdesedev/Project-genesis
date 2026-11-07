@@ -15,17 +15,12 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           s=Path('index.html').read_text('utf-8')
-          keys=['GenesisMercenaryConcept.open','mercenary_equipment_canvas_v001.js','mercenary_equipment_canvas_v001.css','craftedItems.push','function fabricate','GenesisPrototypeEngines.fabricate','engine.fabricate','mercenaryState','mercSheetMission','#startMercExtension','function openMercenary','function generateCraft','tutorialStep === 16','tutorialStep===16','mercModal','mercenaryModal','itemIcon:']
-          print('INDEX LEN',len(s),'LINES',s.count('\n')+1)
+          keys=['function showMercenaryEquipment','function showMercenaryCandidates','function showMercenarySheet','function performExperimentalCraft','function confirmCraft','function performCraft','function generateCraft','function itemVisual','function renderMercInventory','function setTutorialStep','const craftedItems','let craftedItems','const engine=','const session=','let session=','const MERC_CANDIDATES','const poolA','const poolB','window.GenesisMercenaryConcept.open','GenesisMercenaryConcept.open','tutorialStep','function showMercenaryEquipment(']
+          print('INDEX LEN',len(s),'LINES',s.count('\\n')+1)
           for k in keys:
-            inds=[];start=0
-            while True:
-              i=s.find(k,start)
-              if i<0:break
-              inds.append(i);start=i+len(k)
-              if len(inds)>=6:break
-            print('\nKEY',repr(k),'COUNTFIRST',len(inds))
-            for i in inds:
-              l=s.count('\n',0,i)+1
-              print('EXCERPT',k,'LINE',l,'TEXT',s[max(0,i-950):min(len(s),i+1650)].replace('\r','')[:2650])
+            i=s.find(k)
+            if i < 0:
+              print('MISSING',repr(k));continue
+            l=s.count('\\n',0,i)+1
+            print('BLOCK',repr(k),'LINE',l,'=>',repr(s[max(0,i-220):min(len(s),i+9200)]))
           PY
