@@ -594,6 +594,8 @@
 .approvedFabV04.prepArtboard {
   min-width:0!important;width:100%!important;
   aspect-ratio:1672 / 941!important;position:relative!important;
+  height:auto!important;left:auto!important;top:auto!important;transform:none!important;
+  min-height:0!important;max-height:none!important;
   isolation:isolate;container-type:inline-size;overflow:hidden!important;
   background:#070504!important;line-height:1.2!important;
   color:#f1d9b2!important;font-family:Georgia,'Times New Roman',serif!important;
