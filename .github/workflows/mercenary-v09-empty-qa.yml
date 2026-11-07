@@ -21,6 +21,14 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
       - uses: actions/checkout@v4
+      - name: Audit existing game entrypoint for mercenary module wiring
+        run: |
+          python3 - <<'PY_HOST'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8',errors='replace')
+          for needle in ('mercenary_equipment_canvas_v001.js','mercenary_equipment_canvas_v001.css','GenesisMercenaryConcept.open','GenesisMercenaryConcept'):
+              print(f'HOST REFERENCE {needle}: {s.count(needle)}')
+          PY_HOST
       - name: Install pinned Playwright
         run: npm install --prefix /tmp/mercenary-v09-qa playwright@1.56.1
       - name: Verify exact art sources, geometry and no fabricated data

@@ -36,13 +36,41 @@ const server = http.createServer((req,res)=>{
   assert.deepEqual([bg.originalWidth,bg.originalHeight],[1671,941]);
   assert.ok(Math.abs(bg.ratio-1670/942)<.006);
   assert.ok(bg.bg.includes('V09_Plantilla_Vacia_Referencia.png'));
+  const out=path.resolve(root,'previews/mercenary-v09/approved-empty-1600x900.png');fs.mkdirSync(path.dirname(out),{recursive:true});
+  await page.screenshot({path:out,fullPage:true});
   await page.locator('[data-family="second"]').click();
   assert.equal(await page.locator('.mcChannel').count(),0);
   assert.equal(await page.locator('.pv9Grid .mcInventorySlot').count(),20);
-  const out=path.resolve(root,'previews/mercenary-v09/approved-empty-1600x900.png');fs.mkdirSync(path.dirname(out),{recursive:true});
-  await page.screenshot({path:out,fullPage:true});
+  // Functional smoke uses transient test inputs AFTER photographing the genuinely empty state.
+  // No test inventory/character is written to the game or included in the reference screenshot.
+  await page.evaluate(() => {
+    const a={id:'s1',recipe:'espada_hierro',name:'Espada de prueba 1',rarity:'Común',channels:[['Base',14],['Luz',4]]};
+    const b={id:'s2',recipe:'espada_hierro',name:'Espada de prueba 2',rarity:'Bueno',channels:[['Base',24],['Fuego',8]]};
+    const c={id:'h1',recipe:'escudo_hierro',name:'Escudo de prueba 1',rarity:'Común',channels:[['Base',3]]};
+    const d={id:'h2',recipe:'escudo_hierro',name:'Escudo de prueba 2',rarity:'Bueno',channels:[['Base',6],['Hielo',5]]};
+    window.v09QAConfirm=null;
+    window.GenesisMercenaryConcept.open({
+      modal:(html,cls)=>{let e=document.querySelector('#modal');e.innerHTML=html;e.className='modal '+cls;},
+      mercName:'Mercenario I',candidate:0,body:'peasant',
+      poolFirst:[a,b],poolSecond:[c,d],equippedFirst:a,equippedSecond:c,
+      onConfirm:(x,y)=>{window.v09QAConfirm=[x.id,y.id]}
+    });
+  });
+  assert.equal(await page.locator('.mcChannel').count(),2);
+  await page.locator('[data-item="1"]').click();
+  assert.equal(await page.locator('.mcChannel').count(),3,'compare union of source channels only');
+  await page.locator('[data-family="second"]').click();
+  assert.equal(await page.locator('.mcChannel').count(),1);
+  await page.locator('[data-item="1"]').click();
+  assert.equal(await page.locator('.mcChannel').count(),2);
+  await page.locator('[data-action="equip"]').click();
+  assert.deepEqual(await page.evaluate(()=>window.v09QAConfirm),['s2','h2']);
+  await page.locator('[data-action="inspect"]').click();
+  assert.equal(await page.locator('.mcOverlay').count(),1);
+  await page.locator('[data-action="dismiss"]').click();
+  assert.equal(await page.locator('.mcOverlay').count(),0);
   assert.deepEqual(errors,[],'browser must not throw runtime errors');
-  console.log('PASS V09: immutable original art, existing empty plate, 16:9, 20 empty squares, 10 anatomical slots, 2 rings, genuine-data-only, blank compare, no equip without items.');
+  console.log('PASS V09: original art, empty 16:9, 20 squares, 10 anatomical slots/2 rings, zero dummy data, correct family filters, dynamic channel union, inspect, equip callback.');
   console.log('Screenshot:',out);
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});
