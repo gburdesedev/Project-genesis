@@ -6,6 +6,7 @@ on:
       - tests/v014030_mercenary_baseline_real.cjs
       - index.html
       - mercenary_equipment_canvas_v09.js
+      - mercenary_equipment_canvas_v001.js
       - mercenary_equipment_canvas_v09.css
       - .github/workflows/v014030-real-comparison.yml
   workflow_dispatch:
