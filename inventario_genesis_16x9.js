@@ -1,8 +1,31 @@
 
-/* Genesis Inventory v01 — art source: original preparation 39 PNG, data: live game session. */
+/* Genesis Inventory: geometría 1:1 del arte limpio aprobado 1672×941, datos LIVE. */
 (function () {
   'use strict';
   const ROOT = 'assets/ui/preparacion/01_Capas/';
+  const APPROVED_ART='assets/ui/inventario/INVENTARIO_BASE_LIMPIA_APROBADA_16x9.png';
+  let approvedArtPromise=null;
+  function installApprovedArt(board){
+    if(!approvedArtPromise)approvedArtPromise=new Promise(function(resolve,reject){
+      const image=new Image();
+      image.onload=function(){
+        if(image.naturalWidth!==1672||image.naturalHeight!==941){
+          reject(new Error('Inventario aprobado: dimensiones de imagen inesperadas'));
+          return;
+        }
+        resolve(APPROVED_ART);
+      };
+      image.onerror=function(){reject(new Error('No se encontró el PNG limpio original del Inventario'))};
+      image.src=APPROVED_ART;
+    });
+    approvedArtPromise.then(function(url){
+      if(!board.isConnected)return;
+      board.style.backgroundImage='url("'+url+'")';
+      board.style.backgroundSize='100% 100%';
+      board.classList.add('genInvCanonical');
+      board.dataset.approvedArt='original-1672x941';
+    }).catch(function(err){console.warn('[Genesis Inventory] Fallback visual sin arte aprobado:',err)});
+  }
   const TABS = [
     ['Inventario','Pestanas/Pestana_Inventario.png'],
     ['Preparacion','Pestanas/Pestana_Preparacion.png'],
@@ -113,8 +136,13 @@
       '<p class="genInvEmptyPreview">La familia seleccionada no contiene objetos</p>';
     const title=chosen?esc(chosen.name):'Seleccioná un objeto';
     const facts=chosen?(materialMode?
-      '<div class="genInvInfoLine"><span>Familia</span><b>Materiales</b></div><div class="genInvInfoLine"><span>Cantidad</span><b>'+chosen.qty+'</b></div>':
-      '<div class="genInvInfoLine"><span>Familia</span><b>'+esc(state.family)+'</b></div><div class="genInvInfoLine"><span>Rareza</span><b>'+esc(item.rarity||'')+'</b></div>'+
+      '<div class="genInvInfoLine"><span>Nombre</span><b>'+esc(chosen.name)+'</b></div>'+
+      '<div class="genInvInfoLine"><span>Familia</span><b>Materiales</b></div>'+
+      '<div class="genInvInfoLine"><span>Rareza</span><b>—</b></div>'+
+      '<div class="genInvChannels" role="list"><div class="genInvChannel"><span>Cantidad disponible</span><b>'+esc(chosen.qty)+'</b></div></div>':
+      '<div class="genInvInfoLine"><span>Nombre</span><b>'+esc(chosen.name)+'</b></div>'+
+      '<div class="genInvInfoLine"><span>Familia</span><b>'+esc(state.family)+'</b></div>'+
+      '<div class="genInvInfoLine"><span>Rareza</span><b>'+esc(item.rarity||'')+'</b></div>'+
       '<h3 class="genInvSubhead">CANALES DEL OBJETO</h3>'+
       '<div class="genInvChannels" role="list">'+channelSummary(item)+'</div>'+
       '<h3 class="genInvSubhead">RELATO NGE</h3>'+storySummary(item)) : '';
@@ -142,12 +170,13 @@
           '<input class="genInvFilter" id="genInvFilter" aria-label="Filtrar objetos" placeholder="Filtrar '+(materialMode?'materiales':'creaciones')+'..." value="'+esc(state.search)+'">'+
           '<span class="genInvNotice">'+filtered.length+' tipos registrados</span></div>'+
           '<div class="genInvSlots">'+slots+'</div>'+
-          '<div class="genInvPage"><button id="genInvPrev" '+(state.page===0?'disabled':'')+'>◀</button>'+
+          '<div class="genInvPage" data-pages="'+pages+'"><button id="genInvPrev" '+(state.page===0?'disabled':'')+'>◀</button>'+
           '<span>Página '+(state.page+1)+' / '+pages+'</span><button id="genInvNext" '+(state.page===pages-1?'disabled':'')+'>▶</button></div></section>'+
       '</main></div>';
     ctx.modal(html,'preparationModal genInvModal');
     const board=document.querySelector('#genInv');
     if(!board)return;
+    installApprovedArt(board);
     board.querySelectorAll('[data-nav]').forEach(function(b){b.onclick=function(){
       if(b.dataset.nav==='Preparacion')nav.renderMenu();
       else if(b.dataset.nav!=='Inventario')nav.renderWorkspace(b.dataset.nav);
@@ -294,5 +323,5 @@
       pane.querySelector('#genInvCloseDetails').onclick=function(){pane.remove()};
     };
   }
-  window.GenesisInventory16={render:render,version:'INVENTARIO_16x9_V014024_GLB_REAL_EXPERIMENTAL',dataSource:'session.inventory + session.getItems'};
+  window.GenesisInventory16={render:render,version:'INVENTARIO_16x9_V014030_ORA_APROBADO_1A1',dataSource:'session.inventory + session.getItems'};
 })();
