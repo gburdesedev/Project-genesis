@@ -1,0 +1,18 @@
+name: "Fabricaciones demo locks and PT restrictions"
+on:
+  push:
+    branches: [experiment/fabricaciones-bloqueos-pt-demo-20261107]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  restrictions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test lock states and demo PT limitations
+        run: node tests/fabricaciones_bloqueos_pt_demo.cjs
