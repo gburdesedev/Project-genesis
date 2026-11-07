@@ -4,6 +4,8 @@ on:
     branches: [experiment/fabricacion-directa-ui-qa-20261107]
     paths-ignore:
       - 'ci-results/**'
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: write
@@ -36,7 +38,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 15
       - name: Publish QA screenshot and status to experimental branch for direct inspection
-        if: always()
+        if: always() && github.event_name == 'push'
         shell: bash
         env:
           TEST_JOB_STATUS: ${{ job.status }}
