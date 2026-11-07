@@ -93,3 +93,29 @@
 .pv9Shell .pv9ChannelArtwork{display:flex;align-items:center;justify-content:flex-start;height:100%;width:100%;min-width:0;overflow:hidden;background:transparent;border:0}
 .pv9Shell .pv9ChannelArtwork img{display:block;width:100%;height:auto;max-height:3.02cqw;object-fit:contain;object-position:left center}
 .pv9Shell .pv9Channels .mcChannelNum{font:normal 1.02cqw/1.2 Georgia,serif;text-align:center;white-space:nowrap;padding:0 .05cqw;overflow:hidden;text-overflow:clip}
+
+
+/* V014030 final fit: long native NGE names must stay fully INSIDE the two existing gold frames. */
+.pv9Shell .pv9ComparisonContents{
+  gap:.07cqw!important;padding:.20cqw .15cqw!important;
+  justify-content:center!important;min-height:0!important;
+}
+.pv9Shell .pv9ComparisonIcon{
+  height:3.70cqw!important;flex:0 0 3.70cqw!important;
+  max-height:3.70cqw!important;
+}
+.pv9Shell .pv9ComparisonIcon img{
+  height:3.65cqw!important;max-height:3.65cqw!important;
+  max-width:3.7cqw!important;object-fit:contain!important;
+}
+.pv9Shell .pv9ComparisonName{
+  font:normal .84cqw/1.08 Georgia,serif!important;
+  max-height:2.18em!important;min-height:0!important;
+  display:-webkit-box!important;-webkit-box-orient:vertical!important;
+  -webkit-line-clamp:2!important;line-clamp:2!important;
+  overflow:hidden!important;text-overflow:ellipsis!important;
+}
+.pv9Shell .pv9ComparisonRarity{
+  flex:0 0 auto!important;font:normal .77cqw/1.08 Georgia,serif!important;
+  max-height:1.12em!important;
+}
