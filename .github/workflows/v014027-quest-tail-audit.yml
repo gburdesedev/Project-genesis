@@ -1,0 +1,39 @@
+name: V014.027 | Read-only gameplay tail audit 12-23
+on:
+  push:
+    branches:
+      - experiment/v014027-demo-full-e2e-20261107
+    paths:
+      - .github/workflows/v014027-quest-tail-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect-real-engine:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract real late-game quest and UI transitions without modifying source
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text()
+          print('REAL_GAME_SOURCE_BYTES',len(s))
+          probes=[f'setTutorialStep({n})' for n in range(12,25)]+[
+            'function showMercenaryCandidates','function showMercenaryEquipment',
+            'function equipMercenaryCreations','function showMercenarySheet',
+            'function showExpeditionResult','function finishMercenaryDeparture',
+            'function showComparison','function performCraft',
+            'function objectiveTarget','function showExperimentalCraftConfirm',
+            'function showLockedDemoMaterial','function showDemoMaterialMentorDialogue',
+            'function updateTutorial','tutorialStep===14','tutorialStep===15',
+            'tutorialStep===16','tutorialStep===17','tutorialStep===18',
+            'tutorialStep===19','tutorialStep===20','tutorialStep===21',
+            'tutorialStep===22','tutorialStep===23']
+          for needle in probes:
+            at=s.find(needle)
+            print('\\n===QUEST_TAIL',repr(needle),'count',s.count(needle),'line',s.count('\\n',0,max(0,at))+1,'===')
+            if at>=0:
+              print(s[max(0,at-420):at+1150].replace('\\x00',''))
+          PY
