@@ -27,7 +27,9 @@ jobs:
           node --check inventario_genesis_16x9.js
           node --check preparacion_control.js
           node --check tests/v014031_inventory_approved.cjs
-          git diff --exit-code ade8e2f495fcfd4b8e5fb3a02f970f695216e31a HEAD -- mercenary_equipment_canvas_v09.js mercenary_equipment_canvas_v001.css mercenary_equipment_domain_v001.js
+          test "$(git hash-object mercenary_equipment_canvas_v09.js)" = "2b7be9094df3873d80d15bdc1d91ac3e9c5538c0"
+          test "$(git hash-object mercenary_equipment_canvas_v001.css)" = "60042577dac204c866cf0fe6c3ca673d1e3b225b"
+          test "$(git hash-object mercenary_equipment_domain_v001.js)" = "c2b2f998302f4dbcdf7794d95bc9fb2f54f3e1f3"
       - name: Install Playwright runner
         run: |
           npm install --prefix /tmp/genesis-v014031-qa --no-audit --no-fund playwright@1.56.1
