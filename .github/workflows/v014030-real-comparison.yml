@@ -1,0 +1,31 @@
+name: V014.030 | Actual game Common sword vs Good and Useless shield vs Common
+on:
+  push:
+    branches: [experiment/v014030-mercenary-starter-gear-compare-20261107]
+    paths:
+      - tests/v014030_mercenary_baseline_real.cjs
+      - index.html
+      - mercenary_equipment_canvas_v09.js
+      - mercenary_equipment_canvas_v09.css
+      - .github/workflows/v014030-real-comparison.yml
+  workflow_dispatch:
+jobs:
+  actual-game:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned browser
+        run: npm install --no-save playwright@1.56.1
+      - name: Play actual game, native NGE, starter-gear comparison and screenshot
+        run: node tests/v014030_mercenary_baseline_real.cjs
+      - name: Preserve screenshot and report even if failed
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v014030-real-game-starter-comparison
+          path: previews/v014030-mercenary-baseline-compare/
+          if-no-files-found: warn
+          retention-days: 14
