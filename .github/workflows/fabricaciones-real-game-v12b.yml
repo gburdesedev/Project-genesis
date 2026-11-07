@@ -21,10 +21,10 @@ jobs:
           sha256sum previews/fabricaciones-real-game/V12B_reference.png
       - name: Install pinned Playwright
         run: npm install --prefix /tmp/genesis-fab-real playwright@1.56.1
-      - name: Run original game Fabricaciones UI and genuine NGE crafting without village preload
+      - name: Capture Fabricaciones UI directly with real NGE engine and approved V12B poster
         env:
           NODE_PATH: /tmp/genesis-fab-real/node_modules
-        run: node tests/fabricaciones_menu_real_dom_qa.cjs
+        run: node tests/fabricaciones_menu_nge_fastqa.cjs
         timeout-minutes: 16
       - name: Preserve screenshots and diagnostics even on failure
         uses: actions/upload-artifact@v4
