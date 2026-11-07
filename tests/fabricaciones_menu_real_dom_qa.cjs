@@ -57,7 +57,24 @@ window.__GENESIS_MENU_QA__={
    await page.goto('http://127.0.0.1:8765/index.html?qa=fabricaciones-menu',{waitUntil:'domcontentloaded',timeout:90000});
    await page.waitForFunction(()=>!!window.__GENESIS_MENU_QA__&&!!window.GenesisPreparation&&!!window.GenesisPrototypeEngines,null,{timeout:70000});
    report.session=await page.evaluate(()=>window.__GENESIS_MENU_QA__.setup());
-   await page.waitForSelector('.prepArtboard[data-active-tab="Fabricaciones"]',{timeout:20000});
+   report.domImmediately=await page.evaluate(()=>({
+     modalClass:document.getElementById('modal')?.className,
+     modalHTML:document.getElementById('modal')?.innerHTML?.slice(0,600),
+     modalLayerStyle:document.getElementById('modalLayer')?.style.display,
+     modalLayerComputed:getComputedStyle(document.getElementById('modalLayer')).display,
+     artboardCount:document.querySelectorAll('.prepArtboard').length,
+     artboardActive:document.querySelector('.prepArtboard')?.dataset?.activeTab||null,
+     prepRootCount:document.querySelectorAll('.prepRoot').length,
+     scriptReady:typeof window.GenesisPreparation?.open,
+     bodyClasses:document.body.className
+   }));
+   await shot('01-diagnostico-tras-abrir-menu');
+   await page.waitForSelector('.prepArtboard[data-active-tab="Fabricaciones"]',{state:'attached',timeout:6500});
+   await page.evaluate(()=>{
+     const layer=document.getElementById('modalLayer');
+     if(layer && getComputedStyle(layer).display==='none')layer.style.display='grid';
+   });
+   await page.waitForSelector('.prepArtboard[data-active-tab="Fabricaciones"]',{timeout:6500});
    await page.waitForFunction(()=>{const e=document.querySelector('.workspaceRecipeHero img');return e?.complete&&e.naturalWidth>0},null,{timeout:25000});
    report.menu=await page.evaluate(()=>({tab:window.GenesisPreparation.activeTab(),family:[...document.querySelectorAll('.workspaceRecipeFamily')].map(e=>({name:e.querySelector('h4')?.textContent,locked:e.classList.contains('is-locked')})),pt:[...document.querySelectorAll('.fabricationDemoBar')].map(e=>({name:e.dataset.ptName,value:e.querySelector('b')?.textContent})),image:document.querySelector('.workspaceRecipeHero img')?.currentSrc,canCraft:!document.getElementById('prepStart')?.disabled}));
    assert.equal(report.menu.tab,'Fabricaciones');
