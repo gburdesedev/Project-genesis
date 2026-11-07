@@ -1,0 +1,61 @@
+name: V014.026 | Repair Ordan original Walk_Loop binding and real cinema visual QA
+on:
+  push:
+    branches:
+      - experiment/v014026-ordan-walk-bind-20261106
+    paths:
+      - .github/workflows/v014026-ordan-walk-bind-qa.yml
+      - index.html
+      - tests/v014026_cinematic_actual_walk_review.cjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source integrity and the existing route-around-fountain QA
+        run: |
+          node --check tests/v014026_cinematic_actual_walk_review.cjs
+          node --test tests/v014026_ordan_market_cinematic_paths.cjs
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text()
+          marker="el.closest('#ordanModel')"
+          assert s.count(marker)==2,'Ordan animation clips must be included in both boot count and boot load gate'
+          assert s.count('pc-anim-clip name="Walk_Loop" data-genesis-boot-asset="ual1086"')>=6
+          print('ORDAN_ORIGINAL_ANIM_SOURCES_WIRED_AND_GATE_MATCHED')
+          PY
+  real-animation:
+    needs: source-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify existing approved physical geometry and real world
+        run: |
+          python3 scripts/v014024_relocate_chest_side_aisle.py
+          node --check tests/v014026_cinematic_actual_walk_review.cjs
+      - name: Install pinned real browser
+        run: npm install --prefix /tmp/genesis-ordan-rig-fix playwright@1.56.1
+      - name: Play actual Ordan quest and assert Walk_Loop is bound on body head and beard
+        env:
+          NODE_PATH: /tmp/genesis-ordan-rig-fix/node_modules
+          GENESIS_RETRY_SCREENSHOTS: '0'
+          GENESIS_CINEMATIC_CAPTURE: '1'
+        timeout-minutes: 25
+        run: node tests/v014026_cinematic_actual_walk_review.cjs
+      - name: Preserve verified mid-cinematic screenshot, real market receipts, and issues
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014026-ordan-rig-walk-binding-real-frame
+          path: |
+            previews/v014026-ordan-rig-clip-fixed/
+            previews/v014024-chest-side-aisle/static-geometry-audit.json
+          if-no-files-found: warn
+          retention-days: 12
