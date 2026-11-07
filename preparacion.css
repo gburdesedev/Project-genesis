@@ -523,3 +523,30 @@
 }
 .workspaceViewer .prepMaterialVisual.charcoal .prepMaterialModel{transform:scale(1.13)}
 .workspaceViewer .prepMaterialVisual.charcoal .prepMaterialPoster{transform:scale(1.06);mask-image:none}
+
+
+/* Fabricaciones · demo: bloqueo de familias/recetas usando los mismos marcos originales.
+   Sólo desaturar contenido bloqueado, sin alterar geometría ni arte aprobado. */
+.prepArtboard .workspaceRecipeFamily.is-locked{
+  filter:grayscale(1);
+  opacity:.5;
+}
+.prepSkinDetails .workspaceRecipeFamily.is-locked h4{
+  color:#aaa!important;
+}
+.prepArtboard .workspaceRecipeChoice.is-locked,
+.prepArtboard .workspaceRecipeChoice:disabled{
+  color:#939393!important;
+  background:#161616!important;
+  border-color:#505050!important;
+  box-shadow:none!important;
+  cursor:not-allowed!important;
+  filter:grayscale(1);
+  opacity:.6;
+}
+.prepArtboard .workspaceRecipeChoice.is-locked[aria-pressed="true"]{
+  border-color:#606060!important;
+  color:#aaa!important;
+  background:#1b1b1b!important;
+}
+.workspaceRecipeLock{display:inline-block;margin-right:.45em;font-size:.91em;vertical-align:baseline;}
