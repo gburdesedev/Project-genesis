@@ -25,11 +25,12 @@ const root=path.resolve(__dirname,'..');
         {id:'escudo',family:'Escudos',subfamily:'Escudo de hierro',formula:{materials:[{material:'Lingote de hierro',qty:6}]}},
         {id:'armadura',family:'Armaduras',subfamily:'Armadura de hierro',formula:{materials:[{material:'Lingote de hierro',qty:1}]},questLocked:true}
       ];
+      window.__testCreatedItems=[];
       window.GenesisPreparation.open({
         profession:'Herrero',inventory:{'Lingote de hierro':3,'Mineral de hierro':1},
         requiredStock:{'Lingote de hierro':2},formula:recipes[0].formula,
         recipeName:'Espada de hierro',startTab:'Fabricaciones',
-        getItems:()=>[],getRecipeCatalog:()=>recipes,canCraftRecipe:id=>id!=='armadura',
+        getItems:()=>window.__testCreatedItems,getRecipeCatalog:()=>recipes,canCraftRecipe:id=>id!=='armadura',
         onCraft:()=>{},onCraftRecipe:()=>{},renderAsset:()=>'',recipeAsset:()=>'<div>VISOR DE PRUEBA</div>',
         modal(html,cls){const e=document.querySelector('#modal');e.className='modal '+cls;e.innerHTML=html;document.querySelector('#modalLayer').style.display='grid'},
         closeModal(){document.querySelector('#modalLayer').style.display='none'}
@@ -42,7 +43,23 @@ const root=path.resolve(__dirname,'..');
     assert.equal(await page.locator('.workspaceRecipeChoice:disabled').count(),2,'Blocked actions disabled');
     assert.equal(await page.locator('.workspaceRecipeLock').count(),4,'Each blocked family/recipe has padlock');
     assert.equal(await page.locator('#prepStart').isDisabled(),false,'Ready sword remains craftable');
+    assert.equal(await page.locator('.fabricationDemoBar').count(),5,'Five reference PT bars');
+    assert.equal(await page.locator('.fabricationDemoBar[data-pt-name="Global"] b').textContent(),'0%');
+    assert.equal(await page.locator('.fabricationDemoBar[data-pt-name="Fabricación"] b').textContent(),'0%');
+    for(const name of ['Refinamiento','Reciclaje','Conocimiento']) {
+      assert.equal(await page.locator('.fabricationDemoBar[data-pt-name="'+name+'"] b').textContent(),'DEMO');
+    }
     await page.screenshot({path:path.join(out,'fabricaciones-candados-demo.png'),fullPage:false});
+    await page.evaluate(()=>{
+      window.__testCreatedItems.push({id:'espada-prueba-1',name:'Espada de hierro',rarity:'Común',recipe:'espada',channels:[]});
+      window.GenesisPreparation.navigate('Fabricaciones');
+    });
+    assert.equal(await page.locator('.fabricationDemoBar[data-pt-name="Global"] b').textContent(),'1%');
+    assert.equal(await page.locator('.fabricationDemoBar[data-pt-name="Fabricación"] b').textContent(),'1%');
+    for(const name of ['Refinamiento','Reciclaje','Conocimiento']) {
+      assert.equal(await page.locator('.fabricationDemoBar[data-pt-name="'+name+'"] b').textContent(),'DEMO');
+    }
+    await page.screenshot({path:path.join(out,'fabricaciones-candados-pt-demo.png'),fullPage:false});
     console.log('PASS visual UI: recipe lock state and original CSS art; screenshot saved.');
   } finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
