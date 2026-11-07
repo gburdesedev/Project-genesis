@@ -1,0 +1,36 @@
+name: V014.027 | Read-only UI interaction target audit
+on:
+  push:
+    branches:
+      - experiment/v014027-demo-full-e2e-20261107
+    paths: 
+      - .github/workflows/v014027-late-ui-targets.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect-real-game-transitions:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Output bounded original-game snippets for legitimate late quest actions
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text()
+          targets=[
+            ('function showComparison(',4400),
+            ('function completePrototype(',3900),
+            ('function showMercenaryCandidates(',2800),
+            ('function showMercenarySheet(',4700),
+            ('function showMercenaryMission(',3500),
+            ('function showDemoMaterialMentorDialogue(',2500),
+            ('function showExperimentalCraftConfirm(',4100),
+            ('function showDemoCycleComplete(',3300),
+            ('function objectiveTarget(',3400),
+            ('function interactables(',2500)]
+          for marker,n in targets:
+            i=s.find(marker)
+            print('\\n==== REAL_LATE_UI',marker,'at',i,'====')
+            if i>=0:print(s[i:i+n])
+          PY
