@@ -1,0 +1,33 @@
+name: V014.027 | Inventory 16:9 containment regression
+on:
+  push:
+    branches:
+      - experiment/v014027-inventory-viewer-fit-20261107
+    paths:
+      - inventario_genesis_16x9.css
+      - .github/workflows/v014027-inventory-fit-qa.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-ora-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Playwright
+        run: npm install --prefix /tmp/genesis-v014027-ui playwright@1.56.1
+      - name: Test actual inventory 16:9 layout, controls, dynamic items and material viewer
+        env:
+          NODE_PATH: /tmp/genesis-v014027-ui/node_modules
+        run: node tests/inventario_16x9.cjs
+      - name: Save browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014027-approved-inventory-16x9
+          path: /tmp/genesis-responsive/
+          if-no-files-found: warn
+          retention-days: 12
