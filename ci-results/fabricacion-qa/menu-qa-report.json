@@ -11,7 +11,7 @@
     "recipe": "espada_hierro",
     "formula": {
       "id": "espada_hierro",
-      "sessionSeed": 933001101,
+      "sessionSeed": 3572992002,
       "materials": [
         {
           "role": "principal",
@@ -21,31 +21,31 @@
         {
           "role": "proceso",
           "material": "Carbón vegetal",
+          "qty": 1
+        },
+        {
+          "role": "secundario",
+          "material": "Cuero bovino curtido",
           "qty": 2
         },
         {
           "role": "secundario",
-          "material": "Cuero caprino curtido",
-          "qty": 2
-        },
-        {
-          "role": "secundario",
-          "material": "Madera seca de fresno",
+          "material": "Madera seca de roble",
           "qty": 1
         }
       ],
-      "signature": "principal:Lingote de hierro:3|proceso:Carbón vegetal:2|secundario:Cuero caprino curtido:2|secundario:Madera seca de fresno:1"
+      "signature": "principal:Lingote de hierro:3|proceso:Carbón vegetal:1|secundario:Cuero bovino curtido:2|secundario:Madera seca de roble:1"
     },
     "stock": {
       "Lingote de hierro": 6,
-      "Carbón vegetal": 4,
-      "Cuero caprino curtido": 4,
-      "Madera seca de fresno": 2
+      "Carbón vegetal": 2,
+      "Cuero bovino curtido": 4,
+      "Madera seca de roble": 2
     }
   },
   "domImmediately": {
-    "modalClass": "modal preparationModal fabV04Modal",
-    "modalHTML": "<div class=\"fabV04Board prepArtboard\" data-active-tab=\"Fabricaciones\" data-version=\"v04-approved\"><img class=\"fabV04Base\" src=\"assets/ui/fabricacion/v04/Genesis_Fabricacion_V04_Original_Barras.png\" alt=\"\" draggable=\"false\"><nav class=\"fabV04Tabs\" aria-label=\"Menús de Project Genesis\"><button type=\"button\" data-fab-tab=\"Inventario\" aria-label=\"Inventario\"></button><button type=\"button\" data-fab-tab=\"Preparacion\" aria-label=\"Preparación\"></button><button type=\"button\" data-fab-tab=\"Fabricaciones\" aria-label=\"Fabricaciones\" aria-current=\"page\" disabled=\"\"></button><button type=\"button\" data-fab-t",
+    "modalClass": "modal preparationModal prepApprovedV04Modal",
+    "modalHTML": "<div class=\"approvedFabV04 prepArtboard\" data-active-tab=\"Fabricaciones\" data-art-version=\"V04\" aria-label=\"Fabricación aprobada V04\"><img class=\"approvedFabArt\" src=\"assets/ui/fabricacion/Genesis_Fabricacion_V04_Original_Barras.png\" alt=\"\" draggable=\"false\"><div class=\"approvedFabRecipes\" role=\"group\" aria-label=\"Recetas conocidas del herrero\"><section class=\"approvedFabFamily workspaceRecipeFamily\"><h4>Espada</h4><button type=\"button\" class=\"approvedFabRecipe workspaceRecipeChoice\" data-recipe-id=\"espada_hierro\" aria-pressed=\"true\">Espada de hierro</button></section><section class=\"approvedF",
     "modalLayerStyle": "grid",
     "modalLayerComputed": "grid",
     "artboardCount": 1,
@@ -59,9 +59,11 @@
     "exists": true,
     "family": [
       {
+        "name": "Espada",
         "locked": false
       },
       {
+        "name": "Escudo",
         "locked": false
       }
     ],
@@ -87,8 +89,12 @@
         "value": "DEMO"
       }
     ],
-    "image": "http://127.0.0.1:8765/assets/ui/fabricacion/v04/espada_v12b_v175_referencia.png",
-    "imageLoaded": true,
+    "image": "http://127.0.0.1:8765/assets/ui/fabricacion/Genesis_Fabricacion_V04_Original_Barras.png",
+    "artVersion": "V04",
+    "artLoaded": true,
+    "materialCards": 4,
+    "noRotatingViewer": true,
+    "imageLoaded": false,
     "canCraft": true
   },
   "clicked": true,
@@ -96,16 +102,16 @@
     "step": 10,
     "created": [
       {
-        "name": "Hoja con Hierro y Piel Caprina del Hierro Implacable del Fresno Preparado",
+        "name": "Hoja del Corte Seguro con curtido Bovino y Hierro de la Brasa Negra",
         "recipe": "espada_hierro",
         "rarity": "Inútil"
       }
     ],
     "inventory": {
       "Lingote de hierro": 3,
-      "Carbón vegetal": 2,
-      "Cuero caprino curtido": 2,
-      "Madera seca de fresno": 1
+      "Carbón vegetal": 1,
+      "Cuero bovino curtido": 2,
+      "Madera seca de roble": 1
     },
     "selected": "Herrero",
     "resultButtonPresent": true,
