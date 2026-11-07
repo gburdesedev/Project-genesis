@@ -1,24 +1,23 @@
 {
   "mode": "Original Project Genesis HTML + actual Fabricaciones controller + real NGE session, 3D village load bypassed",
-  "captured": [],
+  "captured": [
+    "01-diagnostico-tras-abrir-menu",
+    "99-diagnostic"
+  ],
   "errors": [
-    "CDP screenshot 01-diagnostico-tras-abrir-menu: Error: CDP screenshot 18000ms timeout",
-    "Playwright screenshot 01-diagnostico-tras-abrir-menu: TimeoutError: page.screenshot: Timeout 18000ms exceeded.\nCall log:\n  - taking page screenshot\n",
-    "Error: Both screenshot capture methods failed: 01-diagnostico-tras-abrir-menu\n    at shot (/__w/Project-genesis/Project-genesis/tests/fabricaciones_menu_real_dom_qa.cjs:33:21)\n    at async /__w/Project-genesis/Project-genesis/tests/fabricaciones_menu_real_dom_qa.cjs:95:4",
-    "CDP screenshot 99-diagnostic: Error: CDP screenshot 18000ms timeout",
-    "Playwright screenshot 99-diagnostic: TimeoutError: page.screenshot: Timeout 18000ms exceeded.\nCall log:\n  - taking page screenshot\n"
+    "page.waitForSelector: Timeout 6500ms exceeded.\nCall log:\n  - waiting for locator('.prepArtboard[data-active-tab=\"Fabricaciones\"]')\n\n    at /__w/Project-genesis/Project-genesis/tests/fabricaciones_menu_real_dom_qa.cjs:99:15"
   ],
   "status": "FAILED",
   "session": {
     "recipe": "espada_hierro",
     "formula": {
       "id": "espada_hierro",
-      "sessionSeed": 989665631,
+      "sessionSeed": 992526019,
       "materials": [
         {
           "role": "principal",
           "material": "Lingote de hierro",
-          "qty": 2
+          "qty": 3
         },
         {
           "role": "proceso",
@@ -27,22 +26,22 @@
         },
         {
           "role": "secundario",
-          "material": "Cuero bovino curtido",
+          "material": "Cordel de cáñamo",
           "qty": 1
         },
         {
           "role": "secundario",
-          "material": "Madera seca de fresno",
+          "material": "Madera seca de roble",
           "qty": 1
         }
       ],
-      "signature": "principal:Lingote de hierro:2|proceso:Carbón vegetal:1|secundario:Cuero bovino curtido:1|secundario:Madera seca de fresno:1"
+      "signature": "principal:Lingote de hierro:3|proceso:Carbón vegetal:1|secundario:Cordel de cáñamo:1|secundario:Madera seca de roble:1"
     },
     "stock": {
-      "Lingote de hierro": 4,
+      "Lingote de hierro": 6,
       "Carbón vegetal": 2,
-      "Cuero bovino curtido": 2,
-      "Madera seca de fresno": 2
+      "Cordel de cáñamo": 2,
+      "Madera seca de roble": 2
     }
   },
   "domImmediately": {
