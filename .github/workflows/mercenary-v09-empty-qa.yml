@@ -1,0 +1,37 @@
+name: Mercenary approved V09 | Empty inventory visual QA
+on:
+  push:
+    branches:
+      - experiment/mercenary-inventory-v09-approved-empty-20261107
+    paths:
+      - .github/workflows/mercenary-v09-empty-qa.yml
+      - mercenary_equipment_canvas_v09.*
+      - mercenary_equipment_canvas_v001.*
+      - preview_empty.html
+      - tests/mercenary_v09_empty.cjs
+      - assets/ui/mercenary/v09/**
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  v09-empty-art-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Playwright
+        run: npm install --prefix /tmp/mercenary-v09-qa playwright@1.56.1
+      - name: Verify exact art sources, geometry and no fabricated data
+        env:
+          NODE_PATH: /tmp/mercenary-v09-qa/node_modules
+        run: node tests/mercenary_v09_empty.cjs
+      - name: Upload actual Chromium screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mercenary-v09-empty-chromium-1600x900
+          path: previews/mercenary-v09/approved-empty-1600x900.png
+          if-no-files-found: warn
+          retention-days: 14
