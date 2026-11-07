@@ -18,7 +18,6 @@ jobs:
           mkdir -p previews/fabricaciones-real-game
           curl -fLsS --retry 3 --max-time 60 'https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/98cb1c5d94effb206d75d6c94c0d526a5c97ddc8/public-previews/espada-v175-j-roughness-v12/V12_V175_Color_J_Rugosidad034_Hero.png' -o previews/fabricaciones-real-game/V12B_reference.png
           test $(wc -c < previews/fabricaciones-real-game/V12B_reference.png) -gt 100000
-          file previews/fabricaciones-real-game/V12B_reference.png
           sha256sum previews/fabricaciones-real-game/V12B_reference.png
       - name: Install pinned Playwright
         run: npm install --prefix /tmp/genesis-fab-real playwright@1.56.1
