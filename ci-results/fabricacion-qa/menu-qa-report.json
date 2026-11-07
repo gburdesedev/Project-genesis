@@ -11,22 +11,22 @@
     "recipe": "espada_hierro",
     "formula": {
       "id": "espada_hierro",
-      "sessionSeed": 313442494,
+      "sessionSeed": 933001101,
       "materials": [
         {
           "role": "principal",
           "material": "Lingote de hierro",
-          "qty": 2
+          "qty": 3
         },
         {
           "role": "proceso",
           "material": "Carbón vegetal",
-          "qty": 1
+          "qty": 2
         },
         {
           "role": "secundario",
           "material": "Cuero caprino curtido",
-          "qty": 1
+          "qty": 2
         },
         {
           "role": "secundario",
@@ -34,12 +34,12 @@
           "qty": 1
         }
       ],
-      "signature": "principal:Lingote de hierro:2|proceso:Carbón vegetal:1|secundario:Cuero caprino curtido:1|secundario:Madera seca de fresno:1"
+      "signature": "principal:Lingote de hierro:3|proceso:Carbón vegetal:2|secundario:Cuero caprino curtido:2|secundario:Madera seca de fresno:1"
     },
     "stock": {
-      "Lingote de hierro": 4,
-      "Carbón vegetal": 2,
-      "Cuero caprino curtido": 2,
+      "Lingote de hierro": 6,
+      "Carbón vegetal": 4,
+      "Cuero caprino curtido": 4,
       "Madera seca de fresno": 2
     }
   },
@@ -96,15 +96,15 @@
     "step": 10,
     "created": [
       {
-        "name": "Filo con núcleo de Fresno y curtido Caprino del Hierro Firme del Hierro Reforzado",
+        "name": "Hoja con Hierro y Piel Caprina del Hierro Implacable del Fresno Preparado",
         "recipe": "espada_hierro",
         "rarity": "Inútil"
       }
     ],
     "inventory": {
-      "Lingote de hierro": 2,
-      "Carbón vegetal": 1,
-      "Cuero caprino curtido": 1,
+      "Lingote de hierro": 3,
+      "Carbón vegetal": 2,
+      "Cuero caprino curtido": 2,
       "Madera seca de fresno": 1
     },
     "selected": "Herrero",
