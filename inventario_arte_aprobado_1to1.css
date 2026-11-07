@@ -16,6 +16,8 @@
  width:100%!important;height:100%!important;
  aspect-ratio:1672/941!important;
  container-type:inline-size!important;
+ /* El CSS previo aplica background: ... !important: asegurar que no tape el PNG aprobado. */
+ background-image:url('assets/ui/inventario/INVENTARIO_BASE_LIMPIA_APROBADA_16x9.png')!important;
  background-position:center!important;
  background-repeat:no-repeat!important;
  background-size:100% 100%!important;
