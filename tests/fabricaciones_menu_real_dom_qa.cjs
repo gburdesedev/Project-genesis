@@ -57,7 +57,9 @@ window.__GENESIS_MENU_QA__={
    await page.goto('http://127.0.0.1:8765/index.html?qa=fabricaciones-menu',{waitUntil:'domcontentloaded',timeout:90000});
    await page.waitForFunction(()=>!!window.__GENESIS_MENU_QA__&&!!window.GenesisPreparation&&!!window.GenesisPrototypeEngines,null,{timeout:70000});
    report.session=await page.evaluate(()=>window.__GENESIS_MENU_QA__.setup());
-   await page.waitForSelector('.prepArtboard[data-active-tab="Fabricaciones"]',{timeout:20000});
+   report.renderDiagnostic=await page.evaluate(()=>({modalCount:document.querySelectorAll('.prepArtboard').length,activeTab:window.GenesisPreparation?.activeTab?.(),modalLayer:document.getElementById('modalLayer')?.style.display,modalClass:document.getElementById('modal')?.className,modalOuter:document.getElementById('modal')?.outerHTML.slice(0,320),loading:document.getElementById('loading')?.style.display,screen:innerWidth+'x'+innerHeight,htmlErrors:document.body?.innerText?.slice(-500)}));save();console.log('FABRICACIONES_RENDER_DIAG',JSON.stringify(report.renderDiagnostic));
+   await shot('00-menu-diagnostico-inmediato');
+   await page.waitForSelector('.prepArtboard[data-active-tab="Fabricaciones"]',{state:'attached',timeout:20000});
    await page.waitForFunction(()=>{const e=document.querySelector('.workspaceRecipeHero img');return e?.complete&&e.naturalWidth>0},null,{timeout:25000});
    report.menu=await page.evaluate(()=>({tab:window.GenesisPreparation.activeTab(),family:[...document.querySelectorAll('.workspaceRecipeFamily')].map(e=>({name:e.querySelector('h4')?.textContent,locked:e.classList.contains('is-locked')})),pt:[...document.querySelectorAll('.fabricationDemoBar')].map(e=>({name:e.dataset.ptName,value:e.querySelector('b')?.textContent})),image:document.querySelector('.workspaceRecipeHero img')?.currentSrc,canCraft:!document.getElementById('prepStart')?.disabled}));
    assert.equal(report.menu.tab,'Fabricaciones');
