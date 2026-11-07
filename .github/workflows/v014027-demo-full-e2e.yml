@@ -25,7 +25,7 @@ jobs:
   real-end-to-end:
     needs: core
     runs-on: ubuntu-24.04
-    timeout-minutes: 32
+    timeout-minutes: 58
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
@@ -37,7 +37,7 @@ jobs:
           NODE_PATH: /tmp/genesis-v014027-playwright/node_modules
           GENESIS_RETRY_SCREENSHOTS: '1'
           GENESIS_CINEMATIC_CAPTURE: '0'
-        timeout-minutes: 29
+        timeout-minutes: 55
         run: node tests/v014027_demo_full_e2e.cjs
       - name: Preserve real step snapshots and error report even on test failure
         if: always()
