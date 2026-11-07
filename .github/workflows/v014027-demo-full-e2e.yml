@@ -1,0 +1,49 @@
+name: V014.027 | Full demo end-to-end real keyboard Playwright
+on:
+  push:
+    branches:
+      - experiment/v014027-demo-full-e2e-20261107
+    paths:
+      - .github/workflows/v014027-demo-full-e2e.yml
+      - tests/v014027_demo_full_e2e.cjs
+      - inventario_genesis_16x9.css
+      - index.html
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  core:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify test and existing 1024 seeded recipes, market, shields, mercenary equipment
+        run: |
+          node --check tests/v014027_demo_full_e2e.cjs
+          node --test tests/v014025_functional_core.cjs
+          node --test tests/genesis_market_domain_v001.cjs tests/mercenary_equipment_domain_v001.cjs
+  real-end-to-end:
+    needs: core
+    runs-on: ubuntu-24.04
+    timeout-minutes: 32
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned browser test dependency
+        run: npm install --prefix /tmp/genesis-v014027-playwright playwright@1.56.1
+      - name: Play REAL game from seed through swords merchant shields and mercenary, stop on missing interaction
+        env:
+          NODE_PATH: /tmp/genesis-v014027-playwright/node_modules
+          GENESIS_RETRY_SCREENSHOTS: '1'
+          GENESIS_CINEMATIC_CAPTURE: '0'
+        timeout-minutes: 29
+        run: node tests/v014027_demo_full_e2e.cjs
+      - name: Preserve real step snapshots and error report even on test failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014027-complete-demo-real-e2e
+          path: previews/v014027-demo-full-e2e/
+          if-no-files-found: warn
+          retention-days: 14
