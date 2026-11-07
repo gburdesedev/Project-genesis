@@ -429,14 +429,102 @@ async function main(){
      report.testOnlyRenderSetting=diagnostic;
      log('HEADLESS_RENDER_LOOP_PRESERVED',diagnostic);
    }
-   if(st.step>=14){
-     const late=await page.evaluate(()=>({modal:document.getElementById('modal')?.innerText?.slice(0,1800),buttons:Array.from(document.querySelectorAll('button')).filter(x=>x.getClientRects().length).map(x=>({id:x.id,text:x.innerText?.trim()?.slice(0,85),className:x.className,disabled:x.disabled})).slice(-65),quest:document.getElementById('questTitle')?.innerText}));
-     log('POST_SHIELD_LATE_QUEST_DIAGNOSTIC',{step:st.step,crafted:st.crafted,late});
-     try{await page.screenshot({path:path.join(out,'post-shield-real-game.png'),animations:'disabled',timeout:9000})}catch(e){log('POST_SHIELD_SCREENSHOT_FAILED',e.message)}
-     report.result=st.crafted?.length>=4?'FOUR_REAL_CREATIONS_REACHED_MERCENARY_PENDING':'POST_MARKET_INCOMPLETE_CRAFTING';
-     break;
+   if(st.step>=14&&st.step<=24&&st.crafted?.length<4){
+     report.result='LATE_QUEST_WITHOUT_FOUR_REAL_ITEMS';
+     log('LATE_GAME_MISSING_CREATIONS',{step:st.step,crafted:st.crafted});break;
    }
-   if(st.step===9){
+   if(st.step===14){
+     log('SHIELDS_CRAFTED_FINAL_COMPARISON',{step:st.step,items:st.crafted});
+     try{await page.screenshot({path:path.join(out,'four-real-items-after-shields.png'),timeout:8000})}catch{}
+     if(await page.locator('#compareContinue').isVisible().catch(()=>false)){
+       await realButton('#compareContinue');await delay(550);
+     }
+     if(await page.locator('#startMercExtension').isVisible().catch(()=>false)){
+       await realButton('#startMercExtension');await delay(550);
+     }
+     const after=(await snap()).state;
+     log('MERCENARY_EXTENSION_OPENED',{step:after?.step,candidateCount:await page.locator('[data-merc]').count()});
+     if(after?.step!==15){report.result='CANNOT_OPEN_MERCENARY_EXTENSION';break}
+   }else if(st.step===15){
+     const first=page.locator('[data-merc="0"]').first();
+     if(!await first.isVisible().catch(()=>false)){report.result='MERCENARY_CANDIDATE_NOT_VISIBLE';break}
+     await first.click({force:true,timeout:10000,noWaitAfter:true});
+     try{await page.locator('.mcBoard').waitFor({state:'visible',timeout:60000})}catch(e){log('MERCENARY_MODEL_OR_UI_NOT_READY',String(e));report.result='MERCENARY_LOADING_FAILED';break}
+     const after=(await snap()).state;
+     log('MERCENARY_CANDIDATE_REAL_SELECTION',{step:after?.step,boardVisible:await page.locator('.mcBoard').isVisible()});
+     if(after?.step!==16){report.result='MERCENARY_EQUIPMENT_SCREEN_DID_NOT_OPEN';break}
+   }else if(st.step===16){
+     await page.locator('.mcBoard [data-family="first"]').first().click({force:true,noWaitAfter:true});
+     const sword=page.locator('.mcBoard [data-item="0"]').first();
+     if(!await sword.isVisible().catch(()=>false)){report.result='CRAFTED_SWORD_NOT_IN_MERCENARY_INVENTORY';break}
+     await sword.click({force:true,noWaitAfter:true});await delay(160);
+     await page.locator('.mcBoard [data-family="second"]').first().click({force:true,noWaitAfter:true});
+     const shield=page.locator('.mcBoard [data-item="0"]').first();
+     if(!await shield.isVisible().catch(()=>false)){report.result='CRAFTED_SHIELD_NOT_IN_MERCENARY_INVENTORY';break}
+     await shield.click({force:true,noWaitAfter:true});await delay(160);
+     if(!await realButton('.mcBoard [data-action="equip"]')){report.result='MERCENARY_EQUIP_BUTTON_NOT_READY';break}
+     await delay(550);
+     const after=(await snap()).state;log('EQUIPPED_REAL_SWORD_AND_SHIELD',{step:after?.step,mercenaryState:after?.mercenaryState,crafted:after?.crafted});
+     if(after?.step!==17){report.result='MERCENARY_REAL_GEAR_ATTACHMENT_FAILED';break}
+     try{await page.screenshot({path:path.join(out,'mercenary-equipped-real.png'),timeout:8000})}catch{}
+   }else if(st.step===17){
+     const path=await approach();log('REAL_APPROACH_EQUIPPED_MERCENARY',path);
+     if(!path.ok){report.result='CANNOT_REACH_EQUIPPED_MERCENARY';break}
+     await page.keyboard.press('e');await delay(500);
+     if(!await realButton('#mercSheetMission')){report.result='MERCENARY_DOSSIER_OR_MISSION_MISSING';break}
+     await delay(300);
+     if(!await realButton('#missionSend')){report.result='MERCENARY_EXPEDITION_BUTTON_MISSING';break}
+     await delay(600);
+     log('REAL_EXPEDITION_LAUNCHED',{step:(await snap()).state?.step});
+   }else if(st.step===18){
+     let returned=false;
+     for(let t=0;t<210;t++){
+       const check=(await snap()).state;
+       if(check?.step===19){returned=true;break}
+       if(t%22===0)log('MERCENARY_DEPARTURE_PHYSICAL_PROGRESS',{t,step:check?.step,mercenaryState:check?.mercenaryState});
+       await delay(550);
+     }
+     if(!returned){report.result='MERCENARY_NEVER_RETURNED';break}
+     log('MERCENARY_EXPEDITION_RETURNED',{step:19});
+   }else if(st.step===19){
+     try{await page.locator('#collectDemoMaterial').waitFor({state:'visible',timeout:14000})}catch{report.result='EXPEDITION_MATERIAL_COLLECTION_MISSING';break}
+     if(!await realButton('#collectDemoMaterial')){report.result='EXPEDITION_MATERIAL_COLLECT_FAILED';break}
+     await delay(700);
+     log('EXPEDITION_MATERIAL_COLLECTED',{step:(await snap()).state?.step});
+   }else if(st.step===20){
+     try{await page.locator('#demoMaterialTry').waitFor({state:'visible',timeout:14000})}catch{report.result='MATERIAL_KNOWLEDGE_RESTRICTION_MISSING';break}
+     if(!await realButton('#demoMaterialTry')){report.result='MATERIAL_RESTRICTION_TEST_FAILED';break}
+     await delay(420);
+     log('UNKNOWN_MATERIAL_REQUIRES_MENTOR',{step:(await snap()).state?.step});
+   }else if(st.step===21){
+     const path=await approach();log('REAL_APPROACH_MENTOR_WITH_SAMPLE',path);
+     if(!path.ok){report.result='CANNOT_REACH_MENTOR_WITH_SAMPLE';break}
+     await page.keyboard.press('e');await delay(430);
+     if(!await realButton('#demoPrepareMaterial')){report.result='MENTOR_MATERIAL_PREPARATION_NOT_AVAILABLE';break}
+     try{await page.locator('#demoGoCraft').waitFor({state:'visible',timeout:16000})}catch{report.result='MENTOR_DID_NOT_IDENTIFY_MATERIAL';break}
+     if(!await realButton('#demoGoCraft')){report.result='MATERIAL_PREPARED_BUT_CANNOT_LEAVE_MENTOR';break}
+     await delay(350);log('MATERIAL_PREPARED_REAL_DIALOGUE',{step:(await snap()).state?.step});
+   }else if(st.step===23){
+     const path=await approach();log('REAL_APPROACH_THIRD_SWORD_STATION',path);
+     if(!path.ok){report.result='CANNOT_REACH_EXPERIMENTAL_FORGE';break}
+     await page.keyboard.press('e');await delay(440);
+     if(!await realButton('#demoCraftConfirm')){report.result='THIRD_SWORD_EXPERIMENTAL_CRAFT_NOT_AVAILABLE';break}
+     await delay(550);
+     const after=(await snap()).state;
+     log('REAL_THIRD_SWORD_CRAFTED_WITH_EXPEDITION_SAMPLE',{step:after?.step,crafted:after?.crafted});
+     if(after?.step!==24||after?.crafted?.length!==5){report.result='THIRD_SWORD_NOT_CREATED_OR_SAMPLE_NOT_CONSUMED';break}
+   }else if(st.step===24){
+     if(!await realButton('#demoCycleFinish')){report.result='DEMO_CYCLE_FINISH_ACTION_NOT_VISIBLE';break}
+     await delay(480);
+     const final=await page.evaluate(()=>({cycle:document.querySelector('.bigState')?.textContent||'',text:document.getElementById('modal')?.innerText?.slice(0,1900),modal:document.getElementById('modalLayer')?.style.display}));
+     log('ACTUAL_DEMO_FINAL_CYCLE',{step:st.step,crafted:st.crafted,final});
+     if(!final.cycle.includes('CICLO COMPLETADO')||!final.text?.includes('muestra desconocida')){report.result='DEMO_CYCLE_COMPLETION_NOT_RENDERED';break}
+     try{await page.screenshot({path:path.join(out,'demo-real-cycle-completed.png'),animations:'disabled',timeout:10000})}catch(e){log('FINAL_SCREENSHOT_FAILED',String(e))}
+     report.result='DEMO_END_FULLY_VERIFIED';break;
+   }else if(st.step===22){
+     try{await page.locator('#demoGoCraft').waitFor({state:'visible',timeout:16000})}catch{report.result='MATERIAL_PREPARATION_STEP22_STALLED';break}
+     await realButton('#demoGoCraft');await delay(380);
+   }else if(st.step===9){
     // Q9 requires an actual inventory open-and-close, not a direct quest mutation.
     await dialog();
     const before=await page.evaluate(()=>({modal:document.getElementById('modalLayer')?.style.display,inventoryTab:window.GenesisPreparation?.activeTab?.()}));
