@@ -1683,6 +1683,52 @@ function resetMercenaryExtension(){resetDemoEpilogue();mercCandidate=null;mercSw
 function candidateMiniStats(c){return `<div class="mercStatsMini"><div class="mercStatMini"><b>${c.stats.damage}</b><span>DAÑO BASE</span></div><div class="mercStatMini"><b>${c.stats.protection}</b><span>PROTECCIÓN BASE</span></div><div class="mercStatMini"><b>${c.stats.vitality}</b><span>VITALIDAD</span></div><div class="mercStatMini"><b>${c.stats.mobility}</b><span>MOVILIDAD</span></div></div>`}
 function showMercenaryCandidates(){setTutorialStep(15);ensureMercenaryReady().catch(err=>toast('No se pudo preparar el Guerrero: '+(err?.message||err),2400));const tanner=mercGearRoute()==='Curtidor',arrival=tanner?'Llega con ropa básica; la armadura y las botas están pendientes.':'Llega sin espada ni escudo.';modal(`<div class="mercTopline"><div><div class="ey">RECORRIDO CONDENSADO · EXTENSIÓN DE GAMEPLAY</div><h2>Elegí un Guerrero para contratar</h2></div><div class="mercProtoFlag">VALORES DE PROTOTIPO · NO BALANCE FINAL</div></div><div class="mercIntro"><strong>Demostración jugable:</strong> los tres candidatos permiten mostrar contratación, estadísticas, equipamiento y expedición sin representar todavía el orden completo del juego final.</div><div class="mercGrid">${MERC_CANDIDATES.map(c=>`<button class="mercCard" data-merc="${c.id}"><div class="mcNum">CANDIDATO ${String(c.id+1).padStart(2,'0')}</div><div class="mercSilhouette">♙</div><h3>${c.label}</h3><p><strong>${c.look}</strong><br>${c.note}. ${arrival}</p>${candidateMiniStats(c)}<span class="mcRole">GUERRERO · COMPATIBLE</span><div class="mcHint">Seleccionar dossier</div></button>`).join('')}</div><div class="actions"><button class="secondary" id="mercBackComplete">Volver</button></div>`,'mercenaryModal');document.querySelectorAll('[data-merc]').forEach(btn=>btn.onclick=async()=>{if(btn.disabled)return;btn.disabled=true;try{mercCandidate=Number(btn.dataset.merc);await ensureMercenaryReady();applyMercCandidateVisual();showMercenaryEquipment()}catch(err){console.error(err);toast('No se pudo cargar el Guerrero: '+(err?.message||err),2600);btn.disabled=false}});document.getElementById('mercBackComplete').onclick=completePrototype}
 function showMercenaryEquipment(editing=false,reuseDraft=false){
+
+  // GENESIS_V014030_STARTER_GEAR: real NGE-issued gear belongs to this warrior,
+  // never to the player's craftedItems. Preserve V09 original layout.
+  if(!editing && mercCandidate!=null && mercGearRoute()==='Herrero'
+     && (!mercSwordItem || !mercShieldItem)){
+    const e=window.GenesisPrototypeEngines;
+    const swordFormula=formulaFor('espada_hierro');
+    const shieldFormula=formulaFor('escudo_hierro');
+    if(!e?.fabricate || !e?.present || !swordFormula || !shieldFormula){
+      throw new Error('El equipamiento inicial del mercenario requiere las fórmulas NGE reales.');
+    }
+    // Deterministic real Common result with apprentice-level stats, not hardcoded values.
+    let commonSwordRaw=null,commonPower=Infinity;
+    for(let seed=1;seed<=384;seed++){
+      const raw=e.fabricate('espada_hierro',{
+        craft:2,seed:(16421+seed*1777)>>>0,
+        artisan:'Armero de la guardia',formula:swordFormula
+      });
+      const power=Number(raw.channels?.[0]?.[1]);
+      if(raw.rarity==='Común' && Number.isFinite(power) && power<commonPower){
+        commonPower=power;commonSwordRaw=raw;
+        if(commonPower<=45)break;
+      }
+    }
+    if(!commonSwordRaw)throw new Error('NGE no produjo espada Común para el mercenario.');
+    const uselessShieldRaw=e.fabricate('escudo_hierro',{
+      craft:1,seed:16421,artisan:'Armero de la guardia',formula:shieldFormula
+    });
+    if(uselessShieldRaw.rarity!=='Inútil')
+      throw new Error('NGE no produjo escudo Inútil para el mercenario.');
+    const issuedSword=e.present(commonSwordRaw,usedItemNames);
+    const issuedShield=e.present(uselessShieldRaw,usedItemNames);
+    usedItemNames.add(issuedSword.name.toLocaleLowerCase('es'));
+    usedItemNames.add(issuedShield.name.toLocaleLowerCase('es'));
+    issuedSword.genesisOrigin='mercenary-issued-gear';
+    issuedShield.genesisOrigin='mercenary-issued-gear';
+    // Existing game fields are the one true mercenary equipment source.
+    mercSwordItem=issuedSword;
+    mercShieldItem=issuedShield;
+    // The player's generated pieces are still in craftedItems, unchanged.
+    if(mercenaryInitialized && mercenaryRoot){
+      if(!equipMercenaryCreations())
+        throw new Error('No se pudo montar el equipo inicial en el rig real.');
+    }
+  }
+
   // Approved 16:9 mercenary concept interface. Keep original implementation as fallback.
   if(window.GenesisMercenaryConcept?.open && mercCandidate!=null){
     if(!editing)setTutorialStep(16);
