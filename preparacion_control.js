@@ -730,7 +730,7 @@
     const recipes = (Array.isArray(all) ? all : []).filter(entry =>
       entry && entry.id && entry.family && entry.subfamily && entry.formula);
     const activeId = String(ctx.selectedRecipeId || ctx.activeRecipeId || '');
-    if (!recipes.some(entry => String(entry.id) === activeId))
+    if (!ctx.selectedRecipeId || !recipes.some(entry => String(entry.id) === String(ctx.selectedRecipeId)))
       ctx.selectedRecipeId = recipes.find(entry => String(entry.id) === String(ctx.activeRecipeId))?.id || recipes[0]?.id || null;
     const selected = recipes.find(entry => String(entry.id) === String(ctx.selectedRecipeId)) || null;
     const formula = selected?.formula || ctx.formula;
