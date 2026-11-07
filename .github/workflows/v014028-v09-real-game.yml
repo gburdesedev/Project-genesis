@@ -1,0 +1,26 @@
+name: V014.028 | Real Herrero game V09 generated gear screenshot Playwright
+on:
+  push:
+    branches: [experiment/v014028-mercenary-v09-real-craft-playwright-20261107]
+    paths: [tests/v014028_mercenary_v09_real_game.cjs,.github/workflows/v014028-v09-real-game.yml]
+  workflow_dispatch:
+jobs:
+  real-game-v09:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Playwright for actual Chromium UI
+        run: npm install --no-save playwright@1.56.1
+      - name: Load genuine PlayCanvas game seed genuine NGE and screenshot V09
+        run: node tests/v014028_mercenary_v09_real_game.cjs
+      - name: Upload screenshots and reports including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014028-v09-real-game-playwright
+          path: previews/v014028-mercenary-v09-real-craft/
+          if-no-files-found: warn
+          retention-days: 14
