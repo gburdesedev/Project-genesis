@@ -83,7 +83,10 @@ async function main(){
  async function realButton(selector){
    const b=page.locator(selector).first();
    if(!await b.count()||!await b.isVisible().catch(()=>false)||await b.isDisabled().catch(()=>true))return false;
-   await b.click({force:true,timeout:8000});return true;
+   // Playwright's scheduled-navigation wait can hang at SwiftShader ~1fps even
+   // though the physical mouse click has already updated the in-game UI.
+   // Keep the real browser input; don't wait for a page navigation in this SPA.
+   await b.click({force:true,timeout:8000,noWaitAfter:true});return true;
  }
  async function clickCraftableRecipe(){
    // Only real UI clicks: never set recipes, inventory, quest flags or the player.
