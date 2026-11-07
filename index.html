@@ -998,7 +998,7 @@ function setupGameViewport(){
 const bootState=window.__genesisBoot||{loaded:0,total:0,error:null};
 // Contar el archivo descargado, el modelo/clip instanciado y la textura del mundo una sola vez.
 // Los LOD de árboles fuera de vista se transmiten luego y no bloquean esta etapa.
-const bootPrepTotal=[...document.querySelectorAll('pc-model[data-genesis-boot-asset]:not([data-route])'),...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]')).length;
+const bootPrepTotal=[...document.querySelectorAll('pc-model[data-genesis-boot-asset]:not([data-route])'),...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]')||!!el.closest('#ordanModel')).length;
 const bootProgress={downloaded:0,downloadTotal:0,prepared:0,prepareTotal:bootPrepTotal,world:0,worldTotal:13};
 const groupSpec=[
  ['paredes','Estructuras'],['objetos','Personajes y objetos'],['animaciones','Animaciones'],
@@ -1055,7 +1055,7 @@ try{
  window.GenesisStreamLoader.setRetryHandler(loaderRetryDelay);
  window.GenesisFPS.attach(appEl.app,document.getElementById('tech'));
  const modelEls=[...document.querySelectorAll('pc-model[data-genesis-boot-asset]:not([data-route])')];
- const clipEls=[...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]'));
+ const clipEls=[...document.querySelectorAll('pc-anim-clip')].filter(el=>!el.closest('pc-model[data-route]')||!!el.closest('#ordanModel'));
  const prepItems=[...modelEls.map(el=>({kind:'modelo',label:el.getAttribute('name')||el.id||el.getAttribute('asset')||'modelo',el})),...clipEls.map(el=>({kind:'animación',label:el.getAttribute('name')||el.getAttribute('asset')||'clip',el}))];
  for(const item of prepItems){item.group=groupFor(item);bootGroups[item.group].total++}
  let prepared=0;const prepTotal=Math.max(1,prepItems.length);
