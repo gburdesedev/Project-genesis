@@ -47,3 +47,49 @@
 .pv9Board .mcOverlay p{font:1.15cqw Georgia;color:#e6cfa5}
 .pv9Board .mcOverlay button{background:#36200d;border:1px solid #b98a4d;color:#f7dcad;padding:.65cqw 2cqw;font:1.3cqw Georgia;cursor:pointer}
 @media (max-width:600px){.pv9Grid{gap:.15cqw}}
+
+
+/* V014029 — fit dynamic artwork inside the EXACT approved V09 frames.
+ * Coordinates are measured against the 1670 × 942 V09 master.
+ * No changes to the original PNG, frame art, panel background or slots.
+ */
+.pv9Shell .pv9CompareEquipped,
+.pv9Shell .pv9CompareSelected{
+  top:24.0%;height:13.7%;width:13.25%;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  margin:0;padding:0 .4cqw;overflow:hidden;border:0;box-shadow:none;background:transparent;
+}
+.pv9Shell .pv9CompareEquipped{left:67.15%}
+.pv9Shell .pv9CompareSelected{left:83.3%}
+.pv9Shell .pv9ComparisonContents{width:100%;height:100%;display:flex;flex-direction:column;gap:.12cqw;align-items:center;justify-content:center;overflow:hidden}
+.pv9Shell .pv9ComparisonIcon{height:5.1cqw;min-height:0;max-width:100%;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.pv9Shell .pv9ComparisonIcon img{width:auto;height:100%;max-width:5.1cqw;max-height:5.1cqw;object-fit:contain}
+.pv9Shell .pv9ComparisonName{
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;
+  width:100%;max-width:100%;max-height:2.42em;min-height:0;overflow:hidden;
+  word-break:normal;overflow-wrap:anywhere;text-overflow:ellipsis;
+  text-align:center;white-space:normal;font:normal .97cqw/1.18 Georgia,serif;
+  color:#f5dfad;text-shadow:0 1px 2px #000
+}
+.pv9Shell .pv9ComparisonRarity{display:block;font:normal .86cqw/1.05 Georgia,serif;color:#eac27a;text-align:center;max-width:100%;max-height:1.3em;overflow:hidden}
+.pv9Shell .pv9ComparisonEmpty{width:100%;height:100%}
+/* Hide only the baked-in static seven-channel rows of the blank template.
+ * Preserve the actual approved headings, scroll ornament, buttons and frames.
+ */
+.pv9Shell .pv9ChannelsMask{
+ left:67.25%;top:42.85%;width:28.05%;height:36.30%;
+ background:#100b08;box-shadow:inset 0 .25cqw .5cqw #060403;
+}
+.pv9Shell .pv9Channels{
+ left:67.25%;top:42.85%;width:28.05%;height:36.30%;
+ padding:0;margin:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;
+}
+.pv9Shell .pv9Channels::-webkit-scrollbar{width:0}
+.pv9Shell .pv9Channels .mcChannel{
+ display:grid;grid-template-columns:62% 18% 20%;width:100%;height:3.12cqw;min-height:3.12cqw;
+ padding:0;margin:0;background:#110b08;border:0;border-bottom:1px solid #47301b;
+ align-items:center;overflow:hidden
+}
+.pv9Shell .pv9ChannelArtwork{display:flex;align-items:center;justify-content:flex-start;height:100%;width:100%;min-width:0;overflow:hidden;background:transparent;border:0}
+.pv9Shell .pv9ChannelArtwork img{display:block;width:100%;height:auto;max-height:3.02cqw;object-fit:contain;object-position:left center}
+.pv9Shell .pv9Channels .mcChannelNum{font:normal 1.02cqw/1.2 Georgia,serif;text-align:center;white-space:nowrap;padding:0 .05cqw;overflow:hidden;text-overflow:clip}
