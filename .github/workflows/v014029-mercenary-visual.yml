@@ -1,0 +1,28 @@
+name: V014.029 | Mercenary V09 real game layout corrected Playwright
+on:
+  push:
+    branches: [experiment/v014029-mercenary-v09-channel-comparison-fix-20261107]
+    paths:
+      - mercenary_equipment_canvas_v09.js
+      - mercenary_equipment_canvas_v09.css
+      - tests/v014028_mercenary_v09_real_game.cjs
+      - .github/workflows/v014029-mercenary-visual.yml
+  workflow_dispatch:
+jobs:
+  real-visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tested Chromium binding
+        run: npm install --no-save playwright@1.56.1
+      - name: Actual PlayCanvas NGE crafting -> V09 comparison screenshot
+        run: node tests/v014028_mercenary_v09_real_game.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v014029-v09-real-comparison-fix
+          path: previews/v014028-mercenary-v09-real-craft/
+          retention-days: 14
