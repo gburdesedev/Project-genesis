@@ -274,6 +274,46 @@ async function main(){
    return {ok:false,why:'Cinematic did not reach merchant in test budget',progress:lastProgress,
      seconds:(Date.now()-start)/1000,samples:observations.slice(-15)};
  }
+ // Physical return: reverse Ordan's original approved road checkpoints via genuine
+ // WASD input. The navigation reads player/camera state but never changes them.
+ async function returnToSmithViaRoads(){
+   const pathBack=require('../genesis_market_quest_v001.js').escortPath.slice().reverse().slice(1);
+   // The final checkpoint is the original front-door corridor; the existing
+   // approach() helper finishes the collision-tested doorway afterwards.
+   const waypoints=pathBack;
+   const samples=[];await page.keyboard.press('q');await delay(330);
+   for(let i=0;i<waypoints.length;i++){
+     const waypoint=waypoints[i];let stagnant=0,lastDist=Infinity;
+     for(let tick=0;tick<120;tick++){
+       const state=(await snap()).state;
+       if(!state?.started||state.step!==12)return {ok:false,why:'game state lost in return',step:state?.step,i,tick,samples:samples.slice(-10)};
+       if(!state.nav?.canMove)return {ok:false,why:'world movement locked',i,tick,state:state.nav};
+       const dx=waypoint.x-state.player.x,dz=waypoint.z-state.player.z,dist=Math.hypot(dx,dz);
+       if(dist<.82){samples.push({i,reached:true,dist:+dist.toFixed(2),at:state.player});break;}
+       const yaw=(state.nav.camYaw||0)*Math.PI/180;
+       const front=(dx*(-Math.sin(yaw))+dz*(-Math.cos(yaw)))/dist;
+       const right=(dx*Math.cos(yaw)+dz*(-Math.sin(yaw)))/dist;
+       const keys=[];
+       if(front>.30)keys.push('w');else if(front<-.30)keys.push('s');
+       if(right>.30)keys.push('d');else if(right<-.30)keys.push('a');
+       if(!keys.length)return {ok:false,why:'unable to calculate real WASD direction',i,tick,front,right};
+       for(const key of keys)await page.keyboard.down(key);
+       await delay(1700);
+       for(const key of keys)await page.keyboard.up(key);
+       await delay(120);
+       const after=(await snap()).state;
+       const nextDist=after?.player?Math.hypot(waypoint.x-after.player.x,waypoint.z-after.player.z):Infinity;
+       if(tick%10===0){const trace={i,tick,keys,distBefore:+dist.toFixed(2),distAfter:+nextDist.toFixed(2),player:after?.player,camYaw:state.nav.camYaw,blocked:after?.nav?.nearbyCollisions};samples.push(trace);log('RETURN_ROAD_REAL_WASD',trace);}
+       if(!Number.isFinite(nextDist))return {ok:false,why:'no player position after input',i,tick};
+       if(nextDist>=dist-.025)stagnant++;else stagnant=0;
+       if(stagnant>=9)return {ok:false,why:'blocked at real road checkpoint',i,tick,waypoint,player:after?.player,dist:nextDist,samples:samples.slice(-12)};
+       lastDist=nextDist;
+       if(tick===119)return {ok:false,why:'waypoint exceeded physical WASD ticks',i,waypoint,lastDist,samples:samples.slice(-12)};
+     }
+   }
+   return {ok:true,waypoints:waypoints.length,samples:samples.slice(-16),position:(await snap()).state?.player};
+ }
+
  async function approach(){
   let noProgress=0;
   let attemptedPhysicalForgeRoute=false;
@@ -292,14 +332,20 @@ async function main(){
      log('RELOCATED_CHEST_PROBE',{step:8,distance:dist,interactable:t?.interactable,lineClear:t?.visibilityToObjective});
      if(t?.interactable==='chest')return {ok:true,id:'chest',distance:dist};
    }
-   if(state.interactable||state.directInteractable)return {ok:true,id:state.interactable||state.directInteractable,step:state.step,tries:i};
+   const expected={8:'chest',10:'craft',11:'craft',11.75:'marketMerchant',12:'craft',13:'craft',17:'mercenary',21:'mentor',23:'demoFinalCraft'}[state.step];
+   const present=[state.interactable,state.directInteractable].find(id=>id&&(!expected||id===expected));
+   if(present)return {ok:true,id:present,step:state.step,tries:i};
+   if(state.step===12&&i===0){
+     const back=await returnToSmithViaRoads();log('REAL_ROAD_RETURN_MARKET_TO_SMITH',back);
+     if(!back.ok)return {ok:false,why:'return journey failed',road:back};
+   }
    const actionRadius={0:2.2,1:2.25,2:2.1,3:1.95,4:2.0,5:2.2,6:2.25,7:2.2,8:1.95,10:2,11:2,12:2,13:2,17:2.5,19:2.6,21:2.2,23:2}[state.step];
    const actionDist=state.objective&&state.player?Math.hypot(state.player.x-state.objective.x,state.player.z-state.objective.z):Infinity;
    if(actionRadius&&actionDist<actionRadius-.1){
      await page.keyboard.press('q');await delay(250);
      const actionable=(await snap()).state?.directInteractable;
      log('DIRECT_INTERACTION_PROBE',{step:state.step,distance:actionDist,radius:actionRadius,actionable:actionable||null});
-     if(actionable)return {ok:true,id:actionable,why:'actual target available without waiting for a graphics frame'};
+     if(actionable&&(!expected||actionable===expected))return {ok:true,id:actionable,why:'actual target available without waiting for a graphics frame'};
    }
    if(!state.objective)return {ok:false,why:'no target',step:state.step};
    const dist=p=>Math.hypot(p.x-state.objective.x,p.z-state.objective.z);
@@ -322,7 +368,7 @@ async function main(){
     const distance=a?.player?dist(a.player):Infinity;
     const trace={key,from:b?.player,to:a?.player,dx:movement,dist:distance,frames:b?.nav&&held?.nav?held.nav.ticks-b.nav.ticks:null,keyRegistered:held?.nav?.keys,allowed:held?.nav?.canMove,collisions:held?.nav?.nearbyCollisions};
     probes.push(trace);
-    if(a?.interactable){log('REAL_MOVEMENT_REACHED_TARGET',{step:state.step,trace});return {ok:true,id:a.interactable,key,tries:i}}
+    if(a?.interactable&&(!expected||a.interactable===expected)){log('REAL_MOVEMENT_REACHED_TARGET',{step:state.step,trace});return {ok:true,id:a.interactable,key,tries:i}}
     if(movement>.035&&distance<d0-.035){closer=true;break}
     if(movement>.035){lateral=true;break}
    }
