@@ -1,0 +1,36 @@
+name: V014.030 | Apply authentic NGE mercenary starter kit to game (experiment only)
+on:
+  push:
+    branches: [experiment/v014030-mercenary-starter-gear-compare-20261107]
+    paths:
+      - scripts/patch_v014030_starter_gear.py
+      - .github/workflows/v014030-apply-starter-gear.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  source-patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Patch actual in-game mercenary function without touching source art or player inventory
+        run: |
+          set -euo pipefail
+          python3 scripts/patch_v014030_starter_gear.py
+          grep -F 'GENESIS_V014030_STARTER_GEAR' index.html
+          grep -F 'mercenary_equipment_canvas_v001.js' index.html
+      - name: Commit only to isolated experimental branch, never main
+        run: |
+          set -euo pipefail
+          git config user.name 'Genesis QA CI'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then
+            echo 'Source already patched'
+          else
+            git commit -m 'experiment(v014030): native common sword and useless shield on mercenary'
+            git push origin HEAD:experiment/v014030-mercenary-starter-gear-compare-20261107
+          fi
