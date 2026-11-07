@@ -15,7 +15,7 @@
     return entries.map((r, i) => {
       let name = Array.isArray(r) ? r[0] : r.name ?? r.channel;
       let value = Number(Array.isArray(r) ? r[1] : r.intensity ?? r.value);
-      if (i === 0 && (name === 'Fisico' || name === 'Físico' || name === 'Daño' || !name)) name = 'Base';
+      if (i === 0 && ['Fisico','Físico','Daño','Protección','Proteccion','Base',''].includes(String(name||''))) name = 'Base';
       return { name: String(name || ''), value };
     }).filter(x => x.name && Number.isFinite(x.value));
   }
@@ -45,6 +45,15 @@
       return `<button type="button" class="mcSlot pv9Slot ${locked?'isLocked':'isActive'} ${kind}" style="left:${x}%;top:${y}%;" aria-label="${esc(name)}" title="${esc(name)}" ${locked?'disabled':''}>${getIcon(item)}</button>`;
     }
     function itemAt(index) { return pool()[state.page*20+index] || null; }
+    function comparisonSlot(item, label) {
+      // Keep the two approved V09 frames. Text is data and must never paint outside a frame.
+      if (!item) return '<div class="pv9ComparisonEmpty" aria-label="'+esc(label)+': sin objeto"></div>';
+      const full=String(item.name||'');
+      return '<div class="pv9ComparisonContents" title="'+esc(full)+'">'
+        + '<div class="pv9ComparisonIcon">'+getIcon(item)+'</div>'
+        + '<div class="pv9ComparisonName">'+esc(full)+'</div>'
+        + '<div class="pv9ComparisonRarity">'+esc(item.rarity||'')+'</div></div>';
+    }
     function render() {
       const candidate = selected(), old = equipped(), rows = compare(old, candidate);
       const family = state.family, canEquip = !!(state.draftFirst || opts.equippedFirst) && !!(state.draftSecond || opts.equippedSecond);
@@ -70,8 +79,8 @@
         ${slot('Casco', 587,283,null,true)}${slot('Pechera',587,378,null,true)}${slot('Guantes',587,474,null,true)}${slot('Pantalón',587,571,null,true)}${slot('Botas',587,669,null,true)}
         ${slot('Collar',803,254,null,true)}
         ${slot('Arma',1022,283,state.draftFirst || opts.equippedFirst,false,'mcEquipSlot')}${slot('Escudo',1022,377,state.draftSecond || opts.equippedSecond,false,'mcEquipSlot')}${slot('Anillo izquierdo',1022,476,null,true)}${slot('Anillo derecho',1022,573,null,true)}
-        <div class="pv9CompareEquipped mcItemImg" aria-label="Objeto equipado">${getIcon(old)}<span>${esc(old?.name || '')}</span></div>
-        <div class="pv9CompareSelected mcItemImg" aria-label="Objeto seleccionado">${getIcon(candidate)}<span>${esc(candidate?.name || '')}</span></div>
+        <div class="pv9CompareEquipped mcItemImg" aria-label="Objeto equipado">${comparisonSlot(old,'Equipado')}</div>
+        <div class="pv9CompareSelected mcItemImg" aria-label="Objeto seleccionado">${comparisonSlot(candidate,'Seleccionado')}</div>
         <div class="pv9ChannelsMask"></div><div class="mcChannels pv9Channels" role="region" aria-label="Canales de comparación">${channels}</div>
         <button class="pv9Target pv9Sheet" data-action="sheet" aria-label="Ficha del mercenario"></button>
         <button class="pv9Target pv9Inventory" data-action="inventory" aria-label="Inventario del mercenario"></button>
