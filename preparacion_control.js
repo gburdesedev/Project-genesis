@@ -189,6 +189,21 @@
       reason === 'quest' ? 'Bloqueada por misión' : 'Bloqueada por progreso';
   }
 
+  // PT demo: sólo estas dos barras pueden crecer. Son porcentajes de referencia;
+  // no se calculan niveles, no hay rollover, no se toca la progresión real del jugador.
+  // La llamada debe hacerse DESPUÉS de que el motor confirme una fabricación exitosa.
+  function advanceDemoPT(previous, gains) {
+    const base = previous && typeof previous === 'object' ? previous : {};
+    const delta = gains && typeof gains === 'object' ? gains : {};
+    const advance = key => {
+      const current = Number.isFinite(base[key]) ? Math.max(0, Math.min(100, base[key])) : 0;
+      const gain = Number.isFinite(delta[key]) && delta[key] > 0 ? delta[key] : 0;
+      return Math.min(100, current + gain);
+    };
+    // No modificar refinamiento, reciclaje, conocimiento ni los niveles existentes.
+    return { ...base, global:advance('global'), fabricacion:advance('fabricacion') };
+  }
+
   function convert(inventory, count) {
     if (!whole(count) || countOf(inventory, RAW) < count) return false;
     inventory[RAW] -= count;
@@ -974,6 +989,6 @@
     if (tab === 'Preparacion') renderMenu(); else renderWorkspace(tab);
     return true;
   }
-  window.GenesisPreparation = Object.freeze({ dismiss(){halt();session=null;document.removeEventListener('keydown',onKeyDown,true)}, activeTab, navigate, rawStock, shortages, ready, batchProfile, actionEffect, progressRate, progressGain, temperatureStatus, heatBands, heatGradient, passiveCooling, convert, open });
+  window.GenesisPreparation = Object.freeze({ dismiss(){halt();session=null;document.removeEventListener('keydown',onKeyDown,true)}, activeTab, navigate, rawStock, shortages, ready, recipeEligibility, advanceDemoPT, batchProfile, actionEffect, progressRate, progressGain, temperatureStatus, heatBands, heatGradient, passiveCooling, convert, open });
 })();
 
