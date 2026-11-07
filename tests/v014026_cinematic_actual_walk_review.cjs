@@ -6,7 +6,7 @@ const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
 const fs=require('fs'),path=require('path');
 const {spawn}=require('child_process');
-const out='previews/v014026-cinematic-visual-qa';
+const out='previews/v014026-ordan-rig-clip-fixed';
 fs.mkdirSync(out,{recursive:true});
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 const server=spawn('python3',['-m','http.server','8765','--bind','127.0.0.1'],{stdio:'ignore'});
@@ -44,6 +44,10 @@ async function main(){
   body=body.replace(cinematicProbeMarker,
     "questGoal:window.GenesisMarketQuest?.steps?.shop||11.75,"+
     "walking:!!walking,running:!!running,walkClip:walkClip||null,"+
+    "mentorWalk:ordanWalk||null,mentorIdle:ordanIdle||null,"+
+    "mentorBodyClips:ordanAnim?.clips?.length||0,"+
+    "mentorHeadClips:ordanHeadAnim?.clips?.length||0,"+
+    "mentorHairClips:ordanHairAnim?.clips?.length||0,"+
     "playingState:playerAnimGroup?.[0]?.baseLayer?.activeState||null,"+
     "camDist,camPitch,camYaw}};");
   const marker='requestAnimationFrame(frame);\n\nsetLoadUI';
@@ -233,6 +237,11 @@ async function main(){
          if(walk>routeTravel+.10)return {ok:false,why:'apprentice left the continuous arc',walk,routeTravel,at:i};
        }
        if(!cine.controlLocked)return {ok:false,why:'player controls remained active during cinematic'};
+       if(cine.progress>3 && (!/walk/i.test(String(cine.mentorWalk)) ||
+          cine.mentorBodyClips<2 || cine.mentorHeadClips<2 || cine.mentorHairClips<2))
+         return {ok:false,why:'Ordan clips not loaded and bound before cinematic',
+           mentorWalk:cine.mentorWalk,mentorBodyClips:cine.mentorBodyClips,
+           mentorHeadClips:cine.mentorHeadClips,mentorHairClips:cine.mentorHairClips};
        if(cine.progress>3 && cine.progress<cine.total-3){
          if(cine.walking)walkingSamples++;
          if(cine.walking && /walk/i.test(String(cine.walkClip)))walkClipSamples++;
@@ -246,6 +255,8 @@ async function main(){
        const data={i,progress:cine.progress,total:cine.total,waypoint:cine.waypoint,
          player:cine.player,mentor:cine.mentor,letterbox:cine.letterbox,step:state.step,
          walking:cine.walking,walkClip:cine.walkClip,playingState:cine.playingState,
+         mentorWalk:cine.mentorWalk,mentorBodyClips:cine.mentorBodyClips,
+         mentorHeadClips:cine.mentorHeadClips,mentorHairClips:cine.mentorHairClips,
          camDist:cine.camDist,camPitch:cine.camPitch};
        observations.push(data);log('ORDAN_MARKET_CINEMATIC_REAL',data);
        if(process.env.GENESIS_CINEMATIC_CAPTURE==='1'&&!captureAttempted&&i>=22&&cine.progress>7){
