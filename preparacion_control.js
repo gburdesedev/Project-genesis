@@ -726,6 +726,7 @@
       enabled=ctx.onComparisonContinue?valid:true;
       run=()=>{if(ctx.onComparisonContinue){const done=ctx.onComparisonContinue;close();done()}else{ctx.inventoryCategory='creations';renderWorkspace('Inventario')}};
     }
+    if (tab === 'Fabricaciones') observeDemoCrafts(items);
     skinDisplay('workspace','',details,tab+' · '+stock.reduce((n,[,q])=>n+Number(q),0)+' unidades · '+items.length+' creaciones');
     const board=document.querySelector('.prepArtboard');
     // Se preserva el botón decorativo, pero no el rótulo PREPARAR horneado en Preparación.
