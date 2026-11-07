@@ -573,6 +573,117 @@
       '<div class="workspaceNgeScroll" tabindex="0">' + reading + '</div></section>';
   }
 
+  // Fabricación V04: usa el PNG aprobado como capa base, no el arte de Preparación.
+  // Las regiones que contenían textos/números horneados reciben controles HTML
+  // alimentados por el catálogo, el stock y el motor NGE de esta sesión.
+  function renderFabricacionApprovedV04(ctx, catalog, selected, formula, enabled, items) {
+    if (!document.getElementById('genesisFabricacionV04CSS')) {
+      const css = document.createElement('link');
+      css.id = 'genesisFabricacionV04CSS';
+      css.rel = 'stylesheet';
+      css.href = 'assets/ui/fabricacion/v04/fabricacion_v04.css?v=20261107.1';
+      document.head.append(css);
+    }
+    const known = Array.isArray(catalog) ? catalog.filter(entry =>
+      entry && entry.id && entry.family && entry.formula) : [];
+    const selectedId = String(selected?.id || ctx.selectedRecipeId || ctx.activeRecipeId || '');
+    const selectedName = selected?.subfamily || ctx.recipeName || 'Sin receta seleccionada';
+    const entries = known.length ? known : (
+      formula ? [{id:selectedId || 'espada_hierro', family:'Espadas', subfamily:selectedName, formula}] : []
+    );
+    const families = [...new Set(entries.map(entry => String(entry.family || 'Conocidas')))];
+    const familyMarkup = families.map(family => {
+      const recipes = entries.filter(entry => entry.family === family);
+      return '<section class="fabV04RecipeFamily workspaceRecipeFamily" aria-label="' + escape(family) + '">' +
+        '<h3>' + escape(family) + '</h3>' +
+        '<div class="fabV04Subtype">Hierro</div>' +
+        recipes.map(entry => {
+          const state = recipeEligibility(entry,ctx);
+          // Falta de materiales NO equivale a receta bloqueada.
+          const locked = state.reason === 'quest' || state.reason === 'progress';
+          return '<button type="button" class="fabV04RecipeChoice workspaceRecipeChoice' +
+            (locked ? ' is-locked' : '') + '" data-recipe-id="' + escape(entry.id) +
+            '" aria-pressed="' + (String(entry.id) === selectedId) + '"' +
+            (locked ? ' disabled title="' + escape(recipeLockLabel(state.reason)) + '"' : '') + '>' +
+            (locked ? '🔒 ' : '⚔ ') + escape(entry.subfamily || entry.id) +
+            (state.reason === 'materials' ? '<small>Faltan materiales · receta conocida</small>' : '') +
+          '</button>';
+        }).join('') + '</section>';
+    }).join('') || '<div class="fabV04RecipeEmpty">Todavía no conocés recetas.</div>';
+    const need = formula ? shortages(formula,ctx.inventory) : [];
+    const materials = need.map(row => {
+      const image = MATERIAL_ART[row.material]?.poster;
+      return '<div class="fabV04Material">' +
+        (image ? '<img class="fabV04MaterialImage" loading="lazy" alt="" src="' + escape(image) + '">' :
+          '<span class="fabV04MaterialMissingIcon" aria-hidden="true">◇</span>') +
+        '<div class="fabV04MaterialBody"><div class="fabV04MaterialName">' + escape(row.material) + '</div>' +
+        '<div class="fabV04MaterialQty"><span>Requerido</span><b>' + row.needed + '</b></div>' +
+        '<div class="fabV04MaterialQty' + (row.missing ? ' isMissing' : '') + '">' +
+        '<span>En inventario</span><b>' + row.available + '</b></div></div></div>';
+    }).join('') || '<div class="fabV04MaterialsEmpty">Seleccioná una receta conocida.</div>';
+    const progressData = typeof ctx.getFabricationPT === 'function' ? ctx.getFabricationPT() : null;
+    const progress = progressData && typeof progressData === 'object' ? progressData : fabricationDemoBars;
+    const ptEntries = [['Global',progress.global],['Fabricación',progress.fabricacion],
+      ['Refinamiento',null],['Reciclaje',null],['Conocimiento',null]];
+    const value = n => Number.isFinite(Number(n)) ? Math.max(0,Math.min(99,Number(n))) : 0;
+    const ptMarkup = ptEntries.map(([name,v]) => '<div class="fabV04Bar fabricationDemoBar" data-pt-name="' + name + '">' +
+      '<div class="fabV04BarHead"><span>' + name + '</span><b>' + (v === null ? 'DEMO' : value(v) + '%') + '</b></div>' +
+      '<div class="fabV04BarTrack" role="progressbar" aria-label="' + name +
+      '" aria-valuemin="0" aria-valuemax="99" aria-valuenow="' + (v === null ? 0 : value(v)) + '">' +
+      '<span class="fabV04BarFill" style="width:' + (v === null ? 0 : value(v)) + '%"></span></div></div>').join('');
+    // Referencia real aprobada V12B/V175 incluida localmente en esta misma rama.
+    // No hay rotación ni GLB interactivo en el visor grande.
+    const previewImage = selectedId === 'espada_hierro' ?
+      'assets/ui/fabricacion/v04/espada_v12b_v175_referencia.png' : '';
+    const preview = previewImage ?
+      '<img src="' + previewImage + '" alt="Espada V12B con material de hierro V175 · render estático" draggable="false">' :
+      '<div class="fabV04PreviewEmpty">Render estático aún no aprobado para esta receta</div>';
+    const selectedState = selected ? recipeEligibility(selected,ctx) : null;
+    const statusText = enabled ? '✓ Disponible' :
+      (selectedState && selectedState.reason === 'quest' ? '🔒 Bloqueada por misión' :
+        selectedState && selectedState.reason === 'progress' ? '🔒 Bloqueada por progreso' :
+        'Faltan materiales');
+    const tabs = [
+      ['Inventario','Inventario'],
+      ['Preparacion','Preparación'],
+      ['Fabricaciones','Fabricaciones'],
+      ['Comparacion','Comparación']
+    ];
+    const tabMarkup = tabs.map(([tab,name]) =>
+      '<button type="button" data-fab-tab="' + tab + '" aria-label="' + name +
+      '" ' + (tab === 'Fabricaciones' ? 'aria-current="page" disabled' : '') + '></button>').join('');
+    ctx.modal('<div class="fabV04Board prepArtboard" data-active-tab="Fabricaciones" data-version="v04-approved">' +
+      '<img class="fabV04Base" src="assets/ui/fabricacion/v04/Genesis_Fabricacion_V04_Original_Barras.png" alt="" draggable="false">' +
+      '<nav class="fabV04Tabs" aria-label="Menús de Project Genesis">' + tabMarkup + '</nav>' +
+      '<button id="prepClose" class="fabV04Close" aria-label="Cerrar">×</button>' +
+      '<div class="fabV04Recipes fabV04Panel workspaceRecipeTree" aria-label="Recetas conocidas">' + familyMarkup + '</div>' +
+      '<div class="fabV04Header fabV04Panel"><h2>' + escape(selectedName) + '</h2>' +
+      '<small>Receta conocida</small></div>' +
+      '<div class="fabV04Preview fabV04Panel workspaceRecipeHero" aria-label="Vista estática del objeto">' + preview + '</div>' +
+      '<div class="fabV04Materials fabV04Panel workspaceIngredients" aria-label="Materiales de la receta seleccionada">' + materials + '</div>' +
+      '<div class="fabV04Status fabV04Panel' + (enabled ? '' : ' isMissing') + '" role="status">' + escape(statusText) + '</div>' +
+      '<button id="prepStart" class="fabV04Craft workspaceAction" aria-label="Confirmar fabricación" ' +
+      (enabled ? '' : 'disabled') + '>FABRICAR</button>' +
+      '<div class="fabV04OverlayFoot fabV04Panel" aria-label="Visor fijo">Vista fija · render del objeto</div>' +
+      '<section class="fabV04Bars" aria-label="Progreso y canales">' + ptMarkup + '</section>' +
+    '</div>', 'preparationModal fabV04Modal');
+    bind('prepClose',close);
+    bind('prepStart',craft);
+    document.querySelectorAll('.fabV04Board [data-fab-tab]').forEach(button => {
+      if (button.disabled) return;
+      button.onclick = () => navigate(button.dataset.fabTab);
+    });
+    document.querySelectorAll('.fabV04Board [data-recipe-id]').forEach(button => {
+      if (button.disabled) return;
+      button.onclick = () => {
+        const chosen = entries.find(entry => String(entry.id) === button.dataset.recipeId);
+        if (!chosen) return;
+        ctx.selectedRecipeId = chosen.id;
+        renderWorkspace('Fabricaciones');
+      };
+    });
+  }
+
   function renderWorkspace(tab) {
     const ctx=session;
     if(!ctx) return;
@@ -694,6 +805,7 @@
           : enabled ? 'Materiales disponibles. Podés fabricar esta receta.'
           : 'Faltan materiales preparados para esta receta.') + '</p>' +
         '<button type="button" class="prepSkinCraft secondary" id="workspaceGoPrep">Ver Preparación</button>';
+      ctx.__fabV04SelectedData = {recipes, selected, selectedFormula};
       viewer = '<div class="workspaceHero workspaceRecipeHero">' +
         (ctx.recipeAsset ? ctx.recipeAsset(selectedId) : '') + '<p>' + escape(selectedName || 'Seleccioná una receta') + '</p></div>';
       action = 'Confirmar fabricación';
@@ -726,7 +838,11 @@
       enabled=ctx.onComparisonContinue?valid:true;
       run=()=>{if(ctx.onComparisonContinue){const done=ctx.onComparisonContinue;close();done()}else{ctx.inventoryCategory='creations';renderWorkspace('Inventario')}};
     }
-    if (tab === 'Fabricaciones') observeDemoCrafts(items);
+    if (tab === 'Fabricaciones') {
+      observeDemoCrafts(items);
+      renderFabricacionApprovedV04(ctx, ctx.__fabV04SelectedData?.recipes || [], ctx.__fabV04SelectedData?.selected || null, ctx.__fabV04SelectedData?.selectedFormula || ctx.formula, enabled, items);
+      return;
+    }
     skinDisplay('workspace','',details,tab+' · '+stock.reduce((n,[,q])=>n+Number(q),0)+' unidades · '+items.length+' creaciones');
     const board=document.querySelector('.prepArtboard');
     // Se preserva el botón decorativo, pero no el rótulo PREPARAR horneado en Preparación.
