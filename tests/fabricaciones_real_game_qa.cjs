@@ -35,10 +35,11 @@ async function capture(label){
    // jamás disfrazar el GLB mercSword10 como V12B.
    const hook=`
 window.__GENESIS_FAB_QA__={
-  state:()=>({gameStarted,selectedProfession,tutorialStep,chestOpen,
+  state:()=>({gameStarted,selectedProfession,tutorialStep,chestOpen,routeLoading,routeReady:[...routeReady],intro:intro.style.display,loading:loading.style.display,loadState:loadState.textContent,loadCount:loadCount.textContent,loadDetail:loadDetail.textContent,
     currentRecipe:gameStarted?currentRecipe():null,ready:!!craftSession,
     craftedCount:craftedItems.length,crafted:craftedItems.map(x=>({name:x.name,recipe:x.recipe,rarity:x.rarity})),
     stock:{...playerInventory},loader:loading.style.display}),
+  start:()=>{const before={routeLoading,gameStarted};void chooseProfessionRoute('Herrero');return {before,after:{routeLoading,gameStarted}};},
   enter:()=>{
     if(!gameStarted||selectedProfession!=='Herrero'||!craftSession)throw Error('Route not ready');
     const recipe=activeRoute.recipes[0],formula=craftSession.formulas[recipe];
@@ -70,7 +71,9 @@ window.__GENESIS_FAB_QA__={
    await page.goto('http://127.0.0.1:8765/index.html?qa=fabricacion-real',{waitUntil:'domcontentloaded',timeout:90000});
    await page.waitForFunction(()=>{const a=document.getElementById('prototypeIntro');return a&&getComputedStyle(a).display!=='none'},null,{timeout:150000,polling:1500});
    await capture('00-inicio-del-juego');
-   await page.locator('[data-profession="Herrero"]').click({force:true});
+   report.routeStart=await page.evaluate(()=>window.__GENESIS_FAB_QA__.start());
+   await wait(1800);report.routeInitial=await page.evaluate(()=>window.__GENESIS_FAB_QA__.state());
+   await capture('01-carga-de-herrero');
    await page.waitForFunction(()=>{const q=window.__GENESIS_FAB_QA__?.state?.();return q?.gameStarted&&getComputedStyle(document.querySelector('#loading')).display==='none'},null,{timeout:220000,polling:1500});
    await capture('01-herrero-en-el-juego');
    report.shortcut=await page.evaluate(()=>window.__GENESIS_FAB_QA__.enter());
@@ -95,6 +98,7 @@ window.__GENESIS_FAB_QA__={
    console.log('GENESIS_REAL_FABRICACION_OK',JSON.stringify({before:report.before,menu:report.menu,after:report.after,status:report.status}));
  }catch(e){
    report.status='FAILED_REAL_GAME';report.errors.push(String(e.stack||e));
+   report.failureState=await page.evaluate(()=>window.__GENESIS_FAB_QA__?.state?.()).catch(err=>({evaluationError:String(err)}));
    await capture('99-error-juego');dump();throw e;
  }finally{dump();await browser.close();server.kill();}
 })().catch(e=>{console.error('GENESIS_REAL_FABRICACION_FAIL',e);process.exitCode=1});
