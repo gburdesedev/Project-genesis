@@ -12,7 +12,7 @@ const server=spawn('python3',['-m','http.server','8765','--bind','127.0.0.1'],{s
 let browser, page;
 const dump=()=>fs.writeFileSync(path.join(folder,'qa-report.json'),JSON.stringify(report,null,2));
 async function capture(label){
- try{await page.screenshot({path:path.join(folder,label+'.png'),animations:'disabled',timeout:12000});report.steps.push(label)}
+ try{await page.screenshot({path:path.join(folder,label+'.png'),animations:'allow',timeout:45000});report.steps.push(label)}
  catch(e){report.errors.push('screenshot '+label+': '+String(e).slice(0,300))}
 }
 (async()=>{
@@ -68,14 +68,14 @@ window.__GENESIS_FAB_QA__={
  });
  try{
    await page.goto('http://127.0.0.1:8765/index.html?qa=fabricacion-real',{waitUntil:'domcontentloaded',timeout:90000});
-   await page.waitForFunction(()=>{const a=document.getElementById('prototypeIntro');return a&&getComputedStyle(a).display!=='none'},{timeout:150000,polling:1500});
+   await page.waitForFunction(()=>{const a=document.getElementById('prototypeIntro');return a&&getComputedStyle(a).display!=='none'},null,{timeout:150000,polling:1500});
    await capture('00-inicio-del-juego');
    await page.locator('[data-profession="Herrero"]').click({force:true});
-   await page.waitForFunction(()=>{const q=window.__GENESIS_FAB_QA__?.state?.();return q?.gameStarted&&getComputedStyle(document.querySelector('#loading')).display==='none'},{timeout:220000,polling:1500});
+   await page.waitForFunction(()=>{const q=window.__GENESIS_FAB_QA__?.state?.();return q?.gameStarted&&getComputedStyle(document.querySelector('#loading')).display==='none'},null,{timeout:220000,polling:1500});
    await capture('01-herrero-en-el-juego');
    report.shortcut=await page.evaluate(()=>window.__GENESIS_FAB_QA__.enter());
    await page.waitForSelector('.prepArtboard[data-active-tab="Fabricaciones"]',{timeout:15000});
-   await page.waitForFunction(()=>{const img=document.querySelector('.workspaceRecipeHero img');return img?.complete&&img.naturalWidth>0},{timeout:20000});
+   await page.waitForFunction(()=>{const img=document.querySelector('.workspaceRecipeHero img');return img?.complete&&img.naturalWidth>0},null,{timeout:20000});
    report.before=await page.evaluate(()=>window.__GENESIS_FAB_QA__.state());
    report.menu=await page.evaluate(()=>({activeTab:window.GenesisPreparation?.activeTab?.(),families:[...document.querySelectorAll('.workspaceRecipeFamily')].map(x=>({name:x.querySelector('h4')?.textContent,locked:x.classList.contains('is-locked')})),bars:[...document.querySelectorAll('.fabricationDemoBar')].map(x=>({name:x.dataset.ptName,value:x.querySelector('b')?.textContent})),posterLoaded:document.querySelector('.workspaceRecipeHero img')?.naturalWidth}));
    assert.equal(report.menu.activeTab,'Fabricaciones');
@@ -88,7 +88,7 @@ window.__GENESIS_FAB_QA__={
    report.after=await page.evaluate(()=>window.__GENESIS_FAB_QA__.state());
    assert.equal(report.after.craftedCount,report.before.craftedCount+1,'NGE engine must craft exactly one sword');
    assert.equal(report.after.crafted[0].recipe,'espada_hierro','Must be the real sword recipe');
-   await page.waitForFunction(()=>{const img=document.querySelector('#modal .qaApprovedSwordPoster');return img?.complete&&img.naturalWidth>0},{timeout:16000});
+   await page.waitForFunction(()=>{const img=document.querySelector('#modal .qaApprovedSwordPoster');return img?.complete&&img.naturalWidth>0},null,{timeout:16000});
    await capture('03-resultado-espada-real');
    report.status='SUCCESS_ACTUAL_GAME_WITH_APPROVED_V12B_STATIC_POSTER';
    dump();
