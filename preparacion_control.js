@@ -204,6 +204,40 @@
     return { ...base, global:advance('global'), fabricacion:advance('fabricacion') };
   }
 
+  // Indicadores visuales locales de la demo. No afectan al nivel del personaje.
+  const fabricationDemoBars = { global: 0, fabricacion: 0 };
+  let fabricationDemoKnownIds = null;
+  function observeDemoCrafts(items) {
+    const ids = new Set((Array.isArray(items) ? items : [])
+      .filter(item => item && item.id !== undefined && item.id !== null)
+      .map(item => String(item.id)));
+    if (fabricationDemoKnownIds === null) {
+      fabricationDemoKnownIds = ids;
+      return;
+    }
+    let newlyCrafted = 0;
+    for (const id of ids) if (!fabricationDemoKnownIds.has(id)) newlyCrafted++;
+    if (newlyCrafted) {
+      const next = advanceDemoPT(fabricationDemoBars, {
+        global: newlyCrafted,
+        fabricacion: newlyCrafted
+      });
+      fabricationDemoBars.global = Math.min(99, next.global);
+      fabricationDemoBars.fabricacion = Math.min(99, next.fabricacion);
+    }
+    for (const id of ids) fabricationDemoKnownIds.add(id);
+  }
+  function fabricationDemoBarMarkup() {
+    return '<section class="fabricationDemoBarStrip" aria-label="PT referenciales sin subida de nivel">' +
+      [['Global', fabricationDemoBars.global], ['Fabricación', fabricationDemoBars.fabricacion],
+       ['Refinamiento', null], ['Reciclaje', null], ['Conocimiento', null]]
+      .map(([name, progress]) => '<div class="fabricationDemoBar" data-pt-name="' + name + '">' +
+        '<div class="fabricationDemoBarLabel"><span>' + name + '</span><b>' + (progress === null ? 'DEMO' : progress + '%') + '</b></div>' +
+        '<div class="fabricationDemoBarTrack" role="progressbar" aria-label="' + name + '"' +
+          ' aria-valuemin="0" aria-valuemax="99" aria-valuenow="' + (progress ?? 0) + '">' +
+          '<span style="width:' + (progress ?? 0) + '%"></span></div></div>').join('') + '</section>';
+  }
+
   function convert(inventory, count) {
     if (!whole(count) || countOf(inventory, RAW) < count) return false;
     inventory[RAW] -= count;
@@ -700,6 +734,7 @@
       const titles=['CREACIONES · 1–10','CREACIONES · 11–20'];
       titles.forEach((title,i)=>board.insertAdjacentHTML('beforeend','<div class="workspaceCollectionLabel '+(i?'lower':'upper')+'" aria-hidden="true"><span>✦</span>'+title+'<span>✦</span></div>'));
     }
+    if (tab === 'Fabricaciones') board.insertAdjacentHTML('beforeend', fabricationDemoBarMarkup());
     const view=document.createElement('div');view.className='workspaceViewer';view.innerHTML=viewer;board.append(view);
     // El visor grande es una imagen fija. El hover ya se conectó sólo a las casillas en skinDisplay().
     const button=document.getElementById('prepStart');button.classList.add('workspaceAction');button.innerHTML='<span class="workspaceActionLabel">'+escape(action)+'</span>';button.disabled=!enabled;button.onclick=run;
