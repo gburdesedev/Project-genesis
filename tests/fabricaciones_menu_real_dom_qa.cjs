@@ -8,7 +8,31 @@ const report={mode:'Original Project Genesis HTML + actual Fabricaciones control
 const server=spawn('python3',['-m','http.server','8765','--bind','127.0.0.1'],{stdio:'ignore'});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));let browser,page;
 const save=()=>fs.writeFileSync(path.join(out,'menu-qa-report.json'),JSON.stringify(report,null,2));
-async function shot(name){await page.screenshot({path:path.join(out,name+'.png'),timeout:30000,animations:'disabled'});report.captured.push(name);}
+async function shot(name){
+ const dst=path.join(out,name+'.png');
+ let captured=false;
+ // Prefer Chrome's direct tab capture. Playwright's screenshot method previously timed out
+ // after fonts loaded while advancing page animations in this 3D game document.
+ let session;
+ try {
+   session=await page.context().newCDPSession(page);
+   const img=await Promise.race([
+     session.send('Page.captureScreenshot',{format:'png',fromSurface:false,captureBeyondViewport:false}),
+     new Promise((_,reject)=>setTimeout(()=>reject(Error('CDP screenshot 18000ms timeout')),18000))
+   ]);
+   if(!img?.data)throw Error('CDP returned empty image');
+   fs.writeFileSync(dst,Buffer.from(img.data,'base64'));
+   captured=true;
+ } catch(error) {
+   report.errors.push('CDP screenshot '+name+': '+String(error));
+   try {
+     await page.screenshot({path:dst,timeout:18000,animations:'allow',caret:'hide'});
+     captured=true;
+   }catch(fallbackError){report.errors.push('Playwright screenshot '+name+': '+String(fallbackError));}
+ } finally {if(session)try{await session.detach()}catch{}}
+ if(!captured)throw Error('Both screenshot capture methods failed: '+name);
+ report.captured.push(name);
+}
 (async()=>{
  await sleep(1400);
  browser=await chromium.launch({headless:true,args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
