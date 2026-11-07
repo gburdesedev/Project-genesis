@@ -21,10 +21,10 @@ jobs:
           sha256sum previews/fabricaciones-real-game/V12B_reference.png
       - name: Install pinned Playwright
         run: npm install --prefix /tmp/genesis-fab-real playwright@1.56.1
-      - name: Run real PlayCanvas game with experimental quest skip and genuine NGE
+      - name: Run original game Fabricaciones UI and genuine NGE crafting without village preload
         env:
           NODE_PATH: /tmp/genesis-fab-real/node_modules
-        run: node tests/fabricaciones_real_game_qa.cjs
+        run: node tests/fabricaciones_menu_real_dom_qa.cjs
         timeout-minutes: 16
       - name: Preserve screenshots and diagnostics even on failure
         uses: actions/upload-artifact@v4
