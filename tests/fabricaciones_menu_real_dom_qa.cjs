@@ -56,13 +56,13 @@ window.__GENESIS_MENU_QA__={
     selectedProfession='Herrero';
     activeRoute=ROUTES.Herrero;
     craftSession=engine.generateSession('Herrero');
-    gameStarted=true;chestOpen=true;usedItemNames=new Set();craftedItems=[];
+    gameStarted=true;chestOpen=true;workshopKey=true;debrisCleared=true;auxCleared=true;forgeHot=true;usedItemNames=new Set();craftedItems=[];
     tutorialStep=10;
     const recipe=activeRoute.recipes[0],formula=craftSession.formulas[recipe];
     if(!formula?.materials?.length)throw Error('Generated recipe missing');
     playerInventory={...craftSession.stock};
     for(const m of formula.materials)playerInventory[m.material]=Math.max(playerInventory[m.material]||0,m.qty);
-    setTutorialStep(10);
+    refreshInventorySummary();setTutorialStep(10);
     // QA-only sword result view: real approved V12B still-image, NOT a final GLB.
     const originalAsset=itemAssetMarkup;
     itemAssetMarkup=item=>item?.recipe==='espada_hierro'
