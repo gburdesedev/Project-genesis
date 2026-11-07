@@ -1,0 +1,31 @@
+name: V014.028 | Audit actual game mercenary entry and crafting
+on:
+  push:
+    branches: [experiment/v014028-mercenary-v09-real-craft-playwright-20261107]
+    paths: [.github/workflows/v014028-inspect-game.yml]
+  workflow_dispatch:
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Print bounded exact game source excerpts
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text('utf-8')
+          keys=['GenesisMercenaryConcept.open','mercenary_equipment_canvas_v001.js','mercenary_equipment_canvas_v001.css','craftedItems.push','function fabricate','GenesisPrototypeEngines.fabricate','engine.fabricate','mercenaryState','mercSheetMission','#startMercExtension','function openMercenary','function generateCraft','tutorialStep === 16','tutorialStep===16','mercModal','mercenaryModal','itemIcon:']
+          print('INDEX LEN',len(s),'LINES',s.count('\n')+1)
+          for k in keys:
+            inds=[];start=0
+            while True:
+              i=s.find(k,start)
+              if i<0:break
+              inds.append(i);start=i+len(k)
+              if len(inds)>=6:break
+            print('\nKEY',repr(k),'COUNTFIRST',len(inds))
+            for i in inds:
+              l=s.count('\n',0,i)+1
+              print('EXCERPT',k,'LINE',l,'TEXT',s[max(0,i-950):min(len(s),i+1650)].replace('\r','')[:2650])
+          PY
