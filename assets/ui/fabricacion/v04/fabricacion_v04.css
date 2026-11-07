@@ -64,12 +64,12 @@
  padding:.15cqw .1cqw;background:#110d0d
 }
 .fabV04Material{
- display:flex;align-items:center;gap:.8cqw;min-height:4.45cqw;
+ display:flex;align-items:center;gap:.8cqw;min-height:4.00cqw;
  padding:.22cqw .45cqw;background:#17130e;
  border:1px solid #6e4a27;color:#e8d4b9
 }
-.fabV04MaterialImage{flex:0 0 4.65cqw;width:4.65cqw;height:4.3cqw;object-fit:contain}
-.fabV04MaterialMissingIcon{display:flex;align-items:center;justify-content:center;flex:0 0 4.65cqw;color:#ab7d49;font-size:2.5cqw}
+.fabV04MaterialImage{flex:0 0 3.8cqw;width:3.8cqw;height:3.55cqw;object-fit:contain}
+.fabV04MaterialMissingIcon{display:flex;align-items:center;justify-content:center;flex:0 0 3.8cqw;color:#ab7d49;font-size:2.5cqw}
 .fabV04MaterialBody{min-width:0;flex:1}
 .fabV04MaterialName{font-size:1.03cqw;color:#f1ddb7}
 .fabV04MaterialQty{font-size:.81cqw;color:#bdb3aa;display:flex;justify-content:space-between;gap:.5cqw}
@@ -89,7 +89,7 @@
 .fabV04Craft:disabled{background:#0706058c;cursor:not-allowed}
 .fabV04Craft:not(:disabled):hover{box-shadow:inset 0 0 30px #df992a88}
 .fabV04OverlayFoot{
- left:28.2%;top:79%;width:36.7%;height:7%;
+ left:27.5%;top:78.5%;width:38.1%;height:10%;
  background:#0c0b0b;backdrop-filter:blur(10px);
  display:flex;align-items:center;justify-content:center;
  font-size:1.0cqw;letter-spacing:.03em;color:#e6cfab
@@ -97,12 +97,12 @@
 .fabV04Preview{
  left:28.4%;top:10.4%;width:36.6%;height:66.8%;z-index:3;
  display:flex;justify-content:center;align-items:center;
- pointer-events:none;background:rgba(9,8,7,.20);backdrop-filter:blur(7px);
+ pointer-events:none;background:rgba(9,8,7,.20);backdrop-filter:blur(23px);
  border-radius:2px;overflow:hidden
 }
 .fabV04Preview img{
  width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;
- mix-blend-mode:screen;opacity:1;
+ mix-blend-mode:normal;opacity:1;
 }
 .fabV04Preview .fabV04PreviewEmpty{font-size:1.3cqw;color:#c3b2a2;text-align:center;padding:2cqw}
 .fabV04Bars{
@@ -110,7 +110,7 @@
  display:grid;grid-template-columns:repeat(5,1fr);align-items:start;gap:.25cqw
 }
 .fabV04Bar{
- background:linear-gradient(90deg,#0c0b0be8,#100d0cee);
+ background:#090806;
  min-width:0;min-height:5.6cqw;padding:.45cqw .5cqw;
  font-size:1.0cqw;border:1px solid #66452a4b
 }
@@ -134,3 +134,5 @@
 /* Evita que los máximos del menú antiguo recorten la columna de recetas. */
 .fabV04Board .fabV04Recipes{max-height:none!important;max-width:none!important}
 .fabV04Board .fabV04Materials{max-height:none!important;max-width:none!important}
+
+.fabV04Board .fabV04Bar{min-height:5.6cqw!important;box-shadow:inset 0 0 10px #452c1833}
