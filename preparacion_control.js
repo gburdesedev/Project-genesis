@@ -171,6 +171,24 @@
     return rows.length > 0 && rows.every(row => row.missing === 0);
   }
 
+  // Estado visual: la receta y la familia permanecen bloqueadas cuando no
+  // existe permiso de progresion o faltan ingredientes. No inventar quests.
+  function recipeEligibility(entry, ctx) {
+    if (!entry || !entry.id || !entry.formula) return { available:false, reason:'unavailable' };
+    const materialReady = ready(entry.formula, ctx.inventory);
+    const permission = typeof ctx.canCraftRecipe === 'function' && ctx.canCraftRecipe(entry.id) === true;
+    const questLocked = entry.questLocked === true || entry.lockedByQuest === true ||
+      (typeof ctx.isRecipeQuestLocked === 'function' && ctx.isRecipeQuestLocked(entry.id) === true);
+    return {
+      available:materialReady && permission && !questLocked,
+      reason:questLocked ? 'quest' : !materialReady ? 'materials' : !permission ? 'progress' : ''
+    };
+  }
+  function recipeLockLabel(reason) {
+    return reason === 'materials' ? 'Faltan materiales' :
+      reason === 'quest' ? 'Bloqueada por misión' : 'Bloqueada por progreso';
+  }
+
   function convert(inventory, count) {
     if (!whole(count) || countOf(inventory, RAW) < count) return false;
     inventory[RAW] -= count;
@@ -585,8 +603,10 @@
       const selectedName = selected ? selected.subfamily : ctx.recipeName;
       const selectedId = selected?.id || null;
       const needs = shortages(selectedFormula, ctx.inventory);
+      const recipeStates = new Map(recipes.map(entry => [String(entry.id), recipeEligibility(entry, ctx)]));
+      const selectedState = selected ? recipeStates.get(String(selectedId)) : null;
       const canCraft = selected
-        ? (typeof ctx.canCraftRecipe === 'function' ? ctx.canCraftRecipe(selectedId) === true : false)
+        ? selectedState.available
         : (ctx.canCraftNow?.() === true && !hasCatalog);
       enabled = !!selectedFormula && ready(selectedFormula, ctx.inventory) && canCraft;
       if (hasCatalog) {
@@ -596,10 +616,19 @@
           '<div class="workspaceRecipeTree" role="group" aria-label="Familias y subfamilias conocidas">' +
           families.map(family => {
             const group = recipes.filter(entry => entry.family === family);
-            return '<section class="workspaceRecipeFamily"><h4>' + escape(family) + '</h4>' +
-              group.map(entry => '<button type="button" class="workspaceRecipeChoice" data-recipe-id="' + escape(entry.id) +
-                '" aria-pressed="' + (String(entry.id) === String(selectedId)) + '">' + escape(entry.subfamily) + '</button>').join('') +
-              '</section>';
+            const familyAvailable = group.some(entry => recipeStates.get(String(entry.id))?.available === true);
+            return '<section class="workspaceRecipeFamily' + (familyAvailable ? '' : ' is-locked') + '"' +
+              ' aria-label="' + escape(family + (familyAvailable ? '' : ' · Bloqueada')) + '">' +
+              '<h4>' + (familyAvailable ? '' : '<span class="workspaceRecipeLock" aria-hidden="true">🔒</span>') + escape(family) + '</h4>' +
+              group.map(entry => {
+                const state = recipeStates.get(String(entry.id));
+                const locked = !state.available;
+                return '<button type="button" class="workspaceRecipeChoice' + (locked ? ' is-locked' : '') +
+                  '" data-recipe-id="' + escape(entry.id) + '" aria-pressed="' + (String(entry.id) === String(selectedId)) + '"' +
+                  (locked ? ' disabled title="' + escape(recipeLockLabel(state.reason)) + '"' : '') + '>' +
+                  (locked ? '<span class="workspaceRecipeLock" aria-hidden="true">🔒</span>' : '') +
+                  escape(entry.subfamily) + '</button>';
+              }).join('') + '</section>';
           }).join('') + '</div>' +
           '<p class="workspaceRecipeSubhead">MATERIALES DE LA RECETA SELECCIONADA</p>';
       } else {
@@ -611,7 +640,8 @@
           '<span>' + escape(row.material) + '</span><b>' + row.available + ' / ' + row.needed + '</b></div>').join('')
           : '<p class="workspaceFootnote">Todavía no hay una fórmula disponible.</p>') + '</div>' +
         '<p class="workspaceCraftState">' +
-          (!canCraft ? 'Receta conocida. Su fabricación se habilita en la etapa correspondiente del recorrido.'
+          (selectedState && !selectedState.available ? recipeLockLabel(selectedState.reason) + '.'
+          : !canCraft ? 'Receta conocida. Su fabricación se habilita en la etapa correspondiente del recorrido.'
           : enabled ? 'Materiales disponibles. Podés fabricar esta receta.'
           : 'Faltan materiales preparados para esta receta.') + '</p>' +
         '<button type="button" class="prepSkinCraft secondary" id="workspaceGoPrep">Ver Preparación</button>';
@@ -674,7 +704,7 @@
       button.onclick = () => {
         const catalog = typeof ctx.getRecipeCatalog === 'function' ? ctx.getRecipeCatalog() : [];
         const chosen = catalog.find(entry => String(entry.id) === button.dataset.recipeId);
-        if (!chosen) return;
+        if (!chosen || !recipeEligibility(chosen, ctx).available) return;
         ctx.selectedRecipeId = chosen.id;
         renderWorkspace('Fabricaciones');
       };
@@ -762,8 +792,7 @@
     const catalog = typeof ctx.getRecipeCatalog === 'function' ? ctx.getRecipeCatalog() : [];
     if (Array.isArray(catalog) && catalog.length) {
       const selected = catalog.find(entry => String(entry.id) === String(ctx.selectedRecipeId));
-      if (!selected || !ready(selected.formula, ctx.inventory) ||
-          typeof ctx.canCraftRecipe !== 'function' || ctx.canCraftRecipe(selected.id) !== true ||
+      if (!selected || !recipeEligibility(selected, ctx).available ||
           typeof ctx.onCraftRecipe !== 'function') return;
       halt();
       session = null;
