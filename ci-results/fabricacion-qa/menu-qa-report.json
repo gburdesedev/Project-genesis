@@ -2,17 +2,16 @@
   "mode": "Original Project Genesis HTML + actual Fabricaciones controller + real NGE session, 3D village load bypassed",
   "captured": [
     "01-diagnostico-tras-abrir-menu",
-    "99-diagnostic"
+    "02-fabricaciones-menu-juego-real",
+    "03-resultados-espada-motor-NGE"
   ],
-  "errors": [
-    "page.waitForSelector: Timeout 6500ms exceeded.\nCall log:\n  - waiting for locator('.prepArtboard[data-active-tab=\"Fabricaciones\"]')\n\n    at /__w/Project-genesis/Project-genesis/tests/fabricaciones_menu_real_dom_qa.cjs:99:15"
-  ],
-  "status": "FAILED",
+  "errors": [],
+  "status": "PASS_MENU_AND_CRAFT_REAL_ENGINE_NO_3D_VILLAGE",
   "session": {
     "recipe": "espada_hierro",
     "formula": {
       "id": "espada_hierro",
-      "sessionSeed": 992526019,
+      "sessionSeed": 4120357083,
       "materials": [
         {
           "role": "principal",
@@ -22,12 +21,12 @@
         {
           "role": "proceso",
           "material": "Carbón vegetal",
-          "qty": 1
+          "qty": 2
         },
         {
           "role": "secundario",
-          "material": "Cordel de cáñamo",
-          "qty": 1
+          "material": "Cuero bovino curtido",
+          "qty": 2
         },
         {
           "role": "secundario",
@@ -35,12 +34,12 @@
           "qty": 1
         }
       ],
-      "signature": "principal:Lingote de hierro:3|proceso:Carbón vegetal:1|secundario:Cordel de cáñamo:1|secundario:Madera seca de roble:1"
+      "signature": "principal:Lingote de hierro:3|proceso:Carbón vegetal:2|secundario:Cuero bovino curtido:2|secundario:Madera seca de roble:1"
     },
     "stock": {
       "Lingote de hierro": 6,
-      "Carbón vegetal": 2,
-      "Cordel de cáñamo": 2,
+      "Carbón vegetal": 4,
+      "Cuero bovino curtido": 4,
       "Madera seca de roble": 2
     }
   },
@@ -54,5 +53,64 @@
     "prepRootCount": 0,
     "scriptReady": "function",
     "bodyClasses": "modalOpen"
+  },
+  "menu": {
+    "tab": "Fabricaciones",
+    "exists": true,
+    "family": [
+      {
+        "name": "Espada",
+        "locked": false
+      },
+      {
+        "name": "🔒Escudo",
+        "locked": true
+      }
+    ],
+    "pt": [
+      {
+        "name": "Global",
+        "value": "0%"
+      },
+      {
+        "name": "Fabricación",
+        "value": "0%"
+      },
+      {
+        "name": "Refinamiento",
+        "value": "DEMO"
+      },
+      {
+        "name": "Reciclaje",
+        "value": "DEMO"
+      },
+      {
+        "name": "Conocimiento",
+        "value": "DEMO"
+      }
+    ],
+    "image": "http://127.0.0.1:8765/previews/fabricaciones-real-game/V12B_reference.png",
+    "imageLoaded": true,
+    "canCraft": true
+  },
+  "clicked": true,
+  "result": {
+    "step": 10,
+    "created": [
+      {
+        "name": "Espada con curtido Bovino y Brasa de Forja del Hierro Reforzado del Temple Frágil",
+        "recipe": "espada_hierro",
+        "rarity": "Inútil"
+      }
+    ],
+    "inventory": {
+      "Lingote de hierro": 3,
+      "Carbón vegetal": 2,
+      "Cuero bovino curtido": 2,
+      "Madera seca de roble": 1
+    },
+    "selected": "Herrero",
+    "resultButtonPresent": true,
+    "modalClass": "modal craftModal"
   }
 }
