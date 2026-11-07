@@ -1,10 +1,12 @@
-name: "Genesis | Real Herrero UI-only QA: skip full village preload"
+name: "Genesis | Real Herrero Fabricacion UI Playwright QA"
 on:
   push:
     branches: [experiment/fabricacion-directa-ui-qa-20261107]
+    paths-ignore:
+      - 'ci-results/**'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   actual-game:
     runs-on: ubuntu-24.04
@@ -13,24 +15,44 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
       - uses: actions/checkout@v4
-      - name: Retrieve exact approved V175 V12B render from public asset repo (static reference)
+      - name: Retrieve approved V175 V12B render
         run: |
           mkdir -p previews/fabricaciones-real-game
           curl -fLsS --retry 3 --max-time 60 'https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/98cb1c5d94effb206d75d6c94c0d526a5c97ddc8/public-previews/espada-v175-j-roughness-v12/V12_V175_Color_J_Rugosidad034_Hero.png' -o previews/fabricaciones-real-game/V12B_reference.png
           test $(wc -c < previews/fabricaciones-real-game/V12B_reference.png) -gt 100000
-          sha256sum previews/fabricaciones-real-game/V12B_reference.png
       - name: Install pinned Playwright
         run: npm install --prefix /tmp/genesis-fab-real playwright@1.56.1
-      - name: Run original game Fabricaciones UI and genuine NGE crafting without village preload
+      - name: Run original game Fabricaciones menu and real NGE crafting (no 3D village preload)
         env:
           NODE_PATH: /tmp/genesis-fab-real/node_modules
         run: node tests/fabricaciones_menu_real_dom_qa.cjs
         timeout-minutes: 16
-      - name: Preserve screenshots and diagnostics even on failure
-        uses: actions/upload-artifact@v4
+      - name: Always store screenshots and diagnostic artifacts
         if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: fabricacion-real-game-v12b-screenshots
           path: previews/fabricaciones-real-game/
           if-no-files-found: warn
           retention-days: 15
+      - name: Publish QA screenshot and status to experimental branch for direct inspection
+        if: always()
+        shell: bash
+        env:
+          TEST_JOB_STATUS: ${{ job.status }}
+        run: |
+          mkdir -p ci-results/fabricacion-qa
+          if [ -d previews/fabricaciones-real-game ]; then
+            cp previews/fabricaciones-real-game/*.png ci-results/fabricacion-qa/ 2>/dev/null || true
+            cp previews/fabricaciones-real-game/menu-qa-report.json ci-results/fabricacion-qa/ 2>/dev/null || true
+          fi
+          printf '{"run_id":"%s","commit":"%s","job_status":"%s","run_url":"https://github.com/%s/actions/runs/%s"}\n' \
+            "$GITHUB_RUN_ID" "$GITHUB_SHA" "$TEST_JOB_STATUS" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" > ci-results/fabricacion-qa/action-status.json
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ci-results/fabricacion-qa
+          if ! git diff --cached --quiet; then
+            git commit -m 'test: publish fabricacion game UI QA evidence [skip ci]'
+            git push origin "HEAD:refs/heads/$GITHUB_REF_NAME"
+          fi
