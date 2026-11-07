@@ -1,0 +1,45 @@
+name: V014.031 | Inventory approved original 1:1 and bellows smoke
+on:
+  push:
+    branches:
+      - experiment/v014031-fuelle-inventario-aprobado-20261107
+    paths:
+      - .github/workflows/v014031-inventory-approved-qa.yml
+      - tests/v014031_inventory_approved.cjs
+      - index.html
+      - preparacion_control.js
+      - inventario_genesis_16x9.js
+      - inventario_arte_aprobado_1to1.css
+      - assets/ui/inventario/**
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  approved-inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check code syntax, branch version and untouched mercenary
+        run: |
+          node --check inventario_genesis_16x9.js
+          node --check preparacion_control.js
+          node --check tests/v014031_inventory_approved.cjs
+          git diff --exit-code ade8e2f495fcfd4b8e5fb3a02f970f695216e31a HEAD -- mercenary_equipment_canvas_v09.js mercenary_equipment_canvas_v001.css mercenary_equipment_domain_v001.js
+      - name: Install Playwright runner
+        run: |
+          npm install --prefix /tmp/genesis-v014031-qa --no-audit --no-fund playwright@1.56.1
+      - name: Verify approved art bytes, 20 live slots, 16:9 layout and navigation in Chromium
+        env:
+          NODE_PATH: /tmp/genesis-v014031-qa/node_modules
+        run: node tests/v014031_inventory_approved.cjs
+      - name: Preserve exact Chromium screenshots and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014031-inventory-original-1to1
+          path: previews/v014031-inventory-approved/
+          if-no-files-found: warn
+          retention-days: 14
