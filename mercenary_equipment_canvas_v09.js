@@ -56,7 +56,7 @@
     }
     function render() {
       const candidate = selected(), old = equipped(), rows = compare(old, candidate);
-      const family = state.family, canEquip = !!(state.draftFirst || opts.equippedFirst) && !!(state.draftSecond || opts.equippedSecond);
+      const family = state.family, canEquip = opts.editing ? (!!(state.draftFirst || opts.equippedFirst) && !!(state.draftSecond || opts.equippedSecond)) : (!!state.draftFirst && !!state.draftSecond);
       const grid = Array.from({length:20}, (_,i) => {
         const item=itemAt(i); return `<button type="button" class="mcInventorySlot ${item?'hasItem':''} ${item && item===candidate?'selected':''}" data-item="${i}" aria-label="${esc(item?.name || 'Casilla vacía')}" title="${esc(item?.name || '')}" ${item?'':'disabled'}>${getIcon(item)}</button>`;
       }).join('');
