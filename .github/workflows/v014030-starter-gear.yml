@@ -4,6 +4,9 @@ on:
     branches: [experiment/v014030-mercenary-starter-gear-real-compare-20261107]
     paths:
       - .github/workflows/v014030-starter-gear.yml
+      - scripts/v014030_apply_mercenary_starter_gear.py
+      - mercenary_equipment_canvas_v09.js
+      - tests/v014030_mercenary_starter_gear.cjs
   workflow_dispatch:
 permissions:
   contents: write
@@ -23,6 +26,8 @@ jobs:
           s=Path('index.html').read_text('utf8')
           assert s.count('function createMercenaryStarterGear()')==1
           assert s.count('function ensureMercenaryStarterEquipment()')==1
+          assert s.count('mercenary_equipment_canvas_v09.js')==1
+          assert 'mercenary_equipment_canvas_v001.js' not in s
           assert s.count('selectedFirst:(editing||chosenFirst!==mercStarterGear?.sword)')==1
           assert s.count('onDraft:(which,item)=>{')==1
           assert s.count('mercSwordItem=mercStarterGear?.sword||null;')==1
