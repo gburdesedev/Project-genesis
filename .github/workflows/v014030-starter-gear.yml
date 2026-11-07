@@ -1,0 +1,53 @@
+name: V014.030 | Common sword and useless shield baseline with real browser QA
+on:
+  push:
+    branches: [experiment/v014030-mercenary-starter-gear-real-compare-20261107]
+    paths:
+      - .github/workflows/v014030-starter-gear.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  starting-equipment-real-game:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch only isolated game branch with starter gear source
+        run: |
+          python3 scripts/v014030_apply_mercenary_starter_gear.py
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text('utf8')
+          assert s.count('function createMercenaryStarterGear()')==1
+          assert s.count('function ensureMercenaryStarterEquipment()')==1
+          assert s.count('selectedFirst:(editing||chosenFirst!==mercStarterGear?.sword)')==1
+          assert s.count('onDraft:(which,item)=>{')==1
+          assert s.count('mercSwordItem=mercStarterGear?.sword||null;')==1
+          print('V014030_SOURCE_MATCHED_AND_PATCHED',len(s))
+          PY
+      - name: Check real-game comparison runner syntax and install Chromium binding
+        run: |
+          node --check tests/v014030_mercenary_starter_gear.cjs
+          node --check mercenary_equipment_canvas_v09.js
+          npm install --no-save playwright@1.56.1
+      - name: Load real game generate two player swords and shields plus mercenary-owned real starting items compare then equip
+        run: node tests/v014030_mercenary_starter_gear.cjs
+      - name: Commit tested game logic to isolated branch only
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'genesis-v014030-qa[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet || git commit -m 'feat(v014030): common starter sword and useless shield from NGE; isolated from crafts'
+          git push origin HEAD:experiment/v014030-mercenary-starter-gear-real-compare-20261107
+      - name: Preserve all real Chromium screenshots and JSON evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014030-real-starter-sword-shield-comparison
+          path: previews/v014030-mercenary-starter-gear/
+          if-no-files-found: warn
+          retention-days: 14
