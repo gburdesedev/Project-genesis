@@ -1,0 +1,53 @@
+name: V014.026 | Cinematic actual Walk_Loop and camera visual QA
+on:
+  push:
+    branches:
+      - experiment/v014026-cinematic-visual-validation-20261106
+    paths:
+      - .github/workflows/v014026-cinematic-visual-validation.yml
+      - tests/v014026_cinematic_actual_walk_review.cjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  route-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm approved plaza detour, existing path and QA source validity
+        run: |
+          node --check genesis_market_cinematic_v001.js
+          node --check tests/v014026_cinematic_actual_walk_review.cjs
+          node --test tests/v014026_ordan_market_cinematic_paths.cjs
+  cinematic-in-game:
+    needs: route-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keep the exact prior world and chest without editing the game version
+        run: |
+          python3 scripts/v014024_relocate_chest_side_aisle.py
+          node --check tests/v014026_cinematic_actual_walk_review.cjs
+      - name: Setup pinned Chromium and real PlayCanvas
+        run: npm install --prefix /tmp/genesis-cinematic-review playwright@1.56.1
+      - name: Play real game from Ordan and inspect the model animation, camera and merchant interaction
+        env:
+          NODE_PATH: /tmp/genesis-cinematic-review/node_modules
+          GENESIS_RETRY_SCREENSHOTS: '0'
+          GENESIS_CINEMATIC_CAPTURE: '1'
+        timeout-minutes: 25
+        run: node tests/v014026_cinematic_actual_walk_review.cjs
+      - name: Preserve physical animation receipts and original screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014026-cinematic-real-walk-visual-audit
+          path: |
+            previews/v014026-cinematic-visual-qa/
+            previews/v014024-chest-side-aisle/static-geometry-audit.json
+          if-no-files-found: warn
+          retention-days: 12
