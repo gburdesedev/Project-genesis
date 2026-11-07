@@ -573,6 +573,43 @@
       '<div class="workspaceNgeScroll" tabindex="0">' + reading + '</div></section>';
   }
 
+  // Color-key sólo para visualizar el render V12B en el visor estático.
+  // No modifica ni el PNG V12B aprobado ni el fondo V04; recorta únicamente
+  // el fondo azul casi uniforme de la referencia al componer la interfaz.
+  let v12bTransparentPreview = null;
+  function prepareV12BStaticPreview(img) {
+    if (!img || img.dataset.genesisStaticKeyed === '1') return;
+    const key = () => {
+      if (img.dataset.genesisStaticKeyed === '1' || !img.naturalWidth) return;
+      if (v12bTransparentPreview) {
+        img.dataset.genesisStaticKeyed = '1';
+        img.src = v12bTransparentPreview;
+        return;
+      }
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const g = canvas.getContext('2d',{willReadFrequently:true});
+        g.drawImage(img,0,0);
+        const pixels = g.getImageData(0,0,canvas.width,canvas.height), d = pixels.data;
+        for (let i=0;i<d.length;i+=4) {
+          const distance = Math.hypot(d[i]-19,d[i+1]-28,d[i+2]-40);
+          d[i+3] = Math.round(d[i+3] * Math.max(0,Math.min(1,(distance-12)/48)));
+        }
+        g.putImageData(pixels,0,0);
+        v12bTransparentPreview = canvas.toDataURL('image/png');
+        img.dataset.genesisStaticKeyed = '1';
+        img.src = v12bTransparentPreview;
+      } catch(error) {
+        // Never block recipe selection or crafting if a browser cannot key a poster.
+        console.warn('Fabricación V04: visor estático sin recorte de fondo',error);
+      }
+    };
+    if (img.complete && img.naturalWidth) key();
+    else img.addEventListener('load',key,{once:true});
+  }
+
   // Fabricación V04: usa el PNG aprobado como capa base, no el arte de Preparación.
   // Las regiones que contenían textos/números horneados reciben controles HTML
   // alimentados por el catálogo, el stock y el motor NGE de esta sesión.
@@ -669,6 +706,7 @@
     '</div>', 'preparationModal fabV04Modal');
     bind('prepClose',close);
     bind('prepStart',craft);
+    if (previewImage) prepareV12BStaticPreview(document.querySelector('.fabV04Preview img'));
     document.querySelectorAll('.fabV04Board [data-fab-tab]').forEach(button => {
       if (button.disabled) return;
       button.onclick = () => navigate(button.dataset.fabTab);
