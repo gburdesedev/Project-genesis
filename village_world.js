@@ -175,11 +175,25 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
    // If the optional roof template was deferred, add only a lightweight roof.
    if(!roof)mesh(building,'Cubierta básica Herrero','box',0,3.4,-5.05,11.5,.18,8,material('Tejado',[.30,.24,.21]));
    buildings.set('Herrero',building);
-   const trees={update(){},blocked(){return false},status(){return{loaded:0}},release(){}};
-   globalThis.__genesisLiteVillage={mode:'herrero-first',trees:0,roads:plan.roads.length,workshops:1};
+   // V014.033: restore approved foliage without re-enabling the costly full village.
+   // Four local LOD2 species are streamed asynchronously; never block Herrero boot
+   // on decoration. Every visible tree receives its actual bark-derived collider.
+   const trees=mountVillageTrees(app,root,{onResourceLoaded,lod2Only:true});
+   trees.update(plan.plaza.x,plan.plaza.z,true);
+   globalThis.__genesisLiteVillage={
+    mode:'herrero-first',trees:trees.sites.length,treeLOD:'LOD2',
+    treeLoadFinished:false,treeVariants:0,treeErrors:0,
+    roads:plan.roads.length,workshops:1
+   };
+   trees.fullReady.then(result=>{
+    Object.assign(globalThis.__genesisLiteVillage,{
+     treeLoadFinished:true,treeVariants:result.loaded,treeErrors:result.failed
+    });
+    if(result.failed)console.warn('V014.033: árboles aprobados incompletos',result);
+   });
    return Object.freeze({root,plan,trees,arcanePortals:[],
     setProfession(prof){building.enabled=true;},
-    blocked(x,z,r=.33){return plan.blocked(x,z,r)}});
+    blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)}});
   }
 
  const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14c');app.root.addChild(root);
