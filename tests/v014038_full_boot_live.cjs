@@ -17,10 +17,36 @@ const srv=http.createServer((req,res)=>{
  const page=await browser.newPage({viewport:{width:1366,height:768},serviceWorkers:'block'});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url())});
  await page.goto('http://127.0.0.1:'+srv.address().port+'/index.html',{waitUntil:'domcontentloaded',timeout:60000});
- await page.waitForFunction(()=>document.getElementById('prototypeIntro')?.style.display==='grid'||document.querySelector('.loadingCard.failed'),null,{timeout:150000});
+ // A browser struggling under software WebGL can lose frames; capture the
+ // precise game loading state before treating the timeout as a boot failure.
+ const inspectBoot=async stage=>{
+  try{return await page.evaluate(()=>({
+   stage,phase:document.getElementById('loadState')?.textContent?.trim(),
+   detail:document.getElementById('loadDetail')?.textContent?.trim(),
+   count:document.getElementById('loadCount')?.textContent?.trim(),
+   failed:!!document.querySelector('.loadingCard.failed'),
+   intro:document.getElementById('prototypeIntro')?.style.display,
+   progress:window.__genesisBoot||null,device:window.GenesisDevice?.safePreviews,
+   lite:window.__genesisLiteVillage||null,trees:window.__genesisTreeStatus||null,
+   fountain:window.__genesisDolphinFountain||null,
+   workshops:window.__genesisClosedWorkshopStatus||null,
+   merchant:window.__genesisMarket?.visual||null,
+   resources:performance.getEntriesByType('resource').length
+  }))}catch(e){return {stage,evaluationError:String(e)}}
+ };
+ const waitGame=async(stage,fn,timeout)=>{
+  try{await page.waitForFunction(fn,null,{timeout})}
+  catch(error){
+   const evidence={error:String(error),state:await inspectBoot(stage),errors:errors.slice(-25)};
+   fs.writeFileSync(path.join(out,'failure-'+stage+'.json'),JSON.stringify(evidence,null,2));
+   console.error('V014038_BOOT_FORENSICS',JSON.stringify(evidence).slice(0,9000));
+   throw error;
+  }
+ };
+ await waitGame('before-selection',()=>document.getElementById('prototypeIntro')?.style.display==='grid'||document.querySelector('.loadingCard.failed'),150000);
  assert.equal(await page.locator('.loadingCard.failed').count(),0,'Startup failed before selecting Herrero');
  await page.locator('[data-profession="Herrero"]').click();
- await page.waitForFunction(()=>document.getElementById('professionChip')?.style.display!=='none'&&document.getElementById('prototypeIntro')?.style.display==='none'||document.querySelector('.loadingCard.failed'),null,{timeout:200000});
+ await waitGame('after-herrero',()=>document.getElementById('professionChip')?.style.display!=='none'&&document.getElementById('prototypeIntro')?.style.display==='none'||document.querySelector('.loadingCard.failed'),200000);
  assert.equal(await page.locator('.loadingCard.failed').count(),0,'Game failed after Herrero selection');
  await page.waitForFunction(()=>!!window.__GenesisArrivalQA?.(),null,{timeout:12000});
  const arrivalFirst=await page.evaluate(()=>window.__GenesisArrivalQA());
