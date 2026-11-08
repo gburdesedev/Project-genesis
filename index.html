@@ -772,6 +772,7 @@ window.__genesisAppError=function(event){
 <script src="./mercenary_equipment_canvas_v001.js?v=0.1.001"></script>
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
+const GENESIS_MERCENARY_LAB=new URLSearchParams(location.search).get("mercenario")==="1"; // Solo rama experimental, no afecta main.
 import { Vec3 } from 'playcanvas';
 import { mountVillage } from './village_world.js?v=0.14.022';
 import { mountGenesisMarket } from './genesis_market_v001.js?v=0.14.022';
@@ -1159,7 +1160,7 @@ window.__GENESIS_RUNTIME_ERRORS=[];addEventListener('error',e=>{window.__GENESIS
 // ---------- Controls ----------
 const HERRERO_WORKSHOP_SETUP_REQUIRED=false; // Build de prueba: false = taller del Herrero ya operativo para validar crafting → mercenarios.
 const DIRECT_MERCENARY_AFTER_CRAFTS=true;
-const GENESIS_MERCENARY_LAB=new URLSearchParams(location.search).get("mercenario")==="1"; // Solo rama experimental, no afecta main. // Build de prueba: tras la segunda familia salta directo a mercenarios.
+// GENESIS_MERCENARY_LAB declarado al comenzar el módulo para evitar TDZ. // Build de prueba: tras la segunda familia salta directo a mercenarios.
 let gameStarted=false,selectedProfession=null,activeRoute=null,tutorialStep=-1,currentInteractable=null;
 let px=0,pz=6.3,camYaw=0,camPitch=24,camDist=4.7,cameraSolvedDist=4.7,moveX=0,moveY=0,walking=false,running=false,lastT=performance.now();const keys=new Set();
 const MOVEMENT_KEYS=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowLeft','ArrowDown','ArrowRight','ShiftLeft','ShiftRight']);const NOTEBOOK_CAMERA_KEYS=new Set(['KeyI','KeyJ','KeyK','KeyL','KeyU','KeyO']);
