@@ -37,9 +37,9 @@ jobs:
           assets=[]
           for m in re.finditer(r'<pc-asset\\b[^>]*>',s):
             tag=m.group(0)
-            src=re.search(r'\\bsrc=["\\']([^"\\']*)',tag)
+            src=re.search(r'src="([^"]*)"',tag)
             if not src:continue
-            mid=re.search(r'\\bid=["\\']([^"\\']*)',tag)
+            mid=re.search(r'id="([^"]*)"',tag)
             name=mid.group(1) if mid else '?'
             url=src.group(1)
             if url.startswith('data:'):
