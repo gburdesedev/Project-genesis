@@ -38,7 +38,7 @@ jobs:
         run: |
           node tests/v014037_arrival_contract.cjs
           node tests/v014038_market_cinema_contract.cjs
-          node tests/ordan_market_quest_v014021.cjs
+          node tests/genesis_market_domain_v001.cjs
   real-village:
     runs-on: ubuntu-24.04
     timeout-minutes: 19
