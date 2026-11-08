@@ -95,9 +95,15 @@ once('const w=workshopAt(px,pz);updateMentorFollow(dt,now,w);',
      'arrival frame tick')
 # Reuse original V014026 condition so the walking controller is not forced to idle
 # while a cinematic controls the avatar.
-once('}else setWalking(false);\\n updateInitialArrival(dt,now);const w=workshopAt(px,pz);',
-     '}else if(!marketCinematic?.active&&!arrivalCinematic?.active)setWalking(false);\\n updateInitialArrival(dt,now);const w=workshopAt(px,pz);',
-     'do not cancel cinematic Walk_Loop')
+# Only the frame movement line is touched, not any unrelated menu handler.
+frame_start=text.index('const canMove=gameStarted&&')
+frame_end=text.index('\\n',frame_start)
+frame_line=text[frame_start:frame_end]
+if 'else setWalking(false);' not in frame_line:
+ raise RuntimeError('The original frame still must contain an idle fallback')
+frame_line=frame_line.replace('else setWalking(false);',
+ 'else if(!marketCinematic?.active&&!arrivalCinematic?.active)setWalking(false);')
+text=text[:frame_start]+frame_line+text[frame_end:]
 # Existing source may not have the above newline in this version; intentional fail
 # rather than silently skip. Only approved script/layout are preserved.
 if 'window.GenesisMarketCinematic' not in text or 'window.GenesisCanvasArrivalV016' not in text:
