@@ -1,0 +1,36 @@
+name: Genesis diagnostic | PC configuration on mobile screen
+on:
+  push:
+    branches: ['diagnostic/pc-on-mobile-20261108']
+    paths:
+      - 'tests/desktop_on_mobile_compare_20261108.cjs'
+      - '.github/workflows/desktop-on-mobile-diagnostic-20261108.yml'
+      - 'device_policy.js'
+      - 'village_world.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pc-on-phone:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate test syntax
+        run: node --check tests/desktop_on_mobile_compare_20261108.cjs
+      - name: Install matching Playwright package
+        run: npm install --prefix /tmp/genesis-desktop-on-mobile playwright@1.56.1
+      - name: Compare real Chromium/WebGL loading, normal mobile versus PC-on-mobile
+        run: NODE_PATH=/tmp/genesis-desktop-on-mobile/node_modules node tests/desktop_on_mobile_compare_20261108.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-20261108-desktop-on-mobile-screens-and-report
+          path: previews/desktop-on-mobile-20261108/
+          retention-days: 14
