@@ -25,7 +25,7 @@ jobs:
           new="await prepareRoute('Herrero');routeLoading=false;setLoadUI(100,'Juego completo listo'"
           assert s.count(old)==1, f'Unexpected bootstrap pattern: {s.count(old)}'
           p.write_text(s.replace(old,new,1))
-          assert s.count(new)==1
+          assert p.read_text().count(new)==1
           print('EXPERIMENTAL_FIX_APPLIED: release routeLoading after preload')
           PY
       - name: Install Playwright
