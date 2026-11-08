@@ -5,7 +5,7 @@ fs.mkdirSync(out,{recursive:true});
 const report={started:new Date().toISOString(),events:[],errors:[],states:[],result:'STARTING'};
 const log=(kind,data)=>{report.events.push({kind,t:Date.now(),data});console.log('STAGED_HERRERO',JSON.stringify({kind,data}).slice(0,2500));};
 (async()=>{
- const browser=await chromium.launch({headless:true,args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
+ const browser=await chromium.launch(process.env.TEST_CHANNEL==='msedge'?{channel:'msedge',headless:true}:{headless:true,args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
  try{
   const context=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1,serviceWorkers:'block',ignoreHTTPSErrors:true});
   const page=await context.newPage();
