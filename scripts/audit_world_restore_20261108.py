@@ -33,3 +33,23 @@ for name,src in [('current',cur),('legacy',legacy)]:
   if any(x in line for x in ['genesis_market_v001.js','genesis_market_cinematic_v001.js','genesis_market_quest_v001.js','genesisFountainV011','genesis_market_domain','genesis_ui_approved','village_world.js']):
    print('REF',name,line_no,line[:500])
 print('FILES_EXIST',json.dumps({x:Path(x).exists() for x in ['genesis_market_v001.js','genesis_market_cinematic_v001.js','genesis_market_cinematic_v001.css','village_world.js','village_trees.js','assets/playcanvas/approved/characters/merchant_v02_75962.glb']}))
+
+print('=== FOCUSED LOGIC COMPARISON ===')
+for name,src in [('current',cur),('legacy',legacy)]:
+ lines=src.splitlines()
+ print('FOCUS',name,'lines',len(lines))
+ key_rx=re.compile(r'cinema|cinem[aá]t|letterbox|escort|mentorFollow|auto.?walk|intro.?walk|marketCinematic|arrivalSequence|startIntro|enterVillage|tour|spawn|tutorialStep.*(talk|escort|shop)',re.I)
+ items=[(i+1,l.strip()) for i,l in enumerate(lines) if key_rx.search(l)]
+ print('SYMBOL_HITS',name,len(items))
+ for i,l in items[:100]:print('SYMBOL',name,i,l[:320])
+ functions=[(i+1,l.strip()) for i,l in enumerate(lines) if re.match(r'\\s*(?:async\\s+)?function\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\(',l)]
+ for i,l in functions:
+  if re.search(r'escort|cinema|arrival|mentor|profession|intro|camera|tutorial|market|start|update',l,re.I):
+   print('FUNCTION',name,i,l[:240])
+for start,end in [(1220,1290),(1310,1450),(1820,1895)]:
+ for name,src in [('current',cur),('legacy',legacy)]:
+  lines=src.splitlines();print('FOCUSED_RANGE',name,start,end)
+  for i in range(start-1,min(end,len(lines))):
+   l=lines[i]
+   if any(t in l for t in ['mentor','Ordan','Cinematic','escort','market','Mercado','cinema','setTutorialStep','pointerLock','gameStarted','intro','chosenProfession','activeRoute','walk']) or (start<=i+1<=end and len(l)<170):
+    print('LINE',name,i+1,l[:400])
