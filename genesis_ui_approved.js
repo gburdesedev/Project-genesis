@@ -1,7 +1,7 @@
 /* Project Genesis UI 2026-11-08: runtime-only overlays over the immutable approved 1672x941 artwork. */
 (function(){
  'use strict';
- const BUILD='V014.025';
+ const BUILD='V014.026';
  const ROOT='assets/ui/approved/';
  const ARTS=Object.freeze({Inventario:ROOT+'Inventario_V11_APROBADO_1672x941.png',Preparacion:ROOT+'Preparacion_APROBADA_1672x941.png',Fabricaciones:ROOT+'Fabricaciones_V07_APROBADA_1672x941.png'});
  const MATERIALS=Object.freeze({
@@ -152,6 +152,45 @@
      preparation(ctx,nav); // Stay on Preparación; never jump to Inventario.
    });
  }
+ function renderThermal(ctx,nav,controls){
+   const work=ctx?.work;
+   if(!work||!controls)return false;
+   const gauge=`<div class="gPrepThermalGauge" id="prepHeatGauge" role="meter" aria-label="Temperatura de la fragua" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(work.temperature)}" style="background:${controls.gradient}">
+     <span class="gPrepThermalTarget" style="left:${work.target}%"></span>
+     <span class="gPrepThermalNeedle" id="prepHeatNeedle"></span>
+   </div>`;
+   const panel=`<section class="gPrepThermalPanel" style="${pos(620,216,576,565)}" aria-label="Control térmico de la fragua">
+     <h2>CONTROL DE LA FRAGUA</h2>
+     <p>Mantené la temperatura cerca del verde para preparar el lingote.</p>
+     ${gauge}
+     <div class="gPrepThermalLegend"><span>FRÍO</span><span>IDEAL</span><span>CALIENTE</span></div>
+     <div class="gPrepThermalProgressHeader"><span>AVANCE DE PREPARACIÓN</span><b id="prepCraftNumber">0.0 / 100</b></div>
+     <div class="gPrepThermalProgressBar"><span id="prepCraftProgress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Avance de preparación"></span></div>
+     <div class="gPrepThermalBellows">${controls.bellows.map((p,i)=>`<button type="button" id="prepBellow${i}" aria-label="Fuelle ${esc(p.label.toLowerCase())}"><b>${esc(p.label)}</b><small>${esc(p.description)}</small><em>${esc(p.key)}</em></button>`).join('')}</div>
+     <p class="gPrepThermalNote">El avance es continuo. Sin pulsar, la fragua se enfría.</p>
+   </section>`;
+   const details=`<section class="gPrepThermalDetails" style="${pos(1220,210,380,505)}">
+     <h3>PREPARACIÓN EN CURSO</h3>
+     <div><span>Producto</span><b>Lingote de hierro</b></div>
+     <div><span>Lote</span><b>${work.count}</b></div>
+     <div><span>Dificultad</span><b>${Math.round(work.batch.difficultyMultiplier*100)} %</b></div>
+     <div><span>Temperatura</span><b id="prepHeatNumber">${Math.round(work.temperature)} / 100</b></div>
+     <div><span>Objetivo</span><b>${Math.round(work.target)} / 100</b></div>
+     <div><span>Intervenciones</span><b id="prepActions">0</b></div>
+     <p class="gPrepThermalMessage" id="prepHeatMessage" aria-live="polite"></p>
+     <p class="gPrepThermalEffectiveness" id="prepActionPoints" aria-live="polite"></p>
+     <button type="button" id="prepAbandon">Cancelar tanda sin consumir mineral</button>
+   </section>`;
+   const board=mount('Preparacion',ctx,nav,panel+details,'data-prep-stage="running"');if(!board)return false;
+   board.classList.add('gApproved-Thermal');
+   board.querySelectorAll('.gApprovedHit:not([data-go="Cerrar"])').forEach(button=>button.disabled=true);
+   controls.bellows.forEach((power,i)=>{
+     const button=board.querySelector('#prepBellow'+i);
+     if(button)button.onclick=()=>controls.intervene(power.key);
+   });
+   board.querySelector('#prepAbandon').onclick=controls.abandon;
+   return true;
+ }
  function fabrications(ctx,nav){
    const catalog=typeof ctx.getRecipeCatalog==='function'?(ctx.getRecipeCatalog()||[]):[];
    const recipes=catalog.filter(r=>r&&r.id&&r.formula);
@@ -193,5 +232,5 @@
    else return false;
    return true;
  }
- window.GenesisApprovedUI=Object.freeze({render,ARTS,BUILD});
+ window.GenesisApprovedUI=Object.freeze({render,renderThermal,ARTS,BUILD});
 })();
