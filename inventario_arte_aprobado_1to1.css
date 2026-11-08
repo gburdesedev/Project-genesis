@@ -278,3 +278,15 @@
 .genInv.genInvCanonical .genInvTab:where(:hover,:focus-visible) img{
   filter:brightness(1.18) drop-shadow(0 0 5px #e9a54b)!important;
 }
+
+/* Foco corregido: el sprite original de Preparacion ya trae una luz naranja
+   incrustada; apagarla en Inventario y encender SOLO el activo. */
+.genInv.genInvCanonical .genInvTab:not([aria-current="page"]) img{
+  filter:brightness(.46) saturate(.55)!important;
+}
+.genInv.genInvCanonical .genInvTab[aria-current="page"] img{
+  filter:brightness(1.65) saturate(1.18) drop-shadow(0 0 7px #df9a3c)!important;
+}
+.genInv.genInvCanonical .genInvTab:hover img{
+  filter:brightness(1.12) saturate(1.0)!important;
+}
