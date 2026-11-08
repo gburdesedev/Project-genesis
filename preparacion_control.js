@@ -515,10 +515,10 @@
     if(approvedUiLoadState==='loading')return false;
     approvedUiLoadState='loading';
     const style=document.createElement('link');
-    style.rel='stylesheet';style.href='genesis_ui_approved.css?v=20261108.2';
+    style.rel='stylesheet';style.href='genesis_ui_approved.css?v=20261108.1';
     document.head.append(style);
     const script=document.createElement('script');
-    script.src='genesis_ui_approved.js?v=20261108.2';
+    script.src='genesis_ui_approved.js?v=20261108.1';
     script.onload=()=>{
       approvedUiLoadState=window.GenesisApprovedUI?.render?'ready':'failed';
       if(approvedUiLoadState==='failed')console.error('[Genesis UI] Falta el módulo de arte aprobado');

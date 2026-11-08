@@ -1,9 +1,0 @@
-/* Original cinematic composition: keep approved HUD/game artwork intact outside arrival. */
-#genesisArrivalLetterbox{position:fixed;inset:0;z-index:9500;pointer-events:none;visibility:hidden;opacity:0;transition:opacity .45s ease,visibility .45s ease}
-#genesisArrivalLetterbox::before,#genesisArrivalLetterbox::after{content:"";position:absolute;left:0;right:0;height:12%;background:rgba(0,0,0,.97)}
-#genesisArrivalLetterbox::before{top:0}
-#genesisArrivalLetterbox::after{bottom:0}
-#genesisArrivalLetterbox .genesisArrivalCaption{position:absolute;right:4%;bottom:4%;color:#dec293;font:600 clamp(12px,1.3vw,17px) Georgia,serif;text-shadow:0 2px 8px #000}
-body.genesis-arrival-cinematic #genesisArrivalLetterbox{visibility:visible;opacity:1}
-body.genesis-arrival-cinematic #hud,body.genesis-arrival-cinematic #mobile,body.genesis-arrival-cinematic #desktopHelp,body.genesis-arrival-cinematic #cameraGuide,body.genesis-arrival-cinematic #prompt,body.genesis-arrival-cinematic #professionChip,body.genesis-arrival-cinematic #npcTag{visibility:hidden!important;pointer-events:none!important}
-@media(prefers-reduced-motion:reduce){#genesisArrivalLetterbox{transition:none}}

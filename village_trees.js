@@ -167,8 +167,6 @@ function measureTrunk(prototype) {
 
 export function mountVillageTrees(app, villageRoot, options={}){
  const safeMobile = globalThis.GenesisDevice?.safePreviews===true;
- // On constrained startup, reuse only the approved LOD2 derivatives, including on desktop.
- const lod2Only=options.lod2Only===true||safeMobile;
  const treeRoot=new Entity('Vegetación aprobada — 14 árboles · follaje íntegro PBR');
  villageRoot.addChild(treeRoot);
  const nodes=TREE_SITES.map(site=>{
@@ -187,12 +185,12 @@ export function mountVillageTrees(app, villageRoot, options={}){
  };
  app.on('update',windTick);
  let active=0,focusX=0,focusZ=0,lastUpdate=0;
- const maxConcurrent=lod2Only?2:4;
+ const maxConcurrent=safeMobile?2:4;
  const initiallySettled=new Set();
  let resolveInitial;
  const initialReady=new Promise(resolve=>{resolveInitial=resolve;});
  // Todos los LOD que la cámara puede usar se resuelven antes de jugar.
- const allVariants=Object.keys(TYPES).flatMap(species=>lod2Only?[species+':2']:[species+':2',species+':1']);
+ const allVariants=Object.keys(TYPES).flatMap(species=>safeMobile?[species+':2']:[species+':2',species+':1']);
  let resolveAll;
  const fullReady=new Promise(resolve=>{resolveAll=resolve});
  const checkAll=()=>{
@@ -204,7 +202,7 @@ export function mountVillageTrees(app, villageRoot, options={}){
   planned:nodes.length,plaza:TREE_SITES.filter(p=>p.region==='plaza').length,
   residentVariants:ready.size,failedVariants:failed.size,pendingVariants:queue.length+active,
   visible:nodes.filter(n=>n.visible&&n.visual).length,rendered:nodes.filter(n=>n.visible&&n.visual).length,
-  mobile:safeMobile,lod2Only,windEnabled:windMaterials.size>0,windMaterials:windMaterials.size
+  mobile:safeMobile,windEnabled:windMaterials.size>0,windMaterials:windMaterials.size
  });
  function pump(){
   while(active<maxConcurrent&&queue.length){
@@ -249,7 +247,7 @@ export function mountVillageTrees(app, villageRoot, options={}){
   }
  }
  function request(species,lod){
-  if(lod2Only&&lod!==2)return;
+  if(safeMobile&&lod!==2)return;
   if(lod===0)return; // Approved master kept offline: no 4K hero GLB in the village runtime.
   const key=species+':'+lod;
   if(ready.has(key)||requested.has(key)||failed.has(key))return;
@@ -296,7 +294,7 @@ export function mountVillageTrees(app, villageRoot, options={}){
    node.visible=d<maximum;
    node.anchor.enabled=node.visible;
    if(!node.visible)continue;
-   const goal=lod2Only?2:d<23?1:2;
+   const goal=safeMobile?2:d<23?1:2;
    request(node.site.species,2);
    if(ready.has(node.site.species+':2')&&goal<=1)request(node.site.species,1);
    const available=goal===1?[1,2]:[2];
@@ -308,7 +306,7 @@ export function mountVillageTrees(app, villageRoot, options={}){
  }
  // Fetch one visible baseline with full-approved master leaves per species before navigation.
  for(const species of Object.keys(TYPES))request(species,2);
- if(!lod2Only)for(const species of Object.keys(TYPES))request(species,1);
+ if(!safeMobile)for(const species of Object.keys(TYPES))request(species,1);
  update(0,0,true);
  return Object.freeze({
   root:treeRoot,sites:TREE_SITES,update,status,initialReady,fullReady,
