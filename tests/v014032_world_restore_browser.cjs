@@ -37,7 +37,9 @@ async function audit(page,label){
     loading:vis(document.getElementById('loading')),
     quest:document.querySelector('#quest h2')?.textContent,
     chip:vis(document.getElementById('professionChip')),
-    button:!!b,errors:window.__genesisRouteAssetErrors||[]};
+    button:!!b,arrival:window.__GenesisArrivalQA?.()||null,
+    routeProgress:(()=>{const p=Object.values(window.__genesisAssetProgress||{});return {total:p.length,ready:p.filter(x=>x.phase==='listo').length,pending:p.filter(x=>x.phase!=='listo').slice(0,8)}})(),
+    routeErrors:window.__genesisRouteAssetErrors||[],errors:window.__genesisRouteAssetErrors||[]};
  });
  const e={label,time:new Date().toISOString(),...state};report.samples.push(e);
  console.log('WORLD_RESTORE_STATE',JSON.stringify(e).slice(0,4000));return state;
@@ -71,10 +73,14 @@ async function audit(page,label){
   assert.equal(s.trees.planned,14,'Expected original 14 tree sites');
   assert(s.merchant.spawned,'Merchant V02 NPC root missing');
   await page.locator('[data-profession="Herrero"]').click({timeout:30000});
-  await page.waitForFunction(()=>{
-   const x=document.getElementById('professionChip');
-   return x&&getComputedStyle(x).display!=='none'&&document.querySelector('#prototypeIntro')?.style.display==='none';
-  },null,{timeout:300000});
+  let entered=false;
+  for(let i=0;i<18;i++){
+   await page.waitForTimeout(10000);
+   s=await audit(page,'after-click-'+i);
+   if(s.chip&&!s.intro){entered=true;break}
+   if(report.errors.length)console.log('WORLD_RUNTIME_ERRORS',JSON.stringify(report.errors.slice(-5)));
+  }
+  if(!entered)throw Error('Herrero route did not finish: '+JSON.stringify({last:s,errors:report.errors.slice(-5),http:report.httpErrors.slice(-8)}));
   s=await audit(page,'entered-real-Herrero');
   assert(s.fullVillage,'Full village disappeared upon route selection');
   assert(s.fountain.content,'Fountain V011 model missing after staged stream');
