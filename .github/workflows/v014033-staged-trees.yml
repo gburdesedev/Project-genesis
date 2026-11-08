@@ -1,0 +1,46 @@
+name: Genesis V014033 | staged mobile trees and actual Herrero boot
+on:
+  push:
+    branches:
+      - experiment/v014033-arboles-carga-escalonada-20261108
+    paths:
+      - village_world.js
+      - village_trees.js
+      - index.html
+      - tests/v014033_tree_staging.cjs
+      - .github/workflows/v014033-staged-trees.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trees-and-herrero:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and deterministic desktop/mobile resource budget
+        run: |
+          node --check village_world.js
+          node --check village_trees.js
+          node --check tests/v014033_tree_staging.cjs
+          node tests/v014033_tree_staging.cjs
+      - name: Real Playwright Chromium and WebGL
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Actual Herrero route in browser
+        run: node tests/integration_stability_20261108.cjs
+      - name: Approved trees PBR materials, bark collisions and screenshot
+        run: timeout 190s node tests/village_trees_browser.cjs
+      - name: Upload real browser screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v014033-real-browser
+          path: |
+            previews/stability-20261108/
+            /tmp/genesis-trees/
+          retention-days: 14
