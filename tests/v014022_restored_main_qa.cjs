@@ -13,6 +13,11 @@ for(const token of ['function loadDeferredModelAsset','async function activateRo
 }
 
 if(process.env.GENESIS_SOURCE_ONLY==='1')process.exit(0);
+// Externalized V014022 contract: HTML must load the exact 17 original GLBs from
+// the organization asset branch, not from inline base64 data URIs.
+const externalized=[...rawGame.matchAll(/<pc-asset\b[^>]*>/g)].map(m=>m[0]).filter(tag=>tag.includes('raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/experiment/v014022-externalize-embedded-20261108/integration/v014022/embedded/'));
+if(externalized.length!==17)throw Error('Expected 17 verified externalized GLBs, found '+externalized.length);
+console.log('EXTERNAL_ASSET_CONTRACT',JSON.stringify({externalized:externalized.length,remainingEmbedded:(rawGame.match(/src="data:model\/gltf-binary;base64,/g)||[]).length}));
 const report={branch:'V014022 restored main',start:new Date().toISOString(),states:[],networkErrors:[],consoleErrors:[],screenshots:[],result:'STARTING'};
 const srv=http.createServer((req,res)=>{
  try{
