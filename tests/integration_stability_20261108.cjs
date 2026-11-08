@@ -56,9 +56,18 @@ async function inspect(page,label){
   // A deliberate Herrero-only lightweight boot is not a full five-workshop
   // village. Report it distinctly instead of pretending the Arcanista mounted.
   if(s.liteBoot){
-   assert.equal(s.liteVillage?.workshops,1,'Lightweight fallback must still mount Herrero');
-   report.observations.world='HERRERO_ONLY_LITE_MODE; other workshops not verified';
-   report.result='PASS_HERRERO_ONLY_LITE_MODE';return;
+   // V014.038 extends the lean playable route with four *closed* facades.
+   // Counting these shells does not prove their PBR/portal GLBs are ready:
+   // the dedicated V014.038 browser gate checks those independently.
+   const expected=release[1]==='v0.14.038'?5:1;
+   assert.equal(s.liteVillage?.workshops,expected,'Lightweight route has incorrect workshop count');
+   if(expected===5)assert.equal(s.liteVillage?.otherWorkshops,'closed-decorative',
+     'Additional workshops must remain non-playable');
+   report.observations.world=expected===5?
+     'HERRERO_PLAYABLE_PLUS_FOUR_DECORATIVE_CLOSED; PBR/portal checked separately':
+     'HERRERO_ONLY_LITE_MODE; other workshops not verified';
+   report.result=expected===5?'PASS_REAL_HERRERO_WITH_FIVE_SHELLS':'PASS_HERRERO_ONLY_LITE_MODE';
+   return;
   }
   // The old Arcanista smoke never clicked a profession. It waited for a village
   // proxy which is installed only once the actual route can build the village.
