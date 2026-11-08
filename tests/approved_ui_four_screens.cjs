@@ -128,6 +128,8 @@ const issues=[];
   await page.locator('#prepResultBack').click();
   assert.equal(await page.evaluate(()=>window.__RESULT_BACK__),true,'Return must keep current approved board');
   assert.equal(await page.locator('.gApproved-Preparacion:not(.gApproved-PrepResult)').count(),1);
+  // Restore the original fixture's ore stock before running actual controller tests.
+  await page.evaluate(()=>{window.__CTX__.inventory={'Mineral de hierro':3,'Lingote de hierro':6,'Madera seca de roble':4};});
   // Verificar la ruta real del controlador: carga diferida, Preparación e Inventario.
   await page.evaluate(()=>{delete window.GenesisApprovedUI;document.getElementById('modal').innerHTML='';});
   await page.addScriptTag({content:fs.readFileSync(path.join(root,'preparacion_control.js'),'utf8')});
