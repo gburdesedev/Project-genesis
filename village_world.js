@@ -262,7 +262,19 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
  onPhase('arboles');
  await bootGate(trees.fullReady,'árboles LOD1 y LOD2'); // Nunca descargar LOD mientras se juega.
  onPhase('puertas');
- await bootGate(Promise.all(arcanePortals.map(portal=>portal.initialReady)),
-   'puerta mágica Arcanista V027');
+ // An optional closed Arcanista portal must not block the playable Herrero route.
+ // Keep loading the ORIGINAL V027 visual and track its actual state separately.
+ const portalsReady=Promise.all(arcanePortals.map(portal=>portal.initialReady));
+ if(globalThis.__GENESIS_WORLD_FULL && globalThis.__GENESIS_LITE_BOOT){
+  globalThis.__genesisArcanePortalBoot={phase:'loading',count:arcanePortals.length};
+  portalsReady.then(result=>{
+   globalThis.__genesisArcanePortalBoot={phase:'settled',count:arcanePortals.length,result};
+  }).catch(error=>{
+   globalThis.__genesisArcanePortalBoot={phase:'error',count:arcanePortals.length,error:String(error)};
+   console.error('Arcanista V027 optional portal could not settle',error);
+  });
+ }else{
+  await bootGate(portalsReady,'puerta mágica Arcanista V027');
+ }
  return Object.freeze({root,plan,trees,arcanePortals,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
 }
