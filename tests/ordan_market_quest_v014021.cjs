@@ -70,7 +70,15 @@ test('Ordan escorts the player to the actual market, and preserves the old quest
  const route=quest.escortPath;
  assert(route.length>=8);
  assert(Math.hypot(route.at(-1).x-25.5,route.at(-1).z-36.3)<2.5);
- assert(route.some(p=>Math.abs(p.x-7)<.01&&Math.abs(p.z-16)<.01));
+ // The V011 dolphin fountain now occupies (7,16), so neither Ordan nor the
+ // player may cross its collider. Check every interpolated segment, not only nodes.
+ assert(route.some(p=>Math.abs(p.x-10)<.01&&Math.abs(p.z-13)<.01));
+ assert(route.some(p=>Math.abs(p.x-10)<.01&&Math.abs(p.z-19)<.01));
+ for(let i=0;i<route.length-1;i++){
+  const a=route[i],b=route[i+1],dx=b.x-a.x,dz=b.z-a.z,den=dx*dx+dz*dz;
+  const t=Math.max(0,Math.min(1,((7-a.x)*dx+(16-a.z)*dz)/(den||1)));
+  assert(Math.hypot(a.x+t*dx-7,a.z+t*dz-16)>2.5,'Ordan entered V011 fountain on segment '+i);
+ }
  assert.match(html,/stepAt===11[\s\S]{0,300}GenesisMarketQuest\.steps\.talk/);
  assert.match(html,/startOrdanMarketEscort/);
  assert.match(html,/updateOrdanMarketEscort\(dt,now\)/);
@@ -89,9 +97,9 @@ test('merchant opens after Ordan lesson, quantity defaults to missing stock and 
  assert.match(merchant,/const missing=needByName\.get\(name\)\?\.missing\|\|0/);
  assert.match(merchant,/if\(typeof onPurchase==='function'\)onPurchase\(result\)/);
  assert.match(merchant,/quantity:chosen\[name\]\|\|Math\.min\(99,Math\.max\(1,needByName\.get\(name\)\?\.missing\|\|0\)\)/);
- assert.match(html,/import '\.\/genesis_market_quest_v001\.js\?v=0\.14\.022'/);
- assert.match(html,/<title>Project Genesis v0\.14\.022 · Build 20261102\.04/);
- assert.match(world,/version='v0\.14\.022', build='20261102\.04'/);
+ assert.match(html,/import '\.\/genesis_market_quest_v001\.js\?v=0\.14\.038'/);
+ assert.match(html,/<title>Project Genesis v0\.14\.038 · Build 20261108\.08/);
+ assert.match(world,/version='v0\.14\.038', build='20261108\.08'/);
  assert.match(merchant,/version:'v0\.14\.022'/);
- assert.match(html,/village_world\.js\?v=0\.14\.022/);
+ assert.match(html,/village_world\.js\?v=0\.14\.038/);
 });
