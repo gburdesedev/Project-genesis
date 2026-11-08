@@ -782,3 +782,16 @@
 .approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(3){left:52.85%!important}
 .approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(4){left:72.05%!important}
 .approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(5){left:90.3%!important}
+
+
+/* Final V04 footer mask: conceal all baked DEMC/DEMO text before painting one live label. */
+.approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(n+3) {
+  top:91.9%!important;height:4.8%!important;
+  width:6.2%!important;display:flex!important;
+  align-items:center!important;justify-content:center!important;
+  background:#0b0a09!important;box-shadow:0 0 5px #0b0a09!important;
+  font-size:1.03cqw!important;z-index:8;
+}
+.approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(3) {left:53.4%!important}
+.approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(4) {left:72.6%!important}
+.approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(5) {left:91.1%!important}
