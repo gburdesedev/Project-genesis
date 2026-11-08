@@ -1,5 +1,6 @@
 import {Entity,StandardMaterial,Texture,Color,Mesh,MeshInstance,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
 import {mountVillageTrees} from './village_trees.js?v=0.15.001';
+import {mountGenesisDolphinFountain} from './village_fountain_v014034.js?v=0.14.034';
 import {mountArcanePortal} from './village_arcanist.js?v=0.14b-mobile-boot-20261103';
 const ROOT='./assets/world/v0.11.004/';
 const MOBILE_TEXTURE_EDGE=1024;
@@ -191,9 +192,12 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
     });
     if(result.failed)console.warn('V014.033: árboles aprobados incompletos',result);
    });
-   return Object.freeze({root,plan,trees,arcanePortals:[],
+   // V014.034 · The approved 16.7 MB fountain follows tree settlement
+   // instead of blocking profession selection or competing for GPU uploads.
+   const fountain=mountGenesisDolphinFountain(app,root,{afterTrees:trees.fullReady});
+   return Object.freeze({root,plan,trees,fountain,arcanePortals:[],
     setProfession(prof){building.enabled=true;},
-    blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)}});
+    blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fountain.blocked(x,z,r)}});
   }
 
  const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14c');app.root.addChild(root);
