@@ -1,0 +1,29 @@
+name: Experiment V014.027-ML01 Mercenary direct equip QA
+on:
+  push:
+    branches:
+      - experiment/v014027-mercenario-directo-equipamiento-20261108
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mercenary-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/genesis-merc-test playwright@1.56.1
+      - name: Chromium real game and mercenary interaction QA
+        run: NODE_PATH=/tmp/genesis-merc-test/node_modules node tests/mercenary_lab_v014027.cjs
+      - name: Archive menu, equipped model, dossier and diagnostics
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mercenary-v014027-ml01-real-browser
+          path: previews/mercenary-lab-v014027/
+          retention-days: 14
