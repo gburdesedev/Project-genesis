@@ -1,0 +1,62 @@
+name: Genesis V014.038 | original cinematics and real village release gate
+on:
+  push:
+    branches: ['experiment/v014038-ordan-mercado-20261108']
+    paths:
+      - 'index.html'
+      - 'village_world.js'
+      - 'village_fountain_v014034.js'
+      - 'village_workshops_v014036.js'
+      - 'genesis_market_cinematic_v001.js'
+      - 'genesis_market_cinematic_v001.css'
+      - 'genesis_arrival_v014037.css'
+      - 'tests/v014037_arrival_contract.cjs'
+      - 'tests/v014038_market_cinema_contract.cjs'
+      - 'tests/v014038_full_boot_live.cjs'
+      - '.github/workflows/v014038-release-gate-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cinema-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check release script syntax
+        run: |
+          node --check v015/canvas-arrival-v016.js
+          node --check genesis_market_cinematic_v001.js
+          node --check tests/v014037_arrival_contract.cjs
+          node --check tests/v014038_market_cinema_contract.cjs
+          node --check village_workshops_v014036.js
+          node --check village_fountain_v014034.js
+      - name: Real original V016 intro and V014026 market mathematical contracts
+        run: |
+          node tests/v014037_arrival_contract.cjs
+          node tests/v014038_market_cinema_contract.cjs
+          node tests/ordan_market_quest_v014021.cjs
+  real-village:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 19
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser automation
+        run: npm install --prefix /tmp/genesis-v038 playwright@1.56.1
+      - name: Real WebGL player and Ordan initial scene, trees, fountain and Arcanista
+        run: NODE_PATH=/tmp/genesis-v038/node_modules node tests/v014038_full_boot_live.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v014038-release-gate-evidence
+          path: previews/v014038-full-boot/
+          retention-days: 14

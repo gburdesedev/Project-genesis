@@ -1,0 +1,47 @@
+name: Genesis V014.039 consolidation QA
+on:
+  push:
+    branches:
+      - experiment/v014039-consolidacion-qa-20261108
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and cinematic contracts
+        run: |
+          node --check village_world.js
+          node tests/v014039_surface_contract.cjs
+          node --check genesis_market_cinematic_v001.js
+          node tests/v014038_release_contract_20261108.cjs
+          node tests/v014037_arrival_contract.cjs
+          node tests/v014038_market_cinema_contract.cjs
+          node tests/approved_ui_four_screens.cjs
+  browser-webgl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser runtime
+        run: npm install --prefix /tmp/genesis-039 playwright@1.56.1
+      - name: Real WebGL Herrero selection and arrival
+        run: NODE_PATH=/tmp/genesis-039/node_modules node tests/v014038_full_boot_live.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v014039-qa-evidence
+          path: previews/v014038-full-boot/
+          retention-days: 14

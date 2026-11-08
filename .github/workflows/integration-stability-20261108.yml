@@ -1,0 +1,48 @@
+name: Genesis | actual Herrero route and approved UI release regression
+on:
+  push:
+    branches: ['main', 'integration/stable-patches-20261108']
+    paths:
+      - 'tests/integration_stability_20261108.cjs'
+      - '.github/workflows/integration-stability-20261108.yml'
+      - 'index.html'
+      - 'genesis_ui_approved.js'
+      - 'preparacion_control.js'
+      - 'tests/approved_ui_four_screens.cjs'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'preparacion_control.js'
+      - 'genesis_ui_approved.js'
+      - 'tests/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  main-stability:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect unmodified release metadata before any version bump
+        run: |
+          node -e "const s=require('fs').readFileSync('index.html','utf8');const m=[...s.matchAll(/v0\\.14\\.\\d+|V014[.]\\d+|<title>[^<]{0,100}|[?&](?:v|ver|build)=[^&'\\\" ]+/g)].map(x=>({i:x.index,txt:x[0]}));console.log('RELEASE_METADATA',JSON.stringify(m.slice(0,42)));console.log('VERSION_COUNTS',JSON.stringify(m.reduce((a,x)=>(a[x.txt]=(a[x.txt]||0)+1,a),{})))"
+      - name: Check diagnostics syntax
+        run: node --check tests/integration_stability_20261108.cjs
+      - name: Install real Chromium
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Approved artboard V07 functionality and quest-lock safety
+        run: node tests/approved_ui_four_screens.cjs
+      - name: Real game boot, actual Herrero click and Arcanista assembly
+        run: node tests/integration_stability_20261108.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-main-stability-real-browser
+          path: previews/stability-20261108/
+          retention-days: 14
