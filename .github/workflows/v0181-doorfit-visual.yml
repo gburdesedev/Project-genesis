@@ -1,0 +1,42 @@
+name: V018.1 isolated visual test - doors CLOSED and OPEN
+on:
+  push:
+    branches: [experiment/v0181-doorfit-and-placeholder-visuals]
+    paths:
+      - .github/workflows/v0181-doorfit-visual.yml
+      - v018/v017-village.js
+      - tools/v0181_doorfit_visual.cjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-door-views:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify candidate source and PlayCanvas visual script
+        run: |
+          test -s v018/manifest.json
+          test -s assets/playcanvas/candidates/workshops/herrero/doors/v082-b-lossless-v018/door-herrero-v082-b-lossless-webp.glb
+          node --check v018/v017-village.js
+          node --check tools/v0181_doorfit_visual.cjs
+      - name: Install Playwright Chromium WebGL
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Actual V018.1 door fit screenshot tests (desktop and mobile)
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v0181-server.log 2>&1 &
+          node tools/v0181_doorfit_visual.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v0181-closed-and-open-door-visuals
+          path: /tmp/v0181-doorfit-visual/
+          retention-days: 7
+          if-no-files-found: warn
