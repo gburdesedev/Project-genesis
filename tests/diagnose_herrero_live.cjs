@@ -16,7 +16,7 @@ async function snapshot(label){let data;try{data=await page.evaluate(()=>{
  const missing=prog.filter(x=>x.phase!=='listo');
  const diag=window.GenesisAssetDiag?.snapshot?.();
  const modelCounts=[...document.querySelectorAll('pc-model[data-route="Herrero"],pc-model[data-route="SharedMercenary"]')].filter(x=>x.dataset.asset);
- return {url:location.href,ready:document.readyState,visible:{intro:shown('prototypeIntro'),loading:shown('loading'),hud:shown('hud'),failed:!!document.querySelector('.loadingCard.failed')},state:txt('loadState'),detail:txt('loadDetail'),count:txt('loadCount'),percent:txt('loadPercent'),quest:txt('questTitle'),boot:window.__genesisBoot,routeErrors:(window.__genesisRouteAssetErrors||[]).slice(-12),assetProgress:{total:prog.length,complete:prog.filter(x=>x.phase==='listo').length,pending:missing.slice(0,15)},modelCounts:{total:modelCounts.length,ready:modelCounts.filter(x=>!!x.contentEntity).length},diagErrors:diag?.errors?.slice(-10)||[],lastNav:performance.getEntriesByType('navigation').map(x=>({type:x.type,duration:Math.round(x.duration)}))};
+ return {url:location.href,ready:document.readyState,visible:{intro:shown('prototypeIntro'),loading:shown('loading'),hud:shown('hud'),professionChip:shown('professionChip'),failed:!!document.querySelector('.loadingCard.failed')},state:txt('loadState'),detail:txt('loadDetail'),count:txt('loadCount'),percent:txt('loadPercent'),quest:document.querySelector('#quest h2')?.textContent?.trim().slice(0,250)||'',boot:window.__genesisBoot,routeErrors:(window.__genesisRouteAssetErrors||[]).slice(-12),assetProgress:{total:prog.length,complete:prog.filter(x=>x.phase==='listo').length,pending:missing.slice(0,15)},modelCounts:{total:modelCounts.length,ready:modelCounts.filter(x=>!!x.contentEntity).length},diagErrors:diag?.errors?.slice(-10)||[],lastNav:performance.getEntriesByType('navigation').map(x=>({type:x.type,duration:Math.round(x.duration)}))};
  });}catch(e){data={evaluateError:String(e)}}const record={s:t(),label,...data};out.snapshots.push(record);log('snapshot',{label,s:record.s,visible:data.visible,state:data.state,detail:data.detail,count:data.count,percent:data.percent,models:data.modelCounts,assets:data.assetProgress,errors:data.routeErrors?.slice(-3)});return data;}
 (async()=>{
  browser=await chromium.launch({headless:true,args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
@@ -57,7 +57,7 @@ async function snapshot(label){let data;try{data=await page.evaluate(()=>{
  for(let i=0;i<40;i++){
   let x=await snapshot('route-'+i);
   if(x.visible?.failed){out.result='ROUTE_FAILED';break}
-  if(!x.visible?.loading&&!x.visible?.intro&&x.quest){out.result='GAME_ENTERED';break}
+  if(!x.visible?.loading&&!x.visible?.intro&&x.visible?.professionChip&&x.quest){out.result='GAME_ENTERED';break}
   if(i===39)out.result='ROUTE_STALLED';
   await page.waitForTimeout(5000);
  }
