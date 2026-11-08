@@ -59,7 +59,16 @@ async function shot(page,name){
   const state=await snapshot(page,'after-Herrero-click');await shot(page,'02-after-Herrero-click.png');
   if(state.failed)throw Error('Loading failed after Herrero selection');
   if(!state.gameplay)throw Error('Herrero route did not enter game');
-  await page.waitForTimeout(3000);
+  // Wait for the actual model counter; entering the world may precede
+  // completion of remaining route assets by several minutes under software WebGL.
+  try {
+    await page.waitForFunction(()=>{
+      if(document.querySelector('.loadingCard.failed'))return true;
+      const t=document.getElementById('loadCount')?.textContent||'';
+      const m=t.match(/(\\d+)\\s+de\\s+(\\d+)/i);
+      return !!m && Number(m[1])===Number(m[2]);
+    },null,{timeout:240000,polling:1500});
+  }catch(e){console.log('REQUIRED_ASSET_WAIT_TIMEOUT',String(e));}
   const final=await snapshot(page,'in-village');await shot(page,'03-in-village.png');
   // Success requires the actual loading UI to declare completion, not only a
   // hidden profession modal. A stalled/failed asset must never yield PASS.
