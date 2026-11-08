@@ -3,7 +3,7 @@
    Catálogo y compras provienen de genesis_market_domain_v001.js.
 */
 import { Entity, StandardMaterial, Color } from 'playcanvas';
-import './genesis_market_domain_v001.js?v=0.14.022';
+import './genesis_market_domain_v001.js?v=0.14.038';
 
 const POS = Object.freeze({x:25.5,y:0,z:36.3});
 const STALL = Object.freeze({x:28.35,y:0,z:37.6});
@@ -126,7 +126,7 @@ function buildMerchant(world,source){
  * are never held hostage by a model download. Original fallback is removed
  * only after the real GLB has valid renderable mesh instances.
  */
-const MERCHANT_V02_GLB='./assets/playcanvas/approved/characters/merchant_v02_75962.glb?v=0.14.022';
+const MERCHANT_V02_GLB='./assets/playcanvas/approved/characters/merchant_v02_75962.glb?v=0.14.038';
 function loadMerchantV02(app,merchantRoot,visual){
   visual.phase='loading';
   visual.assetUrl=MERCHANT_V02_GLB;
@@ -271,7 +271,7 @@ export function mountGenesisMarket(options){
     prompt:()=> 'Hablar con el comerciante',
     interact:open
   });
-  const status={version:'v0.14.022',npc:npc.fullCharacter?'rig_reused':'visible_fallback',
+  const status={version:'v0.14.038',npc:npc.fullCharacter?'rig_reused':'visible_fallback',
     center:POS,stall:STALL,seedBound:true,freePurchase:true};
   // Diagnóstico público de solo lectura: el test usa el mismo catálogo y ventana del juego.
   window.__genesisMarket=Object.freeze({...status,catalog,open,visual});

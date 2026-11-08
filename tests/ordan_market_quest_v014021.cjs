@@ -100,6 +100,6 @@ test('merchant opens after Ordan lesson, quantity defaults to missing stock and 
  assert.match(html,/import '\.\/genesis_market_quest_v001\.js\?v=0\.14\.038'/);
  assert.match(html,/<title>Project Genesis v0\.14\.038 · Build 20261108\.08/);
  assert.match(world,/version='v0\.14\.038', build='20261108\.08'/);
- assert.match(merchant,/version:'v0\.14\.022'/);
+ assert.match(merchant,/version:'v0\.14\.038'/);
  assert.match(html,/village_world\.js\?v=0\.14\.038/);
 });
