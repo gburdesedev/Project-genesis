@@ -1,0 +1,48 @@
+name: V018.4 original 2.18m door width - all five Playwright
+on:
+  push:
+    branches: [experiment/v0184-restore-original-herrero-door-fit]
+    paths:
+      - 'tools/v0184_five_doors_playwright.cjs'
+      - '.github/workflows/v0184-five-door-qa.yml'
+      - 'v0184/v017-village.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  five-door-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 19
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [desktop, portrait]
+        mount: [historical, recessed]
+    env:
+      GENESIS_AUDIT_MODE: ${{ matrix.mode }}
+      GENESIS_DOOR_MOUNT: ${{ matrix.mount }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate candidate source without touching main
+        run: |
+          node --check tools/v0184_five_doors_playwright.cjs
+          node --check v0184/v017-village.js
+          node -e "const x=require('./v0184/manifest.json');if(x.version!=='0.15-v0184')process.exit(1)"
+      - name: Install actual Chromium PlayCanvas WebGL
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Compare REAL portal leaf widths, positions, glow and frames from player camera
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v0184-server.log 2>&1 &
+          node tools/v0184_five_doors_playwright.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v0184-5doors-${{ matrix.mode }}-${{ matrix.mount }}
+          path: /tmp/genesis-v0184-all-doors/${{ matrix.mode }}/${{ matrix.mount }}/
+          retention-days: 14
+          if-no-files-found: warn

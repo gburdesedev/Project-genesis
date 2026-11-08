@@ -1,0 +1,38 @@
+name: V018.4 Q1 original Herrero outward opening QA
+on:
+  push:
+    branches: [experiment/v0184-restore-original-herrero-door-fit]
+    paths:
+      - 'tools/v0184_outward_ordan_qa.cjs'
+      - '.github/workflows/v0184-ordan-outward.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  outward:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify gameplay and QA JS source
+        run: |
+          node --check tools/v0184_outward_ordan_qa.cjs
+          node --check v0184/v017-village.js
+      - name: Install real Chromium and WebGL
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Q1 first Ordan interaction and original outward -92 degree animation, desktop+mobile
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/v0184-ordan-server.log 2>&1 &
+          node tools/v0184_outward_ordan_qa.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v0184-herrero-ordan-outward-playwright
+          path: /tmp/genesis-v0184-open-qa/
+          retention-days: 14
+          if-no-files-found: warn
