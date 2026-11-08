@@ -1,0 +1,30 @@
+name: Genesis experimental | first 15 seconds real world and merchant
+on:
+  push:
+    branches: [experiment/v014032-full-village-market-arrival-20261108]
+    paths: ['.github/workflows/v014032-world-first-frame.yml', 'tests/v014032_world_restore_browser.cjs']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  first-frame:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright@1.56.1 playcanvas@2.23.0
+          npx playwright install --with-deps chromium
+      - name: Inspect actual WebGL mount of 14 tree anchors and market merchant
+        env:
+          GENESIS_WORLD_PROBE_ONLY: '1'
+        run: node tests/v014032_world_restore_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-world-first-frame
+          path: previews/v014032-world-restore/
+          retention-days: 7
