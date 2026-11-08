@@ -1,0 +1,36 @@
+name: Genesis V014032 experimental | full world merchant trees fountain
+on:
+  push:
+    branches: [experiment/v014032-full-village-market-arrival-20261108]
+    paths:
+      - 'index.html'
+      - 'village_world.js'
+      - 'genesis_arcanista_four_walls_v006.js'
+      - 'genesis_market_cinematic_v001.*'
+      - 'tests/v014032_world_restore_browser.cjs'
+      - '.github/workflows/v014032-world-restore-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  full-village:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check tests/v014032_world_restore_browser.cjs
+      - name: Setup Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.56.1 playcanvas@2.23.0
+          npx playwright install --with-deps chromium
+      - name: Verify actual scene and route (not only successful build)
+        run: node tests/v014032_world_restore_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v014032-full-village-qa
+          path: previews/v014032-world-restore/
+          retention-days: 14
