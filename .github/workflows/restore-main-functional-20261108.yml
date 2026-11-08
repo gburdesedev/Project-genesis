@@ -1,0 +1,36 @@
+name: Genesis restore working main before V014038 (experimental only)
+on:
+  push:
+    branches:
+      - experiment/restore-main-functional-assets-only-20261108
+    paths:
+      - .github/workflows/restore-main-functional-20261108.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  prepare-reversal:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Verify main and create restore branch without changing main
+        env:
+          EXPECTED_MERGE: ff5151f5cbaa6f20b74eb703680a51427e76f4b8
+          RESTORE_BRANCH: experiment/restore-main-before-v014038-20261108
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git merge-base --is-ancestor "$EXPECTED_MERGE" HEAD
+          git switch -c "$RESTORE_BRANCH"
+          git revert --no-edit -m 1 "$EXPECTED_MERGE"
+          node --check village_world.js
+          node --check genesis_workshop_live_v015.js
+          git push origin "$RESTORE_BRANCH"
+          echo "RESTORE_BRANCH=$RESTORE_BRANCH" >> "$GITHUB_STEP_SUMMARY"
+          echo "RESTORE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
