@@ -29,16 +29,17 @@ const server=http.createServer((req,res)=>{
 });
 (async()=>{
  await new Promise(done=>server.listen(4173,'127.0.0.1',done));
- let browser, page, state={stage:'started',errors:[],warnings:[],signals:[]};
+ let browser, page, state={stage:'started',errors:[],warnings:[],signals:[],responses:[],snapshots:[]};
  try{
    browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--disable-software-rasterizer=false']});
    page=await browser.newPage({viewport:{width:1600,height:900},deviceScaleFactor:1});
    page.on('pageerror',e=>state.errors.push(String(e.message).slice(0,350)));
    page.on('console',m=>{if(m.type()==='error'||m.type()==='warning')state.warnings.push(m.text().slice(0,300))});
-   page.on('requestfailed',r=>{if(state.warnings.length<50)state.warnings.push('FAILED '+r.url().slice(0,150)+' '+(r.failure()?.errorText||''))});
+   page.on('requestfailed',r=>{if(state.warnings.length<80)state.warnings.push('FAILED '+r.url().slice(0,200)+' '+(r.failure()?.errorText||''))});
+   page.on('response',r=>{if(r.status()>=400&&state.responses.length<80)state.responses.push({url:r.url(),status:r.status()})});
    await page.goto('http://127.0.0.1:4173/?mercenario=1',{waitUntil:'domcontentloaded',timeout:45000});
-   try{await page.locator('.mercConcept .mcBoard').waitFor({timeout:150000});}
-   catch(e){state.lab=await page.evaluate(()=>window.__GENESIS_MERCENARY_LAB||null);throw new Error('El menú no apareció: '+JSON.stringify(state.lab)+'; '+String(e.message).slice(0,150))}
+   try{await page.locator('.mercConcept .mcBoard').waitFor({timeout:35000});}
+   catch(e){state.lab=await page.evaluate(()=>window.__GENESIS_MERCENARY_LAB||null);state.snapshots.push(await page.evaluate(()=>({title:document.title,loading:document.querySelector('#loading')?.innerText?.slice(0,1300),intro:document.querySelector('#prototypeIntro')?.style?.display,body:document.body?.innerText?.slice(0,2200),app:!!document.querySelector('pc-app')?.app,models:[...document.querySelectorAll('pc-model')].filter(x=>x.hasAttribute('asset')).slice(0,20).map(x=>({id:x.id,asset:x.getAttribute('asset'),ready:!!x.contentEntity}))})));throw new Error('El menú no apareció: '+JSON.stringify(state.lab)+'; '+String(e.message).slice(0,150))}
    state.stage='menu';
    state.lab=await page.evaluate(()=>window.__GENESIS_MERCENARY_LAB);
    assert.equal(state.lab.items,4,'exactly four items generated from NGE');
