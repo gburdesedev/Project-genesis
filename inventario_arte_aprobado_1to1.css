@@ -237,3 +237,216 @@
  .genInv.genInvCanonical .genInvInfoLine>b{font-size:clamp(8px,.91cqw,12px)!important;}
  .genInv.genInvCanonical .genInvViewerTitle{font-size:clamp(10px,1.31cqw,16px)!important;}
 }
+
+
+/* ==========================================================================
+   V014.031 · V05 CABECERA EXACTA DE PREPARACIÓN · ARTBOARD 1820 x 1024
+   Los 4 PNG originales tienen, SIN ESCALADO, estas cajas:
+   Inventario (306,42,294,94); Preparación (600,42,320,94);
+   Fabricaciones (920,42,328,94); Comparación (1248,42,298,94).
+   Sólo Inventario usa estas reglas. No duplicar ni redibujar la pintura.
+   ========================================================================== */
+.modal.genInvModal:has(.genInvCanonical){
+ width:min(1820px,calc(100vw - 12px),calc((100dvh - 18px) * 1820 / 1024))!important;
+ max-width:100vw!important;max-height:calc(100dvh - 18px)!important;
+ height:auto!important;aspect-ratio:1820 / 1024!important;
+ padding:0!important;border:0!important;overflow:hidden!important;
+}
+.genInv.genInvCanonical{
+ position:relative!important;display:block!important;grid-template-rows:none!important;
+ width:100%!important;height:100%!important;aspect-ratio:1820 / 1024!important;
+ container-type:inline-size!important;overflow:hidden!important;
+ background:#080605 url('assets/ui/inventario/GENESIS_INVENTARIO_V05_CABECERA_PREPARACION_1820x1024.png') center/100% 100% no-repeat!important;
+}
+.genInv.genInvCanonical::before,
+.genInv.genInvCanonical::after,
+.genInv.genInvCanonical .genInvFamilies::before,
+.genInv.genInvCanonical .genInvViewer::before,
+.genInv.genInvCanonical .genInvInfo::before,
+.genInv.genInvCanonical .genInvGrid::before{content:none!important;display:none!important;}
+.genInv.genInvCanonical .genInvMain{
+ position:absolute!important;inset:0!important;z-index:2!important;
+ display:block!important;grid-row:auto!important;
+ width:100%!important;height:100%!important;margin:0!important;padding:0!important;
+ overflow:visible!important;background:transparent!important;
+}
+.genInv.genInvCanonical .genInvNav{
+ position:absolute!important;left:16.8131868%!important;top:4.1015625%!important;
+ width:68.1318681%!important;height:9.1796875%!important;
+ margin:0!important;padding:0!important;z-index:8!important;
+ display:grid!important;grid-template-columns:294fr 320fr 328fr 298fr!important;
+ gap:0!important;align-items:stretch!important;border:0!important;background:none!important;
+}
+.genInv.genInvCanonical .genInvTab{
+ display:block!important;position:relative!important;
+ width:100%!important;height:100%!important;min-width:0!important;
+ margin:0!important;padding:0!important;border:0!important;background:none!important;
+ filter:none!important;cursor:pointer!important;
+}
+.genInv.genInvCanonical .genInvTab img{visibility:hidden!important;opacity:0!important;}
+.genInv.genInvCanonical .genInvTab::before,
+.genInv.genInvCanonical .genInvTab::after{content:none!important;display:none!important;}
+.genInv.genInvCanonical .genInvTab:focus-visible{outline:2px solid #ffca74!important;outline-offset:-4px!important;}
+.genInv.genInvCanonical .genInvFamilies,
+.genInv.genInvCanonical .genInvViewer,
+.genInv.genInvCanonical .genInvInfo,
+.genInv.genInvCanonical .genInvGrid{
+ position:absolute!important;display:block!important;min-width:0!important;min-height:0!important;
+ margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;
+ background:transparent!important;
+}
+.genInv.genInvCanonical .genInvFamilies{
+ left:3%!important;top:24.4%!important;width:16%!important;height:14%!important;
+ display:flex!important;flex-direction:column!important;
+ overflow-x:hidden!important;overflow-y:auto!important;scrollbar-width:thin;
+}
+.genInv.genInvCanonical .genInvHead,
+.genInv.genInvCanonical .genInvInfoTitle,
+.genInv.genInvCanonical .genInvSubhead,
+.genInv.genInvCanonical .genInvGridTitle,
+.genInv.genInvCanonical .genInvNotice{display:none!important;}
+.genInv.genInvCanonical .genInvFamily{
+ display:flex!important;align-items:center!important;gap:3%!important;
+ width:100%!important;min-height:30.8%!important;height:30.8%!important;
+ max-height:30.8%!important;flex-shrink:0!important;
+ margin:0!important;padding:0 4%!important;border:0!important;border-radius:0!important;
+ background:transparent!important;box-shadow:none!important;font-size:1.02cqw!important;
+ color:#dec29a!important;line-height:1.15!important;white-space:nowrap!important;overflow:hidden!important;
+}
+.genInv.genInvCanonical .genInvFamily::before{content:none!important;display:none!important;}
+.genInv.genInvCanonical .genInvFamily[aria-pressed=true]{
+ background:#e29f3024!important;box-shadow:inset 0 0 0 1px #dda742!important;
+ color:#ffe2a6!important;
+}
+.genInv.genInvCanonical .genInvFamIcon{min-width:1.2cqw!important;max-width:1.2cqw!important;font-size:1cqw!important;}
+.genInv.genInvCanonical .genInvViewer{
+ left:20.4%!important;top:15.1%!important;width:40.5%!important;height:35.9%!important;
+ overflow:hidden!important;
+}
+.genInv.genInvCanonical .genInvViewerTitle{
+ position:absolute!important;left:7%!important;top:5.5%!important;
+ width:86%!important;height:10%!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ margin:0!important;padding:0!important;font-size:1.22cqw!important;
+ white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+ color:#ecd39e!important;
+}
+.genInv.genInvCanonical .genInvImageWrap{
+ position:absolute!important;left:7%!important;top:21%!important;
+ width:86%!important;height:70%!important;display:grid!important;place-items:center!important;
+ margin:0!important;padding:0!important;overflow:hidden!important;
+}
+.genInv.genInvCanonical .genInvImageWrap :is(img,model-viewer,canvas){max-width:100%!important;max-height:100%!important;}
+.genInv.genInvCanonical .genInvViewLabel{display:none!important;}
+.genInv.genInvCanonical .genInvInfo{
+ left:61.4%!important;top:15.1%!important;width:28.2%!important;height:35.8%!important;
+ overflow:hidden!important;
+}
+.genInv.genInvCanonical .genInvInfoLine{
+ position:absolute!important;left:10%!important;width:84%!important;height:7%!important;
+ display:flex!important;align-items:center!important;justify-content:flex-end!important;
+ margin:0!important;padding:0!important;gap:0!important;border:0!important;
+ background:transparent!important;font-size:.91cqw!important;line-height:1!important;
+}
+.genInv.genInvCanonical .genInvInfoLine:nth-of-type(1){top:20%!important;}
+.genInv.genInvCanonical .genInvInfoLine:nth-of-type(2){top:27.8%!important;}
+.genInv.genInvCanonical .genInvInfoLine:nth-of-type(3){top:35%!important;}
+.genInv.genInvCanonical .genInvInfoLine>span{display:none!important;}
+.genInv.genInvCanonical .genInvInfoLine>b{
+ max-width:100%!important;font-size:.91cqw!important;font-weight:normal!important;
+ color:#f2d5a3!important;text-align:right!important;
+ overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
+}
+.genInv.genInvCanonical .genInvChannels{
+ position:absolute!important;left:8.6%!important;top:49.2%!important;
+ width:85%!important;height:14.6%!important;display:block!important;
+ margin:0!important;padding:0 1%!important;overflow:auto!important;
+ font-size:.80cqw!important;color:#deb987!important;
+}
+.genInv.genInvCanonical .genInvChannel{
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+ margin:0!important;padding:0 1%!important;gap:6px!important;line-height:1.3!important;
+}
+.genInv.genInvCanonical .genInvNgeText{
+ position:absolute!important;left:8.3%!important;top:72%!important;
+ width:86%!important;height:9%!important;margin:0!important;
+ overflow:hidden!important;font-size:.77cqw!important;line-height:1.15!important;
+ color:#c8a57f!important;
+}
+.genInv.genInvCanonical .genInvInfoMore{
+ position:absolute!important;left:11%!important;top:82.9%!important;
+ width:77%!important;height:12.5%!important;margin:0!important;padding:0!important;
+ border:0!important;background:transparent!important;box-shadow:none!important;
+}
+.genInv.genInvCanonical .genInvInfoMore span{
+ position:absolute!important;width:1px!important;height:1px!important;
+ padding:0!important;overflow:hidden!important;clip-path:inset(50%)!important;
+}
+.genInv.genInvCanonical .genInvGrid{
+ left:20.4%!important;top:52.3%!important;width:69.5%!important;height:33.6%!important;
+ overflow:hidden!important;
+}
+.genInv.genInvCanonical .genInvGridControls{
+ position:absolute!important;right:3%!important;top:1%!important;width:22%!important;height:10%!important;
+ display:block!important;margin:0!important;padding:0!important;min-height:0!important;
+ background:transparent!important;overflow:hidden!important;
+}
+.genInv.genInvCanonical .genInvFilter{
+ position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+ margin:0!important;padding:0 2%!important;opacity:0!important;border:0!important;
+ background:transparent!important;font-size:.8cqw!important;
+}
+.genInv.genInvCanonical .genInvFilter:focus{
+ opacity:1!important;background:#110c08ed!important;border:1px solid #9a7543!important;
+}
+.genInv.genInvCanonical .genInvSlots{
+ position:absolute!important;left:2.5%!important;top:19.6%!important;
+ width:94.9%!important;height:65.8%!important;
+ display:grid!important;grid-template-columns:repeat(10,minmax(0,1fr))!important;
+ grid-template-rows:repeat(2,minmax(0,1fr))!important;
+ column-gap:1.05%!important;row-gap:7.4%!important;margin:0!important;padding:0!important;
+}
+.genInv.genInvCanonical .genInvSlot{
+ position:relative!important;display:grid!important;place-items:center!important;
+ width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;
+ margin:0!important;padding:1.5%!important;border:0!important;border-radius:0!important;
+ background:none!important;box-shadow:none!important;overflow:hidden!important;
+}
+.genInv.genInvCanonical .genInvSlot:disabled{background:none!important;box-shadow:none!important;outline:none!important;}
+.genInv.genInvCanonical .genInvSlot.selected{
+ outline:1px solid #f6bf56!important;outline-offset:-5px!important;
+ box-shadow:inset 0 0 10px #da8d2355!important;
+}
+.genInv.genInvCanonical .genInvSlot>.genInvSlotArtwork{
+ position:relative!important;inset:auto!important;
+ display:grid!important;place-items:center!important;
+ width:87%!important;height:83%!important;max-width:87%!important;max-height:83%!important;
+ margin:0!important;padding:0!important;border:0!important;background:transparent!important;
+ pointer-events:none!important;
+ transform:perspective(350px) rotateY(var(--gen-slot-yaw,0deg))!important;
+ transform-origin:center center!important;transition:transform 150ms ease-out!important;
+}
+.genInv.genInvCanonical .genInvSlotArtwork :is(img,model-viewer,canvas){
+ width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;
+ object-fit:contain!important;pointer-events:none!important;
+}
+.genInv.genInvCanonical .genInvSlot>.genInvSlotQty{
+ position:absolute!important;right:3%!important;bottom:2%!important;
+ width:auto!important;height:auto!important;max-width:95%!important;
+ padding:0 2%!important;font-size:.65cqw!important;
+ color:#ebce9a!important;background:#130e09cc!important;transform:none!important;
+}
+.genInv.genInvCanonical .genInvPage{
+ position:absolute!important;right:4%!important;bottom:0!important;
+ width:25%!important;height:9%!important;margin:0!important;padding:0!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;gap:5%!important;
+ font-size:.7cqw!important;
+}
+.genInv.genInvCanonical .genInvPage[data-pages="1"]{display:none!important;}
+.genInv.genInvCanonical .genInvPage button{
+ min-width:14%!important;font-size:.8cqw!important;padding:0!important;
+ background:#130b06db!important;border:1px solid #805c33!important;
+}
+@media(hover:none),(prefers-reduced-motion:reduce){
+ .genInv.genInvCanonical .genInvSlot>.genInvSlotArtwork{transform:none!important;transition:none!important;}
+}
