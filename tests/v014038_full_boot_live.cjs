@@ -52,7 +52,13 @@ const srv=http.createServer((req,res)=>{
  await waitGame('before-selection',()=>document.getElementById('prototypeIntro')?.style.display==='grid'||document.querySelector('.loadingCard.failed'),150000);
  assert.equal(await page.locator('.loadingCard.failed').count(),0,'Startup failed before selecting Herrero');
  await page.locator('[data-profession="Herrero"]').click();
- await waitGame('after-herrero',()=>document.getElementById('professionChip')?.style.display!=='none'&&document.getElementById('prototypeIntro')?.style.display==='none'||document.querySelector('.loadingCard.failed'),200000);
+ await waitGame('after-herrero',()=>{
+  const chip=document.getElementById('professionChip'),intro=document.getElementById('prototypeIntro');
+  return (chip?.style.display==='block'&&getComputedStyle(chip).display!=='none'&&
+    intro?.style.display==='none'&&document.getElementById('loading')?.style.display==='none')
+    ||!!document.querySelector('.loadingCard.failed');
+ },200000);
+ console.log('V014038_REAL_GAME_ENTERED',JSON.stringify(await inspectBoot('real-entry')).slice(0,2800));
  assert.equal(await page.locator('.loadingCard.failed').count(),0,'Game failed after Herrero selection');
  await waitGame('arrival-controller',()=>!!window.__GenesisArrivalQA?.()||!!document.querySelector('.loadingCard.failed'),30000);
  assert.equal(await page.locator('.loadingCard.failed').count(),0,'Loading failed after profession selection');
