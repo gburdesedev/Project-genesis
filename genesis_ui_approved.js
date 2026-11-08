@@ -115,9 +115,9 @@
    // Dos espacios de receta: cubrir también el segundo renglón horneado cuando la fórmula usa un solo material.
    const rows=Array.from({length:2},(_,i)=>{
      const r=req[i];
-     if(!r)return `<div class="gApprovedRequired" style="${pos(1261,300+i*143,326,115)}"></div>`;
+     if(!r)return `<div class="gApprovedRequired" style="${pos(1261,300+i*143,350,115)}"></div>`;
      const qty=Number(ctx.inventory?.[r.material]||0),needed=Number(r.qty||0);
-     return `<div class="gApprovedRequired" style="${pos(1261,300+i*143,326,115)}"><h3>${esc(r.material)}</h3><p>Requerido: <b>${needed}</b></p><p>Stock real: <b>${qty}</b></p></div>`;
+     return `<div class="gApprovedRequired" style="${pos(1261,300+i*143,350,115)}"><h3>${esc(r.material)}</h3><p>Requerido: <b>${needed}</b></p><p>Stock real: <b>${qty}</b></p></div>`;
    }).join('');
    const state=`<div class="gApprovedCraftState ${ready&&canCraft?'is-ready':'is-blocked'}" style="${pos(1290,610,292,51)}">${ready&&canCraft?'✓ Disponible':ready?'Receta todavía bloqueada':'Faltan materiales'}</div>`;
    const hero=isShield?`<div class="gApprovedRecipeHeroSwap" style="${pos(456,114,643,706)}">${ctx.recipeAsset?.(chosen?.id)||''}<span>${esc(chosenName)}</span></div>`:'';
