@@ -53,6 +53,14 @@ async function audit(page,label){
   await page.waitForTimeout(15000);
   let s=await audit(page,'startup-15s');
   assert(s.fullMode===true,'Full village toggle missing');
+  if(process.env.GENESIS_WORLD_PROBE_ONLY==='1'){
+   assert(s.fullVillage,'Full world root was not created during first 15 seconds');
+   assert.equal(s.trees.planned,14,'Original 14 tree positions are missing');
+   assert(s.merchant.spawned,'Market merchant NPC is missing');
+   assert(s.fountain.src?.includes('PG_Dolphin_Fountain_V011'),'Approved fountain source missing');
+   report.state='PASS_WORLD_MOUNT_DIAG_ONLY';
+   return;
+  }
   const start=Date.now();
   while(Date.now()-start<330000&&!s.intro&&!s.errors.length){
    await page.waitForTimeout(12000);s=await audit(page,'boot');
