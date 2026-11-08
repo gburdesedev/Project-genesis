@@ -1,7 +1,7 @@
 name: Genesis V014.038 | cumulative release candidate and actual Herrero browser
 on:
   push:
-    branches: ['experiment/v014038-final-integrada-20261108']
+    branches: ['experiment/v014038-arranque-decoracion-escalonada-20261108']
     paths:
       - 'index.html'
       - 'village_world.js'

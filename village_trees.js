@@ -169,6 +169,9 @@ export function mountVillageTrees(app, villageRoot, options={}){
  const safeMobile = globalThis.GenesisDevice?.safePreviews===true;
  // On constrained startup, reuse only the approved LOD2 derivatives, including on desktop.
  const lod2Only=options.lod2Only===true||safeMobile;
+ // V014.038 progressive boot: optional geometry is fetched only after Herrero
+ // route assets are fully ready. No GLBs/objects are replaced or fabricated.
+ let loadingStarted=options.deferLoading!==true;
  const treeRoot=new Entity('Vegetación aprobada — 14 árboles · follaje íntegro PBR');
  villageRoot.addChild(treeRoot);
  const nodes=TREE_SITES.map(site=>{
@@ -249,6 +252,7 @@ export function mountVillageTrees(app, villageRoot, options={}){
   }
  }
  function request(species,lod){
+  if(!loadingStarted)return;
   if(lod2Only&&lod!==2)return;
   if(lod===0)return; // Approved master kept offline: no 4K hero GLB in the village runtime.
   const key=species+':'+lod;
@@ -306,12 +310,22 @@ export function mountVillageTrees(app, villageRoot, options={}){
   }
   globalThis.__genesisTreeStatus=status();
  }
- // Fetch one visible baseline with full-approved master leaves per species before navigation.
- for(const species of Object.keys(TYPES))request(species,2);
- if(!lod2Only)for(const species of Object.keys(TYPES))request(species,1);
+ // Fetch approved foliage on demand after the critical route has finished.
+ function start(){
+  if(loadingStarted)return false;
+  loadingStarted=true;
+  for(const species of Object.keys(TYPES))request(species,2);
+  if(!lod2Only)for(const species of Object.keys(TYPES))request(species,1);
+  update(focusX,focusZ,true);
+  return true;
+ }
+ if(loadingStarted){
+  for(const species of Object.keys(TYPES))request(species,2);
+  if(!lod2Only)for(const species of Object.keys(TYPES))request(species,1);
+ }
  update(0,0,true);
  return Object.freeze({
-  root:treeRoot,sites:TREE_SITES,update,status,initialReady,fullReady,
+  root:treeRoot,sites:TREE_SITES,update,start,status,initialReady,fullReady,
   blocked(x,z,r=.33){return nodes.some(node=>node.visible&&node.visual&&node.anchor.enabled&&node.collider&&Math.hypot(node.collider.x-x,node.collider.z-z)<node.collider.r+r)},
   collisionSnapshot(){return nodes.filter(node=>node.collider).map(node=>({id:node.site.id,species:node.site.species,region:node.site.region,lod:node.lod,x:node.collider.x,z:node.collider.z,r:node.collider.r,measured:node.collider.measured,visible:node.visible,loaded:!!node.visual}))},
   release(){app.off('update',windTick);treeRoot.destroy();queue.length=0}

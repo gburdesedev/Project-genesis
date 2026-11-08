@@ -180,12 +180,12 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
    // V014.033: restore approved foliage without re-enabling the costly full village.
    // Four local LOD2 species are streamed asynchronously; never block Herrero boot
    // on decoration. Every visible tree receives its actual bark-derived collider.
-   const trees=mountVillageTrees(app,root,{onResourceLoaded,lod2Only:true});
+   const trees=mountVillageTrees(app,root,{onResourceLoaded,lod2Only:true,deferLoading:true});
    trees.update(plan.plaza.x,plan.plaza.z,true);
    globalThis.__genesisLiteVillage={
     mode:'herrero-first',trees:trees.sites.length,treeLOD:'LOD2',
     treeLoadFinished:false,treeVariants:0,treeErrors:0,
-    roads:plan.roads.length,workshops:1
+    roads:plan.roads.length,workshops:1,decorDeferredUntilHerrero:true
    };
    trees.fullReady.then(result=>{
     Object.assign(globalThis.__genesisLiteVillage,{
