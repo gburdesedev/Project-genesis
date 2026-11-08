@@ -153,10 +153,25 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
    app.root.addChild(root);
    // NPCs, merchant and economy subscribe to this callback.
    onRootReady(root);
-   const floor=material('Suelo de aldea',[.32,.36,.30]);
-   mesh(root,'Suelo','plane',7,-.04,17,63,1,63,floor);
-   const pathMat=material('Caminos',[.48,.44,.36]);
-   for(const lane of plan.roads)mesh(root,lane.name,'plane',lane.x,-.02,lane.z,lane.w,1,lane.d,pathMat);
+   // Render immediately with safe fallback; stream the approved PBR village
+   // pavement and roads after gameplay starts, never gating Herrero boot.
+   const floor=material('Suelo de aldea · respaldo temporal',[.32,.36,.30]);
+   const floorEntity=mesh(root,'Suelo','plane',7,-.04,17,63,1,63,floor);
+   const pathMat=material('Caminos · respaldo temporal',[.48,.44,.36]);
+   const roadEntities=plan.roads.map(lane=>({lane,entity:mesh(root,lane.name,'plane',lane.x,-.02,lane.z,lane.w,1,lane.d,pathMat)}));
+   globalThis.__genesisVillageSurface={phase:'loading',fallback:true};
+   (async()=>{
+    try{
+     const cobble=await maps(app,'cobble',false,onResourceLoaded);
+     floorEntity.render.material=pavedMaterial('Adoquín original · aldea',cobble,63,63);
+     const traffic=await maps(app,'traffic',false,onResourceLoaded);
+     for(const {lane,entity} of roadEntities)entity.render.material=pavedMaterial(lane.name+' · PBR',traffic,lane.w,lane.d);
+     globalThis.__genesisVillageSurface={phase:'ready',fallback:false,roadCount:roadEntities.length};
+    }catch(error){
+     globalThis.__genesisVillageSurface={phase:'error',fallback:true,error:String(error)};
+     console.error('V014.039: no se pudieron cargar los suelos PBR originales',error);
+    }
+   })();
    const buildings=new Map();
    const w=plan.workshops.find(p=>p.profession==='Herrero');
    if(!w)throw new Error('Herrero no figura en village plan');
