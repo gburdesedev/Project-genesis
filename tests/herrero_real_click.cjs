@@ -3,7 +3,7 @@ const {chromium}=require('playwright');
 const fs=require('fs'),path=require('path');
 const mode=process.env.TEST_BROWSER||'chromium';
 const source=process.env.TEST_URL||'https://gburdesedev.github.io/Project-genesis/';
-const url=source+(source.includes('?')?'&':'?')+'diag_nocache=20261108_1100';
+const url=source+(source.includes('?')?'&':'?')+'diag_nocache=20261108_main_381e1b5';
 const dir=path.resolve(process.env.GITHUB_WORKSPACE||'.','previews','herrero-real-click',mode);
 fs.mkdirSync(dir,{recursive:true});
 const report={mode,url,started:new Date().toISOString(),samples:[],events:[],errors:[]};
