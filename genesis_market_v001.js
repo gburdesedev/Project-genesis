@@ -204,8 +204,23 @@ export function mountGenesisMarket(options){
   attachStyle();
   const stall=buildStall(village.root);
   const npc=buildMerchant(village.root,character);
-  const visual={phase:'initializing',assetUrl:null,triangles:75962,meshInstances:0,error:null};
-  loadMerchantV02(app,npc.entity,visual);
+  // On phones, don't decode a 76k-triangle merchant while loading the Herrero.
+  // The market stall remains present; decode the ORIGINAL V02 as the player nears.
+  const mobile=window.GenesisDevice?.safePreviews===true;
+  const visual={phase:mobile?'deferred':'initializing',assetUrl:null,triangles:75962,meshInstances:0,error:null};
+  let requested=false;
+  function maybeStartNearMarket(){
+    const pos=character?.getPosition?.();
+    if(pos&&Math.hypot(pos.x-POS.x,pos.z-POS.z)<22)startVisualLoad();
+  }
+  function startVisualLoad(){
+    if(requested)return;
+    requested=true;
+    if(mobile)app.off('update',maybeStartNearMarket);
+    loadMerchantV02(app,npc.entity,visual);
+  }
+  if(mobile)app.on('update',maybeStartNearMarket);
+  else startVisualLoad();
   const chosen=Object.create(null);
   let lastMessage='';
   const toRawStock=window.GenesisPreparation?.rawStock;
@@ -260,6 +275,7 @@ export function mountGenesisMarket(options){
     }));
   }
   function open(){
+    startVisualLoad();
     if(typeof modal!=='function'||typeof closeModal!=='function')return false;
     if(!getSession()){toast?.('Elegí primero una profesión para crear la semilla.',1500);return false;}
     if(typeof canTrade==='function'&&!canTrade()){toast?.('Primero hablá con Ordan. Él te enseñará a reabastecerte en el mercado.',2100);return false;}
@@ -271,9 +287,9 @@ export function mountGenesisMarket(options){
     prompt:()=> 'Hablar con el comerciante',
     interact:open
   });
-  const status={version:'v0.14.032',npc:npc.fullCharacter?'rig_reused':'visible_fallback',
+  const status={version:'v0.14.035',npc:npc.fullCharacter?'rig_reused':'visible_fallback',
     center:POS,stall:STALL,seedBound:true,freePurchase:true};
   // Diagnóstico público de solo lectura: el test usa el mismo catálogo y ventana del juego.
-  window.__genesisMarket=Object.freeze({...status,catalog,open,visual});
+  window.__genesisMarket=Object.freeze({...status,catalog,open,visual,startVisualLoad});
   return Object.freeze({interactable,open,catalog,stall,npc:npc.entity,status});
 }
