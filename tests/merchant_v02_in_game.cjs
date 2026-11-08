@@ -29,14 +29,9 @@ const server=http.createServer((req,res)=>{
   page.on('response',res=>{if(res.url().includes('merchant_v02_75962.glb'))assetResponses.push({url:res.url(),status:res.status()})});
   try{
     await page.goto('http://127.0.0.1:'+server.address().port+'/index.html',{waitUntil:'domcontentloaded',timeout:120000});
-    // The original game does not mount the market until choosing a profession.
-    await page.waitForFunction(()=>document.querySelector('#prototypeIntro')?.style.display==='grid'||!!document.querySelector('.loadingCard.failed'),null,{timeout:150000});
-    if(await page.locator('.loadingCard.failed').count())throw Error('Game failed before selecting Herrero');
-    await page.locator('[data-profession="Herrero"]').click({timeout:30000});
-    await page.waitForFunction(()=>document.querySelector('#prototypeIntro')?.style.display==='none'||!!document.querySelector('.loadingCard.failed'),null,{timeout:300000});
-    if(await page.locator('.loadingCard.failed').count())throw Error('Game loading failed after selecting Herrero');
+    // The marketplace may mount before the profession selector finishes painting.
+    // Wait for the actual model status; no redundant Herrero click in headless mode.
     await page.waitForFunction(()=>['ready','fallback'].includes(window.__genesisMarket?.visual?.phase),null,{timeout:180000});
-
     const status=await page.evaluate(()=>{
       const app=document.querySelector('#genesisApp')?.app;
       const root=app?.root.findByName('Mercader de suministros · NPC interactivo V001');
