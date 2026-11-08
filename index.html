@@ -209,7 +209,14 @@ if(!window.GenesisDevice.safePreviews){const script=document.createElement('scri
 
 <script>
 // Capture PlayCanvas preload progress before the module script starts.
-window.__GENESIS_LITE_BOOT=true;window.__GENESIS_WORLD_FULL=true;window.__GENESIS_TEST_NO_DOOR_FORGE=true;window.__genesisBoot={loaded:0,total:0,error:null};
+// Separate actual mobile memory budget from the desktop village. PlayCanvas
+// downloads/decompresses much more than the transferred GLB size on phones.
+const genesisMobile=window.GenesisDevice?.safePreviews===true;
+window.__GENESIS_LITE_BOOT=genesisMobile;
+window.__GENESIS_WORLD_FULL=!genesisMobile;
+window.__GENESIS_TEST_NO_DOOR_FORGE=true;
+window.__genesisBoot={loaded:0,total:0,error:null};
+window.__genesisWorldPolicy=Object.freeze({mobile:genesisMobile,mode:genesisMobile?'mobile-herrero-first':'desktop-full-village'});
 window.__genesisPreloadProgress=function(event){
   window.__genesisBoot.loaded=Number(event.loaded)||0;
   window.__genesisBoot.total=Number(event.total)||0;
@@ -692,7 +699,19 @@ window.__genesisAppError=function(event){
     <pc-model id="genesisFountainV011Model" name="Genesis plaza dolphin fountain V011 HQ" data-asset="genesisFountainV011HQAsset" data-route="Herrero" data-priority="stream" position="7 0 16" scale="1 1 1"><pc-anim id="genesisFountainV011Anim" activate="true"></pc-anim></pc-model>
   </pc-scene>
 </pc-app>
-<script>window.GenesisDevice.configureApp(document.getElementById('genesisApp'));</script>
+<script>
+window.GenesisDevice.configureApp(document.getElementById('genesisApp'));
+if(window.GenesisDevice.safePreviews){
+ // Preserve the approved HQ fountain in desktop. On phones avoid unpacking
+ // its 16.7 MB container at the same time as artisan, Herrero and mercenary.
+ const fountain=document.getElementById('genesisFountainV011Model');
+ if(fountain?.dataset.asset){
+  fountain.dataset.disabledAsset=fountain.dataset.asset;
+  delete fountain.dataset.asset;
+  fountain.dataset.mobileDeferred='memory-budget';
+ }
+}
+</script>
 
 <div id="grade"></div>
 
