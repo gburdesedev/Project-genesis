@@ -1,0 +1,28 @@
+name: Genesis | stage restored full village assets (not main)
+on:
+  push:
+    branches: [experiment/v014032-full-village-market-arrival-20261108]
+    paths: ['scripts/patch_v014032_full_world.py', '.github/workflows/stage-full-world-20261108.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  stage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover full 63x63 world and HQ fountain incrementally
+        run: |
+          python3 scripts/patch_v014032_full_world.py
+          git diff --check
+          node --check genesis_arcanista_four_walls_v006.js
+          node --check village_world.js
+      - name: Push patch only to experimental branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html village_world.js genesis_arcanista_four_walls_v006.js
+          git diff --cached --stat
+          git commit -m "experiment(world): restore full village, original 14 trees, V011 fountain and V027 Arcanista"
+          git push origin HEAD:experiment/v014032-full-village-market-arrival-20261108

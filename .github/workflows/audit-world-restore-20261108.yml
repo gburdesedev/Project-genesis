@@ -1,0 +1,16 @@
+name: Genesis v014032 | compare original village/market/arrival
+on:
+  push:
+    branches: [experiment/v014032-full-village-market-arrival-20261108]
+    paths: ['scripts/audit_world_restore_20261108.py', '.github/workflows/audit-world-restore-20261108.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch legacy index and inspect actual wiring
+        run: python3 scripts/audit_world_restore_20261108.py

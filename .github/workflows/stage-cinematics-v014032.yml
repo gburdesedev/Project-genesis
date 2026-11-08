@@ -1,0 +1,28 @@
+name: Genesis | restore original arrival and Ordan market cinema experimentally
+on:
+  push:
+    branches: [experiment/v014032-full-village-market-arrival-20261108]
+    paths: ['scripts/restore_v014032_cinematics.py', '.github/workflows/stage-cinematics-v014032.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keep approved game and port only confirmed cinematic controller
+        run: |
+          python3 scripts/restore_v014032_cinematics.py
+          git diff --check
+          node --check genesis_market_cinematic_v001.js
+          node --check v015/canvas-arrival-v016.js
+      - name: Persist experimental patch (never main)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html
+          git diff --cached --stat
+          git commit -m "experiment: restore V016 arrival and V014026 Ordan market tour without replacing approved menus"
+          git push origin HEAD:experiment/v014032-full-village-market-arrival-20261108
