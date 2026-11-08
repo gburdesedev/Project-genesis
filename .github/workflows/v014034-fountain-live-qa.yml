@@ -1,0 +1,39 @@
+name: Genesis V014.034 | approved V011 HQ dolphin fountain in actual game
+on:
+  push:
+    branches: ['experiment/v014034-fuente-v011-20261108']
+    paths:
+      - 'village_world.js'
+      - 'village_fountain_v014034.js'
+      - 'tests/v014034_fountain_live.cjs'
+      - '.github/workflows/v014034-fountain-live-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fountain-live:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JavaScript
+        run: |
+          node --check village_world.js
+          node --check village_fountain_v014034.js
+          node --check tests/v014034_fountain_live.cjs
+      - name: Install Chromium test runner
+        run: npm install --prefix /tmp/genesis-v034 playwright@1.56.1
+      - name: Real PlayCanvas fountain and tree gate
+        run: NODE_PATH=/tmp/genesis-v034/node_modules node tests/v014034_fountain_live.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v014034-fountain-real-game
+          path: previews/v014034-fountain/
+          retention-days: 14
