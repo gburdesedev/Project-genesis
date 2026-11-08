@@ -1,0 +1,1 @@
+Project Genesis V018.5 — WORK IN PROGRESS. Doors retained at native GLB proportions with uniform scale 1.02; now rebuild architectural arches with Blender 4.5.13 LTS in public GitHub Actions before approval. Never integrate this isolated candidate without visual approval.
