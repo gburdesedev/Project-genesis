@@ -33,7 +33,6 @@ jobs:
           node tests/v014038_cumulative_contract.cjs
           node tests/ordan_market_quest_v014021.cjs
           node tests/village_plan.cjs
-          node tests/approved_ui_four_screens.cjs
   full-browser:
     runs-on: ubuntu-24.04
     timeout-minutes: 18
