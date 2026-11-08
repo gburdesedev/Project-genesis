@@ -120,3 +120,51 @@
 .gApproved-Preparacion .gApprovedPrepSlot.gPrepEligible:hover{
   box-shadow:inset 0 0 0 1px #ffc16c77;
 }
+
+/* V014.026: approved Preparación includes its own golden cell frames;
+   runtime slots are only hit targets and must not draw secondary frames. */
+.gApproved-Preparacion .gApprovedPrepSlot,
+.gApproved-Preparacion .gApprovedPrepSlot:focus,
+.gApproved-Preparacion .gApprovedPrepSlot:focus-visible,
+.gApproved-Preparacion .gApprovedPrepSlot:hover,
+.gApproved-Preparacion .gApprovedPrepSlot.gPrepEligible:hover {
+  background:transparent!important;border:0!important;outline:0!important;
+  box-shadow:none!important;border-radius:0!important;
+}
+.gApproved-Preparacion .gApprovedPrepSlot img{
+  max-width:90%!important;max-height:88%!important;
+  object-fit:contain;pointer-events:none;
+}
+/* During the thermal game, keep the actual 1672x941 artwork and replace
+   ONLY dynamic content over its central and details panels. */
+.gApproved-Thermal .gApprovedHit:disabled{cursor:default;pointer-events:none}
+.gPrepThermalPanel,.gPrepThermalDetails{
+  position:absolute;z-index:8;box-sizing:border-box;
+  background:linear-gradient(135deg,#160f0bea,#080707f3);
+  color:#edd3aa;border:1px solid #8e6028;
+  box-shadow:inset 0 0 25px #000a,0 0 12px #0006;
+  border-radius:4px;font:normal 1.05cqw Georgia,serif;
+}
+.gPrepThermalPanel{padding:2.1% 2.5%;display:flex;flex-direction:column;justify-content:space-around;gap:1%}
+.gPrepThermalPanel h2{font:normal 1.7cqw Georgia,serif;text-align:center;margin:0;color:#ffe0a7;letter-spacing:.06em}
+.gPrepThermalPanel p{margin:0;text-align:center;font-size:1.06cqw}
+.gPrepThermalGauge{width:100%;height:12%;position:relative;border:2px solid #d09b51;border-radius:4px;box-shadow:inset 0 0 14px #000a}
+.gPrepThermalTarget{position:absolute;top:-12%;height:124%;width:2px;background:#ffe5a4;opacity:.8;pointer-events:none}
+.gPrepThermalNeedle{position:absolute;top:-18%;height:136%;width:4px;background:#fff;box-shadow:0 0 8px #fff;transform:translateX(-50%)}
+.gPrepThermalLegend{display:flex;justify-content:space-between;font-size:.85cqw;color:#bba98d}
+.gPrepThermalProgressHeader{display:flex;justify-content:space-between;font-size:.95cqw}
+.gPrepThermalProgressBar{height:9%;background:#100b08;border:1px solid #b28c50;border-radius:3px;overflow:hidden}
+.gPrepThermalProgressBar span{display:block;width:0;height:100%;background:linear-gradient(90deg,#ae6e27,#e7bf63);transition:width .12s linear}
+.gPrepThermalBellows{display:flex;gap:2%;min-height:22%}
+.gPrepThermalBellows button{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5%;border:1px solid #a77838;background:linear-gradient(#382318,#170f0b);font-size:1.02cqw;padding:2%}
+.gPrepThermalBellows button:hover{background:linear-gradient(#654024,#24130c)}
+.gPrepThermalBellows small{font-size:.76cqw;color:#d9c1a0}.gPrepThermalBellows em{font-size:.85cqw;color:#ffd88a}
+.gPrepThermalPanel .gPrepThermalNote{font-size:.88cqw;color:#beac90}
+.gPrepThermalDetails{padding:2% 2%;display:flex;flex-direction:column;justify-content:space-between}
+.gPrepThermalDetails h3{text-align:center;font:normal 1.5cqw Georgia,serif;margin:0 0 2%;color:#ffe0a7}
+.gPrepThermalDetails div{display:flex;justify-content:space-between;gap:4%;border-bottom:1px solid #76502e;padding:2% 0}
+.gPrepThermalDetails p{font-size:.95cqw;line-height:1.3;min-height:6%}
+.gPrepThermalDetails [data-tone="good"]{color:#9be2ac}
+.gPrepThermalDetails [data-tone="cold"],.gPrepThermalDetails [data-tone="hot"]{color:#e5a778}
+.gPrepThermalDetails button{border:1px solid #ad7b3f;background:#21130c;color:#f1d1a0;padding:3%;font-size:1.02cqw}
+.gPrepThermalDetails button:hover{background:#4a2818}
