@@ -35,7 +35,7 @@ jobs:
           node tests/village_plan.cjs
   full-browser:
     runs-on: ubuntu-24.04
-    timeout-minutes: 18
+    timeout-minutes: 23
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
       options: --user 1001

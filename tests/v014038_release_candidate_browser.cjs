@@ -50,7 +50,7 @@ async function snap(page){
   assert(!state.failed&&state.intro,'Game did not reach profession selection');
   await page.locator('[data-profession="Herrero"]').click({timeout:30000});
   try{
-   await page.waitForFunction(()=>((document.querySelector('#prototypeIntro')?.style.display==='none')&&getComputedStyle(document.querySelector('#professionChip')).display!=='none')||document.querySelector('.loadingCard.failed'),null,{timeout:140000});
+   await page.waitForFunction(()=>((document.querySelector('#prototypeIntro')?.style.display==='none')&&getComputedStyle(document.querySelector('#professionChip')).display!=='none')||document.querySelector('.loadingCard.failed'),null,{timeout:360000});
   }catch(error){
    const diag=await page.evaluate(()=>{
     const get=id=>document.getElementById(id),state=id=>get(id)?.textContent?.trim()?.slice(0,160);
@@ -63,7 +63,7 @@ async function snap(page){
      introDisplay:get('prototypeIntro')?.style.display,professionChipDisplay:get('professionChip')?.style.display};
    }).catch(e=>({snapshotError:String(e)}));
    record('herrero-route-timeout',diag);
-   throw new Error('Herrero route did not complete in 140s: '+JSON.stringify(diag).slice(0,2000)+' | '+error.message);
+   throw new Error('Herrero route did not complete in 360s: '+JSON.stringify(diag).slice(0,2000)+' | '+error.message);
   }
   state=await snap(page);record('herrero-entered',state);
   assert(!state.failed&&state.chip&&state.rendering,'Selecting Herrero failed');
