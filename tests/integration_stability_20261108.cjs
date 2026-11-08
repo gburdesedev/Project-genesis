@@ -3,6 +3,14 @@
 const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'previews','stability-20261108');
 fs.mkdirSync(out,{recursive:true});
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const release=html.match(/<title>Project Genesis (v[0-9.]+) · Build ([0-9]{8}[.][0-9]+)/);
+assert(release,'Numeric release metadata missing from title');
+assert(html.includes('id="brand">PROJECT GENESIS · '+release[1]+' · BUILD '+release[2]),
+  'HUD version/build differs from HTML title');
+assert(html.includes('content="playcanvas-'+release[1]+'-build-'+release[2]),
+  'Build meta differs from title and HUD');
+console.log('STABILITY_RELEASE_IDENTIFIERS',JSON.stringify({version:release[1],build:release[2]}));
 const report={version:'2026-11-08',result:'RUNNING',states:[],errors:[],timings:{},observations:{}};
 const server=http.createServer((req,res)=>{
  try{
