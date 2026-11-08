@@ -23,9 +23,7 @@
  ].join('');
  function materialVisual(name,hero){
    const [poster,glb]=MATERIALS[name]||[];
-   if(hero&&glb&&!window.GenesisDevice?.safePreviews&&window.customElements?.get('model-viewer')){
-     return `<model-viewer class="gApprovedModel" src="${esc(glb)}" ${poster?'poster="'+esc(poster)+'"':''} camera-controls interaction-prompt="none" auto-rotate rotation-per-second="15deg" shadow-intensity="0" environment-image="neutral" exposure="1.2" alt="${esc(name)}"></model-viewer>`;
-   }
+   // Materials are not equipment; no 360-degree model-viewer or rotation.
    return poster?`<img src="${esc(poster)}" alt="${esc(name)}" draggable="false">`:`<span class="gApprovedNoModel">${esc(name)}</span>`;
  }
  function itemFamily(item){const raw=String(item?.family||item?.recipeFamily||item?.recipe||'').toLowerCase();return /escud/.test(raw)?'Escudos':/espad/.test(raw)?'Espadas':'Creaciones'}
@@ -60,20 +58,21 @@
    const chosen=page.find(e=>e.key===state.selected)||null;
    const familyButtons=families.map((f,i)=>`<button type="button" class="gApprovedFamily ${f===state.family?'is-selected':''}" data-family="${f}" aria-pressed="${f===state.family}" style="${pos(54,229+45*i,288,45)}" aria-label="Filtrar ${f}"></button>`).join('');
    const slots=Array.from({length:20},(_,i)=>{
-     const e=page[i],x=404+(i%10)*122.0,y=589+Math.floor(i/10)*126;
+     const e=page[i],x=410+(i%10)*122.0,y=589+Math.floor(i/10)*126;
      return `<button type="button" class="gApprovedSlot ${e?.key===state.selected?'is-selected':''}" style="${pos(x,y,107,109)}" ${e?'data-slot="'+i+'" aria-label="'+esc(e.name)+'"':'disabled aria-label="Casilla vacía"'}>${e?`<span class="gApprovedSlotAsset">${entryView(e,ctx,false)}</span><span class="gApprovedQty">${esc(e.material?e.qty:e.item?.rarity||'')}</span>`:''}</button>`;
    }).join('');
    const info=chosen?`<div class="gApprovedInfoValues" style="${pos(1305,208,260,88)}"><span>${esc(chosen.name)}</span><span>${esc(chosen.material?'Materiales':state.family)}</span><span>${esc(chosen.material?'—':chosen.item?.rarity||'—')}</span></div>`:'';
-   const hero=chosen?`<div class="gApprovedHero" style="${pos(425,206,610,245)}">${entryView(chosen,ctx,true)}</div>`:'';
+   const hero=chosen?`<div class="gApprovedHero ${chosen.material?'gApprovedMaterialHero':'gApprovedEquipmentHero'}" style="${pos(425,190,610,300)}">${entryView(chosen,ctx,true)}</div>`:'';
    const sheet=state.sheet&&chosen&&!chosen.material?`<section class="gApprovedSheet" aria-label="Ficha del objeto"><button class="gApprovedSheetClose" id="gApprovedSheetClose">×</button><h2>${esc(chosen.name)}</h2><p>${esc(chosen.item?.rarity||'')}</p><h3>Canales del objeto</h3>${(chosen.item?.channels||[]).map((c,i)=>{const metric=ctx.metricForChannel?.(chosen.item,c,i);return `<div><span>${esc(metric?.label||c[0])}</span><b>${esc(metric?.display??c[1])}</b></div>`}).join('')}<h3>Materiales utilizados</h3>${(chosen.item?.formula?.materials||[]).map(m=>`<div><span>${esc(m.material)}</span><b>${Number(m.qty)||0}×</b></div>`).join('')}</section>`:'';
    const body=familyButtons+slots+hero+info+
+     (state.family==='Materiales'?'<div class="gApprovedMaterialRotationMask" aria-hidden="true"></div><div class="gApprovedMaterialFichaMask" aria-hidden="true"></div>':'')+
      `<button type="button" class="gApprovedInfoButton" id="gApprovedInfoButton" aria-label="Consultar ficha del objeto" style="${pos(1170,437,410,57)}" ${chosen&&!chosen.material?'':'disabled'}></button>`+
      `<button type="button" class="gApprovedPagePrev" id="gApprovedPagePrev" style="${pos(1482,845,45,25)}" ${state.page===0?'disabled':''} aria-label="Página anterior">‹</button>`+
      `<button type="button" class="gApprovedPageNext" id="gApprovedPageNext" style="${pos(1535,845,45,25)}" ${state.page===maxPage?'disabled':''} aria-label="Página siguiente">›</button>`+sheet;
    const board=mount('Inventario',ctx,nav,body,`data-family="${esc(state.family)}"`);if(!board)return;
    board.querySelectorAll('[data-family]').forEach(b=>b.onclick=()=>{state.family=b.dataset.family;state.page=0;state.selected=null;state.sheet=false;inventory(ctx,nav)});
    board.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{state.selected=page[Number(b.dataset.slot)]?.key||null;state.sheet=false;inventory(ctx,nav)});
-   const details=board.querySelector('#gApprovedInfoButton');if(details)details.onclick=()=>{state.sheet=true;inventory(ctx,nav)};
+   const details=board.querySelector('#gApprovedInfoButton');if(details)details.onclick=()=>{if(!chosen||chosen.material)return;state.sheet=true;inventory(ctx,nav)};
    const sheetClose=board.querySelector('#gApprovedSheetClose');if(sheetClose)sheetClose.onclick=()=>{state.sheet=false;inventory(ctx,nav)};
    board.querySelector('#gApprovedPagePrev').onclick=()=>{state.page--;state.selected=null;inventory(ctx,nav)};
    board.querySelector('#gApprovedPageNext').onclick=()=>{state.page++;state.selected=null;inventory(ctx,nav)};
