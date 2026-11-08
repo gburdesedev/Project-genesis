@@ -1,6 +1,7 @@
 /* Project Genesis UI 2026-11-08: runtime-only overlays over the immutable approved 1672x941 artwork. */
 (function(){
  'use strict';
+ const BUILD='V014.025';
  const ROOT='assets/ui/approved/';
  const ARTS=Object.freeze({Inventario:ROOT+'Inventario_V11_APROBADO_1672x941.png',Preparacion:ROOT+'Preparacion_APROBADA_1672x941.png',Fabricaciones:ROOT+'Fabricaciones_V07_APROBADA_1672x941.png'});
  const MATERIALS=Object.freeze({
@@ -22,9 +23,55 @@
    hit('Fabricaciones',816,38,337,76),hit('Comparacion',1153,38,303,76)
  ].join('');
  function materialVisual(name,hero){
-   const [poster,glb]=MATERIALS[name]||[];
-   // Materials are not equipment; no 360-degree model-viewer or rotation.
-   return poster?`<img src="${esc(poster)}" alt="${esc(name)}" draggable="false">`:`<span class="gApprovedNoModel">${esc(name)}</span>`;
+   const [poster]=MATERIALS[name]||[];
+   // The approved stock image is static. A source poster may have an opaque grey matte:
+   // the local image is cleaned at runtime without modifying its approved master.
+   return poster?`<img class="gApprovedMaterialArt" data-matte-source="${esc(poster)}" src="${esc(poster)}" alt="${esc(name)}" draggable="false">`:
+     `<span class="gApprovedNoModel">${esc(name)}</span>`;
+ }
+ const matteCache=new Map();
+ function cleanMaterialPoster(img){
+   if(!img||img.dataset.matteAttached)return;
+   img.dataset.matteAttached='1';
+   const source=img.dataset.matteSource;
+   if(!source)return;
+   if(matteCache.has(source)){const cached=matteCache.get(source);if(cached)img.src=cached;return;}
+   function clean(){
+     if(!img.naturalWidth||!img.naturalHeight)return;
+     try{
+       const w=img.naturalWidth,h=img.naturalHeight;
+       const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+       const c=canvas.getContext('2d',{willReadFrequently:true});c.drawImage(img,0,0);
+       const rgba=c.getImageData(0,0,w,h),d=rgba.data;
+       const corners=[0,(w-1)*4,(w*(h-1))*4,(w*h-1)*4].map(i=>[d[i],d[i+1],d[i+2],d[i+3]]);
+       // If the source already has transparency, keep it unchanged.
+       if(corners.some(px=>px[3]<230)){matteCache.set(source,source);return;}
+       const mean=[0,1,2].map(k=>Math.round(corners.reduce((acc,p)=>acc+p[k],0)/4));
+       const similarity=corners.every(px=>Math.abs(px[0]-mean[0])+Math.abs(px[1]-mean[1])+Math.abs(px[2]-mean[2])<48);
+       if(!similarity){matteCache.set(source,source);return;}
+       const pixels=w*h,seen=new Uint8Array(pixels),queue=new Int32Array(pixels);
+       let start=0,end=0;
+       const near=p=>{const i=p*4;const dr=d[i]-mean[0],dg=d[i+1]-mean[1],db=d[i+2]-mean[2];return dr*dr+dg*dg+db*db<2600;};
+       function add(p){if(p<0||p>=pixels||seen[p]||!near(p))return;seen[p]=1;queue[end++]=p;}
+       for(let x=0;x<w;x++){add(x);add((h-1)*w+x);}
+       for(let y=0;y<h;y++){add(y*w);add(y*w+w-1);}
+       let removed=0;
+       while(start<end){
+         const p=queue[start++],x=p%w;d[p*4+3]=0;removed++;
+         if(x>0)add(p-1);if(x<w-1)add(p+1);if(p>=w)add(p-w);if(p<pixels-w)add(p+w);
+       }
+       if(removed>pixels*.025&&removed<pixels*.98){
+         c.putImageData(rgba,0,0);
+         const cleaned=canvas.toDataURL('image/png');matteCache.set(source,cleaned);
+         // Model identity is unchanged; only the flat poster matte is transparent.
+         img.src=cleaned;
+       }else matteCache.set(source,source);
+     }catch(error){matteCache.set(source,source);console.warn('Material matte clean skipped',source,error);}
+   }
+   if(img.complete&&img.naturalWidth)clean();else img.addEventListener('load',clean,{once:true});
+ }
+ function cleanBoardPosters(board){
+   board.querySelectorAll('img.gApprovedMaterialArt').forEach(cleanMaterialPoster);
  }
  function itemFamily(item){const raw=String(item?.family||item?.recipeFamily||item?.recipe||'').toLowerCase();return /escud/.test(raw)?'Escudos':/espad/.test(raw)?'Espadas':'Creaciones'}
  function entryView(e,ctx,hero){
@@ -37,6 +84,8 @@
    const html=`<div id="genesisApprovedBoard" class="gApprovedBoard gApproved-${tab}" data-screen="${tab}" data-approved-source="${esc(ARTS[tab])}" ${attrs} style="background-image:url('${ARTS[tab]}')">${tabs()}${body}${hit('Cerrar',1603,0,69,36)}</div>`;
    ctx.modal(html,'preparationModal genesisApprovedModal');
    const board=document.getElementById('genesisApprovedBoard');if(!board)return null;
+   board.dataset.build=BUILD;
+   cleanBoardPosters(board);
    board.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{
      const tab=b.dataset.go;
      if(tab==='Cerrar'){nav.close();return}
@@ -62,7 +111,7 @@
      return `<button type="button" class="gApprovedSlot ${e?.key===state.selected?'is-selected':''}" style="${pos(x,y,107,109)}" ${e?'data-slot="'+i+'" aria-label="'+esc(e.name)+'"':'disabled aria-label="Casilla vacía"'}>${e?`<span class="gApprovedSlotAsset">${entryView(e,ctx,false)}</span><span class="gApprovedQty">${esc(e.material?e.qty:e.item?.rarity||'')}</span>`:''}</button>`;
    }).join('');
    const info=chosen?`<div class="gApprovedInfoValues" style="${pos(1305,208,260,88)}"><span>${esc(chosen.name)}</span><span>${esc(chosen.material?'Materiales':state.family)}</span><span>${esc(chosen.material?'—':chosen.item?.rarity||'—')}</span></div>`:'';
-   const hero=chosen?`<div class="gApprovedHero ${chosen.material?'gApprovedMaterialHero':'gApprovedEquipmentHero'}" style="${pos(425,190,610,300)}">${entryView(chosen,ctx,true)}</div>`:'';
+   const hero=chosen?`<div class="gApprovedHero ${chosen.material?'gApprovedMaterialHero':'gApprovedEquipmentHero'}" style="${pos(405,177,700,325)}">${entryView(chosen,ctx,true)}</div>`:'';
    const sheet=state.sheet&&chosen&&!chosen.material?`<section class="gApprovedSheet" aria-label="Ficha del objeto"><button class="gApprovedSheetClose" id="gApprovedSheetClose">×</button><h2>${esc(chosen.name)}</h2><p>${esc(chosen.item?.rarity||'')}</p><h3>Canales del objeto</h3>${(chosen.item?.channels||[]).map((c,i)=>{const metric=ctx.metricForChannel?.(chosen.item,c,i);return `<div><span>${esc(metric?.label||c[0])}</span><b>${esc(metric?.display??c[1])}</b></div>`}).join('')}<h3>Materiales utilizados</h3>${(chosen.item?.formula?.materials||[]).map(m=>`<div><span>${esc(m.material)}</span><b>${Number(m.qty)||0}×</b></div>`).join('')}</section>`:'';
    const body=familyButtons+slots+hero+info+
      (state.family==='Materiales'?'<div class="gApprovedMaterialRotationMask" aria-hidden="true"></div><div class="gApprovedMaterialFichaMask" aria-hidden="true"></div>':'')+
@@ -82,17 +131,26 @@
    const basic=stock.filter(([name])=>!/^(Lingote|Material preparado|Material tratado)/i.test(name)).slice(0,10);
    const treated=stock.filter(([name])=>/^(Lingote|Material preparado|Material tratado)/i.test(name)).slice(0,10);
    const slots=[...basic,...Array(Math.max(0,10-basic.length)).fill(null),...treated,...Array(Math.max(0,10-treated.length)).fill(null)];
-   const body=slots.map((entry,i)=>{
-     const x=38+(i%5)*105,y=(i<10?249:588)+(Math.floor(i%10/5))*103;
-     return entry?`<button type="button" class="gApprovedPrepSlot" data-stock="${esc(entry[0])}" style="${pos(x,y,90,88)}" aria-label="${esc(entry[0])}">${materialVisual(entry[0],false)}<b>${Number(entry[1])}</b></button>`:'';
-   }).join('')+`<div class="gApprovedPrepData" style="${pos(1245,203,340,487)}"><h3>Preparación de hierro</h3><p>Mineral disponible: <b>${Number(ctx.inventory?.['Mineral de hierro']||0)}</b></p><p>Lingotes: <b>${Number(ctx.inventory?.['Lingote de hierro']||0)}</b></p><div class="gApprovedPrepQty"><button id="gPrepMinus" aria-label="Reducir cantidad">−</button><strong>${ctx.count||0}</strong><button id="gPrepPlus" aria-label="Aumentar cantidad">+</button></div><p>Elegí la cantidad para la tanda. La preparación no modifica la rareza.</p></div>`+
-     `<button type="button" class="gApprovedPrepAction" id="gPrepAction" style="${pos(1244,714,357,96)}" aria-label="Preparar" ${Number(ctx.inventory?.['Mineral de hierro']||0)>0?'':'disabled'}></button>`;
-   const board=mount('Preparacion',ctx,nav,body);if(!board)return;
    const raw=Number(ctx.inventory?.['Mineral de hierro']||0);
+   // In the iron preparation tutorial, only RAW IRON ORE is a selectable input.
+   // The product preview is the ingot, independent of the currently selected slot.
+   if(ctx.selectedMaterial!=='Mineral de hierro')ctx.selectedMaterial='Mineral de hierro';
+   const cells=slots.map((entry,i)=>{
+     const x=38+(i%5)*105,y=(i<10?249:588)+(Math.floor(i%10/5))*103;
+     const eligible=!!entry&&entry[0]==='Mineral de hierro'&&raw>0;
+     return entry?`<button type="button" class="gApprovedPrepSlot ${eligible?'gPrepEligible':'gPrepLocked'}" ${eligible?'data-prep-raw="1"':'disabled'} style="${pos(x,y,90,88)}" aria-label="${esc(entry[0])}">${materialVisual(entry[0],false)}<b>${Number(entry[1])}</b></button>`:'';
+   }).join('');
+   const product=`<div class="gApprovedPrepProduct" role="img" aria-label="Resultado de preparación: Lingote de hierro" style="${pos(765,225,390,390)}">${materialVisual('Lingote de hierro',true)}</div>`;
+   const data=`<div class="gApprovedPrepData" style="${pos(1245,203,340,487)}"><h3>Preparación de hierro</h3><p>Mineral disponible: <b>${raw}</b></p><p>Lingotes: <b>${Number(ctx.inventory?.['Lingote de hierro']||0)}</b></p><div class="gApprovedPrepQty"><button id="gPrepMinus" aria-label="Reducir cantidad">−</button><strong>${ctx.count||0}</strong><button id="gPrepPlus" aria-label="Aumentar cantidad">+</button></div><p>Elegí la cantidad para la tanda. La preparación no modifica la rareza.</p></div>`;
+   const action=`<button type="button" class="gApprovedPrepAction" id="gPrepAction" style="${pos(1244,714,357,96)}" aria-label="Preparar" ${raw>0?'':'disabled'}></button>`;
+   const board=mount('Preparacion',ctx,nav,cells+product+data+action,'data-prep-output="Lingote de hierro"');if(!board)return;
    board.querySelector('#gPrepMinus').onclick=()=>{ctx.count=Math.max(1,(ctx.count||1)-1);preparation(ctx,nav)};
    board.querySelector('#gPrepPlus').onclick=()=>{ctx.count=Math.min(raw,(ctx.count||0)+1);preparation(ctx,nav)};
    board.querySelector('#gPrepAction').onclick=nav.start;
-   board.querySelectorAll('[data-stock]').forEach(b=>b.onclick=()=>{ctx.selectedMaterial=b.dataset.stock;ctx.genesisApprovedInventory={family:'Materiales',page:0,selected:'m:'+b.dataset.stock,sheet:false};nav.renderWorkspace('Inventario')});
+   board.querySelectorAll('[data-prep-raw]').forEach(b=>b.onclick=()=>{
+     ctx.selectedMaterial='Mineral de hierro';
+     preparation(ctx,nav); // Stay on Preparación; never jump to Inventario.
+   });
  }
  function fabrications(ctx,nav){
    const catalog=typeof ctx.getRecipeCatalog==='function'?(ctx.getRecipeCatalog()||[]):[];
@@ -135,5 +193,5 @@
    else return false;
    return true;
  }
- window.GenesisApprovedUI=Object.freeze({render,ARTS});
+ window.GenesisApprovedUI=Object.freeze({render,ARTS,BUILD});
 })();
