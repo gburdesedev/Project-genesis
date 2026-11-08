@@ -59,6 +59,29 @@ const issues=[];
   const background=await page.locator('.gApprovedBoard').evaluate(el=>getComputedStyle(el).backgroundImage);
   assert(background.includes('Inventario_V11_APROBADO_1672x941.png'));
   await page.screenshot({path:path.join(out,'01-inventario-v11-1600x900.png'),animations:'disabled'});
+  // Regression screenshots: material 2/3 must never be cut by a rotated GLB.
+  assert.equal(await page.locator('#gApprovedInfoButton').isDisabled(),true);
+  assert.equal(await page.locator('.gApprovedHero model-viewer').count(),0);
+  assert.equal(await page.locator('.gApprovedMaterialRotationMask').count(),1);
+  assert.equal(await page.locator('.gApprovedMaterialFichaMask').count(),1);
+  for(const [index,name] of [[1,'Lingote de hierro'],[2,'Madera seca de roble']]){
+    await page.locator('[data-slot="'+index+'"]').click();
+    assert.equal(await page.locator('.gApprovedInfoValues span').first().innerText(),name);
+    assert.equal(await page.locator('#gApprovedInfoButton').isDisabled(),true);
+    const fit=await page.locator('.gApprovedMaterialHero').evaluate(hero=>{
+      const image=hero.querySelector('img'),hr=hero.getBoundingClientRect(),ir=image.getBoundingClientRect();
+      return {image:!!image,inside:ir.left>=hr.left-1&&ir.right<=hr.right+1&&ir.top>=hr.top-1&&ir.bottom<=hr.bottom+1,style:getComputedStyle(image).position};
+    });
+    assert(fit.image&&fit.inside&&fit.style==='static',JSON.stringify(fit));
+    const frames=await page.locator('.gApprovedSlot.is-selected').evaluate(el=>({
+      shadow:getComputedStyle(el).boxShadow,border:getComputedStyle(el).borderTopWidth
+    }));
+    assert.equal(frames.shadow,'none','Artwork already has one frame: no second golden border');
+    assert.equal(frames.border,'0px');
+    await page.screenshot({path:path.join(out,'01-inventario-material-'+(index+1)+'-1600x900.png'),animations:'disabled'});
+  }
+  await page.locator('[data-family="Materiales"]').click();
+
   await page.locator('[data-family="Espadas"]').click();
   assert.equal(await page.locator('.gApprovedSlot:not(:disabled)').count(),1);
   await page.locator('#gApprovedInfoButton').click();
