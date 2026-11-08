@@ -39,7 +39,7 @@ function setup(models){
    return models.filter(m=>m.dataset.route===parts[1]&&m.dataset.priority===parts[2]);
   }
  };
- const context={document,setTimeout,clearTimeout,setInterval,clearInterval,
+ const context={document,window:{GenesisDevice:{safePreviews:false}},setTimeout,clearTimeout,setInterval,clearInterval,
   requestAnimationFrame:fn=>queueMicrotask(fn),
   performance:{now:()=>Date.now(),getEntriesByName:()=>[]},URL,location:{href:'http://localhost/index.html'},
   console,Promise,Map,Set,Error};
