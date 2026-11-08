@@ -1,0 +1,22 @@
+name: V018 audit approved workshop positions
+on:
+  push:
+    branches: [experiment/v018-workshop-positions-lossless-door]
+    paths:
+      - 'tools/v018_geometry_audit.py'
+      - '.github/workflows/v018-geometry-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  geometry:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read GLB bounds with actual node transforms
+        run: python3 tools/v018_geometry_audit.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v018-approved-geometry-audit
+          path: v018-geometry-audit.json
