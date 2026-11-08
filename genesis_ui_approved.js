@@ -1,7 +1,7 @@
 /* Project Genesis UI 2026-11-08: runtime-only overlays over the immutable approved 1672x941 artwork. */
 (function(){
  'use strict';
- const BUILD='V014.026';
+ const BUILD='V014.027';
  const ROOT='assets/ui/approved/';
  const ARTS=Object.freeze({Inventario:ROOT+'Inventario_V11_APROBADO_1672x941.png',Preparacion:ROOT+'Preparacion_APROBADA_1672x941.png',Fabricaciones:ROOT+'Fabricaciones_V07_APROBADA_1672x941.png'});
  const MATERIALS=Object.freeze({
@@ -191,6 +191,39 @@
    board.querySelector('#prepAbandon').onclick=controls.abandon;
    return true;
  }
+ function renderResult(ctx,nav,opts){
+   const work=opts?.work;
+   if(!work)return false;
+   const success=!!opts.success;
+   const stock=Object.entries(ctx.inventory||{}).filter(([,qty])=>Number(qty)>0);
+   const basics=stock.filter(([name])=>!/^(Lingote|Material preparado|Material tratado)/i.test(name)).slice(0,10);
+   const prepared=stock.filter(([name])=>/^(Lingote|Material preparado|Material tratado)/i.test(name)).slice(0,10);
+   const cells=[...basics,...Array(Math.max(0,10-basics.length)).fill(null),...prepared,...Array(Math.max(0,10-prepared.length)).fill(null)].map((entry,i)=>{
+     if(!entry)return '';
+     const x=38+(i%5)*105,y=(i<10?249:588)+(Math.floor(i%10/5))*103;
+     return `<div class="gApprovedPrepSlot gPrepResultSlot" style="${pos(x,y,90,88)}" aria-label="${esc(entry[0])}: ${Number(entry[1])}">${materialVisual(entry[0],false)}<b>${Number(entry[1])}</b></div>`;
+   }).join('');
+   const headline=success?'Preparación completada':'Lote no aplicado';
+   const center=`<div class="gApprovedPrepResultDisplay" style="${pos(750,205,397,460)}">
+     ${success?materialVisual('Lingote de hierro',true):''}
+     <div class="gPrepResultHeadline">${success?'✓':'!'} ${headline}</div>
+     <p>${success?esc(work.count+' lingote'+(work.count===1?'':'s')+' incorporados al inventario.'):'El inventario cambió durante la tanda.'}</p>
+   </div>`;
+   const info=`<section class="gApprovedPrepResultInfo" style="${pos(1215,205,378,502)}" aria-label="Resultado de preparación">
+     <h2>RESULTADO DE LA TANDA</h2><h3>${success?'Lingotes preparados':'Preparación interrumpida'}</h3>
+     <div><span>Mineral restante</span><b>${Number(ctx.inventory?.['Mineral de hierro']||0)}</b></div>
+     <div><span>Lingotes listos</span><b>${Number(ctx.inventory?.['Lingote de hierro']||0)}</b></div>
+     <div><span>Intervenciones</span><b>${Number(work.clicks||0)}</b></div>
+     <button id="prepResultBack">Volver a Preparación</button>
+     <button id="prepResultClose">Cerrar menú</button>
+   </section>`;
+   const board=mount('Preparacion',ctx,nav,cells+center+info,'data-prep-stage="result"');if(!board)return false;
+   board.classList.add('gApproved-PrepResult');
+   board.querySelectorAll('.gApprovedHit:not([data-go="Cerrar"])').forEach(button=>button.disabled=true);
+   board.querySelector('#prepResultBack').onclick=opts.back;
+   board.querySelector('#prepResultClose').onclick=opts.close;
+   return true;
+ }
  function fabrications(ctx,nav){
    const catalog=typeof ctx.getRecipeCatalog==='function'?(ctx.getRecipeCatalog()||[]):[];
    const recipes=catalog.filter(r=>r&&r.id&&r.formula);
@@ -232,5 +265,5 @@
    else return false;
    return true;
  }
- window.GenesisApprovedUI=Object.freeze({render,renderThermal,ARTS,BUILD});
+ window.GenesisApprovedUI=Object.freeze({render,renderThermal,renderResult,ARTS,BUILD});
 })();
