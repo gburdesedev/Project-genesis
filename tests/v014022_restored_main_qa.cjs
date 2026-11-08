@@ -4,6 +4,14 @@ const fs=require('node:fs'),http=require('node:http'),path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const out=path.join(root,'previews','v014022-restored-qa');
 fs.mkdirSync(out,{recursive:true});
+// Forensic source excerpts before changing the original game logic.
+const rawGame=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const rawLines=rawGame.split('\\n');
+for(const token of ['function loadDeferredModelAsset','async function activateRouteGroups','Sprint_Loop','Walk_Loop','tannerChest09','rangerMale086','ShiftLeft']){
+ const indexes=[];rawLines.forEach((line,i)=>{if(line.includes(token)&&indexes.length<3)indexes.push(i)});
+ for(const i of indexes){console.log('SOURCE_PROBE',token,'line',i+1,rawLines.slice(Math.max(0,i-5),Math.min(rawLines.length,i+18)).map((line,k)=>(Math.max(0,i-5)+k+1)+': '+line.slice(0,250)).join('\\n'))}
+}
+
 const report={branch:'V014022 restored main',start:new Date().toISOString(),states:[],networkErrors:[],consoleErrors:[],screenshots:[],result:'STARTING'};
 const srv=http.createServer((req,res)=>{
  try{
