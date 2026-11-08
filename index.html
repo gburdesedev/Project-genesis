@@ -1185,7 +1185,7 @@ function workshopAt(x,z){const lz=z/WORKSHOP_SCALE;if(lz<.25&&lz>-10.4){for(cons
 
 window.__GENESIS_RUNTIME_ERRORS=[];addEventListener('error',e=>{window.__GENESIS_RUNTIME_ERRORS.push({type:'error',message:e.message||String(e.error||e),source:e.filename||'',line:e.lineno||0});console.error('GENESIS RUNTIME ERROR',e.error||e.message)});addEventListener('unhandledrejection',e=>{window.__GENESIS_RUNTIME_ERRORS.push({type:'rejection',message:String(e.reason?.message||e.reason||'Unhandled rejection')});console.error('GENESIS UNHANDLED REJECTION',e.reason)});
 // ---------- Controls ----------
-const HERRERO_WORKSHOP_SETUP_REQUIRED=false; // Build de prueba: false = taller del Herrero ya operativo para validar crafting → mercenarios.
+const HERRERO_WORKSHOP_SETUP_REQUIRED=true; // Release V014.038: tutorial original Q1-Q3 + llegada V016, sin atajo al taller.
 const DIRECT_MERCENARY_AFTER_CRAFTS=true; // Build de prueba: tras la segunda familia salta directo a mercenarios.
 let gameStarted=false,selectedProfession=null,activeRoute=null,tutorialStep=-1,currentInteractable=null;
 let px=0,pz=6.3,camYaw=0,camPitch=24,camDist=4.7,cameraSolvedDist=4.7,moveX=0,moveY=0,walking=false,running=false,lastT=performance.now();const keys=new Set();
