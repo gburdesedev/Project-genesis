@@ -133,7 +133,7 @@ function arcaneSurround(app,building,cobble,shell){
  return frame;
 }
 function stampVersion(){
- const version='v0.14.035', build='20261108.04';
+ const version='v0.14.036', build='20261108.05';
  globalThis.__genesisVillageBuild={version,build};
  document.title=document.title.replace(/v0\.14(?:[a-c]|\.\d{3})?/gi,version);
  // The existing HUD build label lives in the monolithic demo HTML. Update
@@ -176,16 +176,43 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
    // If the optional roof template was deferred, add only a lightweight roof.
    if(!roof)mesh(building,'Cubierta básica Herrero','box',0,3.4,-5.05,11.5,.18,8,material('Tejado',[.30,.24,.21]));
    buildings.set('Herrero',building);
+   // V014.036: restore the four approved workshop façades as shared instanced
+   // shell/roof/door models, without re-downloading the same GLB per workshop.
+   // Arcanista V027 is an optional later visual stage; it never gates Herrero.
+   let arcaneBuilding=null,arcaneFallbackDoor=null;
+   const arcanePortals=[];
+   for(const p of plan.workshops){
+    if(p.profession==='Herrero')continue;
+    const other=new Entity(p.profession+' · fachada cerrada aprobada');
+    root.addChild(other);
+    other.setLocalPosition(p.x,0,p.z);
+    other.setLocalScale(plan.workshopScale,1,plan.workshopScale);
+    other.setLocalEulerAngles(0,p.yaw,0);
+    for(const [src,position] of [[shell,[0,0,0]],[roof,[0,3.40,-5.05]],[door,[-1.1,0,.12]]]){
+     if(!src)continue;
+     const clone=src.clone();clone.enabled=true;clone.setLocalPosition(...position);
+     if(src===roof)clone.setLocalScale(1.28,.70,.86);
+     if(src===shell&&p.profession==='Arcanista')tintArcaneFacade(clone);
+     other.addChild(clone);
+     if(src===door&&p.profession==='Arcanista')arcaneFallbackDoor=clone;
+    }
+    if(!roof)mesh(other,'Cubierta básica','box',0,3.4,-5.05,11.5,.18,8,material('Tejado',[.30,.24,.21]));
+    buildings.set(p.profession,other);
+    if(p.profession==='Arcanista')arcaneBuilding=other;
+   }
    // V014.033: approved foliage; mobile downloads it only after Herrero is playable.
    const mobile=globalThis.GenesisDevice?.safePreviews===true;
    const trees=mountVillageTrees(app,root,{onResourceLoaded,deferInitialLoads:true});
    const fountain=mountGenesisFountainV014034(app,root,{onResourceLoaded});
-   globalThis.__genesisLiteVillage={mode:'herrero-first-trees',trees:trees.sites.length,
-    roads:plan.roads.length,workshops:1,mobile,streaming:mobile?'post-start-mobile':'post-start-desktop',
-    fountain:mobile?'HQ-deferred-mobile-budget':'HQ-scheduled-desktop'};
-   return Object.freeze({root,plan,trees,fountain,arcanePortals:[],
+   globalThis.__genesisLiteVillage={mode:'herrero-first-five-facades',trees:trees.sites.length,
+    roads:plan.roads.length,workshops:buildings.size,mobile,streaming:mobile?'post-start-mobile':'post-start-desktop',
+    fountain:mobile?'HQ-deferred-mobile-budget':'HQ-scheduled-desktop',
+    arcaneDoor:mobile?'original-fallback-mobile':'V027-deferred-desktop'};
+   return Object.freeze({root,plan,trees,fountain,arcanePortals,
     setProfession(prof){
-     building.enabled=true;
+     for(const b of buildings.values())b.enabled=true;
+     if(arcaneBuilding&&arcaneFallbackDoor)
+      setTimeout(()=>arcanePortals.push(mountArcanePortal(app,arcaneBuilding,arcaneFallbackDoor,{onResourceLoaded})),mobile?5200:11000);
      setTimeout(()=>trees.startLoading(),mobile?3500:1500);
      // HQ stays in the same PC profile; opt-in only on low-memory devices.
      if(!mobile)setTimeout(()=>fountain.start(),6500);
