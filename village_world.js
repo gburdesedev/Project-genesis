@@ -146,7 +146,7 @@ function stampVersion(){
 }
 export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{},onRootReady=()=>{}}){
  stampVersion();
-  if(globalThis.__GENESIS_LITE_BOOT){
+  if(globalThis.__GENESIS_LITE_BOOT && !globalThis.__GENESIS_WORLD_FULL){
    const plan=globalThis.GenesisVillagePlan,root=new Entity('Project Genesis · Herrero primero');
    app.root.addChild(root);
    // NPCs, merchant and economy subscribe to this callback.

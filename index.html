@@ -207,7 +207,7 @@ if(!window.GenesisDevice.safePreviews){const script=document.createElement('scri
 
 <script>
 // Capture PlayCanvas preload progress before the module script starts.
-window.__GENESIS_LITE_BOOT=true;window.__GENESIS_TEST_NO_DOOR_FORGE=true;window.__genesisBoot={loaded:0,total:0,error:null};
+window.__GENESIS_LITE_BOOT=true;window.__GENESIS_WORLD_FULL=true;window.__GENESIS_TEST_NO_DOOR_FORGE=true;window.__genesisBoot={loaded:0,total:0,error:null};
 window.__genesisPreloadProgress=function(event){
   window.__genesisBoot.loaded=Number(event.loaded)||0;
   window.__genesisBoot.total=Number(event.total)||0;
@@ -687,7 +687,7 @@ window.__genesisAppError=function(event){
       <pc-entity id="mercBootsGlowA" position="0 .16 0"><pc-light id="mercBootsLightA" type="omni" color="#b7c2ca" intensity="0" range=".72"></pc-light></pc-entity>
       <pc-entity id="mercBootsGlowB" position="0 .11 .04"><pc-light id="mercBootsLightB" type="omni" color="#b7c2ca" intensity="0" range=".62"></pc-light></pc-entity>
     </pc-entity>
-    <pc-model id="genesisFountainV011Model" name="Genesis plaza dolphin fountain V011 HQ" data-disabled-asset="genesisFountainV011HQAsset" data-route="LiteDecor" position="7 0 16" scale="1 1 1"><pc-anim id="genesisFountainV011Anim" activate="true"></pc-anim></pc-model>
+    <pc-model id="genesisFountainV011Model" name="Genesis plaza dolphin fountain V011 HQ" data-asset="genesisFountainV011HQAsset" data-route="Herrero" data-priority="stream" position="7 0 16" scale="1 1 1"><pc-anim id="genesisFountainV011Anim" activate="true"></pc-anim></pc-model>
   </pc-scene>
 </pc-app>
 <script>window.GenesisDevice.configureApp(document.getElementById('genesisApp'));</script>
@@ -777,7 +777,7 @@ window.__genesisAppError=function(event){
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
 import { Vec3 } from 'playcanvas';
-import { mountVillage } from './village_world.js?v=0.14.022-mobile-rescue';
+import { mountVillage } from './village_world.js?v=0.14.032-full-village-experimental';
 import { mountGenesisMarket } from './genesis_market_v001.js?v=0.14.022';
 import './genesis_market_quest_v001.js?v=0.14.022';
 
@@ -2174,6 +2174,6 @@ window.GenesisPrototypeEngines=Object.freeze({recipes:REC,formulaProfiles:FORMUL
 
 <script type="module" src="./previews/genesis-v038-fuente-hq-runtime.js?v=0.15.001"></script>
 <script type="module" src="./genesis_workshop_live_v015.js?v=0.17.014-herrero-v082b"></script>
-<script type="module" src="./genesis_arcanista_four_walls_v006.js?v=0.16.006b"></script>
+<script type="module" src="./genesis_arcanista_four_walls_v006.js?v=0.14.032-full-village-experimental"></script>
 </body>
 </html>
