@@ -1,0 +1,36 @@
+name: Genesis UI four screens | source audit
+on:
+  push:
+    branches:
+      - experiment/ui-approved-four-screens-20261108
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit current game menu hooks and source
+        run: |
+          python3 - <<'PY'
+          import re,json,pathlib
+          s=pathlib.Path('index.html').read_text()
+          needles=['onCraftRecipe','onCraft','showCraftResult','renderCraftResult','fabricationResult','Resultado de fabricación','GenesisPreparation.open','GenesisPreparation','function showResult','function craft']
+          for needle in needles:
+            print('NEEDLE',needle,'COUNT',s.count(needle))
+            for m in list(re.finditer(re.escape(needle),s,re.I))[:8]:
+              print('  ',s[max(0,m.start()-200):m.start()+340].replace('\n',' ')[:500])
+          PY
+      - name: Preserve index and menu source for offline review
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-four-screens-source-snapshot
+          path: |
+            index.html
+            preparacion_control.js
+            inventario_genesis_16x9.js
+            inventario_genesis_16x9.css
+            inventario_arte_aprobado_1to1.css
+            preparacion.css
+          retention-days: 3
