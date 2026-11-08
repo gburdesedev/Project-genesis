@@ -17,9 +17,9 @@
    [4.3,20],
    [4.3,13],
    [4.3,7],
-   [1.72,3.75] // stop close to Ordan, in front of Herrero door
+   [1.29,3.15] // actual world-scale Ordan position (1.29,1.425); now within E interaction radius
  ].map(x=>Object.freeze(x)));
- const DISTANCE_TO_ORDAN=Math.hypot(1.72-1.72,3.75-1.90);
+ const DISTANCE_TO_ORDAN=Math.hypot(1.29-1.29,3.15-1.425);
  function create({artisan,game,playAnimation,announce=()=>{},speed=3.2,onFinish=()=>{}}){
    if(!artisan||!game?.step)throw Error('V016 arrival requires original artisan and Q1–Q3 state machine');
    let state=game.step()===0?'pending':'resumed',point=0,distance=0,elapsed=0;
@@ -68,7 +68,7 @@
      update,begin,skip,position,
      get active(){return state==='pending'||state==='arriving'},
      get state(){return state},
-     snapshot:()=>({state,point,totalWaypoints:WAYPOINTS.length,elapsed,distance,position:position(),ordanDistance:Math.hypot(position()[0]-1.72,position()[2]-1.90)})
+     snapshot:()=>({state,point,totalWaypoints:WAYPOINTS.length,elapsed,distance,position:position(),ordanDistance:Math.hypot(position()[0]-1.29,position()[2]-1.425)})
    });
  }
  return Object.freeze({create,start:START,waypoints:WAYPOINTS,distanceToOrdan:DISTANCE_TO_ORDAN});

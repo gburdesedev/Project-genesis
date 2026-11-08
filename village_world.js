@@ -1,5 +1,7 @@
 import {Entity,StandardMaterial,Texture,Color,Mesh,MeshInstance,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
 import {mountVillageTrees} from './village_trees.js?v=0.15.001';
+import {mountGenesisDolphinFountain} from './village_fountain_v014034.js?v=0.14.034';
+import {mountClosedWorkshopsV014036} from './village_workshops_v014036.js?v=0.14.036';
 import {mountArcanePortal} from './village_arcanist.js?v=0.14b-mobile-boot-20261103';
 const ROOT='./assets/world/v0.11.004/';
 const MOBILE_TEXTURE_EDGE=1024;
@@ -132,7 +134,7 @@ function arcaneSurround(app,building,cobble,shell){
  return frame;
 }
 function stampVersion(){
- const version='v0.14.022', build='20261102.04';
+ const version='v0.14.038', build='20261108.08';
  globalThis.__genesisVillageBuild={version,build};
  document.title=document.title.replace(/v0\.14(?:[a-c]|\.\d{3})?/gi,version);
  // The existing HUD build label lives in the monolithic demo HTML. Update
@@ -175,11 +177,34 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
    // If the optional roof template was deferred, add only a lightweight roof.
    if(!roof)mesh(building,'Cubierta básica Herrero','box',0,3.4,-5.05,11.5,.18,8,material('Tejado',[.30,.24,.21]));
    buildings.set('Herrero',building);
-   const trees={update(){},blocked(){return false},status(){return{loaded:0}},release(){}};
-   globalThis.__genesisLiteVillage={mode:'herrero-first',trees:0,roads:plan.roads.length,workshops:1};
-   return Object.freeze({root,plan,trees,arcanePortals:[],
+   // V014.033: restore approved foliage without re-enabling the costly full village.
+   // Four local LOD2 species are streamed asynchronously; never block Herrero boot
+   // on decoration. Every visible tree receives its actual bark-derived collider.
+   const trees=mountVillageTrees(app,root,{onResourceLoaded,lod2Only:true});
+   trees.update(plan.plaza.x,plan.plaza.z,true);
+   globalThis.__genesisLiteVillage={
+    mode:'herrero-first',trees:trees.sites.length,treeLOD:'LOD2',
+    treeLoadFinished:false,treeVariants:0,treeErrors:0,
+    roads:plan.roads.length,workshops:1
+   };
+   trees.fullReady.then(result=>{
+    Object.assign(globalThis.__genesisLiteVillage,{
+     treeLoadFinished:true,treeVariants:result.loaded,treeErrors:result.failed
+    });
+    if(result.failed)console.warn('V014.033: árboles aprobados incompletos',result);
+   });
+   // V014.034 · The approved 16.7 MB fountain follows tree settlement
+   // instead of blocking profession selection or competing for GPU uploads.
+   const fountain=mountGenesisDolphinFountain(app,root,{afterTrees:trees.fullReady});
+   // V014.036: restore four closed workshops, but never gate playable Herrero
+   // on their decorative GLBs or their optional Arcanista portal.
+   const closedWorkshops=mountClosedWorkshopsV014036(app,root,plan,{
+    shell,roof,door,afterDecor:fountain.ready
+   });
+   Object.assign(globalThis.__genesisLiteVillage,{workshops:1+closedWorkshops.status.installed,otherWorkshops:'closed-decorative'});
+   return Object.freeze({root,plan,trees,fountain,closedWorkshops,arcanePortals:[],
     setProfession(prof){building.enabled=true;},
-    blocked(x,z,r=.33){return plan.blocked(x,z,r)}});
+    blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fountain.blocked(x,z,r)}});
   }
 
  const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14c');app.root.addChild(root);

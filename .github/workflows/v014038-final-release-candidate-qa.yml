@@ -1,0 +1,56 @@
+name: Genesis V014.038 | cumulative release candidate and actual Herrero browser
+on:
+  push:
+    branches: ['experiment/v014038-final-integrada-20261108']
+    paths:
+      - 'index.html'
+      - 'village_world.js'
+      - 'genesis_market_quest_v001.js'
+      - 'tests/v014038_cumulative_contract.cjs'
+      - 'tests/ordan_market_quest_v014021.cjs'
+      - 'tests/v014038_release_candidate_browser.cjs'
+      - '.github/workflows/v014038-final-release-candidate-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and cumulative logic of V014.038
+        run: |
+          node --check tests/v014038_cumulative_contract.cjs
+          node --check tests/v014038_release_candidate_browser.cjs
+          node --check village_world.js
+          node --check village_trees.js
+          node --check village_fountain_v014034.js
+          node --check village_workshops_v014036.js
+          node tests/v014038_cumulative_contract.cjs
+          node tests/ordan_market_quest_v014021.cjs
+          node tests/village_plan.cjs
+  full-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 23
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: npm install --prefix /tmp/genesis-v038-cumulative playwright@1.56.1
+      - name: Real PlayCanvas Herrero flow and complete cumulative village
+        run: NODE_PATH=/tmp/genesis-v038-cumulative/node_modules node tests/v014038_release_candidate_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v014038-cumulative-real-game-and-diagnostics
+          path: previews/v014038-release-candidate/
+          retention-days: 14
