@@ -1,0 +1,61 @@
+name: V014.031 | V05 exact Preparation inventory & real Chromium QA
+on:
+  push:
+    branches:
+      - experiment/v014031-fuelle-inventario-aprobado-20261107
+    paths:
+      - .github/workflows/v014031-v05-inventory-qa.yml
+      - scripts/build_v014031_inventory_v05.py
+      - inventario_arte_aprobado_1to1.css
+      - inventario_genesis_16x9.js
+      - preparacion_control.js
+      - tests/v014031_inventory_approved.cjs
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build-exact-v05-and-verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 23
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify the mercenary was not changed
+        run: |
+          test "$(git hash-object mercenary_equipment_canvas_v09.js)" = "2b7be9094df3873d80d15bdc1d91ac3e9c5538c0"
+          test "$(git hash-object mercenary_equipment_canvas_v001.css)" = "60042577dac204c866cf0fe6c3ca673d1e3b225b"
+          test "$(git hash-object mercenary_equipment_domain_v001.js)" = "c2b2f998302f4dbcdf7794d95bc9fb2f54f3e1f3"
+      - name: Reconstruct exactly the 1820x1024 pixels of V05, using approved source art and untouched Preparation PNGs
+        run: |
+          python3 -m pip install --break-system-packages --no-cache-dir Pillow==12.3.0
+          python3 scripts/build_v014031_inventory_v05.py
+      - name: Check JS syntax and install pinned browser binding
+        run: |
+          node --check inventario_genesis_16x9.js
+          node --check preparacion_control.js
+          node --check tests/v014031_inventory_approved.cjs
+          npm install --prefix /tmp/genesis-v014031-v05 --no-audit --no-fund playwright@1.56.1
+      - name: Measure true Preparation tab boxes, compare art SHA and exercise eight live materials in Chromium
+        env:
+          NODE_PATH: /tmp/genesis-v014031-v05/node_modules
+        run: node tests/v014031_inventory_approved.cjs
+      - name: Archive real browser screenshots and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014031-v05-preparacion-exacta
+          path: previews/v014031-inventory-approved/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Commit only the verified V05 image to this experimental branch
+        if: success()
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'genesis-v05-qa[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/ui/inventario/GENESIS_INVENTARIO_V05_CABECERA_PREPARACION_1820x1024.png
+          if ! git diff --cached --quiet; then
+            git commit -m 'asset(v014031): pin exact V05 artwork verified by real Chromium QA [skip ci]'
+            git push origin HEAD:experiment/v014031-fuelle-inventario-aprobado-20261107
+          fi
