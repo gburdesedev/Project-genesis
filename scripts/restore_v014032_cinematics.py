@@ -97,7 +97,7 @@ once('const w=workshopAt(px,pz);updateMentorFollow(dt,now,w);',
 # while a cinematic controls the avatar.
 # Only the frame movement line is touched, not any unrelated menu handler.
 frame_start=text.index('const canMove=gameStarted&&')
-frame_end=text.index('\\n',frame_start)
+frame_end=text.index(chr(10),frame_start)
 frame_line=text[frame_start:frame_end]
 if 'else setWalking(false);' not in frame_line:
  raise RuntimeError('The original frame still must contain an idle fallback')
