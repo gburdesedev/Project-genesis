@@ -1,0 +1,34 @@
+name: Genesis | stable integration acceptance 2026-11-08
+on:
+  push:
+    branches: ['integration/stable-patches-20261108']
+    paths:
+      - 'tests/integration_stability_20261108.cjs'
+      - '.github/workflows/integration-stability-20261108.yml'
+      - 'index.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  main-stability:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check diagnostics syntax
+        run: node --check tests/integration_stability_20261108.cjs
+      - name: Install real Chromium
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Real game boot, actual Herrero click and Arcanista assembly
+        run: node tests/integration_stability_20261108.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-main-stability-real-browser
+          path: previews/stability-20261108/
+          retention-days: 14
