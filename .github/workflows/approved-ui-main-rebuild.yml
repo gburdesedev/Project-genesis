@@ -1,0 +1,54 @@
+name: Genesis | Rebuild UI approved on original gameplay
+on:
+  push:
+    branches:
+      - integration/v014022-approved-menus-20261108
+      - main
+    paths:
+      - preparacion_control.js
+      - genesis_ui_approved.js
+      - genesis_ui_approved.css
+      - inventario_genesis_16x9.js
+      - inventario_genesis_16x9.css
+      - 'assets/ui/approved/**'
+      - tests/approved_ui_four_screens.cjs
+      - .github/workflows/approved-ui-main-rebuild.yml
+  pull_request:
+    paths:
+      - preparacion_control.js
+      - genesis_ui_approved.js
+      - genesis_ui_approved.css
+      - 'assets/ui/approved/**'
+      - tests/approved_ui_four_screens.cjs
+      - .github/workflows/approved-ui-main-rebuild.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  approved-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Source syntax
+        run: |
+          node --check preparacion_control.js
+          node --check genesis_ui_approved.js
+          node --check inventario_genesis_16x9.js
+          node --check tests/approved_ui_four_screens.cjs
+      - name: Install Playwright test dependency
+        run: npm install --prefix /tmp/genesis-ui-test playwright@1.56.1
+      - name: Real Chromium approved menus and interactions
+        run: NODE_PATH=/tmp/genesis-ui-test/node_modules node tests/approved_ui_four_screens.cjs
+      - name: Screenshots and report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-approved-ui-rebuild-evidence
+          path: previews/approved-ui-four-screens/
+          retention-days: 14
