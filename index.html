@@ -1224,7 +1224,7 @@ const ROUTES={
  Curtidor:{profession:'Curtidor',center:14,mentorName:'Mentor Curtidor',mentor:()=>tannerMentor,mentorAnims:tannerMentorAnimGroup,mentorIdle:tannerIdle,mentorWalk:tannerWalk,mentorGesture:tannerGesture,recipes:['armadura_cuero','botas_cuero'],stationName:'Mesa de corte',stationPos:()=>{const p=tannerTableEntity?.getPosition?.()||{x:10.28,y:0,z:-8.42};return{x:p.x,y:1.15,z:p.z}},craftPrompt:'Trabajar en la mesa de corte'}
 };
 let workshopKey=false,debrisCleared=false,auxCleared=false,chestOpen=false,craftedItems=[],usedItemNames=new Set(),craftSession=null,playerInventory={},inventoryOpen=false,inventoryTutorialOpened=false,mentorYaw=-21,mentorGestureAt=0,mentorGestureReturn=0,mentorFollowState='outside',mentorFollowDelay=0,mentorPath=[],mentorWaypoint=0;
-let marketEscortWaypoint=0,marketEscortWaiting=false,arrivalCinematic=null,marketCinematic=null;
+let marketEscortWaypoint=0,marketEscortWaiting=false,arrivalCinematic=null,marketCinematic=null,arrivalCinematicClock=0;
 // v0.11 · Epílogo de demo. Estas muestras NO son materiales canonizados ni otorgan propiedades mecánicas.
 const DEMO_DISCOVERY_MATERIALS=Object.freeze([
  {id:'ferruginosa',unknown:'Muestra ferruginosa desconocida',prepared:'Muestra ferruginosa estabilizada',color:'#d88756',glyph:'◆',effect:'Resplandor ferruginoso'},
@@ -1889,6 +1889,7 @@ function startInitialArrival(){
   }
  });
  arrivalCinematic=ctl;
+ arrivalCinematicClock=performance.now();
  if(!ctl.active)return;
  const p=ctl.position();px=p[0];pz=p[2];
  camYaw=12;camPitch=27;camDist=cameraSolvedDist=6.15;
@@ -1903,7 +1904,11 @@ function startInitialArrival(){
 }
 function updateInitialArrival(dt,now){
  if(!arrivalCinematic?.active)return;
- arrivalCinematic.update(dt);
+ // The game physics is capped at 50ms/frame, but this cinematic must keep
+ // its approved travel speed at low FPS in Playwright and real WebGL devices.
+ const cinematicDelta=arrivalCinematicClock>0?Math.max(0,Math.min(.45,(now-arrivalCinematicClock)/1000)):dt;
+ arrivalCinematicClock=now;
+ arrivalCinematic.update(cinematicDelta);
  const p=arrivalCinematic.position();px=p[0];pz=p[2];
  if(playerFillEntity)playerFillEntity.setPosition(px,3.25,pz);
  if(now-lastPlayerStep>450){footstepSound(false,.013);lastPlayerStep=now}
