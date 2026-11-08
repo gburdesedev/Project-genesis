@@ -1,0 +1,39 @@
+name: Genesis Herrero | stage minimal patch on clean branch (not main)
+on:
+  push:
+    branches: [fix/herrero-boot-regression-20261108]
+    paths:
+      - '.github/workflows/herrero-stage-clean-fix.yml'
+permissions:
+  contents: write
+jobs:
+  stage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/herrero-preload-guard-main-20261108
+          persist-credentials: true
+      - name: Stage ONLY the single-line fix to the existing bootstrap
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          old="await prepareRoute('Herrero');setLoadUI(100,'Juego completo listo'"
+          new="await prepareRoute('Herrero');routeLoading=false;setLoadUI(100,'Juego completo listo'"
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new,1))
+          assert p.read_text().count(new)==1
+          PY
+          git diff --check
+          git diff --stat
+          git diff -- index.html | head -35
+      - name: Save candidate without modifying main
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m "fix: clear Herrero preload guard before profession selection"
+          git push origin HEAD:fix/herrero-preload-guard-main-20261108
