@@ -33,13 +33,12 @@ function render(opts){
  function currentItem(){return state.selection||current()||currentPool()[0]||null;}
  function fmtValue(r,side){const c=r[side];return c?(c.name==='Base'?String(c.value):'+'+c.value+'%'):'—';}
  function central(){
-  const bodyUrl=opts.body==='ranger'?'./assets/vendor/genesis/externals/rangerMale086/src/male_ranger.glb':'./assets/vendor/genesis/externals/peasantMale086/src/male_peasant.glb';
-  const cachedBodyUrl=window.GenesisPreflight?.modelUrl(bodyUrl)||bodyUrl;
+  const bodyUrl=opts.body==='ranger'?'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_ranger.glb':'https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/male_peasant.glb';
   return '<section class="mcPanel mcCenter">'+
    '<div class="mcMercNav"><span class="mcMercName">'+esc(opts.mercName)+'</span><span class="mcMercIDs">'+[0,1,2].map(i=>'<button type="button" '+(i===opts.candidate?'class="on"':'disabled')+' aria-label="Mercenario '+(i+1)+'">'+(i+1)+'</button>').join('')+'</span></div>'+
    '<div class="mcMercField">'+
     '<div class="mcSlotsLeft">'+slot('Casco','♜',true)+slot('Brazales','✥',true)+slot('Anillo izquierdo','◈',true)+slot(opts.labelFirst,'⚔',false,a,'mcEquipSlot')+slot('Piernas','♟',true)+'</div>'+
-    '<div class="mcHero"><div class="mcNeck">'+slot('Collar','♢',true)+'</div><model-viewer src="'+esc(cachedBodyUrl)+'" camera-controls auto-rotate rotation-per-second="6deg" camera-orbit="15deg 80deg 3.8m" shadow-intensity=".7" exposure="1.1" interaction-prompt="none" alt="Modelo base GLB real del mercenario de PlayCanvas"></model-viewer><span class="mcModelNote">GLB base del juego · equipo visible en el mundo</span></div>'+
+    '<div class="mcHero"><div class="mcNeck">'+slot('Collar','♢',true)+'</div><model-viewer src="'+esc(bodyUrl)+'" camera-controls auto-rotate rotation-per-second="6deg" camera-orbit="15deg 80deg 3.8m" shadow-intensity=".7" exposure="1.1" interaction-prompt="none" alt="Modelo base GLB real del mercenario de PlayCanvas"></model-viewer><span class="mcModelNote">GLB base del juego · equipo visible en el mundo</span></div>'+
     '<div class="mcSlotsRight">'+slot('Pechera','♜',true)+slot('Guantes','✥',true)+slot('Anillo derecho','◈',true)+slot(opts.labelSecond,'⬡',false,b,'mcEquipSlot')+slot('Botas','♟',true)+'</div></div>'+
    '<div class="mcFooterButtons"><button data-action="sheet">FICHA DEL MERCENARIO</button><button data-action="inventory">INVENTARIO DEL MERCENARIO</button><button data-action="back">CERRAR / VOLVER</button></div></section>';
  }

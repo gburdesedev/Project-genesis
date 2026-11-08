@@ -3,7 +3,7 @@
  * restrained blue ancient runes. Door V027 and its animations are untouched.
  * Runs only when Arcanista's existing Village proxy has been constructed.
  */
-const MODEL_URL='./assets/vendor/genesis/externals/arcanistWallsV006/src/arcanista_four_walls_preview.glb';
+const MODEL_URL='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/feature/workshop-arcanist-four-walls-v006/public/models/arcanista-four-walls-v006/batched/arcanista_four_walls_preview.glb';
 const state={
  version:'v0.16-arcanista-006',phase:'waiting-for-village',installed:false,
  frontPreserved:true,frontVersion:'V005',
@@ -82,5 +82,5 @@ async function mount(){
  }
  state.phase='village-unavailable-after-15min';
 }
-if(!globalThis.__GENESIS_LITE_BOOT)mount().catch(error=>{state.phase='error';state.error=String(error?.stack||error);
+mount().catch(error=>{state.phase='error';state.error=String(error?.stack||error);
  console.error('[GENESIS_ARCANISTA_V006]',error)});

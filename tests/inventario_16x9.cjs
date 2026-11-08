@@ -1,13 +1,3 @@
-/* El arte aprobado V11 reemplaza el DOM del Inventario V014.031.
-   En main se ejecuta la prueba nueva de integración real, manteniendo este
-   test histórico para versiones anteriores sin assets/ui/approved/. */
-const fsApproved=require('node:fs'),pathApproved=require('node:path');
-if(fsApproved.existsSync(pathApproved.join(__dirname,'..','assets','ui','approved','Inventario_V11_APROBADO_1672x941.png'))){
-  require('node:child_process').execFileSync(process.execPath,
-    [pathApproved.join(__dirname,'approved_ui_four_screens.cjs')],{stdio:'inherit'});
-  console.log('PASS Inventory V11: approved 16:9 artwork, real controller, dynamic slots and recipe callback');
-  process.exit(0);
-}
 
 /* A browser check against the real inventory controller and the original 39 image assets.
    Only the test session data are fixtures; production reads ctx.inventory/getItems. */

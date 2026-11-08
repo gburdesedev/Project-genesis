@@ -4,7 +4,7 @@
  */
 import {Entity,Color,Texture,FILTER_LINEAR} from 'playcanvas';
 
-export const ARCANE_DOOR_SOURCE = './assets/vendor/genesis/externals/arcanistDoorV027/src/Arcanist_Door_V027_WebGL.glb';
+export const ARCANE_DOOR_SOURCE = 'https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/588de60f6888c7e3d4db20e31ee60b3e19918968/deliverables/door_v027/webgl/Arcanist_Door_V027_WebGL.glb';
 
 
 // Animate the emissive masks themselves: the light climbs through the original
@@ -113,34 +113,9 @@ export function mountArcanePortal(app,building,fallbackDoor,options={}){
  let phase='loading',detail='';
  let resolveInitial;
  const initialReady=new Promise(resolve=>{resolveInitial=resolve;});
- // El evento visual de progreso jamás debe impedir resolver initialReady.
- // Si falla la UI de carga, el asset 3D debe terminar de asentarse igualmente.
- let settled=false;
- const settle=()=>{
-  if(settled)return;
-  settled=true;
-  const result=report();
-  globalThis.__genesisArcaneDoorStatus=result;
-  try{
-   if(phase==='ready')options.onResourceLoaded?.('door:arcane:V027');
-  }catch(error){
-   console.warn('Progreso de puerta V027 no disponible:',error);
-  }finally{
-   resolveInitial(result);
-  }
- };
+ const settle=()=>{globalThis.__genesisArcaneDoorStatus=report();if(phase==='ready')options.onResourceLoaded?.('door:arcane:V027');resolveInitial(report());};
  const report=()=>({version:'V027',phase,detail,url:ARCANE_DOOR_SOURCE});
  globalThis.__genesisArcaneDoorStatus=report();
- // The player cannot enter Arcanista in the current mobile demo. Loading its
- // 191-renderer hero door here is unnecessary and can exhaust phone GPU memory.
- // Preserve the approved HQ door for desktop, and reuse the existing door
- // already provided by the world on touch/mobile devices.
- if(globalThis.GenesisDevice?.safePreviews===true){
-  phase='mobile-fallback';
-  detail='Puerta de respaldo; V027 HQ reservada para PC';
-  settle();
-  return Object.freeze({pivot,status:report,initialReady});
- }
  app.assets.loadFromUrl(ARCANE_DOOR_SOURCE,'container',(error,asset)=>{
   if(error||!asset?.resource){
    phase='fallback';detail=String(error||'GLB sin recurso');

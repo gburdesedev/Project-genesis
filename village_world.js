@@ -1,6 +1,6 @@
 import {Entity,StandardMaterial,Texture,Color,Mesh,MeshInstance,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
 import {mountVillageTrees} from './village_trees.js?v=0.15.001';
-import {mountArcanePortal} from './village_arcanist.js?v=0.14b-mobile-boot-20261103';
+import {mountArcanePortal} from './village_arcanist.js?v=0.14b';
 const ROOT='./assets/world/v0.11.004/';
 const MOBILE_TEXTURE_EDGE=1024;
 // Decode one full-resolution source at a time on touch devices, then keep only
@@ -144,47 +144,9 @@ function stampVersion(){
   node.nodeValue=node.nodeValue.replace(/v0\.14(?:[a-c]|\.\d{3})?/gi,version).replace(/202610(?:29|31)\.0[1-9]/g,build);
  }
 }
-export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{},onRootReady=()=>{}}){
+export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},onPhase=()=>{}}){
  stampVersion();
-  if(globalThis.__GENESIS_LITE_BOOT){
-   const plan=globalThis.GenesisVillagePlan,root=new Entity('Project Genesis · Herrero primero');
-   app.root.addChild(root);
-   // NPCs, merchant and economy subscribe to this callback.
-   onRootReady(root);
-   const floor=material('Suelo de aldea',[.32,.36,.30]);
-   mesh(root,'Suelo','plane',7,-.04,17,63,1,63,floor);
-   const pathMat=material('Caminos',[.48,.44,.36]);
-   for(const lane of plan.roads)mesh(root,lane.name,'plane',lane.x,-.02,lane.z,lane.w,1,lane.d,pathMat);
-   const buildings=new Map();
-   const w=plan.workshops.find(p=>p.profession==='Herrero');
-   if(!w)throw new Error('Herrero no figura en village plan');
-   // The existing workshop shell and door are reused, not fabricated geometry.
-   const building=new Entity('Herrero · taller completo');
-   root.addChild(building);
-   building.setLocalPosition(w.x,0,w.z);
-   building.setLocalScale(plan.workshopScale,1,plan.workshopScale);
-   building.setLocalEulerAngles(0,w.yaw,0);
-   for(const [source,position] of [[shell,[0,0,0]],[roof,[0,3.40,-5.05]],[door,[-1.1,0,.12]]]){
-    if(!source)continue;
-    const clone=source.clone();
-    clone.enabled=true;
-    clone.setLocalPosition(...position);
-    if(source===roof)clone.setLocalScale(1.28,.70,.86);
-    building.addChild(clone);
-   }
-   // If the optional roof template was deferred, add only a lightweight roof.
-   if(!roof)mesh(building,'Cubierta básica Herrero','box',0,3.4,-5.05,11.5,.18,8,material('Tejado',[.30,.24,.21]));
-   buildings.set('Herrero',building);
-   const trees={update(){},blocked(){return false},status(){return{loaded:0}},release(){}};
-   globalThis.__genesisLiteVillage={mode:'herrero-first',trees:0,roads:plan.roads.length,workshops:1};
-   return Object.freeze({root,plan,trees,arcanePortals:[],
-    setProfession(prof){building.enabled=true;},
-    blocked(x,z,r=.33){return plan.blocked(x,z,r)}});
-  }
-
  const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14c');app.root.addChild(root);
- // Economy/NPC can mount immediately; detailed trees/PBR may still load asynchronously.
- onRootReady(root);
  // Begin tree transfers before road PBR maps: four species are part of the initial scene.
  const trees=mountVillageTrees(app,root,{onResourceLoaded});
  onPhase('arboles');
@@ -245,24 +207,9 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
   {x:25.5,z:36.3,r:.34},{x:28.35,z:37.6,r:1.02}];
  // Do not enable movement until each baseline LOD2 has loaded or explicitly failed.
  // Failed variants have no collision; the scene never contains invisible trunks.
- // Las promesas que dependen de assets remotos no pueden dejar el
- // inicio bloqueado indefinidamente. No abrimos el juego al vencer el plazo:
- // reportamos el recurso que falta y dejamos visible Reintentar.
- async function bootGate(promise,label,timeout=240000){
-  let timer;
-  try{
-   return await Promise.race([
-    promise,
-    new Promise((_,reject)=>{
-     timer=setTimeout(()=>reject(new Error('Carga incompleta: '+label+' ('+Math.round(timeout/1000)+' s)')),timeout);
-    })
-   ]);
-  }finally{clearTimeout(timer)}
- }
  onPhase('arboles');
- await bootGate(trees.fullReady,'árboles LOD1 y LOD2'); // Nunca descargar LOD mientras se juega.
+ await trees.initialReady;
  onPhase('puertas');
- await bootGate(Promise.all(arcanePortals.map(portal=>portal.initialReady)),
-   'puerta mágica Arcanista V027');
+ await Promise.all(arcanePortals.map(portal=>portal.initialReady));
  return Object.freeze({root,plan,trees,arcanePortals,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
 }

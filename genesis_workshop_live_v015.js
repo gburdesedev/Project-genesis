@@ -5,10 +5,10 @@
  */
 const ASSETS='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/';
 const GLBS={
- walls:'./assets/vendor/genesis/externals/blacksmithWallsV082/src/blacksmith_four_walls_arched_v082.glb',
- roof:'./assets/vendor/genesis/externals/blacksmithRoofV013/src/blacksmith_roof_preview.glb',
- chimney:'./assets/vendor/genesis/externals/blacksmithChimneyV013/src/blacksmith_chimney_candidate_preview.glb',
- // Door intentionally disabled for isolation test
+ walls:ASSETS+'integration/herrero-v082-arched-doorway/public/models/blacksmith-v082-arched-portal/blacksmith_four_walls_arched_v082.glb',
+ roof:ASSETS+'feature/blacksmith-workshop-windows-flue-v013/public/models/blacksmith-structural-v013/batched/blacksmith_roof_preview.glb',
+ chimney:ASSETS+'feature/blacksmith-workshop-windows-flue-v013/public/models/blacksmith-structural-v013/batched/blacksmith_chimney_candidate_preview.glb',
+ door:ASSETS+'production/door-herrero-v082-subtle-forging/public/models/door-herrero-v082-b/door-herrero-v082-b.glb'
 };
 const status={version:'v0.17.014-herrero-v082b',phase:'waiting',assets:{},installed:[],
  doorVisual:'V082-B',doorProfile:'arched',doorHinge:'left',doorHandle:'right',
@@ -83,9 +83,14 @@ function install(app,root,kind,sources,{tutorial=false}={}){
  // IMPORTANT: door itself remains the gameplay hinge at -1.10 0 0.12.
  // Parent the new artwork INSIDE that existing entity, not modelRoot.
  // Its glTF native left hinge has been rebased to the origin by Blender.
- const upgraded=null;
-
- const v082Renderers=new Set();
+ const upgraded=sources.door.clone();
+ upgraded.name='Genesis Herrero V082-B · hierro forjado · hoja arqueada';
+ upgraded.setLocalPosition(0,0,0);
+ upgraded.setLocalEulerAngles(0,0,0);
+ const scale=2.18/1.20;
+ upgraded.setLocalScale(scale,1,scale);
+ door.addChild(upgraded);
+ const v082Renderers=new Set(upgraded.findComponents('render'));
  const hiddenRenderers=new Set();
  const ensureDoorVisual=()=>{
    const all=door.findComponents('render');

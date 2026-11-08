@@ -111,7 +111,7 @@ function classifyAndTune(prototype,mobile,windMaterials) {
 
 const assetPath = (species,lod) => lod===0
  ? ORIGINALS+TYPES[species].master
- : './assets/vendor/genesis/externals/tree_v005_'+species+'_lod'+lod+'/src/lod'+lod+'.glb';
+ : REPO+'assets/tree_webgl_v005/'+species+'/lod'+lod+'.glb';
 function boundsOf(entity){
  const stack=[entity];let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
  entity.syncHierarchy();
@@ -189,15 +189,6 @@ export function mountVillageTrees(app, villageRoot, options={}){
  const initiallySettled=new Set();
  let resolveInitial;
  const initialReady=new Promise(resolve=>{resolveInitial=resolve;});
- // Todos los LOD que la cámara puede usar se resuelven antes de jugar.
- const allVariants=Object.keys(TYPES).flatMap(species=>safeMobile?[species+':2']:[species+':2',species+':1']);
- let resolveAll;
- const fullReady=new Promise(resolve=>{resolveAll=resolve});
- const checkAll=()=>{
-  if(allVariants.every(key=>ready.has(key)||failed.has(key)))
-   resolveAll({loaded:allVariants.filter(key=>ready.has(key)).length,
-     failed:allVariants.filter(key=>failed.has(key)).length,total:allVariants.length});
- };
  const status=()=>({
   planned:nodes.length,plaza:TREE_SITES.filter(p=>p.region==='plaza').length,
   residentVariants:ready.size,failedVariants:failed.size,pendingVariants:queue.length+active,
@@ -208,7 +199,7 @@ export function mountVillageTrees(app, villageRoot, options={}){
   while(active<maxConcurrent&&queue.length){
    const task=queue.shift();active++;
    const url=task.legacy
-    ? './assets/vendor/genesis/externals/tree_v003_'+task.species+'_lod'+task.lod+'/src/lod'+task.lod+'.glb'
+    ? ORIGINALS+'assets/tree_webgl_v003/'+task.species+'/lod'+task.lod+'.glb'
     : assetPath(task.species,task.lod);
    app.assets.loadFromUrl(url,'container',(error,asset)=>{
     active--;
@@ -235,11 +226,9 @@ export function mountVillageTrees(app, villageRoot, options={}){
     }
     if(task.lod===2&&!initiallySettled.has(task.species)){
      initiallySettled.add(task.species);
-     if(ready.has(task.key))try{options.onResourceLoaded?.('tree:'+task.species+':lod2')}catch(progressError){console.warn('Genesis trees: error en progreso LOD2',progressError)}
+     if(ready.has(task.key))options.onResourceLoaded?.('tree:'+task.species+':lod2');
      if(initiallySettled.size===Object.keys(TYPES).length)resolveInitial({loaded:Object.keys(TYPES).length-failed.size,failed:failed.size});
     }
-    if(task.lod===1&&ready.has(task.key))try{options.onResourceLoaded?.('tree:'+task.species+':lod1')}catch(progressError){console.warn('Genesis trees: error en progreso LOD1',progressError)}
-    checkAll();
     update(focusX,focusZ,true);
     globalThis.__genesisTreeStatus=status();
     pump();
@@ -306,10 +295,9 @@ export function mountVillageTrees(app, villageRoot, options={}){
  }
  // Fetch one visible baseline with full-approved master leaves per species before navigation.
  for(const species of Object.keys(TYPES))request(species,2);
- if(!safeMobile)for(const species of Object.keys(TYPES))request(species,1);
  update(0,0,true);
  return Object.freeze({
-  root:treeRoot,sites:TREE_SITES,update,status,initialReady,fullReady,
+  root:treeRoot,sites:TREE_SITES,update,status,initialReady,
   blocked(x,z,r=.33){return nodes.some(node=>node.visible&&node.visual&&node.anchor.enabled&&node.collider&&Math.hypot(node.collider.x-x,node.collider.z-z)<node.collider.r+r)},
   collisionSnapshot(){return nodes.filter(node=>node.collider).map(node=>({id:node.site.id,species:node.site.species,region:node.site.region,lod:node.lod,x:node.collider.x,z:node.collider.z,r:node.collider.r,measured:node.collider.measured,visible:node.visible,loaded:!!node.visual}))},
   release(){app.off('update',windTick);treeRoot.destroy();queue.length=0}

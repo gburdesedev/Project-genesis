@@ -314,7 +314,7 @@
     const render3D = !safePreviews && art.model && type !== 'featured';
     const exposure = material === CHARCOAL ? '1.16' : '1.45';
     const visual = render3D
-      ? `<model-viewer class="prepMaterialModel" src="${escape(window.GenesisPreflight?.modelUrl(art.model) || art.model)}" poster="${poster}" loading="lazy" reveal="auto" interaction-prompt="none" camera-orbit="0deg 75deg auto" environment-image="neutral" exposure="${exposure}" shadow-intensity="0" alt="${name}"></model-viewer>`
+      ? `<model-viewer class="prepMaterialModel" src="${escape(art.model)}" poster="${poster}" loading="lazy" reveal="auto" interaction-prompt="none" camera-orbit="0deg 75deg auto" environment-image="neutral" exposure="${exposure}" shadow-intensity="0" alt="${name}"></model-viewer>`
       : `<img class="prepMaterialPoster" src="${poster}" alt="${name}" loading="lazy" draggable="false">`;
     return `<span class="prepMaterialVisual ${type}${material === CHARCOAL ? ' charcoal' : ''}" data-material="${name}">${visual}</span>`;
   }
@@ -506,48 +506,9 @@
       '<div class="workspaceNgeScroll" tabindex="0">' + reading + '</div></section>';
   }
 
-  // Integración visual aprobada (PNG exactos); carga aislada, con fallback al controlador previo.
-  let approvedUiLoadState='idle',approvedUiPending=null;
-  function loadApprovedUi(next){
-    if(window.GenesisApprovedUI?.render)return true;
-    if(approvedUiLoadState==='failed')return false;
-    approvedUiPending=next;
-    if(approvedUiLoadState==='loading')return false;
-    approvedUiLoadState='loading';
-    const style=document.createElement('link');
-    style.rel='stylesheet';style.href='genesis_ui_approved.css?v=20261108.1';
-    document.head.append(style);
-    const script=document.createElement('script');
-    script.src='genesis_ui_approved.js?v=20261108.1';
-    script.onload=()=>{
-      approvedUiLoadState=window.GenesisApprovedUI?.render?'ready':'failed';
-      if(approvedUiLoadState==='failed')console.error('[Genesis UI] Falta el módulo de arte aprobado');
-      const fn=approvedUiPending;approvedUiPending=null;fn?.();
-    };
-    script.onerror=()=>{
-      approvedUiLoadState='failed';style.remove();
-      console.error('[Genesis UI] No se pudo cargar el arte aprobado; se conserva interfaz anterior');
-      const fn=approvedUiPending;approvedUiPending=null;fn?.();
-    };
-    document.head.append(script);
-    return false;
-  }
-  function approvedUiNav(){return {renderMenu,renderWorkspace,craft,start,close,sheetForItem};}
   function renderWorkspace(tab) {
     const ctx=session;
     if(!ctx) return;
-    // Único arte aprobado para Inventario V11 y Fabricaciones V07, sin cambiar los originales.
-    if(ctx.profession==='Herrero'&&ctx.getItems&&['Inventario','Fabricaciones'].includes(tab)){
-      if(window.GenesisApprovedUI?.render){
-        halt();ctx.mode='workspace';ctx.tab=tab;
-        window.GenesisApprovedUI.render(ctx,approvedUiNav(),tab);
-        return;
-      }
-      if(approvedUiLoadState!=='failed'){
-        loadApprovedUi(()=>renderWorkspace(tab));
-        return;
-      }
-    }
     // Inventario panorámico aislado: no altera Preparación, Fabricación ni Comparación.
     // Conserva datos de la sesión real, nunca resultados incrustados en el arte.
     if(tab==='Inventario') {
@@ -559,16 +520,12 @@
       if(!window.__GenesisInv16Loading){
         window.__GenesisInv16Loading=true;
         const style=document.createElement('link');
-        style.rel='stylesheet';style.href='inventario_genesis_16x9.css?v=0.14.031-main';
+        style.rel='stylesheet';style.href='inventario_genesis_16x9.css?v=0.1.003-head-50036d1';
         document.head.append(style);
-        const approvedArtLayout=document.createElement('link');
-        approvedArtLayout.rel='stylesheet';
-        approvedArtLayout.href='inventario_arte_aprobado_1to1.css?v=0.14.031-main';
-        document.head.append(approvedArtLayout);
         const loader=document.createElement('script');
-        loader.src='inventario_genesis_16x9.js?v=0.14.031-main';
+        loader.src='inventario_genesis_16x9.js?v=0.1.001';
         loader.onload=()=>renderWorkspace('Inventario');
-        loader.onerror=()=>{window.__GenesisInv16Loading=false;style.remove();approvedArtLayout.remove();};
+        loader.onerror=()=>{window.__GenesisInv16Loading=false;style.remove();};
         document.head.append(loader);
       }
     }
@@ -768,19 +725,6 @@
     const ctx = session;
     if (!ctx) return;
     if (ctx.profession !== 'Herrero') { renderLegacyMenu(); return; }
-    if(ctx.getItems){
-      const raw=countOf(ctx.inventory,RAW);
-      ctx.count=raw?Math.min(Math.max(ctx.count||1,1),raw):0;
-      if(window.GenesisApprovedUI?.render){
-        halt();ctx.mode='menu';ctx.tab='Preparacion';
-        window.GenesisApprovedUI.render(ctx,approvedUiNav(),'Preparacion');
-        return;
-      }
-      if(approvedUiLoadState!=='failed'){
-        loadApprovedUi(renderMenu);
-        return;
-      }
-    }
     halt();
     ctx.mode = 'menu';ctx.tab='Preparacion';
     const raw = countOf(ctx.inventory, RAW), ingots = countOf(ctx.inventory, PREPARED);
