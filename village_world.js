@@ -177,11 +177,11 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
    buildings.set('Herrero',building);
    // V014.033: approved foliage; mobile downloads it only after Herrero is playable.
    const mobile=globalThis.GenesisDevice?.safePreviews===true;
-   const trees=mountVillageTrees(app,root,{onResourceLoaded,deferInitialLoads:mobile});
+   const trees=mountVillageTrees(app,root,{onResourceLoaded,deferInitialLoads:true});
    globalThis.__genesisLiteVillage={mode:'herrero-first-trees',trees:trees.sites.length,
-    roads:plan.roads.length,workshops:1,mobile,streaming:mobile?'post-start':'desktop'};
+    roads:plan.roads.length,workshops:1,mobile,streaming:mobile?'post-start-mobile':'post-start-desktop'};
    return Object.freeze({root,plan,trees,arcanePortals:[],
-    setProfession(prof){building.enabled=true;if(mobile)trees.startLoading();},
+    setProfession(prof){building.enabled=true;setTimeout(()=>trees.startLoading(),mobile?3500:1500);},
     blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)}});
   }
 
