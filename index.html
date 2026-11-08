@@ -5,7 +5,7 @@
 <script src="./village_plan.js?v=0.11.017"></script>
 <script src="./device_policy.js?v=0.14.024-pc"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Project Genesis V014.027-ML01 · EXPERIMENTO MERCENARIO · sin publicar · Powered by NGE Alpha</title>
+<title>Project Genesis V014.027-ML02 · EXPERIMENTO MERCENARIO · sin publicar · Powered by NGE Alpha</title>
 <link rel="stylesheet" href="./preparacion.css?v=0.14.018-charcoal-v010">
 <link rel="stylesheet" href="./mercenary_equipment_canvas_v001.css?v=0.1.001">
 
@@ -741,8 +741,8 @@ window.__genesisAppError=function(event){
 </div>
 
 <div id="hud">
- <div id="brand">PROJECT GENESIS · V014.027-ML01 · MERCENARIO EXPERIMENTAL</div>
- <div id="tech">PLAYCANVAS 2.22.1 · PRUEBA AISLADA · V014.027-ML01</div>
+ <div id="brand">PROJECT GENESIS · V014.027-ML02 · MERCENARIO EXPERIMENTAL</div>
+ <div id="tech">PLAYCANVAS 2.22.1 · PRUEBA AISLADA · V014.027-ML02</div>
  <div id="buttonsTop"><button id="cameraSettingsBtn" class="uiBtn" type="button" aria-label="Configurar cámara">⚙ CÁMARA</button></div>
  <section id="quest">
    <div class="ey" id="questEy">PROTOTIPO · SELECCIÓN DE PROFESIÓN</div>
@@ -1036,7 +1036,7 @@ try{
 let village;
 try{
  activeBootGroup='arboles';showBootProgress(groupStage('arboles'),'Preparando los cuatro árboles aprobados.');
- village=await mountVillage(appEl.app,{
+ village=GENESIS_MERCENARY_LAB ? {setProfession(){},blocked(){return false},trees:{update(){}}} : await mountVillage(appEl.app,{
   shell:document.getElementById('villageShellSource').entity,
   roof:document.getElementById('villageRoofSource').entity,
   door:document.getElementById('villageDoorSource').entity,
@@ -1052,7 +1052,7 @@ try{
 window.__genesisVillage=village;
 let genesisMarket=null;
 try {
- genesisMarket=mountGenesisMarket({
+ if(!GENESIS_MERCENARY_LAB)genesisMarket=mountGenesisMarket({
   app:appEl.app,village,
   character:document.getElementById('playerModel')?.entity,
   getSession:()=>craftSession,
@@ -1529,7 +1529,7 @@ function applyMercCandidateVisual(){
 function resetMercenaryExtension(){resetDemoEpilogue();mercCandidate=null;mercSwordItem=null;mercShieldItem=null;mercArmorItem=null;mercBootsItem=null;mercenaryState='hidden';mercDeparturePath=[];mercDepartureWaypoint=0;mercGearAttached=false;mercMaterialsPatched=false;mercActiveBodyModelId='mercBodyModel';mercEditSwordItem=null;mercEditShieldItem=null;mercEditArmorItem=null;mercEditBootsItem=null;mercGearMaterialBases.clear();['mercSwordLightA','mercSwordLightB','mercShieldLightA','mercShieldLightB','mercArmorLightA','mercArmorLightB','mercBootsLightA','mercBootsLightB'].forEach(id=>{const l=C(id);if(l){l.intensity=0;l.enabled=false}});['mercSwordGlowA','mercSwordGlowB','mercShieldGlowA','mercShieldGlowB','mercArmorGlowA','mercArmorGlowB','mercBootsGlowA','mercBootsGlowB'].forEach(id=>{const e=E(id);if(e)e.enabled=false});setCurtidorWearableVisibility(false,false,false);if(mercenaryRoot){mercenaryRoot.setPosition(3.25,-40,3.10);mercenaryRoot.setLocalScale(1,1,1);const pb=E('mercBodyModel'),rb=E('mercBodyRangerModel'),bd=E('mercBeardModel'),sw=E('mercSwordModel'),sh=E('mercShieldModel');if(pb)pb.enabled=true;if(rb)rb.enabled=false;if(bd)bd.enabled=false;if(sw)sw.enabled=false;if(sh)sh.enabled=false}}
 function candidateMiniStats(c){return `<div class="mercStatsMini"><div class="mercStatMini"><b>${c.stats.damage}</b><span>DAÑO BASE</span></div><div class="mercStatMini"><b>${c.stats.protection}</b><span>PROTECCIÓN BASE</span></div><div class="mercStatMini"><b>${c.stats.vitality}</b><span>VITALIDAD</span></div><div class="mercStatMini"><b>${c.stats.mobility}</b><span>MOVILIDAD</span></div></div>`}
 
-/* V014.027-ML01: punto de control temporal. Genera cuatro resultados legítimos
+/* V014.027-ML02: punto de control temporal. Carga de pueblo y mercado omitida sólo en este laboratorio. Genera cuatro resultados legítimos
    del NGE usando las fórmulas de la sesión. No modifica las partidas normales. */
 async function launchMercenaryLab(){
   const status=window.__GENESIS_MERCENARY_LAB={status:'initializing',branch:'experiment/v014027-mercenario-directo-equipamiento-20261108',base:'b7af9410118b18994ac5f4d8798551de70be8b46',items:0,approved:false};
@@ -1675,7 +1675,7 @@ async function activateRouteGroups(prof,priority,onProgress){const groups=groupR
 function refreshRouteBindings(prof){document.querySelectorAll(`pc-model[data-route="${prof}"]`).forEach(el=>el.contentEntity&&hideCollisionMeshes(el));if(prof==='Herrero'){tintModel(document.getElementById('ordanModel'),[.58,.52,.43],0);tintModel(document.getElementById('ordanHairModel'),[.62,.62,.60],0);const root=document.getElementById('chestModel')?.contentEntity;chestLid=root?.findByName?.('Lid')||null;if(chestLid){const e=chestLid.getLocalEulerAngles();chestLidBase={x:e.x,y:e.y,z:e.z}}if(forgeVisualBoundRoot!==forgeModelEl?.contentEntity){forgeVisualBoundRoot=forgeModelEl?.contentEntity||null;forgeHotMaterialPatched=false;forgeCoalMaterials=[]}igniteForgeVisual()}else{tintModel(document.getElementById('tannerMentorModel'),[.72,.54,.37],0);tintModel(document.getElementById('tannerMentorHairModel'),[.33,.24,.18],0);tannerChestClosed=chooseClip(tannerChestAnim,'Chest_Closed');tannerChestOpen=chooseClip(tannerChestAnim,'Chest_Open');tannerChestOpened=chooseClip(tannerChestAnim,'Chest_Opened');if(tannerChestClosed)tannerChestAnim?.transition?.(tannerChestClosed,.01);applyTannerVisualPass()}}
 async function prepareRoute(prof){if(routeReady.has(prof))return;routeLoading=true;intro.style.display='none';loading.style.display='grid';loadRetry.style.display='none';const planned=groupRouteModels(routeModels(prof,'critical')).length;loadCount.textContent='0 de '+planned+' assets del '+prof;setLoadUI(0,'Preparando '+prof,'Los modelos se cargan en paralelo. Los que falten seguirán en segundo plano.');const report=await activateRouteGroups(prof,'critical',(done,total,label)=>{setLoadUI(100*done/Math.max(1,total),'Preparando '+prof,label);loadCount.textContent=done+' de '+total+' assets del '+prof+' cargados'});try{refreshRouteBindings(prof)}catch(err){console.warn('Bindings parciales de ruta:',err)}routeReady.add(prof);if(!report?.timedOut&&report?.failed===0)setLoadUI(100,prof+' listo','Ruta preparada. El decorado secundario continuará en segundo plano.');else setLoadUI(100*report.loaded/Math.max(1,report.total),prof+' disponible',''+report.loaded+' de '+report.total+' assets listos; los restantes seguirán en segundo plano.');loadCount.textContent=report.loaded+' de '+report.total+' assets del '+prof+' cargados';await sleep(90)}
 function streamRouteDecor(prof){const models=routeModels(prof,'stream');let index=0;const pump=()=>{if(index>=models.length)return;const batch=models.slice(index,index+4);index+=4;for(const el of batch)activateDeferredModel(el,45000).then(()=>{hideCollisionMeshes(el);if(prof==='Curtidor'){applyTannerVisualPass()}}).catch(err=>console.warn('Decoración diferida:',err.message));setTimeout(pump,180)};(window.requestIdleCallback?requestIdleCallback(()=>pump(),{timeout:420}):setTimeout(pump,160))}
-async function chooseProfessionRoute(prof){if(routeLoading||gameStarted)return;const buttons=[...document.querySelectorAll('[data-profession]')];buttons.forEach(b=>b.disabled=true);try{await prepareRoute(prof);startRoute(prof);loading.style.display='none';streamRouteDecor(prof)}catch(err){console.error(err);failLoading(err?.message||String(err),'No se habilitó la ruta. Reintentá; el resto del prototipo no se cargó.');intro.style.display='none'}finally{routeLoading=false;buttons.forEach(b=>b.disabled=false)}}
+async function chooseProfessionRoute(prof){if(routeLoading||gameStarted)return;if(GENESIS_MERCENARY_LAB){startRoute(prof);loading.style.display="none";return;}const buttons=[...document.querySelectorAll('[data-profession]')];buttons.forEach(b=>b.disabled=true);try{await prepareRoute(prof);startRoute(prof);loading.style.display='none';streamRouteDecor(prof)}catch(err){console.error(err);failLoading(err?.message||String(err),'No se habilitó la ruta. Reintentá; el resto del prototipo no se cargó.');intro.style.display='none'}finally{routeLoading=false;buttons.forEach(b=>b.disabled=false)}}
 
 function startRoute(prof){village.setProfession(prof);selectedProfession=prof;activeRoute=ROUTES[prof];const engine=window.GenesisPrototypeEngines;if(!engine){toast('Motor NGE Alpha no disponible.',1600);return}craftSession=engine.generateSession(prof);gameStarted=true;tutorialStep=0;workshopKey=false;debrisCleared=false;auxCleared=false;chestOpen=false;playerInventory={};inventoryOpen=false;inventoryTutorialOpened=false;craftedItems=[];usedItemNames=new Set();resetMercenaryExtension();forgeHot=false;tannerOperational=false;igniteForgeVisual();if(tannerWorkLight)tannerWorkLight.intensity=.72;doorAngle=doorTarget=tannerDoorAngle=tannerDoorTarget=0;if(doorLeafEntity)doorLeafEntity.setEulerAngles(0,0,0);if(tannerDoorLeafEntity)tannerDoorLeafEntity.setEulerAngles(0,0,0);const center=activeRoute.center;px=center;pz=6.3;player.setPosition(px,0,pz);camera.setPosition(center,3,10);camYaw=0;camPitch=24;camDist=cameraSolvedDist=4.7;const mentor=activeRoute.mentor();mentor.setPosition(center+1.72*WORKSHOP_SCALE,0,1.90*WORKSHOP_SCALE);mentorYaw=-21;mentor.setEulerAngles(0,mentorYaw,0);mentorFollowState='outside';mentorFollowDelay=0;mentorPath=[];mentorWaypoint=0;marketEscortWaypoint=0;marketEscortWaiting=false;setMentorAnim(activeRoute.mentorIdle,.01);npcTag.textContent=activeRoute.mentorName.toUpperCase();professionChip.textContent=`PROFESIÓN · ${prof.toUpperCase()} · 2 FAMILIAS · 4 FABRICACIONES`;professionChip.style.display='block';materialsPanel.style.display='none';if(inventoryTouch){inventoryTouch.classList.add('locked');inventoryTouch.classList.remove('ready')}intro.style.display='none';mouseCapture.refresh();const fastSetup=applyDevFastTestState();restoreKnownLightingProfile();if(GENESIS_MERCENARY_LAB)setTimeout(()=>launchMercenaryLab().catch(err=>{console.error("MERCENARY LAB:",err);window.__GENESIS_MERCENARY_LAB={status:"error",message:String(err?.message||err),approved:false};failLoading("Prueba del mercenario: "+(err?.message||err));}),50);if(forgeHot){igniteForgeVisual();pulseForge(.10)}if(!fastSetup){setTutorialStep(0);toast(`Recorrido ${prof} iniciado.`,1500);mentorGestureAt=performance.now()+4800;mentorGestureReturn=0}}
 document.querySelectorAll('[data-profession]').forEach(btn=>btn.addEventListener('click',()=>{getAudio();uiTick();chooseProfessionRoute(btn.dataset.profession)}));
