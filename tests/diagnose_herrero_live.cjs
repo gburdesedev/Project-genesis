@@ -31,7 +31,7 @@ async function snapshot(label){let data;try{data=await page.evaluate(()=>{
  page.on('framenavigated',f=>{if(f===page.mainFrame())log('navigation',f.url())});
  await page.goto(url,{waitUntil:'domcontentloaded',timeout:100000});
  let intro=false;
- for(let i=0;i<20;i++){
+ for(let i=0;i<55;i++){
   let x=await snapshot('pre-'+i);
   if(x.visible?.intro){intro=true;break}
   if(x.visible?.failed){out.result='BOOT_FAILED';break}
