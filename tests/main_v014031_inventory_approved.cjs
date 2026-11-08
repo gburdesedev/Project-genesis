@@ -55,6 +55,34 @@ try{
  await page.waitForFunction(()=>document.querySelector('#genInv')?.dataset.approvedArt==='original-1672x941');
  assert.equal(await page.locator('.genInvSlot').count(),20);
  assert.equal(await page.locator('.genInvTab').count(),4);
+ // Contrato visual V05: pestañas originales en coordenadas de Preparación.
+ const navCheck=await page.evaluate(()=>{
+   const root=document.getElementById('genInv'),board=root.getBoundingClientRect();
+   const nav=root.querySelector('.genInvNav').getBoundingClientRect();
+   const tabs=[...root.querySelectorAll('.genInvTab')].map(el=>{
+     const rect=el.getBoundingClientRect(),img=el.querySelector('img');
+     return {left:(rect.left-board.left)/board.width,top:(rect.top-board.top)/board.height,
+       width:rect.width/board.width,height:rect.height/board.height,
+       visible:getComputedStyle(img).visibility==='visible',
+       loaded:img?.complete&&img?.naturalWidth>0,
+       current:el.getAttribute('aria-current')};
+   });
+   return {x:(nav.left-board.left)/board.width,y:(nav.top-board.top)/board.height,
+     width:nav.width/board.width,height:nav.height/board.height,
+     tabs,underlay:getComputedStyle(root,'::before').backgroundImage};
+ });
+ assert(Math.abs(navCheck.x-.16824)<.01,'V05 header X does not match Preparacion');
+ assert(Math.abs(navCheck.y-.0385)<.01,'V05 header Y does not match Preparacion');
+ assert(Math.abs(navCheck.width-.68115)<.01,'V05 tabs must retain exact Preparacion width');
+ assert(Math.abs(navCheck.height-.0918)<.015,'V05 tabs must retain exact Preparacion height');
+ assert(navCheck.underlay.includes('FondoEstructural.png'),'V05 header must reuse approved structural source');
+ assert(navCheck.tabs.every(t=>t.visible&&t.loaded),'Original Preparacion tab PNGs must be visibly rendered');
+ assert.equal(navCheck.tabs.filter(t=>t.current==='page').length,1,'Only Inventario is active');
+ const ratios=[294,320,328,298].map(n=>n/1240);
+ navCheck.tabs.forEach((tab,i)=>{
+   assert(Math.abs(tab.width/navCheck.width-ratios[i])<.012,'V05 tab '+i+' has wrong relative width');
+ });
+
  assert.equal(await page.locator('.genInvFamily').count(),1);
  assert.equal(await page.locator('#genInvGoCraft').count(),0);
  assert.equal(await page.locator('.genInvSlot:not(:disabled)').count(),2);
