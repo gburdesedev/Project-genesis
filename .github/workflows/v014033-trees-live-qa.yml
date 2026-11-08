@@ -1,0 +1,40 @@
+name: Genesis V014.033 | 14 approved trees actual Herrero game
+on:
+  push:
+    branches: ['experiment/v014033-arboles-20261108']
+    paths:
+      - 'village_world.js'
+      - 'village_trees.js'
+      - 'tests/v014033_trees_live.cjs'
+      - '.github/workflows/v014033-trees-live-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trees-live:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax verification
+        run: |
+          node --check village_world.js
+          node --check village_trees.js
+          node --check tests/v014033_trees_live.cjs
+          node tests/village_plan.cjs
+      - name: Install browser automation
+        run: npm install --prefix /tmp/genesis-v033 playwright@1.56.1
+      - name: Real-game tree and collision regression
+        run: NODE_PATH=/tmp/genesis-v033/node_modules node tests/v014033_trees_live.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v014033-trees-real-game
+          path: previews/v014033-trees/
+          retention-days: 14
