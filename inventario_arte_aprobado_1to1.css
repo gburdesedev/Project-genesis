@@ -237,3 +237,44 @@
  .genInv.genInvCanonical .genInvInfoLine>b{font-size:clamp(8px,.91cqw,12px)!important;}
  .genInv.genInvCanonical .genInvViewerTitle{font-size:clamp(10px,1.31cqw,16px)!important;}
 }
+
+
+/* V014.031 main — cabecera V05: mismo layout y PNG de Preparacion. */
+/* Fuente canónica: assets/ui/preparacion/layout_capas_preparacion.json.
+   Artboard 1536x1024, centrado en panorama 16:9 (1820.444x1024).
+   Pestañas 294/320/328/298 x 94, origen x164/458/778/1106, y42.
+   El resto del Inventario y los datos LIVE se mantienen intactos. */
+.genInv.genInvCanonical::before{
+  content:""!important; display:block!important;
+  position:absolute!important;inset:0 0 auto 0!important;
+  height:14.25%!important; width:100%!important;
+  z-index:6!important;pointer-events:none!important;
+  border:0!important;box-shadow:none!important;
+  background:#080707 url('assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png') center top / 100% auto no-repeat!important;
+}
+.genInv.genInvCanonical .genInvNav{
+  left:16.824%!important;
+  top:3.85%!important;
+  width:68.115%!important;
+  height:9.18%!important;
+  grid-template-columns:294fr 320fr 328fr 298fr!important;
+  z-index:9!important;
+  overflow:visible!important;
+}
+.genInv.genInvCanonical .genInvTab{
+  display:grid!important;place-items:center!important;
+  height:100%!important;min-width:0!important;
+  padding:0!important;
+}
+.genInv.genInvCanonical .genInvTab img{
+  visibility:visible!important;opacity:1!important;
+  width:100%!important;height:100%!important;
+  object-fit:fill!important;
+  filter:none!important;
+}
+.genInv.genInvCanonical .genInvTab[aria-current="page"] img{
+  filter:brightness(1.13) drop-shadow(0 0 5px #d18a33)!important;
+}
+.genInv.genInvCanonical .genInvTab:where(:hover,:focus-visible) img{
+  filter:brightness(1.18) drop-shadow(0 0 5px #e9a54b)!important;
+}
