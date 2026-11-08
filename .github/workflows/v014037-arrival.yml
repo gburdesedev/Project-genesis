@@ -1,0 +1,23 @@
+name: Genesis V014037 | original cinematic arrival at Ordan
+on:
+  push:
+    branches: ['experiment/v014037-llegada-ordan-v016-20261108']
+    paths: ['index.html','village_world.js','v015/canvas-arrival-v016.js','genesis_arrival_v014037.css','tests/v014037_arrival_contract.cjs','.github/workflows/v014037-arrival.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  arrival:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original V016 actual walk, Ordan stop, fountain clearance and input lock
+        run: |
+          node --check v015/canvas-arrival-v016.js
+          node --check tests/v014037_arrival_contract.cjs
+          node tests/v014037_arrival_contract.cjs
+          node tests/canvas_intro_v016.cjs
