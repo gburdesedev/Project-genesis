@@ -1,0 +1,29 @@
+name: V018.2 GLB doorway geometry analysis
+on:
+  push:
+    branches: [experiment/v0182-playwright-wall-door-audit]
+    paths:
+      - 'tools/v0182_inspect_glb_geometry.py'
+      - '.github/workflows/v0182-glb-geometry.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  geometry:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install 'numpy>=2.0,<2.4'
+      - name: Compute real front wall arch opening geometry and door bounds
+        run: python tools/v0182_inspect_glb_geometry.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v0182-geometry-report
+          path: /tmp/genesis-v0182-geometry-report.json
+          if-no-files-found: warn
+          retention-days: 14
