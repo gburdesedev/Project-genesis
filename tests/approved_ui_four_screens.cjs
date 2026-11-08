@@ -76,6 +76,17 @@ const issues=[];
   await page.locator('#gApprovedCraftAction').click();assert.equal(await page.evaluate(()=>window.__CRAFT__),'espada_hierro');
   await page.locator('[data-recipe="escudo_hierro"]').click();
   assert.equal(await page.locator('.gApprovedRecipeHeroSwap').count(),1);
+  // Regression: V07 must honor the game engine's quest lock even if a
+  // recipe has sufficient stock and an over-permissive canCraftRecipe callback.
+  await page.evaluate(()=>{
+    const recipe=window.__CTX__.getRecipeCatalog().find(r=>r.id==='espada_hierro');
+    recipe.questLocked=true;window.__CTX__.selectedRecipeId=recipe.id;
+    window.__NAV__.renderWorkspace('Fabricaciones');
+  });
+  assert.equal(await page.locator('#gApprovedCraftAction').isDisabled(),true,'Quest-locked recipe must never craft');
+  assert.equal(await page.locator('[data-recipe="espada_hierro"]').isDisabled(),true,'Quest-locked recipe must not activate');
+  assert.match(await page.locator('.gApprovedCraftState').innerText(),/Bloqueada por misión/);
+  await page.evaluate(()=>{window.__CTX__.getRecipeCatalog().find(r=>r.id==='espada_hierro').questLocked=false;window.__NAV__.renderWorkspace('Fabricaciones')});
   await page.screenshot({path:path.join(out,'04-fabricaciones-escudo-1600x900.png'),animations:'disabled'});
   await page.setViewportSize({width:1280,height:720});
   await page.locator('[data-go="Inventario"]').click();
