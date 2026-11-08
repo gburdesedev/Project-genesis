@@ -46,8 +46,15 @@ async function shot(page,name){
   if(state.failed)throw Error('Loading failed after Herrero selection');
   if(!state.gameplay)throw Error('Herrero route did not enter game');
   await page.waitForTimeout(3000);
-  await snapshot(page,'in-village');await shot(page,'03-in-village.png');
-  report.result='PASS_BASIC_HERRERO_ENTRY_NOT_FULL_VERTICAL_SLICE';
+  const final=await snapshot(page,'in-village');await shot(page,'03-in-village.png');
+  // Success requires the actual loading UI to declare completion, not only a
+  // hidden profession modal. A stalled/failed asset must never yield PASS.
+  const progress=(final.count||'').match(/(\d+)\s+de\s+(\d+)/i);
+  const complete=progress&&Number(progress[1])===Number(progress[2]);
+  if(!complete)throw Error('Incomplete route asset loading: '+final.count+'; stage='+final.stage);
+  if((final.routeErrors||[]).length)throw Error('Route asset errors: '+JSON.stringify(final.routeErrors).slice(0,1500));
+  if(report.consoleErrors.length)throw Error('Browser JavaScript errors: '+JSON.stringify(report.consoleErrors.slice(0,8)));
+  report.result='PASS_BASIC_HERRERO_ENTRY_ASSETS_COMPLETE_NOT_FULL_VERTICAL_SLICE';
  }finally{await browser.close();}
 })().catch(e=>{report.result='FAIL';report.exception=String(e.stack||e).slice(0,3200);console.error('GENESIS_QA_FAIL',report.exception);process.exitCode=1;})
 .finally(()=>{report.finish=new Date().toISOString();fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2));srv.close();console.log('GENESIS_QA_RESULT',report.result);});
