@@ -49,6 +49,14 @@ for(let i=0;i<1200&&intro.active;i++)intro.update(.05);
 assert.equal(intro.state,'arrived','Intro V016 never arrived');
 assert(intro.snapshot().ordanDistance<2.2,'Intro did not stop close to Ordan');
 assert.equal(clip,'Idle_Loop');
+// Regression: 3 FPS would make the old 0.1-second cap take over half a minute
+// for a 9-second walk. This cinematic must follow wall-clock progress.
+position=[0,0,0];
+const lowFpsArrival=arrival.create({artisan:avatar,game:{step:()=>0},playAnimation:x=>clip=x});
+assert(lowFpsArrival.begin());
+for(let i=0;i<25&&lowFpsArrival.active;i++)lowFpsArrival.update(.45);
+assert.equal(lowFpsArrival.state,'arrived','V016 animation stalls when WebGL FPS drops to 2-3');
+
 const scripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)].filter(m=>m[1].includes('type="module"')&&m[2].trim());
 assert(scripts.length>0,'No game entry module');
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'genesis-038-check-'));
