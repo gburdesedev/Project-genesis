@@ -1,6 +1,7 @@
 import {Entity,StandardMaterial,Texture,Color,Mesh,MeshInstance,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
 import {mountVillageTrees} from './village_trees.js?v=0.15.001';
 import {mountGenesisDolphinFountain} from './village_fountain_v014034.js?v=0.14.034';
+import {mountClosedWorkshopsV014036} from './village_workshops_v014036.js?v=0.14.036';
 import {mountArcanePortal} from './village_arcanist.js?v=0.14b-mobile-boot-20261103';
 const ROOT='./assets/world/v0.11.004/';
 const MOBILE_TEXTURE_EDGE=1024;
@@ -195,7 +196,13 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
    // V014.034 · The approved 16.7 MB fountain follows tree settlement
    // instead of blocking profession selection or competing for GPU uploads.
    const fountain=mountGenesisDolphinFountain(app,root,{afterTrees:trees.fullReady});
-   return Object.freeze({root,plan,trees,fountain,arcanePortals:[],
+   // V014.036: restore four closed workshops, but never gate playable Herrero
+   // on their decorative GLBs or their optional Arcanista portal.
+   const closedWorkshops=mountClosedWorkshopsV014036(app,root,plan,{
+    shell,roof,door,afterDecor:fountain.ready
+   });
+   Object.assign(globalThis.__genesisLiteVillage,{workshops:1+closedWorkshops.status.installed,otherWorkshops:'closed-decorative'});
+   return Object.freeze({root,plan,trees,fountain,closedWorkshops,arcanePortals:[],
     setProfession(prof){building.enabled=true;},
     blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fountain.blocked(x,z,r)}});
   }
