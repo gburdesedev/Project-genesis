@@ -30,7 +30,10 @@ async function inspect(page,label){
   return {intro:vis('prototypeIntro'),loading:vis('loading'),hud:vis('hud'),chip:vis('professionChip'),
   quest:document.querySelector('#quest h2')?.textContent?.trim(),progress:el('loadCount')?.textContent,
   boot:el('loadState')?.textContent,arcanista:{phase:a.phase,installed:a.installed,error:a.error,magicDoorExists:a.magicDoorExists,magicDoorEnabled:a.magicDoorEnabled},
-  smith:{phase:b.phase,walls:b.assets?.walls?.renderers,errors:b.errors},anim:el('playerAnim')?.component?.baseLayer?.activeState,
+  smith:{phase:b.phase,walls:b.assets?.walls?.renderers,errors:b.errors},
+  sceneWorkshops:(el('genesisApp')?.app?.root?.findByName('Project Genesis · Herrero primero')?.children||[])
+   .filter(child=>/taller completo|fachada cerrada aprobada/.test(child.name)).map(child=>child.name),
+  anim:el('playerAnim')?.component?.baseLayer?.activeState,
   liteBoot:window.__GENESIS_LITE_BOOT===true,liteVillage:window.__genesisLiteVillage||null,gameStarted:!!el('genesisApp')?.app,routeErrors:window.__genesisRouteAssetErrors||[]};
  });
  report.states.push({label,at:new Date().toISOString(),...s});console.log('STABILITY_STATE',JSON.stringify({label,...s}).slice(0,2200));return s;
@@ -56,9 +59,10 @@ async function inspect(page,label){
   // A deliberate Herrero-only lightweight boot is not a full five-workshop
   // village. Report it distinctly instead of pretending the Arcanista mounted.
   if(s.liteBoot){
-   assert.equal(s.liteVillage?.workshops,1,'Lightweight fallback must still mount Herrero');
-   report.observations.world='HERRERO_ONLY_LITE_MODE; other workshops not verified';
-   report.result='PASS_HERRERO_ONLY_LITE_MODE';return;
+   assert.equal(s.liteVillage?.workshops,5,'V014.036 must mount all five approved workshop shells');
+   assert.equal(s.sceneWorkshops?.length,5,'Actual PlayCanvas world missing workshop entities: '+JSON.stringify(s.sceneWorkshops));
+   report.observations.world='FIVE_REAL_WORKSHOP_FACADES; Arcanista V027 optional later stage';
+   report.result='PASS_HERRERO_ROUTE_FIVE_WORKSHOPS';return;
   }
   // The old Arcanista smoke never clicked a profession. It waited for a village
   // proxy which is installed only once the actual route can build the village.
