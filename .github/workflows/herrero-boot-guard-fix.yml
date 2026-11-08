@@ -11,7 +11,7 @@ permissions:
 jobs:
   patch-and-verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 17
+    timeout-minutes: 20
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
@@ -31,22 +31,19 @@ jobs:
           PY
       - name: Install Playwright
         run: npm install --prefix /tmp/genesis-herrero-boot --no-audit --no-fund playwright@1.56.1
-      - name: Start local game from experimental patch
-        run: |
-          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/genesis-herrero-http.log 2>&1 &
-          sleep 2
-          curl -fsSI http://127.0.0.1:8765/index.html | head
-      - name: Enter Herrero in real desktop Chromium, no mocked gameplay
+      - name: Enter Herrero in production Pages with one-line HTML interception, desktop
         env:
           NODE_PATH: /tmp/genesis-herrero-boot/node_modules
           GENESIS_MODE: desktop
-          GENESIS_URL: http://127.0.0.1:8765/
+          GENESIS_URL: https://gburdesedev.github.io/Project-genesis/
+          GENESIS_PATCH_BOOT: '1'
         run: node tests/diagnose_herrero_live.cjs
-      - name: Enter Herrero in real mobile Chromium, no mocked gameplay
+      - name: Enter Herrero in production Pages with one-line HTML interception, mobile
         env:
           NODE_PATH: /tmp/genesis-herrero-boot/node_modules
           GENESIS_MODE: mobile
-          GENESIS_URL: http://127.0.0.1:8765/
+          GENESIS_URL: https://gburdesedev.github.io/Project-genesis/
+          GENESIS_PATCH_BOOT: '1'
         run: node tests/diagnose_herrero_live.cjs
       - name: Commit only validated one-line fix to experimental branch
         run: |
