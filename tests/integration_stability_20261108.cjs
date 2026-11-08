@@ -31,7 +31,7 @@ async function inspect(page,label){
   quest:document.querySelector('#quest h2')?.textContent?.trim(),progress:el('loadCount')?.textContent,
   boot:el('loadState')?.textContent,arcanista:{phase:a.phase,installed:a.installed,error:a.error,magicDoorExists:a.magicDoorExists,magicDoorEnabled:a.magicDoorEnabled},
   smith:{phase:b.phase,walls:b.assets?.walls?.renderers,errors:b.errors},anim:el('playerAnim')?.component?.baseLayer?.activeState,
-  liteBoot:window.__GENESIS_LITE_BOOT===true,liteVillage:window.__genesisLiteVillage||null,gameStarted:!!el('genesisApp')?.app,routeErrors:window.__genesisRouteAssetErrors||[]};
+  liteBoot:window.__GENESIS_LITE_BOOT===true,fullWorld:window.__GENESIS_WORLD_FULL===true,liteVillage:window.__genesisLiteVillage||null,gameStarted:!!el('genesisApp')?.app,routeErrors:window.__genesisRouteAssetErrors||[]};
  });
  report.states.push({label,at:new Date().toISOString(),...s});console.log('STABILITY_STATE',JSON.stringify({label,...s}).slice(0,2200));return s;
 }
@@ -55,7 +55,7 @@ async function inspect(page,label){
   await page.screenshot({path:path.join(out,'01-real-game.png'),timeout:20000}).catch(e=>console.log('SCREENSHOT_UNAVAILABLE',String(e)));
   // A deliberate Herrero-only lightweight boot is not a full five-workshop
   // village. Report it distinctly instead of pretending the Arcanista mounted.
-  if(s.liteBoot){
+  if(s.liteBoot&&!s.fullWorld){
    assert.equal(s.liteVillage?.workshops,1,'Lightweight fallback must still mount Herrero');
    report.observations.world='HERRERO_ONLY_LITE_MODE; other workshops not verified';
    report.result='PASS_HERRERO_ONLY_LITE_MODE';return;
