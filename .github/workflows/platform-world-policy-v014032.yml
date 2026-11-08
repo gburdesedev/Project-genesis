@@ -1,0 +1,23 @@
+name: Genesis V014032 | desktop full / mobile memory budget
+on:
+  push:
+    branches: [experiment/v014032-full-village-market-arrival-20261108]
+    paths: ['index.html', 'device_policy.js', 'village_world.js', 'village_trees.js', 'tests/platform_world_policy_v014032.cjs', '.github/workflows/platform-world-policy-v014032.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  world-platform-policy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify two device configurations without WebGL
+        run: |
+          node --check tests/platform_world_policy_v014032.cjs
+          node tests/platform_world_policy_v014032.cjs
+          node tests/v014032_cinematics_contract.cjs
+          node tests/route_preflight_v001.cjs
