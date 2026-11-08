@@ -1837,7 +1837,7 @@ try{await waitVisualModulesBeforePlay()}catch(err){
  throw err;
 }
 showBootProgress('Interfaz y escena preparadas','Todos los recursos iniciales están listos.');
-await prepareRoute('Herrero');setLoadUI(100,'Juego completo listo','Herrero preparado antes de elegir profesión.');clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
+await prepareRoute('Herrero');routeLoading=false;setLoadUI(100,'Juego completo listo','Herrero preparado antes de elegir profesión.');clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
 </script>
 
 <script id="genesis-prototype-engines">
