@@ -29,7 +29,7 @@ jobs:
           node tests/v014033_tree_staging.cjs
       - name: Real Playwright Chromium and WebGL
         run: |
-          npm install --no-save playwright@1.56.1
+          npm install --no-save playwright@1.56.1 playcanvas@2.22.1
           npx playwright install --with-deps chromium
       - name: Actual Herrero route in browser
         run: node tests/integration_stability_20261108.cjs
