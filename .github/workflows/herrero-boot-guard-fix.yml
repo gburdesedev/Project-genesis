@@ -4,6 +4,7 @@ on:
     branches: [fix/herrero-boot-regression-20261108]
     paths:
       - '.github/workflows/herrero-boot-guard-fix.yml'
+      - 'tests/diagnose_herrero_live.cjs'
   workflow_dispatch:
 permissions:
   contents: write
