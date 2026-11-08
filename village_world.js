@@ -1,5 +1,6 @@
 import {Entity,StandardMaterial,Texture,Color,Mesh,MeshInstance,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
 import {mountVillageTrees} from './village_trees.js?v=0.14.033-mobile-staged';
+import {mountGenesisFountainV014034} from './genesis_fountain_v014034.js?v=0.14.034';
 import {mountArcanePortal} from './village_arcanist.js?v=0.14b-mobile-boot-20261103';
 const ROOT='./assets/world/v0.11.004/';
 const MOBILE_TEXTURE_EDGE=1024;
@@ -132,7 +133,7 @@ function arcaneSurround(app,building,cobble,shell){
  return frame;
 }
 function stampVersion(){
- const version='v0.14.033', build='20261108.02';
+ const version='v0.14.034', build='20261108.03';
  globalThis.__genesisVillageBuild={version,build};
  document.title=document.title.replace(/v0\.14(?:[a-c]|\.\d{3})?/gi,version);
  // The existing HUD build label lives in the monolithic demo HTML. Update
@@ -178,11 +179,23 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
    // V014.033: approved foliage; mobile downloads it only after Herrero is playable.
    const mobile=globalThis.GenesisDevice?.safePreviews===true;
    const trees=mountVillageTrees(app,root,{onResourceLoaded,deferInitialLoads:true});
+   const fountain=mountGenesisFountainV014034(app,root,{onResourceLoaded});
    globalThis.__genesisLiteVillage={mode:'herrero-first-trees',trees:trees.sites.length,
-    roads:plan.roads.length,workshops:1,mobile,streaming:mobile?'post-start-mobile':'post-start-desktop'};
-   return Object.freeze({root,plan,trees,arcanePortals:[],
-    setProfession(prof){building.enabled=true;setTimeout(()=>trees.startLoading(),mobile?3500:1500);},
-    blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)}});
+    roads:plan.roads.length,workshops:1,mobile,streaming:mobile?'post-start-mobile':'post-start-desktop',
+    fountain:mobile?'HQ-deferred-mobile-budget':'HQ-scheduled-desktop'};
+   return Object.freeze({root,plan,trees,fountain,arcanePortals:[],
+    setProfession(prof){
+     building.enabled=true;
+     setTimeout(()=>trees.startLoading(),mobile?3500:1500);
+     // HQ stays in the same PC profile; opt-in only on low-memory devices.
+     if(!mobile)setTimeout(()=>fountain.start(),6500);
+     else if(globalThis.__GENESIS_ENABLE_HQ_FOUNTAIN_MOBILE===true)
+      trees.fullReady.then(()=>setTimeout(()=>fountain.start(),5000));
+    },
+    blocked(x,z,r=.33){
+     return plan.blocked(x,z,r)||trees.blocked(x,z,r)||
+      (fountain.status().phase==='ready'&&Math.hypot(x-7,z-16)<2.13+r);
+    }});
   }
 
  const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14c');app.root.addChild(root);
