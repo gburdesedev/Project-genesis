@@ -60,7 +60,11 @@ function setup(models){
  const bad=[new Model('Herrero','critical','OK'),new Model('Herrero','stream','FAIL',true),
             new Model('SharedMercenary','ondemand','MERC')];
  const progress=[];
- await assert.rejects(()=>setup(bad)('Herrero','all',(n,total)=>progress.push({n,total})),/Faltan 1 recursos/);
+ const incomplete=await setup(bad)('Herrero','all',(n,total)=>progress.push({n,total}));
+ assert.equal(incomplete.failed,1,'A failed resource must be reported to route retry gate');
+ assert.equal(incomplete.loaded,2,'Two distinct assets should load');
+ assert.equal(incomplete.total,3,'One missing asset must remain counted');
+ assert.match(incomplete.errors.join(' | '),/Broken model FAIL/,'Failure report must identify the missing asset');
  assert.equal(progress.at(-1).n,2,'failed route must never report all as ready');
  console.log('PASS route preflight: critical + stream + mercenary; error blocks play and progress');
 })().catch(err=>{console.error(err);process.exitCode=1});
