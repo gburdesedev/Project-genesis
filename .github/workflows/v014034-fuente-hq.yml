@@ -1,0 +1,24 @@
+name: Genesis V014034 | isolated fountain V011 HQ
+on:
+  push:
+    branches: ['experiment/v014034-fuente-hq-20261108']
+    paths: ['genesis_fountain_v014034.js','village_world.js','index.html','tests/v014034_fountain_contract.cjs','.github/workflows/v014034-fuente-hq.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fountain-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate local 16.7 MB GLB source, safe install and error path
+        run: |
+          node --check genesis_fountain_v014034.js
+          node --check village_world.js
+          node --check tests/v014034_fountain_contract.cjs
+          node tests/v014034_fountain_contract.cjs
+          test -s assets/vendor/genesis/externals/genesisFountainV011HQAsset/src/PG_Dolphin_Fountain_V011_PlayCanvas_HQ_Optimized.glb
