@@ -74,7 +74,8 @@ test('Ordan escorts the player to the actual market, and preserves the old quest
  assert.match(html,/stepAt===11[\s\S]{0,300}GenesisMarketQuest\.steps\.talk/);
  assert.match(html,/startOrdanMarketEscort/);
  assert.match(html,/updateOrdanMarketEscort\(dt,now\)/);
- assert.match(html,/if\(distanceToPlayer>6\.75\)/);
+ assert.match(html,/const c=marketCinematic,engine=window\.GenesisMarketCinematic/);
+ assert.match(html,/!marketCinematic\?\.active/);
  assert.match(html,/if\(\[10,11,12,13\]\.includes\(tutorialStep\)\)return\[\{id:'craft'/);
  assert.match(html,/case 11\.75:return\{label:'Comerciante del mercado'/);
  assert.match(html,/if\(selectedProfession==='Herrero'&&tutorialStep===window\.GenesisMarketQuest\.steps\.shop/);
@@ -89,9 +90,9 @@ test('merchant opens after Ordan lesson, quantity defaults to missing stock and 
  assert.match(merchant,/const missing=needByName\.get\(name\)\?\.missing\|\|0/);
  assert.match(merchant,/if\(typeof onPurchase==='function'\)onPurchase\(result\)/);
  assert.match(merchant,/quantity:chosen\[name\]\|\|Math\.min\(99,Math\.max\(1,needByName\.get\(name\)\?\.missing\|\|0\)\)/);
- assert.match(html,/import '\.\/genesis_market_quest_v001\.js\?v=0\.14\.022'/);
- assert.match(html,/<title>Project Genesis v0\.14\.022 · Build 20261102\.04/);
- assert.match(world,/version='v0\.14\.022', build='20261102\.04'/);
- assert.match(merchant,/version:'v0\.14\.022'/);
- assert.match(html,/village_world\.js\?v=0\.14\.022/);
+ assert.match(html,/import '\.\/genesis_market_quest_v001\.js\?v=0\.14\.032'/);
+ assert.match(html,/<title>Project Genesis v0\.14\.032 · Build 20261108\.01/);
+ assert.match(world,/version='v0\.14\.032', build='20261108\.01'/);
+ assert.match(merchant,/version:'v0\.14\.032'/);
+ assert.match(html,/village_world\.js\?v=0\.14\.032/);
 });
