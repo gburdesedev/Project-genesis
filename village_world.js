@@ -133,7 +133,7 @@ function arcaneSurround(app,building,cobble,shell){
  return frame;
 }
 function stampVersion(){
- const version='v0.14.034', build='20261108.03';
+ const version='v0.14.035', build='20261108.04';
  globalThis.__genesisVillageBuild={version,build};
  document.title=document.title.replace(/v0\.14(?:[a-c]|\.\d{3})?/gi,version);
  // The existing HUD build label lives in the monolithic demo HTML. Update
