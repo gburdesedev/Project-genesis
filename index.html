@@ -1471,7 +1471,7 @@ async function ensureMercenaryReady(){
  if(mercenaryInitialized&&mercenaryRoot)return true;
  if(mercenaryReadyPromise)return mercenaryReadyPromise;
  mercenaryReadyPromise=(async()=>{
-  const ids=['mercBodyModel','mercBodyRangerModel','mercHeadModel','mercHairPartedModel','mercHairBuzzModel','mercHairLongModel','mercBeardModel','mercSwordModel','mercShieldModel'];
+  const ids=GENESIS_MERCENARY_LAB ? ['mercBodyModel','mercHeadModel','mercHairPartedModel','mercSwordModel','mercShieldModel'] : ['mercBodyModel','mercBodyRangerModel','mercHeadModel','mercHairPartedModel','mercHairBuzzModel','mercHairLongModel','mercBeardModel','mercSwordModel','mercShieldModel'];
   const models=ids.map(id=>mercNode(id)).filter(Boolean);
   for(let i=0;i<models.length;i+=3){
    const batch=models.slice(i,i+3);
@@ -1483,9 +1483,9 @@ async function ensureMercenaryReady(){
   mercenaryRoot=E('mercenaryRoot');
   if(!mercenaryRoot)throw new Error('No se creó mercenaryRoot');
   mercBodyAnim=await whenReady('#mercBodyAnim');
-  mercBodyRangerAnim=await whenReady('#mercBodyRangerAnim');
+  mercBodyRangerAnim=GENESIS_MERCENARY_LAB?null:await whenReady('#mercBodyRangerAnim');
   mercHeadAnim=await whenReady('#mercHeadAnim');
-  mercHairAnims=[await whenReady('#mercHairPartedAnim'),await whenReady('#mercHairBuzzAnim'),await whenReady('#mercHairLongAnim'),await whenReady('#mercBeardAnim')].filter(Boolean);
+  mercHairAnims=GENESIS_MERCENARY_LAB?[await whenReady('#mercHairPartedAnim')]:[await whenReady('#mercHairPartedAnim'),await whenReady('#mercHairBuzzAnim'),await whenReady('#mercHairLongAnim'),await whenReady('#mercBeardAnim')].filter(Boolean);
   mercAnimControllers=[mercBodyAnim,mercBodyRangerAnim,mercHeadAnim,...mercHairAnims].filter(Boolean);
   mercIdle=chooseClip(mercBodyAnim,'Idle_Loop')||chooseClip(mercBodyRangerAnim,'Idle_Loop')||chooseClip(mercBodyAnim,'idle')||chooseClip(mercBodyRangerAnim,'idle')||mercBodyAnim?.clips?.[0]||mercBodyRangerAnim?.clips?.[0];
   mercWalk=chooseClip(mercBodyAnim,'Walk_Loop')||chooseClip(mercBodyRangerAnim,'Walk_Loop')||chooseClip(mercBodyAnim,'walk')||chooseClip(mercBodyRangerAnim,'walk')||mercIdle;
