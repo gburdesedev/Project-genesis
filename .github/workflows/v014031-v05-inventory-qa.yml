@@ -28,6 +28,7 @@ jobs:
           test "$(git hash-object mercenary_equipment_domain_v001.js)" = "c2b2f998302f4dbcdf7794d95bc9fb2f54f3e1f3"
       - name: Reconstruct exactly the 1820x1024 pixels of V05, using approved source art and untouched Preparation PNGs
         run: |
+          apt-get update -qq && apt-get install -y -qq python3-pip
           python3 -m pip install --break-system-packages --no-cache-dir Pillow==12.3.0
           python3 scripts/build_v014031_inventory_v05.py
       - name: Check JS syntax and install pinned browser binding
