@@ -89,13 +89,18 @@ const issues=[];
     const ctx=window.__CTX__;
     window.GenesisPreparation.open({...ctx,requiredStock:{'Lingote de hierro':2},
       formula:{materials:[{material:'Lingote de hierro',qty:2}]},
-      onCraft(){window.__REAL_CRAFT__=true},closeModal(){document.getElementById('modal').innerHTML='';}});
+      onCraft(){window.__REAL_CRAFT__=true},onCraftRecipe(id){window.__REAL_CRAFT_RECIPE__=id},closeModal(){document.getElementById('modal').innerHTML='';}});
   });
   await page.waitForSelector('.gApproved-Preparacion',{timeout:12000});
   assert.equal(await page.evaluate(()=>window.GenesisPreparation.activeTab()),'Preparacion');
   assert.equal(await page.evaluate(()=>window.GenesisPreparation.navigate('Inventario')),true);
   await page.waitForSelector('.gApproved-Inventario');
   assert.equal(await page.evaluate(()=>window.GenesisPreparation.activeTab()),'Inventario');
+  assert.equal(await page.evaluate(()=>window.GenesisPreparation.navigate('Fabricaciones')),true);
+  await page.waitForSelector('.gApproved-Fabricaciones');
+  await page.locator('#gApprovedCraftAction').click();
+  assert.equal(await page.evaluate(()=>window.__REAL_CRAFT_RECIPE__),'espada_hierro',
+    'Fabricar must invoke the actual procedural crafting callback with selected recipe');
   assert.equal(issues.length,0,issues.join('\n'));
   fs.writeFileSync(path.join(out,'report.json'),JSON.stringify({result:'PASS',artwork:'EXACT SHA256',screens:['Inventario V11','Preparación','Fabricaciones V07'],resultScreen:'Existing dynamic renderItemCard; provisional, not visually approved',ratio,issues},null,2));
   console.log('PASS GENESIS_THREE_APPROVED_ARTWORKS_INTEGRATED',JSON.stringify({ratio,slots:20,issues}));
