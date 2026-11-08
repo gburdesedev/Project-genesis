@@ -28,6 +28,29 @@ jobs:
         run: node --check tests/v014022_restored_main_qa.cjs
       - name: Install Playwright
         run: npm install --prefix /tmp/genesis-v014022-restored playwright@1.56.1
+      - name: Inventory embedded GLBs and verify load sources
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re,json
+          s=Path('index.html').read_text()
+          assets=[]
+          for m in re.finditer(r'<pc-asset\\b[^>]*>',s):
+            tag=m.group(0)
+            src=re.search(r'\\bsrc=["\\']([^"\\']*)',tag)
+            if not src:continue
+            mid=re.search(r'\\bid=["\\']([^"\\']*)',tag)
+            name=mid.group(1) if mid else '?'
+            url=src.group(1)
+            if url.startswith('data:'):
+              hdr,data=url.split(',',1)
+              assets.append(dict(name=name,mime=hdr.split(';')[0],sizeMiB=round(len(data)*.75/1048576,2),embedded=True))
+            else:assets.append(dict(name=name,url=url[:155],embedded=False))
+          e=[x for x in assets if x['embedded']]
+          print('EMBEDDED_ASSET_REPORT',json.dumps(dict(total=len(assets),embedded=len(e),estimatedMiB=round(sum(x['sizeMiB'] for x in e),2),largest=sorted(e,key=lambda x:-x['sizeMiB'])[:30]),ensure_ascii=False))
+          print('REMOTE_COUNT',sum(not x['embedded'] and x.get('url','').startswith('http') for x in assets))
+          print('HTML_SIZE_MIB',round(len(s.encode())/1048576,2))
+          PY
       - name: Browser actual Herrero route and snapshots
         run: NODE_PATH=/tmp/genesis-v014022-restored/node_modules node tests/v014022_restored_main_qa.cjs
       - name: Upload screenshots and forensic JSON, including failed runs
