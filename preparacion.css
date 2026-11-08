@@ -735,3 +735,50 @@
 .approvedFabV04 .approvedFabNav.fabricaciones{left:65.4%;width:17.6%}
 .approvedFabV04 .approvedFabNav.comparacion{left:82.9%;width:16.7%}
 .approvedFabV04 button:focus-visible {outline:2px solid #efd19a;outline-offset:-2px}
+
+
+/* V04 QA polish: opaque readable data zones, 4 genuine recipe materials and exact bottom labels. */
+.approvedFabV04 .approvedFabRecipes {
+  background:#0b0908!important;
+}
+.approvedFabV04 .approvedFabMaterials {
+  background:#110d0a!important;
+  height:29.3%!important;
+  gap:.27cqw!important;
+}
+.approvedFabV04 .approvedFabMaterial {
+  min-height:3.53cqw!important;
+  gap:.55cqw!important;
+  padding:.16cqw .42cqw!important;
+}
+.approvedFabV04 .approvedFabMaterialIcon,
+.approvedFabV04 .approvedFabMaterialIcon img {
+  max-width:3.05cqw!important;
+  max-height:3.05cqw!important;
+}
+.approvedFabV04 .approvedFabMaterialIcon {
+  width:3.05cqw!important;height:3.05cqw!important;flex-basis:3.05cqw!important;
+}
+.approvedFabV04 .approvedFabMaterialText {
+  gap:.1cqw!important;
+}
+.approvedFabV04 .approvedFabMaterialText b {
+  font-size:.94cqw!important;
+}
+.approvedFabV04 .approvedFabMaterialText small {
+  font-size:.7cqw!important;
+}
+.approvedFabV04 .approvedFabState {
+  background:#100d0b!important;
+}
+.approvedFabV04 .approvedFabFooterText {
+  background:#0c0908!important;
+  color:#ead5b1!important;
+}
+.approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(n+3){
+  top:93.0%!important;
+  background:#0b0909!important;
+}
+.approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(3){left:52.85%!important}
+.approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(4){left:72.05%!important}
+.approvedFabV04 .approvedFabProgressLabels .fabricationDemoBar:nth-child(5){left:90.3%!important}
