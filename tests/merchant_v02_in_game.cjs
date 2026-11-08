@@ -43,9 +43,18 @@ const server=http.createServer((req,res)=>{
       const entity=root?.findByName('Mercader V02 · Meshoptimizer 75962 tri');
       const renderers=entity?.findComponents('render')||[];
       const count=renderers.reduce((n,r)=>n+(r.meshInstances?.length||0),0);
+      const boxes=renderers.flatMap(r=>r.meshInstances||[]).map(mi=>{
+        const b=mi.aabb;return b?{center:[b.center.x,b.center.y,b.center.z],
+          minY:b.getMin().y,maxY:b.getMax().y,half:[b.halfExtents.x,b.halfExtents.y,b.halfExtents.z]}:null;
+      }).filter(Boolean);
+      const origin=root?.getPosition();
+      const horizontalOffset=boxes.length&&origin?
+        Math.max(...boxes.map(b=>Math.hypot(b.center[0]-origin.x,b.center[2]-origin.z))):null;
       return {visual:{...window.__genesisMarket?.visual},root:!!root,entity:!!entity,
         rootChildren:root?.children.map(x=>x.name),
         count,position:root?.getPosition().toString(),
+        enabled:{root:root?.enabled,entity:entity?.enabled,renderers:renderers.map(r=>r.enabled)},
+        boxes,horizontalOffset,
         marketVersion:window.__genesisMarket?.version,
         app:!!app};
     });
@@ -54,6 +63,9 @@ const server=http.createServer((req,res)=>{
     assert.equal(status.visual.phase,'ready','V02 GLB failed: '+JSON.stringify(status.visual));
     assert.equal(status.marketVersion,'v0.14.022');
     assert(status.entity&&status.count>0,'Real V02 mesh not mounted');
+    assert(status.enabled.root&&status.enabled.entity&&status.enabled.renderers.every(Boolean),'Merchant mesh or parent disabled');
+    assert(Number.isFinite(status.horizontalOffset)&&status.horizontalOffset<2,'Merchant mesh displaced from market anchor: '+JSON.stringify(status.boxes));
+    assert(status.boxes.some(b=>b.minY>-0.25&&b.minY<0.25),'Merchant mesh floats/sinks: '+JSON.stringify(status.boxes));
     assert.deepEqual(status.rootChildren,['Mercader V02 · Meshoptimizer 75962 tri'],
       'Old clone or procedural apron is still occupying same NPC');
     assert(assetResponses.some(x=>x.status===200),'GLB did not load via game HTTP server');
