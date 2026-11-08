@@ -11,12 +11,12 @@
     "recipe": "espada_hierro",
     "formula": {
       "id": "espada_hierro",
-      "sessionSeed": 3572992002,
+      "sessionSeed": 1978376276,
       "materials": [
         {
           "role": "principal",
           "material": "Lingote de hierro",
-          "qty": 3
+          "qty": 2
         },
         {
           "role": "proceso",
@@ -30,17 +30,17 @@
         },
         {
           "role": "secundario",
-          "material": "Madera seca de roble",
+          "material": "Madera seca de fresno",
           "qty": 1
         }
       ],
-      "signature": "principal:Lingote de hierro:3|proceso:Carbón vegetal:1|secundario:Cuero bovino curtido:2|secundario:Madera seca de roble:1"
+      "signature": "principal:Lingote de hierro:2|proceso:Carbón vegetal:1|secundario:Cuero bovino curtido:2|secundario:Madera seca de fresno:1"
     },
     "stock": {
-      "Lingote de hierro": 6,
+      "Lingote de hierro": 4,
       "Carbón vegetal": 2,
       "Cuero bovino curtido": 4,
-      "Madera seca de roble": 2
+      "Madera seca de fresno": 2
     }
   },
   "domImmediately": {
@@ -102,16 +102,16 @@
     "step": 10,
     "created": [
       {
-        "name": "Hoja del Corte Seguro con curtido Bovino y Hierro de la Brasa Negra",
+        "name": "Hoja del Temple Vacilante del Cuero Bovino Firme con núcleo de Fresno y estructura de Hierro",
         "recipe": "espada_hierro",
         "rarity": "Inútil"
       }
     ],
     "inventory": {
-      "Lingote de hierro": 3,
+      "Lingote de hierro": 2,
       "Carbón vegetal": 1,
       "Cuero bovino curtido": 2,
-      "Madera seca de roble": 1
+      "Madera seca de fresno": 1
     },
     "selected": "Herrero",
     "resultButtonPresent": true,
