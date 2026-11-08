@@ -520,12 +520,16 @@
       if(!window.__GenesisInv16Loading){
         window.__GenesisInv16Loading=true;
         const style=document.createElement('link');
-        style.rel='stylesheet';style.href='inventario_genesis_16x9.css?v=preflight-20261102';
+        style.rel='stylesheet';style.href='inventario_genesis_16x9.css?v=0.14.031-main';
         document.head.append(style);
+        const approvedArtLayout=document.createElement('link');
+        approvedArtLayout.rel='stylesheet';
+        approvedArtLayout.href='inventario_arte_aprobado_1to1.css?v=0.14.031-main';
+        document.head.append(approvedArtLayout);
         const loader=document.createElement('script');
-        loader.src='inventario_genesis_16x9.js?v=preflight-20261102';
+        loader.src='inventario_genesis_16x9.js?v=0.14.031-main';
         loader.onload=()=>renderWorkspace('Inventario');
-        loader.onerror=()=>{window.__GenesisInv16Loading=false;style.remove();};
+        loader.onerror=()=>{window.__GenesisInv16Loading=false;style.remove();approvedArtLayout.remove();};
         document.head.append(loader);
       }
     }
