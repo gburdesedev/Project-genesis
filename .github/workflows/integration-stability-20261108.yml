@@ -1,13 +1,20 @@
-name: Genesis | stable integration acceptance 2026-11-08
+name: Genesis | actual Herrero route and approved UI release regression
 on:
   push:
-    branches: ['integration/stable-patches-20261108']
+    branches: ['main', 'integration/stable-patches-20261108']
     paths:
       - 'tests/integration_stability_20261108.cjs'
       - '.github/workflows/integration-stability-20261108.yml'
       - 'index.html'
       - 'genesis_ui_approved.js'
+      - 'preparacion_control.js'
       - 'tests/approved_ui_four_screens.cjs'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'preparacion_control.js'
+      - 'genesis_ui_approved.js'
+      - 'tests/**'
   workflow_dispatch:
 permissions:
   contents: read
