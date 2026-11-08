@@ -4,7 +4,7 @@ const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:
 const root=path.resolve(__dirname,'..'),source=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const engine=require.resolve('playcanvas/build/playcanvas.mjs');
 function embedded(id){
- const tag=source.match(new RegExp('<pc-asset\\\\b[^>]*\\\\bid="'+id+'"[^>]*>'))?.[0];
+ const tag=source.match(new RegExp('<pc-asset[^>]*id="'+id+'"[^>]*>'))?.[0];
  assert(tag,'missing source '+id);
  const src=tag.match(/src="([^"]+)"/)?.[1];
  assert(src,'missing asset URL '+id);
