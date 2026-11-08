@@ -1,0 +1,28 @@
+name: Inspect restored Herrero loader and sprint code
+on:
+  push:
+    branches: ['experiment/v014022-restore-assets-playwright-20261108']
+    paths:
+      - '.github/workflows/inspect-herrero-sprint.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Print targeted source sections (bounded)
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text()
+          needles=['function loadDeferredModelAsset','async function activateRouteGroups','function activateRouteGroups','Sprint_Loop','Walk_Loop','tannerChest09','rangerMale086','function updatePlayer','ShiftLeft','shiftKey']
+          lines=s.splitlines()
+          for needle in needles:
+            hits=[i for i,line in enumerate(lines) if needle in line][:5]
+            print('\\n===',needle,'occurrences',len(hits),'===')
+            for i in hits:
+              for j in range(max(0,i-8),min(len(lines),i+20)):
+                print(f'{j+1}: {lines[j][:260]}')
+          PY
