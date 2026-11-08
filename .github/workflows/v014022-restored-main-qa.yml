@@ -5,6 +5,10 @@ on:
     paths:
       - 'tests/v014022_restored_main_qa.cjs'
       - '.github/workflows/v014022-restored-main-qa.yml'
+  pull_request:
+    paths:
+      - 'tests/v014022_restored_main_qa.cjs'
+      - '.github/workflows/v014022-restored-main-qa.yml'
   workflow_dispatch:
 permissions:
   contents: read
