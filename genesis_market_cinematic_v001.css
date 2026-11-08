@@ -1,0 +1,11 @@
+/* V014.026 · única superposición cinematográfica. No modifica el arte ORA. */
+#genesisMarketLetterbox{position:fixed;inset:0;z-index:9500;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .55s ease,visibility .55s ease}
+#genesisMarketLetterbox::before,#genesisMarketLetterbox::after{content:"";position:absolute;left:0;right:0;height:12%;background:rgba(0,0,0,.96)}
+#genesisMarketLetterbox::before{top:0}
+#genesisMarketLetterbox::after{bottom:0}
+#genesisMarketLetterbox .genesisMarketCinemaCaption{position:absolute;right:3.5%;bottom:4.2%;z-index:2;color:#d1b788;font:600 clamp(10px,1.25vw,16px) Georgia,serif;text-shadow:0 2px 8px #000;letter-spacing:.10em}
+body.genesis-market-cinematic #genesisMarketLetterbox{opacity:1;visibility:visible}
+body.genesis-market-cinematic #mobile,body.genesis-market-cinematic #desktopHelp,body.genesis-market-cinematic #cameraGuide,body.genesis-market-cinematic #prompt,body.genesis-market-cinematic #interactMarker,body.genesis-market-cinematic #npcTag{visibility:hidden!important;pointer-events:none!important}
+body.genesis-market-cinematic #quest,body.genesis-market-cinematic #professionChip{visibility:hidden!important}
+@media(max-width:850px){#genesisMarketLetterbox::before,#genesisMarketLetterbox::after{height:11%}#genesisMarketLetterbox .genesisMarketCinemaCaption{bottom:3.3%;right:4%;font-size:10px}}
+@media(prefers-reduced-motion:reduce){#genesisMarketLetterbox{transition:none}}
