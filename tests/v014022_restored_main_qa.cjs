@@ -12,6 +12,7 @@ for(const token of ['function loadDeferredModelAsset','async function activateRo
  for(const i of indexes){console.log('SOURCE_PROBE',token,'line',i+1,rawLines.slice(Math.max(0,i-5),Math.min(rawLines.length,i+18)).map((line,k)=>(Math.max(0,i-5)+k+1)+': '+line.slice(0,250)).join('\\n'))}
 }
 
+if(process.env.GENESIS_SOURCE_ONLY==='1')process.exit(0);
 const report={branch:'V014022 restored main',start:new Date().toISOString(),states:[],networkErrors:[],consoleErrors:[],screenshots:[],result:'STARTING'};
 const srv=http.createServer((req,res)=>{
  try{
