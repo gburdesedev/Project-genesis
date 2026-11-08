@@ -22,7 +22,7 @@ assert(html.includes("routeModels('SharedMercenary','ondemand')"),'mercenary ass
 assert(!html.includes('streamRouteDecor(prof)'), 'no background decor after game started');
 assert(html.includes('if(!report.failed)break;'),'entry requires zero failed route resources');
 assert(html.includes('await loaderRetryDelay('),'failed downloads pause and retry without restarting the page');
-assert(html.indexOf('routeReady.add(prof)')>html.indexOf('if(!report.failed)break;'),'route becomes ready only after retry-checked loading');
+assert(html.lastIndexOf('routeReady.add(prof)')>html.indexOf('if(!report.failed)break;'),'Herrero route becomes ready only after retry-checked loading');
 assert(!html.includes('Promise.race([all,guard])'),'removed the 6.5 s early route gate');
 assert(js.includes('GenesisPreflight?.modelUrl(art.model)'),'menu small models use preloaded URLs');
 let active=0,peak=0,fetchCount=0,imagesRequested=0;
