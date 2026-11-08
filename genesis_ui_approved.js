@@ -104,13 +104,17 @@
    const formula=chosen?.formula||ctx.formula;
    const req=formula?.materials||[];
    const ready=req.length>0&&req.every(r=>Number(ctx.inventory?.[r.material]||0)>=Number(r.qty||0));
-   const canCraft=chosen?(ctx.canCraftRecipe?.(chosen.id)===true):ctx.canCraftNow?.()===true;
+   // Port the tested demo recipe/quest guard without changing the approved artboard.
+   const questLocked=r=>!!r&&(r.questLocked===true||r.lockedByQuest===true||ctx.isRecipeQuestLocked?.(r.id)===true);
+   const recipeReady=r=>!!r?.formula?.materials?.length&&r.formula.materials.every(m=>Number(ctx.inventory?.[m.material]||0)>=Number(m.qty||0));
+   const canCraft=chosen?(ctx.canCraftRecipe?.(chosen.id)===true&&!questLocked(chosen)):ctx.canCraftNow?.()===true;
    const isShield=/escud/i.test(String(chosen?.id||chosen?.subfamily||''));
    const isSword=/espad/i.test(String(chosen?.id||chosen?.subfamily||''));
    const chosenName=chosen?.subfamily||ctx.recipeName||'Sin receta';
    const recipeButtons=recipes.map((r,i)=>{
      const isS=/escud/i.test(String(r.id)+' '+String(r.subfamily));
-     return `<button type="button" class="gApprovedRecipe ${String(ctx.selectedRecipeId)===String(r.id)?'is-selected':''}" data-recipe="${esc(r.id)}" style="${pos(93,isS?465:289,336,53)}" aria-label="Seleccionar ${esc(r.subfamily)}"></button>`;
+     const locked=questLocked(r)||ctx.canCraftRecipe?.(r.id)!==true||!recipeReady(r);
+     return `<button type="button" class="gApprovedRecipe ${String(ctx.selectedRecipeId)===String(r.id)?'is-selected':''}" data-recipe="${esc(r.id)}" data-locked="${locked}" ${locked?'disabled aria-disabled="true" title="Receta bloqueada o sin materiales"':''} style="${pos(93,isS?465:289,336,53)}" aria-label="Seleccionar ${esc(r.subfamily)}"></button>`;
    }).join('');
    // Dos espacios de receta: cubrir también el segundo renglón horneado cuando la fórmula usa un solo material.
    const rows=Array.from({length:2},(_,i)=>{
@@ -119,7 +123,7 @@
      const qty=Number(ctx.inventory?.[r.material]||0),needed=Number(r.qty||0);
      return `<div class="gApprovedRequired" style="${pos(1261,300+i*143,350,115)}"><h3>${esc(r.material)}</h3><p>Requerido: <b>${needed}</b></p><p>Stock real: <b>${qty}</b></p></div>`;
    }).join('');
-   const state=`<div class="gApprovedCraftState ${ready&&canCraft?'is-ready':'is-blocked'}" style="${pos(1290,610,292,51)}">${ready&&canCraft?'✓ Disponible':ready?'Receta todavía bloqueada':'Faltan materiales'}</div>`;
+   const state=`<div class="gApprovedCraftState ${ready&&canCraft?'is-ready':'is-blocked'}" style="${pos(1290,610,292,51)}">${questLocked(chosen)?'Bloqueada por misión':ready&&canCraft?'✓ Disponible':ready?'Receta todavía bloqueada':'Faltan materiales'}</div>`;
    const hero=isShield?`<div class="gApprovedRecipeHeroSwap" style="${pos(456,114,643,706)}">${ctx.recipeAsset?.(chosen?.id)||''}<span>${esc(chosenName)}</span></div>`:'';
    const title=isShield?`<div class="gApprovedRecipeTitle" style="${pos(1153,120,432,85)}"><h2>${esc(chosenName)}</h2><p>Receta conocida</p></div>`:'';
    const body=recipeButtons+rows+state+hero+title+
