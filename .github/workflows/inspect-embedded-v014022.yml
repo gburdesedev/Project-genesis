@@ -1,0 +1,38 @@
+name: Inspect embedded assets V014022
+on:
+  push:
+    branches: ['experiment/v014022-restore-assets-playwright-20261108']
+    paths: ['.github/workflows/inspect-embedded-v014022.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect HTML embedded assets and URLs
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re,json
+          s=Path('index.html').read_text()
+          assets=[]
+          for m in re.finditer(r'<pc-asset\b[^>]*>',s):
+           tag=m.group(0)
+           src=re.search(r'\bsrc=["\']([^"\']*)',tag)
+           if not src:continue
+           idm=re.search(r'\bid=["\']([^"\']*)',tag)
+           ident=idm.group(1) if idm else '?'
+           uri=src.group(1)
+           if uri.startswith('data:'):
+            header,b64=uri.split(',',1)
+            assets.append({'id':ident,'mime':header.partition(';')[0],'bytes':len(b64)*3//4,'embedded':True})
+           else:assets.append({'id':ident,'embedded':False,'url':uri[:180]})
+          inline=[x for x in assets if x['embedded']]
+          print('EMBEDDED_SUMMARY',json.dumps({'totalAssets':len(assets),'embedded':len(inline),'estimatedMiB':round(sum(x['bytes'] for x in inline)/1048576,2),'largest':sorted(inline,key=lambda x:-x['bytes'])[:40]},ensure_ascii=False))
+          for x in assets:
+           if not x['embedded'] and ('https://' in x['url'] or 'http://' in x['url']):print('REMOTE_ASSET',x['id'],x['url'][:150])
+          print('HTML_BYTES',len(s.encode()))
+          
+          PY
