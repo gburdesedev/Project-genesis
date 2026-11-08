@@ -530,10 +530,10 @@
         document.head.append(style);
         const originalArtLayout=document.createElement('link');
         originalArtLayout.rel='stylesheet';
-        originalArtLayout.href='inventario_arte_aprobado_1to1.css?v=0.14.031';
+        originalArtLayout.href='inventario_arte_aprobado_1to1.css?v=0.14.031-v05';
         document.head.append(originalArtLayout);
         const loader=document.createElement('script');
-        loader.src='inventario_genesis_16x9.js?v=0.14.031-ora-1to1';
+        loader.src='inventario_genesis_16x9.js?v=0.14.031-v05';
         loader.onload=()=>renderWorkspace('Inventario');
         loader.onerror=()=>{window.__GenesisInv16Loading=false;style.remove();originalArtLayout.remove();};
         document.head.append(loader);
