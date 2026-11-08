@@ -48,7 +48,6 @@ async function state(label){
  for(let i=0;i<80;i++){
    const s=await state('pre'+i);
    if(s.visible?.intro){intro=true;break}
-   if(document&&false){} // avoid accidental game mutations
    if(s.diag?.length||s.routeErrors?.length)record('boot_diagnostic',s.diag||s.routeErrors);
    if(s.visible?.loading===false&&i>2)record('unusual_no_intro',s);
    await page.waitForTimeout(4000);
