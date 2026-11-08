@@ -17,7 +17,32 @@ const srv=http.createServer((req,res)=>{
  const page=await browser.newPage({viewport:{width:1366,height:768},serviceWorkers:'block'});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url())});
  await page.goto('http://127.0.0.1:'+srv.address().port+'/index.html',{waitUntil:'domcontentloaded',timeout:60000});
- await page.waitForFunction(()=>document.getElementById('prototypeIntro')?.style.display==='grid'||document.querySelector('.loadingCard.failed'),null,{timeout:150000});
+ try{
+  await page.waitForFunction(()=>document.getElementById('prototypeIntro')?.style.display==='grid'||document.querySelector('.loadingCard.failed'),null,{timeout:120000});
+ }catch(error){
+  const diagnostics=await page.evaluate(()=>({
+   readyState:document.readyState,
+   introStyle:document.getElementById('prototypeIntro')?.style.display,
+   introComputed:document.getElementById('prototypeIntro')?getComputedStyle(document.getElementById('prototypeIntro')).display:null,
+   loadingDisplay:document.getElementById('loading')?.style.display,
+   loadingState:document.getElementById('loadState')?.textContent?.trim(),
+   loadingDetail:document.getElementById('loadDetail')?.textContent?.trim(),
+   loadingCount:document.getElementById('loadCount')?.textContent?.trim(),
+   loadingFailed:!!document.querySelector('.loadingCard.failed'),
+   lite:window.__GENESIS_LITE_BOOT,
+   app:!!document.getElementById('genesisApp')?.app,
+   village:window.__genesisLiteVillage,
+   trees:window.__genesisTreeStatus,
+   fountain:window.__genesisDolphinFountain,
+   workshops:window.__genesisClosedWorkshopStatus,
+   market:window.__genesisMarket?.visual,
+   boot:window.__genesisBoot,
+   routeErrors:window.__genesisRouteAssetErrors
+  })).catch(e=>({evaluationError:String(e)}));
+  fs.writeFileSync(path.join(out,'boot-failure.json'),JSON.stringify({diagnostics,errors,error:String(error)},null,2));
+  console.error('V014038_REAL_BOOT_DIAGNOSTIC',JSON.stringify({diagnostics,errors:errors.slice(0,15)}).slice(0,7000));
+  throw error;
+ }
  assert.equal(await page.locator('.loadingCard.failed').count(),0,'Startup failed before selecting Herrero');
  await page.locator('[data-profession="Herrero"]').click();
  await page.waitForFunction(()=>document.getElementById('professionChip')?.style.display!=='none'&&document.getElementById('prototypeIntro')?.style.display==='none'||document.querySelector('.loadingCard.failed'),null,{timeout:200000});
