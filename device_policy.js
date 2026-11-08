@@ -4,10 +4,20 @@
 (() => {
   'use strict';
   const media = expression => !!window.matchMedia?.(expression).matches;
-  const safePreviews = /Android|iPad|iPhone|iPod|Mobile/i.test(navigator.userAgent)
+  // V014.024: explicitly run the original PC experience even when tested
+  // in a mobile browser. Do not use the mobile reduced-quality render path.
+  // The desktop keyboard/mouse control scheme is intentionally retained.
+  const FORCE_DESKTOP=true;
+  const safePreviews = FORCE_DESKTOP ? false : (/Android|iPad|iPhone|iPod|Mobile/i.test(navigator.userAgent)
     || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-    || media('(pointer: coarse)');
+    || media('(pointer: coarse)'));
   if (safePreviews) document.documentElement.classList.add('mobile-device');
+  if(FORCE_DESKTOP){
+    document.documentElement.classList.add('genesis-force-desktop');
+    const css=document.createElement('style');
+    css.textContent='#mobile,#rotate{display:none!important}#desktopHelp{display:block!important}';
+    document.head.appendChild(css);
+  }
 
   const isPortrait = () => {
     const vp=window.visualViewport;
@@ -86,6 +96,7 @@
 
   window.GenesisDevice=Object.freeze({
     safePreviews,
+    forcedDesktop:FORCE_DESKTOP,
     configureApp(element) {
       appElement=element;
       // Disable multisample antialiasing before web-components initialize WebGL.
