@@ -221,3 +221,27 @@
   background:transparent!important;box-shadow:none!important;
   border:0!important;outline:0!important;
 }
+
+/* V014.028: read generated recipes without painting a second frame over
+   Fabricaciones V07's approved gold art; all required materials stay visible. */
+.gApproved-Fabricaciones .gApprovedRecipe.is-selected{
+  box-shadow:none!important;border:0!important;outline:0!important;
+  background:radial-gradient(ellipse,rgba(231,159,61,.12),transparent 75%);
+}
+.gApproved-Fabricaciones .gApprovedRequired.is-compact{
+  padding:.35% 2%;display:flex;flex-direction:column;justify-content:center;
+}
+.gApproved-Fabricaciones .gApprovedRequired.is-compact h3{
+  font-size:.98cqw;margin:0 0 1%;
+  white-space:nowrap;text-overflow:ellipsis;overflow:hidden;
+}
+.gApproved-Fabricaciones .gApprovedRequired.is-compact p{
+  font-size:.85cqw;margin:0;line-height:1.18;
+}
+.gApproved-Fabricaciones .gApprovedRequired.is-missing b{color:#e6a081}
+.gApproved-Fabricaciones .gApprovedRequired.is-supplied b{color:#afdfad}
+.gApproved-Fabricaciones #gApprovedCraftAction:hover,
+.gApproved-Fabricaciones #gApprovedCraftAction:focus-visible {
+  border:0!important;outline:0!important;box-shadow:none!important;
+  background:transparent!important;
+}
