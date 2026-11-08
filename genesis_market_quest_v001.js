@@ -6,7 +6,10 @@
  const steps=Object.freeze({talk:11.25,escort:11.5,shop:11.75});
  const escortPath=Object.freeze([
   {x:.55,z:-.60},{x:.50,z:1.60},{x:.75,z:3.45},
-  {x:7.0,z:3.6},{x:7.0,z:16.0},{x:7.0,z:26.0},
+  // Approved fountain V011 occupies the plaza centre (7,16).
+  // Both actors follow the eastern path between the original plaza trees.
+  {x:7.0,z:3.6},{x:7.0,z:10.5},{x:10.0,z:13.0},
+  {x:10.0,z:19.0},{x:7.0,z:23.0},{x:7.0,z:26.0},
   {x:7.0,z:36.0},{x:17.0,z:36.0},
   {x:23.0,z:36.0},{x:24.25,z:35.15}
  ].map(p=>Object.freeze(p)));
