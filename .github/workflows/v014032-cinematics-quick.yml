@@ -1,0 +1,20 @@
+name: Genesis V014032 | original arrival and market path quick contracts
+on:
+  push:
+    branches: [experiment/v014032-full-village-market-arrival-20261108]
+    paths: ['.github/workflows/v014032-cinematics-quick.yml', 'tests/v014032_cinematics_contract.cjs', 'index.html']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify original 3D source references and animation math
+        run: |
+          node --check genesis_market_cinematic_v001.js
+          node --check v015/canvas-arrival-v016.js
+          node --check tests/v014032_cinematics_contract.cjs
+          node tests/v014032_cinematics_contract.cjs
