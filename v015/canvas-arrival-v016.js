@@ -38,7 +38,9 @@
    function update(dt){
      if(state==='pending')return{active:true,state,animation:'Idle_Loop'};
      if(state!=='arriving')return{active:false,state};
-     const step=Math.max(0,Math.min(.1,Number(dt)||0));
+     // The scene may run at 2–10 FPS under software WebGL. Preserve real
+   // walking speed even when the regular gameplay delta is capped at 50 ms.
+   const step=Math.max(0,Math.min(.45,Number(dt)||0));
      if(!step)return{active:true,state,animation:'Walk_Loop'};
      elapsed+=step;
      let distanceBudget=speed*step;
