@@ -45,7 +45,7 @@ const server=http.createServer((req,res)=>{
     console.log('MERCHANT_V02_IN_GAME',JSON.stringify(status),JSON.stringify(assetResponses));
     assert(status.app&&status.root,'NPC anchor missing from PlayCanvas market');
     assert.equal(status.visual.phase,'ready','V02 GLB failed: '+JSON.stringify(status.visual));
-    assert.equal(status.marketVersion,'v0.14.022');
+    assert.equal(status.marketVersion,'v0.14.035');
     assert(status.entity&&status.count>0,'Real V02 mesh not mounted');
     assert.deepEqual(status.rootChildren,['Mercader V02 · Meshoptimizer 75962 tri'],
       'Old clone or procedural apron is still occupying same NPC');
