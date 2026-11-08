@@ -3,7 +3,17 @@
 const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..'),source=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const engine=require.resolve('playcanvas/build/playcanvas.mjs');
-function embedded(id){const match=source.match(new RegExp('<pc-asset id="'+id+'"[^>]+src="data:model/gltf-binary;base64,([^"]+)"'));assert(match,`missing source ${id}`);return Buffer.from(match[1],'base64')}
+function embedded(id){
+ const tag=source.match(new RegExp('<pc-asset[^>]*id="'+id+'"[^>]*>'))?.[0];
+ assert(tag,'missing source '+id);
+ const src=tag.match(/src="([^"]+)"/)?.[1];
+ assert(src,'missing asset URL '+id);
+ if(src.startsWith('data:model/gltf-binary;base64,'))return Buffer.from(src.split(',')[1],'base64');
+ // Original meshes are now in the public Project Genesis assets repository.
+ assert(src.startsWith('https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/'),'unexpected source '+id);
+ const {execFileSync}=require('node:child_process');
+ return execFileSync('curl',['--fail','--location','--silent','--show-error','--max-time','90',src],{maxBuffer:20*1024*1024});
+}
 const assets={'/test-shell.glb':embedded('workshopShell'),'/test-door.glb':embedded('doorLeaf083')};
 const html=`<!doctype html><html><head><style>html,body{margin:0;width:100%;height:100%;overflow:hidden}canvas{width:100%;height:100%;display:block}</style><script type="importmap">{"imports":{"playcanvas":"/engine.mjs"}}</script><script src="/village_plan.js"></script></head><body><canvas id="scene"></canvas><script type="module">
 import {Application,Entity,Color,Vec3} from 'playcanvas';import {mountVillage} from '/village_world.js';
