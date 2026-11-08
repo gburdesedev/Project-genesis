@@ -15,7 +15,7 @@ const srv=http.createServer((req,res)=>{
  const browser=await chromium.launch({args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
  try{
  const page=await browser.newPage({viewport:{width:1366,height:768},serviceWorkers:'block'});
- const errors=[];page.on('pageerror',e=>errors.push(String(e.stack||e.message).slice(0,1300)));page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url())});
+ const errors=[];page.on('pageerror',e=>errors.push(String(e.stack||e.message).slice(0,1300)));page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url())});page.on('console',e=>{if(e.type()==='error')errors.push('CONSOLE '+e.text().slice(0,1000))});
  await page.goto('http://127.0.0.1:'+srv.address().port+'/index.html',{waitUntil:'domcontentloaded',timeout:60000});
  // A browser struggling under software WebGL can lose frames; capture the
  // precise game loading state before treating the timeout as a boot failure.
@@ -31,6 +31,12 @@ const srv=http.createServer((req,res)=>{
    fountain:window.__genesisDolphinFountain||null,
    workshops:window.__genesisClosedWorkshopStatus||null,
    merchant:window.__genesisMarket?.visual||null,
+   arrivalScript:!!window.GenesisCanvasArrivalV016,
+   arrivalController:window.__GenesisArrivalQA?.()||null,
+   arrivalQuest:document.querySelector('#quest h2')?.textContent?.trim(),
+   arrivalCinemaBody:document.body.classList.contains('genesis-arrival-cinematic'),
+   professionChip:document.getElementById('professionChip')?.style.display,
+   gameplayStarted:document.getElementById('prototypeIntro')?.style.display==='none',
    resources:performance.getEntriesByType('resource').length
   }),stage)}catch(e){return {stage,evaluationError:String(e)}}
  };
@@ -48,7 +54,9 @@ const srv=http.createServer((req,res)=>{
  await page.locator('[data-profession="Herrero"]').click();
  await waitGame('after-herrero',()=>document.getElementById('professionChip')?.style.display!=='none'&&document.getElementById('prototypeIntro')?.style.display==='none'||document.querySelector('.loadingCard.failed'),200000);
  assert.equal(await page.locator('.loadingCard.failed').count(),0,'Game failed after Herrero selection');
- await page.waitForFunction(()=>!!window.__GenesisArrivalQA?.(),null,{timeout:12000});
+ await waitGame('arrival-controller',()=>!!window.__GenesisArrivalQA?.()||!!document.querySelector('.loadingCard.failed'),30000);
+ assert.equal(await page.locator('.loadingCard.failed').count(),0,'Loading failed after profession selection');
+
  const arrivalFirst=await page.evaluate(()=>window.__GenesisArrivalQA());
  assert(['arriving','arrived'].includes(arrivalFirst.state),'Fresh seed did not activate original V016 arrival: '+JSON.stringify(arrivalFirst));
  await page.waitForFunction(()=>window.__GenesisArrivalQA?.()?.state==='arrived',null,{timeout:90000});
