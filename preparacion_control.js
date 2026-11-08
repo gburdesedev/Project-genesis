@@ -57,7 +57,7 @@
   const MATERIAL_PROFILES = Object.freeze({
     [PREPARED]: Object.freeze({
       target: 72, baseTolerance: 11, initialGap: 17,
-      coolingPerSecond: 0.45, heatResponse: 1, processingSpeed: 1
+      coolingPerSecond: 0.45 * 1.90, heatResponse: 1, processingSpeed: 1.60
     })
   });
   const BASE_PROGRESS_PER_SECOND = 3; // Velocidad demostrativa; NO es un cronómetro límite.
@@ -890,6 +890,16 @@
     halt();
     work.lastThermalAt = performance.now();
     const gradient = heatGradient(work.target, work.batch.tolerance);
+    // V014.026: embed thermal controls in the approved 16:9 Preparación board.
+    // Retain legacy skin only as fallback for older standalone previews.
+    if(ctx.getItems && window.GenesisApprovedUI?.renderThermal){
+      window.GenesisApprovedUI.renderThermal(ctx,approvedUiNav(),{
+        gradient, bellows:BELLOWS, intervene, abandon:renderMenu
+      });
+      drawThermal();
+      thermalTimer=setInterval(passiveStep,THERMAL_TICK_MS);
+      return;
+    }
     const center = `<section class="prepSkinHeatWindow">
       <h3>Control de la fragua</h3>
       <p>Mantené la temperatura cerca del verde. Cuanto más te alejás, menos avanza la preparación.</p>
