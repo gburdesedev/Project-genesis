@@ -38,7 +38,9 @@
    function update(dt){
      if(state==='pending')return{active:true,state,animation:'Idle_Loop'};
      if(state!=='arriving')return{active:false,state};
-     const step=Math.max(0,Math.min(.1,Number(dt)||0));
+     // V017: low frame-rate recovery. Preserve smooth 3.2 m/s path at normal FPS;
+     // permit up to .30 s on slow WebGL without 10x slow-motion when frame time spikes.
+     const step=Math.max(0,Math.min(.30,Number(dt)||0));
      if(!step)return{active:true,state,animation:'Walk_Loop'};
      elapsed+=step;
      let distanceBudget=speed*step;

@@ -1,0 +1,50 @@
+name: V017 Vendor HDRI 32-bit (approved lighting source)
+on:
+  push:
+    branches: [feat/v017-assets-loader-hdri]
+    paths:
+      - '.github/workflows/v017-vendor-hdri32.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  vendor-radiance-hdri:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/v017-assets-loader-hdri
+          persist-credentials: true
+      - name: Download unchanged Poly Haven Studio Small 09 Radiance HDR (CC0)
+        run: |
+          set -euo pipefail
+          mkdir -p assets/playcanvas/approved/lighting/studio_small_09
+          for size in 1k 2k; do
+            output="assets/playcanvas/approved/lighting/studio_small_09/studio_small_09_${size}.hdr"
+            curl --fail --location --retry 3 --connect-timeout 30 --max-time 240 \
+              "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/${size}/studio_small_09_${size}.hdr" -o "${output}"
+          done
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          for size in ('1k', '2k'):
+              path=Path(f'assets/playcanvas/approved/lighting/studio_small_09/studio_small_09_{size}.hdr')
+              prefix=path.read_bytes()[:256]
+              assert prefix.startswith((b'#?RADIANCE',b'#?RGBE')), f'Not Radiance HDR: {path}'
+              assert b'FORMAT=32-bit_rle_rgbe' in prefix, f'Not 32-bit RGBE HDR: {path}'
+              assert path.stat().st_size > 100000, f'HDR unexpectedly small: {path}'
+              print(f'HDR VALIDATED {size}: {path.stat().st_size} bytes; sha256={hashlib.sha256(path.read_bytes()).hexdigest()}')
+          PY
+      - name: Commit verified HDRI binaries only to experimental V017 branch
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/playcanvas/approved/lighting/studio_small_09/*.hdr
+          if ! git diff --cached --quiet; then
+            git commit -m 'V017: vendor original studio_small_09 HDR/RGBE environment 1k and 2k'
+            git push origin HEAD:feat/v017-assets-loader-hdri
+          else
+            echo 'V017 HDRI already present, no changes'
+          fi
