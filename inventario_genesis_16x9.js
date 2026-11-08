@@ -3,13 +3,13 @@
 (function () {
   'use strict';
   const ROOT = 'assets/ui/preparacion/01_Capas/';
-  const APPROVED_ART='assets/ui/inventario/INVENTARIO_BASE_LIMPIA_APROBADA_16x9.png';
+  const APPROVED_ART='assets/ui/inventario/GENESIS_INVENTARIO_V05_CABECERA_PREPARACION_1820x1024.png';
   let approvedArtPromise=null;
   function installApprovedArt(board){
     if(!approvedArtPromise)approvedArtPromise=new Promise(function(resolve,reject){
       const image=new Image();
       image.onload=function(){
-        if(image.naturalWidth!==1672||image.naturalHeight!==941){
+        if(image.naturalWidth!==1820||image.naturalHeight!==1024){
           reject(new Error('Inventario aprobado: dimensiones de imagen inesperadas'));
           return;
         }
@@ -23,7 +23,7 @@
       board.style.backgroundImage='url("'+url+'")';
       board.style.backgroundSize='100% 100%';
       board.classList.add('genInvCanonical');
-      board.dataset.approvedArt='original-1672x941';
+      board.dataset.approvedArt='v05-preparacion-1820x1024';
     }).catch(function(err){console.warn('[Genesis Inventory] Fallback visual sin arte aprobado:',err)});
   }
   const TABS = [
@@ -323,5 +323,5 @@
       pane.querySelector('#genInvCloseDetails').onclick=function(){pane.remove()};
     };
   }
-  window.GenesisInventory16={render:render,version:'INVENTARIO_16x9_V014031_ORA_APROBADO_1A1',dataSource:'session.inventory + session.getItems'};
+  window.GenesisInventory16={render:render,version:'INVENTARIO_V05_V014031_PREPARACION_EXACTA',dataSource:'session.inventory + session.getItems'};
 })();
