@@ -1674,38 +1674,45 @@ function describeRouteAsset(asset){
 }
 function loadDeferredModelAsset(el,asset,timeout=ROUTE_ASSET_TIMEOUT_MS,onProgress=()=>{}){
  return new Promise((resolve,reject)=>{
-  let done=false;
-  const label=el.getAttribute('name')||el.id||asset;
-  const started=performance.now();
+  let done=false,seenBytes=0,lastPhase='',lastAdvance=performance.now();
+  const started=performance.now(),label=el.getAttribute('name')||el.id||asset;
   function publish(){
+   if(done)return;
    const info=describeRouteAsset(asset),seconds=Math.round((performance.now()-started)/1000);
    const phase=el.contentEntity?'listo':info.resourceReady?'instanciando':info.downloadComplete?'procesando modelo':'descargando';
-   const state={asset,label,seconds,phase,bytes:info.bytes,downloadComplete:info.downloadComplete,instanceReady:!!el.contentEntity};
-   routeAssetProgress[asset]=state;
-   onProgress(state);
+   if(phase!==lastPhase||(info.bytes||0)>seenBytes){
+    lastPhase=phase;seenBytes=Math.max(seenBytes,info.bytes||0);lastAdvance=performance.now();
+   }
+   routeAssetProgress[asset]={asset,label,seconds,phase,bytes:info.bytes,downloadComplete:info.downloadComplete,instanceReady:!!el.contentEntity};
+   onProgress(routeAssetProgress[asset]);
    if(el.contentEntity)finish(true);
   }
   function finish(ok,message){
    if(done)return;
-   done=true;clearInterval(poller);clearTimeout(timer);
+   done=true;clearInterval(poller);clearInterval(watchdog);
    el.removeEventListener('load',onLoad);el.removeEventListener('error',onError);
    const info=describeRouteAsset(asset);
    routeAssetProgress[asset]={asset,label,seconds:Math.round((performance.now()-started)/1000),
     phase:ok?'listo':'error',bytes:info.bytes,downloadComplete:info.downloadComplete,instanceReady:!!el.contentEntity};
+   if(!ok&&!el.contentEntity){try{el.removeAttribute('asset')}catch(_){}}
    ok?resolve(el):reject(new Error(message||('No pudo cargarse '+label+' ['+asset+']')));
   }
   function onLoad(){if(el.contentEntity)finish(true);else publish()}
   function onError(e){finish(false,(e?.message||'Falló la carga')+' · '+label+' ['+asset+']')}
   const poller=setInterval(publish,500);
-  const timer=setTimeout(()=>{
+  // v014.031: timeout por inactividad REAL, no tiempo fijo desde el comienzo.
+  const watchdog=setInterval(()=>{
+   if(done)return;
    if(el.contentEntity){finish(true);return}
+   if(performance.now()-lastAdvance<timeout)return;
    const info=describeRouteAsset(asset);
-   finish(false,'Límite de 120 s agotado: '+label+' ['+asset+'] · '+
-    (info.resourceReady?'modelo descargado, instancia pendiente':info.downloadComplete?'archivo descargado, procesamiento pendiente':'descarga sin completar')+
-    (info.bytes!=null?' · '+(info.bytes/1048576).toFixed(1)+' MiB recibidos':' · bytes aún no informados por el navegador'));
-  },timeout);
+   finish(false,'Sin avance durante '+Math.round(timeout/1000)+' s: '+label+' ['+asset+'] · '+
+    (info.resourceReady?'instancia pendiente':info.downloadComplete?'procesamiento pendiente':'descarga pendiente')+
+    (info.bytes!=null?' · '+(info.bytes/1048576).toFixed(1)+' MiB recibidos':''));
+  },1000);
   el.addEventListener('load',onLoad);el.addEventListener('error',onError);
   if(el.getAttribute('asset')!==asset)el.setAttribute('asset',asset);
+  else if(!el.contentEntity){el.removeAttribute('asset');requestAnimationFrame(()=>{if(!done)el.setAttribute('asset',asset)})}
   publish();
  });
 }
@@ -1725,55 +1732,78 @@ async function activateDeferredModel(el,timeout=ROUTE_ASSET_TIMEOUT_MS,onProgres
 // Instanciar la ruta COMPLETA antes de iniciar el juego. Sin deadline
 // artificial ni descargas adicionales de decoración durante la partida.
 async function activateRouteGroups(prof,priority,onProgress){
- const models=[...routeModels(prof,'critical'),...routeModels(prof,'stream'),...routeModels('SharedMercenary','ondemand')];
+ // v014.031: load one priority group at a time, never a 24-model all-or-nothing batch.
+ const models=priority==='critical'?routeModels(prof,'critical'):
+  priority==='stream'?routeModels(prof,'stream'):
+  priority==='mercenaries'?routeModels('SharedMercenary','ondemand'):
+  [...routeModels(prof,'critical'),...routeModels(prof,'stream'),...routeModels('SharedMercenary','ondemand')];
  const grouped=groupRouteModels(models),total=grouped.length;
- let next=0,loaded=0,failed=0;
- const failures=[];
+ if(!total){onProgress?.(1,1,'Grupo ya preparado');return{total:0,loaded:0,failed:0,errors:[],instances:0}}
+ let next=0,loaded=0,failed=0;const errors=[];
  onProgress?.(0,total,'Plan: '+models.length+' instancias; '+total+' recursos únicos');
  async function worker(){
   while(next<grouped.length){
    const [asset,els]=grouped[next++];
-   const results=[];
-    for(const el of els){
-     const result=await Promise.allSettled([activateDeferredModel(el,ROUTE_ASSET_TIMEOUT_MS,state=>{
+   const results=await Promise.allSettled(els.map(el=>activateDeferredModel(el,ROUTE_ASSET_TIMEOUT_MS,state=>{
     const size=state.bytes!=null?' · '+(state.bytes/1048576).toFixed(1)+' MiB':' · bytes no informados';
-    onProgress?.(loaded,total,asset+' · '+state.phase+size+' · '+state.seconds+' / 120 s');
-   })]);
-     results.push(result[0]);
-     if(window.GenesisDevice?.safePreviews)await new Promise(r=>requestAnimationFrame(()=>r()));
-    }
+    onProgress?.(loaded,total,asset+' · '+state.phase+size+' · '+state.seconds+' s');
+   })));
    const ok=results.every((r,i)=>r.status==='fulfilled'&&!!els[i].contentEntity);
-   if(ok)loaded++;
+   if(ok){loaded++;try{refreshRouteBindings(prof)}catch(_){}}
    else{
-    failed++;
-    const problem=results.find(r=>r.status==='rejected');
-    failures.push(asset+': '+(problem?.reason?.message||'Instancia vacía'));
+    failed++;errors.push(asset+': '+results.filter(r=>r.status==='rejected').map(r=>r.reason?.message||String(r.reason)).join(' | '));
    }
-   onProgress?.(loaded,total,(ok?'Listo: ':'Error: ')+asset);
+   onProgress?.(loaded,total,(ok?'Listo: ':'Pendiente: ')+asset);
+   if(window.GenesisDevice?.safePreviews)await new Promise(r=>requestAnimationFrame(r));
   }
  }
- await Promise.all(Array.from({length:Math.min(window.GenesisDevice?.safePreviews?1:3,total)},worker));
- if(failed)throw new Error('Faltan '+failed+' recursos de la ruta: '+failures.slice(0,3).join(' | '));
- return{total,loaded,failed:0,timedOut:false,instances:models.length};
+ await Promise.all(Array.from({length:Math.min(window.GenesisDevice?.safePreviews?1:2,total)},worker));
+ return{total,loaded,failed,errors,instances:models.length};
 }
 function refreshRouteBindings(prof){document.querySelectorAll(`pc-model[data-route="${prof}"]`).forEach(el=>el.contentEntity&&hideCollisionMeshes(el));if(prof==='Herrero'){tintModel(document.getElementById('ordanModel'),[.58,.52,.43],0);tintModel(document.getElementById('ordanHairModel'),[.62,.62,.60],0);const root=document.getElementById('chestModel')?.contentEntity;chestLid=root?.findByName?.('Lid')||null;if(chestLid){const e=chestLid.getLocalEulerAngles();chestLidBase={x:e.x,y:e.y,z:e.z}}if(forgeVisualBoundRoot!==forgeModelEl?.contentEntity){forgeVisualBoundRoot=forgeModelEl?.contentEntity||null;forgeHotMaterialPatched=false;forgeCoalMaterials=[]}igniteForgeVisual()}else{tintModel(document.getElementById('tannerMentorModel'),[.72,.54,.37],0);tintModel(document.getElementById('tannerMentorHairModel'),[.33,.24,.18],0);tannerChestClosed=chooseClip(tannerChestAnim,'Chest_Closed');tannerChestOpen=chooseClip(tannerChestAnim,'Chest_Open');tannerChestOpened=chooseClip(tannerChestAnim,'Chest_Opened');if(tannerChestClosed)tannerChestAnim?.transition?.(tannerChestClosed,.01);applyTannerVisualPass()}}
-async function prepareRoute(prof){if(window.__GENESIS_LITE_BOOT&&prof!=='Herrero'){routeReady.add(prof);return;}
- if(routeReady.has(prof))return;
- routeLoading=true;
- intro.style.display='none';loading.style.display='grid';
- loadingCard.classList.remove('failed');loadRetry.style.display='none';
- const all=[...routeModels(prof,'critical'),...routeModels(prof,'stream'),...routeModels('SharedMercenary','ondemand')];
- const total=groupRouteModels(all).length;
- loadCount.textContent='0 de '+total+' modelos únicos · '+all.length+' instancias';
- setLoadUI(0,'Preparando partida completa','Talleres, decoración y mercenarios se cargan ANTES de jugar.');
- const report=await activateRouteGroups(prof,'all',(done,count,label)=>{
-  setLoadUI(count?100*done/count:100,'Cargando ruta completa de '+prof,label);
-  loadCount.textContent=done+' de '+count+' modelos únicos · '+all.length+' instancias';
+function loaderRetryDelay(label,attempt=1,detail=''){
+ return new Promise(resolve=>{
+  const ms=Math.min(20000,Math.max(2500,3000*Math.pow(1.55,Math.min(attempt-1,5))));
+  let done=false;
+  const finish=()=>{if(done)return;done=true;clearTimeout(timer);loadRetry.onclick=null;
+   loadRetry.style.display='none';loadingCard.classList.remove('failed');resolve()};
+  const timer=setTimeout(finish,ms);
+  loading.style.display='grid';loadingCard.classList.add('failed');
+  loadState.textContent='CARGA EN PAUSA · REINTENTO SIN REINICIAR';
+  loadDetail.textContent=label+' · intento '+attempt+' · '+detail+' · reintento en '+Math.round(ms/1000)+' s';
+  loadRetry.textContent='REINTENTAR AHORA · SIN RECARGAR';
+  loadRetry.style.display='inline-block';loadRetry.onclick=finish;
+  window.GenesisAssetDiag?.save?.();
  });
- refreshRouteBindings(prof);
- routeReady.add(prof);
- setLoadUI(100,'Partida completamente preparada','No queda decoración diferida en segundo plano.');
- loadCount.textContent=report.loaded+' de '+report.total+' modelos únicos · '+report.instances+' instancias';
+}
+async function prepareRoute(prof){
+ if(window.__GENESIS_LITE_BOOT&&prof!=='Herrero'){routeReady.add(prof);return}
+ if(routeReady.has(prof))return;
+ routeLoading=true;intro.style.display='none';loading.style.display='grid';
+ loadingCard.classList.remove('failed');loadRetry.style.display='none';
+ const stages=[['critical','Modelos esenciales'],['stream','Herrería y decoración'],['mercenaries','Mercenario y equipamiento']];
+ let stageIndex=0;
+ for(const [priority,label] of stages){
+  let attempt=0;
+  while(true){
+   const pending=groupRouteModels(priority==='mercenaries'?routeModels('SharedMercenary','ondemand'):routeModels(prof,priority)).length;
+   setLoadUI(100*stageIndex/stages.length,'Cargando '+prof+' · '+label,'Quedan '+pending+' recursos únicos; ningún modelo se carga dos veces.');
+   const report=await activateRouteGroups(prof,priority,(done,total,detail)=>{
+    setLoadUI(100*(stageIndex+(total?done/total:1))/stages.length,'Cargando '+prof+' · '+label,detail);
+    loadCount.textContent=done+' de '+total+' recursos únicos del grupo · etapa '+(stageIndex+1)+' de '+stages.length;
+   });
+   if(!report.failed)break;
+   attempt++;
+   const reason=report.errors.slice(0,3).join(' | ');
+   console.warn('Genesis Herrero carga parcial · '+priority+' · '+reason);
+   await loaderRetryDelay(prof+' · '+label+' · '+report.failed+' recursos pendientes',attempt,reason);
+  }
+  stageIndex++;
+ }
+ try{refreshRouteBindings(prof)}catch(err){console.warn('Genesis bindings de ruta:',err)}
+ routeReady.add(prof);loadingCard.classList.remove('failed');loadRetry.style.display='none';
+ setLoadUI(100,'Ruta de '+prof+' completa','Todos los modelos de Herrero y mercenario fueron procesados antes de entrar.');
+ loadCount.textContent='3 de 3 grupos preparados · sin carga diferida';
 }
 async function chooseProfessionRoute(prof){
  if(routeLoading||gameStarted)return;
@@ -1785,11 +1815,12 @@ async function chooseProfessionRoute(prof){
   loading.style.display='none';
  }catch(err){
   console.error(err);
-  failLoading(err?.message||String(err),'No se habilitó la ruta: todos sus recursos deben estar completos. Reintentá.');
+  failLoading(err?.message||String(err),'Ruta en pausa; podés reintentar sin reiniciar la página.');
+  loadRetry.textContent='REINTENTAR RUTA · SIN RECARGAR';
+  loadRetry.onclick=()=>{routeLoading=false;loadingCard.classList.remove('failed');chooseProfessionRoute(prof)};
   intro.style.display='none';
  }finally{
-  routeLoading=false;
-  buttons.forEach(b=>b.disabled=false);
+  routeLoading=false;buttons.forEach(b=>b.disabled=false);
  }
 }
 function startRoute(prof){village.setProfession(prof);selectedProfession=prof;activeRoute=ROUTES[prof];const engine=window.GenesisPrototypeEngines;if(!engine){toast('Motor NGE Alpha no disponible.',1600);return}craftSession=engine.generateSession(prof);gameStarted=true;tutorialStep=0;workshopKey=false;debrisCleared=false;auxCleared=false;chestOpen=false;playerInventory={};inventoryOpen=false;inventoryTutorialOpened=false;craftedItems=[];usedItemNames=new Set();resetMercenaryExtension();forgeHot=false;tannerOperational=false;igniteForgeVisual();if(tannerWorkLight)tannerWorkLight.intensity=.72;doorAngle=doorTarget=tannerDoorAngle=tannerDoorTarget=0;if(doorLeafEntity)doorLeafEntity.setEulerAngles(0,0,0);if(tannerDoorLeafEntity)tannerDoorLeafEntity.setEulerAngles(0,0,0);const center=activeRoute.center;px=center;pz=6.3;player.setPosition(px,0,pz);camera.setPosition(center,3,10);camYaw=0;camPitch=24;camDist=cameraSolvedDist=4.7;const mentor=activeRoute.mentor();mentor.setPosition(center+1.72*WORKSHOP_SCALE,0,1.90*WORKSHOP_SCALE);mentorYaw=-21;mentor.setEulerAngles(0,mentorYaw,0);mentorFollowState='outside';mentorFollowDelay=0;mentorPath=[];mentorWaypoint=0;marketEscortWaypoint=0;marketEscortWaiting=false;setMentorAnim(activeRoute.mentorIdle,.01);npcTag.textContent=activeRoute.mentorName.toUpperCase();professionChip.textContent=`PROFESIÓN · ${prof.toUpperCase()} · 2 FAMILIAS · 4 FABRICACIONES`;professionChip.style.display='block';materialsPanel.style.display='none';if(inventoryTouch){inventoryTouch.classList.add('locked');inventoryTouch.classList.remove('ready')}intro.style.display='none';mouseCapture.refresh();const fastSetup=applyDevFastTestState();restoreKnownLightingProfile();if(forgeHot){igniteForgeVisual();pulseForge(.10)}if(!fastSetup){setTutorialStep(0);toast(`Recorrido ${prof} iniciado.`,1500);mentorGestureAt=performance.now()+4800;mentorGestureReturn=0}}
@@ -1837,7 +1868,7 @@ try{await waitVisualModulesBeforePlay()}catch(err){
  throw err;
 }
 showBootProgress('Interfaz y escena preparadas','Todos los recursos iniciales están listos.');
-await prepareRoute('Herrero');routeLoading=false;setLoadUI(100,'Juego completo listo','Herrero preparado antes de elegir profesión.');clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
+routeLoading=false;setLoadUI(100,'Núcleo listo','Personaje y controles preparados. La herrería se cargará al seleccionar Herrero.');clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
 </script>
 
 <script id="genesis-prototype-engines">
