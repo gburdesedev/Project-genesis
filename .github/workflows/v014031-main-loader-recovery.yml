@@ -1,0 +1,68 @@
+name: Genesis main candidate | recover V014031 staged Herrero loader
+on:
+  push:
+    branches: [integration/v014031-loader-recovery-20261108]
+    paths:
+      - '.github/workflows/v014031-main-loader-recovery.yml'
+      - 'scripts/restore_v014031_loader_incremental.py'
+      - 'tests/herrero_v014031_loader_recovery.cjs'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply incremental boot patch to current main HTML
+        run: |
+          python3 scripts/restore_v014031_loader_incremental.py
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text()
+          assert "Núcleo listo" in s
+          assert "await prepareRoute('Herrero');routeLoading=false;" not in s
+          assert "loaderRetryDelay(" in s
+          assert "genesis_ui_approved" in Path('preparacion_control.js').read_text() or Path('genesis_ui_approved.js').exists()
+          print("PASS: staged loader + original approved menu files untouched")
+          PY
+          git diff --check
+          git diff --stat
+      - name: Check inline module JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          import pathlib,re
+          s=pathlib.Path('index.html').read_text()
+          chunks=re.findall(r'<script\s+type="module"\s*>(.*?)</script>',s,re.S)
+          print('INLINE_MODULES',len(chunks))
+          for i,chunk in enumerate(chunks):pathlib.Path('/tmp/inline-module-%02d.mjs'%i).write_text(chunk)
+          assert chunks
+          PY
+          for file in /tmp/inline-module-*.mjs; do node --check "$file"; done
+      - name: Install Playwright
+        run: npm install --prefix /tmp/genesis-stage-qa --no-audit --no-fund playwright@1.56.1
+      - name: Play patched branch HTML against real production assets
+        env:
+          NODE_PATH: /tmp/genesis-stage-qa/node_modules
+        run: node tests/herrero_v014031_loader_recovery.cjs
+      - name: Save validated patch only in candidate branch
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --check
+          git diff --cached --stat
+          git commit -m "fix: restore V014031 staged Herrero route loader on current main"
+          git push origin HEAD:integration/v014031-loader-recovery-20261108
+      - name: Upload QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v014031-staged-loader-live-qa
+          path: previews/herrero-recovery-live
+          if-no-files-found: warn
+          retention-days: 7
