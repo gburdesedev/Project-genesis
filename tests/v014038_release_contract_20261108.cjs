@@ -4,6 +4,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const root=path.resolve(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const html=read('index.html'),world=read('village_world.js'),market=read('genesis_market_v001.js');
 const quest=require('../genesis_market_quest_v001.js');
+assert(html.includes('const HERRERO_WORKSHOP_SETUP_REQUIRED=true;'),
+ 'Release must start at Ordan and play V016; developer skip-to-workshop is forbidden');
 const cinema=require('../genesis_market_cinematic_v001.js');
 const arrival=require('../v015/canvas-arrival-v016.js');
 for(const token of [
