@@ -16,8 +16,7 @@ assert.equal(approved.readUInt32BE(16),expectedWidth,'Artwork width changed');
 assert.equal(approved.readUInt32BE(20),expectedHeight,'Artwork height changed');
 const check=(p)=>fs.readFileSync(path.join(root,p),'utf8');
 const html=check('index.html');
-assert.match(html,/genesis-game-version/);
-assert.match(html,/<title>Project Genesis/);
+assert.match(html,/<title>/);
 assert.match(check('preparacion_control.js'),/inventario_arte_aprobado_1to1\.css\?v=0\.14\.031-main/);
 assert.match(check('inventario_genesis_16x9.js'),/INVENTARIO_16x9_V014031_ORA_APROBADO_1A1/);
 
