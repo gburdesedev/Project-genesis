@@ -84,7 +84,7 @@ const issues=[];
     window.__NAV__.renderWorkspace('Fabricaciones');
   });
   assert.equal(await page.locator('#gApprovedCraftAction').isDisabled(),true,'Quest-locked recipe must never craft');
-  assert.equal(await page.locator('[data-recipe="espada_hierro"]').isDisabled(),true,'Quest-locked recipe must not activate');
+  assert.equal(await page.locator('button[data-recipe="espada_hierro"]').isDisabled(),true,'Quest-locked recipe must not activate');
   assert.match(await page.locator('.gApprovedCraftState').innerText(),/Bloqueada por misión/);
   await page.evaluate(()=>{window.__CTX__.getRecipeCatalog().find(r=>r.id==='espada_hierro').questLocked=false;window.__NAV__.renderWorkspace('Fabricaciones')});
   await page.screenshot({path:path.join(out,'04-fabricaciones-escudo-1600x900.png'),animations:'disabled'});
