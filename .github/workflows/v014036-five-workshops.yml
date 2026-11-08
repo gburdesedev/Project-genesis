@@ -1,0 +1,35 @@
+name: Genesis V014036 | five approved workshop facades and Arcanista V027
+on:
+  push:
+    branches: ['experiment/v014036-talleres-puertas-20261108']
+    paths: ['village_world.js','index.html','tests/integration_stability_20261108.cjs','.github/workflows/v014036-five-workshops.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  workshop-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate village plan and modular world
+        run: |
+          node --check village_world.js
+          node tests/village_plan.cjs
+          node --check tests/integration_stability_20261108.cjs
+          test -s assets/vendor/genesis/externals/arcanistDoorV027/src/Arcanist_Door_V027_WebGL.glb
+      - name: Install actual Chromium
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Five actual workshops on the live Herrero route
+        run: node tests/integration_stability_20261108.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v014036-five-workshops
+          path: previews/stability-20261108/
+          retention-days: 14
