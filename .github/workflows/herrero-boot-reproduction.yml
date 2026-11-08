@@ -1,0 +1,38 @@
+name: Genesis Herrero boot regression - real browser
+on:
+  push:
+    branches: [fix/herrero-boot-regression-20261108]
+    paths:
+      - 'tests/diagnose_herrero_live.cjs'
+      - '.github/workflows/herrero-boot-reproduction.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  boot:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [desktop, mobile]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Playwright
+        run: npm install --prefix /tmp/genesis-herrero-boot --no-audit --no-fund playwright@1.56.1
+      - name: Reproduce published main, click Herrero and trace every stalled asset
+        env:
+          NODE_PATH: /tmp/genesis-herrero-boot/node_modules
+          GENESIS_MODE: ${{ matrix.mode }}
+          GENESIS_URL: https://gburdesedev.github.io/Project-genesis/
+        run: node tests/diagnose_herrero_live.cjs
+      - name: Upload boot snapshots, screenshots and resource failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: herrero-boot-${{ matrix.mode }}
+          path: /tmp/genesis-herrero-boot-${{ matrix.mode }}/
+          if-no-files-found: warn
+          retention-days: 7
