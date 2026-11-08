@@ -1695,7 +1695,7 @@ function frame(now){requestAnimationFrame(frame);village.trees?.update(px,pz);co
 }
 requestAnimationFrame(frame);
 
-setLoadUI(100,'Núcleo listo','Edric, cámara y controles preparados. El taller se cargará después de elegir profesión.');clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';setTimeout(()=>{loading.style.display='none';intro.style.display='grid'},360);
+setLoadUI(100,'Núcleo listo','Edric, cámara y controles preparados. El taller se cargará después de elegir profesión.');clearInterval(loadTimer);loadElapsed.textContent=((performance.now()-loadStarted)/1000).toFixed(1)+' s';setTimeout(()=>{loading.style.display='none';if(!GENESIS_MERCENARY_LAB&&!gameStarted)intro.style.display='grid';else intro.style.display='none'},360);
 </script>
 
 <script id="genesis-prototype-engines">
