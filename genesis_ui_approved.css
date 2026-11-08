@@ -168,3 +168,56 @@
 .gPrepThermalDetails [data-tone="cold"],.gPrepThermalDetails [data-tone="hot"]{color:#e5a778}
 .gPrepThermalDetails button{border:1px solid #ad7b3f;background:#21130c;color:#f1d1a0;padding:3%;font-size:1.02cqw}
 .gPrepThermalDetails button:hover{background:#4a2818}
+
+/* V014.027 result: maintain exact current approved 16:9 art, refresh material images. */
+.gApproved-PrepResult .gPrepResultSlot {
+  display:flex;position:absolute;align-items:center;justify-content:center;
+  border:0!important;outline:0!important;box-shadow:none!important;
+  background:transparent!important;overflow:hidden;pointer-events:none;
+}
+.gApproved-PrepResult .gPrepResultSlot img {
+  display:block;width:auto;height:auto;max-width:91%;max-height:82%;
+  object-fit:contain;filter:drop-shadow(0 3px 4px #000b);
+}
+.gApproved-PrepResult .gPrepResultSlot b {
+  position:absolute;right:3%;bottom:1%;
+  font-size:1cqw;color:#f1d5a1;text-shadow:0 2px 4px #000;
+}
+.gApprovedPrepResultDisplay,.gApprovedPrepResultInfo {
+  position:absolute;box-sizing:border-box;z-index:7;
+}
+.gApprovedPrepResultDisplay {
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  gap:2%;text-align:center;color:#f3d6a4;
+}
+.gApprovedPrepResultDisplay img {
+  width:auto;max-width:84%;height:auto;max-height:70%;object-fit:contain;
+  filter:drop-shadow(0 9px 13px #000c);
+}
+.gPrepResultHeadline {
+  font:normal 1.6cqw Georgia,serif;
+  color:#b6e4a3;text-shadow:0 2px 5px #000;
+}
+.gApprovedPrepResultDisplay p{font:normal 1.05cqw Georgia,serif}
+.gApprovedPrepResultInfo{
+  background:linear-gradient(135deg,#120d09e8,#0c0908e9);
+  border:1px solid #9c6934;border-radius:4px;padding:2%;
+  display:flex;flex-direction:column;gap:3%;
+  font:normal 1.12cqw Georgia,serif;color:#f0d5a5;
+}
+.gApprovedPrepResultInfo h2{font:normal 1.2cqw Georgia,serif;text-align:center;letter-spacing:.08em}
+.gApprovedPrepResultInfo h3{font:normal 1.4cqw Georgia,serif;text-align:center;margin:0 0 5%}
+.gApprovedPrepResultInfo div{display:flex;justify-content:space-between;border-bottom:1px solid #735030;padding:3% 0}
+.gApprovedPrepResultInfo button{
+  border:1px solid #a77739;background:#312014;
+  color:#f0d3a7;padding:3%;font:normal 1.05cqw Georgia,serif;
+}
+.gApprovedPrepResultInfo button:hover{background:#4c2d18}
+/* The PREPARAR action uses the golden button already baked in the approved PNG;
+   no added hover border or colored rectangle offset from the source frame. */
+.gApproved-Preparacion #gPrepAction,
+.gApproved-Preparacion #gPrepAction:hover,
+.gApproved-Preparacion #gPrepAction:focus-visible {
+  background:transparent!important;box-shadow:none!important;
+  border:0!important;outline:0!important;
+}

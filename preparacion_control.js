@@ -57,7 +57,7 @@
   const MATERIAL_PROFILES = Object.freeze({
     [PREPARED]: Object.freeze({
       target: 72, baseTolerance: 11, initialGap: 17,
-      coolingPerSecond: 0.45 * 1.90, heatResponse: 1, processingSpeed: 1.60
+      coolingPerSecond: 0.45 * 1.90, heatResponse: 1, processingSpeed: 1.60 * 1.30
     })
   });
   const BASE_PROGRESS_PER_SECOND = 3; // Velocidad demostrativa; NO es un cronómetro límite.
@@ -948,6 +948,15 @@
   }
 
   function renderResultSkin(ctx, work, success) {
+    // On current game sessions keep using the approved 16:9 preparation board.
+    // Legacy 1536x1024 result mode has stale model-viewer slots and hides posters.
+    if(ctx.getItems && window.GenesisApprovedUI?.renderResult){
+      window.GenesisApprovedUI.renderResult(ctx, approvedUiNav(), {
+        work, success, back:renderMenu, close
+      });
+      return;
+    }
+
     const raw = countOf(ctx.inventory, RAW), ingots = countOf(ctx.inventory, PREPARED);
     const center = `<section class="prepSkinResultBox"><div class="prepSkinResultIcon">${success ? '✓' : '!'}</div>
       <h3>${success ? 'Preparación completada' : 'Lote no aplicado'}</h3>
