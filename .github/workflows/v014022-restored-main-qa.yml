@@ -1,0 +1,35 @@
+name: Genesis V014022 restored main - real Playwright and asset routes
+on:
+  push:
+    branches: ['experiment/v014022-restore-assets-playwright-20261108']
+    paths:
+      - 'tests/v014022_restored_main_qa.cjs'
+      - '.github/workflows/v014022-restored-main-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify diagnosis script syntax
+        run: node --check tests/v014022_restored_main_qa.cjs
+      - name: Install Playwright
+        run: npm install --prefix /tmp/genesis-v014022-restored playwright@1.56.1
+      - name: Browser actual Herrero route and snapshots
+        run: NODE_PATH=/tmp/genesis-v014022-restored/node_modules node tests/v014022_restored_main_qa.cjs
+      - name: Upload screenshots and forensic JSON, including failed runs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v014022-restored-herrero-real-qa
+          path: previews/v014022-restored-qa/
+          retention-days: 14
