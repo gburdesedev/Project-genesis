@@ -20,6 +20,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Inspect unmodified release metadata before any version bump
+        run: |
+          node -e "const s=require('fs').readFileSync('index.html','utf8');const m=[...s.matchAll(/v0\\.14\\.\\d+|V014[.]\\d+|<title>[^<]{0,100}|[?&](?:v|ver|build)=[^&'\\\" ]+/g)].map(x=>({i:x.index,txt:x[0]}));console.log('RELEASE_METADATA',JSON.stringify(m.slice(0,42)));console.log('VERSION_COUNTS',JSON.stringify(m.reduce((a,x)=>(a[x.txt]=(a[x.txt]||0)+1,a),{})))"
       - name: Check diagnostics syntax
         run: node --check tests/integration_stability_20261108.cjs
       - name: Install real Chromium
