@@ -49,7 +49,22 @@ async function snap(page){
   let state=await snap(page);record('intro',state);
   assert(!state.failed&&state.intro,'Game did not reach profession selection');
   await page.locator('[data-profession="Herrero"]').click({timeout:30000});
-  await page.waitForFunction(()=>((document.querySelector('#prototypeIntro')?.style.display==='none')&&getComputedStyle(document.querySelector('#professionChip')).display!=='none')||document.querySelector('.loadingCard.failed'),null,{timeout:280000});
+  try{
+   await page.waitForFunction(()=>((document.querySelector('#prototypeIntro')?.style.display==='none')&&getComputedStyle(document.querySelector('#professionChip')).display!=='none')||document.querySelector('.loadingCard.failed'),null,{timeout:140000});
+  }catch(error){
+   const diag=await page.evaluate(()=>{
+    const get=id=>document.getElementById(id),state=id=>get(id)?.textContent?.trim()?.slice(0,160);
+    const track=['hairBeard086','forgeStation','barrelReal','mercHairBuzz10','mercSword10','mercShield10'].map(id=>{
+     const el=get(id),asset=get('genesisApp')?.app?.assets?.find?.(id);return {id,src:el?.getAttribute('src'),lazy:el?.hasAttribute('lazy'),ready:!!el?.resource,assetLoaded:asset?.loaded||null}
+    });
+    return {loadingState:state('loadState'),loadingDetail:state('loadDetail'),loadCount:state('loadCount'),routeAssetProgress:window.__genesisRouteAssetProgress||null,routeErrors:window.__genesisRouteAssetErrors||[],boot:window.__genesisBoot||null,
+     failed:!!document.querySelector('.loadingCard.failed'),diagnostics:window.GenesisAssetDiag?.snapshot?.()||null,track,
+     lastResource:performance.getEntriesByType('resource').slice(-6).map(r=>({name:r.name.slice(-140),bytes:r.transferSize,duration:Math.round(r.duration)})),
+     introDisplay:get('prototypeIntro')?.style.display,professionChipDisplay:get('professionChip')?.style.display};
+   }).catch(e=>({snapshotError:String(e)}));
+   record('herrero-route-timeout',diag);
+   throw new Error('Herrero route did not complete in 140s: '+JSON.stringify(diag).slice(0,2000)+' | '+error.message);
+  }
   state=await snap(page);record('herrero-entered',state);
   assert(!state.failed&&state.chip&&state.rendering,'Selecting Herrero failed');
   assert.equal(state.village?.workshops,5,'Final build must have 5 workshops (1 playable, 4 closed)');
