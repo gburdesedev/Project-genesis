@@ -1,0 +1,50 @@
+name: Genesis | Herrero real click in Chrome and Edge
+on:
+  push:
+    branches: [diagnostic/herrero-real-click-20261108]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chromium:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser test dependency
+        run: npm install --prefix /tmp/genesis-click playwright@1.56.1 --no-audit --no-fund
+      - name: Play real live main (no force click, no injected patches)
+        env:
+          NODE_PATH: /tmp/genesis-click/node_modules
+          TEST_BROWSER: chromium
+        run: node tests/herrero_real_click.cjs
+      - name: Capture evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-herrero-real-click-chromium
+          path: previews/herrero-real-click/chromium/
+          retention-days: 7
+  edge-windows:
+    runs-on: windows-2025
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test dependency
+        run: npm install --no-save playwright@1.56.1 --no-audit --no-fund
+      - name: Play real live main on Windows Microsoft Edge
+        env:
+          TEST_BROWSER: edge
+        run: node tests/herrero_real_click.cjs
+      - name: Capture evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-herrero-real-click-edge-windows
+          path: previews/herrero-real-click/edge/
+          retention-days: 7
