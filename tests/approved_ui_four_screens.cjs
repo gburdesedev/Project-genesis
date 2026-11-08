@@ -80,7 +80,7 @@ const issues=[];
     assert.equal(frames.border,'0px');
     await page.screenshot({path:path.join(out,'01-inventario-material-'+(index+1)+'-1600x900.png'),animations:'disabled'});
   }
-  await page.locator('[data-family="Materiales"]').click();
+  await page.locator('button.gApprovedFamily[data-family="Materiales"]').click();
 
   await page.locator('[data-family="Espadas"]').click();
   assert.equal(await page.locator('.gApprovedSlot:not(:disabled)').count(),1);
