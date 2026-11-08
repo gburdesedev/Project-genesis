@@ -1,0 +1,70 @@
+name: Genesis Herrero | experimental preload guard fix + full entry QA
+on:
+  push:
+    branches: [fix/herrero-boot-regression-20261108]
+    paths:
+      - '.github/workflows/herrero-boot-guard-fix.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch-and-verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply one-line fix to existing game, without rebuilding assets or changing menus
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          old="await prepareRoute('Herrero');setLoadUI(100,'Juego completo listo'"
+          new="await prepareRoute('Herrero');routeLoading=false;setLoadUI(100,'Juego completo listo'"
+          assert s.count(old)==1, f'Unexpected bootstrap pattern: {s.count(old)}'
+          p.write_text(s.replace(old,new,1))
+          assert s.count(new)==1
+          print('EXPERIMENTAL_FIX_APPLIED: release routeLoading after preload')
+          PY
+      - name: Install Playwright
+        run: npm install --prefix /tmp/genesis-herrero-boot --no-audit --no-fund playwright@1.56.1
+      - name: Start local game from experimental patch
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/genesis-herrero-http.log 2>&1 &
+          sleep 2
+          curl -fsSI http://127.0.0.1:8765/index.html | head
+      - name: Enter Herrero in real desktop Chromium, no mocked gameplay
+        env:
+          NODE_PATH: /tmp/genesis-herrero-boot/node_modules
+          GENESIS_MODE: desktop
+          GENESIS_URL: http://127.0.0.1:8765/
+        run: node tests/diagnose_herrero_live.cjs
+      - name: Enter Herrero in real mobile Chromium, no mocked gameplay
+        env:
+          NODE_PATH: /tmp/genesis-herrero-boot/node_modules
+          GENESIS_MODE: mobile
+          GENESIS_URL: http://127.0.0.1:8765/
+        run: node tests/diagnose_herrero_live.cjs
+      - name: Commit only validated one-line fix to experimental branch
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --check
+          git diff --cached --stat
+          git commit -m "fix(experiment): release Herrero routeLoading after complete preboot"
+          git push origin HEAD:fix/herrero-boot-regression-20261108
+      - name: Upload actual gameplay evidence and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-herrero-boot-guard-qa
+          path: |
+            /tmp/genesis-herrero-boot-desktop/
+            /tmp/genesis-herrero-boot-mobile/
+            /tmp/genesis-herrero-http.log
+          if-no-files-found: warn
+          retention-days: 10
