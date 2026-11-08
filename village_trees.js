@@ -186,7 +186,7 @@ export function mountVillageTrees(app, villageRoot, options={}){
  app.on('update',windTick);
  let active=0,focusX=0,focusZ=0,lastUpdate=0;
  // One mobile GLB decode at a time; desktop keeps approved LOD1+LOD2.
- const maxConcurrent=safeMobile?1:4;
+ const maxConcurrent=safeMobile?1:2;
  let started=false;
  const initiallySettled=new Set();
  let resolveInitial;
