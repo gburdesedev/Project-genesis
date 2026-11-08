@@ -60,7 +60,10 @@ function setup(models){
  const bad=[new Model('Herrero','critical','OK'),new Model('Herrero','stream','FAIL',true),
             new Model('SharedMercenary','ondemand','MERC')];
  const progress=[];
- await assert.rejects(()=>setup(bad)('Herrero','all',(n,total)=>progress.push({n,total})),/Faltan 1 recursos/);
+ const report=await setup(bad)('Herrero','all',(n,total)=>progress.push({n,total}));
+ assert.equal(report.failed,1,'failed model is counted and not silently accepted');
+ assert.equal(report.loaded,2,'two valid models remain accounted for');
  assert.equal(progress.at(-1).n,2,'failed route must never report all as ready');
+ assert.equal(report.errors.length,1,'exact failed resource must remain in diagnostic report');
  console.log('PASS route preflight: critical + stream + mercenary; error blocks play and progress');
 })().catch(err=>{console.error(err);process.exitCode=1});
