@@ -6,6 +6,8 @@ on:
       - 'tests/integration_stability_20261108.cjs'
       - '.github/workflows/integration-stability-20261108.yml'
       - 'index.html'
+      - 'genesis_ui_approved.js'
+      - 'tests/approved_ui_four_screens.cjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -24,6 +26,8 @@ jobs:
         run: |
           npm install --no-save playwright@1.56.1
           npx playwright install --with-deps chromium
+      - name: Approved artboard V07 functionality and quest-lock safety
+        run: node tests/approved_ui_four_screens.cjs
       - name: Real game boot, actual Herrero click and Arcanista assembly
         run: node tests/integration_stability_20261108.cjs
       - uses: actions/upload-artifact@v4
