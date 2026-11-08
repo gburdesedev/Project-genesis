@@ -1,0 +1,45 @@
+name: Project Genesis | V014031 staged loader on real Windows Edge
+on:
+  push:
+    branches: [qa/v014031-loader-edge-win-20261108]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  staged-herrero:
+    runs-on: windows-2025
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Incremental V014031 loader patch (do not overwrite approved menus)
+        shell: bash
+        run: |
+          python scripts/restore_v014031_loader_incremental.py
+          git diff --check
+          git diff --stat
+      - name: Install Playwright test library
+        run: npm install --no-save playwright@1.56.1 --no-audit --no-fund
+      - name: Complete real Herrero route with assets from production Pages
+        env:
+          TEST_CHANNEL: msedge
+        run: node tests/herrero_v014031_loader_recovery.cjs
+      - name: Commit validated index.html to Windows QA branch, never main
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --check
+          git commit -m "fix: restore V014031 profession-first staged loading on latest main"
+          git push origin HEAD:qa/v014031-loader-edge-win-20261108
+      - name: Upload render, route log and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v014031-loader-edge-windows-qa
+          path: previews/herrero-recovery-live
+          if-no-files-found: warn
+          retention-days: 7
