@@ -29,8 +29,10 @@ jobs:
           assert "genesis_ui_approved" in Path('preparacion_control.js').read_text() or Path('genesis_ui_approved.js').exists()
           print("PASS: staged loader + original approved menu files untouched")
           PY
-          git diff --check
-          git diff --stat
+          echo "Working directory: $(pwd)"; echo "Workspace: $GITHUB_WORKSPACE"
+          ls -ld .git || true
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git -C "$GITHUB_WORKSPACE" rev-parse --show-toplevel || true
       - name: Check inline module JavaScript syntax
         run: |
           python3 - <<'PY'
@@ -53,11 +55,11 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html
-          git diff --cached --check
-          git diff --cached --stat
-          git commit -m "fix: restore V014031 staged Herrero route loader on current main"
-          git push origin HEAD:integration/v014031-loader-recovery-20261108
+          git -C "$GITHUB_WORKSPACE" add index.html
+          git -C "$GITHUB_WORKSPACE" diff --cached --check
+          git -C "$GITHUB_WORKSPACE" diff --cached --stat
+          git -C "$GITHUB_WORKSPACE" commit -m "fix: restore V014031 staged Herrero route loader on current main"
+          git -C "$GITHUB_WORKSPACE" push origin HEAD:integration/v014031-loader-recovery-20261108
       - name: Upload QA evidence
         if: always()
         uses: actions/upload-artifact@v4
