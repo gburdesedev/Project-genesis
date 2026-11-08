@@ -64,10 +64,11 @@ async function audit(page,label){
    return;
   }
   const start=Date.now();
-  while(Date.now()-start<330000&&!s.intro&&!s.errors.length){
+  while(Date.now()-start<330000&&!s.intro&&!report.errors.length){
    await page.waitForTimeout(12000);s=await audit(page,'boot');
    if(report.samples.length>28)break;
   }
+  if(report.errors.length)throw Error('Browser JS failed during world boot: '+JSON.stringify(report.errors));
   if(!s.intro)throw Error('Full village failed to reach profession chooser: '+JSON.stringify(s));
   assert(s.fullVillage,'Full 63x63 village not mounted');
   assert.equal(s.trees.planned,14,'Expected original 14 tree sites');
@@ -80,6 +81,7 @@ async function audit(page,label){
    if(s.chip&&!s.intro){entered=true;break}
    if(report.errors.length)console.log('WORLD_RUNTIME_ERRORS',JSON.stringify(report.errors.slice(-5)));
   }
+  if(report.errors.length)throw Error('Browser JS failed during route: '+JSON.stringify(report.errors));
   if(!entered)throw Error('Herrero route did not finish: '+JSON.stringify({last:s,errors:report.errors.slice(-5),http:report.httpErrors.slice(-8)}));
   s=await audit(page,'entered-real-Herrero');
   assert(s.fullVillage,'Full village disappeared upon route selection');
