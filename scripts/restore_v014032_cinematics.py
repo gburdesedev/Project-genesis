@@ -45,8 +45,8 @@ once('function interact(){const target=',
 once('function getInteractables(){if(!gameStarted||!activeRoute||tutorialStep<0)return[];',
      'function getInteractables(){if(!gameStarted||!activeRoute||tutorialStep<0||arrivalCinematic?.active||marketCinematic?.active)return[];',
      'interaction target lock')
-once('function cameraInputBlocked(){',
-     'function cameraInputBlocked(){if(arrivalCinematic?.active||marketCinematic?.active)return true;',
+once('const cameraInputBlocked=e=>{if(!gameStarted||',
+     'const cameraInputBlocked=e=>{if(arrivalCinematic?.active||marketCinematic?.active||!gameStarted||',
      'camera lock')
 once('mentorGestureReturn=0}}\ndocument.querySelectorAll(\'[data-profession]\')',
      'mentorGestureReturn=0}if(!fastSetup&&prof===\'Herrero\')startInitialArrival()}\ndocument.querySelectorAll(\'[data-profession]\')',
@@ -95,8 +95,8 @@ once('const w=workshopAt(px,pz);updateMentorFollow(dt,now,w);',
      'arrival frame tick')
 # Reuse original V014026 condition so the walking controller is not forced to idle
 # while a cinematic controls the avatar.
-once('}else setWalking(false);\n const w=workshopAt(px,pz);',
-     '}else if(!marketCinematic?.active&&!arrivalCinematic?.active)setWalking(false);\n const w=workshopAt(px,pz);',
+once('}else setWalking(false);\\n updateInitialArrival(dt,now);const w=workshopAt(px,pz);',
+     '}else if(!marketCinematic?.active&&!arrivalCinematic?.active)setWalking(false);\\n updateInitialArrival(dt,now);const w=workshopAt(px,pz);',
      'do not cancel cinematic Walk_Loop')
 # Existing source may not have the above newline in this version; intentional fail
 # rather than silently skip. Only approved script/layout are preserved.
