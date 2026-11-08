@@ -1,0 +1,40 @@
+name: V014024 PC-force contract
+on:
+  push:
+    branches: ['release/v014024-force-desktop-20261108']
+    paths:
+      - 'device_policy.js'
+      - 'index.html'
+      - '.github/workflows/v014024-pc-force.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify forced PC mode and version on real game sources
+        run: |
+          node --check device_policy.js
+          node - <<'JS'
+          const assert=require('node:assert/strict');
+          const fs=require('node:fs'),vm=require('node:vm');
+          const html=fs.readFileSync('index.html','utf8');
+          assert(html.includes('Project Genesis v0.14.024'));
+          assert(html.includes('device_policy.js?v=0.14.024-pc'));
+          const classes=new Set();
+          const root={classList:{add(x){classes.add(x)},toggle(){},remove(x){classes.delete(x)}},style:{setProperty(){}}};
+          const style={textContent:''};
+          const doc={documentElement:root,head:{appendChild(){}},createElement(){return style},readyState:'loading',addEventListener(){}};
+          const window={matchMedia(){return {matches:true}},visualViewport:null,devicePixelRatio:3,innerWidth:390,innerHeight:844};
+          const navigator={userAgent:'Mozilla/5.0 iPhone Mobile',platform:'iPhone',maxTouchPoints:5};
+          const ctx={window,document:doc,navigator,screen:{orientation:{addEventListener(){}}},addEventListener(){},requestAnimationFrame(){return 1},ResizeObserver:undefined};
+          vm.runInNewContext(fs.readFileSync('device_policy.js','utf8'),ctx);
+          assert.equal(window.GenesisDevice.safePreviews,false);
+          assert.equal(window.GenesisDevice.forcedDesktop,true);
+          assert(classes.has('genesis-force-desktop'));
+          assert(!classes.has('mobile-device'));
+          assert(style.textContent.includes('#mobile,#rotate{display:none!important}'));
+          console.log('PASS V014024: PC renderer and desktop UI forced even with iPhone UA');
+          JS
