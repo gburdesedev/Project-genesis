@@ -29,6 +29,17 @@ async function snapshot(label){let data;try{data=await page.evaluate(()=>{
  page.on('response',r=>{if(r.status()>=400){let obj={status:r.status(),url:r.url().slice(0,220)};out.errors.push({type:'http',...obj});log('http-error',obj)}});
  page.on('crash',()=>{out.errors.push({type:'crash'});log('crash','Renderer crashed')});
  page.on('framenavigated',f=>{if(f===page.mainFrame())log('navigation',f.url())});
+ if(process.env.GENESIS_PATCH_BOOT==='1') {
+  await page.route('https://gburdesedev.github.io/Project-genesis/',async route=>{
+   const response=await route.fetch();
+   const original=await response.text();
+   const old="await prepareRoute('Herrero');setLoadUI(100,'Juego completo listo'";
+   const patched="await prepareRoute('Herrero');routeLoading=false;setLoadUI(100,'Juego completo listo'";
+   if(original.split(old).length!==2)throw Error('Live HTML did not match expected preboot guard');
+   await route.fulfill({response,body:original.replace(old,patched)});
+   log('patched-live-html',{bytes:original.length,changedOnly:'routeLoading=false after preboot'});
+  });
+ }
  await page.goto(url,{waitUntil:'domcontentloaded',timeout:100000});
  let intro=false;
  for(let i=0;i<55;i++){
