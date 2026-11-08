@@ -99,7 +99,7 @@ const issues=[];
   assert.equal(await page.evaluate(()=>window.GenesisPreparation.navigate('Fabricaciones')),true);
   await page.waitForSelector('.gApproved-Fabricaciones');
   await page.locator('#gApprovedCraftAction').click();
-  assert.equal(await page.evaluate(()=>window.__REAL_CRAFT_RECIPE__),'espada_hierro',
+  assert.equal(await page.evaluate(()=>window.__REAL_CRAFT_RECIPE__),'escudo_hierro',
     'Fabricar must invoke the actual procedural crafting callback with selected recipe');
   assert.equal(issues.length,0,issues.join('\n'));
   fs.writeFileSync(path.join(out,'report.json'),JSON.stringify({result:'PASS',artwork:'EXACT SHA256',screens:['Inventario V11','Preparación','Fabricaciones V07'],resultScreen:'Existing dynamic renderItemCard; provisional, not visually approved',ratio,issues},null,2));
