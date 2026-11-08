@@ -1,0 +1,45 @@
+/* Original approved artwork is an immutable raster background. CSS positions interactive/data overlays only. */
+.modal.preparationModal.genesisApprovedModal{
+ width:min(1672px,calc(100vw - 12px),calc((100dvh - 12px)*1672/941))!important;
+ max-height:calc(100dvh - 12px)!important;max-width:100%!important;
+ aspect-ratio:1672/941!important;height:auto!important;
+ overflow:hidden!important;padding:0!important;border:0!important;background:#080605!important;
+ box-shadow:0 16px 65px #000e!important;
+}
+.gApprovedBoard{position:relative;isolation:isolate;box-sizing:border-box;width:100%;height:100%;aspect-ratio:1672/941;background-color:#080605;background-position:center;background-size:100% 100%;background-repeat:no-repeat;container-type:inline-size;overflow:hidden;font-family:Georgia,'Times New Roman',serif;color:#ead0a2}
+.gApprovedBoard *{box-sizing:border-box}
+.gApprovedBoard button{font-family:inherit;color:inherit;cursor:pointer}
+.gApprovedBoard button:focus-visible{outline:2px solid #ffd28b;outline-offset:-2px}
+.gApprovedHit,.gApprovedInfoButton,.gApprovedPrepAction,.gApprovedCraftAction,.gApprovedRecipe,.gApprovedFamily{position:absolute;border:0;background:transparent;z-index:3;padding:0}
+.gApprovedHit:hover{background:linear-gradient(#ffb8490c,#ffb84924)}
+.gApprovedHit[data-go="Cerrar"]{z-index:15}
+.gApprovedSlot,.gApprovedPrepSlot{position:absolute;z-index:4;background:transparent;border:0;display:flex;align-items:center;justify-content:center;padding:3px;overflow:hidden}
+.gApprovedSlot.is-selected,.gApprovedPrepSlot:focus-visible{box-shadow:inset 0 0 0 2px #f5a934,0 0 12px #ff9d2788;border-radius:4px}
+.gApprovedSlotAsset{width:100%;height:80%;display:grid;place-items:center;overflow:hidden;pointer-events:none}
+.gApprovedSlotAsset img,.gApprovedPrepSlot img{max-width:94%;max-height:94%;object-fit:contain;filter:drop-shadow(0 3px 4px #000)}
+.gApprovedQty{position:absolute;bottom:1%;right:3%;font:normal 1.05cqw Georgia,serif;color:#ffdc9d;text-shadow:0 2px 3px #000,0 0 4px #000}
+.gApprovedHero{position:absolute;z-index:3;display:grid;place-items:center;overflow:hidden;pointer-events:auto}
+.gApprovedHero img{max-width:96%;max-height:96%;object-fit:contain;filter:drop-shadow(0 8px 12px #000c)}
+.gApprovedHero model-viewer{width:100%;height:100%;background:transparent;--progress-bar-color:transparent}
+.gApprovedInfoValues{position:absolute;z-index:4;display:grid;grid-template-rows:repeat(3,1fr);font:normal 1.05cqw Georgia,serif;color:#f6d5a1;text-shadow:0 2px 4px #000;pointer-events:none;overflow:hidden}
+.gApprovedInfoValues span{text-align:right;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;padding-right:2%}
+.gApprovedInfoButton:hover,.gApprovedPrepAction:hover,.gApprovedCraftAction:hover{background:#ffc05919;box-shadow:inset 0 0 0 1px #edaa5488}
+.gApprovedInfoButton:disabled,.gApprovedPrepAction:disabled,.gApprovedCraftAction:disabled{cursor:not-allowed;filter:grayscale(.5)}
+.gApprovedFamily.is-selected{box-shadow:inset 0 0 0 2px #e9a43a;border-radius:3px}
+.gApprovedFamily:hover,.gApprovedRecipe:hover{box-shadow:inset 0 0 0 1px #f6c36d}
+.gApprovedPagePrev,.gApprovedPageNext{position:absolute;z-index:5;border:1px solid #9a652b;background:#17100bdc;color:#edc590;font-size:1.3cqw}
+.gApprovedSheet{position:absolute;z-index:20;inset:14% 24% 9% 24%;padding:3%;overflow-y:auto;background:linear-gradient(#22170ff7,#090706fb);border:2px solid #b77b36;box-shadow:0 0 0 900px #0009,0 20px 45px #000;font-size:1.2cqw}
+.gApprovedSheet h2{text-align:center;font-size:2cqw}.gApprovedSheet h3{font-size:1.4cqw;color:#f3cb8c;border-bottom:1px solid #7d562e;padding-bottom:1%}
+.gApprovedSheet div{display:flex;justify-content:space-between;padding:1.1%;border-bottom:1px solid #684528}.gApprovedSheetClose{position:absolute;right:2%;top:2%;background:#26170c;border:1px solid #a97d45;font-size:2cqw}
+.gApprovedPrepSlot{font-size:1cqw}.gApprovedPrepSlot b{position:absolute;right:2%;bottom:1%;text-shadow:0 1px 3px #000}
+.gApprovedPrepData{position:absolute;z-index:4;font-size:1.12cqw;line-height:1.3;padding:2% 3%;color:#ead3ab;text-shadow:0 1px 4px #000}
+.gApprovedPrepData h3{font-size:1.5cqw;margin:0 0 8%}.gApprovedPrepData p{margin:3% 0 5%}
+.gApprovedPrepQty{display:flex;align-items:center;justify-content:center;gap:10%;margin:6% 0}.gApprovedPrepQty button{background:#201309;border:1px solid #d39b53;min-width:12%;font-size:1.7cqw}
+.gApprovedRequired{position:absolute;z-index:4;padding:1% 3%;background:linear-gradient(90deg,#110d0cfa,#130f0ef7);font:normal 1.05cqw Georgia,serif;overflow:hidden}
+.gApprovedRequired h3{font:normal 1.18cqw Georgia,serif;margin:0 0 3%;color:#ffe1ae}.gApprovedRequired p{margin:1% 0;display:flex;justify-content:space-between;color:#e3cfb1}
+.gApprovedCraftState{position:absolute;z-index:4;text-align:center;padding:1%;font-size:1.25cqw;background:#0c0b09d9}.gApprovedCraftState.is-ready{color:#91e79e}.gApprovedCraftState.is-blocked{color:#e2a47d}
+.gApprovedRecipe.is-selected{box-shadow:inset 0 0 0 2px #c78b39,0 0 8px #bd793e66}
+.gApprovedRecipeHeroSwap{position:absolute;z-index:4;display:grid;place-items:center;overflow:hidden;background:#17110c url('assets/ui/preparacion/01_Capas/Paneles/FondoVisorHerreria.png') center/cover no-repeat;border:1px solid #5e422b}
+.gApprovedRecipeHeroSwap img{max-width:82%;max-height:82%;object-fit:contain}.gApprovedRecipeHeroSwap span{position:absolute;bottom:4%;text-shadow:0 2px 4px #000;font-size:1.2cqw}
+.gApprovedNoModel{font-size:1.2cqw;text-align:center;color:#d7b98c}.gApprovedItemGlyph{font-size:3cqw;color:#c89b53}
+@media(max-width:760px){.gApprovedInfoValues{font-size:1.35cqw}.gApprovedPrepData{font-size:1.25cqw}}

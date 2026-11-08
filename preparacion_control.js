@@ -506,9 +506,48 @@
       '<div class="workspaceNgeScroll" tabindex="0">' + reading + '</div></section>';
   }
 
+  // Integración visual aprobada (PNG exactos); carga aislada, con fallback al controlador previo.
+  let approvedUiLoadState='idle',approvedUiPending=null;
+  function loadApprovedUi(next){
+    if(window.GenesisApprovedUI?.render)return true;
+    if(approvedUiLoadState==='failed')return false;
+    approvedUiPending=next;
+    if(approvedUiLoadState==='loading')return false;
+    approvedUiLoadState='loading';
+    const style=document.createElement('link');
+    style.rel='stylesheet';style.href='genesis_ui_approved.css?v=20261108.1';
+    document.head.append(style);
+    const script=document.createElement('script');
+    script.src='genesis_ui_approved.js?v=20261108.1';
+    script.onload=()=>{
+      approvedUiLoadState=window.GenesisApprovedUI?.render?'ready':'failed';
+      if(approvedUiLoadState==='failed')console.error('[Genesis UI] Falta el módulo de arte aprobado');
+      const fn=approvedUiPending;approvedUiPending=null;fn?.();
+    };
+    script.onerror=()=>{
+      approvedUiLoadState='failed';style.remove();
+      console.error('[Genesis UI] No se pudo cargar el arte aprobado; se conserva interfaz anterior');
+      const fn=approvedUiPending;approvedUiPending=null;fn?.();
+    };
+    document.head.append(script);
+    return false;
+  }
+  function approvedUiNav(){return {renderMenu,renderWorkspace,craft,start,close,sheetForItem};}
   function renderWorkspace(tab) {
     const ctx=session;
     if(!ctx) return;
+    // Único arte aprobado para Inventario V11 y Fabricaciones V07, sin cambiar los originales.
+    if(ctx.profession==='Herrero'&&ctx.getItems&&['Inventario','Fabricaciones'].includes(tab)){
+      if(window.GenesisApprovedUI?.render){
+        halt();ctx.mode='workspace';ctx.tab=tab;
+        window.GenesisApprovedUI.render(ctx,approvedUiNav(),tab);
+        return;
+      }
+      if(approvedUiLoadState!=='failed'){
+        loadApprovedUi(()=>renderWorkspace(tab));
+        return;
+      }
+    }
     // Inventario panorámico aislado: no altera Preparación, Fabricación ni Comparación.
     // Conserva datos de la sesión real, nunca resultados incrustados en el arte.
     if(tab==='Inventario') {
@@ -729,6 +768,19 @@
     const ctx = session;
     if (!ctx) return;
     if (ctx.profession !== 'Herrero') { renderLegacyMenu(); return; }
+    if(ctx.getItems){
+      const raw=countOf(ctx.inventory,RAW);
+      ctx.count=raw?Math.min(Math.max(ctx.count||1,1),raw):0;
+      if(window.GenesisApprovedUI?.render){
+        halt();ctx.mode='menu';ctx.tab='Preparacion';
+        window.GenesisApprovedUI.render(ctx,approvedUiNav(),'Preparacion');
+        return;
+      }
+      if(approvedUiLoadState!=='failed'){
+        loadApprovedUi(renderMenu);
+        return;
+      }
+    }
     halt();
     ctx.mode = 'menu';ctx.tab='Preparacion';
     const raw = countOf(ctx.inventory, RAW), ingots = countOf(ctx.inventory, PREPARED);
