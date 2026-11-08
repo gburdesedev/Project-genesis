@@ -1,5 +1,5 @@
 import {Entity,StandardMaterial,Texture,Color,Mesh,MeshInstance,ADDRESS_REPEAT,BLEND_NORMAL,FILTER_LINEAR,FILTER_LINEAR_MIPMAP_LINEAR} from 'playcanvas';
-import {mountVillageTrees} from './village_trees.js?v=0.15.001';
+import {mountVillageTrees} from './village_trees.js?v=0.14.033-mobile-staged';
 import {mountArcanePortal} from './village_arcanist.js?v=0.14b-mobile-boot-20261103';
 const ROOT='./assets/world/v0.11.004/';
 const MOBILE_TEXTURE_EDGE=1024;
@@ -132,7 +132,7 @@ function arcaneSurround(app,building,cobble,shell){
  return frame;
 }
 function stampVersion(){
- const version='v0.14.032', build='20261108.01';
+ const version='v0.14.033', build='20261108.02';
  globalThis.__genesisVillageBuild={version,build};
  document.title=document.title.replace(/v0\.14(?:[a-c]|\.\d{3})?/gi,version);
  // The existing HUD build label lives in the monolithic demo HTML. Update
@@ -175,11 +175,14 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
    // If the optional roof template was deferred, add only a lightweight roof.
    if(!roof)mesh(building,'Cubierta básica Herrero','box',0,3.4,-5.05,11.5,.18,8,material('Tejado',[.30,.24,.21]));
    buildings.set('Herrero',building);
-   const trees={update(){},blocked(){return false},status(){return{loaded:0}},release(){}};
-   globalThis.__genesisLiteVillage={mode:'herrero-first',trees:0,roads:plan.roads.length,workshops:1};
+   // V014.033: approved foliage; mobile downloads it only after Herrero is playable.
+   const mobile=globalThis.GenesisDevice?.safePreviews===true;
+   const trees=mountVillageTrees(app,root,{onResourceLoaded,deferInitialLoads:mobile});
+   globalThis.__genesisLiteVillage={mode:'herrero-first-trees',trees:trees.sites.length,
+    roads:plan.roads.length,workshops:1,mobile,streaming:mobile?'post-start':'desktop'};
    return Object.freeze({root,plan,trees,arcanePortals:[],
-    setProfession(prof){building.enabled=true;},
-    blocked(x,z,r=.33){return plan.blocked(x,z,r)}});
+    setProfession(prof){building.enabled=true;if(mobile)trees.startLoading();},
+    blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)}});
   }
 
  const plan=globalThis.GenesisVillagePlan;const root=new Entity('Aldea 63x63 · v0.14c');app.root.addChild(root);
