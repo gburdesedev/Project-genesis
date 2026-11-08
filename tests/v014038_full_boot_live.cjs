@@ -15,12 +15,12 @@ const srv=http.createServer((req,res)=>{
  const browser=await chromium.launch({args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
  try{
  const page=await browser.newPage({viewport:{width:1366,height:768},serviceWorkers:'block'});
- const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url())});
+ const errors=[];page.on('pageerror',e=>errors.push(String(e.stack||e.message).slice(0,1300)));page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url())});
  await page.goto('http://127.0.0.1:'+srv.address().port+'/index.html',{waitUntil:'domcontentloaded',timeout:60000});
  // A browser struggling under software WebGL can lose frames; capture the
  // precise game loading state before treating the timeout as a boot failure.
  const inspectBoot=async stage=>{
-  try{return await page.evaluate(()=>({
+  try{return await page.evaluate(stage=>({
    stage,phase:document.getElementById('loadState')?.textContent?.trim(),
    detail:document.getElementById('loadDetail')?.textContent?.trim(),
    count:document.getElementById('loadCount')?.textContent?.trim(),
@@ -32,7 +32,7 @@ const srv=http.createServer((req,res)=>{
    workshops:window.__genesisClosedWorkshopStatus||null,
    merchant:window.__genesisMarket?.visual||null,
    resources:performance.getEntriesByType('resource').length
-  }))}catch(e){return {stage,evaluationError:String(e)}}
+  }),stage)}catch(e){return {stage,evaluationError:String(e)}}
  };
  const waitGame=async(stage,fn,timeout)=>{
   try{await page.waitForFunction(fn,null,{timeout})}
