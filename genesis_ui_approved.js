@@ -112,13 +112,17 @@
      const isS=/escud/i.test(String(r.id)+' '+String(r.subfamily));
      return `<button type="button" class="gApprovedRecipe ${String(ctx.selectedRecipeId)===String(r.id)?'is-selected':''}" data-recipe="${esc(r.id)}" style="${pos(93,isS?465:289,336,53)}" aria-label="Seleccionar ${esc(r.subfamily)}"></button>`;
    }).join('');
-   const rows=req.slice(0,2).map((r,i)=>{
+   // Dos espacios de receta: cubrir también el segundo renglón horneado cuando la fórmula usa un solo material.
+   const rows=Array.from({length:2},(_,i)=>{
+     const r=req[i];
+     if(!r)return `<div class="gApprovedRequired" style="${pos(1261,300+i*143,326,115)}"></div>`;
      const qty=Number(ctx.inventory?.[r.material]||0),needed=Number(r.qty||0);
-     return `<div class="gApprovedRequired" style="${pos(1286,311+i*143,300,101)}"><h3>${esc(r.material)}</h3><p>Requerido: <b>${needed}</b></p><p>Stock real: <b>${qty}</b></p></div>`;
+     return `<div class="gApprovedRequired" style="${pos(1261,300+i*143,326,115)}"><h3>${esc(r.material)}</h3><p>Requerido: <b>${needed}</b></p><p>Stock real: <b>${qty}</b></p></div>`;
    }).join('');
    const state=`<div class="gApprovedCraftState ${ready&&canCraft?'is-ready':'is-blocked'}" style="${pos(1290,610,292,51)}">${ready&&canCraft?'✓ Disponible':ready?'Receta todavía bloqueada':'Faltan materiales'}</div>`;
    const hero=isShield?`<div class="gApprovedRecipeHeroSwap" style="${pos(456,114,643,706)}">${ctx.recipeAsset?.(chosen?.id)||''}<span>${esc(chosenName)}</span></div>`:'';
-   const body=recipeButtons+rows+state+hero+
+   const title=isShield?`<div class="gApprovedRecipeTitle" style="${pos(1153,120,432,85)}"><h2>${esc(chosenName)}</h2><p>Receta conocida</p></div>`:'';
+   const body=recipeButtons+rows+state+hero+title+
      `<button type="button" class="gApprovedCraftAction" id="gApprovedCraftAction" style="${pos(1148,672,435,100)}" aria-label="Fabricar ${esc(chosenName)}" ${ready&&canCraft?'':'disabled'}></button>`;
    const board=mount('Fabricaciones',ctx,nav,body,`data-recipe="${esc(chosen?.id||'')}"`);if(!board)return;
    board.querySelectorAll('[data-recipe]').forEach(b=>b.onclick=()=>{ctx.selectedRecipeId=b.dataset.recipe;fabrications(ctx,nav)});
