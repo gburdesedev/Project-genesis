@@ -296,3 +296,46 @@
   left:80%;top:48%;width:35%;height:38%;
 }
 .pg4tShell .pv9Hero.pv9ModelReady .pg4tHeroEquippedHalo{display:none!important}
+
+/* ML11: 2D fallback preview cues reflect CURRENTLY EQUIPPED NGE channel.
+   The REAL 3D shader is separate and runs on PlayCanvas V050 in the scene.
+   Do not label these poster cues as a native shader export. */
+.pg4tShell .pv9Hero .pg4tHeroAnimatedChannel{
+  position:absolute;pointer-events:none;z-index:4;
+  transform:translate(-50%,-50%);border-radius:35%;
+  opacity:calc(.20 + var(--fx-strength)*.62);
+  mix-blend-mode:screen;overflow:hidden;
+}
+.pg4tShell .pv9Hero .pg4tHeroAnimatedChannel::before,
+.pg4tShell .pv9Hero .pg4tHeroAnimatedChannel::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+}
+.pg4tShell .pv9Hero .pg4tHeroAnimatedChannel.pg4tHeroHalo-sword{
+  left:29%;top:34%;width:24%;height:47%;
+  transform:translate(-50%,-50%) rotate(-19deg);
+}
+.pg4tShell .pv9Hero .pg4tHeroAnimatedChannel.pg4tHeroHalo-shield{
+  left:80%;top:49%;width:34%;height:37%;
+  border-radius:50%;
+}
+.pg4tShell .pv9Hero .pg4tHeroAnimatedChannel[data-affinity="Rayo"]::before{
+  background:repeating-linear-gradient(155deg,transparent 0%,transparent 7%,
+   #e4f8ff 7.8%,#4eacff 9%,transparent 10%,transparent 19%);
+  filter:drop-shadow(0 0 .35cqw #50bbff);
+  animation:pg11-electric .76s linear infinite;
+}
+.pg4tShell .pv9Hero .pg4tHeroAnimatedChannel[data-affinity="Fuego"]::before{
+  background:repeating-radial-gradient(ellipse at 45% 90%,transparent 0%,#ff5a17 6%,#ffba3b 9%,transparent 17%,transparent 26%);
+  filter:blur(.1cqw);
+  animation:pg11-flame 1.1s ease-in-out infinite alternate;
+}
+.pg4tShell .pv9Hero .pg4tHeroAnimatedChannel[data-affinity="Hielo"]::before{
+  background:repeating-conic-gradient(from 18deg at 50% 50%,transparent 0deg,#9dedff 6deg,#b4f4ff 12deg,transparent 24deg,transparent 40deg);
+  filter:drop-shadow(0 0 .2cqw #6ce5ff);
+  animation:pg11-frost 2.4s linear infinite;
+}
+.pg4tShell .pv9Hero.pv9ModelReady .pg4tHeroAnimatedChannel{display:none!important}
+@keyframes pg11-electric{from{transform:translateY(-16%) skewX(-5deg);opacity:.7}50%{opacity:1}to{transform:translateY(18%) skewX(8deg);opacity:.66}}
+@keyframes pg11-flame{from{transform:translateY(12%) scale(.90,1.05);opacity:.5}to{transform:translateY(-12%) scale(1.10,1.16);opacity:1}}
+@keyframes pg11-frost{from{transform:rotate(0deg) scale(.98);opacity:.48}50%{opacity:.92}to{transform:rotate(55deg) scale(1.04);opacity:.5}}
+@media (prefers-reduced-motion:reduce){.pg4tShell .pg4tHeroAnimatedChannel::before{animation:none!important}}
