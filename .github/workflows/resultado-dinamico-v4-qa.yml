@@ -19,6 +19,9 @@ jobs:
     timeout-minutes: 18
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
