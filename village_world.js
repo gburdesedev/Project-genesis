@@ -220,6 +220,16 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
   console.warn('[Genesis V016.001] Árboles iniciales todavía pendientes; aldea habilitada sin colisiones invisibles.',trees.status());
  }
  onPhase('puertas');
- await Promise.all(arcanePortals.map(portal=>portal.initialReady));
+ // V016.001: conservar las puertas originales como respaldo mientras
+ // se descarga la puerta arcanista V027 aprobada. Una CDN lenta no debe
+ // impedir entrar al Herrero ni fabricar, pero el GLB V027 se monta al llegar.
+ const doorsStartup=await Promise.race([
+  Promise.all(arcanePortals.map(portal=>portal.initialReady)).then(result=>({timedOut:false,result})),
+  new Promise(resolve=>setTimeout(()=>resolve({timedOut:true,result:[]}),18000))
+ ]);
+ globalThis.__genesisDoorsStartup=doorsStartup;
+ if(doorsStartup.timedOut){
+  console.warn('[Genesis V016.001] Puerta del Arcanista pendiente; sigue el modelo de respaldo aprobado.',arcanePortals.map(p=>p.status()));
+ }
  return Object.freeze({root,plan,trees,arcanePortals,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
 }
