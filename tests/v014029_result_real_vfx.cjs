@@ -33,9 +33,9 @@ const report={status:'START',errors:[],samples:[]};
    }
    const iframe=page.frameLocator('iframe.grSwordInteractive');
    await iframe.locator('canvas#sword3d').waitFor({state:'visible',timeout:18000});
-   await page.waitForFunction(()=>{const f=document.querySelector('iframe.grSwordInteractive');try{return f?.contentWindow?.__genesisSwordViewerStatus?.phase==='ready'}catch(e){return false}},null,{timeout:180000});
+   await page.waitForFunction(()=>{const f=document.querySelector('iframe.grSwordInteractive');try{return ['ready','error'].includes(f?.contentWindow?.__genesisSwordViewerStatus?.phase)}catch(e){return false}},null,{timeout:90000});
    let state=await page.evaluate(()=>({channels:[...document.querySelectorAll('.grChannelGroup')].map(x=>x.dataset.resultChannel),secondary:document.querySelectorAll('.grSub').length,viewer:document.querySelector('iframe.grSwordInteractive')?.contentWindow?.__genesisSwordViewerStatus}));
-   assert.equal(state.viewer.phase,'ready');assert.equal(state.viewer.vfxReady,true);assert.equal(state.secondary,0);
+   assert.equal(state.viewer.phase,'ready',JSON.stringify(state.viewer));assert.equal(state.viewer.vfxReady,true);assert.equal(state.secondary,0);
    assert.equal(state.channels.length,item.channels.length);
    const expected=Object.fromEntries(item.channels.map(c=>[c[0]==='Daño'?'Base':c[0],c[1]]));
    assert.equal(state.viewer.effects.Fuego.intensity,expected.Fuego||0);
