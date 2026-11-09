@@ -5,6 +5,14 @@ import hashlib
 source=Path("index.html")
 original=source.read_bytes()
 html=original.decode("utf-8")
+# QA-only diagnosis: Curtidor's decorative Chest_Wood.gltf returns 404 on
+# external jsDelivr and blocks the initial app. Point the TEST COPY to the
+# existing Genesis blacksmith chest GLB; never edit the published main index.
+broken='https://cdn.jsdelivr.net/gh/dustinc555/mygame@main/assets/vendor/quaternius/fantasy_props_megakit/gltf/Chest_Wood.gltf'
+safe='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/main/integration/v014022/embedded/genesisChest-e93068f670d9.glb'
+assert html.count(broken)==1, ("Broken external chest source changed",html.count(broken))
+html=html.replace(broken,safe,1)
+print("QA_ONLY_REPLACED_BROKEN_TANNER_CHEST_URL",flush=True)
 needle="requestAnimationFrame(frame);\n\nsetLoadUI(100,"
 assert html.count(needle)==1, "Cannot locate existing main module frame/bootstrap seam"
 hook=r'''
