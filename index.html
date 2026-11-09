@@ -1621,6 +1621,9 @@ function showMercenaryEquipment(editing=false,reuseDraft=false){
     const chosenFirst=editing?(tanner?mercEditArmorItem:mercEditSwordItem):(tanner?mercArmorItem:mercSwordItem);
     const chosenSecond=editing?(tanner?mercEditBootsItem:mercEditShieldItem):(tanner?mercBootsItem:mercShieldItem);
     const activeFirst=tanner?mercArmorItem:mercSwordItem,activeSecond=tanner?mercBootsItem:mercShieldItem;
+    // ML06: un único V049 animado/renderizado por vez: liberar el WebGL del mundo
+    // mientras el visor del equipamiento usa el mismo asset real.
+    if(GENESIS_MERCENARY_LAB){const worldDisplay=E('mercApprovedGearDisplay');if(worldDisplay)worldDisplay.enabled=false;}
     return window.GenesisMercenaryConcept.open({
       modal,mercName:candidate.label,candidate:mercCandidate,body:candidate.body,editing,tanner,
       modelUrl:GENESIS_MERCENARY_LAB?"./assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_V12B_V015_BALANCED_ML06.glb":undefined,
