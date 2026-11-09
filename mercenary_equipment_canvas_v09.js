@@ -7,6 +7,15 @@
   'use strict';
   const A = 'assets/ui/mercenary/v09/';
   const CHANNELS = ['Base','Luz','Sombra','Fuego','Hielo','Naturaleza','Tierra','Rayo'];
+  // ML08: display layer uses the genuine NGE affinities; Base is physical, never magical.
+  const ELEMENT_COLORS=Object.freeze({
+    Luz:'#f4d780',Sombra:'#9d70d3',Fuego:'#fa6a26',Hielo:'#8ccff1',
+    Naturaleza:'#73d790',Tierra:'#c39a64',Rayo:'#a9a0ff'
+  });
+  const nGELevels=item=>Array.isArray(item?.affinities)
+    ?item.affinities.filter(a=>Array.isArray(a)&&ELEMENT_COLORS[a[0]]&&Number(a[1])>0)
+      .map(([name,level])=>({name,level:Math.max(0,Math.min(100,Number(level)||0)),color:ELEMENT_COLORS[name]}))
+    :[];
   function esc(x) { return String(x ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   function readChannels(item) {
     if (!item) return [];
@@ -39,7 +48,13 @@
       if (!item || typeof opts.itemIcon !== 'function') return '';
       const approved3DThumbs={espada_hierro:'assets/ui/mercenary/ml06/espada_hierro_original_3d_render.png',escudo_hierro:'assets/ui/mercenary/ml06/escudo_hierro_original_3d_render.png'};
       const url=(new URLSearchParams(location.search).get('mercenario')==='1'&&approved3DThumbs[item.recipe])||opts.itemIcon(item.recipe);
-      return typeof url === 'string' && url.trim() ? `<img src="${esc(url)}" alt="${esc(item.name||item.recipe)}" loading="eager">` : '';
+      return typeof url === 'string' && url.trim() ? `<img src="${esc(url)}" alt="${esc(item.name||item.recipe)}" loading="eager">${itemAura(item,'slot')}` : '';
+    }
+    function itemAura(item,kind){
+      const levels=nGELevels(item);
+      if(!levels.length)return '';
+      const selected=levels.slice(0,2);
+      return selected.map(({name,level,color},i)=>'<span class="pv9ElementAura '+esc(kind)+' '+esc(name)+'" data-affinity="'+esc(name)+'" data-strength="'+level+'" style="--fx:'+color+';--power:'+(level/100).toFixed(3)+';--ring:'+i+';" aria-hidden="true"></span>').join('');
     }
     function pool() { return pools[state.family]; }
     function selected() { return state.item || (state.family === 'first' ? state.draftFirst : state.draftSecond); }
@@ -65,7 +80,11 @@
         const item=itemAt(i); return `<button type="button" class="mcInventorySlot ${item?'hasItem':''} ${item && item===candidate?'selected':''}" data-item="${i}" aria-label="${esc(item?.name || 'Casilla vacía')}" title="${esc(item?.name || '')}" ${item?'':'disabled'}>${getIcon(item)}</button>`;
       }).join('');
       const poster=opts.modelUrl ? '<img class="pv9RealCyclesPoster" src="assets/ui/mercenary/v09/V049_REAL_CYCLES32_PREVIEW_ALPHA.png" alt="Render original en Blender Cycles HDRI EXR 32 bits del mercenario V049 con espada V12B y escudo V015">' : '';
-      const modelHtml = poster + `<model-viewer src="${esc(model)}" camera-controls auto-rotate interaction-prompt="none" camera-orbit="15deg 80deg 5.2m" exposure="1.05" shadow-intensity=".55" alt="Mercenario 3D real V049 con espada V12B y escudo V015" class="pv9Viewer"></model-viewer>`;
+      // Only channels actually present in the equipped NGE creations produce an aura.
+      // This is a 2D menu preview, not a substitute for native 3D VFX on the GLB.
+      const weaponAura=itemAura(state.draftFirst||opts.equippedFirst,'sword');
+      const shieldAura=itemAura(state.draftSecond||opts.equippedSecond,'shield');
+      const modelHtml = poster + '<div class="pv9WeaponAura">'+weaponAura+'</div><div class="pv9ShieldAura">'+shieldAura+'</div>' + `<model-viewer src="${esc(model)}" camera-controls auto-rotate interaction-prompt="none" camera-orbit="15deg 80deg 5.2m" exposure="1.05" shadow-intensity=".55" alt="Mercenario 3D real V049 con espada V12B y escudo V015" class="pv9Viewer"></model-viewer>`;
       const channels = rows.map(row => {
         const known=CHANNELS.includes(row.name) && row.name !== 'Rayo';
         const delta = row.a && row.b ? row.b.value-row.a.value : null;
@@ -142,5 +161,5 @@
     }
     render(); return {refresh:render};
   }
-  global.GenesisMercenaryConcept={open, version:'MERCENARY_V09_LIVE_ML07_STABLE_3D_VIEWER'};
+  global.GenesisMercenaryConcept={open, version:'MERCENARY_V09_LIVE_ML08_NGE_CHANNEL_PREVIEW'};
 })(window);
