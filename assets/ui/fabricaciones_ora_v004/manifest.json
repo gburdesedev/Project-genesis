@@ -1,0 +1,16 @@
+{
+  "source": "assets/ui/approved/Fabricaciones_V07_APROBADA_1672x941.png",
+  "source_sha256": "55464a0de649f538700101d110504fe2f66afbf875288af2e484dd875a4bcb7f",
+  "status": "experimental runtime candidate, artwork V07 remains untouched",
+  "layout": [
+    1672,
+    941
+  ],
+  "method": "pixel crops and clone patches from same source; visor blurred by approved decision",
+  "assets": "authentic material posters and V12B image are loaded separately at runtime",
+  "notes": [
+    "not the historical local ORA V004 binary",
+    "gold outer decoration original source",
+    "no source geometry or model substitution"
+  ]
+}
