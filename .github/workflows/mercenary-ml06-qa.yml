@@ -1,7 +1,7 @@
-name: ML11 Mercenario V050 real shader VFX plus NGE preview QA
+name: ML12 Mercenario V050 shader frame clock and preview QA
 on:
   push:
-    branches: [experiment/mercenario-ml11-vfx-preview-20261109]
+    branches: [experiment/mercenario-ml12-vfx-animation-clock-20261109]
     paths:
       - 'index.html'
       - 'mercenary_4t_runtime_ml06.js'
@@ -36,7 +36,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: genesis-mercenario-ml11-v050-real-vfx-preview-qa
+          name: genesis-mercenario-ml12-clock-vfx-preview-qa
           path: previews/mercenary-lab-ml06-4t/
           retention-days: 14
           if-no-files-found: warn
