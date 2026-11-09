@@ -1,0 +1,52 @@
+name: ML08 shield alpha 2D thumbnail (preserve V015 geometry)
+on:
+  push:
+    branches: [experiment/v014027-mercenario-directo-equipamiento-20261108]
+    paths: ['.github/workflows/mercenary-ml08-shield-alpha.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: experiment/v014027-mercenario-directo-equipamiento-20261108
+      - name: Install Pillow for alpha-only game icon
+        run: python3 -m pip install --quiet --break-system-packages Pillow==11.3.0
+      - name: Derive transparent shield inventory icon (not 3D mesh)
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from PIL import Image,ImageFilter
+          from pathlib import Path
+          import hashlib,math,json
+          src=Path('assets/ui/mercenary/ml06/escudo_hierro_original_3d_render.png')
+          assert src.exists(),src
+          orig=Image.open(src).convert('RGBA')
+          w,h=orig.size
+          # Suppress background outside the circular V015 shield, not its PBR face.
+          # Feather at the outer edge to avoid a grey square in the inventory cell.
+          mask=Image.new('L',(w,h))
+          from PIL import ImageDraw
+          draw=ImageDraw.Draw(mask)
+          rx=w*.445;ry=h*.445
+          draw.ellipse((w/2-rx,h/2-ry,w/2+rx,h/2+ry),fill=255)
+          mask=mask.filter(ImageFilter.GaussianBlur(radius=2.3))
+          orig.putalpha(mask)
+          dst=src.with_name('escudo_hierro_v015_canal_alpha_ml08.png')
+          orig.save(dst,optimize=True)
+          verify=Image.open(dst).convert('RGBA')
+          assert verify.getpixel((0,0))[3]==0 and verify.getpixel((w//2,h//2))[3]>235
+          print('ML08_SHIELD_ALPHA',dst,'px',verify.size,'sha256',hashlib.sha256(dst.read_bytes()).hexdigest())
+          PY
+      - name: Commit experimental icon without touching originals
+        run: |
+          git config user.name 'genesis-experimental-asset-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/ui/mercenary/ml06/escudo_hierro_v015_canal_alpha_ml08.png
+          if git diff --staged --quiet;then exit 0;fi
+          git commit -m 'assets(ML08): remove grey backdrop from V015 item thumbnail only [skip ci]'
+          git push origin HEAD:experiment/v014027-mercenario-directo-equipamiento-20261108
