@@ -24,6 +24,6 @@ jobs:
           grep -q 'ML05' /tmp/mercenary-public.html
           for f in mercenary_equipment_canvas_v09.js mercenary_equipment_canvas_v09.css mercenary_lab_inventory_v05.js mercenary_lab_inventory_v05.css assets/ui/mercenary/v09/V09_Plantilla_Vacia_Referencia.png assets/ui/inventario/GENESIS_INVENTARIO_V05_CABECERA_PREPARACION_1820x1024.png assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb; do
             printf 'Checking %s: ' "$f"
-            curl -L --fail --silent --show-error --max-time 60 -I "$BASE/$f" | head -n 1
+            curl --location --fail --silent --show-error --max-time 120 --output /dev/null --write-out "HTTP %{http_code}; bytes %{size_download}; type %{content_type}\\n" "$BASE/$f"
           done
           echo 'PASS: ML05 isolated experimental HTML/CSS/JS/PNG/GLB URL available'
