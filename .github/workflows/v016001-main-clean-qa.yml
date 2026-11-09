@@ -1,0 +1,34 @@
+name: Genesis V016.001 | Main-clean ORA QA
+on:
+  push:
+    branches:
+      - experiment/v016001-main-clean-20261109
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm 8 original ORAs & render only real elemental channels
+        run: |
+          node --check genesis_result_dynamic_v001.js
+          node tests/resultado_ora_assets_v016001.cjs
+          node - <<'NODE'
+          const fs=require('fs'),assert=require('assert');
+          const html=fs.readFileSync('index.html','utf8');
+          assert(html.includes('window.GenesisResultDynamic?.decorate'));
+          assert(!html.includes('TreeStartup')&&!html.includes('genesisTreeStartup'));
+          console.log('CLEAN_BASE_SOURCE_OK');
+          NODE
+      - name: Install Playwright
+        run: npm install --prefix /tmp/genesis-clean playwright@1.56.1
+      - name: Render game result screen with authentic ORAs
+        run: NODE_PATH=/tmp/genesis-clean/node_modules node tests/resultado_dinamico_browser_v4.cjs
