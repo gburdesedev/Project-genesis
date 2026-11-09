@@ -17,8 +17,11 @@ const camera=new pc.Entity('OriginalSwordPreviewCamera');
 camera.addComponent('camera',{fov:35,nearClip:.01,farClip:100,clearColor:new pc.Color(.013,.019,.032)});
 camera.setPosition(0,.02,3.2);camera.lookAt(0,0,0);app.root.addChild(camera);
 let sword=null,triangles=0;
-app.assets.loadFromUrlAndFilename('/tests/channel-vfx-v014040/source_original_v03.glb',
- 'verified_user_approved_v03.glb','container',async(err,asset)=>{
+const modelSource=new URLSearchParams(location.search).get('model')==='placeholder'?
+ '/assets/vendor/genesis/externals/mercSword10/src/sword.glb':
+ '/tests/channel-vfx-v014040/source_original_v03.glb';
+app.assets.loadFromUrlAndFilename(modelSource,
+ 'measured_current_sword.glb','container',async(err,asset)=>{
  if(err){window.__vfxError=String(err);return;}
  sword=new pc.Entity('MercSwordTransform');
  app.root.addChild(sword);
@@ -45,7 +48,7 @@ app.assets.loadFromUrlAndFilename('/tests/channel-vfx-v014040/source_original_v0
   }
   manager.setItem({affinities:tests[4][1]});
   sword.setEulerAngles(0,0,0);
-  window.__vfxReady={triangles,states,liveManager:manager.status()};
+  window.__vfxReady={triangles,states,modelSource,liveManager:manager.status()};
   console.log('GENESIS_V014040_VFX_REAL_V03_HARNESS_READY',JSON.stringify(window.__vfxReady));
  }catch(e){window.__vfxError=e.stack||String(e);console.error(window.__vfxError);}
 });
