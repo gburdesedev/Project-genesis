@@ -48,13 +48,13 @@ a_bbox=alpha.getbbox() or (0,0,approved_ingot.width,approved_ingot.height)
 ingot_cut=approved_ingot.crop(a_bbox)
 icon_layer=Image.new('RGBA',original.size,(0,0,0,0))
 # Exact same background zone restored in both subcategory material icons.
-for x1,y1,x2,y2 in ((116,242,174,285),(116,421,174,463)):
+for x1,y1,x2,y2 in ((106,238,178,286),(106,417,178,466)):
     donor_box=(336,y1,336+(x2-x1),y2)
     tile=original.crop(donor_box)
     im.paste(tile,(x1,y1))
     # Fit the approved icon in the ORIGINAL icon slot, without covering "Hierro".
     fitted=ingot_cut.copy()
-    fitted.thumbnail((50,32),Image.Resampling.LANCZOS)
+    fitted.thumbnail((48,29),Image.Resampling.LANCZOS)
     place=(x1+(x2-x1-fitted.width)//2,y1+(y2-y1-fitted.height)//2)
     icon_layer.alpha_composite(fitted,place)
 # Save the REAL replaceable V175 layer and its cleared underlay separately.
