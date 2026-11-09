@@ -61,7 +61,7 @@
         const item=itemAt(i); return `<button type="button" class="mcInventorySlot ${item?'hasItem':''} ${item && item===candidate?'selected':''}" data-item="${i}" aria-label="${esc(item?.name || 'Casilla vacía')}" title="${esc(item?.name || '')}" ${item?'':'disabled'}>${getIcon(item)}</button>`;
       }).join('');
       const poster=opts.modelUrl ? '<img class="pv9RealCyclesPoster" src="assets/ui/mercenary/v09/V049_REAL_CYCLES32_PREVIEW_ALPHA.png" alt="Render original en Blender Cycles HDRI EXR 32 bits del mercenario V049 con espada V12B y escudo V015">' : '';
-      const modelHtml = poster + `<model-viewer src="${esc(model)}" camera-controls auto-rotate interaction-prompt="none" camera-orbit="15deg 80deg 3.8m" exposure="1.05" shadow-intensity=".55" alt="Mercenario 3D real V049 con espada V12B y escudo V015" class="pv9Viewer"></model-viewer>`;
+      const modelHtml = poster + `<model-viewer src="${esc(model)}" camera-controls auto-rotate interaction-prompt="none" camera-orbit="15deg 80deg 5.2m" exposure="1.05" shadow-intensity=".55" alt="Mercenario 3D real V049 con espada V12B y escudo V015" class="pv9Viewer"></model-viewer>`;
       const channels = rows.map(row => {
         const known=CHANNELS.includes(row.name) && row.name !== 'Rayo';
         const delta = row.a && row.b ? row.b.value-row.a.value : null;
@@ -71,7 +71,7 @@
       const overlay = state.modal === 'sheet' ? `<div class="mcOverlay"><section><h2>FICHA DEL MERCENARIO</h2>${typeof opts.getStatsHTML==='function'?opts.getStatsHTML(state.draftFirst,state.draftSecond):opts.statsHTML || '<p>Sin datos registrados.</p>'}<button data-action="dismiss">VOLVER</button></section></div>` :
         state.modal === 'inventory' ? `<div class="mcOverlay"><section><h2>INVENTARIO DEL MERCENARIO</h2>${typeof opts.getMercInventoryHTML==='function'?opts.getMercInventoryHTML(state.draftFirst,state.draftSecond):'<p>Sin objetos asignados.</p>'}<button data-action="dismiss">VOLVER</button></section></div>` :
         state.modal === 'inspect' && candidate ? `<div class="mcOverlay"><section><h2>${esc(candidate.name)}</h2><p>${esc(candidate.rarity)}</p>${readChannels(candidate).map(c=>`<p>${esc(c.name)}: ${c.value}</p>`).join('')}<button data-action="dismiss">VOLVER</button></section></div>` : '';
-      const html = `<div class="mercConcept pv9Shell"><div class="mcBoard pv9Board" aria-label="Inventario del Mercenario · Concept V09 aprobado">
+      const html = `<div class="mercConcept pv9Shell pv9IntegratedML06"><div class="mcBoard pv9Board" aria-label="Inventario del Mercenario · equipamiento interactivo del juego">
         <div class="pv9Target pv9FamilyEspadas ${family==='first'?'on':''}" data-family="first" role="button" tabindex="0" aria-label="Espadas"></div>
         <div class="pv9Target pv9FamilyEscudos ${family==='second'?'on':''}" data-family="second" role="button" tabindex="0" aria-label="Escudos"></div>
         <div class="mcInventoryGrid pv9Grid">${grid}</div>
@@ -126,5 +126,5 @@
     }
     render(); return {refresh:render};
   }
-  global.GenesisMercenaryConcept={open, version:'MERCENARY_APPROVED_V09_EMPTY_EXPERIMENT'};
+  global.GenesisMercenaryConcept={open, version:'MERCENARY_V09_LIVE_ML06_EQUIPPED'};
 })(window);
