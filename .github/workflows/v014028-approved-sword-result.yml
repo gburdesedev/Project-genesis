@@ -1,0 +1,59 @@
+name: Genesis | source-verified V175 V12B Cycles sword in result preview
+on:
+  push:
+    branches:
+      - release/v014028-fabricaciones-quest-loop-20261108
+    paths:
+      - index.html
+      - tests/v014028_approved_sword_result.cjs
+      - .github/workflows/v014028-approved-sword-result.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  original-v12b:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import exact actual Cycles V12B render from source organization (never licensed source GLB)
+        run: |
+          set -euo pipefail
+          dir=assets/playcanvas/approved/equipment
+          mkdir -p "$dir"
+          source='https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/refs/heads/experiment/v45-hdri32-cycles-triple-animacion-v175v12b-20261108/public-previews/espada-v175-j-roughness-v12/V12_V175_Color_J_Rugosidad034_Hero.png'
+          curl -fSL --retry 3 --connect-timeout 15 --max-time 120 "$source" -o "$dir/espada_v03_hierro_v175_v12b_cycles_hdri32.png"
+          python3 - <<'PY'
+          import pathlib,struct,hashlib
+          p=pathlib.Path('assets/playcanvas/approved/equipment/espada_v03_hierro_v175_v12b_cycles_hdri32.png')
+          b=p.read_bytes()
+          assert len(b)>1_500_000,(len(b),'Cycles V12B source unexpectedly small')
+          assert b[:8]==b'\x89PNG\r\n\x1a\n'
+          dims=struct.unpack_from('>II',b,16)
+          assert dims==(1200,1500),dims
+          print('VERIFIED_ORIGINAL_V12B_CYCLES_HDRI32_RENDER',dims,len(b),'sha256',hashlib.sha256(b).hexdigest())
+          PY
+      - name: No fake sword, no publicly exposed original model
+        run: |
+          set -euo pipefail
+          ! grep -q 'Genesara/genesara-web@main/public/models/props/sword.glb' index.html
+          ! find assets/playcanvas/approved/equipment -type f \( -iname '*.glb' -o -iname '*.blend' -o -iname '*.exr' \) | grep -q .
+          node --check tests/v014028_approved_sword_result.cjs
+          node tests/v014028_approved_sword_result.cjs
+      - name: Commit genuine screenshot render on version branch only
+        run: |
+          set -euo pipefail
+          git config user.name 'Project Genesis V12B asset workflow'
+          git config user.email '41898282+genesis-preview[bot]@users.noreply.github.com'
+          git add assets/playcanvas/approved/equipment/espada_v03_hierro_v175_v12b_cycles_hdri32.png
+          if ! git diff --cached --quiet; then
+            git commit -m "asset(v014028): verified approved V175 V12B Cycles EXR32 render for game UI"
+            git pull --rebase origin release/v014028-fabricaciones-quest-loop-20261108
+            git push origin HEAD:release/v014028-fabricaciones-quest-loop-20261108
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v014028-v175-v12b-source-verification
+          path: assets/playcanvas/approved/equipment/espada_v03_hierro_v175_v12b_cycles_hdri32.png
+          retention-days: 14
