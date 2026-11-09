@@ -40,6 +40,13 @@ function render(ctx,nav,mount){
  const allowed=available&&questActive&&ctx.canCraftRecipe?.(recipe.id)===true;
  const status=!questActive?'Bloqueada por la misión':!available?'Faltan materiales':!allowed?'No disponible':'Disponible';
  let html='<div class="gFabModular" data-ora="V004" data-canonical="NGE">';
+ // Both 'Hierro' material branches use the exact approved V175 ingot poster.
+ // Cover the OLD baked V07 generic icons without replacing the master PNG.
+ // Icons are display-only; families and stock remain controlled by NGE.
+ const v175=material['Lingote de hierro'];
+ for(const y of [244,421]){
+   html+='<div class="gFabV175Category" data-fab-material="Lingote de hierro" style="'+pos(127,y,62,52)+'"><img src="'+esc(v175)+'" alt="Lingote de hierro V175 aprobado" draggable="false"></div>';
+ }
  const locations={sword:{y:288,icon:'⚔'},shield:{y:463,icon:'◈'}};
  for(const rec of recipes){
    const shield=/escud/i.test(String(rec.id)),p=shield?locations.shield:locations.sword;
