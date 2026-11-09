@@ -1,7 +1,7 @@
-name: ML08 Mercenario 4-T ORA V3.2 + slots QA
+name: ML09 Mercenario NGE starter + item-frame QA
 on:
   push:
-    branches: [experiment/mercenario-4t-slot-ora-ml08-20261109]
+    branches: [experiment/mercenario-4t-fit-starter-ml09-20261109]
     paths:
       - 'index.html'
       - 'mercenary_4t_runtime_ml06.js'
@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate original ORA V3.2 bytes + 74/76/66 fit CSS
+      - name: Validate original ORA V3.2 bytes + CSS fit
         run: node tests/mercenary_ml08_slot_ora.cjs
       - run: npm install --prefix /tmp/genesis-ml06-test playwright@1.56.1
       - name: Test actual PlayCanvas gameplay + original 4T + exact V050 equipped model
@@ -34,7 +34,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: genesis-mercenario-ml08-approved-oras-slot-game-qa
+          name: genesis-mercenario-ml09-starter-gear-compare-qa
           path: previews/mercenary-lab-ml06-4t/
           retention-days: 14
           if-no-files-found: warn
