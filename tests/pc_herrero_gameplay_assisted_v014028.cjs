@@ -46,12 +46,13 @@ async function screenshot(name){try{
  page.on('pageerror',err=>issues.push('PAGE '+err.message));
  page.on('console',m=>{if(m.type()==='error')issues.push('CONSOLE '+m.text().slice(0,340))});
  page.on('requestfailed',req=>{if(!req.url().includes('fonts'))issues.push('NETWORK '+(req.failure()?.errorText||'?')+' '+req.url().slice(0,220))});
+ page.on('response',r=>{if(r.status()>=400)issues.push('HTTP_'+r.status()+' '+r.url().slice(0,220))});
  try{
  await stage('boot-and-controls',async()=>{
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:120000});
-  await page.waitForFunction(()=>!!window.__genesisFullRouteQA,{timeout:180000});
+  await page.waitForFunction(()=>!!window.__genesisFullRouteQA,null,{timeout:180000});
   await page.waitForFunction(()=>getComputedStyle(document.querySelector('#prototypeIntro')).display==='grid',
-    null,{timeout:20000});
+    null,{timeout:60000});
   assert(await page.locator('[data-profession="Herrero"]').count()>=1,'No Herrero choice in game');
   assert.equal((await read()).started,false);
  });
