@@ -243,6 +243,10 @@
    return true;
  }
  function fabrications(ctx,nav){
+   if(window.GenesisFabricacionModular?.render && window.GenesisExperimentalFabricacionV004===true){
+     return window.GenesisFabricacionModular.render(ctx,nav,mount);
+   }
+
    const catalog=typeof ctx.getRecipeCatalog==='function'?(ctx.getRecipeCatalog()||[]):[];
    const recipes=catalog.filter(r=>r&&r.id&&r.formula);
    const ids=new Set(recipes.map(r=>String(r.id)));
