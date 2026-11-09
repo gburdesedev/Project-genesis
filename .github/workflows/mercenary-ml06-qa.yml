@@ -1,12 +1,14 @@
-name: ML06 REAL GAME QA approved Mercenary 4T V050
+name: ML08 Mercenario 4-T ORA V3.2 + slots QA
 on:
   push:
-    branches: [experiment/mercenario-4t-channel-fx-fix-20261109]
+    branches: [experiment/mercenario-4t-slot-ora-ml08-20261109]
     paths:
       - 'index.html'
       - 'mercenary_4t_runtime_ml06.js'
       - 'mercenary_4t_runtime_ml06.css'
       - 'tests/mercenary_ml06_4t.cjs'
+      - 'tests/mercenary_ml08_slot_ora.cjs'
+      - 'assets/ui/resultado/oras/**'
       - '.github/workflows/mercenary-ml06-qa.yml'
       - 'assets/ui/mercenary/4t/**'
   workflow_dispatch:
@@ -23,6 +25,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Validate original ORA V3.2 bytes + 74/76/66 fit CSS
+        run: node tests/mercenary_ml08_slot_ora.cjs
       - run: npm install --prefix /tmp/genesis-ml06-test playwright@1.56.1
       - name: Test actual PlayCanvas gameplay + original 4T + exact V050 equipped model
         run: NODE_PATH=/tmp/genesis-ml06-test/node_modules node tests/mercenary_ml06_4t.cjs
@@ -30,7 +34,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: genesis-mercenario-ml06-4t-real-game-qa
+          name: genesis-mercenario-ml08-approved-oras-slot-game-qa
           path: previews/mercenary-lab-ml06-4t/
           retention-days: 14
           if-no-files-found: warn
