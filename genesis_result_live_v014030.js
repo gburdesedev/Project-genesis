@@ -21,7 +21,7 @@
     const entry=g.GenesisApprovedRuntimeModels?.espada_hierro;
     if(!entry || entry.status!=='approved' ||
        entry.sha256!==SWORD_SHA || entry.recipe!=='espada_hierro' ||
-       typeof entry.url!=='string' || !/^\\.\\/assets\\/playcanvas\\/approved\\/equipment\\/[A-Za-z0-9_/-]+\\.glb$/.test(entry.url)) return null;
+       typeof entry.url!=='string' || !/^\.\/assets\/playcanvas\/approved\/equipment\/[A-Za-z0-9_/-]+\.glb$/.test(entry.url)) return null;
     return entry.url;
   }
   function render(item,fallbackMarkup) {
