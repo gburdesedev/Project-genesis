@@ -34,7 +34,11 @@ jobs:
         if: always()
         run: |
           sha256sum -c /tmp/original-main-game.sha256
-          git diff --exit-code -- index.html preparacion_control.js genesis_ui_approved.js genesis_ui_approved.css
+          if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+            git diff --exit-code -- index.html preparacion_control.js genesis_ui_approved.js genesis_ui_approved.css
+          else
+            echo 'Git working tree unavailable in container; original SHA256 verification passed'
+          fi
       - name: Upload concrete gameplay audit and screenshots
         if: always()
         uses: actions/upload-artifact@v4
