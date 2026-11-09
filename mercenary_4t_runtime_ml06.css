@@ -278,3 +278,21 @@
 .pg4tShell .pv9Grid .mcInventorySlot.pg4tAlreadyEquipped:disabled{
   filter:none!important;opacity:1!important;
 }
+
+/* ML10: aligned NGE aura proxies for the existing approved Cycles V050 poster.
+   Show while poster is visible; the live scene uses the real V050 light components. */
+.pg4tShell .pv9Hero .pg4tHeroEquippedHalo{
+  position:absolute;display:block;pointer-events:none;z-index:4;
+  background:radial-gradient(ellipse closest-side,var(--fx-color) 0%,
+    color-mix(in srgb,var(--fx-color) 25%,transparent) 42%,transparent 77%);
+  mix-blend-mode:screen;filter:blur(.30cqw);
+  opacity:calc(.28 + var(--fx-strength) * .48);
+  transform:translate(-50%,-50%);border-radius:50%;
+}
+.pg4tShell .pv9Hero .pg4tHeroHalo-sword{
+  left:30%;top:34%;width:27%;height:46%;transform:translate(-50%,-50%) rotate(-18deg);
+}
+.pg4tShell .pv9Hero .pg4tHeroHalo-shield{
+  left:80%;top:48%;width:35%;height:38%;
+}
+.pg4tShell .pv9Hero.pv9ModelReady .pg4tHeroEquippedHalo{display:none!important}
