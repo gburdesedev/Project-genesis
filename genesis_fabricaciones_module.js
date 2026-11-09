@@ -88,7 +88,7 @@
  function modelEntry(recipe){
    const entry=g.GenesisApprovedCraftPreviewModels?.[recipe.id];
    // No generic props, ingots, illustrative stand-ins or external URLs.
-   if(!entry||entry.approvedForGame!==true||!/^assets\\/playcanvas\\/approved\\/equipment\\/[A-Za-z0-9_./-]+\\.glb$/.test(entry.url||''))return null;
+   if(!entry||entry.approvedForGame!==true||!/^assets\/playcanvas\/approved\/equipment\/[A-Za-z0-9_./-]+\.glb$/.test(entry.url||''))return null;
    return entry.url;
  }
  function viewer(recipe){
