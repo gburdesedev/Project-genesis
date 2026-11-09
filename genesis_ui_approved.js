@@ -1,7 +1,7 @@
 /* Project Genesis UI 2026-11-08: runtime-only overlays over the immutable approved 1672x941 artwork. */
 (function(){
  'use strict';
- const BUILD='V014.027';
+ const BUILD='V014.028';
  const ROOT='assets/ui/approved/';
  const ARTS=Object.freeze({Inventario:ROOT+'Inventario_V11_APROBADO_1672x941.png',Preparacion:ROOT+'Preparacion_APROBADA_1672x941.png',Fabricaciones:ROOT+'Fabricaciones_V07_APROBADA_1672x941.png'});
  const MATERIALS=Object.freeze({
@@ -228,7 +228,14 @@
    const catalog=typeof ctx.getRecipeCatalog==='function'?(ctx.getRecipeCatalog()||[]):[];
    const recipes=catalog.filter(r=>r&&r.id&&r.formula);
    const ids=new Set(recipes.map(r=>String(r.id)));
-   if(!ids.has(String(ctx.selectedRecipeId)))ctx.selectedRecipeId=recipes.find(r=>String(r.id)===String(ctx.activeRecipeId))?.id||recipes[0]?.id||null;
+   // Q2/Q3: espada; Q5/Q6: escudo. When Ordan advances the quest, switch
+   // recipe automatically instead of leaving the previous (blocked) selection.
+   const activeId=String(ctx.activeRecipeId||'');
+   if(ctx.genesisApprovedQuestRecipe!==activeId){
+     ctx.genesisApprovedQuestRecipe=activeId;
+     ctx.selectedRecipeId=ids.has(activeId)?activeId:recipes[0]?.id||null;
+   }
+   if(!ids.has(String(ctx.selectedRecipeId)))ctx.selectedRecipeId=ids.has(activeId)?activeId:recipes[0]?.id||null;
    const chosen=recipes.find(r=>String(r.id)===String(ctx.selectedRecipeId))||null;
    const formula=chosen?.formula||ctx.formula;
    const req=formula?.materials||[];
@@ -241,12 +248,14 @@
      const isS=/escud/i.test(String(r.id)+' '+String(r.subfamily));
      return `<button type="button" class="gApprovedRecipe ${String(ctx.selectedRecipeId)===String(r.id)?'is-selected':''}" data-recipe="${esc(r.id)}" style="${pos(93,isS?465:289,336,53)}" aria-label="Seleccionar ${esc(r.subfamily)}"></button>`;
    }).join('');
-   // Dos espacios de receta: cubrir también el segundo renglón horneado cuando la fórmula usa un solo material.
-   const rows=Array.from({length:2},(_,i)=>{
-     const r=req[i];
-     if(!r)return `<div class="gApprovedRequired" style="${pos(1261,300+i*143,350,115)}"></div>`;
+   // Every material of the generated recipe must be visible; never show only
+   // the first two when seeded formulas contain three or four inputs.
+   const compact=req.length>2;
+   const rows=Array.from({length:Math.max(2,Math.min(4,req.length))},(_,i)=>{
+     const r=req[i],y=compact?286+i*76:300+i*143,h=compact?74:115;
+     if(!r)return `<div class="gApprovedRequired" style="${pos(1261,y,350,h)}"></div>`;
      const qty=Number(ctx.inventory?.[r.material]||0),needed=Number(r.qty||0);
-     return `<div class="gApprovedRequired" style="${pos(1261,300+i*143,350,115)}"><h3>${esc(r.material)}</h3><p>Requerido: <b>${needed}</b></p><p>Stock real: <b>${qty}</b></p></div>`;
+     return `<div class="gApprovedRequired ${compact?'is-compact':''} ${qty>=needed?'is-supplied':'is-missing'}" style="${pos(1261,y,350,h)}"><h3>${esc(r.material)}</h3><p>Requerido: <b>${needed}</b></p><p>Stock real: <b>${qty}</b></p></div>`;
    }).join('');
    const state=`<div class="gApprovedCraftState ${ready&&canCraft?'is-ready':'is-blocked'}" style="${pos(1290,610,292,51)}">${ready&&canCraft?'✓ Disponible':ready?'Receta todavía bloqueada':'Faltan materiales'}</div>`;
    const hero=isShield?`<div class="gApprovedRecipeHeroSwap" style="${pos(456,114,643,706)}">${ctx.recipeAsset?.(chosen?.id)||''}<span>${esc(chosenName)}</span></div>`:'';

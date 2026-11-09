@@ -95,7 +95,7 @@ const issues=[];
   assert.equal(await page.locator('.gApprovedPrepSlot.gPrepLocked').count(),2);
   assert.equal(await page.locator('.gApprovedPrepProduct img').count(),1);
   assert.equal(await page.locator('.gApprovedPrepProduct').getAttribute('aria-label'),'Resultado de preparación: Lingote de hierro');
-  assert.equal(await page.locator('.gApprovedBoard').getAttribute('data-build'),'V014.027');
+  assert.equal(await page.locator('.gApprovedBoard').getAttribute('data-build'),'V014.028');
   await page.locator('[data-prep-raw]').click();
   assert.equal(await page.locator('.gApproved-Preparacion').count(),1,'Selecting ore must stay in Preparación');
   assert.equal(await page.evaluate(()=>window.__LAST_NAV__),'Preparacion','Ore click must never navigate to Inventario');
@@ -105,7 +105,33 @@ const issues=[];
   assert.equal(await page.locator('.gApproved-Fabricaciones').count(),1);
   await page.screenshot({path:path.join(out,'03-fabricaciones-v07-1600x900.png'),animations:'disabled'});
   await page.locator('#gApprovedCraftAction').click();assert.equal(await page.evaluate(()=>window.__CRAFT__),'espada_hierro');
-  await page.locator('[data-recipe="escudo_hierro"]').click();
+
+  // Ordan's ordered quest changes the active recipe; the UI MUST follow it.
+  await page.evaluate(()=>{
+    const ctx=window.__CTX__;
+    ctx.activeRecipeId='escudo_hierro';
+    ctx.selectedRecipeId='espada_hierro';
+    window.GenesisApprovedUI.render(ctx,window.__NAV__,'Fabricaciones');
+  });
+  assert.equal(await page.locator('.gApprovedBoard').getAttribute('data-recipe'),'escudo_hierro',
+    'Q5/Q6 must auto-select the shield after Q2/Q3 sword completion');
+  assert.equal(await page.evaluate(()=>window.__CTX__.selectedRecipeId),'escudo_hierro');
+  await page.locator('#gApprovedCraftAction').click();
+  assert.equal(await page.evaluate(()=>window.__CRAFT__),'escudo_hierro');
+  await page.evaluate(()=>{
+    const ctx=window.__CTX__,catalog=ctx.getRecipeCatalog();
+    catalog[1].formula.materials=[
+      {material:'Lingote de hierro',qty:2},
+      {material:'Madera seca de roble',qty:1},
+      {material:'Carbón vegetal',qty:1}
+    ];
+    ctx.inventory['Carbón vegetal']=2;
+    window.GenesisApprovedUI.render(ctx,window.__NAV__,'Fabricaciones');
+  });
+  assert.equal(await page.locator('.gApprovedRequired h3').count(),3,
+    'Every seeded recipe ingredient must be visible; no truncation after two');
+  await page.screenshot({path:path.join(out,'04b-fabricaciones-escudo-quest-1600x900.png'),animations:'disabled'});
+  await page.locator('button.gApprovedRecipe[data-recipe="escudo_hierro"]').click();
   assert.equal(await page.locator('.gApprovedRecipeHeroSwap').count(),1);
   await page.screenshot({path:path.join(out,'04-fabricaciones-escudo-1600x900.png'),animations:'disabled'});
   await page.setViewportSize({width:1280,height:720});
@@ -125,13 +151,16 @@ const issues=[];
   await page.waitForFunction(()=>[...document.querySelectorAll('.gPrepResultSlot img, .gApprovedPrepResultDisplay img')].every(img=>img.complete&&img.naturalWidth>0),null,{timeout:12000});
 
   assert.equal(await page.locator('.gApprovedPrepResultDisplay img').count(),1,'Product ingot image missing');
-  assert.equal(await page.locator('.gApproved-PrepResult').getAttribute('data-build'),'V014.027');
+  assert.equal(await page.locator('.gApproved-PrepResult').getAttribute('data-build'),'V014.028');
   await page.screenshot({path:path.join(out,'07-preparacion-resultado-v014027-1600x900.png'),animations:'disabled'});
   await page.locator('#prepResultBack').click();
   assert.equal(await page.evaluate(()=>window.__RESULT_BACK__),true,'Return must keep current approved board');
   assert.equal(await page.locator('.gApproved-Preparacion:not(.gApproved-PrepResult)').count(),1);
   // Restore the original fixture's ore stock before running actual controller tests.
-  await page.evaluate(()=>{window.__CTX__.inventory={'Mineral de hierro':3,'Lingote de hierro':6,'Madera seca de roble':4};});
+  await page.evaluate(()=>{
+    window.__CTX__.inventory={'Mineral de hierro':3,'Lingote de hierro':6,'Madera seca de roble':4};
+    window.__CTX__.getRecipeCatalog()[1].formula.materials=[{material:'Lingote de hierro',qty:2}];
+  });
   // Verificar la ruta real del controlador: carga diferida, Preparación e Inventario.
   await page.evaluate(()=>{delete window.GenesisApprovedUI;document.getElementById('modal').innerHTML='';});
   await page.addScriptTag({content:fs.readFileSync(path.join(root,'preparacion_control.js'),'utf8')});
@@ -152,7 +181,7 @@ const issues=[];
   assert.equal(await page.locator('#prepBellow0').count(),1);
   assert.equal(await page.locator('#prepBellow1').count(),1);
   assert.equal(await page.locator('#prepBellow2').count(),1);
-  assert.equal(await page.locator('.gApproved-Thermal').getAttribute('data-build'),'V014.027');
+  assert.equal(await page.locator('.gApproved-Thermal').getAttribute('data-build'),'V014.028');
   const oldHeat=Number((await page.locator('#prepHeatNumber').innerText()).split(' / ')[0]);
   await page.locator('#prepBellow2').click();
   const newHeat=Number((await page.locator('#prepHeatNumber').innerText()).split(' / ')[0]);
