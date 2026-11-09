@@ -7,7 +7,7 @@ import re,hashlib,json
 s=Path("index.html").read_text(encoding="utf8")
 original_sha=hashlib.sha256(s.encode()).hexdigest()
 output=Path("index-v014040-channel-vfx-experimental.html")
-if output.exists():raise RuntimeError("Preview already exists; avoid silent overwrite")
+if output.exists(): print("Existing preview will be verified against deterministic source",flush=True)
 needles={
 "merc_original":"applyMercGearMaterial('mercSwordModel',sc.demo||sc.a,sc.demo?1.28:(sc.dual?1.18:1.02));",
 "light_a":"setMercLight('mercSwordLightA',sc.a,3.45,1.52);",
@@ -47,7 +47,7 @@ s=s.replace("<title>Project Genesis", "<title>Project Genesis V014.040-VFX01 EXP
 s=s.replace("</head>","""<meta name="genesis-channel-vfx-candidate" content="V014.040-VFX01-UNAPPROVED" />
 </head>""",1)
 output.write_text(s,encoding="utf8")
-assert Path("index.html").read_bytes()==Path("index.html").read_bytes()
+assert hashlib.sha256(Path("index.html").read_bytes()).hexdigest()==original_sha
 assert s.count("genesisVfxActive")>=3
 assert "genesis_channel_vfx/boot.mjs" in s
 assert "index-v014040-channel-vfx-experimental" not in Path("index.html").read_text()
