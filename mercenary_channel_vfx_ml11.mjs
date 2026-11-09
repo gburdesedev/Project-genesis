@@ -127,15 +127,15 @@ function attach(app,modelRoot){
  const rafTick=now=>{
    // Some headless WebGL environments do not schedule RAF while the modal is open.
    // The interval below keeps NGE uniforms fresh, but this is NOT GPU-frame proof.
-   if(lastRafTime!==null&&now-lastAppTick>220&&now-(lastTimerTick??-Infinity)>150){
+   if(lastRafTime!==null&&now-lastAppTick>220&&now-(lastTimerTick??-Infinity)>240){
      update((now-lastRafTime)/1000,'preview-clock');
    }
    lastRafTime=now;
    rafId=requestAnimationFrame(rafTick);
  };
- const intervalTick=()=>{
+ // ML13: a running RAF does not mean the PlayCanvas scene is rendering.\n // When app updates pause, keep GLSL uniforms advancing with the fallback clock.\n const intervalTick=()=>{
    const now=performance.now();
-   if(now-lastAppTick>220&&now-(lastRafTime??-Infinity)>150){
+   if(now-lastAppTick>220){
      update(lastTimerTick==null?0.08:(now-lastTimerTick)/1000,'preview-clock');
    }
    lastTimerTick=now;
