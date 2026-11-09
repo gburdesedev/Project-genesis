@@ -46,7 +46,7 @@ const server=http.createServer((req,res)=>{
    assert.equal(state.lab.equipped,true,'ML06 must begin with actual V049 sword and shield attached to 3D mercenary');
    assert.equal(await page.locator('.mercConcept .pv9Slot').count(),10,'V09 must keep exactly ten original gear slots');
    assert.equal(await page.locator('.mercConcept .pv9Viewer').count(),1,'real V049 GLB viewer must exist');
-   assert.match(await page.locator('.pv9Viewer').getAttribute('src'),/V049_SWORD_V12B_SHIELD_V015_WEB\.glb/);
+   assert.match(await page.locator('.pv9Viewer').getAttribute('src'),/V049_V12B_V015_BALANCED_ML06\.glb/);
    assert.match(await page.locator('.pv9Shell').evaluate(el=>getComputedStyle(el).backgroundImage),/V09_Plantilla_Vacia_Referencia/);
    state.approvedSources=await page.evaluate(()=>({v09:window.GenesisMercenaryConcept?.version,v05:window.GenesisInventory16?.version,hero:document.querySelector('.pv9Viewer')?.getAttribute('src')}));
    assert.equal(await page.locator('.mercConcept .mcInventorySlot').count(),20,'V09 must keep 20 original cells');
