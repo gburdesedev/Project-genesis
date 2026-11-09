@@ -21,7 +21,9 @@ jobs:
         run: |
           node --check genesis_result_live_v014030.js
           node --check tests/v014030_result_live_gate.cjs
+          node --check tests/v014030_verified_glb_bytes.cjs
           node tests/v014030_result_live_gate.cjs
+          node tests/v014030_verified_glb_bytes.cjs
           node tests/v014028_approved_sword_result.cjs
       - name: Install Chromium test harness
         run: npm install --prefix /tmp/genesis-v014030 playwright@1.56.1
