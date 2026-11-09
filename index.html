@@ -5,9 +5,10 @@
 <script src="./village_plan.js?v=0.11.017"></script>
 <script src="./device_policy.js?v=0.14.024-pc"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Project Genesis V014.027-ML05 · EXPERIMENTO MERCENARIO · sin publicar · Powered by NGE Alpha</title>
+<title>Project Genesis V014.027-ML06 · MERCENARIO 4-T EXPERIMENTAL · sin publicar · Powered by NGE Alpha</title>
 <link rel="stylesheet" href="./preparacion.css?v=0.14.018-charcoal-v010">
 <link rel="stylesheet" href="./mercenary_equipment_canvas_v09.css?v=0.14.027-ML05">
+<link rel="stylesheet" href="./mercenary_4t_runtime_ml06.css?v=0.14.027-ML06">
 <link rel="stylesheet" href="./inventario_genesis_16x9.css?v=0.14.027-ML05">
 <link rel="stylesheet" href="./mercenary_lab_inventory_v05.css?v=0.14.027-ML05">
 
@@ -239,7 +240,7 @@ window.__genesisAppError=function(event){
   <pc-asset id="mercHairLong10" type="container" src="https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/hair_long.glb" lazy></pc-asset>
   <pc-asset id="mercSword10" type="container" src="https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/sword.glb" lazy></pc-asset>
   <pc-asset id="mercShield10" type="container" src="https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/shield_round.glb" lazy></pc-asset>
-  <pc-asset id="mercV049Exact" type="container" src="./assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb" lazy></pc-asset>
+  <pc-asset id="mercV050Exact" type="container" src="./assets/playcanvas/candidates/mercenary/v050/GENESIS_MERCENARY_V050_4T_SHIELD_FIT_V12B_V015.glb" lazy></pc-asset>
 
   <!-- v0.8.8: props authored; sin squash falso ni animaciones físicamente absurdas. -->
   <pc-asset id="roofReal086" type="container" src="https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Roof_RoundTiles_6x10.gltf" lazy></pc-asset>
@@ -656,7 +657,7 @@ window.__genesisAppError=function(event){
         <pc-entity id="mercSwordGlowA" position="0 .28 0"><pc-light id="mercSwordLightA" type="omni" color="#b7c2ca" intensity="0" range="1.45"></pc-light></pc-entity>
         <pc-entity id="mercSwordGlowB" position="0 -.18 0"><pc-light id="mercSwordLightB" type="omni" color="#b7c2ca" intensity="0" range="1.15"></pc-light></pc-entity>
       </pc-model>
-      <pc-model id="mercApprovedGearDisplay" name="Experimental exact 3D V049 · real sword V12B + shield V015" data-asset="mercV049Exact" data-route="SharedMercenary" data-priority="ondemand" position="0 -40 0"></pc-model>
+      <pc-model id="mercApprovedGearDisplay" name="Experimental actual GLB V050 · original V12B sword + fitted V015 shield" data-asset="mercV050Exact" data-route="SharedMercenary" data-priority="ondemand" position="0 -40 0"></pc-model>
       <pc-model id="mercShieldModel" name="Equipped crafted shield visual" data-asset="mercShield10" data-route="SharedMercenary" data-priority="ondemand" position="0 -40 0">
         <pc-entity id="mercShieldGlowA" position="0 0 .08"><pc-light id="mercShieldLightA" type="omni" color="#b7c2ca" intensity="0" range="1.55"></pc-light></pc-entity>
         <pc-entity id="mercShieldGlowB" position="0 0 -.08"><pc-light id="mercShieldLightB" type="omni" color="#b7c2ca" intensity="0" range="1.20"></pc-light></pc-entity>
@@ -745,8 +746,8 @@ window.__genesisAppError=function(event){
 </div>
 
 <div id="hud">
- <div id="brand">PROJECT GENESIS · V014.027-ML05 · MERCENARIO EXPERIMENTAL</div>
- <div id="tech">PLAYCANVAS 2.22.1 · PRUEBA AISLADA · V014.027-ML05</div>
+ <div id="brand">PROJECT GENESIS · V014.027-ML06 · MERCENARIO 4-T EXPERIMENTAL</div>
+ <div id="tech">PLAYCANVAS 2.22.1 · PRUEBA AISLADA · V014.027-ML06</div>
  <div id="buttonsTop"><button id="cameraSettingsBtn" class="uiBtn" type="button" aria-label="Configurar cámara">⚙ CÁMARA</button></div>
  <section id="quest">
    <div class="ey" id="questEy">PROTOTIPO · SELECCIÓN DE PROFESIÓN</div>
@@ -784,7 +785,7 @@ if(new URLSearchParams(location.search).get('mercenario')==='1'){
 <script src="./fps_counter.js?v=20261025-1"></script>
 <script src="./camera_mouse.js?v=20261025-1"></script>
 <script src="./preparacion_control.js?v=0.14c.020-static-featured"></script>
-<script src="./mercenary_equipment_canvas_v09.js?v=0.14.027-ML05"></script>
+<script src="./mercenary_4t_runtime_ml06.js?v=0.14.027-ML06"></script>
 <script src="./mercenary_lab_inventory_v05.js?v=0.14.027-ML05"></script>
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
@@ -1549,7 +1550,7 @@ function candidateMiniStats(c){return `<div class="mercStatsMini"><div class="me
 /* V014.027-ML02: punto de control temporal. Carga de pueblo y mercado omitida sólo en este laboratorio. Genera cuatro resultados legítimos
    del NGE usando las fórmulas de la sesión. No modifica las partidas normales. */
 async function launchMercenaryLab(){
-  const status=window.__GENESIS_MERCENARY_LAB={status:'initializing',branch:'experiment/v014027-mercenario-directo-equipamiento-20261108',base:'b7af9410118b18994ac5f4d8798551de70be8b46',items:0,approved:false};
+  const status=window.__GENESIS_MERCENARY_LAB={status:'initializing',branch:'experiment/mercenario-4t-runtime-ml06-20261109',base:'b7af9410118b18994ac5f4d8798551de70be8b46',items:0,approved:false};
   if(!gameStarted||selectedProfession!=='Herrero'||!craftSession)throw new Error('La ruta del Herrero todavía no está preparada');
   const engine=window.GenesisPrototypeEngines;
   if(!engine?.fabricate||!engine?.present)throw new Error('El motor NGE no está inicializado');
@@ -1615,7 +1616,7 @@ function showMercenaryEquipment(editing=false,reuseDraft=false){
     const activeFirst=tanner?mercArmorItem:mercSwordItem,activeSecond=tanner?mercBootsItem:mercShieldItem;
     return window.GenesisMercenaryConcept.open({
       modal,mercName:candidate.label,candidate:mercCandidate,body:candidate.body,editing,tanner,
-      modelUrl:GENESIS_MERCENARY_LAB?"./assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb":undefined,
+      modelUrl:GENESIS_MERCENARY_LAB?"./assets/playcanvas/candidates/mercenary/v050/GENESIS_MERCENARY_V050_4T_SHIELD_FIT_V12B_V015.glb":undefined,
       onInventory:GENESIS_MERCENARY_LAB?showApprovedInventoryForMercenary:undefined,
       labelFirst:tanner?'Armadura':'Arma',labelSecond:tanner?'Botas':'Escudo',
       familyFirst:tanner?'Armaduras':'Espadas',familySecond:tanner?'Botas':'Escudos',
@@ -1639,11 +1640,11 @@ function showMercenaryEquipment(editing=false,reuseDraft=false){
         if(GENESIS_MERCENARY_LAB){
           try{
             const el=mercNode("mercApprovedGearDisplay");
-            if(!el)throw Error("Falta el componente 3D V049");
+            if(!el)throw Error("Falta el componente 3D V050");
             toast("Cargando equipo V12B / V015…",2400);
             await activateDeferredModel(el,120000);
-            if(!el.contentEntity)throw Error("V049 terminó de cargar sin geometría");
-          }catch(error){console.error("ML05 gear load:",error);toast("Error cargando V049: "+error.message,4700);return}
+            if(!el.contentEntity)throw Error("V050 terminó de cargar sin geometría");
+          }catch(error){console.error("ML06 gear load:",error);toast("Error cargando V050: "+error.message,4700);return}
         }
         if(!first||!second)return;
         const previous=[mercSwordItem,mercShieldItem,mercArmorItem,mercBootsItem];
@@ -1669,7 +1670,7 @@ if(GENESIS_MERCENARY_LAB){
   ['mercBodyModel','mercBodyRangerModel','mercHeadModel','mercHairPartedModel','mercHairBuzzModel','mercHairLongModel','mercBeardModel','mercSwordModel','mercShieldModel'].forEach(id=>{const e=E(id);if(e)e.enabled=false});
   display.enabled=true;display.setLocalPosition(0,0,0);display.setLocalEulerAngles(0,0,0);display.setLocalScale(1,1,1);
   mercenaryRoot.syncHierarchy?.();
-  if(window.__GENESIS_MERCENARY_LAB)Object.assign(window.__GENESIS_MERCENARY_LAB,{approved3d:true,model:'V049_SWORD_V12B_SHIELD_V015',modelNodeCount:source.contentEntity.children?.length||0});
+  if(window.__GENESIS_MERCENARY_LAB)Object.assign(window.__GENESIS_MERCENARY_LAB,{approved3d:true,model:'V050_FITTED_SHIELD_V015_SWORD_V12B',modelNodeCount:source.contentEntity.children?.length||0});
 }
 return true}
 
