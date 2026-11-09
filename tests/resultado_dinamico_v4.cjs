@@ -59,9 +59,21 @@ assert.throws(()=>result.normalize({...example,channels:[['Daño',10],['Daño',3
 assert.throws(()=>result.normalize({...example,channels:[['Daño',10],['Rayo','no']] }),/inválido/);
 const secure=result.html({...example,name:'<script>alert(1)</script>'});
 assert.doesNotMatch(secure,/<script>alert/);
-const glbUi=result.html({...example,modelAsset:'assets/playcanvas/approved/equipment/sword_approved.glb'});
-assert.match(glbUi,/model-viewer/);
+const approvedPath='assets/playcanvas/approved/equipment/sword_approved.glb';
+const pending=result.html({...example,modelAsset:approvedPath});
+assert.doesNotMatch(pending,/<model-viewer data-result-approved-glb="true"/);
+resultContext.window.GenesisApprovedRuntimeModels={espada_hierro:{
+  status:'approved',gameExportApproved:true,distributionRightsConfirmed:true,
+  sourceSha256:'e2228f078b2572768416c48c0e63c2d908f214e2c0625a2ab754c877a099112b',
+  exportSha256:'a'.repeat(64),
+  materialPreset:'Genesis_Espada_V03_Hierro_V175_V12B',recipe:'espada_hierro',url:approvedPath
+}};
+const glbUi=result.html({...example,modelAsset:approvedPath});
+assert.match(glbUi,/<model-viewer data-result-approved-glb="true"/);
 assert.match(glbUi,/camera-controls/);
+resultContext.window.GenesisApprovedRuntimeModels.espada_hierro.distributionRightsConfirmed=false;
+const unlicensed=result.html({...example,modelAsset:approvedPath});
+assert.doesNotMatch(unlicensed,/<model-viewer data-result-approved-glb="true"/);
 const external=result.html({...example,modelAsset:'https://unapproved.example/sword.glb'});
 assert.doesNotMatch(external,/<model-viewer data-result-approved-glb="true"/);
 assert.match(external,/GLB jugable pendiente/);
