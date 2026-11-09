@@ -23,30 +23,12 @@ function escapeText(value){
   });
 }
 function attachStyle(){
-  if(document.getElementById('genesis-market-style-v001'))return;
-  const style=document.createElement('style');style.id='genesis-market-style-v001';
-  style.textContent=[
-   '.genesisMarketModal{width:min(960px,96vw);background:#121516;color:#eddfbb;border:1px solid #685032}',
-   '.genesisMarketBoard{padding:clamp(15px,3vw,28px);font-family:system-ui,Arial,sans-serif}',
-   '.genesisMarketTop{display:flex;gap:14px;justify-content:space-between;align-items:start}',
-   '.genesisMarketTop small{color:#b99760;font-size:11px;letter-spacing:.12em}',
-   '.genesisMarketTop h2{font:normal 28px Georgia,serif;margin:5px 0;color:#ead49f}',
-   '.genesisMarketBoard p{font-size:13px;line-height:1.5;color:#c8bda8;margin:8px 0 16px}',
-   '.genesisMarketGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;max-height:55vh;overflow:auto;overscroll-behavior:contain}',
-   '.genesisMarketCard{border:1px solid #6b5638;background:#222421;padding:13px;min-height:150px;display:flex;flex-direction:column;justify-content:space-between;gap:12px}',
-   '.genesisMarketCard strong{font:normal 17px Georgia,serif;color:#f2dfb7;overflow-wrap:anywhere}',
-   '.genesisMarketCard small{color:#b6b4aa;font-size:11px}',
-   '.genesisMarketQty{display:flex;gap:7px;align-items:center;justify-content:space-between}',
-   '.genesisMarketQty button{min-width:33px;height:34px;border:1px solid #9d7d47;background:#302b22;color:#f5dfb3;font-size:19px}',
-   '.genesisMarketQty b{font-size:14px}',
-   '.genesisMarketBuy{width:100%;background:#46341c;border:1px solid #d4ab65;color:#ffe2aa;padding:10px;font-weight:700;cursor:pointer}',
-   '.genesisMarketBuy:hover,.genesisMarketQty button:hover{filter:brightness(1.18)}',
-   '.genesisMarketClose{background:#2a2924;border:1px solid #886d48;color:#ebd7b0;padding:9px 14px;cursor:pointer}',
-   '.genesisMarketFoot{margin-top:14px;color:#c9aa70;font-size:12px;min-height:20px}',
-   '.genesisMarketModal button:focus-visible{outline:2px solid #f1c676;outline-offset:2px}',
-   '@media(max-width:580px){.genesisMarketGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.genesisMarketCard{padding:9px;min-height:141px}.genesisMarketTop h2{font-size:22px}}'
-  ].join('\n');
-  document.head.appendChild(style);
+  if(document.getElementById('genesis-market-approved-style'))return;
+  const link=document.createElement('link');
+  link.id='genesis-market-approved-style';
+  link.rel='stylesheet';
+  link.href='./genesis_ui_approved.css?v=0.14.028';
+  document.head.appendChild(link);
 }
 function buildStall(world){
   const wood=mat('Puesto de mercado - roble usado',.26,.16,.09);
@@ -208,6 +190,7 @@ export function mountGenesisMarket(options){
   loadMerchantV02(app,npc.entity,visual);
   const chosen=Object.create(null);
   let lastMessage='';
+  let selectedIndex=0;
   const toRawStock=window.GenesisPreparation?.rawStock;
   function catalog(){return domain.catalog(getSession(),toRawStock);}
   function draw(){
@@ -216,26 +199,57 @@ export function mountGenesisMarket(options){
     const inv=getInventory();
     const needs=typeof getMarketNeeds==='function'?getMarketNeeds():[];
     const needByName=new Map(needs.map(n=>[n.material,n]));
-    const cards=names.map((name,index)=>{
-      const missing=needByName.get(name)?.missing||0;
-      const quantity=chosen[name]||Math.min(99,Math.max(1,missing)),now=Number(inv?.[name]||0);
-      return '<article class="genesisMarketCard" data-slot="'+index+'">'+
-       '<div><strong>'+escapeText(name)+'</strong><div><small>Tenés '+now+' · Precio: 0 oro</small></div>'+(needByName.has(name)?'<div><small>Para 2 escudos faltan '+missing+'</small></div>':'')+'</div>'+
-       '<div><div class="genesisMarketQty"><button data-dec="'+index+'" aria-label="Restar una unidad">−</button>'+
-       '<b>'+quantity+'</b><button data-inc="'+index+'" aria-label="Sumar una unidad">+</button></div>'+
-       '<button class="genesisMarketBuy" data-buy="'+index+'">Obtener '+quantity+' · GRATIS</button></div></article>';
+    const ROOT='assets/ui/preparacion/01_Capas/';
+    const MATERIALS={
+      'Mineral de hierro':'assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png',
+      'Lingote de hierro':'assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png',
+      'Carbón vegetal':'assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png',
+      'Madera seca de roble':'assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png',
+      'Madera seca de fresno':'assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png',
+      'Cuero bovino curtido':'assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_poster.png',
+      'Cuero caprino curtido':'assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_poster.png',
+      'Cordel de cáñamo':'assets/playcanvas/approved/materials/hemp/v018/cordel_canamo_v018_poster.jpg',
+      'Hilo de lino':'assets/playcanvas/approved/materials/linen/v021/hilo_lino_v021_poster.jpg'
+    };
+    const pos=(x,y,w,h)=>'left:'+(x/1672*100).toFixed(3)+'%;top:'+(y/941*100).toFixed(3)+'%;width:'+(w/1672*100).toFixed(3)+'%;height:'+(h/941*100).toFixed(3)+'%';
+    const panel=(path,x,y,w,h)=>'<img alt="" aria-hidden="true" src="./'+ROOT+path+'" style="position:absolute;pointer-events:none;'+pos(x,y,w,h)+'">';
+    const asset=name=>MATERIALS[name]?'<img class="gApprovedMaterialArt" src="./'+escapeText(MATERIALS[name])+'" alt="'+escapeText(name)+'" style="max-width:78%;max-height:73%;object-fit:contain;filter:drop-shadow(0 4px 5px #000)">':'<span class="gApprovedNoModel">'+escapeText(name)+'</span>';
+    const cards=names.slice(0,10).map((name,index)=>{
+      const x=38+(index%5)*106,y=274+Math.floor(index/5)*113;
+      const qty=chosen[name]||Math.min(99,Math.max(1,needByName.get(name)?.missing||0));
+      return '<button type="button" class="gApprovedPrepSlot" data-select="'+index+'" title="'+escapeText(name)+'" aria-label="'+escapeText(name)+'" style="'+pos(x,y,99,108)+'">'+asset(name)+
+        '<img alt="" aria-hidden="true" src="./'+ROOT+'Casillas/Casilla_Basicos_01.png" style="position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;pointer-events:none">'+
+        '<b>'+Number(inv?.[name]||0)+'</b></button>';
     }).join('');
-    modal('<section class="genesisMarketBoard" id="genesisMarketBoard">'+
-      '<div class="genesisMarketTop"><div><small>MERCADO · DEMOSTRACIÓN DE COMPRA</small>'+
-      '<h2>Comerciante de materiales</h2></div>'+
-      '<button class="genesisMarketClose" id="genesisMarketClose">Cerrar ✕</button></div>'+
-      '<p>Solo materiales de las recetas conocidas y necesarias para la demo de <b>'+
-        escapeText(current?.profession||'la partida')+'</b>. Por ahora, todas las compras cuestan <b>0 oro</b>.</p>'+
-      '<div class="genesisMarketGrid">'+(cards||'<div class="genesisMarketCard">Esta partida todavía no tiene materiales conocidos.</div>')+
-      '</div><div class="genesisMarketFoot" aria-live="polite">'+escapeText(lastMessage)+'</div></section>',
-      'genesisMarketModal');
+    let selected=names[selectedIndex]||names[0];
+    if(!names.includes(selected))selected=names[0];
+    selectedIndex=Math.max(0,names.indexOf(selected));
+    const qty=selected?(chosen[selected]||Math.min(99,Math.max(1,needByName.get(selected)?.missing||0))):0;
+    modal('<div class="gApprovedBoard gApproved-Preparacion" id="genesisMarketBoard" style="background-image:url(\'./'+ROOT+'Fondo/FondoEstructural.png\')">'+
+      panel('Paneles/PanelBasicos.png',17,153,562,380)+
+      panel('Paneles/PanelPreparados.png',17,533,562,380)+
+      panel('Paneles/FondoVisorHerreria.png',579,153,548,760)+
+      panel('Paneles/PanelDatos.png',1127,153,399,624)+
+      panel('Paneles/PanelAccionSinBoton.png',1127,777,399,136)+
+      '<div class="gApprovedRecipeTitle" style="'+pos(180,30,1310,100)+';background:#100b09"><h2>MERCADO · SUMINISTROS</h2><p>Comerciante de materiales · '+escapeText(current?.profession||'Artesano')+'</p></div>'+
+      '<button class="gApprovedHit" id="genesisMarketClose" style="'+pos(1603,0,69,36)+';z-index:10;color:#f4d49c;background:#1a110a">✕</button>'+
+      '<div class="gApprovedPrepData" style="'+pos(38,177,505,80)+';font-size:1.6cqw">Materiales disponibles · seleccioná una casilla</div>'+
+      cards+
+      '<div class="gApprovedPrepData" style="'+pos(40,560,490,75)+';font-size:1.5cqw">Materiales de recetas conocidas · '+names.length+' tipos</div>'+
+      '<div class="gApprovedPrepProduct" style="'+pos(605,230,494,540)+'">'+(selected?asset(selected):'')+'</div>'+
+      '<div class="gApprovedPrepData" style="'+pos(1144,185,350,570)+'">'+
+      '<h3 style="font-size:2cqw">'+escapeText(selected||'Sin materiales')+'</h3>'+
+      '<p>En inventario: '+Number(inv?.[selected]||0)+'</p>'+
+      '<p>Precio: 0 oro · Demostración</p>'+
+      '<p>Para 2 escudos faltan: '+Number(needByName.get(selected)?.missing||0)+'</p>'+
+      '<div class="gApprovedPrepQty"><button data-dec="'+selectedIndex+'">−</button><strong>'+qty+'</strong><button data-inc="'+selectedIndex+'">+</button></div>'+
+      '<p>Total: 0 oro</p></div>'+
+      '<button type="button" class="gApprovedPrepAction" data-buy="'+selectedIndex+'" style="'+pos(1150,796,344,92)+';background:#3b2513;color:#f9d59c;border:1px solid #c69b60;font-size:2cqw">OBTENER '+qty+' · GRATIS</button>'+
+      '<div class="gApprovedCraftState" style="'+pos(605,805,490,55)+'">'+escapeText(lastMessage)+'</div>'+
+      '</div>','preparationModal genesisApprovedModal genesisMarketModal');
     const root=document.getElementById('genesisMarketBoard');
     root?.querySelector('#genesisMarketClose')?.addEventListener('click',()=>closeModal());
+    root?.querySelectorAll('[data-select]').forEach(btn=>btn.addEventListener('click',()=>{selectedIndex=Number(btn.dataset.select);draw();}));
     root?.querySelectorAll('[data-inc]').forEach(btn=>btn.addEventListener('click',()=>{
       const name=names[Number(btn.dataset.inc)];
       if(!name)return;const required=needByName.get(name)?.missing||0;chosen[name]=Math.min(99,(chosen[name]||Math.min(99,Math.max(1,required)))+1);draw();
@@ -263,7 +277,7 @@ export function mountGenesisMarket(options){
     if(typeof modal!=='function'||typeof closeModal!=='function')return false;
     if(!getSession()){toast?.('Elegí primero una profesión para crear la semilla.',1500);return false;}
     if(typeof canTrade==='function'&&!canTrade()){toast?.('Primero hablá con Ordan. Él te enseñará a reabastecerte en el mercado.',2100);return false;}
-    lastMessage='';draw();return true;
+    lastMessage='';selectedIndex=0;draw();return true;
   }
   const interactable=Object.freeze({
     id:'marketMerchant',radius:2.85,
