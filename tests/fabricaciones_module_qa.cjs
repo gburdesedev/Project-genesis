@@ -1,0 +1,41 @@
+'use strict';
+const assert=require('node:assert/strict');
+const vm=require('node:vm');
+const fs=require('node:fs');
+const moduleSrc=fs.readFileSync('genesis_fabricaciones_module.js','utf8');
+const sandbox={window:{}};
+vm.runInNewContext(moduleSrc,sandbox);
+const mod=sandbox.window.GenesisCraftingModule;
+assert.equal(mod.version,'FAB-MOD-001');
+const recipes=[
+ {id:'espada_hierro',family:'Espadas',subfamily:'Espada de hierro',formula:{materials:[{material:'Lingote de hierro',qty:2},{material:'Madera seca de roble',qty:1}]}},
+ {id:'escudo_hierro',family:'Escudos',subfamily:'Escudo de hierro',formula:{materials:[{material:'Lingote de hierro',qty:2},{material:'Carbón vegetal',qty:1},{material:'Cuero bovino curtido',qty:1}]}}
+];
+const inventory={'Lingote de hierro':6,'Madera seca de roble':4,'Carbón vegetal':2,'Cuero bovino curtido':3};
+const ctx={getRecipeCatalog:()=>recipes,activeRecipeId:'espada_hierro',selectedRecipeId:'espada_hierro',inventory,canCraftRecipe:()=>true};
+let d=mod.collect(ctx);
+assert.equal(d.selected.id,'espada_hierro');
+assert.equal(d.material.length,2);
+assert.equal(d.canCraft,true);
+ctx.activeRecipeId='escudo_hierro';
+d=mod.collect(ctx);
+assert.equal(d.selected.id,'escudo_hierro');
+assert.equal(d.material.length,3);
+assert.equal(d.groups.size,2);
+assert.equal(d.canCraft,true);
+delete ctx.inventory['Cuero bovino curtido'];
+d=mod.collect(ctx);assert.equal(d.canCraft,false);
+assert.equal(mod.modelEntry(d.selected),null,'Do not display a generic substitute GLB');
+sandbox.window.GenesisApprovedCraftPreviewModels={escudo_hierro:{approvedForGame:true,url:'https://example.com/swap.glb'}};
+assert.equal(mod.modelEntry(d.selected),null,'No remote GLBs');
+sandbox.window.GenesisApprovedCraftPreviewModels.escudo_hierro.url='assets/playcanvas/approved/equipment/GENESIS_ESCUDO_V015.glb';
+assert.equal(mod.modelEntry(d.selected),'assets/playcanvas/approved/equipment/GENESIS_ESCUDO_V015.glb');
+const css=fs.readFileSync('genesis_fabricaciones_module.css','utf8');
+assert.match(css,/\.gfmBoard\b/);
+assert(!css.includes('.gApprovedBoard{'),'Must not override approved global UI');
+const original=fs.readFileSync('genesis_ui_approved.js','utf8');
+assert.match(original,/GenesisCraftingModule\?\.render\(ctx,nav\)/);
+const game=fs.readFileSync('index.html','utf8');
+assert.match(game,/genesis_fabricaciones_module\.js/);
+assert.match(game,/genesis_fabricaciones_module\.css/);
+console.log('PASS: modular Fabricaciones, recipe switching, real stock, strict 3D asset gate and isolated CSS');
