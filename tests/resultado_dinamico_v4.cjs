@@ -21,7 +21,7 @@ const formula=session.formulas.espada_hierro;
 assert.ok(formula,'Fórmula procedimental real de sesión');
 assert.match(html,/GenesisResultDynamic\?\.decorate\?\.\(modalBox,item,itemAssetMarkup\)/);
 assert.match(html,/id="resultContinue"/);
-assert.ok(html.includes('genesis_result_dynamic_v001.css?v=016001')&&html.includes('genesis_result_dynamic_v001.js?v=016001'));
+assert.ok(html.includes('genesis_result_dynamic_v001.css?v=016002')&&html.includes('genesis_result_dynamic_v001.js?v=016002'));
 const names=new Set();
 for(let n=1;n<=12;n++){
  const first=engine.present(engine.fabricate('espada_hierro',{craft:1,seed:n*977,artisan:'QA',formula}),names);
