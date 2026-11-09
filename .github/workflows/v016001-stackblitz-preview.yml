@@ -1,0 +1,51 @@
+name: Genesis V016001 | Browser live preview StackBlitz
+on:
+  push:
+    branches: [v016001-playable-preview-20261109]
+    paths: ['.github/workflows/v016001-stackblitz-preview.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preview-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/stackblitz-test playwright@1.56.1
+      - name: Check public browser preview launches
+        run: |
+          mkdir -p previews/stackblitz-check
+          NODE_PATH=/tmp/stackblitz-test/node_modules node - <<'NODE'
+          const {chromium}=require('playwright'),fs=require('fs');
+          const url='https://stackblitz.com/github/gburdesedev/Project-genesis/tree/v016001-playable-preview-20261109?startScript=dev&file=index.html';
+          (async()=>{
+           const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+           const page=await browser.newPage({viewport:{width:1440,height:900}});
+           const diag={url,errors:[],responses:[]};
+           page.on('pageerror',e=>diag.errors.push(e.message.slice(0,300)));
+           page.on('response',r=>{if(r.status()>=400&&diag.responses.length<15)diag.responses.push({url:r.url().slice(0,150),status:r.status()})});
+           try{
+            const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:50000});
+            diag.http=response?.status();diag.title=await page.title();
+            await page.waitForTimeout(27000);
+            diag.bodyStart=(await page.locator('body').innerText({timeout:12000})).slice(0,1200);
+            diag.frames=page.frames().map(f=>({url:f.url().slice(0,400),name:f.name()}));
+            diag.preview=diag.frames.some(f=>/webcontainer|stackblitz.io|local-credentialless/.test(f.url));
+            await page.screenshot({path:'previews/stackblitz-check/stackblitz.png',timeout:12000}).catch(e=>diag.screenshot_error=e.message.slice(0,150));
+           }catch(e){diag.error=e.message.slice(0,450)}
+           console.log('STACKBLITZ_GENESIS_PREVIEW',JSON.stringify(diag));
+           fs.writeFileSync('previews/stackblitz-check/report.json',JSON.stringify(diag,null,2));
+           await browser.close();
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v016001-stackblitz-preview
+          path: previews/stackblitz-check/
