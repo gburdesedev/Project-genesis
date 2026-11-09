@@ -57,6 +57,7 @@ const issues=[];
   assert.equal(await page.locator('.gFabRecipe.is-selected').count(),1);
   assert.equal(await page.locator('.gFabV175Category').count(),0,'V175 must be in ORA art, not CSS overlays');
   assert.equal(await page.locator('.gFabRecipeSymbol').count(),2,'Keep recipe symbols independent of material icon');
+  // Original material icon has been erased from the raster; never double-render a V175 asset.
   assert.equal(await page.locator('.gApprovedBoard').evaluate(e=>getComputedStyle(e).backgroundImage.includes('Fabricaciones_Base_Limpia_V004.png')),true);
 
   assert.equal(await page.locator('.gFabMaterials[data-count="3"] .gFabMat').count(),3);
