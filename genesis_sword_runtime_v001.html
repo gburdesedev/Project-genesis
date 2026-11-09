@@ -13,15 +13,25 @@ canvas:active{cursor:grabbing}
 <div id="help">Arrastrar: girar · Rueda: acercar/alejar · Doble clic: restablecer</div>
 <script type="module">
 import * as pc from 'https://cdn.jsdelivr.net/npm/playcanvas@2.22.1/build/playcanvas.mjs';
+import {createRayoV07,RAYO_V07_APPROVAL} from './vfx/approved/Genesis_Rayo_Helicoidal_V07.mjs';
+import {createFuegoFiloV01,FUEGO_V01_SPEC} from './vfx/experimental/Genesis_Fuego_Filo_V01.mjs';
 if(window.parent!==window)document.documentElement.classList.add('embedded');
 const HDRI='https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/studio_small_09_2k.hdr';
 const MODEL='https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/experiment/mercenary-v050-ui-4t-shield-fit-20261109/candidates/mercenary/stand_v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb';
 const NODE='GENESIS_V048_APPROVED_SWORD_V12B_IN_RIGHT_HAND_STATIC';
+const CHANNELS=['Base','Luz','Sombra','Fuego','Hielo','Naturaleza','Tierra','Rayo'];
+let supplied={};
+try{supplied=JSON.parse(new URLSearchParams(location.search).get('channels')||'{}');if(!supplied||typeof supplied!=='object'||Array.isArray(supplied))supplied={};}
+catch(e){supplied={};}
+const finiteIntensity=key=>{const n=Number(supplied[key]??0);return Number.isFinite(n)?Math.min(100,Math.max(0,n)):0};
+const levels=Object.freeze({Fuego:finiteIntensity('Fuego'),Rayo:finiteIntensity('Rayo')});
+const unimplemented=CHANNELS.filter(k=>k!=='Base'&&k!=='Fuego'&&k!=='Rayo'&&Number(supplied[k])>0);
 const status=document.getElementById('status');
-const state={phase:'loading',geometry:'V12B',dimensions:null,node:null,source:'V049 composite game GLB',hdri:'Studio Small 09 · RGBE HDR 2K',hdriReady:false,modelReady:false,error:null};
+const state={phase:'loading',geometry:'V12B',dimensions:null,node:null,source:'V049 composite game GLB',hdri:'Studio Small 09 · RGBE HDR 2K',hdriReady:false,modelReady:false,error:null,
+ levels,unimplementedEffects:unimplemented,effects:{},effectTime:0,vfxReady:false};
 window.__genesisSwordViewerStatus=state;
 function show(text){status.textContent=text}
-function readyCheck(){if(state.modelReady&&state.hdriReady){state.phase='ready';show('Espada 3D V175/V12B · GLB real · HDRI Studio Small 09 · arrastrá para girar')}}
+function readyCheck(){if(state.modelReady&&state.hdriReady){state.phase='ready';show('Espada V12B · GLB 3D · Fuego '+levels.Fuego+'/100 · Rayo '+levels.Rayo+'/100 · HDRI · girá para inspeccionar')}}
 let app;
 try{
  const canvas=document.getElementById('sword3d');
@@ -74,6 +84,41 @@ try{
    const extents=new pc.Vec3().sub2(max,min);const height=Math.max(.05,extents.length());
    const pivot=new pc.Entity('Inspection pivot');app.root.addChild(pivot);
    isolated.reparent(pivot);isolated.setLocalPosition(-center.x,-center.y,-center.z);
+   // VFX shares the exact pivot and origin of the real GLB; no flat poster, no altered sword.
+   const vfxFrame=new pc.Entity('V12B_CHANNEL_EFFECTS_ORIGIN');
+   pivot.addChild(vfxFrame);
+   vfxFrame.setLocalPosition(-center.x,-center.y,-center.z);
+   const originalSwordBounds=new pc.BoundingBox(center.clone(),extents.clone().mulScalar(.5));
+   const rayo=createRayoV07(pc,app,originalSwordBounds);
+   const fuego=createFuegoFiloV01(pc,app,originalSwordBounds);
+   function moveVfxToSword(mod){
+     if(mod.entity){mod.entity.reparent(vfxFrame);mod.entity.setLocalPosition(0,0,0);mod.entity.setLocalRotation(new pc.Quat());mod.entity.setLocalScale(1,1,1);}
+     if(mod.light){
+       const p=mod.light.getPosition().clone();
+       mod.light.reparent(vfxFrame);mod.light.setLocalPosition(p.x,p.y,p.z);
+     }
+   }
+   moveVfxToSword(rayo);moveVfxToSword(fuego);
+   // The approved Rayo V07 shader is copied verbatim. Fuego V01 is experimental.
+   let effectsClock=0;
+   function updateEffects(seconds){
+     effectsClock=Math.max(0,Number(seconds)||0);
+     rayo.set(effectsClock,levels.Rayo);
+     fuego.set(effectsClock,levels.Fuego);
+     state.effectTime=effectsClock;
+   }
+   updateEffects(0);
+   app.on('update',dt=>updateEffects(effectsClock+dt));
+   window.__genesisVfxStep=async t=>{
+     updateEffects(t);
+     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+     return {levels,time:state.effectTime,effects:state.effects};
+   };
+   state.effects={
+    Rayo:{intensity:levels.Rayo,source:'Rayo Helicoidal V07',approvedVisual:RAYO_V07_APPROVAL.approvedVisual,triangles:rayo.stats.triangles,animated:true},
+    Fuego:{intensity:levels.Fuego,source:'Fuego Filo V01',approvedVisual:FUEGO_V01_SPEC.approved,triangles:fuego.stats.triangles,animated:true}
+   };
+   state.vfxReady=true;
    let yaw=26,pitch=-8,zoom=height*1.65;
    let dragging=false,lastX=0,lastY=0;
    function update(){pivot.setEulerAngles(pitch,yaw,0);cam.setPosition(0,height*.10,zoom);cam.lookAt(0,0,0)}
