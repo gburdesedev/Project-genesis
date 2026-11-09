@@ -100,7 +100,16 @@
         return `<button type="button" class="mcInventorySlot ${item?'hasItem':''} ${isEquipped?'pg4tAlreadyEquipped':''} ${item&&sameItem(item,candidate)?'selected':''}" data-item="${i}" data-item-id="${esc(item?.id||'')}" aria-label="${esc(isEquipped?'Equipado: '+item.name:(item?.name||'Casilla vacía'))}" title="${esc(isEquipped?'Ya equipado · '+item.name:(item?.name||''))}" ${(!item||isEquipped)?'disabled':''}>${getIcon(item)}</button>`;
       }).join('');
       const poster=opts.modelUrl ? `<img class="pv9RealCyclesPoster" src="${ART}V050_REAL_CYCLES32_CHARACTER_RGBA.png" alt="Render Cycles EXR32 del mercenario real V050 con espada V175/V12B y escudo V015 proporcionado">` : '';
-      const modelHtml = poster + `<model-viewer data-asset-src="${esc(model)}" camera-controls interaction-prompt="none" loading="lazy" camera-orbit="15deg 80deg 5.1m" exposure="1.25" shadow-intensity=".32" alt="GLB real V050: espada V12B y escudo V015" class="pv9Viewer"></model-viewer>`;
+      // The modal defaults to the real Cycles V050 poster until WebGL is activated.
+      // Mirror the NGE equipped halos in that poster; live world 3D lights are handled
+      // by applyV050EquippedHalos in index.html. Not a replacement for GLB/VFX assets.
+      const heroHalo=(item,kind)=>{
+        if(!item)return '';
+        const fx=dominant(item);
+        return `<span class="pg4tHeroEquippedHalo pg4tHeroHalo-${kind}" data-equipment-halo="${kind}" data-affinity="${esc(fx.first)}" style="--fx-color:${fx.color};--fx-color-2:${fx.color2};--fx-strength:${fx.strength.toFixed(2)}" aria-hidden="true"></span>`;
+      };
+      const modelHtml = poster + `<model-viewer data-asset-src="${esc(model)}" camera-controls interaction-prompt="none" loading="lazy" camera-orbit="15deg 80deg 5.1m" exposure="1.25" shadow-intensity=".32" alt="GLB real V050: espada V12B y escudo V015" class="pv9Viewer"></model-viewer>`+
+        heroHalo(opts.equippedFirst,'sword')+heroHalo(opts.equippedSecond,'shield');
       const channels = rows.map(row => {
         const known=CHANNELS.includes(row.name);
         const delta = row.a && row.b ? row.b.value-row.a.value : null;
