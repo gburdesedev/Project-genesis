@@ -5,7 +5,7 @@
 <script src="./village_plan.js?v=0.11.017"></script>
 <script src="./device_policy.js?v=0.14.024-pc"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Project Genesis V014.027-ML02 · EXPERIMENTO MERCENARIO · sin publicar · Powered by NGE Alpha</title>
+<title>Project Genesis V014.027-ML04 · EXPERIMENTO MERCENARIO · sin publicar · Powered by NGE Alpha</title>
 <link rel="stylesheet" href="./preparacion.css?v=0.14.018-charcoal-v010">
 <link rel="stylesheet" href="./mercenary_equipment_canvas_v001.css?v=0.1.001">
 
@@ -741,8 +741,8 @@ window.__genesisAppError=function(event){
 </div>
 
 <div id="hud">
- <div id="brand">PROJECT GENESIS · V014.027-ML02 · MERCENARIO EXPERIMENTAL</div>
- <div id="tech">PLAYCANVAS 2.22.1 · PRUEBA AISLADA · V014.027-ML02</div>
+ <div id="brand">PROJECT GENESIS · V014.027-ML04 · MERCENARIO EXPERIMENTAL</div>
+ <div id="tech">PLAYCANVAS 2.22.1 · PRUEBA AISLADA · V014.027-ML04</div>
  <div id="buttonsTop"><button id="cameraSettingsBtn" class="uiBtn" type="button" aria-label="Configurar cámara">⚙ CÁMARA</button></div>
  <section id="quest">
    <div class="ey" id="questEy">PROTOTIPO · SELECCIÓN DE PROFESIÓN</div>
@@ -766,6 +766,17 @@ window.__genesisAppError=function(event){
 
 <div id="modalLayer"><div class="modal" id="modal"></div></div>
 
+<script>
+/* ML04 · Eliminar SOLO elementos decorativos de la instancia experimental antes
+   de que PlayCanvas inicialice su árbol DOM y sus assets. */
+if(new URLSearchParams(location.search).get('mercenario')==='1'){
+  for(const id of ['villageShellSource','villageRoofSource','villageDoorSource','genesisFountainV011Model','tannerMentorModel']){
+    document.getElementById(id)?.remove();
+  }
+  document.querySelectorAll('pc-model[data-route="Curtidor"]').forEach(el=>el.remove());
+  document.getElementById('genesisFountainV011HQAsset')?.remove();
+}
+</script>
 <script src="./fps_counter.js?v=20261025-1"></script>
 <script src="./camera_mouse.js?v=20261025-1"></script>
 <script src="./preparacion_control.js?v=0.14c.020-static-featured"></script>
