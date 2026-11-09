@@ -80,8 +80,19 @@ const server=http.createServer((req,res)=>{
    assert.equal(state.lab.shaderAnimation?.ready,6,
      'Three actual GLSL shaders for each V050 gear item must be instantiated: '+
        JSON.stringify(state.lab.shaderAnimation?.errors));
+   // Clock tick confirms shader uniforms advance, not necessarily GPU rendering.
+   // World frames and suspended-modal fallback frames are diagnosed separately.
    await page.waitForFunction(()=>Number(window.__GENESIS_MERCENARY_LAB?.shaderAnimation?.updateFrames)>2,
        null,{timeout:25000});
+   const shaderClock=await page.evaluate(()=>({
+     source:window.__GENESIS_MERCENARY_LAB.shaderAnimation.lastClock,
+     frames:window.__GENESIS_MERCENARY_LAB.shaderAnimation.updateFrames,
+     appFrames:window.__GENESIS_MERCENARY_LAB.shaderAnimation.playCanvasFrames,
+     clockFrames:window.__GENESIS_MERCENARY_LAB.shaderAnimation.previewClockFrames
+   }));
+   assert.ok(['playcanvas','preview-clock'].includes(shaderClock.source));
+   assert.ok(shaderClock.frames>2,'Shader uniforms must advance on a live frame clock');
+   state.shaderClock=shaderClock;
    assert.equal(await page.evaluate(()=>!!window.__GENESIS_MERCENARY_LAB?.shaderAnimation?.runtimeError),false,
        'Animated GLSL programs must update on actual PlayCanvas frames without exceptions');
    assert.ok(state.lab.shaderAnimation?.originalModelUnchanged);
