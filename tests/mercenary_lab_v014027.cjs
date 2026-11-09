@@ -48,7 +48,8 @@ const server=http.createServer((req,res)=>{
    assert.match(await page.locator('.pv9Viewer').getAttribute('src'),/V049_SWORD_V12B_SHIELD_V015_WEB\.glb/);
    assert.match(await page.locator('.pv9Shell').evaluate(el=>getComputedStyle(el).backgroundImage),/V09_Plantilla_Vacia_Referencia/);
    state.approvedSources=await page.evaluate(()=>({v09:window.GenesisMercenaryConcept?.version,v05:window.GenesisInventory16?.version,hero:document.querySelector('.pv9Viewer')?.getAttribute('src')}));
-   assert.equal(await page.locator('.mercConcept .mcInventorySlot').count(),2);
+   assert.equal(await page.locator('.mercConcept .mcInventorySlot').count(),20,'V09 must keep 20 original cells');
+   assert.equal(await page.locator('.mercConcept .mcInventorySlot.hasItem').count(),2,'only two created items in current family');
    await page.locator('.pv9Viewer').evaluate(async(el)=>{try{await Promise.race([el.updateComplete||new Promise(()=>{}),new Promise(r=>setTimeout(r,25000))])}catch(_){}});
    state.hero=await page.locator('.pv9Viewer').evaluate(el=>({loaded:el.loaded,visible:el.modelIsVisible,src:el.getAttribute('src')}));
    await page.screenshot({path:path.join(OUT,'01-menu-espadas-v09-v049.png'),fullPage:true,timeout:25000});
@@ -61,7 +62,8 @@ const server=http.createServer((req,res)=>{
    await page.locator('[data-nav="Preparacion"]').click();
    await page.locator('.pv9Board').waitFor({timeout:10000});
    await page.locator('[data-family="second"]').click();
-   assert.equal(await page.locator('.mercConcept .mcInventorySlot').count(),2);
+   assert.equal(await page.locator('.mercConcept .mcInventorySlot').count(),20,'V09 must keep 20 original cells');
+   assert.equal(await page.locator('.mercConcept .mcInventorySlot.hasItem').count(),2,'only two created items in current family');
    await page.screenshot({path:path.join(OUT,'03-menu-escudos-v09.png'),fullPage:true,timeout:25000});
    await page.locator('[data-action="equip"]').click();
    await page.waitForFunction(()=>window.__GENESIS_MERCENARY_LAB?.status==='equipped',null,{timeout:125000}).catch(()=>null);
