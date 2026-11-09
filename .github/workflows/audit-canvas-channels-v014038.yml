@@ -15,6 +15,7 @@ jobs:
       - name: Audit original Canvas and V014038 without changing any source
         run: |
           python3 scripts/qa/audit_canvas_channels_v014038.py
+          python3 scripts/qa/audit_canvas_mercenary_attach_v014038.py
       - name: Preserve audit evidence
         uses: actions/upload-artifact@v4
         with:
