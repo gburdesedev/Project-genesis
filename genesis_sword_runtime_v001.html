@@ -12,27 +12,42 @@ canvas:active{cursor:grabbing}
 <div id="help">Arrastrar: girar · Rueda: acercar/alejar · Doble clic: restablecer</div>
 <script type="module">
 import * as pc from 'https://cdn.jsdelivr.net/npm/playcanvas@2.22.1/build/playcanvas.mjs';
+const HDRI='https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/studio_small_09_2k.hdr';
 const MODEL='https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/experiment/mercenary-v050-ui-4t-shield-fit-20261109/candidates/mercenary/stand_v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb';
 const NODE='GENESIS_V048_APPROVED_SWORD_V12B_IN_RIGHT_HAND_STATIC';
 const status=document.getElementById('status');
-const state={phase:'loading',geometry:'V12B',dimensions:null,node:null,source:'V049 composite game GLB',error:null};
+const state={phase:'loading',geometry:'V12B',dimensions:null,node:null,source:'V049 composite game GLB',hdri:'Studio Small 09 · RGBE HDR 2K',hdriReady:false,modelReady:false,error:null};
 window.__genesisSwordViewerStatus=state;
 function show(text){status.textContent=text}
+function readyCheck(){if(state.modelReady&&state.hdriReady){state.phase='ready';show('Espada 3D V175/V12B · GLB real · HDRI Studio Small 09 · arrastrá para girar')}}
 let app;
 try{
  const canvas=document.getElementById('sword3d');
  app=new pc.Application(canvas,{graphicsDeviceOptions:{antialias:true,alpha:true,preserveDrawingBuffer:true}});
  app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
  app.setCanvasResolution(pc.RESOLUTION_AUTO);
- app.scene.ambientLight=new pc.Color(.60,.57,.53);
+ app.scene.ambientLight=new pc.Color(.14,.13,.12);
+ app.scene.toneMapping=pc.TONEMAP_ACES;
+ app.scene.exposure=1.16;
  app.start();
  const cam=new pc.Entity('Genesis inspection camera');
  cam.addComponent('camera',{clearColor:new pc.Color(.08,.09,.12),fov:39,nearClip:.01,farClip:250,frustumCulling:true});
  app.root.addChild(cam);
  const sun=new pc.Entity('Warm neutral key');
- sun.addComponent('light',{type:'directional',color:new pc.Color(1,.93,.84),intensity:2.1,castShadows:false});
+ sun.addComponent('light',{type:'directional',color:new pc.Color(1,.93,.84),intensity:1.15,castShadows:false});
  sun.setEulerAngles(36,35,0);app.root.addChild(sun);
- const bounce=new pc.Entity('Cool fill');bounce.addComponent('light',{type:'directional',color:new pc.Color(.67,.77,1),intensity:.75,castShadows:false});bounce.setEulerAngles(-28,-140,0);app.root.addChild(bounce);
+ const bounce=new pc.Entity('Cool fill');bounce.addComponent('light',{type:'directional',color:new pc.Color(.67,.77,1),intensity:.48,castShadows:false});bounce.setEulerAngles(-28,-140,0);app.root.addChild(bounce);
+ app.assets.loadFromUrl(HDRI,'texture',(error,asset)=>{
+  try{
+   if(error||!asset?.resource)throw Error('No se pudo cargar el HDRI RGBE: '+String(error||'sin recurso'));
+   const source=asset.resource;
+   const lighting=pc.EnvLighting.generateLightingSource(source);
+   app.scene.envAtlas=pc.EnvLighting.generateAtlas(lighting);
+   lighting.destroy();
+   app.scene.skyboxIntensity=1.22;
+   state.hdriReady=true;readyCheck();
+  }catch(err){state.phase='error';state.error='HDRI '+String(err?.message||err);show(state.error);console.error(err)}
+ });
  app.assets.loadFromUrl(MODEL,'container',(error,asset)=>{
   try{
    if(error||!asset?.resource)throw Error('No se recibió el GLB original: '+String(error||'asset vacío'));
@@ -66,8 +81,8 @@ try{
    canvas.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(height*.75,Math.min(height*4.5,zoom*Math.exp(e.deltaY*.001)));update()},{passive:false});
    canvas.addEventListener('dblclick',()=>{yaw=26;pitch=-8;zoom=height*1.65;update()});
    update();
-   state.phase='ready';state.dimensions={x:extents.x,y:extents.y,z:extents.z,diagonal:height};state.node=NODE;state.meshes=meshes;
-   show('Espada 3D V175/V12B · GLB real · '+meshes+' superficies');
+   state.modelReady=true;state.dimensions={x:extents.x,y:extents.y,z:extents.z,diagonal:height};state.node=NODE;state.meshes=meshes;
+   readyCheck();
   }catch(err){state.phase='error';state.error=String(err.message||err);show('ERROR GLB: '+state.error);console.error(err)}
  });
 }catch(e){state.phase='error';state.error=String(e?.message||e);show('Error del visor PlayCanvas: '+state.error);console.error(e)}
