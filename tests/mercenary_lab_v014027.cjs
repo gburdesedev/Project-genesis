@@ -57,7 +57,10 @@ const server=http.createServer((req,res)=>{
    await page.locator('.genInvCanonical').waitFor({timeout:15000});
    assert.match(await page.locator('.genInvCanonical').evaluate(el=>getComputedStyle(el).backgroundImage),/GENESIS_INVENTARIO_V05_CABECERA_PREPARACION/);
    assert.equal(await page.locator('.genInvSlot').count(),20);
-   state.v05=await page.evaluate(()=>({background:getComputedStyle(document.querySelector('.genInvCanonical')).backgroundImage,items:[...document.querySelectorAll('.genInvSlot:not(:disabled)')].map(e=>e.getAttribute('aria-label'))}));
+   state.v05=await page.evaluate(()=>{
+     const geom=(selector)=>{const el=document.querySelector(selector);if(!el)return null;const r=el.getBoundingClientRect(),c=getComputedStyle(el);return {x:Math.round(r.x),y:Math.round(r.y),w:Math.round(r.width),h:Math.round(r.height),display:c.display,position:c.position,font:c.fontSize};};
+     return {background:getComputedStyle(document.querySelector('.genInvCanonical')).backgroundImage,items:[...document.querySelectorAll('.genInvSlot:not(:disabled)')].map(e=>e.getAttribute('aria-label')),geometry:Object.fromEntries(['.genInvCanonical','.genInvMain','.genInvInfo','.genInvInfoLine','.genInvInfoLine>b','.genInvChannels','.genInvNgeText','.genInvViewer','.genInvViewerTitle','.genInvFamilies'].map(s=>[s,geom(s)]))};
+   });
    await page.screenshot({path:path.join(OUT,'02-inventario-v05-aprobado.png'),fullPage:true,timeout:25000});
    await page.locator('[data-nav="Preparacion"]').click();
    await page.locator('.pv9Board').waitFor({timeout:10000});
