@@ -22,12 +22,9 @@
       const value=Number(Array.isArray(raw)?raw[1]:raw?.value??raw?.valor);
       if(!ORDER[name]||seen.has(name)||!Number.isFinite(value)||value<0)throw Error("Resultado V4: canal inválido/duplicado "+name);
       seen.add(name);
-      const byName=item.channelTechniques?.[name]||item.tecnicasPorCanal?.[name]||raw?.tecnicas||[];
-      const techniques=Array.isArray(byName)?byName.map(t=>({
-        name:String(t.nombre||t.name||""),value:t.valor??t.value??null,
-        description:String(t.descripcion||t.description||"")
-      })).filter(t=>t.name):[];
-      return {key:name,value,sequence:i,techniques};
+      // Demo V016: las técnicas/estados secundarios (Quemadura, Veneno, etc.)
+      // están excluidos. Solo existen canales elementales reales, sin subfilas.
+      return {key:name,value,sequence:i,techniques:[]};
     });
     if(!channels.length)throw Error("Resultado V4: fabricación sin Canal Base");
     const savedBase=channels[0].key==="Base";
@@ -69,15 +66,14 @@
   }
   function row(c){
     const [file,color]=ORDER[c.key];
-    const subs=c.techniques.length?'<div class="grSubRows">'+c.techniques.map(t=>'<div class="grSub"><span>'+esc(t.name)+
-      (t.description?' · '+esc(t.description):'')+'</span><b>'+(t.value==null?'':esc(t.value))+'</b></div>').join("")+'</div>':"";
+
     return '<div class="grChannelGroup" data-result-channel="'+esc(c.key)+'" data-result-value="'+esc(c.value)+'">'+
       '<div class="grChannelRow" style="--grColor:'+color+'">'+
        '<img class="grOra" src="'+rootArt+file+'" alt="" aria-hidden="true" loading="eager">'+
        '<div class="grChannelFallback" aria-hidden="true"></div>'+
        '<span class="grChannelLabel">'+esc(c.key)+'</span>'+
        '<strong class="grChannelNumber">'+esc(c.value)+'</strong>'+
-      '</div>'+subs+'</div>';
+      '</div></div>';
   }
   function html(item,renderAsset){
     const s=normalize(item);
