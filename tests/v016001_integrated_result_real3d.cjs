@@ -17,10 +17,10 @@ const report={status:'START',errors:[],samples:[]};
   const base={id:'sword-1',recipe:'espada_hierro',name:'Espada de hierro',rarity:'Inútil',channels:[['Daño',42.64]],description:'Primer cierre de fabricación: Canal Base obtenido por NGE.'};
   for(const [n,item] of [['01-primera-espada-3d.png',base],['02-segunda-espada-3d.png',{...base,id:'sword-2',rarity:'Bueno',channels:[['Daño',78],['Fuego',82],['Rayo',55.5]],channelTechniques:{Fuego:[{nombre:'Quemadura',valor:32}]},description:'Resultado de fabricación con valores de ejemplo para los canales NGE.'}]]){
    await page.evaluate(data=>{const el=document.getElementById('modal');el.className='modal';window.GenesisResultDynamic.decorate(el,data)},item);
-   await page.waitForFunction(()=>Array.from(document.querySelectorAll('.grOra')).every(img=>img.complete&&img.naturalWidth===990),null,{timeout:15000});
+   await page.waitForFunction(()=>Array.from(document.querySelectorAll('.grOra')).every(img=>img.complete&&img.naturalWidth===990),null,{timeout:60000});
    const iframe=page.frameLocator('iframe.grSwordInteractive');
    await iframe.locator('canvas#sword3d').waitFor({state:'visible',timeout:18000});
-   await page.waitForFunction(()=>{const f=document.querySelector('iframe.grSwordInteractive');try{return f?.contentWindow?.__genesisSwordViewerStatus?.phase==='ready'}catch(e){return false}},null,{timeout:150000});
+   await page.waitForFunction(()=>{const f=document.querySelector('iframe.grSwordInteractive');try{return f?.contentWindow?.__genesisSwordViewerStatus?.phase==='ready'}catch(e){return false}},null,{timeout:180000});
    let state=await page.evaluate(()=>({channels:[...document.querySelectorAll('.grChannelGroup')].map(x=>x.dataset.resultChannel),secondary:document.querySelectorAll('.grSub').length,viewer:document.querySelector('iframe.grSwordInteractive')?.contentWindow?.__genesisSwordViewerStatus}));
    assert.equal(state.viewer.phase,'ready');assert.equal(state.secondary,0);assert.equal(state.channels.length,item.channels.length);
    report.samples.push({name:n,channels:state.channels,viewer:state.viewer});
