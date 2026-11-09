@@ -269,3 +269,12 @@
   color:#f8dfb8;font:normal 1cqw Georgia,serif;
   padding:3px 12px;border:1px solid #996b40;background:#110d0bdb;
 }
+
+.gApproved-Inventario .gApprovedEquipmentHero img.genesisSwordV12BCycles{
+  mix-blend-mode:screen!important;
+  filter:drop-shadow(0 0 12px var(--creation-halo))!important;
+}
+.gApproved-Inventario .gApprovedCreatedSlot img.genesisSwordV12BCycles{
+  mix-blend-mode:screen!important;
+  filter:drop-shadow(0 0 5px var(--creation-halo))!important;
+}
