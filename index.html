@@ -1544,38 +1544,75 @@ function applyMercCandidateVisual(){
  mercenaryState='contracted';
  setMercAnim(false)
 }
-function resetMercenaryExtension(){resetDemoEpilogue();mercCandidate=null;mercSwordItem=null;mercShieldItem=null;mercArmorItem=null;mercBootsItem=null;mercenaryState='hidden';mercDeparturePath=[];mercDepartureWaypoint=0;mercGearAttached=false;mercMaterialsPatched=false;mercActiveBodyModelId='mercBodyModel';mercEditSwordItem=null;mercEditShieldItem=null;mercEditArmorItem=null;mercEditBootsItem=null;mercGearMaterialBases.clear();['mercSwordLightA','mercSwordLightB','mercShieldLightA','mercShieldLightB','mercArmorLightA','mercArmorLightB','mercBootsLightA','mercBootsLightB'].forEach(id=>{const l=C(id);if(l){l.intensity=0;l.enabled=false}});['mercSwordGlowA','mercSwordGlowB','mercShieldGlowA','mercShieldGlowB','mercArmorGlowA','mercArmorGlowB','mercBootsGlowA','mercBootsGlowB'].forEach(id=>{const e=E(id);if(e)e.enabled=false});setCurtidorWearableVisibility(false,false,false);if(mercenaryRoot){mercenaryRoot.setPosition(3.25,-40,3.10);mercenaryRoot.setLocalScale(1,1,1);const pb=E('mercBodyModel'),rb=E('mercBodyRangerModel'),bd=E('mercBeardModel'),sw=E('mercSwordModel'),sh=E('mercShieldModel');if(pb)pb.enabled=true;if(rb)rb.enabled=false;if(bd)bd.enabled=false;if(sw)sw.enabled=false;if(sh)sh.enabled=false}}
+/* ML09: the demo has real NGE-generated initial gear, distinct from draft selection.
+   This state is scoped to ?mercenario=1 and never writes the normal saved game. */
+let mercLabEquipment=null,mercLabDraft=null;
+function resetMercenaryExtension(){mercLabEquipment=null;mercLabDraft=null;resetDemoEpilogue();mercCandidate=null;mercSwordItem=null;mercShieldItem=null;mercArmorItem=null;mercBootsItem=null;mercenaryState='hidden';mercDeparturePath=[];mercDepartureWaypoint=0;mercGearAttached=false;mercMaterialsPatched=false;mercActiveBodyModelId='mercBodyModel';mercEditSwordItem=null;mercEditShieldItem=null;mercEditArmorItem=null;mercEditBootsItem=null;mercGearMaterialBases.clear();['mercSwordLightA','mercSwordLightB','mercShieldLightA','mercShieldLightB','mercArmorLightA','mercArmorLightB','mercBootsLightA','mercBootsLightB'].forEach(id=>{const l=C(id);if(l){l.intensity=0;l.enabled=false}});['mercSwordGlowA','mercSwordGlowB','mercShieldGlowA','mercShieldGlowB','mercArmorGlowA','mercArmorGlowB','mercBootsGlowA','mercBootsGlowB'].forEach(id=>{const e=E(id);if(e)e.enabled=false});setCurtidorWearableVisibility(false,false,false);if(mercenaryRoot){mercenaryRoot.setPosition(3.25,-40,3.10);mercenaryRoot.setLocalScale(1,1,1);const pb=E('mercBodyModel'),rb=E('mercBodyRangerModel'),bd=E('mercBeardModel'),sw=E('mercSwordModel'),sh=E('mercShieldModel');if(pb)pb.enabled=true;if(rb)rb.enabled=false;if(bd)bd.enabled=false;if(sw)sw.enabled=false;if(sh)sh.enabled=false}}
 function candidateMiniStats(c){return `<div class="mercStatsMini"><div class="mercStatMini"><b>${c.stats.damage}</b><span>DAÑO BASE</span></div><div class="mercStatMini"><b>${c.stats.protection}</b><span>PROTECCIÓN BASE</span></div><div class="mercStatMini"><b>${c.stats.vitality}</b><span>VITALIDAD</span></div><div class="mercStatMini"><b>${c.stats.mobility}</b><span>MOVILIDAD</span></div></div>`}
 
 /* V014.027-ML02: punto de control temporal. Carga de pueblo y mercado omitida sólo en este laboratorio. Genera cuatro resultados legítimos
    del NGE usando las fórmulas de la sesión. No modifica las partidas normales. */
+
 async function launchMercenaryLab(){
-  const status=window.__GENESIS_MERCENARY_LAB={status:'initializing',branch:'experiment/mercenario-4t-runtime-ml06-20261109',base:'b7af9410118b18994ac5f4d8798551de70be8b46',items:0,approved:false};
+  const status=window.__GENESIS_MERCENARY_LAB={
+    status:'initializing',branch:'experiment/mercenario-4t-fit-starter-ml09-20261109',
+    source:'NGE_DEMO_REDUCED_V4',items:0,approved:false,equipmentRevision:0
+  };
   if(!gameStarted||selectedProfession!=='Herrero'||!craftSession)throw new Error('La ruta del Herrero todavía no está preparada');
   const engine=window.GenesisPrototypeEngines;
   if(!engine?.fabricate||!engine?.present)throw new Error('El motor NGE no está inicializado');
   craftedItems=[];
   usedItemNames=new Set();
-  const slots=[['espada_hierro',1],['espada_hierro',2],['escudo_hierro',1],['escudo_hierro',2]];
-  for(let i=0;i<slots.length;i++){
-    const [recipe,craft]=slots[i],formula=formulaFor(recipe);
-    if(!formula)throw new Error('No hay fórmula NGE para '+recipe);
-    const raw=engine.fabricate(recipe,{craft,seed:(0x47454e10+i*7919)>>>0,artisan:'Artesano · banco de ensayo',formula});
-    const item=engine.present(raw,usedItemNames);
+  // First sword is Común and first shield Inútil, both real NGE outcomes.
+  // Alternates are stronger: Bueno sword and Común shield. Nothing is overwritten
+  // or assigned an invented rarity, channel value or name.
+  const requests=[
+    {recipe:'espada_hierro',rarity:'Común',slot:'starter-sword'},
+    {recipe:'espada_hierro',rarity:'Bueno',slot:'upgrade-sword'},
+    {recipe:'escudo_hierro',rarity:'Inútil',slot:'starter-shield'},
+    {recipe:'escudo_hierro',rarity:'Común',slot:'upgrade-shield'}
+  ];
+  for(let i=0;i<requests.length;i++){
+    const request=requests[i],formula=formulaFor(request.recipe);
+    if(!formula)throw new Error('Falta fórmula NGE para '+request.recipe);
+    const craft=request.rarity==='Inútil'?1:2;
+    let outcome=null;
+    for(let attempt=0;attempt<512;attempt++){
+      const seed=(0x47454e10+i*7919+attempt*104729)>>>0;
+      const raw=engine.fabricate(request.recipe,{craft,seed,artisan:'Artesano · banco de ensayo',formula});
+      if(raw.rarity===request.rarity){outcome=raw;break}
+    }
+    if(!outcome)throw new Error('No se obtuvo '+request.rarity+' para '+request.recipe+' con NGE');
+    const item=engine.present(outcome,usedItemNames);
+    if(item.rarity!==request.rarity||item.recipe!==request.recipe)throw new Error('NGE devolvió un resultado no esperado');
     usedItemNames.add(item.name.toLocaleLowerCase());
     craftedItems.push(item);
   }
-  if(craftedItems.length!==4)throw new Error('La prueba requiere exactamente 4 objetos');
-  status.items=craftedItems.length;
+  if(craftedItems.length!==4)throw new Error('La prueba requiere exactamente cuatro creaciones NGE');
+  mercLabEquipment={sword:craftedItems[0],shield:craftedItems[2]};
+  mercLabDraft={sword:craftedItems[1],shield:craftedItems[3]};
+  mercSwordItem=mercLabEquipment.sword;mercShieldItem=mercLabEquipment.shield;
+  Object.assign(status,{items:craftedItems.length,
+    initialSword:mercSwordItem.name,initialShield:mercShieldItem.name,
+    initialSwordRarity:mercSwordItem.rarity,initialShieldRarity:mercShieldItem.rarity,
+    selectedSwordRarity:mercLabDraft.sword.rarity,selectedShieldRarity:mercLabDraft.shield.rarity,
+    equippedSwordId:mercSwordItem.id,equippedShieldId:mercShieldItem.id
+  });
   chestOpen=true;workshopKey=true;
   if(inventoryTouch){inventoryTouch.classList.remove('locked');inventoryTouch.classList.add('ready')}
   px=activeRoute.center+3.25;pz=5.0;player.setPosition(px,0,pz);
   camYaw=178;camPitch=20;camDist=cameraSolvedDist=5.2;
-  mercSwordItem=craftedItems[1];mercShieldItem=craftedItems[3];
   setTutorialStep(15);status.status='loading_3d';
   await ensureMercenaryReady();
-  mercCandidate=0;applyMercCandidateVisual();refreshInventorySummary();
-  status.status='menu';status.modelsReady=!!mercenaryRoot;
+  mercCandidate=0;applyMercCandidateVisual();
+  // Equip the starter pair physically in the world, not just in a comparison card.
+  const fitted=mercNode('mercApprovedGearDisplay');
+  if(!fitted)throw new Error('Falta el modelo de mercenario V050 para equipar inicial');
+  await activateDeferredModel(fitted,120000);
+  if(!fitted.contentEntity||!equipMercenaryCreations())throw new Error('No se pudo equipar el conjunto inicial 3D V050');
+  refreshInventorySummary();
+  Object.assign(status,{status:'menu',modelsReady:!!mercenaryRoot,starterEquipped3d:true,
+    equipped:true,sword:mercSwordItem.name,shield:mercShieldItem.name});
   closeModal();showMercenaryEquipment(false);
 }
 function showMercenaryCandidates(){setTutorialStep(15);ensureMercenaryReady().catch(err=>toast('No se pudo preparar el Guerrero: '+(err?.message||err),2400));const tanner=mercGearRoute()==='Curtidor',arrival=tanner?'Llega con ropa básica; la armadura y las botas están pendientes.':'Llega sin espada ni escudo.';modal(`<div class="mercTopline"><div><div class="ey">RECORRIDO CONDENSADO · EXTENSIÓN DE GAMEPLAY</div><h2>Elegí un Guerrero para contratar</h2></div><div class="mercProtoFlag">VALORES DE PROTOTIPO · NO BALANCE FINAL</div></div><div class="mercIntro"><strong>Demostración jugable:</strong> los tres candidatos permiten mostrar contratación, estadísticas, equipamiento y expedición sin representar todavía el orden completo del juego final.</div><div class="mercGrid">${MERC_CANDIDATES.map(c=>`<button class="mercCard" data-merc="${c.id}"><div class="mcNum">CANDIDATO ${String(c.id+1).padStart(2,'0')}</div><div class="mercSilhouette">♙</div><h3>${c.label}</h3><p><strong>${c.look}</strong><br>${c.note}. ${arrival}</p>${candidateMiniStats(c)}<span class="mcRole">GUERRERO · COMPATIBLE</span><div class="mcHint">Seleccionar dossier</div></button>`).join('')}</div><div class="actions"><button class="secondary" id="mercBackComplete">Volver</button></div>`,'mercenaryModal');document.querySelectorAll('[data-merc]').forEach(btn=>btn.onclick=async()=>{if(btn.disabled)return;btn.disabled=true;try{mercCandidate=Number(btn.dataset.merc);await ensureMercenaryReady();applyMercCandidateVisual();showMercenaryEquipment()}catch(err){console.error(err);toast('No se pudo cargar el Guerrero: '+(err?.message||err),2600);btn.disabled=false}});document.getElementById('mercBackComplete').onclick=completePrototype}
@@ -1611,9 +1648,11 @@ function showMercenaryEquipment(editing=false,reuseDraft=false){
     }
     const poolFirst=craftedItems.filter(x=>x.recipe===(tanner?'armadura_cuero':'espada_hierro'));
     const poolSecond=craftedItems.filter(x=>x.recipe===(tanner?'botas_cuero':'escudo_hierro'));
-    const chosenFirst=editing?(tanner?mercEditArmorItem:mercEditSwordItem):(tanner?mercArmorItem:mercSwordItem);
-    const chosenSecond=editing?(tanner?mercEditBootsItem:mercEditShieldItem):(tanner?mercBootsItem:mercShieldItem);
-    const activeFirst=tanner?mercArmorItem:mercSwordItem,activeSecond=tanner?mercBootsItem:mercShieldItem;
+    const lab=GENESIS_MERCENARY_LAB&&mercLabEquipment&&!tanner;
+    const chosenFirst=lab?mercLabDraft.sword:(editing?(tanner?mercEditArmorItem:mercEditSwordItem):(tanner?mercArmorItem:mercSwordItem));
+    const chosenSecond=lab?mercLabDraft.shield:(editing?(tanner?mercEditBootsItem:mercEditShieldItem):(tanner?mercBootsItem));
+    const activeFirst=lab?mercLabEquipment.sword:(tanner?mercArmorItem:mercSwordItem),
+          activeSecond=lab?mercLabEquipment.shield:(tanner?mercBootsItem:mercShieldItem);
     return window.GenesisMercenaryConcept.open({
       modal,mercName:candidate.label,candidate:mercCandidate,body:candidate.body,editing,tanner,
       modelUrl:GENESIS_MERCENARY_LAB?"./assets/playcanvas/candidates/mercenary/v050/GENESIS_MERCENARY_V050_4T_SHIELD_FIT_V12B_V015.glb":undefined,
@@ -1621,17 +1660,19 @@ function showMercenaryEquipment(editing=false,reuseDraft=false){
       labelFirst:tanner?'Armadura':'Arma',labelSecond:tanner?'Botas':'Escudo',
       familyFirst:tanner?'Armaduras':'Espadas',familySecond:tanner?'Botas':'Escudos',
       poolFirst,poolSecond,selectedFirst:chosenFirst,selectedSecond:chosenSecond,
-      equippedFirst:mercGearAttached?activeFirst:null,equippedSecond:mercGearAttached?activeSecond:null,
+      equippedFirst:lab?activeFirst:(mercGearAttached?activeFirst:null),equippedSecond:lab?activeSecond:(mercGearAttached?activeSecond:null),
       itemIcon,defensive:tanner,statsHTML:renderMercStats(chosenFirst,chosenSecond),
       getStatsHTML:(a,b)=>renderMercStats(a,b),
       getMercInventoryHTML:(a,b)=>renderMercInventory(a,b),
       onDraft:(which,item)=>{
+        if(lab){if(which==='first')mercLabDraft.sword=item;else mercLabDraft.shield=item;return}
         if(tanner){if(which==='first'){if(editing)mercEditArmorItem=item;else mercArmorItem=item}
           else{if(editing)mercEditBootsItem=item;else mercBootsItem=item}}
         else if(which==='first'){if(editing)mercEditSwordItem=item;else mercSwordItem=item}
         else{if(editing)mercEditShieldItem=item;else mercShieldItem=item}
       },
       onBack:()=>{
+        if(lab){return closeModal()}
         if(editing){mercEditSwordItem=mercEditShieldItem=mercEditArmorItem=mercEditBootsItem=null;return showMercenarySheet()}
         mercSwordItem=mercShieldItem=mercArmorItem=mercBootsItem=null;
         return showMercenaryCandidates();
@@ -1654,8 +1695,18 @@ function showMercenaryEquipment(editing=false,reuseDraft=false){
           [mercSwordItem,mercShieldItem,mercArmorItem,mercBootsItem]=previous;
           toast('El modelo del Guerrero todavía no está listo.',1800);return;
         }
+        if(lab){
+          mercLabEquipment={sword:first,shield:second};
+          mercLabDraft={sword:first,shield:second};
+        }
         refreshInventorySummary();
-        if(GENESIS_MERCENARY_LAB&&window.__GENESIS_MERCENARY_LAB)Object.assign(window.__GENESIS_MERCENARY_LAB,{status:'equipped',equipped:true,sword:first?.name,shield:second?.name});
+        if(GENESIS_MERCENARY_LAB&&window.__GENESIS_MERCENARY_LAB){
+          const report=window.__GENESIS_MERCENARY_LAB;
+          Object.assign(report,{status:'equipped',equipped:true,sword:first?.name,shield:second?.name,
+            equippedSwordId:first?.id,equippedShieldId:second?.id,
+            equippedSwordRarity:first?.rarity,equippedShieldRarity:second?.rarity,
+            equipmentRevision:(report.equipmentRevision||0)+1});
+        }
         if(editing){toast('Equipo actualizado con objetos del inventario.',1500);return showMercenarySheet()}
         closeModal();setTutorialStep(17);
         setTimeout(()=>{orientCameraToObjective();toast(tanner?'Guerrero vestido · acercate para abrir su dossier.':'Guerrero equipado · acercate para abrir su dossier.',1800)},120);
