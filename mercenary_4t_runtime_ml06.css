@@ -303,7 +303,7 @@
 .pg4tShell .pv9Hero .pg4tHeroAnimatedChannel{
   position:absolute;pointer-events:none;z-index:4;
   transform:translate(-50%,-50%);border-radius:35%;
-  opacity:calc(.20 + var(--fx-strength)*.62);
+  opacity:calc(.13 + var(--fx-strength)*.40);
   mix-blend-mode:screen;overflow:hidden;
 }
 .pg4tShell .pv9Hero .pg4tHeroAnimatedChannel::before,
@@ -311,11 +311,11 @@
   content:"";position:absolute;inset:0;pointer-events:none;
 }
 .pg4tShell .pv9Hero .pg4tHeroAnimatedChannel.pg4tHeroHalo-sword{
-  left:29%;top:34%;width:24%;height:47%;
+  left:29%;top:35%;width:12%;height:35%;
   transform:translate(-50%,-50%) rotate(-19deg);
 }
 .pg4tShell .pv9Hero .pg4tHeroAnimatedChannel.pg4tHeroHalo-shield{
-  left:80%;top:49%;width:34%;height:37%;
+  left:80%;top:49%;width:22%;height:27%;
   border-radius:50%;
 }
 .pg4tShell .pv9Hero .pg4tHeroAnimatedChannel[data-affinity="Rayo"]::before{
