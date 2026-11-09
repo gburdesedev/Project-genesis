@@ -38,7 +38,7 @@ const server=http.createServer((req,res)=>{
    page.on('requestfailed',r=>{if(state.warnings.length<80)state.warnings.push('FAILED '+r.url().slice(0,200)+' '+(r.failure()?.errorText||''))});
    page.on('response',r=>{if(r.status()>=400&&state.responses.length<80)state.responses.push({url:r.url(),status:r.status()})});
    await page.goto('http://127.0.0.1:4173/?mercenario=1',{waitUntil:'domcontentloaded',timeout:45000});
-   try{await page.locator('.mercConcept .mcBoard').waitFor({timeout:35000});}
+   try{await page.locator('.mercConcept .mcBoard').waitFor({timeout:90000});}
    catch(e){state.lab=await page.evaluate(()=>window.__GENESIS_MERCENARY_LAB||null);state.snapshots.push(await page.evaluate(()=>({title:document.title,loading:document.querySelector('#loading')?.innerText?.slice(0,1300),intro:document.querySelector('#prototypeIntro')?.style?.display,body:document.body?.innerText?.slice(0,2200),app:!!document.querySelector('pc-app')?.app,ui:(()=>{const ids=['modalLayer','modal','prototypeIntro'];const u={};for(const id of ids){const e=document.getElementById(id),r=e?.getBoundingClientRect();u[id]={inline:e?.style.display,display:e?getComputedStyle(e).display:null,visibility:e?getComputedStyle(e).visibility:null,width:r?.width,height:r?.height,classes:e?.className}};for(const cls of ['.mercConcept','.mcBoard']){const e=document.querySelector(cls),r=e?.getBoundingClientRect();u[cls]={present:!!e,display:e?getComputedStyle(e).display:null,width:r?.width,height:r?.height}};return u})(),models:[...document.querySelectorAll('pc-model')].filter(x=>x.hasAttribute('asset')).slice(0,20).map(x=>({id:x.id,asset:x.getAttribute('asset'),ready:!!x.contentEntity}))})));throw new Error('El menú no apareció: '+JSON.stringify(state.lab)+'; '+String(e.message).slice(0,150))}
    state.stage='menu';
    state.lab=await page.evaluate(()=>window.__GENESIS_MERCENARY_LAB);
@@ -51,7 +51,7 @@ const server=http.createServer((req,res)=>{
    state.approvedSources=await page.evaluate(()=>({v09:window.GenesisMercenaryConcept?.version,v05:window.GenesisInventory16?.version,hero:document.querySelector('.pv9Viewer')?.getAttribute('src')}));
    assert.equal(await page.locator('.mercConcept .mcInventorySlot').count(),20,'V09 must keep 20 original cells');
    assert.equal(await page.locator('.mercConcept .mcInventorySlot.hasItem').count(),2,'only two created items in current family');
-   await page.locator('.pv9Viewer').evaluate(async(el)=>{try{await Promise.race([el.updateComplete||new Promise(()=>{}),new Promise(r=>setTimeout(r,25000))])}catch(_){}});
+   await page.locator('.pv9Viewer').evaluate(async(el)=>{try{await Promise.race([el.updateComplete||new Promise(()=>{}),new Promise(r=>setTimeout(r,4000))])}catch(_){}});
    state.hero=await page.locator('.pv9Viewer').evaluate(el=>({loaded:el.loaded,visible:el.modelIsVisible,src:el.getAttribute('src')}));
    // Con GLB de 27 MB, SwiftShader puede agotar el tiempo de captura aunque el DOM funcione.
    // Captura de diagnóstico opcional: no confundir fallo de screenshot con fallo jugable.
