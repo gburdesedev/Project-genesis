@@ -1,0 +1,40 @@
+name: ML06 vendor V050 original GLB - experimental only
+on:
+  push:
+    branches: [experiment/mercenario-4t-runtime-ml06-20261109]
+    paths:
+      - '.github/workflows/mercenary-ml06-vendor-glb.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  vendor:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: experiment/mercenario-4t-runtime-ml06-20261109
+      - name: Vendor exact V050 binary from user's public experimental Assets2 repo
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/playcanvas/candidates/mercenary/v050
+          URL='https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/20030ed9db324249e20fcbf4e326b9505e612243/candidates/mercenary/stand_v050/GENESIS_MERCENARY_V050_4T_SHIELD_FIT_V12B_V015.glb'
+          curl -fSL --retry 3 --connect-timeout 25 --max-time 240 "$URL" -o assets/playcanvas/candidates/mercenary/v050/GENESIS_MERCENARY_V050_4T_SHIELD_FIT_V12B_V015.glb
+          echo 'e0f38c9d08bcb36396acbf824efae1fb2d798b9bcea1281b315332c8bc7b5ff2  assets/playcanvas/candidates/mercenary/v050/GENESIS_MERCENARY_V050_4T_SHIELD_FIT_V12B_V015.glb' | sha256sum -c
+          python3 - <<'PY'
+          import pathlib,struct
+          p=pathlib.Path('assets/playcanvas/candidates/mercenary/v050/GENESIS_MERCENARY_V050_4T_SHIELD_FIT_V12B_V015.glb');b=p.read_bytes()
+          assert b[:4]==b'glTF' and struct.unpack_from('<I',b,4)[0]==2 and struct.unpack_from('<I',b,8)[0]==len(b)
+          assert len(b)>20_000_000
+          print('PASS actual V050 GLB binary',len(b))
+          PY
+      - name: Commit only the experimental candidate, keep main untouched
+        run: |
+          git config user.name genesis-asset-bot
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/playcanvas/candidates/mercenary/v050
+          if git diff --staged --quiet; then exit 0; fi
+          git commit -m 'assets(ML06): vendor exact V050 V12B sword V015 proportioned shield [skip ci]'
+          git push origin HEAD:experiment/mercenario-4t-runtime-ml06-20261109
