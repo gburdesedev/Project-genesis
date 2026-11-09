@@ -90,7 +90,14 @@ async function screenshot(name){try{
    if(n===1)await page.evaluate(()=>window.__genesisFullRouteQA.stepCraft(10));
    const recipe=await page.evaluate(()=>window.__genesisFullRouteQA.craft());
    assert.equal(recipe,expected);
-   await page.locator('#confirmCraft').click();
+   // The approved 16:9 Canvas UI replaces the legacy #confirmCraft modal.
+   // Use the REAL Fabricaciones V07 tab and its native #gApprovedCraftAction.
+   const navigated=await page.evaluate(()=>window.GenesisPreparation.navigate('Fabricaciones'));
+   assert.equal(navigated,true,'Approved fabrication tab did not open');
+   await page.waitForSelector('#gApprovedCraftAction',{timeout:60000});
+   const craftButton=page.locator('#gApprovedCraftAction');
+   assert(!(await craftButton.isDisabled()),'Approved Fabricaciones action disabled for fully prepared formula');
+   await craftButton.click({timeout:60000});
    await page.waitForSelector('#resultContinue',{timeout:10000});
    const result=await read();
    assert.equal(result.crafted.length,n);
@@ -98,9 +105,9 @@ async function screenshot(name){try{
    assert.equal(result.crafted[n-1].rarity,n===1?'Inútil':result.crafted[n-1].rarity);
    await page.locator('#resultContinue').click();
    if(n===2){
-    await page.waitForSelector('#compareContinue',{timeout:10000});
+    await page.waitForSelector('#prepStart',{timeout:30000});
     await screenshot('02-two-swords-comparison');
-    await page.locator('#compareContinue').click();
+    await page.locator('#prepStart').click({timeout:30000});
    }
   });
  }
@@ -121,16 +128,23 @@ async function screenshot(name){try{
   await stage('craft-shield-'+(n-2),async()=>{
    const recipe=await page.evaluate(()=>window.__genesisFullRouteQA.craft());
    assert.equal(recipe,expected);
-   await page.locator('#confirmCraft').click();
+   // The approved 16:9 Canvas UI replaces the legacy #confirmCraft modal.
+   // Use the REAL Fabricaciones V07 tab and its native #gApprovedCraftAction.
+   const navigated=await page.evaluate(()=>window.GenesisPreparation.navigate('Fabricaciones'));
+   assert.equal(navigated,true,'Approved fabrication tab did not open');
+   await page.waitForSelector('#gApprovedCraftAction',{timeout:60000});
+   const craftButton=page.locator('#gApprovedCraftAction');
+   assert(!(await craftButton.isDisabled()),'Approved Fabricaciones action disabled for fully prepared formula');
+   await craftButton.click({timeout:60000});
    await page.waitForSelector('#resultContinue',{timeout:10000});
    const result=await read();
    assert.equal(result.crafted.length,n,'Expected exactly '+n+' crafted items');
    assert.equal(result.crafted[n-1].recipe,expected);
    await page.locator('#resultContinue').click();
    if(n===4){
-    await page.waitForSelector('#compareContinue',{timeout:10000});
+    await page.waitForSelector('#prepStart',{timeout:30000});
     await screenshot('03-two-shields-comparison');
-    await page.locator('#compareContinue').click();
+    await page.locator('#prepStart').click({timeout:30000});
     await page.waitForSelector('[data-merc]',{timeout:20000});
    }
   });
