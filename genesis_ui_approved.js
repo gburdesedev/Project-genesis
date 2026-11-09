@@ -266,11 +266,34 @@
    board.querySelectorAll('[data-recipe]').forEach(b=>b.onclick=()=>{ctx.selectedRecipeId=b.dataset.recipe;fabrications(ctx,nav)});
    board.querySelector('#gApprovedCraftAction').onclick=nav.craft;
  }
+ // Experimental switch; disabled by default, so Inventario/Preparación/main remain intact.
+ let craftModuleLoading=false,craftModuleFailed=false;
+ function experimentalFabricaciones(ctx,nav){
+   const enabled=window.GenesisExperimentalCraftingV001===true||
+     /(?:[?&])craftingV001=1(?:&|$)/.test(window.location?.search||'');
+   if(!enabled)return false;
+   if(window.GenesisCraftingModule?.render)return window.GenesisCraftingModule.render(ctx,nav);
+   if(craftModuleFailed)return false; // fallback to original V07 if the isolated module cannot load
+   if(!craftModuleLoading){
+     craftModuleLoading=true;
+     const css=document.createElement('link');css.rel='stylesheet';css.href='modules/fabricaciones_v001.css?v=001';document.head.append(css);
+     const js=document.createElement('script');js.src='modules/fabricaciones_v001.js?v=001';
+     js.onload=()=>{
+       craftModuleLoading=false;
+       if(window.GenesisCraftingModule?.render)window.GenesisCraftingModule.render(ctx,nav);
+       else {craftModuleFailed=true;fabrications(ctx,nav);}
+     };
+     js.onerror=()=>{craftModuleLoading=false;craftModuleFailed=true;console.error('[Genesis] Fabricaciones V001 unavailable; original V07 preserved');fabrications(ctx,nav);};
+     document.head.append(js);
+   }
+   ctx.modal('<div class="gCraftLoading" style="text-align:center;padding:9%;background:#100b08;color:#efc887">Preparando Fabricaciones experimental…</div>','preparationModal genesisApprovedModal');
+   return true;
+ }
  function render(ctx,nav,tab){
    if(!ctx||!nav)return false;
    if(tab==='Inventario')inventory(ctx,nav);
    else if(tab==='Preparacion')preparation(ctx,nav);
-   else if(tab==='Fabricaciones')fabrications(ctx,nav);
+   else if(tab==='Fabricaciones'){if(!experimentalFabricaciones(ctx,nav))fabrications(ctx,nav);}
    else return false;
    return true;
  }
