@@ -551,3 +551,19 @@
   text-align:center;max-width:98%;overflow:hidden;text-overflow:ellipsis}
 .genesisComparisonSword small{position:relative;z-index:2;color:var(--compare-halo);
   background:#080707da;border:1px solid #76532a;padding:4px 8px;font-size:.9cqw}
+
+/* Make the 32-bit-HDRI Cycles sword composite over the real game atelier
+   instead of showing a large opaque render background. Only presentation
+   changes; the approved sword pixels and geometry are never altered. */
+.genesisComparisonSwordAsset img.genesisSwordV12BCycles{
+  mix-blend-mode:screen!important;
+  filter:drop-shadow(0 0 12px var(--compare-halo))!important;
+}
+.genesisComparisonSwordGlow{
+  background:radial-gradient(ellipse at 50% 44%,
+   color-mix(in srgb,var(--compare-halo) 60%,transparent),transparent 72%);
+  filter:blur(9px);
+}
+.genesisComparisonSword{
+  box-shadow:inset 0 0 16px color-mix(in srgb,var(--compare-halo) 36%,transparent);
+}
