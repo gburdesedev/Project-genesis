@@ -77,6 +77,8 @@ const issues=[];
   assert.equal(await page.locator('button#gApprovedCraftAction:enabled').count(),1);
   await page.waitForTimeout(800);
   await page.screenshot({path:path.join(out,'01-fabricaciones-espada-v12b-real-v004.png'),animations:'allow',timeout:35000});
+  await page.locator('.gFabRecipe.is-selected').screenshot({path:path.join(out,'03-recuadro-seleccion-arte-ora.png')});
+  await page.locator('.gFabStatus').screenshot({path:path.join(out,'04-estado-sin-recuadro-css.png')});
   await page.locator('#gApprovedCraftAction').click();
   assert.equal(await page.evaluate(()=>window.__CRAFT__),'espada_hierro');
   await page.evaluate(()=>{
@@ -115,6 +117,7 @@ const issues=[];
   assert.equal(await page.locator('.gFabStatus .gFabStatusBlocked').count(),1);
   const statusStyle=await page.locator('.gFabStatus').evaluate(el=>({background:getComputedStyle(el).backgroundColor,border:getComputedStyle(el).borderStyle}));
   assert.equal(statusStyle.background,'rgba(0, 0, 0, 0)','State must not introduce a black CSS rectangle');
+  await page.locator('.gFabStatus').screenshot({path:path.join(out,'05-faltan-materiales-sin-rectangulo.png')});
   if(issues.length)throw Error('Browser errors: '+issues.join(' | '));
   // Public-facing lightweight preview uses the exact controller and real sprites.
   await page.goto('http://genesis.local/fabricaciones-v004-preview.html',{waitUntil:'domcontentloaded'});
