@@ -131,7 +131,7 @@ const issues=[];
   assert.equal(await page.locator('.gApprovedRequired h3').count(),3,
     'Every seeded recipe ingredient must be visible; no truncation after two');
   await page.screenshot({path:path.join(out,'04b-fabricaciones-escudo-quest-1600x900.png'),animations:'disabled'});
-  await page.locator('[data-recipe="escudo_hierro"]').click();
+  await page.locator('button.gApprovedRecipe[data-recipe="escudo_hierro"]').click();
   assert.equal(await page.locator('.gApprovedRecipeHeroSwap').count(),1);
   await page.screenshot({path:path.join(out,'04-fabricaciones-escudo-1600x900.png'),animations:'disabled'});
   await page.setViewportSize({width:1280,height:720});
