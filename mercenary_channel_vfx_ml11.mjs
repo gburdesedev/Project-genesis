@@ -114,7 +114,10 @@ function attach(app,modelRoot){
  };
  const handle={app,modelRoot,instances,extras,report,levels:{sword:{},shield:{}},update,
   apply(sword,shield){
-   handle.levels={sword:itemIntensity(sword),shield:itemIntensity(shield)};
+   const requested={sword:itemIntensity(sword),shield:itemIntensity(shield)};
+   handle.levels={sword:{},shield:{}};
+   for(const kind of ['sword','shield'])for(const [name,level] of Object.entries(requested[kind]))
+     if(instances[kind][name]&&level>0)handle.levels[kind][name]=level;
    report.active={sword:{...handle.levels.sword},shield:{...handle.levels.shield}};
    report.time=t;
    report.visible=!!(parentByType.sword.enabled&&parentByType.shield.enabled&&modelRoot.enabled);
