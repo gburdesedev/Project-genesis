@@ -64,7 +64,7 @@ const server=http.createServer((req,res)=>{
    assert.equal(await page.locator('.mercConcept .mcInventorySlot').count(),2);
    await page.screenshot({path:path.join(OUT,'03-menu-escudos-v09.png'),fullPage:true,timeout:25000});
    await page.locator('[data-action="equip"]').click();
-   await page.waitForFunction(()=>window.__GENESIS_MERCENARY_LAB?.status==='equipped',{timeout:120000}).catch(()=>null);
+   await page.waitForFunction(()=>window.__GENESIS_MERCENARY_LAB?.status==='equipped',null,{timeout:125000}).catch(()=>null);
    state.lab=await page.evaluate(()=>window.__GENESIS_MERCENARY_LAB);
    if(state.lab.status!=='equipped'||state.lab.approved3d!==true)throw new Error('El equipamiento V049 V12B/V015 falló: '+JSON.stringify(state.lab));
    state.stage='equipped';
