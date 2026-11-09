@@ -1,0 +1,27 @@
+name: Genesis V016.001 | Comprobar URL web de prueba
+on:
+  push:
+    branches:
+      - experiment/v016001-main-clean-20261109
+    paths:
+      - '.github/workflows/v016001-web-preview-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  external-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - name: Verificar contenido servido en URL de vista previa
+        shell: bash
+        run: |
+          set -euo pipefail
+          SITE="https://raw.githack.com/gburdesedev/Project-genesis/ce085dab23133a65aebe1b85495c04fa2452b5d3"
+          for F in index.html genesis_result_dynamic_v001.js assets/ui/resultado/oras/01_Base.png; do
+            code="$(curl -sSL -o /tmp/preview.tmp -w '%{http_code}' --max-time 25 "$SITE/$F")"
+            echo "$F HTTP $code $(stat -c%s /tmp/preview.tmp) bytes"
+            test "$code" = "200"
+          done
+          grep -q 'Project Genesis V016.001 EXP' <(curl -fsSL --max-time 25 "$SITE/index.html")
+          echo "PREVIEW_HTTP_OK"

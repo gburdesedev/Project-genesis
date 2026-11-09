@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project Genesis · Inventario y ficha v0.1.008</title>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/model-viewer.min.js"></script>
+<style>
+*{box-sizing:border-box}
+:root{color-scheme:dark}
+html,body{margin:0;min-height:100%;background:#0d100f;color:#f0e2bd;font-family:Georgia,"Times New Roman",serif}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid #f7ca6c;outline-offset:3px}
+header{height:62px;padding:10px 22px;display:flex;align-items:center;justify-content:space-between;background:#111715;border-bottom:1px solid #5b482a}
+header b{letter-spacing:2px;font-size:16px}
+header small{font:12px system-ui;color:#b9a477}
+#viewport{height:calc(100dvh - 62px);display:grid;place-items:center;overflow:hidden}
+#wrapper{position:relative}
+#board{position:absolute;width:1536px;height:1024px;overflow:hidden;transform-origin:top left;background:#0c0e0d url('../assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png') center/100% 100% no-repeat}
+nav{position:absolute;inset:0;pointer-events:none;z-index:5}
+.tab{position:absolute;top:42px;height:94px;border:0;padding:0;background:transparent;pointer-events:auto}
+.tab img.tabBase{width:100%;height:100%;display:block;filter:brightness(.50) saturate(.52);transition:filter .15s}
+.tab img.tabGlow{position:absolute;inset:0;width:100%;height:100%;opacity:0;pointer-events:none;transition:opacity .15s}
+.tab[aria-selected=true] img.tabBase{filter:brightness(1.35) saturate(1.15) drop-shadow(0 0 7px #c89443)}
+.tab[aria-selected=true] img.tabGlow{opacity:1;filter:brightness(1.05)}
+.tab[aria-selected=true]::after{content:"";position:absolute;left:22%;right:22%;bottom:14px;height:2px;background:#f6cf78;box-shadow:0 0 9px #ffd26e,0 0 15px #dc9437;pointer-events:none}
+.tab:hover:not([aria-selected=true]) img.tabBase{filter:brightness(.78) saturate(.85)}
+#content{position:absolute;inset:0;z-index:2}
+.bronze{border:2px solid #80663c;outline:1px solid #24170b;box-shadow:inset 0 0 0 2px #271c0e,inset 0 0 35px #0009,0 0 12px #0009;background:linear-gradient(150deg,#161b19f5,#0d1110f7)}
+.panel{position:absolute;top:164px;height:755px;overflow:hidden}
+.panel h2{font-size:25px;letter-spacing:1.2px;font-weight:400;color:#e8cd87;margin:0}
+.panelHead{height:55px;padding:15px 16px 8px;border-bottom:1px solid #61492c}
+.categoryPanel{left:37px;width:195px}
+.category{display:flex;align-items:center;text-align:left;width:calc(100% - 15px);min-height:77px;margin:9px 7px 0;padding:7px 10px;border:1px solid #564a34;background:linear-gradient(130deg,#1b201f,#111514);gap:12px;transition:background .15s,border-color .15s}
+.category:hover,.category.active{border-color:#e5ba5c;background:linear-gradient(130deg,#554026,#1d211c);box-shadow:inset 0 0 12px #ce853d3a}
+.category .symbol{font:30px Georgia;width:35px;text-align:center;color:#e9d29d;flex-shrink:0}
+.category .name{font-size:18px;line-height:1.12}
+.gridPanel{left:244px;width:329px}
+.gridWrap{padding:10px 12px 0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(6,99px);gap:8px}
+.slot{position:relative;border:1px solid #7c6341;background:rgba(0,0,0,.68);padding:6px;overflow:hidden;display:grid;place-items:center}
+.slot:hover,.slot.active{border-color:#f0bc5d;box-shadow:inset 0 0 0 1px #e6a95a66,0 0 10px #d99b4040}
+.slot img{width:100%;height:100%;object-fit:contain}
+.slot[data-model]{-webkit-touch-callout:none;user-select:none;touch-action:manipulation}
+.slot .qty{position:absolute;bottom:4px;right:5px;z-index:3;font:16px system-ui;text-shadow:1px 1px 4px #000,0 0 3px #000}
+.slot model-viewer.slotModel{position:absolute;inset:5px;width:calc(100% - 10px);height:calc(100% - 10px);z-index:2;opacity:0;pointer-events:none;background:transparent;transition:opacity .22s}
+.slot.is3dReady model-viewer.slotModel{opacity:1}
+.slot.is3dReady > img{opacity:0}
+.slot.is3dLoading::after{content:"CARGANDO 3D";position:absolute;bottom:23px;left:3px;right:3px;z-index:3;text-align:center;font:9px system-ui;color:#e1bd83;text-shadow:0 2px 3px #000;pointer-events:none}
+.slot.is3dLoading > img{opacity:.5}
+@media(hover:none){.slot.is3dLoading::after{display:none}}
+.swordMini{display:grid;place-items:center;filter:drop-shadow(0 2px 5px #000)}
+.slot .swordMini{width:74px;height:80px}
+.thumb .swordMini{width:57px;height:67px}
+.swordMini svg{display:block;width:100%;height:100%;overflow:hidden}
+.empty{opacity:.76;cursor:default}
+.paging{height:42px;display:flex;align-items:center;justify-content:center;gap:20px;font:13px system-ui;color:#bca77f}
+.paging button{width:33px;height:29px;background:#1d201b;border:1px solid #725933}
+.paging button:disabled{opacity:.3;cursor:default}
+.viewerPanel{left:586px;width:558px}
+.viewerPanel .backdrop,.detailViewer .backdrop{position:absolute;inset:0;background:url('../assets/ui/preparacion/01_Capas/Paneles/FondoVisorHerreria.png') center/cover no-repeat;opacity:.72;filter:brightness(.78)}
+.viewerPanel:after,.detailViewer:after{content:'';position:absolute;inset:0;border:11px solid transparent;pointer-events:none;box-shadow:inset 0 0 48px #050705}
+.viewerTitle{position:absolute;z-index:2;top:17px;left:12px;right:12px;text-align:center;text-shadow:0 2px 6px #000}
+.viewerTitle h1{font-size:29px;font-weight:400;letter-spacing:1.1px;margin:0}
+.viewerTitle .subtitle{font-size:17px;color:#ded5c5;margin-top:4px}
+.previewArt{position:absolute;top:103px;bottom:78px;left:20px;right:20px;display:grid;place-items:center;z-index:2}
+.previewArt img{width:90%;height:78%;object-fit:contain;filter:drop-shadow(0 14px 14px #000c)}
+.previewArt img.ore{transform:scale(1.16)}
+.viewerFoot{position:absolute;bottom:16px;left:10px;right:10px;text-align:center;z-index:3;font:16px system-ui;color:#ead7a7;text-shadow:0 2px 4px #000}
+.swordBox{width:100%;height:100%;display:grid;place-items:center;touch-action:none;cursor:grab;perspective:950px}
+.swordBox:active{cursor:grabbing}
+.swordRotator{width:200px;height:565px;transform-style:preserve-3d;will-change:transform;filter:drop-shadow(0 14px 17px #000)}
+.swordRotator svg{width:100%;height:100%;overflow:visible}
+.placeholderBadge{display:inline-block;font:11px system-ui;letter-spacing:1px;border:1px solid #6c5733;background:#141717e8;color:#d1b276;padding:5px 8px;margin-top:5px}
+.rightPanel{left:1156px;width:342px}
+.rightPanel .body{padding:18px 18px 16px}
+.ey{font:13px system-ui;letter-spacing:1.3px;color:#d5b775;text-transform:uppercase}
+.rightPanel .itemLine{display:flex;gap:13px;align-items:center;margin:13px 0 17px}
+.thumb{width:81px;height:80px;flex:0 0 81px;background:#17211c;border:1px solid #856841;display:grid;place-items:center;overflow:hidden}
+.thumb img{max-width:97%;max-height:97%;object-fit:contain}
+.thumb .symbol{font-size:50px;color:#dcc58e}
+.itemLine h3{font-size:21px;font-weight:400;margin:0 0 6px}
+.mini{font:13px/1.5 system-ui;color:#c4b695}
+.rarity{display:inline-block;border:1px solid #c69a4e;color:#f0cc6c;padding:4px 12px;margin-top:6px;font:15px Georgia;letter-spacing:1px}
+.stat{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #574a33;padding:14px 0;font:14px/1.35 system-ui}
+.stat b{font-weight:500;color:#efcf8f;text-align:right}
+.desc{font:14px/1.55 system-ui;color:#d3c4a8;margin:16px 0}
+.action{display:block;width:100%;border:1px solid #d5a34e;color:#f6da9a;padding:16px 10px;background:linear-gradient(#614b2c,#33271c);font-size:17px;letter-spacing:1px;margin-top:18px}
+.action:hover{filter:brightness(1.18)}
+.action:disabled{opacity:.5;cursor:default}
+.sheetViewer{left:36px;width:734px}
+.sheetData{left:785px;width:713px}
+.sheetTitle{text-align:center;padding-top:18px}
+.sheetTitle .kicker{font-size:30px;letter-spacing:1px}
+.sheetTitle .object{font-size:24px;margin-top:5px}
+.sheetTabs{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:19px 12px 0}
+.sheetTabs button{height:54px;background:#171d1b;border:1px solid #79603d;font-size:19px}
+.sheetTabs button.active{background:linear-gradient(#6f532d,#322c1d);border-color:#f0bb56;color:#ffe0a0}
+.sheetBody{padding:13px 22px}
+.sectionLabel{font-size:19px;color:#efca78;border-bottom:1px solid #6e5533;padding:6px 0;margin:3px 0 5px;letter-spacing:1px}
+.sheetRow{height:35px;display:grid;grid-template-columns:46% 54%;align-items:center;border-bottom:1px solid #403e30;font:15px system-ui}
+.sheetRow span:last-child{color:#e7d1a5}
+.sheetNGE{margin-top:8px}
+.ngeScroll{height:122px;overflow-y:auto;padding:12px 14px;border:1px solid #7a5b36;background:#0d1211d9;scrollbar-color:#b08b49 #20241d;scrollbar-width:thin;font:italic 16px/1.58 Georgia}
+.ngeScroll p{margin:0 0 12px}
+.sheetReturn{position:absolute;right:20px;top:16px;bottom:auto;width:177px;margin:0;padding:9px 8px;font-size:12px;z-index:4}
+.sheetViewer .viewerTitle{top:25px}
+.sheetViewer .previewArt{top:82px;bottom:85px}
+.note{position:absolute;bottom:40px;left:55px;right:55px;display:flex;justify-content:space-between;font:12px system-ui;color:#b6a17d}
+.messagePanel{left:62px;width:1411px;text-align:center;padding:95px 130px}
+.messagePanel h1{font-size:36px;font-weight:400}
+.messagePanel p{font-size:21px;line-height:1.65;color:#d3c5a6}
+.messagePanel .action{max-width:500px;margin:45px auto}
+@media(prefers-reduced-motion:reduce){.category{transition:none}}
+</style>
+</head>
+<body>
+<header><b>PROJECT GENESIS <small>· ESTUDIO DE INVENTARIO v0.1.008</small></b><small>MAQUETA INTERACTIVA · DATOS DE EJEMPLO · NO MODIFICA LA PARTIDA</small></header>
+<main id="viewport"><div id="wrapper"><div id="board"><nav role="tablist" aria-label="Menús del artesano"></nav><div id="content"></div><footer class="note"><span>Visor estático · slots con GLB: cursor o dedo ±45° · ficha NGE desplazable</span><span>v0.1.008 · estudio aislado</span></footer></div></div></main>
+<script>
+"use strict";
+var base = "../assets/playcanvas/approved/materials/";
+var ore = base + "iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png";
+var ingot = base + "iron/v175/iron_v175_transparent.png";
+var oreGlb = base + "iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_55k_pbr1536_v007.glb";
+var ingotGlb = "../assets/playcanvas/candidates/materials/iron_ingot/v175/iron_v175_web_candidate.glb";
+var tabs = [
+  {id:"Inventario",x:164,w:294},
+  {id:"Preparacion",x:458,w:320},
+  {id:"Fabricaciones",x:778,w:328},
+  {id:"Comparacion",x:1106,w:298}
+];
+var categories = [
+  {id:"basic",name:"Materiales<br>Básicos",symbol:"✣"},
+  {id:"prepared",name:"Materiales<br>Preparados",symbol:"❄"},
+  {id:"crafted",name:"Objetos<br>Fabricados",symbol:"⚒"},
+  {id:"tools",name:"Herramientas",symbol:"⚒"},
+  {id:"swords",name:"Espadas",symbol:"⚔"},
+  {id:"shields",name:"Escudos",symbol:"♜"},
+  {id:"other",name:"Otros",symbol:"✥"}
+];
+var inventory = [
+  {id:"ore",kind:"material",cat:"basic",name:"Mineral de hierro",qty:10,img:ore,model:oreGlb},
+  {id:"ingot",kind:"material",cat:"prepared",name:"Lingote de hierro",qty:2,img:ingot,model:ingotGlb,modelStatus:"candidate"},
+  {id:"sword",kind:"crafted",cat:"swords",name:"Espada de hierro",rarity:"Bueno"}
+];
+var mainTab="Inventario",view="inventory",cat="basic",selected="ore",sheetTab="channels",page=0,yaw=0,dragging=false,dragX=0,reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function scaleBoard(){var s=Math.min((innerWidth-10)/1536,(innerHeight-70)/1024,1);wrapper.style.width=1536*s+"px";wrapper.style.height=1024*s+"px";board.style.transform="scale("+s+")"}
+addEventListener("resize",scaleBoard);scaleBoard();
+function esc(s){return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
+function current(){return inventory.find(function(i){return i.id===selected}) || inventory[0]}
+function shownItems(){return inventory.filter(function(i){return i.cat===cat || (cat==="crafted" && i.kind==="crafted")})}
+function tabsHtml(){return tabs.map(function(t){var active=mainTab===t.id;return '<button role="tab" class="tab" style="left:'+t.x+'px;width:'+t.w+'px" aria-selected="'+active+'" tabindex="'+(active?'0':'-1')+'" data-top="'+t.id+'" aria-label="'+t.id+'"><img class="tabBase" src="../assets/ui/preparacion/01_Capas/Pestanas/Pestana_'+t.id+'.png" alt=""><img class="tabGlow" src="../assets/ui/preparacion/01_Capas/Efectos/Pestana_'+t.id+'_HoverBrillo.png" alt="" aria-hidden="true"></button>'}).join("")}
+function swordSvg(){return '<svg viewBox="0 0 200 620" aria-label="Silueta provisional de espada"><defs><linearGradient id="bladeGrad"><stop offset="0" stop-color="#747e83"/><stop offset=".24" stop-color="#e2e9e4"/><stop offset=".47" stop-color="#a7b2b4"/><stop offset=".55" stop-color="#f7f2dc"/><stop offset=".8" stop-color="#707878"/><stop offset="1" stop-color="#3b4240"/></linearGradient><linearGradient id="goldGrad"><stop stop-color="#755124"/><stop offset=".5" stop-color="#e3c483"/><stop offset="1" stop-color="#6b451d"/></linearGradient></defs><circle cx="100" cy="31" r="19" fill="url(#goldGrad)" stroke="#e8d9a8" stroke-width="3"/><path d="M94 50 L106 50 L109 170 L91 170 Z" fill="#402b25" stroke="#a47e4e" stroke-width="3"/><path d="M94 63 L107 77 M93 86 L107 100 M93 110 L107 124 M93 134 L107 148" stroke="#be9561" stroke-width="4"/><path d="M36 166 Q80 172 91 158 L109 158 Q135 171 164 166 L167 177 Q130 188 113 180 L107 194 L93 194 L87 180 Q66 188 33 177 Z" fill="url(#goldGrad)" stroke="#e4cc90" stroke-width="3"/><path d="M90 196 L110 196 L113 544 L100 608 L87 544 Z" fill="url(#bladeGrad)" stroke="#d9dedb" stroke-width="2"/><path d="M100 198 L100 591" stroke="#f5f3e9" stroke-width="2" opacity=".68"/><path d="M88 208 L100 199 L112 208" stroke="#6e7b7a" fill="none"/></svg>'}
+function viewerBox(item,isSheet){var hasSword=item.kind==="crafted";var itemArt=hasSword?'<div class="swordBox" aria-label="Visor de espada 360 grados"><div class="swordRotator">'+swordSvg()+'</div></div>':'<img class="'+(item.id==="ore"?"ore":"")+'" src="'+item.img+'" alt="'+esc(item.name)+'">';return '<div class="backdrop"></div><div class="viewerTitle">'+(isSheet?'':'<h1>'+esc(item.name.toUpperCase())+'</h1><div class="subtitle">'+(hasSword?'Creación única':'Material')+'</div>')+'</div><div class="previewArt">'+itemArt+'</div><div class="viewerFoot">'+(hasSword?'↻ VISTA 360° · Arrastrá para girar<br><span class="placeholderBadge">SILUETA DE PRUEBA · GLB FINAL PENDIENTE</span>':'IMAGEN ESTÁTICA · ASSET APROBADO')+'</div>'}
+function slotHtml(item){if(!item)return '<div class="slot empty" aria-hidden="true"></div>';var model=item.model?' data-model="'+esc(item.model)+'" title="Modelo 3D: cursor o mantener presionado"':'';return '<button class="slot '+(selected===item.id?'active':'')+'" data-select="'+item.id+'"'+model+' aria-label="'+esc(item.name)+'">'+(item.kind==="crafted"?'<span class="swordMini" aria-hidden="true">'+swordSvg()+'</span>':'<img src="'+item.img+'" alt="">')+(item.kind==="material"?'<span class="qty">'+item.qty+'</span>':'')+'</button>'}
+function inventoryHtml(){var item=current(),list=shownItems(),pageCount=Math.max(1,Math.ceil(list.length/18));if(page>=pageCount)page=0;var visible=list.slice(page*18,page*18+18);var grid=Array.from({length:18},function(_,i){return slotHtml(visible[i])}).join("");var cats=categories.map(function(c){return '<button class="category '+(cat===c.id?'active':'')+'" data-category="'+c.id+'"><span class="symbol">'+c.symbol+'</span><span class="name">'+c.name+'</span></button>'}).join("");var right=item.kind==="crafted"?'<div class="itemLine"><div class="thumb"><span class="swordMini" aria-hidden="true">'+swordSvg()+'</span></div><div><h3>Espada de hierro</h3><div class="mini">Familia: Espada</div><div class="rarity">BUENO</div></div></div><div class="stat"><span>Canal Base</span><b>Daño físico</b></div><div class="stat"><span>Afinidades activas</span><b>Hielo · Fuego</b></div><div class="stat"><span>Integridad</span><b>—</b></div><div class="stat"><span>Identidad</span><b>Creación única</b></div><p class="desc">Valores ilustrativos sin números. Cada espada ocupa su propia casilla.</p><button class="action" data-open-sheet="1">VER FICHA COMPLETA</button>':'<div class="itemLine"><div class="thumb"><img src="'+item.img+'" alt=""></div><div><h3>'+esc(item.name)+'</h3><div class="mini">'+(item.id==="ore"?'Material básico':'Material preparado')+'</div></div></div><div class="stat"><span>Cantidad disponible</span><b>'+item.qty+' unidades</b></div><div class="stat"><span>Estado</span><b>'+ (item.id==="ore"?'En bruto':'Preparado')+'</b></div><div class="stat"><span>Destino</span><b>'+(item.id==="ore"?'Preparación':'Fabricaciones')+'</b></div><p class="desc">'+(item.id==="ore"?'Mineral de hierro en bruto. Se utiliza en la fragua para obtener lingotes.':'Lingote de hierro preparado para utilizar en recetas conocidas.')+'</p><button class="action" data-top="'+(item.id==="ore"?'Preparacion':'Fabricaciones')+'">'+(item.id==="ore"?'IR A PREPARACIÓN':'IR A FABRICACIONES')+'</button>';return '<section class="panel bronze categoryPanel"><div class="panelHead"><h2>CATEGORÍAS</h2></div>'+cats+'</section><section class="panel bronze gridPanel"><div class="panelHead"><h2>INVENTARIO</h2></div><div class="gridWrap"><div class="grid">'+grid+'</div><div class="paging"><button data-page="-1" '+(page===0?'disabled':'')+'>◀</button><span>Página '+(page+1)+' / '+pageCount+' · máximo 18</span><button data-page="1" '+(page>=pageCount-1?'disabled':'')+'>▶</button></div></div></section><section class="panel bronze viewerPanel">'+viewerBox(item,false)+'</section><aside class="panel bronze rightPanel"><div class="panelHead"><h2>'+(item.kind==="crafted"?'DETALLES DE LA CREACIÓN':'DETALLES DEL MATERIAL')+'</h2></div><div class="body">'+right+'</div></aside>'}
+function field(name,value){return '<div class="sheetRow"><span>'+name+'</span><span>'+value+'</span></div>'}
+function sheetHtml(){var item=inventory.find(function(i){return i.id==="sword"});var body=sheetTab==="channels"?'<div class="sectionLabel">CANALES Y DAÑO</div>'+field('Canal Base','Daño físico · —')+field('Afinidad activa','Hielo · —')+field('Afinidad activa','Fuego · —')+'<div class="sectionLabel">ESTADO DEL OBJETO</div>'+field('Integridad actual / máxima','— / —')+field('Técnicas aplicadas','Consultar Fabricación')+'<div style="font:14px/1.6 system-ui;color:#c8b795;margin-top:22px">La rareza «Bueno» indica tres canales activos en este ejemplo. No se muestran intensidades ni daños inventados.</div>':'<div class="sectionLabel">RECETA Y MATERIALES</div>'+field('Receta base','Espada de hierro')+field('Profesión','Herrero')+field('Material principal','Hierro')+field('Materiales secundarios','Madera · Cuero')+'<div class="sectionLabel">CIERRE DE FABRICACIÓN</div>'+field('Técnicas aplicadas','—')+field('Artesano creador','—')+field('Taller','—')+'<div class="sectionLabel">DESCRIPCIÓN DE NGE</div><div class="ngeScroll" tabindex="0" role="region" aria-label="Descripción desplazable de NGE"><p>Espada de hierro con empuñadura de cuero y afinidades de Hielo y Fuego.</p><p>Esta segunda parte es texto de prueba para verificar el desplazamiento vertical. En la partida sólo aparecerán hechos y descripciones autorizados por el servidor.</p><p>El relato podrá extenderse cuando una creación tenga acontecimientos narrativos legítimos. Este recuadro se desplaza de forma independiente y nunca cambia el tamaño del visor.</p></div>';return '<section class="panel bronze detailViewer sheetViewer">'+viewerBox(item,true)+'</section><section class="panel bronze sheetData"><div class="sheetTitle"><div class="kicker">FICHA DE CREACIÓN</div><div class="object">ESPADA DE HIERRO</div><div class="rarity">BUENO</div><div class="mini">Creación única · Familia: Espada</div></div><div class="sheetTabs"><button data-sheet-tab="channels" class="'+(sheetTab==="channels"?'active':'')+'">CANALES Y DAÑO</button><button data-sheet-tab="craft" class="'+(sheetTab==="craft"?'active':'')+'">FABRICACIÓN</button></div><div class="sheetBody">'+body+'</div><button class="action sheetReturn" data-back="1">VOLVER AL INVENTARIO</button></section>'}
+function otherHtml(){var title=mainTab==="Preparacion"?"PREPARACIÓN YA APROBADA":mainTab==="Fabricaciones"?"FABRICACIONES · SIGUIENTE FASE":"COMPARACIÓN · SIGUIENTE FASE";var body=mainTab==="Preparacion"?"El minijuego y la distribución de las 39 capas originales permanecen intactos. Esta maqueta sólo estudia Inventario y Ficha de Creación.":"Esta pantalla se diseñará después de aprobar Inventario y Ficha de Creación, con datos reales del motor y sin adelantar resultados.";return '<section class="panel bronze messagePanel"><h1>'+title+'</h1><p>'+body+'</p>'+(mainTab==="Preparacion"?'<a class="action" style="text-decoration:none" href="../index.html" target="_blank" rel="noopener">ABRIR PREPARACIÓN JUGABLE</a>':'')+'<button class="action" data-top="Inventario">VOLVER AL INVENTARIO</button></section>'}
+function render(){document.getElementById("board").dataset.activeMenu=mainTab;document.querySelector("nav").innerHTML=tabsHtml();document.getElementById("content").innerHTML=mainTab==="Inventario"?(view==="sheet"?sheetHtml():inventoryHtml()):otherHtml();wireSword();wireModelHover()}
+function switchMenu(next){if(!tabs.some(function(t){return t.id===next}))return;mainTab=next;view="inventory";render()}
+function wireModelHover(){
+  if(reduced)return;
+  var webglReady=false;
+  try{var probe=document.createElement("canvas");webglReady=!!(probe.getContext("webgl2")||probe.getContext("webgl"))}catch(e){webglReady=false}
+  document.querySelectorAll(".slot[data-model]").forEach(function(slot){
+    if(!webglReady){slot.title="WebGL no disponible: se conserva el PNG aprobado";return}
+    var heldPointer=null,pressTimer=0,holdActivated=false;
+    function enter(){
+      if(slot._hovering)return;
+      if(activeModelSlot && activeModelSlot!==slot)leaveOther();
+      slot._hovering=true;
+      slot._hoverStart=performance.now();
+      activeModelSlot=slot;
+      clearTimeout(slot._returnTimer);
+      if(!slot._mv){
+        slot.classList.add("is3dLoading");
+        var mv=document.createElement("model-viewer");
+        mv.className="slotModel";
+        mv.setAttribute("alt","Modelo 3D del material");
+        mv.setAttribute("src",slot.dataset.model);
+        mv.setAttribute("camera-orbit","0deg 75deg 110%");
+        mv.setAttribute("field-of-view","30deg");
+        mv.setAttribute("environment-image","neutral");
+        mv.setAttribute("shadow-intensity","0.6");
+        mv.setAttribute("interaction-prompt","none");
+        mv.setAttribute("loading","eager");
+        mv.addEventListener("load",function(){
+          slot._modelReady=true;slot.classList.remove("is3dLoading");
+          if(slot._hovering)slot.classList.add("is3dReady")
+        });
+        mv.addEventListener("error",function(){
+          slot._modelReady=false;slot._hovering=false;
+          slot.classList.remove("is3dLoading","is3dReady");
+          slot.title="No se pudo abrir el modelo 3D; se conserva el PNG"
+        });
+        slot._mv=mv;slot.appendChild(mv)
+      }else if(slot._modelReady){slot.classList.add("is3dReady")}
+    }
+    function leaveOther(){
+      var old=activeModelSlot;
+      if(!old||old===slot)return;
+      old._hovering=false;
+      if(old._mv)old._mv.setAttribute("camera-orbit","0deg 75deg 110%");
+      clearTimeout(old._returnTimer);
+      old._returnTimer=setTimeout(function(){if(!old._hovering)old.classList.remove("is3dReady","is3dLoading")},750);
+      activeModelSlot=null
+    }
+    function leave(){
+      clearTimeout(pressTimer);
+      if(!slot._hovering)return;
+      slot._hovering=false;
+      if(activeModelSlot===slot)activeModelSlot=null;
+      if(slot._mv)slot._mv.setAttribute("camera-orbit","0deg 75deg 110%");
+      clearTimeout(slot._returnTimer);
+      slot._returnTimer=setTimeout(function(){
+        if(!slot._hovering)slot.classList.remove("is3dReady","is3dLoading")
+      },750)
+    }
+    slot.addEventListener("pointerenter",function(e){
+      if(e.pointerType==="mouse" && matchMedia("(hover:hover) and (pointer:fine)").matches)enter()
+    });
+    slot.addEventListener("pointerleave",function(e){
+      if(e.pointerType==="mouse" || heldPointer===e.pointerId)leave()
+    });
+    slot.addEventListener("pointerdown",function(e){
+      if(e.pointerType!=="touch" && e.pointerType!=="pen")return;
+      heldPointer=e.pointerId;
+      holdActivated=false;
+      clearTimeout(pressTimer);
+      pressTimer=setTimeout(function(){
+        if(heldPointer!==e.pointerId)return;
+        holdActivated=true;
+        enter();
+        try{slot.setPointerCapture(e.pointerId)}catch(_){}
+      },180)
+    });
+    function release(e){
+      if(heldPointer!==e.pointerId)return;
+      clearTimeout(pressTimer);
+      heldPointer=null;
+      if(holdActivated){
+        slot._suppressClick=true;
+        setTimeout(function(){slot._suppressClick=false},700);
+        holdActivated=false;
+        leave()
+      }
+    }
+    slot.addEventListener("pointerup",release);
+    slot.addEventListener("pointercancel",release);
+    slot.addEventListener("lostpointercapture",release);
+    slot.addEventListener("click",function(e){
+      if(slot._suppressClick){
+        slot._suppressClick=false;
+        e.preventDefault();
+        e.stopImmediatePropagation()
+      }
+    },true);
+    slot.addEventListener("contextmenu",function(e){
+      if(slot._hovering || heldPointer!==null)e.preventDefault()
+    })
+  })
+}
+function wireSword(){var box=document.querySelector(".swordBox");if(!box)return;box.onpointerdown=function(e){dragging=true;dragX=e.clientX;box.setPointerCapture(e.pointerId)};box.onpointermove=function(e){if(!dragging)return;yaw+=(e.clientX-dragX)*.72;dragX=e.clientX};box.onpointerup=function(){dragging=false};box.onpointercancel=function(){dragging=false}}
+document.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;if(b.dataset.top){switchMenu(b.dataset.top);return}if(b.dataset.category){cat=b.dataset.category;page=0;var l=shownItems();if(l.length)selected=l[0].id;render();return}if(b.dataset.select){selected=b.dataset.select;render();return}if(b.dataset.page){page+=Number(b.dataset.page);render();return}if(b.dataset.openSheet){view="sheet";sheetTab="channels";render();return}if(b.dataset.sheetTab){sheetTab=b.dataset.sheetTab;render();return}if(b.dataset.back){view="inventory";render();return}});
+var last=performance.now(),activeModelSlot=null,lastModelOrbit=0;function frame(t){var dt=Math.min((t-last)/1000,.1);last=t;if(!dragging&&!reduced)yaw+=dt*12;var rot=document.querySelector(".swordRotator");if(rot)rot.style.transform="rotateY("+yaw+"deg)";if(activeModelSlot&&activeModelSlot.isConnected&&activeModelSlot._hovering&&activeModelSlot._modelReady&&t-lastModelOrbit>55){var angle=45*Math.sin((t-activeModelSlot._hoverStart)*Math.PI*2/4000);activeModelSlot._mv.setAttribute("camera-orbit",angle.toFixed(1)+"deg 75deg 110%");lastModelOrbit=t}requestAnimationFrame(frame)}requestAnimationFrame(frame);render();
+</script>
+</body></html>

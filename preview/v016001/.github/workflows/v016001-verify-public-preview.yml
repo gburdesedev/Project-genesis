@@ -1,0 +1,59 @@
+name: Genesis V016.001 | Verificar preview jugable directo
+on:
+  push:
+    branches:
+      - experiment/v016001-main-clean-20261109
+    paths:
+      - '.github/workflows/v016001-verify-public-preview.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/playwright-preview playwright@1.56.1
+      - name: Open independent preview websites in Chromium
+        shell: bash
+        run: |
+          mkdir -p previews/v016001-public-url
+          NODE_PATH=/tmp/playwright-preview/node_modules node - <<'NODE'
+          const {chromium}=require('playwright');
+          const fs=require('fs');
+          const urls=[
+           'https://cdn.statically.io/gh/gburdesedev/Project-genesis@experiment/v016001-main-clean-20261109/index.html',
+           'https://htmlpreview.github.io/?https://github.com/gburdesedev/Project-genesis/blob/experiment/v016001-main-clean-20261109/index.html',
+           'https://cdn.jsdelivr.net/gh/gburdesedev/Project-genesis@experiment/v016001-main-clean-20261109/index.html'
+          ];
+          (async()=>{
+           const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
+           const report=[];
+           for(let i=0;i<urls.length;i++){
+            const page=await browser.newPage({viewport:{width:1280,height:720}});
+            const item={url:urls[i],errors:[]};
+            page.on('pageerror',e=>item.errors.push('JS '+e.message.slice(0,160)));
+            try{
+             const response=await page.goto(urls[i],{waitUntil:'domcontentloaded',timeout:35000});
+             item.status=response?.status();item.title=await page.title();
+             item.bodyStart=(await page.locator('body').innerText({timeout:12000})).slice(0,300);
+             item.professionButton=await page.locator('[data-profession="Herrero"]').count();
+             if(item.professionButton)await page.screenshot({path:'previews/v016001-public-url/provider-'+i+'.png',timeout:12000,animations:'allow'}).catch(e=>item.screenshotError=e.message.slice(0,150));
+            }catch(e){item.error=e.message.slice(0,280)}
+            report.push(item);await page.close();
+           }
+           console.log('PREVIEW_SERVICES_REPORT',JSON.stringify(report));
+           fs.writeFileSync('previews/v016001-public-url/report.json',JSON.stringify(report,null,2));await browser.close();
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v016001-browser-web-preview-diagnosis
+          path: previews/v016001-public-url/

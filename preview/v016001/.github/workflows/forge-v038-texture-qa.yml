@@ -1,0 +1,36 @@
+name: "Project Genesis - V038 forge texture quality truth audit"
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/forge_texture_audit_v015.py
+      - .github/workflows/forge-v038-texture-qa.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  inspect-v038:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: python3 -m pip install pillow==11.3.0
+      - name: Inspect native GLB and PBR texture resolutions
+        run: python3 scripts/forge_texture_audit_v015.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: forge-v038-texture-resolution-inspection
+          path: reports/forge-v038-pbr-quality-audit.json
+          retention-days: 5
+      - name: Publish factual V038 map-resolution audit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/forge-v038-pbr-quality-audit.json
+          git diff --cached --quiet || {
+            git commit -m "Record verified native V038 PBR texture quality [skip ci]"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          }

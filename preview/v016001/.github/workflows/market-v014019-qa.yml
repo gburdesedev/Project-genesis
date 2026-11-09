@@ -1,0 +1,61 @@
+name: "Project Genesis v0.14.019 marketplace QA"
+on:
+  push:
+    branches: [feature/market-merchant-v014d]
+    paths:
+      - index.html
+      - village_world.js
+      - genesis_market_domain_v001.js
+      - genesis_market_v001.js
+      - tests/genesis_market_domain_v001.cjs
+      - tests/genesis_market_integration_v001.cjs
+      - tests/genesis_market_browser_v001.cjs
+      - .github/workflows/market-v014019-qa.yml
+  pull_request:
+    paths:
+      - index.html
+      - village_world.js
+      - genesis_market_domain_v001.js
+      - genesis_market_v001.js
+      - tests/genesis_market_domain_v001.cjs
+      - tests/genesis_market_integration_v001.cjs
+      - tests/genesis_market_browser_v001.cjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  market-domain:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JavaScript and seed-to-inventory behavior
+        run: |
+          node --check genesis_market_domain_v001.js
+          node --check genesis_market_v001.js
+          node --check village_world.js
+          node --test tests/genesis_market_domain_v001.cjs tests/genesis_market_integration_v001.cjs
+  market-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    needs: market-domain
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Chromium PlayCanvas setup
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: In-game marketplace smoke and screenshot
+        run: node tests/genesis_market_browser_v001.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-market-v014019-browser
+          path: previews/market-v014019-qa/
+          retention-days: 7

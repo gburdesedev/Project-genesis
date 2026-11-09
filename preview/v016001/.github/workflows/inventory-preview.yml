@@ -1,0 +1,32 @@
+name: Inventory 16:9 visual preview
+on:
+  pull_request:
+    paths:
+      - 'preparacion_control.js'
+      - 'inventario_genesis_16x9.js'
+      - 'inventario_genesis_16x9.css'
+      - 'tests/inventario_16x9.cjs'
+      - '.github/workflows/inventory-preview.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/genesis-inventory-preview playwright@1.56.1
+      - run: NODE_PATH=/tmp/genesis-inventory-preview/node_modules node tests/inventario_16x9.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: inventory-16x9-browser-captures
+          path: /tmp/genesis-responsive/inventario-16x9-*.png
+          retention-days: 7

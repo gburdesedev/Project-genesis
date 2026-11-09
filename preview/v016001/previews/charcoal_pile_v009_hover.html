@@ -1,0 +1,66 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project Genesis · Carbón vegetal V009 · Hover</title>
+<style>
+*{box-sizing:border-box}body{background:#16191d;color:#f1eadf;margin:0;padding:24px 12px;font-family:system-ui,Segoe UI,sans-serif}main{width:min(1080px,100%);margin:auto}
+h1{font-size:clamp(17px,2.5vw,26px);font-weight:600}.stage{position:relative;aspect-ratio:16/9;border:1px solid #55504b;border-radius:12px;overflow:hidden;background:radial-gradient(ellipse at 50% 38%,#44464a 0%,#282c32 65%,#1b1f24 100%)}
+#viewport{position:absolute;inset:0}canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+#loading{position:absolute;inset:0;display:grid;place-items:center;background:#151719d9;z-index:2;padding:25px;text-align:center}
+#loading.hidden{display:none}.tag{position:absolute;top:12px;left:12px;border-radius:6px;background:#1118;padding:7px 11px;font-size:12px;letter-spacing:.06em}
+#readout{position:absolute;bottom:12px;right:12px;background:#121418d9;border-radius:7px;padding:8px 11px;font-size:12px;font-variant-numeric:tabular-nums}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}
+button{cursor:pointer;background:#33302c;color:#f5eee2;border:1px solid #80735f;border-radius:8px;padding:11px 14px;font-weight:600}button.active{background:#6d593c;border-color:#c8af7d}button:hover{background:#7a6547}
+p{font-size:13px;color:#bbb3a7;line-height:1.5}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"}}</script>
+</head><body><main><h1>Project Genesis · Carbón vegetal V009</h1>
+<div class="stage"><div id="viewport"></div><div class="tag">4 fragmentos de V008 · PBR 2K</div><div id="readout">Hover · ±45°</div><div id="loading">Cargando carbón vegetal real en 3D…</div></div>
+<div class="controls"><button id="four" class="active">4 carbones</button><button id="three">3 carbones</button><button id="reset">Centrar</button></div>
+<p>Pasá el mouse sobre el modelo para ver la rotación suave entre −45° y +45°. Al salir vuelve al frente. En pantallas táctiles, mantené el dedo presionado. Versión de prueba: no modifica menús ni materiales aprobados.</p></main>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+const viewport=document.getElementById('viewport'),readout=document.getElementById('readout'),loading=document.getElementById('loading');
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(35,16/9,.01,80);
+camera.position.set(3.25,2.55,4.4);camera.lookAt(0,.52,0);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
+renderer.setClearColor(0x000000,0);renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.98;viewport.append(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xe7ebef,0x39312a,1.38));
+for(const [color,intensity,x,y,z] of [[0xffedd6,2.15,2,5,3],[0xcfdcf8,1.5,-3,3,-4],[0xffffff,.7,-2,1,2]]){
+  const l=new THREE.DirectionalLight(color,intensity);l.position.set(x,y,z);scene.add(l);
+}
+const root=new THREE.Group();root.position.y=-.16;scene.add(root);
+let on=false,angle=0,phase=0,loaded=false,fourth=null,paused=false;
+function resize(){const b=viewport.getBoundingClientRect();if(!b.width||!b.height)return;camera.aspect=b.width/b.height;camera.updateProjectionMatrix();renderer.setSize(b.width,b.height,false)}
+addEventListener('resize',resize);resize();
+const can=renderer.domElement;
+can.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&loaded&&!paused)on=true});
+can.addEventListener('pointerleave',()=>{on=false;phase=0});
+can.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'&&loaded&&!paused)on=true});
+can.addEventListener('pointerup',()=>{on=false});
+can.addEventListener('pointercancel',()=>{on=false});
+addEventListener('blur',()=>{on=false});
+const active=(n)=>{document.getElementById('three').classList.toggle('active',n===3);document.getElementById('four').classList.toggle('active',n===4);if(fourth)fourth.visible=n===4};
+document.getElementById('three').onclick=()=>active(3);
+document.getElementById('four').onclick=()=>active(4);
+document.getElementById('reset').onclick=()=>{on=false;phase=0;paused=true;setTimeout(()=>paused=false,800)};
+const url='https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/main/previews/charcoal_pile_v009/model_web.glb';
+new GLTFLoader().load(url,gltf=>{
+  root.add(gltf.scene);
+  gltf.scene.traverse(o=>{
+    if(o.name==='master_source_hidden')o.visible=false;
+    if(o.name==='04_carbon_support')fourth=o;
+  });
+  loaded=true;loading.classList.add('hidden');
+},undefined,e=>{loading.textContent='Error cargando GLB. Descargá la versión local de la preview. '+(e.message||'');console.error(e)});
+let previous=performance.now();
+function draw(now){requestAnimationFrame(draw);const dt=Math.min((now-previous)/1000,.06);previous=now;
+  if(on)phase+=dt*1.15;
+  const target=on?Math.PI/4*Math.sin(phase):0;
+  angle+=(target-angle)*(1-Math.exp(-5.3*dt));
+  root.rotation.y=angle;
+  readout.textContent='Giro '+(angle*180/Math.PI).toFixed(1)+'° · '+(on?'Hover':'Reposo');
+  renderer.render(scene,camera);
+}
+requestAnimationFrame(draw);
+</script></body></html>

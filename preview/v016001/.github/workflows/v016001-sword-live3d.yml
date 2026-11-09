@@ -1,0 +1,38 @@
+name: Genesis V016.001 | Espada V12B 3D interactiva real
+on:
+  push:
+    branches:
+      - experiment/v016001-main-clean-20261109
+    paths:
+      - genesis_sword_runtime_v001.html
+      - genesis_result_dynamic_v001.js
+      - genesis_result_dynamic_v001.css
+      - tests/v016001_sword_live3d.cjs
+      - '.github/workflows/v016001-sword-live3d.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect-v12b:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Node syntax
+        run: node --check tests/v016001_sword_live3d.cjs && node --check genesis_result_dynamic_v001.js
+      - name: Setup Playwright
+        run: npm install --prefix /tmp/genesis-v12b playwright@1.56.1
+      - name: Load real interactive sword using WebGL / PlayCanvas
+        run: NODE_PATH=/tmp/genesis-v12b/node_modules node tests/v016001_sword_live3d.cjs
+      - name: Archive actual 3D views and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v016001-v12b-interactive-sword
+          path: previews/v016001-v12b-live3d/
+          retention-days: 14

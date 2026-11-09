@@ -1,0 +1,43 @@
+name: "Project Genesis v015 main PlayCanvas HQ integration browser QA"
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - genesis_workshop_live_v015.js
+      - village_world.js
+      - village_trees.js
+      - previews/genesis-v038-fuente-hq-runtime.js
+      - tests/game_v015_production_browser.cjs
+      - .github/workflows/game-v015-production-qa.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  main-game-webgl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JS
+        run: |
+          node --check genesis_workshop_live_v015.js
+          node --check village_world.js
+          node --check village_trees.js
+          node --check previews/genesis-v038-fuente-hq-runtime.js
+          node --check tests/game_v015_production_browser.cjs
+      - name: Setup Chromium
+        run: |
+          npm install --no-save playwright@1.56.1 playcanvas@2.23.0
+          npx playwright install --with-deps chromium
+      - name: Test actual production index.html
+        run: node tests/game_v015_production_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: project-genesis-v015-main-playcanvas-qa
+          path: previews/v015-production-audit/
+          retention-days: 5

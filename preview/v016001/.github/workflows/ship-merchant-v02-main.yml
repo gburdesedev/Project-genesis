@@ -1,0 +1,91 @@
+name: Ship Project Genesis merchant V02 to official main - QA rollout visual capture post-release
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ship-merchant-v02-main.yml
+      - tests/genesis_market_browser_v001.cjs
+      - tests/merchant_v02_in_game.cjs
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  integrate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch pinned tested 75962 triangle merchant GLB from public asset repository
+        run: |
+          set -euo pipefail
+          mkdir -p assets/playcanvas/approved/characters
+          curl --fail --location --silent --show-error --retry 3 \
+            "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/55faf13308bd9091f6d63d4446f02d5791ce9dbb/public/characters/merchant_v02_75962.glb" \
+            --output assets/playcanvas/approved/characters/merchant_v02_75962.glb
+          ls -lh assets/playcanvas/approved/characters/merchant_v02_75962.glb
+      - name: Stage new merchant visual and official version without touching market logic
+        run: python scripts/integrate_merchant_v02_main.py
+      - name: Run static and gameplay domain regression tests
+        run: |
+          node --check genesis_market_v001.js
+          node --check village_world.js
+          node --test \
+            tests/genesis_market_domain_v001.cjs \
+            tests/genesis_market_integration_v001.cjs \
+            tests/ordan_market_quest_v014021.cjs \
+            tests/starter_sword_stock_v014020.cjs
+      - name: Validate final release content before committing
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          h=Path('index.html').read_text()
+          market=Path('genesis_market_v001.js').read_text()
+          world=Path('village_world.js').read_text()
+          assert '<title>Project Genesis v0.14.022 · Build 20261102.04' in h
+          assert 'PROJECT GENESIS · v0.14.022 · BUILD 20261102.04' in h
+          assert "genesis_market_v001.js?v=0.14.022" in h
+          assert "version='v0.14.022', build='20261102.04'" in world
+          assert "id:'marketMerchant',radius:2.85" in market
+          assert "position:()=>({x:POS.x,y:1.30,z:POS.z})" in market
+          assert "const npc=buildMerchant(village.root,character)" in market
+          assert "loadMerchantV02(app,npc.entity,visual)" in market
+          assert Path('assets/playcanvas/approved/characters/merchant_v02_75962.glb').stat().st_size==2049508
+          print('RELEASE_VALIDATED main v0.14.022 build 20261102.04')
+          PY
+      - name: Publish tested game code and real GLB to official main
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html village_world.js genesis_market_v001.js \
+             tests/ordan_market_quest_v014021.cjs tests/starter_sword_stock_v014020.cjs \
+             assets/playcanvas/approved/characters/merchant_v02_75962.glb
+          git diff --cached --stat
+          git diff --cached --quiet && exit 1
+          git commit -m "release: v0.14.022 merchant V02 GLB in official market"
+          git push origin HEAD:main
+      - name: Install Playwright for actual 3D game and marketplace rendering
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Check merchant mesh import in PlayCanvas; screenshot is best-effort on headless GPU
+        continue-on-error: true
+        run: |
+          node tests/merchant_v02_in_game.cjs
+          node tests/genesis_market_browser_v001.cjs
+      - name: Save actual in-game screenshot and QA results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-main-merchant-v02-game-qa
+          path: |
+            previews/merchant-v02-game/
+            previews/market-v014019-qa/
+          retention-days: 14
+          if-no-files-found: warn

@@ -1,0 +1,37 @@
+name: "Project Genesis Herrero V012 — real PlayCanvas stone corner and chimney QA"
+on:
+  push:
+    branches: [main]
+    paths:
+      - previews/herreria-v012-playcanvas.html
+      - previews/herreria-v012-playcanvas-overlay.js
+      - tests/herreria_v012_playcanvas_browser.cjs
+      - .github/workflows/herreria-v012-browser-qa.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-3d-workshop-v012:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check preview and tests JavaScript
+        run: |
+          node --check previews/herreria-v012-playcanvas-overlay.js
+          node --check tests/herreria_v012_playcanvas_browser.cjs
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.56.1 playcanvas@2.23.0
+          npx playwright install --with-deps chromium
+      - name: Test physical GLB scene mount and controls
+        run: node tests/herreria_v012_playcanvas_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: project-genesis-herrero-v012-browser-audit
+          path: previews/herreria-v012-browser-reports/
+          retention-days: 5

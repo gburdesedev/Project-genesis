@@ -1,0 +1,57 @@
+// Production controller: live stock -> thermal preparation -> craft -> item comparison.
+const {chromium}=require('playwright'),fs=require('fs'),path=require('path'),assert=require('assert/strict');const root=path.resolve(__dirname,'..');
+(async()=>{const browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1366,height:900}});const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.route('**/*',r=>r.abort());const src=fs.readFileSync(path.join(root,'index.html'),'utf8');await page.setContent(src.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<link\b[^>]*>/gi,''));for(const f of ['preparacion.css','responsive.css'])await page.addStyleTag({content:fs.readFileSync(path.join(root,f),'utf8')});await page.clock.install();await page.evaluate(()=>{window.GenesisDevice={safePreviews:true};document.querySelector('#loading').style.display='none';document.querySelector('#prototypeIntro').style.display='none'});await page.addScriptTag({content:fs.readFileSync(path.join(root,'preparacion_control.js'),'utf8')});await page.evaluate(()=>{window.stock={'Mineral de hierro':4,'Lingote de hierro':0};window.items=[];window.crafts=0;window.gated=true;window.openLive=()=>GenesisPreparation.open({profession:'Herrero',inventory:stock,requiredStock:{'Lingote de hierro':4},formula:{materials:[{material:'Lingote de hierro',qty:1}]},recipeName:'Espada de hierro',startTab:'Inventario',getItems:()=>items,renderItem:i=>`<article>${i.name} · ${i.rarity}</article>`,renderAsset:i=>i?`<p>${i.name}</p>`:'',recipeAsset:()=>'<p>Espada de hierro</p>',metricForChannel:(item,c,i)=>({label:i?'Daño de '+c[0]:'Daño base',display:i?'+'+c[1]+'%':String(c[1])}),namingReason:item=>'NGE · '+item.name,canCraftNow:()=>gated,modal(html,extra){const m=document.querySelector('#modal');m.className='modal '+extra;m.innerHTML=html;document.querySelector('#modalLayer').style.display='grid'},closeModal(){document.querySelector('#modalLayer').style.display='none'},onCraft(){if(stock['Lingote de hierro']>=1){stock['Lingote de hierro']--;items.push({name:'Espada '+(++crafts),recipe:'espada',rarity:crafts===1?'Inútil':'Común',channels:crafts===1?[['Base',14]]:[['Base',18],['Fuego',12]],formula:{materials:[{material:'Lingote de hierro',qty:1}]}})}}});openLive()});
+await page.evaluate(()=>{stock={'Mineral de hierro':0,'Lingote de hierro':0};openLive()});
+assert.equal(await page.locator('.prepSkinSlot.empty').count(),20,'twenty inventory holes stay empty before receiving materials');
+assert.equal(await page.locator('.prepSkinInventory img').count(),0,'empty slots never embed item art');
+assert.equal(await page.locator('.workspaceViewer img').count(),0,'empty stock cannot show a fake ore preview');
+assert((await page.locator('.workspaceViewer').textContent()).includes('Casillas vacías'));
+assert(await page.locator('#prepStart').isDisabled(),'no material means no material action');
+await page.evaluate(()=>{stock={'Mineral de hierro':4,'Lingote de hierro':0};openLive()});
+assert.equal(await page.locator('.prepSkinSlot.occupied').count(),1,'resources appear only after being acquired in game data');
+await page.locator('[data-tab="Fabricaciones"]').click();assert(await page.locator('#prepStart').isDisabled());assert.equal(await page.evaluate(()=>crafts),0,'opening tab must not fabricate');await page.locator('[data-tab="Preparacion"]').click();await page.locator('#prepStart').click();
+for(let i=0;i<100&&await page.locator('#prepHeatGauge').count();i++){const heat=Number(await page.locator('#prepHeatGauge').getAttribute('aria-valuenow'));if(heat<70)await page.locator('#prepBellow0').click();await page.clock.runFor(1000)}
+assert.equal(await page.evaluate(()=>stock['Lingote de hierro']),1);assert.equal(await page.evaluate(()=>stock['Mineral de hierro']),3);await page.evaluate(()=>openLive());
+assert.equal(await page.locator('.prepArtboard').getAttribute('data-active-tab'),'Inventario','INV opens inventory, not preparation');
+assert.equal(await page.locator('.prepSkinTab[aria-current="page"]').getAttribute('data-tab'),'Inventario','inventory highlight belongs to the selected tab');
+assert.equal(await page.locator('.prepSkinPiece[src$="/Pestana_Preparacion.png"]').evaluate(e=>getComputedStyle(e).filter.includes('brightness(0.49)')),true,'baked Preparation gold must be dimmed outside Preparation');
+assert.equal(await page.locator('.prepSkinStart.workspaceAction').evaluate(e=>getComputedStyle(e).backgroundImage.includes('BotonPreparar_Normal.png')),true,'dynamic action must reuse original ornamented button');
+assert.equal(await page.locator('.prepSkinScroll').evaluate(e=>Math.abs(e.getBoundingClientRect().width/e.getBoundingClientRect().height-16/9)<.005),true,'widescreen frame must actually be 16:9');
+await page.locator('[data-tab="Preparacion"]').click();
+assert.equal(await page.locator('.prepArtboard').getAttribute('data-active-tab'),'Preparacion');
+assert.equal(await page.evaluate(()=>GenesisPreparation.navigate('Inventario')),true,'HUD TAB/INV reopens inventory');
+assert.equal(await page.locator('.prepArtboard').getAttribute('data-active-tab'),'Inventario');
+await page.locator('.prepSkinSlot[data-stock-name="Lingote de hierro"]').click();
+assert.equal(await page.locator('.prepArtboard').getAttribute('data-active-tab'),'Fabricaciones','treated material routes to fabrication');
+await page.locator('[data-tab="Preparacion"]').click();
+await page.locator('.prepSkinSlot[data-stock-name="Lingote de hierro"]').click();
+assert.equal(await page.locator('.prepArtboard').getAttribute('data-active-tab'),'Fabricaciones','treated material on Preparation also routes to fabrication');
+await page.locator('[data-tab="Fabricaciones"]').click();assert(!(await page.locator('#prepStart').isDisabled()));await page.locator('#prepStart').click();assert.equal(await page.evaluate(()=>crafts),1);assert.equal(await page.evaluate(()=>stock['Lingote de hierro']),0);await page.evaluate(()=>{stock['Lingote de hierro']=1;openLive()});await page.locator('[data-tab="Fabricaciones"]').click();await page.locator('#prepStart').click();await page.evaluate(()=>openLive());await page.locator('[data-inventory-category="creations"]').click();assert.equal(await page.locator('.prepSkinSlot').count(),20,'original twenty artwork slots are preserved');assert.equal(await page.locator('.prepSkinSlot.occupied').count(),2,'two unique creations appear in the real artwork slots');assert.equal(await page.locator('.workspaceCollectionLabel').count(),2,'creation headings replace the baked material captions');assert.equal(await page.locator('#workspaceItem').count(),0,'inventory uses its own artwork slots, not a native dropdown');assert.equal(await page.locator('[data-role^="boton_"]').count(),0,'workspace avoids the original baked PREPARAR label');assert.equal(await page.locator('.prepArtboard').getAttribute('data-active-tab'),'Inventario');assert.equal(await page.locator('.prepSkinPiece[data-hover="Inventario"]').evaluate(el=>getComputedStyle(el).opacity),'1','active Inventory tab uses the original golden glow');await page.locator('.prepSkinSlot[data-item-index="1"]').click();assert((await page.locator('.prepSkinDetails').textContent()).includes('Espada 2'));assert((await page.locator('.workspaceSheetBody').textContent()).includes('Daño de Fuego'));await page.locator('[data-sheet-tab="craft"]').click();assert((await page.locator('.workspaceSheetBody').textContent()).includes('Lingote de hierro'));await page.locator('[data-tab="Comparacion"]').click();assert.equal(await page.locator('.prepArtboard').getAttribute('data-active-tab'),'Comparacion');assert.equal(await page.locator('.prepSkinPiece[data-hover="Comparacion"]').evaluate(el=>getComputedStyle(el).opacity),'1');assert((await page.locator('.workspaceCompareRow').allTextContents()).some(row=>row.includes('Fuego')));await page.locator('#workspaceB').selectOption('0');assert((await page.locator('.prepSkinDetails').textContent()).includes('dos objetos distintos'));await page.evaluate(()=>{gated=false;stock['Lingote de hierro']=3;openLive()});await page.locator('[data-tab="Fabricaciones"]').click();assert(await page.locator('#prepStart').isDisabled());await page.locator('[data-tab="Preparacion"]').click();assert.equal(await page.locator('#prepFabricate').count(),0,'tutorial lock must hide direct craft action');// El árbol del personaje consulta recetas ya fijadas y nunca vuelve a generarlas.
+await page.evaluate(()=>{
+  window.catalogBuilds=0;window.lastCatalogCraft=null;
+  const known=[
+    {id:'espada_hierro',family:'Espada',subfamily:'Espada de hierro',formula:{materials:[{material:'Lingote de hierro',qty:1}]}},
+    {id:'escudo_hierro',family:'Escudo',subfamily:'Escudo de hierro',formula:{materials:[{material:'Lingote de hierro',qty:1}]}}
+  ];
+  GenesisPreparation.open({
+    profession:'Herrero',inventory:stock,requiredStock:{'Lingote de hierro':2},
+    formula:known[1].formula,recipeName:'Escudo de hierro',startTab:'Fabricaciones',
+    getItems:()=>items,getRecipeCatalog:()=>known,activeRecipeId:'escudo_hierro',
+    recipeAsset:id=>'<p>Vista de '+id+'</p>',
+    canCraftRecipe:id=>id==='escudo_hierro',onCraftRecipe:id=>{lastCatalogCraft=id},
+    onCraft:()=>{},
+    modal(html,extra){const m=document.querySelector('#modal');m.className='modal '+extra;m.innerHTML=html;document.querySelector('#modalLayer').style.display='grid'},
+    closeModal(){document.querySelector('#modalLayer').style.display='none'}
+  });
+});
+assert.equal(await page.locator('.workspaceRecipeFamily').count(),2,'two real initial families');
+assert.equal(await page.locator('.workspaceRecipeChoice').count(),2,'subfamilies derive from the saved catalog');
+assert.equal(await page.locator('.workspaceRecipeChoice[aria-pressed="true"]').textContent(),'Escudo de hierro','tutorial recipe initially selected');
+await page.locator('[data-recipe-id="espada_hierro"]').click();
+assert(await page.locator('#prepStart').isDisabled(),'known recipe is visible but tutorial gate remains authoritative');
+await page.locator('[data-recipe-id="escudo_hierro"]').click();
+assert(!(await page.locator('#prepStart').isDisabled()),'eligible known recipe may be crafted');
+await page.locator('#prepStart').click();
+assert.equal(await page.evaluate(()=>lastCatalogCraft),'escudo_hierro','craft uses selected saved recipe');
+await page.evaluate(()=>{gated=false;stock['Lingote de hierro']=3;openLive()});
+for(const [width,height]of [[390,844],[844,390]]){await page.setViewportSize({width,height});await page.clock.runFor(100);await page.evaluate(()=>dispatchEvent(new Event('resize')));await page.clock.runFor(100);await page.waitForFunction(()=>{const r=document.querySelector('.prepArtboard').getBoundingClientRect();return r.left>=-1&&r.right<=innerWidth+1&&r.bottom<=innerHeight+1})}await page.keyboard.press('Escape');assert.equal(await page.locator('#modalLayer').evaluate(e=>e.style.display),'none');assert.equal(errors.length,0,errors.join('\n'));await browser.close();console.log('PASS live menus: empty slots until acquisition, inventory button, treated materials to fabrication, thermal conversion, craft once, comparison, viewport and Escape');})().catch(e=>{console.error(e);process.exit(1)});

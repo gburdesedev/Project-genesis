@@ -1,0 +1,11 @@
+{
+  "status": "STATIC_V038_BROWSER_PREVIEW",
+  "source": "forge-v038-preview.html",
+  "output": "forge-v038-fixed-preview.html",
+  "forge_glb_original": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/production/auto-forge-breathing-coals-v038/public/models/forge-v038-web-hq.glb",
+  "forge_glb_repaired": "https://raw.githubusercontent.com/ProjectgenesisAssets/genesis-workshop-assets/feature/playcanvas-herrero-arcanista-walls-preview/public/models/Forge_V038_HeaderFixed_Preview.glb",
+  "replacements": 1,
+  "game_logic_untouched": true,
+  "menu_art_untouched": true,
+  "approval": "PENDING_BROWSER_AND_VISUAL"
+}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Project Genesis · Mercenario experimental</title><style>body{background:#100e0b;color:#f2dfba;font:18px Georgia;text-align:center;padding:3rem}</style></head>
+<body><p>Cargando Project Genesis desde GitHub Pages…</p>
+<script>
+(async function(){
+ const commit='85f1add6b0bca23fd762622f67350c5d8d48da41';
+ const raw='https://raw.githubusercontent.com/gburdesedev/Project-genesis/'+commit+'/index.html';
+ try{
+  const response=await fetch(raw,{cache:'no-store'});
+  if(!response.ok)throw Error('Archivo del juego: HTTP '+response.status);
+  let html=await response.text();
+  if(!html.includes('GenesisPrototypeEngines'))throw Error('El juego descargado está incompleto');
+  // The approved floor and world images are available on the same GitHub Pages origin.
+  const pages='https://gburdesedev.github.io/Project-genesis/';
+  const branchAssets='https://cdn.jsdelivr.net/gh/gburdesedev/Project-genesis@'+commit+'/';
+  html=html.replace(/<head([^>]*)>/i,'<head$1><base href="'+pages+'">');
+  // Keep executable JS/CSS on the experimental revision, not production main.
+  html=html.replace(/(src|href)=(["'])(?!https?:|data:|\/|#)([^"']+?\.(?:js|css)(?:\?[^"']*)?)\2/gi,(match,attr,q,file)=>{
+    return attr+'='+q+branchAssets+file+q;
+  });
+  // No iframe / srcdoc: retain real URL query for mercenary-qa=1 and same-origin PBR assets.
+  document.open();document.write(html);document.close();
+ }catch(error){
+  document.body.textContent='No se pudo iniciar la prueba: '+error.message;
+ }
+})();
+</script></body></html>
