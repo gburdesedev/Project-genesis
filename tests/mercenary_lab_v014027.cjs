@@ -74,7 +74,7 @@ const server=http.createServer((req,res)=>{
    await page.keyboard.press('e');
    await page.waitForTimeout(900);
    state.dossierVisible=await page.locator('.mercSheetBody').count()>0;
-   if(state.dossierVisible)await page.screenshot({path:path.join(OUT,'05-dossier-interaccion.png'),fullPage:true,timeout:25000});
+   if(state.dossierVisible)await page.screenshot({path:path.join(OUT,'05-dossier-interaccion.png'),fullPage:true,timeout:12000,animations:'disabled'}).catch(e=>state.warnings.push('Dossier screenshot skipped (low FPS): '+String(e.message).slice(0,95)));
    assert.ok(state.dossierVisible,'mercenary world interaction should open dossier');
    state.stage='passed';
    console.log('PASS: V09 original artwork, V05 approved inventory, actual V049 equipped V12B/V015, NGE four items, world + E dossier');
