@@ -5,9 +5,11 @@
 <script src="./village_plan.js?v=0.11.017"></script>
 <script src="./device_policy.js?v=0.14.024-pc"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Project Genesis V014.027-ML04 · EXPERIMENTO MERCENARIO · sin publicar · Powered by NGE Alpha</title>
+<title>Project Genesis V014.027-ML05 · EXPERIMENTO MERCENARIO · sin publicar · Powered by NGE Alpha</title>
 <link rel="stylesheet" href="./preparacion.css?v=0.14.018-charcoal-v010">
-<link rel="stylesheet" href="./mercenary_equipment_canvas_v001.css?v=0.1.001">
+<link rel="stylesheet" href="./mercenary_equipment_canvas_v09.css?v=0.14.027-ML05">
+<link rel="stylesheet" href="./inventario_genesis_16x9.css?v=0.14.027-ML05">
+<link rel="stylesheet" href="./mercenary_lab_inventory_v05.css?v=0.14.027-ML05">
 
 <script type="importmap">
 {
@@ -237,6 +239,7 @@ window.__genesisAppError=function(event){
   <pc-asset id="mercHairLong10" type="container" src="https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/hair_long.glb" lazy></pc-asset>
   <pc-asset id="mercSword10" type="container" src="https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/sword.glb" lazy></pc-asset>
   <pc-asset id="mercShield10" type="container" src="https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/shield_round.glb" lazy></pc-asset>
+  <pc-asset id="mercV049Exact" type="container" src="./assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb" lazy></pc-asset>
 
   <!-- v0.8.8: props authored; sin squash falso ni animaciones físicamente absurdas. -->
   <pc-asset id="roofReal086" type="container" src="https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Roof_RoundTiles_6x10.gltf" lazy></pc-asset>
@@ -653,6 +656,7 @@ window.__genesisAppError=function(event){
         <pc-entity id="mercSwordGlowA" position="0 .28 0"><pc-light id="mercSwordLightA" type="omni" color="#b7c2ca" intensity="0" range="1.45"></pc-light></pc-entity>
         <pc-entity id="mercSwordGlowB" position="0 -.18 0"><pc-light id="mercSwordLightB" type="omni" color="#b7c2ca" intensity="0" range="1.15"></pc-light></pc-entity>
       </pc-model>
+      <pc-model id="mercApprovedGearDisplay" name="Experimental exact 3D V049 · real sword V12B + shield V015" data-asset="mercV049Exact" data-route="SharedMercenary" data-priority="ondemand" position="0 -40 0"></pc-model>
       <pc-model id="mercShieldModel" name="Equipped crafted shield visual" data-asset="mercShield10" data-route="SharedMercenary" data-priority="ondemand" position="0 -40 0">
         <pc-entity id="mercShieldGlowA" position="0 0 .08"><pc-light id="mercShieldLightA" type="omni" color="#b7c2ca" intensity="0" range="1.55"></pc-light></pc-entity>
         <pc-entity id="mercShieldGlowB" position="0 0 -.08"><pc-light id="mercShieldLightB" type="omni" color="#b7c2ca" intensity="0" range="1.20"></pc-light></pc-entity>
@@ -741,8 +745,8 @@ window.__genesisAppError=function(event){
 </div>
 
 <div id="hud">
- <div id="brand">PROJECT GENESIS · V014.027-ML04 · MERCENARIO EXPERIMENTAL</div>
- <div id="tech">PLAYCANVAS 2.22.1 · PRUEBA AISLADA · V014.027-ML04</div>
+ <div id="brand">PROJECT GENESIS · V014.027-ML05 · MERCENARIO EXPERIMENTAL</div>
+ <div id="tech">PLAYCANVAS 2.22.1 · PRUEBA AISLADA · V014.027-ML05</div>
  <div id="buttonsTop"><button id="cameraSettingsBtn" class="uiBtn" type="button" aria-label="Configurar cámara">⚙ CÁMARA</button></div>
  <section id="quest">
    <div class="ey" id="questEy">PROTOTIPO · SELECCIÓN DE PROFESIÓN</div>
@@ -780,7 +784,8 @@ if(new URLSearchParams(location.search).get('mercenario')==='1'){
 <script src="./fps_counter.js?v=20261025-1"></script>
 <script src="./camera_mouse.js?v=20261025-1"></script>
 <script src="./preparacion_control.js?v=0.14c.020-static-featured"></script>
-<script src="./mercenary_equipment_canvas_v001.js?v=0.1.001"></script>
+<script src="./mercenary_equipment_canvas_v09.js?v=0.14.027-ML05"></script>
+<script src="./mercenary_lab_inventory_v05.js?v=0.14.027-ML05"></script>
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
 const GENESIS_MERCENARY_LAB=new URLSearchParams(location.search).get("mercenario")==="1"; // Solo rama experimental, no afecta main.
@@ -1573,6 +1578,27 @@ async function launchMercenaryLab(){
   closeModal();showMercenaryEquipment(false);
 }
 function showMercenaryCandidates(){setTutorialStep(15);ensureMercenaryReady().catch(err=>toast('No se pudo preparar el Guerrero: '+(err?.message||err),2400));const tanner=mercGearRoute()==='Curtidor',arrival=tanner?'Llega con ropa básica; la armadura y las botas están pendientes.':'Llega sin espada ni escudo.';modal(`<div class="mercTopline"><div><div class="ey">RECORRIDO CONDENSADO · EXTENSIÓN DE GAMEPLAY</div><h2>Elegí un Guerrero para contratar</h2></div><div class="mercProtoFlag">VALORES DE PROTOTIPO · NO BALANCE FINAL</div></div><div class="mercIntro"><strong>Demostración jugable:</strong> los tres candidatos permiten mostrar contratación, estadísticas, equipamiento y expedición sin representar todavía el orden completo del juego final.</div><div class="mercGrid">${MERC_CANDIDATES.map(c=>`<button class="mercCard" data-merc="${c.id}"><div class="mcNum">CANDIDATO ${String(c.id+1).padStart(2,'0')}</div><div class="mercSilhouette">♙</div><h3>${c.label}</h3><p><strong>${c.look}</strong><br>${c.note}. ${arrival}</p>${candidateMiniStats(c)}<span class="mcRole">GUERRERO · COMPATIBLE</span><div class="mcHint">Seleccionar dossier</div></button>`).join('')}</div><div class="actions"><button class="secondary" id="mercBackComplete">Volver</button></div>`,'mercenaryModal');document.querySelectorAll('[data-merc]').forEach(btn=>btn.onclick=async()=>{if(btn.disabled)return;btn.disabled=true;try{mercCandidate=Number(btn.dataset.merc);await ensureMercenaryReady();applyMercCandidateVisual();showMercenaryEquipment()}catch(err){console.error(err);toast('No se pudo cargar el Guerrero: '+(err?.message||err),2600);btn.disabled=false}});document.getElementById('mercBackComplete').onclick=completePrototype}
+
+/* ML05 · Approved-source V05 inventory; preserves the live NGE item references. */
+function showApprovedInventoryForMercenary(){
+  if(!GENESIS_MERCENARY_LAB||!window.GenesisInventory16?.render)return showMercenaryEquipment(false);
+  const shield='assets/playcanvas/candidates/shield/v015/escudo_hierro_v015_PBR2K_WEBP_v022.glb';
+  const swordPoster='https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/6f2d179c8441ab7c2842d98ada030e843055a902/public-previews/espada-v175-j-roughness-v12/V12_V175_Color_J_Rugosidad034_Hero.png';
+  const ctx={
+    inventory:playerInventory,
+    getItems:()=>craftedItems,
+    modal,genInvState:{family:'Espadas',page:0,search:''},
+    renderAsset:(item)=>item?.recipe==='escudo_hierro'
+      ? '<model-viewer src="'+shield+'" alt="Escudo original V015 3D" camera-controls auto-rotate interaction-prompt="none" shadow-intensity=".5" exposure="1.05" style="width:100%;height:100%"></model-viewer>'
+      : '<img src="'+swordPoster+'" alt="Espada aprobada V175 V12B, render Cycles HDRI 32 bits" style="height:100%;width:100%;object-fit:contain">',
+  };
+  const nav={
+    renderMenu:()=>showMercenaryEquipment(mercGearAttached),
+    renderWorkspace:()=>showMercenaryEquipment(mercGearAttached),
+    sheetForItem:(_ctx,item)=>renderItemCard(item),
+  };
+  window.GenesisInventory16.render(ctx,nav);
+}
 function showMercenaryEquipment(editing=false,reuseDraft=false){
   // Approved 16:9 mercenary concept interface. Keep original implementation as fallback.
   if(window.GenesisMercenaryConcept?.open && mercCandidate!=null){
@@ -1589,6 +1615,8 @@ function showMercenaryEquipment(editing=false,reuseDraft=false){
     const activeFirst=tanner?mercArmorItem:mercSwordItem,activeSecond=tanner?mercBootsItem:mercShieldItem;
     return window.GenesisMercenaryConcept.open({
       modal,mercName:candidate.label,candidate:mercCandidate,body:candidate.body,editing,tanner,
+      modelUrl:GENESIS_MERCENARY_LAB?"./assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb":undefined,
+      onInventory:GENESIS_MERCENARY_LAB?showApprovedInventoryForMercenary:undefined,
       labelFirst:tanner?'Armadura':'Arma',labelSecond:tanner?'Botas':'Escudo',
       familyFirst:tanner?'Armaduras':'Espadas',familySecond:tanner?'Botas':'Escudos',
       poolFirst,poolSecond,selectedFirst:chosenFirst,selectedSecond:chosenSecond,
@@ -1607,7 +1635,16 @@ function showMercenaryEquipment(editing=false,reuseDraft=false){
         mercSwordItem=mercShieldItem=mercArmorItem=mercBootsItem=null;
         return showMercenaryCandidates();
       },
-      onConfirm:(first,second)=>{
+      onConfirm:async (first,second)=>{
+        if(GENESIS_MERCENARY_LAB){
+          try{
+            const el=mercNode("mercApprovedGearDisplay");
+            if(!el)throw Error("Falta el componente 3D V049");
+            toast("Cargando equipo V12B / V015…",2400);
+            await activateDeferredModel(el,120000);
+            if(!el.contentEntity)throw Error("V049 terminó de cargar sin geometría");
+          }catch(error){console.error("ML05 gear load:",error);toast("Error cargando V049: "+error.message,4700);return}
+        }
         if(!first||!second)return;
         const previous=[mercSwordItem,mercShieldItem,mercArmorItem,mercBootsItem];
         if(tanner){mercArmorItem=first;mercBootsItem=second;mercEditArmorItem=mercEditBootsItem=null}
@@ -1625,7 +1662,16 @@ function showMercenaryEquipment(editing=false,reuseDraft=false){
     });
   }
 if(mercCandidate==null)return showMercenaryCandidates();if(!editing)setTutorialStep(16);const tanner=mercGearRoute()==='Curtidor';if(editing&&!reuseDraft){if(tanner){mercEditArmorItem=mercArmorItem;mercEditBootsItem=mercBootsItem}else{mercEditSwordItem=mercSwordItem;mercEditShieldItem=mercShieldItem}}const c=MERC_CANDIDATES[mercCandidate],poolA=craftedItems.filter(x=>x.recipe===(tanner?'armadura_cuero':'espada_hierro')),poolB=craftedItems.filter(x=>x.recipe===(tanner?'botas_cuero':'escudo_hierro')),selectedA=editing?(tanner?mercEditArmorItem:mercEditSwordItem):(tanner?mercArmorItem:mercSwordItem),selectedB=editing?(tanner?mercEditBootsItem:mercEditShieldItem):(tanner?mercBootsItem:mercShieldItem),typeA=tanner?'armor':'sword',typeB=tanner?'boots':'shield',labelA=tanner?'TORSO · ARMADURA':'MANO PRINCIPAL · ESPADA',labelB=tanner?'PIES · BOTAS':'MANO SECUNDARIA · ESCUDO',modeTitle=editing?'CAMBIO DE EQUIPO · INVENTARIO DEL ARTESANO':`CONTRATO DE DEMOSTRACIÓN · ${c.label.toUpperCase()}`,baseTag=editing?'EQUIPO ACTUAL · ELEGÍ REEMPLAZOS':(tanner?'ROPA BÁSICA · ARMADURA Y BOTAS PENDIENTES':'SIN ARMADURA · ESPADA Y ESCUDO PENDIENTES'),backLabel=editing?'Cancelar · volver al dossier':'Cambiar Guerrero',confirmLabel=editing?'Aplicar cambios':(tanner?'Vestir físicamente':'Equipar físicamente');modal(`<div class="mercTopline"><div><div class="ey">${modeTitle}</div><h2>${editing?'Cambiar equipo de '+esc(c.label):'Dossier y equipamiento'}</h2></div><div class="mercProtoFlag">${editing?'OBJETOS DISPONIBLES EN INVENTARIO':'ESTADÍSTICAS DE PROTOTIPO'}</div></div><div class="mercDossier"><aside class="mercIdentity"><div class="mercAvatar">♙</div><h3>${c.label}</h3><p>${c.look} · ${c.note}</p><span class="mercBaseTag">${baseTag}</span></aside><section class="mercPanel"><div class="mercPanelTitle"><b>IMPACTO DEL EQUIPAMIENTO</b><span>Base + objeto = valor mostrado</span></div>${renderMercStats(selectedA,selectedB)}</section></div><div class="mercIntro"><strong>Inventario del artesano:</strong> elegí cualquiera de ${tanner?'las armaduras y botas':'las espadas y escudos'} fabricados durante esta sesión. El objeto anterior vuelve a quedar disponible automáticamente al confirmar el cambio.</div><div class="gearColumns"><section class="gearColumn"><h3>${labelA}</h3>${poolA.map((it,i)=>mercChoiceCard(it,i,typeA,selectedA,selectedB)).join('')}</section><section class="gearColumn"><h3>${labelB}</h3>${poolB.map((it,i)=>mercChoiceCard(it,i,typeB,selectedA,selectedB)).join('')}</section></div><div class="mercSheetGrid"><section class="mercPanel"><div class="mercPanelTitle"><b>INVENTARIO DEL MERCENARIO</b><span>Vista previa</span></div>${renderMercInventory(selectedA,selectedB)}</section><section class="mercPanel"><div class="mercPanelTitle"><b>LECTURA DEL EQUIPO</b><span>Creaciones de esta sesión</span></div><div class="mercEquipmentSummary">${mercEquippedSummaryItem(selectedA,tanner?'ARMADURA':'ESPADA')}${mercEquippedSummaryItem(selectedB,tanner?'BOTAS':'ESCUDO')}</div><div class="mercInventoryNote">${tanner?'Al confirmar, una pechera y unas botas de demostración se montan físicamente sobre el Guerrero. Sus detalles y halos reproducen los canales de las creaciones elegidas.':'Al confirmar, los modelos 3D y sus canales se actualizan físicamente sobre el Guerrero.'}</div></section></div><div class="actions"><button class="secondary" id="mercEquipBack">${backLabel}</button><button id="mercEquipConfirm" ${selectedA&&selectedB?'':'disabled'}>${confirmLabel}</button></div>`,'mercenaryModal');document.querySelectorAll('[data-gear-type]').forEach(el=>el.onclick=()=>{const type=el.dataset.gearType,idx=Number(el.dataset.gearIdx),isA=['sword','armor'].includes(type),pool=isA?poolA:poolB;if(editing){if(tanner){if(isA)mercEditArmorItem=pool[idx];else mercEditBootsItem=pool[idx]}else{if(isA)mercEditSwordItem=pool[idx];else mercEditShieldItem=pool[idx]}showMercenaryEquipment(true,true)}else{if(tanner){if(isA)mercArmorItem=pool[idx];else mercBootsItem=pool[idx]}else{if(isA)mercSwordItem=pool[idx];else mercShieldItem=pool[idx]}showMercenaryEquipment(false)}});document.getElementById('mercEquipBack').onclick=()=>{if(editing){mercEditSwordItem=mercEditShieldItem=mercEditArmorItem=mercEditBootsItem=null;return showMercenarySheet()}mercSwordItem=mercShieldItem=mercArmorItem=mercBootsItem=null;showMercenaryCandidates()};document.getElementById('mercEquipConfirm').onclick=()=>{if(!selectedA||!selectedB)return;if(editing){if(tanner){mercArmorItem=selectedA;mercBootsItem=selectedB;mercEditArmorItem=mercEditBootsItem=null}else{mercSwordItem=selectedA;mercShieldItem=selectedB;mercEditSwordItem=mercEditShieldItem=null}}else if(tanner){mercArmorItem=selectedA;mercBootsItem=selectedB}else{mercSwordItem=selectedA;mercShieldItem=selectedB}if(!equipMercenaryCreations()){toast('El modelo del Guerrero todavía no está listo.',1800);return}refreshInventorySummary();if(editing){toast('Equipo actualizado con objetos del inventario.',1500);showMercenarySheet();return}closeModal();setTutorialStep(17);setTimeout(()=>{orientCameraToObjective();toast(tanner?'Guerrero vestido · acercate para abrir su dossier.':'Guerrero equipado · acercate para abrir su dossier.',1800)},120)}}
-function equipMercenaryCreations(){if(!mercenaryInitialized||!mercenaryRoot||!mercGearReady())return false;const tanner=mercGearRoute()==='Curtidor',sword=E('mercSwordModel'),shield=E('mercShieldModel');if(tanner){if(sword)sword.enabled=false;if(shield)shield.enabled=false;/* Demo visual: conservar el candidato y añadir pechera + botas sobre su rig. */if(!attachCurtidorWearables())return false;const ac=gearColors(mercArmorItem),bc=gearColors(mercBootsItem);setCurtidorWearableVisibility(true,ac.dual,bc.dual);mercenaryRoot.syncHierarchy?.();applyMercGearChannels();requestAnimationFrame(()=>{attachCurtidorWearables();applyMercGearChannels();verifyMercenaryHaloState()});setTimeout(()=>{attachCurtidorWearables();applyMercGearChannels()},80);mercGearAttached=true;mercenaryState='equipped';itemRevealSound();restoreKnownLightingProfile();return true}setCurtidorWearableVisibility(false,false,false);const handR=findMercBone(['hand_r','Hand_R','hand.R','RightHand']),foreL=findMercBone(['lowerarm_l','forearm_l','hand_l','Hand_L','LeftHand']);if(!sword||!shield)return false;sword.enabled=true;shield.enabled=true;safeReparent(sword,handR||mercenaryRoot);safeReparent(shield,foreL||mercenaryRoot);sword.setLocalPosition(.002,.010,.002);sword.setLocalEulerAngles(0,0,0);sword.setLocalScale(.108,.108,.108);shield.setLocalPosition(.005,.018,.016);shield.setLocalEulerAngles(0,0,90);shield.setLocalScale(.124,.124,.124);const sGlowA=E('mercSwordGlowA'),sGlowB=E('mercSwordGlowB'),hGlowA=E('mercShieldGlowA'),hGlowB=E('mercShieldGlowB');if(sGlowA)sGlowA.setLocalPosition(0,2.20,.18);if(sGlowB)sGlowB.setLocalPosition(0,-1.55,-.12);if(hGlowA)hGlowA.setLocalPosition(.12,.10,.55);if(hGlowB)hGlowB.setLocalPosition(-.12,-.10,-.45);mercenaryRoot.syncHierarchy?.();applyMercGearChannels();requestAnimationFrame(()=>{applyMercGearChannels();verifyMercenaryHaloState()});setTimeout(()=>applyMercGearChannels(),80);mercGearAttached=true;mercenaryState='equipped';itemRevealSound();restoreKnownLightingProfile();return true}
+function equipMercenaryCreations(){if(!mercenaryInitialized||!mercenaryRoot||!mercGearReady())return false;const tanner=mercGearRoute()==='Curtidor',sword=E('mercSwordModel'),shield=E('mercShieldModel');if(tanner){if(sword)sword.enabled=false;if(shield)shield.enabled=false;/* Demo visual: conservar el candidato y añadir pechera + botas sobre su rig. */if(!attachCurtidorWearables())return false;const ac=gearColors(mercArmorItem),bc=gearColors(mercBootsItem);setCurtidorWearableVisibility(true,ac.dual,bc.dual);mercenaryRoot.syncHierarchy?.();applyMercGearChannels();requestAnimationFrame(()=>{attachCurtidorWearables();applyMercGearChannels();verifyMercenaryHaloState()});setTimeout(()=>{attachCurtidorWearables();applyMercGearChannels()},80);mercGearAttached=true;mercenaryState='equipped';itemRevealSound();restoreKnownLightingProfile();return true}setCurtidorWearableVisibility(false,false,false);const handR=findMercBone(['hand_r','Hand_R','hand.R','RightHand']),foreL=findMercBone(['lowerarm_l','forearm_l','hand_l','Hand_L','LeftHand']);if(!sword||!shield)return false;sword.enabled=true;shield.enabled=true;safeReparent(sword,handR||mercenaryRoot);safeReparent(shield,foreL||mercenaryRoot);sword.setLocalPosition(.002,.010,.002);sword.setLocalEulerAngles(0,0,0);sword.setLocalScale(.108,.108,.108);shield.setLocalPosition(.005,.018,.016);shield.setLocalEulerAngles(0,0,90);shield.setLocalScale(.124,.124,.124);const sGlowA=E('mercSwordGlowA'),sGlowB=E('mercSwordGlowB'),hGlowA=E('mercShieldGlowA'),hGlowB=E('mercShieldGlowB');if(sGlowA)sGlowA.setLocalPosition(0,2.20,.18);if(sGlowB)sGlowB.setLocalPosition(0,-1.55,-.12);if(hGlowA)hGlowA.setLocalPosition(.12,.10,.55);if(hGlowB)hGlowB.setLocalPosition(-.12,-.10,-.45);mercenaryRoot.syncHierarchy?.();applyMercGearChannels();requestAnimationFrame(()=>{applyMercGearChannels();verifyMercenaryHaloState()});setTimeout(()=>applyMercGearChannels(),80);mercGearAttached=true;mercenaryState='equipped';itemRevealSound();restoreKnownLightingProfile();
+if(GENESIS_MERCENARY_LAB){
+  const source=mercNode('mercApprovedGearDisplay'),display=E('mercApprovedGearDisplay');
+  if(!source?.contentEntity||!display)return false;
+  ['mercBodyModel','mercBodyRangerModel','mercHeadModel','mercHairPartedModel','mercHairBuzzModel','mercHairLongModel','mercBeardModel','mercSwordModel','mercShieldModel'].forEach(id=>{const e=E(id);if(e)e.enabled=false});
+  display.enabled=true;display.setLocalPosition(0,0,0);display.setLocalEulerAngles(0,0,0);display.setLocalScale(1,1,1);
+  mercenaryRoot.syncHierarchy?.();
+  if(window.__GENESIS_MERCENARY_LAB)Object.assign(window.__GENESIS_MERCENARY_LAB,{approved3d:true,model:'V049_SWORD_V12B_SHIELD_V015',modelNodeCount:source.contentEntity.children?.length||0});
+}
+return true}
 
 
 
