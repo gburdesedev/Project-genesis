@@ -10,16 +10,34 @@
 }
 .gFabModular>div,.gFabModular>section{position:absolute;box-sizing:border-box}
 .gFabModular button{position:absolute;box-sizing:border-box;pointer-events:auto;cursor:pointer}
-.gFabRecipe{
- color:#f3dbac!important;font-size:1.21cqw!important;text-align:left!important;white-space:nowrap!important;
- display:flex;gap:2%;align-items:center;padding:0 3.8%!important;
- background:#130e0ab0!important;border:1px solid #8e642db8!important;
- border-radius:2px;text-shadow:0 1px 3px #000;z-index:4;
+/* Real V07 art, extracted into the ORA: no CSS rectangles, no emojis.
+   Recipe content is an actual HTML text layer; the selected border is an
+   independent transparent original V07 asset, not a gradient or box shadow. */
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabRecipe{
+ display:flex!important;justify-content:center!important;align-items:center!important;
+ padding:0 5%!important;margin:0!important;
+ border:0!important;border-radius:0!important;outline:0!important;
+ background:transparent!important;box-shadow:none!important;
+ white-space:nowrap!important;overflow:visible!important;
+ color:#f2d6a5!important;font:normal 1.25cqw/1.08 Georgia,'Times New Roman',serif!important;
+ text-align:center!important;text-shadow:0 1px 3px #000!important;
+ z-index:5;
 }
-.gFabRecipe .gFabRecipeSymbol{width:13%;font-size:1.7cqw;color:#f6d59f;text-align:center;flex:none}
-.gFabRecipe.is-selected{box-shadow:inset 0 0 0 1px #f7c67d,0 0 13px #bd742b88!important;
- background:linear-gradient(90deg,#664021c8,#25160bab)!important}
-.gFabRecipe:hover{border-color:#e5bb75!important}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabRecipe.is-selected,
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabRecipe:hover,
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabRecipe:focus-visible{
+ background:transparent!important;box-shadow:none!important;border:0!important;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabRecipe .gFabRecipeText{
+ position:relative;z-index:2;pointer-events:none;white-space:nowrap;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabSelectedFrame{
+ position:absolute;z-index:1;inset:-9% -1%;width:102%;height:118%;
+ object-fit:fill;pointer-events:none;filter:none!important;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabRecipe:hover:not(.is-selected) .gFabRecipeText{
+ color:#ffe6b5;
+}
 .gFabHero{overflow:hidden;display:flex;justify-content:center;align-items:center;isolation:isolate}
 .gFabHero:before{content:'';position:absolute;inset:0;pointer-events:none;
  background:radial-gradient(ellipse at 50% 47%,#e5b57318,transparent 59%);
@@ -67,10 +85,23 @@
 .gFabMatLabels span{display:flex;justify-content:space-between;gap:2%;color:#ded0b3}
 .gFabMatLabels b{color:#b0e4a7;font-weight:normal}
 .gFabMat.is-missing b{color:#dba49d}
-.gFabStatus{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9%;color:#d8ba7d}
-.gFabStatus span{font-size:1.05cqw;letter-spacing:.16em}
-.gFabStatus strong{font-size:1.4cqw;font-weight:normal}
-.gFabStatusReady{color:#9aeca8}.gFabStatusBlocked{color:#db9d8c}
+/* The underlying inscription is cleaned in ORA; these are the ONLY
+   state texts. Keep both in the right panel without a black CSS card. */
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabStatus{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:7%;color:#dec79a;background:transparent!important;
+ border:0!important;box-shadow:none!important;outline:0!important;
+ padding:0!important;text-shadow:0 2px 3px #0008;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabStatus span{
+ font:normal 1.05cqw/1.15 Georgia,'Times New Roman',serif!important;
+ letter-spacing:.1em;color:#d0ac70;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabStatus strong{
+ font:normal 1.2cqw/1.1 Georgia,'Times New Roman',serif!important;
+ letter-spacing:.015em;white-space:nowrap;
+}
+.gFabStatusReady{color:#a3deb2}.gFabStatusBlocked{color:#dcb5a1}
 .gFabCraft{
  background:transparent!important;border:0!important;outline:0!important;
  font:normal 2.3cqw Georgia,serif!important;letter-spacing:.02em;color:#f6d6a0!important;
