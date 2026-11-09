@@ -450,3 +450,18 @@
 @media(hover:none),(prefers-reduced-motion:reduce){
  .genInv.genInvCanonical .genInvSlot>.genInvSlotArtwork{transform:none!important;transition:none!important;}
 }
+
+/* ML05 browser evidence alignment, overlay ONLY: never alter approved V05 PNG.
+   NGE creates long names; keep every dynamic value inside original print frames. */
+.genInv.genInvCanonical .genInvViewerTitle{
+ display:block!important;left:5%!important;top:6%!important;width:90%!important;
+ line-height:1.15!important;overflow:hidden!important;text-overflow:ellipsis!important;
+ white-space:nowrap!important;text-align:center!important;font-size:1.02cqw!important;
+}
+.genInv.genInvCanonical .genInvInfoLine:nth-of-type(1){top:29.8%!important;}
+.genInv.genInvCanonical .genInvInfoLine:nth-of-type(2){top:36.4%!important;}
+.genInv.genInvCanonical .genInvInfoLine:nth-of-type(3){top:43.0%!important;}
+.genInv.genInvCanonical .genInvInfoLine>b{overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;}
+.genInv.genInvCanonical .genInvChannels{top:59.0%!important;height:13%!important;overflow-y:auto!important;}
+.genInv.genInvCanonical .genInvNgeText{top:78.5%!important;height:8%!important;overflow:hidden!important;}
+.genInv.genInvCanonical .genInvFamily{font-size:.89cqw!important;}
