@@ -17,8 +17,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          URL='https://raw.githack.com/gburdesedev/Project-genesis/e712767f059330ba5b7b8409ed389e09f59e950e/index.html?mercenario=1'
+          BASE="https://raw.githack.com/gburdesedev/Project-genesis/$GITHUB_SHA"
+          URL="$BASE/index.html?mercenario=1"
           curl --location --fail --silent --show-error --max-time 45 --output /tmp/mercenary-public.html --write-out 'HTTP %{http_code}; content_type %{content_type}; size %{size_download}; effective_url %{url_effective}\n' "$URL"
           grep -q 'GENESIS_MERCENARY_LAB' /tmp/mercenary-public.html
-          grep -q 'ML04' /tmp/mercenary-public.html
-          echo 'PASS: isolated public experimental HTML available'
+          grep -q 'ML05' /tmp/mercenary-public.html
+          for f in mercenary_equipment_canvas_v09.js mercenary_equipment_canvas_v09.css mercenary_lab_inventory_v05.js mercenary_lab_inventory_v05.css assets/ui/mercenary/v09/V09_Plantilla_Vacia_Referencia.png assets/ui/inventario/GENESIS_INVENTARIO_V05_CABECERA_PREPARACION_1820x1024.png assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb; do
+            printf 'Checking %s: ' "$f"
+            curl -L --fail --silent --show-error --max-time 60 -I "$BASE/$f" | head -n 1
+          done
+          echo 'PASS: ML05 isolated experimental HTML/CSS/JS/PNG/GLB URL available'
