@@ -24,7 +24,7 @@
 .gFabHero:before{content:'';position:absolute;inset:0;pointer-events:none;
  background:radial-gradient(ellipse at 50% 47%,#e5b57318,transparent 59%);
 }
-.gFabSwordPoster{display:block;width:91%;height:94%;max-width:100%;max-height:100%;
+.gFabSwordPoster{display:block;width:80%;height:87%;max-width:100%;max-height:100%;
  object-fit:contain;mix-blend-mode:normal;filter:drop-shadow(0 6px 11px #000b);pointer-events:none}
 .gFabShieldPoster{width:78%;height:85%;object-fit:contain;position:absolute;inset:7% 11%;
  filter:drop-shadow(0 8px 11px #000b);pointer-events:none}
@@ -62,3 +62,16 @@
 }
 .gFabCraft:hover:not(:disabled){filter:brightness(1.25)}
 .gFabCraft:disabled{cursor:not-allowed;opacity:.45}
+
+
+/* The approved raster already contains the permanent FABRICAR lettering
+   and anvil. The button is an invisible functional hit area only. */
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabCraft{
+ font-size:0!important;color:transparent!important;text-shadow:none!important;
+ padding:0!important;background:transparent!important;border:0!important;
+ box-shadow:none!important
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabCraft:hover:not(:disabled){
+ background:linear-gradient(#f9b33d10,#f9b33d15)!important;
+ filter:none!important
+}
