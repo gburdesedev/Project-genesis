@@ -83,3 +83,84 @@
 .pg4tShell .pv9CompareEquipped .pg4tItemVisual,.pg4tShell .pv9CompareSelected .pg4tItemVisual{width:100%;height:100%}
 .pg4tShell .pg4tChannelPending{display:flex!important;align-items:center;min-width:0;color:#f4e0b6;font-weight:700;text-shadow:0 0 .28cqw var(--fx-color);font-size:clamp(9px,.94cqw,17px)}
 .pg4tShell .mcChannel{--fx-color:#b7c2ca}
+
+/* ML08 — exact approved V3.2 channel ORAs + one consistent constrained item frame.
+   The V4-T master PNG and all source icons are unchanged.
+   74% grid, 76% equipment, 66% comparison. Do not crop or distort source images. */
+.pg4tShell .pg4tItemVisual{
+  width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  overflow:hidden!important;position:relative!important;isolation:isolate!important;
+  flex:0 0 auto!important;pointer-events:none!important
+}
+.pg4tShell .pg4tIconFit{
+  --pg4t-fill:74%;
+  width:var(--pg4t-fill)!important;height:var(--pg4t-fill)!important;
+  max-width:var(--pg4t-fill)!important;max-height:var(--pg4t-fill)!important;
+  display:flex!important;justify-content:center!important;align-items:center!important;
+  overflow:hidden!important;flex:0 0 auto!important;box-sizing:border-box!important;
+  padding:0!important;margin:0!important;transform:none!important;position:relative!important
+}
+.pg4tShell .pg4tIconFit img{
+  width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;
+  display:block!important;object-fit:contain!important;object-position:50% 50%!important;
+  transform:none!important;position:static!important;margin:0!important;padding:0!important;
+  box-sizing:border-box!important;min-width:0!important;min-height:0!important;
+  background:transparent!important
+}
+.pg4tShell .pv9Grid .mcInventorySlot{overflow:hidden!important;padding:0!important}
+.pg4tShell .pv9Grid .mcInventorySlot .pg4tIconFit{--pg4t-fill:74%}
+.pg4tShell .pv9Slot{overflow:hidden!important}
+.pg4tShell .pv9Slot .pg4tIconFit{--pg4t-fill:76%}
+.pg4tShell .pv9ComparisonIcon{overflow:hidden!important;min-width:0!important;min-height:0!important}
+.pg4tShell .pv9ComparisonIcon .pg4tIconFit{--pg4t-fill:66%}
+.pg4tShell .pv9CompareEquipped .pg4tItemVisual,
+.pg4tShell .pv9CompareSelected .pg4tItemVisual{width:100%!important;height:100%!important}
+.pg4tShell .pv9CompareEquipped .pv9ComparisonContents,
+.pg4tShell .pv9CompareSelected .pv9ComparisonContents{
+  display:grid!important;grid-template-rows:minmax(0,57%) minmax(0,28%) minmax(0,15%)!important;
+  justify-items:center!important;align-items:center!important;
+  width:100%!important;height:100%!important;gap:0!important;overflow:hidden!important
+}
+.pg4tShell .pv9CompareEquipped .pv9ComparisonIcon,
+.pg4tShell .pv9CompareSelected .pv9ComparisonIcon{
+  width:100%!important;height:100%!important;max-height:none!important;
+  display:flex!important;justify-content:center!important;align-items:center!important;overflow:hidden!important
+}
+.pg4tShell .pv9ComparisonName{
+  display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;
+  line-clamp:2!important;max-height:100%!important;line-height:1.06!important;
+  margin:0!important;padding:0 3%!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  white-space:normal!important;text-align:center!important;align-self:center!important;
+  font-size:clamp(8px,.77cqw,14px)!important
+}
+.pg4tShell .pv9ComparisonRarity{
+  width:100%!important;max-height:100%!important;margin:0!important;
+  line-height:1.05!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  white-space:nowrap!important;text-align:center!important
+}
+/* The new artwork retains its 990:165 proportions; two NGE numbers live next to it.
+   This is a separate scroll region and never resizes the approved 4-T plate. */
+.pg4tShell .pv9Channels .mcChannel{
+  display:grid!important;grid-template-columns:minmax(0,62%) minmax(0,18%) minmax(0,20%)!important;
+  gap:0!important;align-items:center!important;min-width:0!important;overflow:hidden!important;
+  height:3.25cqw!important;min-height:3.25cqw!important;padding:0!important;
+  background:#100b08!important
+}
+.pg4tShell .pv9Channels .mcChannel .pg4tChannelApproved{
+  height:100%!important;width:100%!important;min-width:0!important;
+  overflow:hidden!important;display:flex!important;justify-content:flex-start!important;align-items:center!important
+}
+.pg4tShell .pv9Channels .mcChannel .pg4tChannelApproved img{
+  display:block!important;width:100%!important;height:100%!important;
+  max-height:100%!important;max-width:100%!important;
+  object-fit:contain!important;object-position:left center!important;
+  padding:0!important;margin:0!important;border:0!important;
+  background:transparent!important;transform:none!important
+}
+.pg4tShell .pv9Channels .mcChannelNum{
+  text-align:center!important;font-size:clamp(9px,.94cqw,17px)!important;
+  font-variant-numeric:tabular-nums!important;white-space:nowrap!important;
+  overflow:hidden!important;min-width:0!important;padding:0!important
+}
+.pg4tShell .pg4tOraMissing,.pg4tShell .pg4tOraLoadError{color:#ee8e6b!important}
