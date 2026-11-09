@@ -23,9 +23,15 @@ const report={status:'START',events:[],errors:[]};
  const browser=await chromium.launch({headless:true,args:['--no-sandbox','--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
  try{
   const page=await browser.newPage({viewport:{width:1600,height:900},serviceWorkers:'block'});
-  page.on('pageerror',e=>report.errors.push(String(e).slice(0,240)));
+  page.on('pageerror',e=>report.errors.push('JS '+String(e).slice(0,240)));
+  page.on('response',r=>{if(r.status()>=400&&report.errors.length<50)report.errors.push('HTTP '+r.status()+' '+r.url().slice(0,180))});
+  page.on('requestfailed',r=>{if(report.errors.length<50)report.errors.push('FAILED '+r.url().slice(0,160)+' '+r.failure()?.errorText)});
   await page.goto('http://127.0.0.1:'+server.address().port+'/index.html',{waitUntil:'domcontentloaded',timeout:90000});
-  await page.locator('[data-profession="Herrero"]').waitFor({state:'visible',timeout:180000});
+  try{await page.locator('[data-profession="Herrero"]').waitFor({state:'visible',timeout:60000})}catch(e){
+    report.loader=await page.evaluate(()=>({loadState:document.querySelector('#loadState')?.textContent,loadDetail:document.querySelector('#loadDetail')?.textContent,loadCount:document.querySelector('#loadCount')?.textContent,loadPercent:document.querySelector('#loadPercent')?.textContent,intro:document.querySelector('#prototypeIntro')?.style.display,failed:document.querySelector('.loadingCard')?.className,boot:window.__genesisBoot,assets:performance.getEntriesByType('resource').length}));
+    await page.screenshot({path:path.join(out,'00-loader-blocked.png'),timeout:15000,animations:'disabled'}).catch(x=>{report.errors.push('SCREENSHOT '+x.message)});
+    throw Error('HERRERO_STARTUP_BLOCKED '+JSON.stringify(report.loader)+'; first errors '+JSON.stringify(report.errors.slice(0,10)));
+  }
   await page.locator('[data-profession="Herrero"]').click({timeout:30000});
   await page.waitForFunction(()=>window.__e2e?.state().gameStarted===true,null,{timeout:180000});
   report.events.push('Mundo Herrero iniciado');
