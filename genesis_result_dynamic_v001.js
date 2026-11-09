@@ -39,12 +39,22 @@
         typeof item.asset?.glb==="string"?item.asset.glb:"",
       source:item};
   };
-  const approvedModel=(asset)=>{
-    // No sustituir con un GLB ajeno ni exponer un GLB sin licencia.
-    return /^\.?\/?assets\/playcanvas\/approved\/equipment\/[\w./-]+\.glb$/i.test(asset) && !asset.includes("..");
+  const approvedModel=(s)=>{
+    // V12B es una aprobación visual de materiales, NO permiso para redistribuir fuente Fab.
+    // Exigimos un manifiesto de exportación aprobado y derechos de distribución confirmados.
+    if(s.recipe!=="espada_hierro")return false;
+    const e=root.GenesisApprovedRuntimeModels?.espada_hierro;
+    return !!(e && e.status==="approved" && e.gameExportApproved===true &&
+      e.distributionRightsConfirmed===true &&
+      e.sourceSha256==="e2228f078b2572768416c48c0e63c2d908f214e2c0625a2ab754c877a099112b" &&
+      /^[a-f0-9]{64}$/.test(e.exportSha256||"") && e.exportSha256!==e.sourceSha256 &&
+      e.materialPreset==="Genesis_Espada_V03_Hierro_V175_V12B" &&
+      e.url===s.asset &&
+      /^\.?\/?assets\/playcanvas\/approved\/equipment\/[\w/-]+\.glb$/i.test(s.asset) &&
+      !s.asset.includes(".."));
   };
   function viewer(s,renderAsset){
-    if(approvedModel(s.asset)){
+    if(approvedModel(s)){
       const poster=s.recipe==="espada_hierro"?approvedSwordPoster:"";
       return '<model-viewer data-result-approved-glb="true" src="'+esc(s.asset)+'"'+
         (poster?' poster="'+esc(poster)+'"':'')+
