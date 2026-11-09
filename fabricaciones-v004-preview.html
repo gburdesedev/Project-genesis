@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project Genesis | Prueba visual Fabricaciones ORA V004</title>
+<link rel="stylesheet" href="./genesis_ui_approved.css?v=014030v004">
+<link rel="stylesheet" href="./genesis_fabricacion_modular_v004.css?v=014030v004">
+<style>
+html,body{margin:0;min-height:100%;background:#080706;color:#e5cda3;font-family:Georgia,serif}
+body{display:flex;flex-direction:column;justify-content:center;align-items:center}
+.previewHeader{width:min(1672px,100%);min-height:52px;box-sizing:border-box;padding:10px 17px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font:14px sans-serif}
+.previewHeader strong{color:#ffe2a9}.previewHeader span{flex:1;min-width:220px;opacity:.8}
+.previewHeader button{background:#28160b;border:1px solid #ad743c;color:#ffe2af;border-radius:3px;padding:7px 13px;cursor:pointer}
+.previewHeader button:hover{filter:brightness(1.2)}
+#modalLayer{width:100%;display:flex;align-items:center;justify-content:center}
+#modal{position:relative!important}
+.note{max-width:1200px;margin:0 auto 7px;padding:0 16px;color:#bbad99;font:12px sans-serif}
+@media(max-width:750px){.previewHeader{font-size:12px}.previewHeader button{padding:4px 6px}}
+</style>
+</head>
+<body>
+<header class="previewHeader">
+ <strong>FABRICACIONES — ORA V004 EXPERIMENTAL</strong>
+ <span>Visor de prueba del menú real. Stock y estado de misión: datos de ensayo, no partida guardada.</span>
+ <button type="button" id="previewSword">Espada</button>
+ <button type="button" id="previewShield">Escudo</button>
+ <button type="button" id="previewStock">Agotar lingotes</button>
+</header>
+<div id="modalLayer"><div id="modal" class="modal"></div></div>
+<p class="note">Arte de Fabricaciones V07 reconstruido por capas. Espada: imagen del render V12B aprobada, no GLB en vivo. Escudo: póster V015 con GLB experimental. El juego principal permanece separado.</p>
+<script>window.GenesisExperimentalFabricacionV004=true;</script>
+<script src="./genesis_fabricacion_modular_v004.js?v=014030v004"></script>
+<script src="./genesis_ui_approved.js?v=014030v004"></script>
+<script>
+(function(){
+'use strict';
+const recipes=[
+{id:'espada_hierro',subfamily:'Espada de hierro',family:'Espadas',formula:{materials:[
+{material:'Lingote de hierro',qty:2},{material:'Madera seca de roble',qty:1},{material:'Carbón vegetal',qty:1}]}},
+{id:'escudo_hierro',subfamily:'Escudo de hierro',family:'Escudos',formula:{materials:[
+{material:'Lingote de hierro',qty:2},{material:'Madera seca de roble',qty:1},{material:'Carbón vegetal',qty:1}]}}
+];
+const ctx={
+profession:'Herrero',inventory:{'Lingote de hierro':6,'Madera seca de roble':4,'Carbón vegetal':2},
+selectedRecipeId:'espada_hierro',activeRecipeId:'espada_hierro',
+getRecipeCatalog:()=>recipes,canCraftRecipe:id=>id===ctx.activeRecipeId,
+modal(html,cls){const e=document.getElementById('modal');e.className='modal '+cls;e.innerHTML=html}
+};
+const nav={craft(){alert('Sólo vista de prueba. La fabricación real funciona dentro de la partida.')},
+renderMenu(){},renderWorkspace(tab){window.GenesisApprovedUI.render(ctx,nav,tab)},close(){}};
+function show(which){
+ ctx.activeRecipeId=which;ctx.selectedRecipeId=which;
+ window.GenesisApprovedUI.render(ctx,nav,'Fabricaciones');
+}
+document.getElementById('previewSword').onclick=()=>show('espada_hierro');
+document.getElementById('previewShield').onclick=()=>show('escudo_hierro');
+document.getElementById('previewStock').onclick=()=>{
+ ctx.inventory['Lingote de hierro']=ctx.inventory['Lingote de hierro']?0:6;
+ window.GenesisApprovedUI.render(ctx,nav,'Fabricaciones');
+};
+show('espada_hierro');
+})();
+</script>
+</body>
+</html>

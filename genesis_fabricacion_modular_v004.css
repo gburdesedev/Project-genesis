@@ -1,0 +1,126 @@
+/* Project Genesis Fabricaciones V004: geometric overlays over separated artwork.
+   Preserve 1672×941 pixel positions and do not copy text baked in the former V07.
+*/
+.gApprovedBoard.gApproved-Fabricaciones[data-ora-modular="V004"]{
+ background-image:url('./assets/ui/fabricaciones_ora_v004/Fabricaciones_Base_Limpia_V004.png')!important;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabModular{
+ position:absolute;inset:0;z-index:2;pointer-events:none;
+ font-family:Georgia,'Times New Roman',serif;
+}
+.gFabModular>div,.gFabModular>section{position:absolute;box-sizing:border-box}
+.gFabModular button{position:absolute;box-sizing:border-box;pointer-events:auto;cursor:pointer}
+/* Real V07 art, extracted into the ORA: no CSS rectangles, no emojis.
+   Recipe content is an actual HTML text layer; the selected border is an
+   independent transparent original V07 asset, not a gradient or box shadow. */
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabRecipe{
+ display:flex!important;justify-content:center!important;align-items:center!important;
+ padding:0 5%!important;margin:0!important;
+ border:0!important;border-radius:0!important;outline:0!important;
+ background:transparent!important;box-shadow:none!important;
+ white-space:nowrap!important;overflow:visible!important;
+ color:#f2d6a5!important;font:normal 1.25cqw/1.08 Georgia,'Times New Roman',serif!important;
+ text-align:center!important;text-shadow:0 1px 3px #000!important;
+ z-index:5;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabRecipe.is-selected,
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabRecipe:hover,
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabRecipe:focus-visible{
+ background:transparent!important;box-shadow:none!important;border:0!important;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabRecipe .gFabRecipeText{
+ position:relative;z-index:2;pointer-events:none;white-space:nowrap;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabSelectedFrame{
+ position:absolute;z-index:1;inset:-9% -1%;width:102%;height:118%;
+ object-fit:fill;pointer-events:none;filter:none!important;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabRecipe:hover:not(.is-selected) .gFabRecipeText{
+ color:#ffe6b5;
+}
+.gFabHero{overflow:hidden;display:flex;justify-content:center;align-items:center;isolation:isolate}
+.gFabHero:before{content:'';position:absolute;inset:0;pointer-events:none;
+ background:radial-gradient(ellipse at 50% 47%,#e5b57318,transparent 59%);
+}
+.gFabSwordPoster{display:block;width:80%;height:87%;max-width:100%;max-height:100%;
+ object-fit:contain;mix-blend-mode:normal;filter:drop-shadow(0 6px 11px #000b);pointer-events:none}
+.gFabShieldPoster{width:78%;height:85%;object-fit:contain;position:absolute;inset:7% 11%;
+ filter:drop-shadow(0 8px 11px #000b);pointer-events:none}
+.gFabShieldModel{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;background:transparent}
+.gFabLoadedShield3D .gFabShieldModel{opacity:1}
+.gFabLoadedShield3D .gFabShieldPoster{display:none}
+.gFabHeroCaption{
+ display:flex;align-items:center;justify-content:center;text-align:center;
+ color:#f4d5a1;font-size:1.45cqw;background:#110b09ed;
+ border:1px solid #987041;border-radius:8px;text-shadow:0 2px 3px #000;
+}
+/* ORA V004: right title is a SINGLE dynamic text element on the CLEAN
+   title plate; never a box or a second text painted on top of baked text. */
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabTitle{
+ text-align:center;display:flex;flex-direction:column;
+ justify-content:center;align-items:center;
+ padding:0 3%;background:none!important;border:0!important;
+ box-shadow:none!important;overflow:hidden;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabTitle h2{
+ margin:0!important;max-width:100%;
+ color:#f0d2a2;font:normal 1.65cqw/1.19 Georgia,'Times New Roman',serif!important;
+ letter-spacing:.045em;text-transform:uppercase;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ text-shadow:0 2px 2px #000b;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabTitle span{
+ color:#c5b7a3;font-size:1cqw;letter-spacing:.03em;
+ margin-top:2%;text-shadow:0 1px 2px #000b;
+}
+.gFabMaterialsLabel{color:#f3d5a0;text-align:center;display:flex;align-items:center;justify-content:center;font-size:1.35cqw;letter-spacing:.075em}
+.gFabMaterials{display:flex;flex-direction:column;gap:1.5%;overflow-y:auto;padding:1% 1.5%;scrollbar-color:#8c5d2d #160e09;pointer-events:auto}
+.gFabMat{display:flex;align-items:center;width:100%;min-height:30.5%;flex:1 0 auto;
+ background:#080706e6;border:1px solid #76532e;box-shadow:inset 0 0 8px #2f1a0b;
+ padding:1% 2%;overflow:hidden}
+.gFabMatAsset{flex:0 0 25%;height:94%;display:grid;place-items:center;overflow:hidden;border-right:1px solid #78522d57}
+.gFabMatAsset img{width:94%;height:94%;max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 2px 4px #000a)}
+.gFabMatLabels{display:flex;flex:1;flex-direction:column;justify-content:center;gap:3%;min-width:0;padding:0 4%;font-size:1.07cqw}
+.gFabMatLabels strong{font-weight:normal;font-size:1.25cqw;color:#f3d9b6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gFabMatLabels span{display:flex;justify-content:space-between;gap:2%;color:#ded0b3}
+.gFabMatLabels b{color:#b0e4a7;font-weight:normal}
+.gFabMat.is-missing b{color:#dba49d}
+/* The underlying inscription is cleaned in ORA; these are the ONLY
+   state texts. Keep both in the right panel without a black CSS card. */
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabStatus{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:7%;color:#dec79a;background:transparent!important;
+ border:0!important;box-shadow:none!important;outline:0!important;
+ padding:0!important;text-shadow:0 2px 3px #0008;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabStatus span{
+ font:normal 1.05cqw/1.15 Georgia,'Times New Roman',serif!important;
+ letter-spacing:.1em;color:#d0ac70;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabStatus strong{
+ font:normal 1.2cqw/1.1 Georgia,'Times New Roman',serif!important;
+ letter-spacing:.015em;white-space:nowrap;
+}
+.gFabStatusReady{color:#a3deb2}.gFabStatusBlocked{color:#dcb5a1}
+.gFabCraft{
+ background:transparent!important;border:0!important;outline:0!important;
+ font:normal 2.3cqw Georgia,serif!important;letter-spacing:.02em;color:#f6d6a0!important;
+ text-shadow:0 2px 6px #000,0 0 8px #f3aa6450;z-index:4;padding-left:21%!important;text-align:center!important
+}
+.gFabCraft:hover:not(:disabled){filter:brightness(1.25)}
+.gFabCraft:disabled{cursor:not-allowed;opacity:.45}
+
+
+/* The approved raster already contains the permanent FABRICAR lettering
+   and anvil. The button is an invisible functional hit area only. */
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabCraft{
+ font-size:0!important;color:transparent!important;text-shadow:none!important;
+ padding:0!important;background:transparent!important;border:0!important;
+ box-shadow:none!important
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabCraft:hover:not(:disabled){
+ background:linear-gradient(#f9b33d10,#f9b33d15)!important;
+ filter:none!important
+}
+
+

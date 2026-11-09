@@ -1,7 +1,7 @@
 /* Project Genesis UI 2026-11-08: runtime-only overlays over the immutable approved 1672x941 artwork. */
 (function(){
  'use strict';
- const BUILD='V014.028';
+ const BUILD='V014.029';
  const ROOT='assets/ui/approved/';
  const ARTS=Object.freeze({Inventario:ROOT+'Inventario_V11_APROBADO_1672x941.png',Preparacion:ROOT+'Preparacion_APROBADA_1672x941.png',Fabricaciones:ROOT+'Fabricaciones_V07_APROBADA_1672x941.png'});
  const MATERIALS=Object.freeze({
@@ -73,12 +73,30 @@
  function cleanBoardPosters(board){
    board.querySelectorAll('img.gApprovedMaterialArt').forEach(cleanMaterialPoster);
  }
- function itemFamily(item){const raw=String(item?.family||item?.recipeFamily||item?.recipe||'').toLowerCase();return /escud/.test(raw)?'Escudos':/espad/.test(raw)?'Espadas':'Creaciones'}
+ function itemFamily(item){
+   // The recipe ID is authoritative. Created items may have a localized
+   // display family ('Armas') that would otherwise hide both finished swords.
+   const raw=[item?.recipe,item?.recipeFamily,item?.family,item?.name].filter(Boolean).join(' ').toLowerCase();
+   return /escud/.test(String(item?.recipe||''))?'Escudos':
+      /espad/.test(String(item?.recipe||''))?'Espadas':
+      /escud/.test(raw)?'Escudos':/espad/.test(raw)?'Espadas':'Creaciones';
+ }
+ function equipmentHalo(item){
+   const active=Array.isArray(item?.affinities)?item.affinities:[];
+   const affinity=active.length?active.map(a=>Array.isArray(a)?a[0]:a).filter(Boolean):[];
+   const t=affinity.join(' ').toLowerCase();
+   const palette={fuego:'#f58b33',rayo:'#6bbaff',hielo:'#8cdff3',escarcha:'#a6e6ff',luz:'#fff0a4',
+     sombra:'#ba9cda',naturaleza:'#77c891',tierra:'#c5a274',base:'#c5b7a4'};
+   const name=Object.keys(palette).find(k=>k!=='base'&&t.includes(k));
+   return {color:palette[name||'base'],label:affinity.length?affinity.join(' + '):'Canal Base'};
+ }
+
  function entryView(e,ctx,hero){
    if(e.material)return materialVisual(e.name,hero);
-   return hero?(typeof ctx.renderAsset==='function'?ctx.renderAsset(e.item):''):
-     (e.item?.thumbnail||e.item?.poster?`<img src="${esc(e.item.thumbnail||e.item.poster)}" alt="${esc(e.name)}">`:
-       '<span class="gApprovedItemGlyph">✦</span>');
+   // Render the actual created-item asset in each slot, not the generic ✦.
+   return typeof ctx.renderAsset==='function'?ctx.renderAsset(e.item):
+     (e.item?.thumbnail||e.item?.poster?`<img src="${esc(e.item.thumbnail||e.item.poster)}" alt="${esc(e.name)}">`:'');
+
  }
  function mount(tab,ctx,nav,body,attrs=''){
    const html=`<div id="genesisApprovedBoard" class="gApprovedBoard gApproved-${tab}" data-screen="${tab}" data-approved-source="${esc(ARTS[tab])}" ${attrs} style="background-image:url('${ARTS[tab]}')">${tabs()}${body}${hit('Cerrar',1603,0,69,36)}</div>`;
@@ -108,10 +126,10 @@
    const familyButtons=families.map((f,i)=>`<button type="button" class="gApprovedFamily ${f===state.family?'is-selected':''}" data-family="${f}" aria-pressed="${f===state.family}" style="${pos(54,229+45*i,288,45)}" aria-label="Filtrar ${f}"></button>`).join('');
    const slots=Array.from({length:20},(_,i)=>{
      const e=page[i],x=410+(i%10)*122.0,y=589+Math.floor(i/10)*126;
-     return `<button type="button" class="gApprovedSlot ${e?.key===state.selected?'is-selected':''}" style="${pos(x,y,107,109)}" ${e?'data-slot="'+i+'" aria-label="'+esc(e.name)+'"':'disabled aria-label="Casilla vacía"'}>${e?`<span class="gApprovedSlotAsset">${entryView(e,ctx,false)}</span><span class="gApprovedQty">${esc(e.material?e.qty:e.item?.rarity||'')}</span>`:''}</button>`;
+     return `<button type="button" class="gApprovedSlot ${e?.key===state.selected?'is-selected':''} ${e&&!e.material?'gApprovedCreatedSlot':''}" style="${pos(x,y,107,109)};${e&&!e.material?'--creation-halo:'+equipmentHalo(e.item).color+';':''}" ${e?'data-slot="'+i+'" aria-label="'+esc(e.name)+'"':'disabled aria-label="Casilla vacía"'}>${e?`<span class="gApprovedSlotAsset">${entryView(e,ctx,false)}</span><span class="gApprovedQty">${esc(e.material?e.qty:e.item?.rarity||'')}</span>`:''}</button>`;
    }).join('');
    const info=chosen?`<div class="gApprovedInfoValues" style="${pos(1305,208,260,88)}"><span>${esc(chosen.name)}</span><span>${esc(chosen.material?'Materiales':state.family)}</span><span>${esc(chosen.material?'—':chosen.item?.rarity||'—')}</span></div>`:'';
-   const hero=chosen?`<div class="gApprovedHero ${chosen.material?'gApprovedMaterialHero':'gApprovedEquipmentHero'}" style="${pos(405,177,700,325)}">${entryView(chosen,ctx,true)}</div>`:'';
+   const hero=chosen?`<div class="gApprovedHero ${chosen.material?'gApprovedMaterialHero':'gApprovedEquipmentHero'}" style="${pos(405,177,700,325)};${chosen.material?'':'--creation-halo:'+equipmentHalo(chosen.item).color+';'}">${entryView(chosen,ctx,true)}${chosen.material?'':`<span class="gApprovedItemHaloLabel">${esc(equipmentHalo(chosen.item).label)}</span>`}</div>`:'';
    const sheet=state.sheet&&chosen&&!chosen.material?`<section class="gApprovedSheet" aria-label="Ficha del objeto"><button class="gApprovedSheetClose" id="gApprovedSheetClose">×</button><h2>${esc(chosen.name)}</h2><p>${esc(chosen.item?.rarity||'')}</p><h3>Canales del objeto</h3>${(chosen.item?.channels||[]).map((c,i)=>{const metric=ctx.metricForChannel?.(chosen.item,c,i);return `<div><span>${esc(metric?.label||c[0])}</span><b>${esc(metric?.display??c[1])}</b></div>`}).join('')}<h3>Materiales utilizados</h3>${(chosen.item?.formula?.materials||[]).map(m=>`<div><span>${esc(m.material)}</span><b>${Number(m.qty)||0}×</b></div>`).join('')}</section>`:'';
    const body=familyButtons+slots+hero+info+
      (state.family==='Materiales'?'<div class="gApprovedMaterialRotationMask" aria-hidden="true"></div><div class="gApprovedMaterialFichaMask" aria-hidden="true"></div>':'')+
@@ -225,6 +243,10 @@
    return true;
  }
  function fabrications(ctx,nav){
+   if(window.GenesisFabricacionModular?.render && window.GenesisExperimentalFabricacionV004===true){
+     return window.GenesisFabricacionModular.render(ctx,nav,mount);
+   }
+
    const catalog=typeof ctx.getRecipeCatalog==='function'?(ctx.getRecipeCatalog()||[]):[];
    const recipes=catalog.filter(r=>r&&r.id&&r.formula);
    const ids=new Set(recipes.map(r=>String(r.id)));

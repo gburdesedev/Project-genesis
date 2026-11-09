@@ -1,0 +1,90 @@
+name: Genesis Fabricaciones V004 | Generate runtime artwork
+on:
+  push:
+    branches:
+      - experiment/v014030-fabricaciones-ora-v004-runtime-20261109
+    paths:
+      - 'scripts/build_fabricacion_ora_v004_runtime.py'
+      - '.github/workflows/fabricaciones-v004-build-assets.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build-sprites:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Pillow and create ORA raster modules from approved V07
+        run: |
+          python -m pip install pillow==11.3.0
+          python scripts/build_fabricacion_ora_v004_runtime.py
+      - name: Vendor V015 assets only into isolated experimental screen
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin experiment/mercenario-4t-runtime-ml06-20261109
+          root=assets/ui/fabricaciones_ora_v004
+          git show FETCH_HEAD:assets/ui/mercenary/4t/V015_REAL_SHIELD_ICON_RGBA.png > "$root/V015_REAL_SHIELD_ICON_RGBA.png"
+          git show FETCH_HEAD:assets/playcanvas/candidates/shield/v015/escudo_hierro_v015_PBR2K_WEBP_v022.glb > "$root/escudo_hierro_v015_PBR2K_WEBP_v022.glb"
+          test -s "$root/V015_REAL_SHIELD_ICON_RGBA.png"
+          test -s "$root/escudo_hierro_v015_PBR2K_WEBP_v022.glb"
+          python scripts/build_fabricacion_ora_v004_runtime.py
+          ls -lah "$root" | tail -18
+      - name: Validate ORA + actual V015 binary
+        run: |
+          python - <<'PY'
+          from PIL import Image
+          import zipfile, pathlib, struct
+          base=pathlib.Path('assets/ui/fabricaciones_ora_v004')
+          assert Image.open(base/'Fabricaciones_Base_Limpia_V004.png').size==(1672,941)
+          with zipfile.ZipFile(base/'Fabricaciones_Runtime_V004.ora') as z:
+            assert z.testzip() is None and z.read('mimetype')==b'image/openraster'
+          v015=(base/'escudo_hierro_v015_PBR2K_WEBP_v022.glb').read_bytes()
+          assert v015[:4]==b'glTF' and int.from_bytes(v015[8:12],'little')==len(v015)
+          print('PASS: real modular raster, ORA, shield GLB and icon')
+          PY
+      - name: Commit generated assets to same isolated branch
+        shell: bash
+        env:
+          BRANCH: experiment/v014030-fabricaciones-ora-v004-runtime-20261109
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/ui/fabricaciones_ora_v004/
+          if ! git diff --cached --quiet; then
+            git commit -m 'assets(fabricaciones V004): real V07 cropped modular ORA and V015, isolated'
+            # Another commit may have landed while Pillow generated sprites.
+            # Rebase safely; never force-push or discard the new GitHub head.
+            git fetch --no-tags origin "$BRANCH"
+            git rebase FETCH_HEAD
+            git push origin "HEAD:refs/heads/$BRANCH"
+          else
+            echo 'Generated assets already present'
+          fi
+
+      - name: Export exact rebuilt screen files for independent Chromium QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-fabricaciones-v004-ora-visual-source
+          retention-days: 7
+          path: |
+            assets/ui/approved/Fabricaciones_V07_APROBADA_1672x941.png
+            assets/ui/fabricaciones_ora_v004/
+            assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png
+            assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png
+            assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png
+            assets/playcanvas/approved/equipment/espada_v03_hierro_v175_v12b_cycles_hdri32.png
+            genesis_ui_approved.css
+            genesis_ui_approved.js
+            genesis_fabricacion_modular_v004.css
+            genesis_fabricacion_modular_v004.js
+            fabricaciones-v004-preview.html
+            tests/fabricaciones_v004_runtime_qa.cjs

@@ -1,0 +1,43 @@
+name: Genesis Fabricaciones V004 | Real UI screenshot QA
+on:
+  push:
+    branches:
+      - experiment/v014030-fabricaciones-ora-v004-runtime-20261109
+    paths:
+      - 'genesis_fabricacion_modular_v004.js'
+      - 'genesis_fabricacion_modular_v004.css'
+      - 'tests/fabricaciones_v004_runtime_qa.cjs'
+      - 'genesis_ui_approved.js'
+      - '.github/workflows/fabricaciones-v004-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-visuals:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check controller syntax and actual approved/candidate files
+        run: |
+          node --check genesis_fabricacion_modular_v004.js
+          node --check genesis_ui_approved.js
+          node --check tests/fabricaciones_v004_runtime_qa.cjs
+          test -s assets/ui/fabricaciones_ora_v004/Fabricaciones_Base_Limpia_V004.png
+          test -s assets/ui/fabricaciones_ora_v004/V015_REAL_SHIELD_ICON_RGBA.png
+      - name: Install Chromium harness
+        run: npm install --prefix /tmp/genesis-fabric-v004 playwright@1.56.1
+      - name: Test real art, stock, quests, switch sword to shield and generate screenshots
+        run: NODE_PATH=/tmp/genesis-fabric-v004/node_modules node tests/fabricaciones_v004_runtime_qa.cjs
+      - name: Upload actual 1600x900 screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-fabricaciones-v004-runtime-screens
+          path: previews/fabricaciones-v004-runtime/
+          retention-days: 14
