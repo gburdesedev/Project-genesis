@@ -21,6 +21,10 @@ jobs:
         run: |
           mkdir -p /tmp/genesis_ml06 assets/ui/mercenary/ml06
           curl -fSL --retry 3 --max-time 90 \
+            'https://raw.githubusercontent.com/gburdesedev/Project-genesis/c13f6f50c07cfba29a1d4d6593f0fb95e8b29af7/assets/playcanvas/approved/equipment/espada_v03_hierro_v175_v12b_cycles_hdri32.png' \
+            -o /tmp/genesis_ml06/espada_v12b_original_cycles.png
+          test -s /tmp/genesis_ml06/espada_v12b_original_cycles.png
+          curl -fSL --retry 3 --max-time 90 \
             'https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/4f1378c9f3e40250e87f730f0788577ee9e1f245/experiments/escudo-hierro-meshy-jajar-v015/previews/V015_01_frente_golpes_fuertes.jpg' \
             -o /tmp/genesis_ml06/escudo_original_v015.jpg
           test -s /tmp/genesis_ml06/escudo_original_v015.jpg
@@ -33,7 +37,7 @@ jobs:
           import json
           out=Path('assets/ui/mercenary/ml06')
           sources=[
-            ('espada_hierro','assets/playcanvas/approved/equipment/espada_v03_hierro_v175_v12b_cycles_hdri32.png'),
+            ('espada_hierro','/tmp/genesis_ml06/espada_v12b_original_cycles.png'),
             ('escudo_hierro','/tmp/genesis_ml06/escudo_original_v015.jpg'),
           ]
           records={}
