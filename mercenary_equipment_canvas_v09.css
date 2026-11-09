@@ -111,3 +111,43 @@
 .pv9Shell .pv9ComparisonIcon img{max-width:3.8cqw!important;max-height:3.7cqw!important}
 .pv9Shell .pv9ComparisonName{font-size:.82cqw!important;line-height:1.08!important;max-height:2.2em!important}
 .pv9Shell .pv9ComparisonRarity{font-size:.72cqw!important;max-height:1.1em!important}
+
+/* ML06: corrección visual EN EL JUEGO — solo elementos dinámicos.
+ * La lámina aprobada de fondo jamás se altera.
+ * El personaje se encuadra dentro del espacio libre del escenario.
+ * La previsualización Cycles real no desaparece mientras el GLB esté transparente
+ * en Chromium/software WebGL; el canvas 3D queda por encima cuando dibuja.
+ */
+.pv9IntegratedML06 .pv9Hero{
+ left:39.0%!important;top:25.0%!important;width:18.7%!important;height:49.5%!important;
+ overflow:visible!important
+}
+.pv9IntegratedML06 .pv9RealCyclesPoster{
+ position:absolute;inset:0;width:100%;height:100%;
+ object-fit:contain!important;object-position:center bottom!important;
+ opacity:1!important;z-index:2!important;filter:drop-shadow(0 .2cqw .5cqw #000a)
+}
+.pv9IntegratedML06 .pv9Hero .pv9Viewer{
+ position:absolute!important;inset:0;width:100%;height:100%;
+ z-index:3!important;background:transparent!important;opacity:0!important
+}
+.pv9IntegratedML06 .pv9Hero.pv9ModelReady .pv9Viewer{opacity:1!important}
+.pv9IntegratedML06 .pv9Hero.pv9ModelReady .pv9RealCyclesPoster{opacity:1!important}
+.pv9IntegratedML06 .pv9Grid .mcInventorySlot{
+ position:relative;overflow:hidden;display:grid;place-items:center
+}
+.pv9IntegratedML06 .pv9Grid .mcInventorySlot.hasItem img{
+ display:block!important;width:91%!important;height:91%!important;
+ max-width:91%!important;max-height:91%!important;object-fit:contain!important;
+ transform:scale(1.25);transform-origin:center center;
+ filter:drop-shadow(0 .14cqw .2cqw #000)
+}
+.pv9IntegratedML06 .pv9Slot.mcEquipSlot.isActive img{
+ width:83%!important;height:83%!important;max-width:83%!important;
+ max-height:83%!important;object-fit:contain!important;transform:scale(1.12)
+}
+.pv9IntegratedML06 .pv9Grid .mcInventorySlot.hasItem.selected{
+ outline:2px solid #ffcf70!important;outline-offset:-2px;
+ box-shadow:inset 0 0 .7cqw #ffb33170!important
+}
+.pv9IntegratedML06 .pv9ComparisonIcon img{width:auto!important;height:100%!important;object-fit:contain!important}
