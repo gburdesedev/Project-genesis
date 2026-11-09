@@ -43,6 +43,7 @@ const server=http.createServer((req,res)=>{
    state.stage='menu';
    state.lab=await page.evaluate(()=>window.__GENESIS_MERCENARY_LAB);
    assert.equal(state.lab.items,4,'exactly four items generated from NGE');
+   assert.equal(state.lab.equipped,true,'ML06 must begin with actual V049 sword and shield attached to 3D mercenary');
    assert.equal(await page.locator('.mercConcept .pv9Slot').count(),10,'V09 must keep exactly ten original gear slots');
    assert.equal(await page.locator('.mercConcept .pv9Viewer').count(),1,'real V049 GLB viewer must exist');
    assert.match(await page.locator('.pv9Viewer').getAttribute('src'),/V049_SWORD_V12B_SHIELD_V015_WEB\.glb/);
@@ -52,7 +53,10 @@ const server=http.createServer((req,res)=>{
    assert.equal(await page.locator('.mercConcept .mcInventorySlot.hasItem').count(),2,'only two created items in current family');
    await page.locator('.pv9Viewer').evaluate(async(el)=>{try{await Promise.race([el.updateComplete||new Promise(()=>{}),new Promise(r=>setTimeout(r,25000))])}catch(_){}});
    state.hero=await page.locator('.pv9Viewer').evaluate(el=>({loaded:el.loaded,visible:el.modelIsVisible,src:el.getAttribute('src')}));
-   await page.screenshot({path:path.join(OUT,'01-menu-espadas-v09-v049.png'),fullPage:true,timeout:25000});
+   // Con GLB de 27 MB, SwiftShader puede agotar el tiempo de captura aunque el DOM funcione.
+   // Captura de diagnóstico opcional: no confundir fallo de screenshot con fallo jugable.
+   try{await page.screenshot({path:path.join(OUT,'01-menu-espadas-v09-v049.png'),fullPage:false,animations:'disabled',timeout:12000})}
+   catch(e){state.warnings.push('Captura 01 no disponible por bajo FPS: '+String(e.message).slice(0,150))}
    await page.locator('[data-action="inventory"]').click();
    await page.locator('.genInvCanonical').waitFor({timeout:15000});
    assert.match(await page.locator('.genInvCanonical').evaluate(el=>getComputedStyle(el).backgroundImage),/GENESIS_INVENTARIO_V05_CABECERA_PREPARACION/);
@@ -61,19 +65,19 @@ const server=http.createServer((req,res)=>{
      const geom=(selector)=>{const el=document.querySelector(selector);if(!el)return null;const r=el.getBoundingClientRect(),c=getComputedStyle(el);return {x:Math.round(r.x),y:Math.round(r.y),w:Math.round(r.width),h:Math.round(r.height),display:c.display,position:c.position,font:c.fontSize};};
      return {background:getComputedStyle(document.querySelector('.genInvCanonical')).backgroundImage,items:[...document.querySelectorAll('.genInvSlot:not(:disabled)')].map(e=>e.getAttribute('aria-label')),geometry:Object.fromEntries(['.genInvCanonical','.genInvMain','.genInvInfo','.genInvInfoLine','.genInvInfoLine>b','.genInvChannels','.genInvNgeText','.genInvViewer','.genInvViewerTitle','.genInvFamilies'].map(s=>[s,geom(s)]))};
    });
-   await page.screenshot({path:path.join(OUT,'02-inventario-v05-aprobado.png'),fullPage:true,timeout:25000});
+   try{await page.screenshot({path:path.join(OUT,'02-inventario-v05-aprobado.png'),fullPage:false,animations:'disabled',timeout:12000})}catch(e){state.warnings.push('Captura 02 no disponible por bajo FPS: '+String(e.message).slice(0,130))}
    await page.locator('[data-nav="Preparacion"]').click();
    await page.locator('.pv9Board').waitFor({timeout:10000});
    await page.locator('[data-family="second"]').click();
    assert.equal(await page.locator('.mercConcept .mcInventorySlot').count(),20,'V09 must keep 20 original cells');
    assert.equal(await page.locator('.mercConcept .mcInventorySlot.hasItem').count(),2,'only two created items in current family');
-   await page.screenshot({path:path.join(OUT,'03-menu-escudos-v09.png'),fullPage:true,timeout:25000});
+   try{await page.screenshot({path:path.join(OUT,'03-menu-escudos-v09.png'),fullPage:false,animations:'disabled',timeout:12000})}catch(e){state.warnings.push('Captura 03 no disponible por bajo FPS: '+String(e.message).slice(0,130))}
    await page.locator('[data-action="equip"]').click();
    await page.waitForFunction(()=>window.__GENESIS_MERCENARY_LAB?.status==='equipped',null,{timeout:125000}).catch(()=>null);
    state.lab=await page.evaluate(()=>window.__GENESIS_MERCENARY_LAB);
    if(state.lab.status!=='equipped'||state.lab.approved3d!==true)throw new Error('El equipamiento V049 V12B/V015 falló: '+JSON.stringify(state.lab));
    state.stage='equipped';
-   await page.screenshot({path:path.join(OUT,'04-mercenario-equipado-v049-en-mundo.png'),fullPage:true,timeout:25000});
+   try{await page.screenshot({path:path.join(OUT,'04-mercenario-equipado-v049-en-mundo.png'),fullPage:false,animations:'disabled',timeout:12000})}catch(e){state.warnings.push('Captura 04 no disponible por bajo FPS: '+String(e.message).slice(0,130))}
    await page.keyboard.press('e');
    await page.waitForTimeout(900);
    state.dossierVisible=await page.locator('.mercSheetBody').count()>0;
