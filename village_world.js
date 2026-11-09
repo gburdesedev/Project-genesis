@@ -208,7 +208,17 @@ export async function mountVillage(app,{shell,roof,door,onResourceLoaded=()=>{},
  // Do not enable movement until each baseline LOD2 has loaded or explicitly failed.
  // Failed variants have no collision; the scene never contains invisible trunks.
  onPhase('arboles');
- await trees.initialReady;
+ // V016.001: el LOD2 vegetal es progresivo y no bloquea la fabricación.
+ // Si un CDN deja un request pendiente, los árboles aún no residentes
+ // siguen sin colisión y pueden integrarse cuando llegue su GLB real.
+ const treeStartup=await Promise.race([
+  trees.initialReady.then(result=>({timedOut:false,result})),
+  new Promise(resolve=>setTimeout(()=>resolve({timedOut:true,result:null}),22000))
+ ]);
+ globalThis.__genesisTreeStartup=treeStartup;
+ if(treeStartup.timedOut){
+  console.warn('[Genesis V016.001] Árboles iniciales todavía pendientes; aldea habilitada sin colisiones invisibles.',trees.status());
+ }
  onPhase('puertas');
  await Promise.all(arcanePortals.map(portal=>portal.initialReady));
  return Object.freeze({root,plan,trees,arcanePortals,setProfession(profession){for(const p of plan.workshops)proxies.get(p.profession).enabled=!p.existing||p.profession!==profession},blocked(x,z,r=.33){return plan.blocked(x,z,r)||trees.blocked(x,z,r)||fixedObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+r)}});
