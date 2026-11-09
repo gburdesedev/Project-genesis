@@ -45,9 +45,9 @@ const server=http.createServer((req,res)=>{
    assert.equal(state.lab.items,4,'exactly four items generated from NGE');
    assert.equal(await page.locator('.mercConcept .pv9Slot').count(),10,'V09 must keep exactly ten original gear slots');
    assert.equal(await page.locator('.mercConcept .pv9Viewer').count(),1,'real V049 GLB viewer must exist');
-   assert.match(await page.locator('.pv9Viewer').getAttribute('src'),/V050_4T_SHIELD_FIT_V12B_V015\.glb/);
+   assert.match(await page.locator('.pv9Viewer').getAttribute('data-asset-src'),/V050_4T_SHIELD_FIT_V12B_V015\.glb/);
    assert.match(await page.locator('.pg4tShell').evaluate(el=>getComputedStyle(el).backgroundImage),/Genesis_Mercenario_4T_Estado_Vacio_APROBADO/);
-   state.approvedSources=await page.evaluate(()=>({runtime:window.GenesisMercenaryConcept?.version,otherInventory:window.GenesisInventory16?.version,hero:document.querySelector('.pv9Viewer')?.getAttribute('src')}));
+   state.approvedSources=await page.evaluate(()=>({runtime:window.GenesisMercenaryConcept?.version,otherInventory:window.GenesisInventory16?.version,hero:document.querySelector('.pv9Viewer')?.getAttribute('data-asset-src')}));
    assert.equal(state.approvedSources.runtime,'MERCENARY_APPROVED_4T_ML06_LIVE_EXPERIMENT');
    const approvedPng=path.join(ROOT,'assets/ui/mercenary/4t/Genesis_Mercenario_4T_Estado_Vacio_APROBADO.png');
    assert.equal(require('node:crypto').createHash('sha256').update(fs.readFileSync(approvedPng)).digest('hex'),'3e4236ca819ab449dce5ee6677b43a2684bd51f650d6cdbcd46a4868d6ebdbca','Approved 4T plate must remain untouched');
@@ -58,7 +58,7 @@ const server=http.createServer((req,res)=>{
    assert.equal(await page.locator('.mercConcept .mcInventorySlot').count(),20,'V09 must keep 20 original cells');
    assert.equal(await page.locator('.mercConcept .mcInventorySlot.hasItem').count(),2,'two authentic NGE creations in the current family');
    await page.locator('.pv9Viewer').evaluate(async(el)=>{try{await Promise.race([el.updateComplete||new Promise(()=>{}),new Promise(r=>setTimeout(r,25000))])}catch(_){}});
-   state.hero=await page.locator('.pv9Viewer').evaluate(el=>({loaded:el.loaded,visible:el.modelIsVisible,src:el.getAttribute('src')}));
+   state.hero=await page.locator('.pv9Viewer').evaluate(el=>({loaded:el.loaded,visible:el.modelIsVisible,src:el.getAttribute('data-asset-src')}));
    await page.screenshot({path:path.join(OUT,'01-4t-espadas-v050.png'),fullPage:true,timeout:25000});
    await page.locator('[data-action="inventory"]').click();
    await page.locator('.genInvCanonical').waitFor({timeout:15000});
