@@ -1,0 +1,24 @@
+name: Genesis Canvas channel VFX original vs V014038 read-only audit
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [release-candidate/v014038-public-qa-20261108]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  read-only-source-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit original Canvas and V014038 without changing any source
+        run: |
+          python3 scripts/qa/audit_canvas_channels_v014038.py
+          python3 scripts/qa/audit_canvas_mercenary_attach_v014038.py
+      - name: Preserve audit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: Genesis-Canvas-ReadOnly-Audit-Original-V014038
+          path: /tmp/canvas_channel_audit_v014038.json
+          retention-days: 7
