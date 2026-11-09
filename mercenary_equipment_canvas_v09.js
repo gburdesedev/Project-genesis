@@ -32,6 +32,9 @@
     const body = opts.body === 'ranger' ? 'rangerMale086/src/male_ranger.glb' : 'peasantMale086/src/male_peasant.glb';
     const defaultBodyUrl = './assets/vendor/genesis/externals/' + body;
     const model = opts.modelUrl || global.GenesisPreflight?.modelUrl(defaultBodyUrl) || defaultBodyUrl;
+    // ML07: keep ONE live model-viewer instance across sword/shield, candidate and
+    // comparison rerenders; don't restart a 27 MB GPU scene on every click.
+    let persistentViewer = null;
     function getIcon(item) {
       if (!item || typeof opts.itemIcon !== 'function') return '';
       const approved3DThumbs={espada_hierro:'assets/ui/mercenary/ml06/espada_hierro_original_3d_render.png',escudo_hierro:'assets/ui/mercenary/ml06/escudo_hierro_original_3d_render.png'};
@@ -90,11 +93,23 @@
         <button class="pv9Target pv9Inspect" data-action="inspect" aria-label="Inspeccionar" ${candidate?'':'disabled'}></button>
         <button class="pv9Target pv9Equip" data-action="equip" aria-label="Equipar al mercenario" ${canEquip?'':'disabled'}></button>${overlay}
       </div></div>`;
+      // Move to another *connected* parent before replacing the modal DOM.
+      // Moving between connected nodes preserves model-viewer's loading/WebGL state.
+      const savedViewer=persistentViewer?.isConnected ? persistentViewer : null;
+      if(savedViewer)document.body.appendChild(savedViewer);
       opts.modal(html,'mercenaryModal mercConceptModal');
-      const board = document.querySelector('.pv9Board'); if (!board) return;
-      const viewer=board.querySelector('.pv9Viewer'),hero=board.querySelector('.pv9Hero');
+      const board = document.querySelector('.pv9Board');
+      if (!board) { savedViewer?.remove();return; }
+      const hero=board.querySelector('.pv9Hero');
+      const placeholder=board.querySelector('.pv9Viewer');
+      if(savedViewer && placeholder){
+        placeholder.replaceWith(savedViewer);
+      }
+      const viewer=savedViewer||placeholder;
+      persistentViewer=viewer;
+      if(hero)hero.dataset.viewerPreserved=savedViewer?'true':'false';
       if(opts.modelUrl&&viewer&&hero){
-        viewer.addEventListener('load',()=>{if(viewer.loaded)hero.classList.add('pv9ModelReady')},{once:true});
+        viewer.addEventListener('load',()=>{if(viewer.loaded)hero.classList.add('pv9ModelReady')});
         viewer.addEventListener('error',()=>hero.classList.remove('pv9ModelReady'));
         if(viewer.loaded)hero.classList.add('pv9ModelReady');
       }
@@ -127,5 +142,5 @@
     }
     render(); return {refresh:render};
   }
-  global.GenesisMercenaryConcept={open, version:'MERCENARY_V09_LIVE_ML06_EQUIPPED'};
+  global.GenesisMercenaryConcept={open, version:'MERCENARY_V09_LIVE_ML07_STABLE_3D_VIEWER'};
 })(window);
