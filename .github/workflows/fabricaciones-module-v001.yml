@@ -1,0 +1,58 @@
+name: Genesis | Fabricaciones module V001 isolated visual QA
+on:
+  push:
+    branches: [experiment/fabricaciones-modular-v001-20261109]
+    paths:
+      - 'modules/fabricaciones_v001.*'
+      - 'genesis_ui_approved.js'
+      - 'scripts/ui/build_clean_fabricaciones.py'
+      - 'tests/fabricaciones_module_v001.cjs'
+      - '.github/workflows/fabricaciones-module-v001.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  isolated-crafting:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: experiment/fabricaciones-modular-v001-20261109
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Extract clean approved V07 16:9 UI into independent immutable-source sprites
+        run: |
+          python3 -m pip install Pillow --break-system-packages -q
+          python3 scripts/ui/build_clean_fabricaciones.py
+      - name: Check source syntax and source artwork SHA
+        run: |
+          node --check modules/fabricaciones_v001.js
+          node --check genesis_ui_approved.js
+          node --check tests/fabricaciones_module_v001.cjs
+          node tests/v014028_approved_sword_result.cjs
+          git diff --exit-code -- assets/ui/approved/Fabricaciones_V07_APROBADA_1672x941.png
+      - name: Install Chromium harness
+        run: npm install --prefix /tmp/genesis-fabricaciones-mod playwright@1.56.1
+      - name: Render two real Chromium screenshots, validate independent UI data
+        run: NODE_PATH=/tmp/genesis-fabricaciones-mod/node_modules node tests/fabricaciones_module_v001.cjs
+      - name: Persist only derived UI crops inside experimental branch
+        run: |
+          git config user.name 'genesis-fabricaciones-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/ui/fabricaciones/module_v001/
+          if ! git diff --staged --quiet; then
+            git commit -m 'assets(crafting): derived V07 clean background and authentic crop sprites [skip ci]'
+            git push origin HEAD:experiment/fabricaciones-modular-v001-20261109
+          fi
+      - name: Upload actual captured UI evidence and source audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-fabricaciones-module-v001-qa
+          path: |
+            previews/fabricaciones-module-v001/
+            assets/ui/fabricaciones/module_v001/asset_report.json
+          retention-days: 14
