@@ -7,6 +7,7 @@ for(const p of [
  'assets/ui/fabricaciones_ora_v004/Fabricaciones_Base_Limpia_V004.png',
  'assets/ui/fabricaciones_ora_v004/V015_REAL_SHIELD_ICON_RGBA.png',
  'assets/ui/fabricaciones_ora_v004/V015_REAL_SHIELD_CROPPED.png',
+ 'assets/ui/fabricaciones_ora_v004/01_iconos_material_hierro_v175_RGBA.png',
  'assets/ui/fabricaciones_ora_v004/V12B_CYCLES_SOURCE_ALPHA_EXPERIMENTAL.png',
  'assets/ui/fabricaciones_ora_v004/escudo_hierro_v015_PBR2K_WEBP_v022.glb',
  'assets/playcanvas/approved/equipment/espada_v03_hierro_v175_v12b_cycles_hdri32.png',
@@ -54,6 +55,10 @@ const issues=[];
   const recipe=()=>board.getAttribute('data-recipe');
   assert.equal(await recipe(),'espada_hierro');
   assert.equal(await page.locator('.gFabRecipe.is-selected').count(),1);
+  assert.equal(await page.locator('.gFabV175Category').count(),0,'V175 must be in ORA art, not CSS overlays');
+  assert.equal(await page.locator('.gFabRecipeSymbol').count(),2,'Keep recipe symbols independent of material icon');
+  assert.equal(await page.locator('.gApprovedBoard').evaluate(e=>getComputedStyle(e).backgroundImage.includes('Fabricaciones_Base_Limpia_V004.png')),true);
+
   assert.equal(await page.locator('.gFabMaterials[data-count="3"] .gFabMat').count(),3);
   assert.equal(await page.locator('.gFabMatAsset img[src*="iron_v175_transparent"]').count(),1);
   assert.equal(await page.locator('.gFabMatAsset img[src*="carbon_vegetal_v011_poster"]').count(),1);
