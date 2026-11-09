@@ -45,7 +45,7 @@
  box-shadow:inset 0 0 14px #a46d2a44}
 .grChannelFallback{position:absolute;inset:8% 10% 8% 0;border:1px solid var(--grColor);
  background:linear-gradient(95deg,#080707, color-mix(in srgb,var(--grColor) 32%,#100d0d) 55%,#0d080a);}
-.grOra{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:0;pointer-events:none;}
+.grOra{position:absolute;inset:0 auto 0 0;width:88%;height:100%;object-fit:contain;object-position:left center;opacity:0;pointer-events:none;}
 .grHasOra .grOra{opacity:1}.grHasOra .grChannelFallback{display:none}
 .grChannelLabel{position:relative;margin-left:21%;font-size:clamp(14px,2.5vw,35px);
  font-variant:small-caps;text-shadow:0 2px 3px #000;z-index:1;pointer-events:none}
