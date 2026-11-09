@@ -7,7 +7,7 @@ const asset=fs.readFileSync(path.join(root,'assets/playcanvas/approved/equipment
 const art='data:image/png;base64,'+asset.toString('base64');
 assert(asset.length>1500000);
 assert(html.includes('renderGenesisHistoricCreationResult(item)}<div class="actions"'),'Game must actually invoke historic result');
-assert(html.includes('Project Genesis v0.14.029'),'Build version must be incremented');
+assert(html.includes('Project Genesis v0.14.030'),'Build version must be incremented');
 const start=html.indexOf('function renderGenesisHistoricCreationResult(item){');
 const end=html.indexOf('function renderItemCard(item,second=false){',start);
 assert(start>0&&end>start,'Historic renderer missing');
@@ -54,6 +54,6 @@ const out=path.join(root,'previews/v014029-historic-result');fs.mkdirSync(out,{r
    await page.screenshot({path:path.join(out,filename),fullPage:true,animations:'disabled'});
    console.log('HISTORIC_RESULT_OK',title,JSON.stringify(measures));
   }
-  fs.writeFileSync(path.join(out,'report.json'),JSON.stringify({result:'PASS',build:'V014.029',source:'V03 V175 V12B Cycles HDRI EXR 32bit render',isLiveModel:false,channelsDynamic:true},null,2));
+  fs.writeFileSync(path.join(out,'report.json'),JSON.stringify({result:'PASS',build:'V014.030',source:'V03 V175 V12B Cycles HDRI EXR 32bit render',isLiveModel:false,channelsDynamic:true},null,2));
  }finally{await browser.close()}
 })().catch(e=>{console.error(e.stack||e);process.exitCode=1;});
