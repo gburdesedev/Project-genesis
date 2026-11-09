@@ -84,6 +84,8 @@ const issues=[];
   assert.equal(await page.locator('.gFabShieldPoster[src*="V015_REAL_SHIELD_CROPPED"]').count(),1);
   assert.equal(await page.locator('.gFabTitle h2').count(),1,'No duplicate right-side title for shield');
   assert.equal((await page.locator('.gFabTitle h2').textContent()).trim(),'Escudo de hierro');
+  const headingFits=await page.locator('.gFabTitle h2').evaluate(el=>el.scrollWidth<=el.clientWidth+1);
+  assert.equal(headingFits,true,'Right-panel shield title must fit fully without ellipsis');
 
   assert.equal(await page.locator('.gFabSwordPoster').count(),0,'Never leave old sword on shield screen');
   assert.equal(await page.locator('.gFabMaterials[data-count="3"] .gFabMat').count(),3);
