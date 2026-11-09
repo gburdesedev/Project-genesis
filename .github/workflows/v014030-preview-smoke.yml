@@ -1,0 +1,72 @@
+name: Genesis V014.030 | Independent live browser preview
+on:
+  push:
+    branches: [experiment/v014030-created-result-live-asset-gate-20261109]
+    paths:
+      - '.github/workflows/v014030-preview-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Resolve public branch preview without overwriting GitHub Pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://raw.githack.com/gburdesedev/Project-genesis/experiment/v014030-created-result-live-asset-gate-20261109/index.html'
+          echo "Testing: $URL"
+          curl -IL --retry 2 --connect-timeout 20 --max-time 70 "$URL"
+          curl -fsSL --retry 2 --connect-timeout 20 --max-time 70 "$URL" -o /tmp/genesis-v014030.html
+          grep -q 'Project Genesis v0.14.030' /tmp/genesis-v014030.html
+          echo 'PASS: independent V014.030 HTML served over HTTPS'
+      - name: Install browser harness
+        run: npm install --prefix /tmp/genesis-v014030-browser playwright@1.56.1
+      - name: Capture actual public preview from Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p previews/v014030-live-preview
+          NODE_PATH=/tmp/genesis-v014030-browser/node_modules node <<'NODE'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+            try{
+              const context=await browser.newContext({viewport:{width:1600,height:900},deviceScaleFactor:1});
+              await context.addCookies([{name:'__Http-phish',value:'1',url:'https://raw.githack.com',secure:true,httpOnly:true,path:'/'}]);
+              const page=await context.newPage();
+              const errors=[];page.on('pageerror',e=>errors.push(e.message));
+              const url='https://raw.githack.com/gburdesedev/Project-genesis/experiment/v014030-created-result-live-asset-gate-20261109/index.html';
+              const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:90000});
+              await page.waitForTimeout(9000);
+              const state=await page.evaluate(()=>({
+                title:document.title,url:location.href,
+                brand:document.querySelector('#brand')?.textContent,
+                loading:document.querySelector('#loading')?.textContent?.slice(0,400),
+                intro:document.querySelector('#intro')?.textContent?.slice(0,300),
+                app:!!document.querySelector('#genesisApp'),
+                viewer:!!window.GenesisRealCraftViewer,
+                errors:(window.__GENESIS_RUNTIME_ERRORS||[]).slice(0,6)
+              }));
+              state.httpStatus=response?.status()||0;state.errorsJs=errors.slice(0,6);
+              require('fs').writeFileSync('previews/v014030-live-preview/report.json',JSON.stringify(state,null,2));
+              await page.screenshot({path:'previews/v014030-live-preview/01-preview-real-navegador.png',timeout:30000,animations:'disabled'});
+              if(!state.title?.includes('v0.14.030')||!state.app)throw Error('V014.030 did not start loading in a real browser: '+JSON.stringify(state));
+              console.log('LIVE_PREVIEW_OK',JSON.stringify(state));
+            } finally {await browser.close();}
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v014030-live-preview-browser-proof
+          path: previews/v014030-live-preview/
+          retention-days: 14
