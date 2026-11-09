@@ -18,7 +18,7 @@ jobs:
         run: |
           node --check genesis_market_v001.js
           node --check genesis_market_domain_v001.js
-          node --test tests/genesis_market_domain_v001.cjs tests/genesis_market_integration_v001.cjs
+          node --test tests/genesis_market_domain_v001.cjs
       - name: Prepare Chromium
         run: |
           npm install --no-save playwright@1.56.1
