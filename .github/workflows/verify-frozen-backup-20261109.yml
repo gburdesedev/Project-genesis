@@ -1,0 +1,125 @@
+name: "Genesis | Verify frozen main backup 2026-11-09"
+on:
+  push:
+    branches:
+      - ci/verify-backup-main-20261109
+    paths:
+      - .github/workflows/verify-frozen-backup-20261109.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frozen-backup-real-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - name: Checkout frozen backup as game (never checkout experimental versions)
+        uses: actions/checkout@v4
+        with:
+          ref: snapshot/backup-main-20261109
+          path: game
+          persist-credentials: false
+      - name: Verify exact game commit and public version without modifying it
+        working-directory: game
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          expected="010be3f6206c0e340a4fe5c5cc42f7d088c62b81"
+          echo "FROZEN_BACKUP_COMMIT=$actual"
+          test "$actual" = "$expected"
+          grep -q 'Project Genesis v0.14.028' index.html
+          sha256sum index.html
+          node --check preparacion_control.js
+          node --check genesis_ui_approved.js
+          node --check tests/approved_ui_four_screens.cjs
+      - name: Install browser testing library
+        run: npm install --prefix /tmp/genesis-backup-qa playwright@1.56.1
+      - name: Test approved interface and capture screenshots
+        working-directory: game
+        env:
+          NODE_PATH: /tmp/genesis-backup-qa/node_modules
+        run: node tests/approved_ui_four_screens.cjs
+      - name: Test real game boot, Herrero selection, world loading and captures
+        if: always()
+        working-directory: game
+        env:
+          NODE_PATH: /tmp/genesis-backup-qa/node_modules
+        run: |
+          node <<'NODE'
+          'use strict';
+          const fs=require('fs'),path=require('path'),http=require('http');
+          const {chromium}=require('playwright');
+          const root=process.cwd(),out=path.join(root,'previews','snapshot-backup-audit');
+          fs.mkdirSync(out,{recursive:true});
+          const report={commit:'010be3f6206c0e340a4fe5c5cc42f7d088c62b81',source:'snapshot/backup-main-20261109',started:new Date().toISOString(),status:'STARTING',stages:[],pageErrors:[],networkErrors:[],screenshots:[]};
+          const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.glb':'model/gltf-binary','.wasm':'application/wasm','.svg':'image/svg+xml'};
+          const server=http.createServer((req,res)=>{
+            try{
+              const p=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
+              const file=path.resolve(root,'.'+p);
+              if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||!fs.statSync(file).isFile()){res.writeHead(404);return res.end('Not found');}
+              res.writeHead(200,{'Content-Type':mime[path.extname(file)]||'application/octet-stream','Cache-Control':'no-store'});
+              fs.createReadStream(file).pipe(res);
+            }catch(e){res.writeHead(500);res.end(String(e));}
+          });
+          async function screenshot(page,name){
+            try{await page.screenshot({path:path.join(out,name),timeout:20000,animations:'disabled'});report.screenshots.push({name,ok:true});}
+            catch(e){report.screenshots.push({name,ok:false,error:String(e).slice(0,300)});}
+          }
+          async function state(page,name){
+            const value=await page.evaluate(()=>{
+              const el=id=>document.getElementById(id);
+              return {title:document.title,introDisplay:el('prototypeIntro')?.style.display,loadState:el('loadState')?.textContent?.trim(),loadCount:el('loadCount')?.textContent?.trim(),loadDetail:el('loadDetail')?.textContent?.trim()?.slice(0,300),failed:!!document.querySelector('.loadingCard.failed'),canvasCount:document.querySelectorAll('canvas').length,boot:window.__genesisBoot||null,routeErrors:window.__genesisRouteAssetErrors||[]};
+            });
+            report.stages.push({name,...value});console.log('SNAPSHOT_BACKUP_STAGE',JSON.stringify({name,...value}).slice(0,4000));return value;
+          }
+          (async()=>{
+            await new Promise(done=>server.listen(0,'127.0.0.1',done));
+            const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
+            try{
+              const page=await browser.newPage({viewport:{width:1366,height:768},serviceWorkers:'block'});
+              page.on('pageerror',e=>{if(report.pageErrors.length<40)report.pageErrors.push(String(e).slice(0,700));});
+              page.on('response',r=>{if(r.status()>=400&&report.networkErrors.length<80)report.networkErrors.push({status:r.status(),url:r.url().slice(0,200)});});
+              page.on('requestfailed',r=>{if(report.networkErrors.length<80)report.networkErrors.push({status:'failed',url:r.url().slice(0,200),reason:r.failure()?.errorText});});
+              await page.goto('http://127.0.0.1:'+server.address().port+'/index.html',{waitUntil:'domcontentloaded',timeout:90000});
+              await page.waitForFunction(()=>document.querySelector('[data-profession="Herrero"]')?.getBoundingClientRect().width>0||!!document.querySelector('.loadingCard.failed'),null,{timeout:150000});
+              const intro=await state(page,'profession-selection');
+              await screenshot(page,'01-profession-selection.png');
+              if(intro.failed)throw Error('Loading failed before profession selection');
+              await page.locator('[data-profession="Herrero"]').click({timeout:30000});
+              await page.waitForFunction(()=>document.getElementById('prototypeIntro')?.style.display==='none'||!!document.querySelector('.loadingCard.failed'),null,{timeout:300000});
+              const entered=await state(page,'after-Herrero');
+              await screenshot(page,'02-after-Herrero.png');
+              if(entered.failed||entered.introDisplay!=='none')throw Error('Herrero did not enter game');
+              try{await page.waitForFunction(()=>{
+                if(document.querySelector('.loadingCard.failed'))return true;
+                const text=document.getElementById('loadCount')?.textContent||'';
+                const m=text.match(/(\d+)\s+de\s+(\d+)/i);
+                return !!m&&Number(m[1])===Number(m[2]);
+              },null,{timeout:180000,polling:2000});}catch(e){console.log('OPTIONAL_PROGRESS_WAIT_TIMEOUT',String(e).slice(0,300));}
+              const world=await state(page,'world-after-loading');
+              await screenshot(page,'03-world-after-loading.png');
+              if(world.failed)throw Error('World failed during asset loading');
+              if(world.introDisplay!=='none'||!world.canvasCount)throw Error('Game canvas or gameplay scene absent');
+              const m=(world.loadCount||'').match(/(\d+)\s+de\s+(\d+)/i);
+              if(m&&Number(m[1])!==Number(m[2]))throw Error('Incomplete assets '+world.loadCount);
+              if((world.routeErrors||[]).length)throw Error('Route asset errors: '+JSON.stringify(world.routeErrors).slice(0,900));
+              if(report.pageErrors.length)throw Error('Browser JS errors: '+JSON.stringify(report.pageErrors.slice(0,5)));
+              report.status='PASS_BOOT_HERRERO_WORLD';
+              console.log('PASS_BACKUP_BOOT_HERRERO_WORLD',world.loadCount);
+            }finally{await browser.close();}
+          })().catch(e=>{report.status='FAIL';report.error=String(e.stack||e).slice(0,2500);console.error('BACKUP_GAME_FAIL',report.error);process.exitCode=1;}).finally(()=>{report.finished=new Date().toISOString();fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2));server.close();console.log('BACKUP_GAME_QA_RESULT',report.status);});
+          NODE
+      - name: Upload screenshots and diagnosis (also on failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-frozen-backup-20261109-qa
+          path: |
+            game/previews/snapshot-backup-audit/
+            game/previews/approved-ui-four-screens/
+          retention-days: 14
