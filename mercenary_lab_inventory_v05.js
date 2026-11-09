@@ -62,9 +62,9 @@
   function classify(item) {
     // The object owns its actual family. Fallback is the existing recipe name,
     // never a fixed per-profession menu list.
-    const raw=String(item.family || item.recipeFamily || item.recipe || item.category || 'Creaciones').trim();
-    if (/^espada(s)?\b/i.test(raw)) return 'Espadas';
-    if (/^escudo(s)?\b/i.test(raw)) return 'Escudos';
+    const raw=String(item.recipe || item.recipeFamily || item.family || item.category || 'Creaciones').trim();
+    if (/^espada(s)?(?:_|\b)/i.test(raw)) return 'Espadas';
+    if (/^escudo(s)?(?:_|\b)/i.test(raw)) return 'Escudos';
     return raw;
   }
   function channelSummary(item) {
