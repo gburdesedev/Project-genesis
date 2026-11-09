@@ -2,7 +2,7 @@
 const {chromium}=require('playwright'),fs=require('fs'),path=require('path'),http=require('http'),assert=require('assert/strict');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'previews/v014029-result-real-vfx');fs.mkdirSync(out,{recursive:true});
 const shell='<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#09090d;height:100vh}body{display:grid;place-items:center}#modal{width:1600px}</style><link rel="stylesheet" href="/genesis_result_dynamic_v001.css"></head><body><div id="modal" class="modal"></div><script src="/genesis_result_dynamic_v001.js"></script></body></html>';
-const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png'};
+const types={'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.png':'image/png'};
 const srv=http.createServer((req,res)=>{const target=decodeURIComponent(new URL(req.url,'http://localhost').pathname);if(target==='/'){res.writeHead(200,{'Content-Type':'text/html'});return res.end(shell)}
  const f=path.resolve(root,'.'+target);if(!f.startsWith(root+path.sep)||!fs.existsSync(f)||!fs.statSync(f).isFile()){res.writeHead(404);return res.end()}
  res.writeHead(200,{'Content-Type':types[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(res);
