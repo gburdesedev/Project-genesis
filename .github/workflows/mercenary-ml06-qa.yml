@@ -1,7 +1,7 @@
 name: ML06 REAL GAME QA approved Mercenary 4T V050
 on:
   push:
-    branches: [experiment/mercenario-4t-runtime-ml06-20261109]
+    branches: [experiment/mercenario-4t-channel-fx-fix-20261109]
     paths:
       - 'index.html'
       - 'mercenary_4t_runtime_ml06.js'
