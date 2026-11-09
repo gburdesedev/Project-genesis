@@ -7,8 +7,8 @@
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pos=(x,y,w,h)=>'left:'+(100*x/1672).toFixed(4)+'%;top:'+(100*y/941).toFixed(4)+'%;width:'+(100*w/1672).toFixed(4)+'%;height:'+(100*h/941).toFixed(4)+'%';
 const asset={
- sword:'assets/playcanvas/approved/equipment/espada_v03_hierro_v175_v12b_cycles_hdri32.png',
- shield:'assets/ui/fabricaciones_ora_v004/V015_REAL_SHIELD_ICON_RGBA.png',
+ sword:'assets/ui/fabricaciones_ora_v004/V12B_CYCLES_SOURCE_ALPHA_EXPERIMENTAL.png',
+ shield:'assets/ui/fabricaciones_ora_v004/V015_REAL_SHIELD_CROPPED.png',
  shieldGlb:'assets/ui/fabricaciones_ora_v004/escudo_hierro_v015_PBR2K_WEBP_v022.glb'
 };
 const material={
