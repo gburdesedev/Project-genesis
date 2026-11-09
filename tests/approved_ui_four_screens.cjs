@@ -33,6 +33,7 @@ const issues=[];
    const ext=path.extname(p);return route.fulfill({status:200,contentType:ext==='.png'?'image/png':ext==='.jpg'?'image/jpeg':ext==='.glb'?'model/gltf-binary':ext==='.css'?'text/css':'application/javascript',body:fs.readFileSync(p)});
   });
   await page.goto('http://genesis.local/');
+  await page.addStyleTag({content:fs.readFileSync(path.join(root,'preparacion.css'),'utf8')});
   await page.addStyleTag({content:fs.readFileSync(path.join(root,'genesis_ui_approved.css'),'utf8')});
   await page.addScriptTag({content:fs.readFileSync(path.join(root,'genesis_ui_approved.js'),'utf8')});
   await page.evaluate(()=>{
@@ -45,7 +46,9 @@ const issues=[];
    const recipes=[{id:'espada_hierro',subfamily:'Espada de hierro',family:'Espadas',formula:{materials:[{material:'Lingote de hierro',qty:2},{material:'Madera seca de roble',qty:1}]}},{id:'escudo_hierro',subfamily:'Escudo de hierro',family:'Escudos',formula:{materials:[{material:'Lingote de hierro',qty:2}]}}];
    const ctx={profession:'Herrero',inventory:{'Mineral de hierro':3,'Lingote de hierro':6,'Madera seca de roble':4},getItems:()=>[item,secondSword,shield],getRecipeCatalog:()=>recipes,activeRecipeId:'espada_hierro',selectedRecipeId:'espada_hierro',count:1,canCraftRecipe:()=>true,canCraftNow:()=>true,
      modal(html,cls){const m=document.getElementById('modal');m.className='modal '+cls;m.innerHTML=html;},
-     renderAsset:i=>'<img src="assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png" alt="'+i.name+'">',
+     renderAsset:i=>i.recipe==='espada_hierro'?
+       '<img class="genesisSwordV12BCycles" src="assets/playcanvas/approved/equipment/espada_v03_hierro_v175_v12b_cycles_hdri32.png" alt="'+i.name+'">':
+       '<img src="assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png" alt="'+i.name+'">',
      recipeAsset:()=>'<img src="assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png" alt="receta">',
      metricForChannel:(i,c,j)=>({label:j===0?'Daño base':'Daño de '+c[0],display:j===0?String(c[1]):'+'+c[1]+'%'})};
    const nav={renderMenu(){window.__LAST_NAV__='Preparacion';window.GenesisApprovedUI.render(ctx,nav,'Preparacion')},renderWorkspace(tab){window.__LAST_NAV__=tab;if(tab!=='Comparacion')window.GenesisApprovedUI.render(ctx,nav,tab)},start(){window.__START__=true},craft(){window.__CRAFT__=ctx.selectedRecipeId},close(){window.__CLOSE__=true}};
@@ -208,6 +211,15 @@ const issues=[];
   assert.equal(await page.locator('[data-compare-item="B"]').getAttribute('data-halo-channel'),'Rayo');
   const colors=await page.locator('.genesisComparisonSword').evaluateAll(els=>els.map(e=>getComputedStyle(e).getPropertyValue('--compare-halo').trim()));
   assert.notEqual(colors[0],colors[1],'Each sword must have an independent channel halo');
+  await page.waitForTimeout(450);
+  const exposed=await page.locator('.genesisComparisonSwordAsset img').evaluateAll(imgs=>imgs.map(img=>({
+    loaded:img.complete&&img.naturalWidth>0,
+    visible:getComputedStyle(img).visibility!=='hidden'&&Number(getComputedStyle(img).opacity)>0,
+    width:Math.round(img.getBoundingClientRect().width),
+    height:Math.round(img.getBoundingClientRect().height)
+  })));
+  assert.equal(exposed.length,2,'Both original V12B sword images must be visible');
+  assert(exposed.every(x=>x.loaded&&x.visible&&x.width>20&&x.height>20),JSON.stringify(exposed));
   await page.screenshot({path:path.join(out,'08-comparacion-dos-espadas-halos-fuego-rayo-v014029.png'),animations:'disabled'});
 
   assert.equal(await page.evaluate(()=>window.GenesisPreparation.navigate('Fabricaciones')),true);
