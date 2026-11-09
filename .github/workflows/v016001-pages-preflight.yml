@@ -1,0 +1,25 @@
+name: Genesis V016.001 | Consultar Pages sin modificar sitio
+on:
+  push:
+    branches:
+      - experiment/v016001-main-clean-20261109
+    paths:
+      - .github/workflows/v016001-pages-preflight.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Read existing GitHub Pages configuration ONLY
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set +e
+          echo "=== PAGES ==="
+          curl -sS -L -w '\nPAGE_HTTP_CODE=%{http_code}\n' -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/repos/gburdesedev/Project-genesis/pages | python3 -c 'import sys,json;d=sys.stdin.read();print(d[:5500])'
+          echo "=== RECENT PAGES DEPLOYMENTS ==="
+          curl -sS -L -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/repos/gburdesedev/Project-genesis/pages/builds/latest | python3 -c 'import sys;print(sys.stdin.read()[:2000])'
