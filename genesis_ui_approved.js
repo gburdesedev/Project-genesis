@@ -274,5 +274,5 @@
    else return false;
    return true;
  }
- window.GenesisApprovedUI=Object.freeze({render,renderThermal,renderResult,ARTS,BUILD});
+ window.GenesisApprovedUI=Object.freeze({render,renderThermal,renderResult,materialVisual,resolveMaterialPoster:(name)=>MATERIALS[name]?.[0]||null,ARTS,BUILD});
 })();
