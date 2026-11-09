@@ -24,7 +24,7 @@ def donor(rect,patch=(48,535,423,783),brightness=.82,blur=1):
 # Distinct editable skins: remove both baked texts/boxes entirely. The
 # active-state gold frame is cut as an original V07 sprite, NOT CSS border.
 # The source recipe border artwork survives as a transparent reusable layer.
-selection_source=original.crop((100,278,438,347)).convert('RGBA')
+selection_source=original.crop((91,288,434,345)).convert('RGBA')
 sel_alpha=Image.new('L',selection_source.size,0)
 sa=sel_alpha.load()
 fw,fh=selection_source.size
@@ -154,7 +154,7 @@ with zipfile.ZipFile(OUT/'Fabricaciones_Runtime_V004.ora','w') as z:
     # Original V07 active recipe frame, isolated as a hidden reusable sprite.
     buf=io.BytesIO();selection_source.save(buf,'PNG')
     z.writestr('data/active_recipe_frame.png',buf.getvalue(),compress_type=zipfile.ZIP_DEFLATED)
-    ET.SubElement(stack,'layer',{'name':'05 / RECUADRO SELECCION / ORIGINAL V07 · REUTILIZABLE','src':'data/active_recipe_frame.png','x':'100','y':'278','opacity':'1.0','visibility':'hidden','composite-op':'svg:src-over'})
+    ET.SubElement(stack,'layer',{'name':'05 / RECUADRO SELECCION / ORIGINAL V07 · REUTILIZABLE','src':'data/active_recipe_frame.png','x':'91','y':'288','opacity':'1.0','visibility':'hidden','composite-op':'svg:src-over'})
     # The two authentic material sprites are a real editable ORA layer.
     buf=io.BytesIO();icon_layer.save(buf,'PNG')
     z.writestr('data/material_icons_v175.png',buf.getvalue(),compress_type=zipfile.ZIP_DEFLATED)
