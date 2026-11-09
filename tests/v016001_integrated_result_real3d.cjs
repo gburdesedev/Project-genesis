@@ -15,7 +15,7 @@ const report={status:'START',errors:[],samples:[]};
   page.on('pageerror',e=>report.errors.push('JS '+e.message));page.on('response',r=>{if(r.status()>=400&&report.errors.length<30)report.errors.push('HTTP '+r.status()+' '+r.url().slice(0,130))});
   await page.goto('http://127.0.0.1:'+srv.address().port+'/',{waitUntil:'domcontentloaded',timeout:90000});
   const base={id:'sword-1',recipe:'espada_hierro',name:'Espada de hierro',rarity:'Inútil',channels:[['Daño',42.64]],description:'Primer cierre de fabricación: Canal Base obtenido por NGE.'};
-  for(const [n,item] of [['01-primera-espada-3d.png',base],['02-segunda-espada-3d.png',{...base,id:'sword-2',rarity:'Bueno',channels:[['Daño',78],['Fuego',82],['Rayo',55.5]],channelTechniques:{Fuego:[{nombre:'Quemadura',valor:32}]},description:'Resultado de fabricación con valores de ejemplo para los canales NGE.']]){
+  for(const [n,item] of [['01-primera-espada-3d.png',base],['02-segunda-espada-3d.png',{...base,id:'sword-2',rarity:'Bueno',channels:[['Daño',78],['Fuego',82],['Rayo',55.5]],channelTechniques:{Fuego:[{nombre:'Quemadura',valor:32}]},description:'Resultado de fabricación con valores de ejemplo para los canales NGE.'}]]){
    await page.evaluate(data=>{const el=document.getElementById('modal');el.className='modal';window.GenesisResultDynamic.decorate(el,data)},item);
    await page.waitForFunction(()=>Array.from(document.querySelectorAll('.grOra')).every(img=>img.complete&&img.naturalWidth===990),null,{timeout:15000});
    const iframe=page.frameLocator('iframe.grSwordInteractive');
