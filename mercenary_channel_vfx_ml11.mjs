@@ -133,7 +133,9 @@ function attach(app,modelRoot){
    lastRafTime=now;
    rafId=requestAnimationFrame(rafTick);
  };
- // ML13: a running RAF does not mean the PlayCanvas scene is rendering.\n // When app updates pause, keep GLSL uniforms advancing with the fallback clock.\n const intervalTick=()=>{
+ // ML13: a running RAF does not mean the PlayCanvas scene is rendering.
+ // When app updates pause, keep GLSL uniforms advancing with the fallback clock.
+ const intervalTick=()=>{
    const now=performance.now();
    if(now-lastAppTick>220){
      update(lastTimerTick==null?0.08:(now-lastTimerTick)/1000,'preview-clock');
