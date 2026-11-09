@@ -191,6 +191,7 @@ export function mountGenesisMarket(options){
   const chosen=Object.create(null);
   let lastMessage='';
   let selectedIndex=0;
+  let catalogPage=0;
   const toRawStock=window.GenesisPreparation?.rawStock;
   function catalog(){return domain.catalog(getSession(),toRawStock);}
   function draw(){
@@ -200,22 +201,19 @@ export function mountGenesisMarket(options){
     const needs=typeof getMarketNeeds==='function'?getMarketNeeds():[];
     const needByName=new Map(needs.map(n=>[n.material,n]));
     const ROOT='assets/ui/preparacion/01_Capas/';
-    const MATERIALS={
-      'Mineral de hierro':'assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png',
-      'Lingote de hierro':'assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png',
-      'Carbón vegetal':'assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png',
-      'Madera seca de roble':'assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png',
-      'Madera seca de fresno':'assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png',
-      'Cuero bovino curtido':'assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_poster.png',
-      'Cuero caprino curtido':'assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_poster.png',
-      'Cordel de cáñamo':'assets/playcanvas/approved/materials/hemp/v018/cordel_canamo_v018_poster.jpg',
-      'Hilo de lino':'assets/playcanvas/approved/materials/linen/v021/hilo_lino_v021_poster.jpg'
-    };
+    // Las imágenes provienen del registro visual que ya utiliza Inventario/Preparación.
+    // El nombre del artículo viene exclusivamente de la semilla, no de este módulo.
+    const asset=name=>window.GenesisApprovedUI?.materialVisual?.(name,false)||
+      '<span class="gApprovedNoModel">'+escapeText(name)+'</span>';
     const pos=(x,y,w,h)=>'left:'+(x/1672*100).toFixed(3)+'%;top:'+(y/941*100).toFixed(3)+'%;width:'+(w/1672*100).toFixed(3)+'%;height:'+(h/941*100).toFixed(3)+'%';
     const panel=(path,x,y,w,h)=>'<img alt="" aria-hidden="true" src="./'+ROOT+path+'" style="position:absolute;pointer-events:none;'+pos(x,y,w,h)+'">';
-    const asset=name=>MATERIALS[name]?'<img class="gApprovedMaterialArt" src="./'+escapeText(MATERIALS[name])+'" alt="'+escapeText(name)+'" style="max-width:78%;max-height:73%;object-fit:contain;filter:drop-shadow(0 4px 5px #000)">':'<span class="gApprovedNoModel">'+escapeText(name)+'</span>';
-    const cards=names.slice(0,10).map((name,index)=>{
-      const x=38+(index%5)*106,y=274+Math.floor(index/5)*113;
+    const pageSize=10;
+    const pageCount=Math.max(1,Math.ceil(names.length/pageSize));
+    catalogPage=Math.min(catalogPage,pageCount-1);
+    const pageItems=names.slice(catalogPage*pageSize,(catalogPage+1)*pageSize);
+    const cards=pageItems.map((name,slot)=>{
+      const index=catalogPage*pageSize+slot;
+      const x=38+(slot%5)*106,y=274+Math.floor(slot/5)*113;
       const qty=chosen[name]||Math.min(99,Math.max(1,needByName.get(name)?.missing||0));
       return '<button type="button" class="gApprovedPrepSlot" data-select="'+index+'" title="'+escapeText(name)+'" aria-label="'+escapeText(name)+'" style="'+pos(x,y,99,108)+'">'+asset(name)+
         '<img alt="" aria-hidden="true" src="./'+ROOT+'Casillas/Casilla_Basicos_01.png" style="position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;pointer-events:none">'+
@@ -232,10 +230,14 @@ export function mountGenesisMarket(options){
       panel('Paneles/PanelDatos.png',1127,153,399,624)+
       panel('Paneles/PanelAccionSinBoton.png',1127,777,399,136)+
       '<div class="gApprovedRecipeTitle" style="'+pos(180,30,1310,100)+';background:#100b09"><h2>MERCADO · SUMINISTROS</h2><p>Comerciante de materiales · '+escapeText(current?.profession||'Artesano')+'</p></div>'+
+      '<button type="button" disabled aria-disabled="true" title="Vender no disponible" style="position:absolute;'+pos(765,113,286,42)+';background:#151310;color:#887760;border:1px solid #63503c;z-index:3">🔒 Vender</button>'+
       '<button class="gApprovedHit" id="genesisMarketClose" style="'+pos(1603,0,69,36)+';z-index:10;color:#f4d49c;background:#1a110a">✕</button>'+
       '<div class="gApprovedPrepData" style="'+pos(38,177,505,80)+';font-size:1.6cqw">Materiales disponibles · seleccioná una casilla</div>'+
       cards+
       '<div class="gApprovedPrepData" style="'+pos(40,560,490,75)+';font-size:1.5cqw">Materiales de recetas conocidas · '+names.length+' tipos</div>'+
+      '<button type="button" data-page="prev" '+(catalogPage===0?'disabled':'')+' style="'+pos(45,670,190,63)+'">◀ Anterior</button>'+
+      '<button type="button" data-page="next" '+(catalogPage>=pageCount-1?'disabled':'')+' style="'+pos(315,670,190,63)+'">Siguiente ▶</button>'+
+      '<div style="position:absolute;'+pos(203,741,178,42)+';text-align:center;color:#f5d7a9">Página '+(catalogPage+1)+' / '+pageCount+'</div>'+
       '<div class="gApprovedPrepProduct" style="'+pos(605,230,494,540)+'">'+(selected?asset(selected):'')+'</div>'+
       '<div class="gApprovedPrepData" style="'+pos(1144,185,350,570)+'">'+
       '<h3 style="font-size:2cqw">'+escapeText(selected||'Sin materiales')+'</h3>'+
@@ -250,6 +252,7 @@ export function mountGenesisMarket(options){
     const root=document.getElementById('genesisMarketBoard');
     root?.querySelector('#genesisMarketClose')?.addEventListener('click',()=>closeModal());
     root?.querySelectorAll('[data-select]').forEach(btn=>btn.addEventListener('click',()=>{selectedIndex=Number(btn.dataset.select);draw();}));
+    root?.querySelectorAll('[data-page]').forEach(btn=>btn.addEventListener('click',()=>{catalogPage+=btn.dataset.page==='next'?1:-1;draw();}));
     root?.querySelectorAll('[data-inc]').forEach(btn=>btn.addEventListener('click',()=>{
       const name=names[Number(btn.dataset.inc)];
       if(!name)return;const required=needByName.get(name)?.missing||0;chosen[name]=Math.min(99,(chosen[name]||Math.min(99,Math.max(1,required)))+1);draw();
@@ -277,7 +280,7 @@ export function mountGenesisMarket(options){
     if(typeof modal!=='function'||typeof closeModal!=='function')return false;
     if(!getSession()){toast?.('Elegí primero una profesión para crear la semilla.',1500);return false;}
     if(typeof canTrade==='function'&&!canTrade()){toast?.('Primero hablá con Ordan. Él te enseñará a reabastecerte en el mercado.',2100);return false;}
-    lastMessage='';selectedIndex=0;draw();return true;
+    lastMessage='';selectedIndex=0;catalogPage=0;draw();return true;
   }
   const interactable=Object.freeze({
     id:'marketMerchant',radius:2.85,
