@@ -1,0 +1,36 @@
+name: ML06 REAL GAME QA approved Mercenary 4T V050
+on:
+  push:
+    branches: [experiment/mercenario-4t-runtime-ml06-20261109]
+    paths:
+      - 'index.html'
+      - 'mercenary_4t_runtime_ml06.js'
+      - 'mercenary_4t_runtime_ml06.css'
+      - 'tests/mercenary_ml06_4t.cjs'
+      - '.github/workflows/mercenary-ml06-qa.yml'
+      - 'assets/ui/mercenary/4t/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gameplay-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/genesis-ml06-test playwright@1.56.1
+      - name: Test actual PlayCanvas gameplay + original 4T + exact V050 equipped model
+        run: NODE_PATH=/tmp/genesis-ml06-test/node_modules node tests/mercenary_ml06_4t.cjs
+      - name: Archive actual Chromium gameplay screenshots and diagnostics
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-mercenario-ml06-4t-real-game-qa
+          path: previews/mercenary-lab-ml06-4t/
+          retention-days: 14
+          if-no-files-found: warn
