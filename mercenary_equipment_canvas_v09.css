@@ -93,3 +93,21 @@
 .pv9Shell .pv9ChannelArtwork{display:flex;align-items:center;justify-content:flex-start;height:100%;width:100%;min-width:0;overflow:hidden;background:transparent;border:0}
 .pv9Shell .pv9ChannelArtwork img{display:block;width:100%;height:auto;max-height:3.02cqw;object-fit:contain;object-position:left center}
 .pv9Shell .pv9Channels .mcChannelNum{font:normal 1.02cqw/1.2 Georgia,serif;text-align:center;white-space:nowrap;padding:0 .05cqw;overflow:hidden;text-overflow:clip}
+
+/* ML05: poster is an authentic Cycles32 render of exact V049 GLB.
+   It is visible only while the live 3D viewer is not yet ready. */
+.pv9Shell .pv9Hero{overflow:hidden!important}
+.pv9Shell .pv9RealCyclesPoster{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center center;
+  display:block;pointer-events:none;z-index:2;
+  filter:drop-shadow(0 2px 12px #0009)
+}
+.pv9Shell .pv9Hero .pv9Viewer{position:absolute!important;inset:0;z-index:3;opacity:0!important;transition:opacity .18s ease}
+.pv9Shell .pv9Hero.pv9ModelReady .pv9Viewer{opacity:1!important}
+.pv9Shell .pv9Hero.pv9ModelReady .pv9RealCyclesPoster{opacity:0!important}
+/* Fit actual NGE names within the source V09 comparison frames. */
+.pv9Shell .pv9ComparisonIcon{height:3.7cqw!important;max-height:3.7cqw!important}
+.pv9Shell .pv9ComparisonIcon img{max-width:3.8cqw!important;max-height:3.7cqw!important}
+.pv9Shell .pv9ComparisonName{font-size:.82cqw!important;line-height:1.08!important;max-height:2.2em!important}
+.pv9Shell .pv9ComparisonRarity{font-size:.72cqw!important;max-height:1.1em!important}
