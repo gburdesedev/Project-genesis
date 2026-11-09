@@ -36,6 +36,7 @@ window.__genesisFullRouteQA=Object.freeze({
     refreshInventorySummary();
     return{...playerInventory};
   },
+  stepCraft:(n)=>{if(n!==10&&n!==11&&n!==12&&n!==13)throw Error('QA_FORBIDDEN_STEP');setTutorialStep(n);return tutorialStep},
   craft:()=>{showCraftConfirm();return currentRecipe()},
   mentorMarket:()=>{startOrdanMarketEscort();return tutorialStep},
   restockShields:()=>{
