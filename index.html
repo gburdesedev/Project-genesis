@@ -5,7 +5,7 @@
 <script src="./village_plan.js?v=0.11.017"></script>
 <script src="./device_policy.js?v=0.14.024-pc"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Project Genesis V014.027-ML05 · EXPERIMENTO MERCENARIO · sin publicar · Powered by NGE Alpha</title>
+<title>Project Genesis V014.027-ML06 · EXPERIMENTO MERCENARIO · sin publicar · Powered by NGE Alpha</title>
 <link rel="stylesheet" href="./preparacion.css?v=0.14.018-charcoal-v010">
 <link rel="stylesheet" href="./mercenary_equipment_canvas_v09.css?v=0.14.027-ML05">
 <link rel="stylesheet" href="./inventario_genesis_16x9.css?v=0.14.027-ML05">
@@ -745,8 +745,8 @@ window.__genesisAppError=function(event){
 </div>
 
 <div id="hud">
- <div id="brand">PROJECT GENESIS · V014.027-ML05 · MERCENARIO EXPERIMENTAL</div>
- <div id="tech">PLAYCANVAS 2.22.1 · PRUEBA AISLADA · V014.027-ML05</div>
+ <div id="brand">PROJECT GENESIS · V014.027-ML06 · MERCENARIO EXPERIMENTAL</div>
+ <div id="tech">PLAYCANVAS 2.22.1 · PRUEBA AISLADA · V014.027-ML06</div>
  <div id="buttonsTop"><button id="cameraSettingsBtn" class="uiBtn" type="button" aria-label="Configurar cámara">⚙ CÁMARA</button></div>
  <section id="quest">
    <div class="ey" id="questEy">PROTOTIPO · SELECCIÓN DE PROFESIÓN</div>
@@ -1574,7 +1574,15 @@ async function launchMercenaryLab(){
   setTutorialStep(15);status.status='loading_3d';
   await ensureMercenaryReady();
   mercCandidate=0;applyMercCandidateVisual();refreshInventorySummary();
-  status.status='menu';status.modelsReady=!!mercenaryRoot;
+  // ML06: la prueba debe comenzar con equipo 3D REAL, no con una maqueta visual.
+  // La carga se limita al laboratorio; el modo normal sigue contratando sin equipo.
+  const gearAsset=mercNode('mercApprovedGearDisplay');
+  if(!gearAsset)throw Error('No se encontró el equipo V049 del mercenario');
+  status.status='loading_approved_equipment';
+  await activateDeferredModel(gearAsset,120000);
+  if(!gearAsset.contentEntity)throw Error('El equipo V12B/V015 no pudo instanciarse');
+  if(!equipMercenaryCreations())throw Error('No se pudo montar la espada y el escudo en la entidad 3D');
+  status.status='menu';status.equipped=true;status.modelsReady=!!mercenaryRoot;
   closeModal();showMercenaryEquipment(false);
 }
 function showMercenaryCandidates(){setTutorialStep(15);ensureMercenaryReady().catch(err=>toast('No se pudo preparar el Guerrero: '+(err?.message||err),2400));const tanner=mercGearRoute()==='Curtidor',arrival=tanner?'Llega con ropa básica; la armadura y las botas están pendientes.':'Llega sin espada ni escudo.';modal(`<div class="mercTopline"><div><div class="ey">RECORRIDO CONDENSADO · EXTENSIÓN DE GAMEPLAY</div><h2>Elegí un Guerrero para contratar</h2></div><div class="mercProtoFlag">VALORES DE PROTOTIPO · NO BALANCE FINAL</div></div><div class="mercIntro"><strong>Demostración jugable:</strong> los tres candidatos permiten mostrar contratación, estadísticas, equipamiento y expedición sin representar todavía el orden completo del juego final.</div><div class="mercGrid">${MERC_CANDIDATES.map(c=>`<button class="mercCard" data-merc="${c.id}"><div class="mcNum">CANDIDATO ${String(c.id+1).padStart(2,'0')}</div><div class="mercSilhouette">♙</div><h3>${c.label}</h3><p><strong>${c.look}</strong><br>${c.note}. ${arrival}</p>${candidateMiniStats(c)}<span class="mcRole">GUERRERO · COMPATIBLE</span><div class="mcHint">Seleccionar dossier</div></button>`).join('')}</div><div class="actions"><button class="secondary" id="mercBackComplete">Volver</button></div>`,'mercenaryModal');document.querySelectorAll('[data-merc]').forEach(btn=>btn.onclick=async()=>{if(btn.disabled)return;btn.disabled=true;try{mercCandidate=Number(btn.dataset.merc);await ensureMercenaryReady();applyMercCandidateVisual();showMercenaryEquipment()}catch(err){console.error(err);toast('No se pudo cargar el Guerrero: '+(err?.message||err),2600);btn.disabled=false}});document.getElementById('mercBackComplete').onclick=completePrototype}
