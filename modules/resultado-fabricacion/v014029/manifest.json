@@ -1,0 +1,29 @@
+{
+  "id": "genesis.resultado-fabricacion",
+  "module_version": "V014.029",
+  "approval": {
+    "visual": "approved-final-for-now",
+    "game_build": "not-approved",
+    "main_integration": false
+  },
+  "source": {
+    "repository": "gburdesedev/Project-genesis",
+    "branch": "release/v014029-historic-crafting-result-20261108",
+    "commit": "7c96baf76bbbf1e643d57bb6bb7d3ad93689a848",
+    "stable_base_commit": "010be3f6206c0e340a4fe5c5cc42f7d088c62b81"
+  },
+  "files": {
+    "renderer": "resultado-fabricacion-v014029.js",
+    "styles": "resultado-fabricacion-v014029.css",
+    "guide": "README.md",
+    "contract_test": "test-v014029.cjs"
+  },
+  "api": "window.GenesisCraftResultV014029.render(item, adapters)",
+  "integration": "opt-in only; in a new verified working game branch",
+  "assets": "Approved V03/V175/V12B sword rendered by existing itemAssetMarkup; no GLB viewer supplied by this module",
+  "evidence": {
+    "approved_output_comparison": "exact HTML identity for Base and Base+Fuego fixtures confirmed in isolated execution",
+    "approved_css_comparison": "same CSS as approved V014.029",
+    "full_game_end_to_end": "not verified"
+  }
+}
