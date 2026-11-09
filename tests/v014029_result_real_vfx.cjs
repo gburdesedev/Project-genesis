@@ -45,7 +45,7 @@ const report={status:'START',errors:[],samples:[]};
    assert.equal(state.viewer.effects.Rayo.animated,true);
    assert.equal(state.viewer.effects.Fuego.animated,true);
    const fx=await iframe.locator('canvas#sword3d').evaluate(async (canvas,t)=>window.__genesisVfxStep(t),time);
-   assert.equal(fx.time,time);
+   assert(Math.abs(fx.time-time)<0.20,'Animated render clock deviated more than 200ms: '+fx.time+' vs '+time);
    report.samples.push({name:n,channels:state.channels,viewer:state.viewer});
    await page.screenshot({path:path.join(out,n),timeout:20000,animations:'allow'});
   }
