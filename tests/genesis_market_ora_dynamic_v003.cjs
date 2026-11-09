@@ -1,0 +1,15 @@
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const market=fs.readFileSync('genesis_market_v001.js','utf8');
+const approved=fs.readFileSync('genesis_ui_approved.js','utf8');
+assert.match(market,/const names=catalog\(\)/);
+assert.match(market,/const inv=getInventory\(\)/);
+assert.match(market,/GenesisApprovedUI\?\.materialVisual/);
+assert.match(market,/domain\.buy\(/);
+assert.match(market,/data-select/);
+assert.match(market,/data-page/);
+assert.match(market,/Vender no disponible/);
+assert.doesNotMatch(market,/>Recomprar</i);
+assert.doesNotMatch(market,/const MATERIALS=\{/);
+assert.match(approved,/resolveMaterialPoster/);
+console.log('OK: dynamic market catalog, approved material registry and locked sell');
