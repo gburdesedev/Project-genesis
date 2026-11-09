@@ -33,7 +33,7 @@ donor((1150,242,1589,280),(49,541,422,723),.63,1.2)
 donor((1151,286,1610,572),(49,541,422,723),.64,1.7)
 donor((1210,592,1579,667),(49,541,422,723),.69,1.1)
 # Original FABRICAR frame and original anvil are retained; clear baked label.
-donor((1327,687,1537,744),(49,541,422,723),.76,2)
+# Keep the ORIGINAL decorative FABRICAR button and original fixed label, pixel-identical.
 # Keep screenshot's static PT until separately migrated to live PT.
 name='Fabricaciones_Base_Limpia_V004.png'
 im.save(OUT/name,optimize=True)
@@ -68,17 +68,37 @@ sword_path=Path('assets/playcanvas/approved/equipment/espada_v03_hierro_v175_v12
 sword=Image.open(sword_path).convert('RGBA')
 sw,sh=sword.size
 p=sword.load()
-mask=Image.new('L',sword.size,0);m=mask.load()
+from collections import deque
+# Only discard exterior navy pixels CONNECTED to the screenshot border.
+# This preserves dark real iron spots inside the blade, unlike a brightness key.
+samples=[p[3,3],p[sw-4,3],p[3,sh-4],p[sw-4,sh-4]]
+bg=[sorted(z[k] for z in samples)[2] for k in (0,1,2)]
+def is_outer_bg(xx,yy):
+    r,g,b,a=p[xx,yy]
+    return (r<105 and g<120 and b<143 and
+      (abs(r-bg[0])+abs(g-bg[1])+abs(b-bg[2])<105 or
+       (b-r>11 and b-g>1 and r<80)))
+mask=Image.new('L',sword.size,255)
+seen=bytearray(sw*sh)
+queue=deque()
+def visit(xx,yy):
+    i=yy*sw+xx
+    if seen[i] or not is_outer_bg(xx,yy):return
+    seen[i]=1
+    queue.append(i)
+for xx in range(sw):
+    visit(xx,0);visit(xx,sh-1)
 for yy in range(sh):
-    for xx in range(sw):
-        r,g,b,a=p[xx,yy]
-        brightness=max(r,g,b)
-        is_navy=(b-r>7 and b-g>1 and r<114)
-        if is_navy or brightness<50: alpha=0
-        elif brightness<90: alpha=min(255,max(0,int((brightness-48)*6)))
-        else: alpha=255
-        m[xx,yy]=min(a,alpha)
-mask=mask.filter(ImageFilter.GaussianBlur(.55))
+    visit(0,yy);visit(sw-1,yy)
+while queue:
+    q=queue.popleft()
+    xx=q%sw;yy=q//sw
+    mask.putpixel((xx,yy),0)
+    if xx>0:visit(xx-1,yy)
+    if xx+1<sw:visit(xx+1,yy)
+    if yy>0:visit(xx,yy-1)
+    if yy+1<sh:visit(xx,yy+1)
+mask=mask.filter(ImageFilter.GaussianBlur(.65))
 bbox=mask.getbbox()
 if bbox:
     padded=(max(0,bbox[0]-18),max(0,bbox[1]-18),min(sw,bbox[2]+18),min(sh,bbox[3]+18))
