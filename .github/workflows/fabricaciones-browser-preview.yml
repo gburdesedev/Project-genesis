@@ -1,0 +1,39 @@
+name: Fabricaciones modular | Vista en juego Chromium
+on:
+  push:
+    branches: [experiment/fabricaciones-modulo-aislado-20261109]
+    paths:
+      - 'genesis_fabricaciones_module.*'
+      - 'fabricaciones_preview_entry.js'
+      - 'index.html'
+      - 'tests/fabricaciones_preview_browser.cjs'
+      - '.github/workflows/fabricaciones-browser-preview.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-game-menu:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source syntax and real recipe data contract
+        run: |
+          node --check genesis_fabricaciones_module.js
+          node --check fabricaciones_preview_entry.js
+          node tests/fabricaciones_module_qa.cjs
+      - name: Install browser harness
+        run: npm install --prefix /tmp/fabric-module-qa playwright@1.56.1
+      - name: Capture in-game dynamic sword/shield selection, real NGE session
+        run: NODE_PATH=/tmp/fabric-module-qa/node_modules node tests/fabricaciones_preview_browser.cjs
+      - name: Archive browser screenshots and diagnostic report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fabricaciones-modulo-real-browser-evidence
+          path: previews/fabricaciones-modulo-real/
+          retention-days: 14
