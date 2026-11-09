@@ -34,7 +34,8 @@ jobs:
           git show FETCH_HEAD:assets/playcanvas/candidates/shield/v015/escudo_hierro_v015_PBR2K_WEBP_v022.glb > "$root/escudo_hierro_v015_PBR2K_WEBP_v022.glb"
           test -s "$root/V015_REAL_SHIELD_ICON_RGBA.png"
           test -s "$root/escudo_hierro_v015_PBR2K_WEBP_v022.glb"
-          ls -lah "$root" | tail -17
+          python scripts/build_fabricacion_ora_v004_runtime.py
+          ls -lah "$root" | tail -18
       - name: Validate ORA + actual V015 binary
         run: |
           python - <<'PY'
