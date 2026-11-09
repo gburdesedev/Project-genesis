@@ -8,6 +8,7 @@ for(const p of [
  'assets/ui/fabricaciones_ora_v004/V015_REAL_SHIELD_ICON_RGBA.png',
  'assets/ui/fabricaciones_ora_v004/V015_REAL_SHIELD_CROPPED.png',
  'assets/ui/fabricaciones_ora_v004/01_iconos_material_hierro_v175_RGBA.png',
+ 'assets/ui/fabricaciones_ora_v004/05_marco_receta_seleccionada_ORIGINAL.png',
  'assets/ui/fabricaciones_ora_v004/V12B_CYCLES_SOURCE_ALPHA_EXPERIMENTAL.png',
  'assets/ui/fabricaciones_ora_v004/escudo_hierro_v015_PBR2K_WEBP_v022.glb',
  'assets/playcanvas/approved/equipment/espada_v03_hierro_v175_v12b_cycles_hdri32.png',
@@ -56,7 +57,13 @@ const issues=[];
   assert.equal(await recipe(),'espada_hierro');
   assert.equal(await page.locator('.gFabRecipe.is-selected').count(),1);
   assert.equal(await page.locator('.gFabV175Category').count(),0,'V175 must be in ORA art, not CSS overlays');
-  assert.equal(await page.locator('.gFabRecipeSymbol').count(),2,'Keep recipe symbols independent of material icon');
+  assert.equal(await page.locator('.gFabRecipeSymbol').count(),0,'No invented cross-swords/diamonds over original UI');
+  assert.equal(await page.locator('img.gFabSelectedFrame').count(),1,'Only the selected recipe gets ORIGINAL V07 frame');
+  assert.equal(await page.locator('img.gFabSelectedFrame[src*="05_marco_receta_seleccionada_ORIGINAL"]').count(),1);
+  assert.equal(await page.locator('.gFabRecipeText').count(),2);
+  const firstRowCSS=await page.locator('.gFabRecipe.is-selected').evaluate(el=>({background:getComputedStyle(el).backgroundImage,boxShadow:getComputedStyle(el).boxShadow,border:getComputedStyle(el).borderStyle}));
+  assert.equal(firstRowCSS.background,'none','No CSS gradient or rectangular fill');
+  assert.equal(firstRowCSS.boxShadow,'none','No CSS box shadow overlay');
   // Original material icon has been erased from the raster; never double-render a V175 asset.
   assert.equal(await page.locator('.gApprovedBoard').evaluate(e=>getComputedStyle(e).backgroundImage.includes('Fabricaciones_Base_Limpia_V004.png')),true);
 
@@ -80,6 +87,7 @@ const issues=[];
   });
   assert.equal(await recipe(),'escudo_hierro','Ordan changes quest from sword to shield');
   assert.equal(await page.locator('.gFabRecipe.is-selected').count(),1);
+  assert.equal(await page.locator('.gFabSelectedFrame').count(),1,'One ORA selection frame after switching to shield');
   assert.equal(await page.locator('.gFabShieldModel[src*="escudo_hierro_v015"]').count(),1);
   assert.equal(await page.locator('.gFabShieldPoster[src*="V015_REAL_SHIELD_CROPPED"]').count(),1);
   assert.equal(await page.locator('.gFabTitle h2').count(),1,'No duplicate right-side title for shield');
@@ -104,6 +112,9 @@ const issues=[];
   });
   assert.equal(await page.locator('button#gApprovedCraftAction:disabled').count(),1,'No materials, no crafting');
   assert.equal(await page.locator('.gFabMat.is-missing').count(),1);
+  assert.equal(await page.locator('.gFabStatus .gFabStatusBlocked').count(),1);
+  const statusStyle=await page.locator('.gFabStatus').evaluate(el=>({background:getComputedStyle(el).backgroundColor,border:getComputedStyle(el).borderStyle}));
+  assert.equal(statusStyle.background,'rgba(0, 0, 0, 0)','State must not introduce a black CSS rectangle');
   if(issues.length)throw Error('Browser errors: '+issues.join(' | '));
   // Public-facing lightweight preview uses the exact controller and real sprites.
   await page.goto('http://genesis.local/fabricaciones-v004-preview.html',{waitUntil:'domcontentloaded'});
