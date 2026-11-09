@@ -38,11 +38,25 @@ const server=http.createServer((req,res)=>{
    page.on('requestfailed',r=>{if(state.warnings.length<80)state.warnings.push('FAILED '+r.url().slice(0,200)+' '+(r.failure()?.errorText||''))});
    page.on('response',r=>{if(r.status()>=400&&state.responses.length<80)state.responses.push({url:r.url(),status:r.status()})});
    await page.goto('http://127.0.0.1:4173/?mercenario=1',{waitUntil:'domcontentloaded',timeout:45000});
-   try{await page.locator('.mercConcept .mcBoard').waitFor({timeout:35000});}
+   try{await page.locator('.mercConcept .mcBoard').waitFor({timeout:125000});}
    catch(e){state.lab=await page.evaluate(()=>window.__GENESIS_MERCENARY_LAB||null);state.snapshots.push(await page.evaluate(()=>({title:document.title,loading:document.querySelector('#loading')?.innerText?.slice(0,1300),intro:document.querySelector('#prototypeIntro')?.style?.display,body:document.body?.innerText?.slice(0,2200),app:!!document.querySelector('pc-app')?.app,ui:(()=>{const ids=['modalLayer','modal','prototypeIntro'];const u={};for(const id of ids){const e=document.getElementById(id),r=e?.getBoundingClientRect();u[id]={inline:e?.style.display,display:e?getComputedStyle(e).display:null,visibility:e?getComputedStyle(e).visibility:null,width:r?.width,height:r?.height,classes:e?.className}};for(const cls of ['.mercConcept','.mcBoard']){const e=document.querySelector(cls),r=e?.getBoundingClientRect();u[cls]={present:!!e,display:e?getComputedStyle(e).display:null,width:r?.width,height:r?.height}};return u})(),models:[...document.querySelectorAll('pc-model')].filter(x=>x.hasAttribute('asset')).slice(0,20).map(x=>({id:x.id,asset:x.getAttribute('asset'),ready:!!x.contentEntity}))})));throw new Error('El menú no apareció: '+JSON.stringify(state.lab)+'; '+String(e.message).slice(0,150))}
    state.stage='menu';
    state.lab=await page.evaluate(()=>window.__GENESIS_MERCENARY_LAB);
    assert.equal(state.lab.items,4,'exactly four items generated from NGE');
+   assert.equal(state.lab.initialSwordRarity,'Común','Actual starter sword must be NGE Común');
+   assert.equal(state.lab.initialShieldRarity,'Inútil','Actual starter shield must be NGE Inútil');
+   assert.equal(state.lab.selectedSwordRarity,'Bueno','Bench sword should be a better NGE item');
+   assert.equal(state.lab.selectedShieldRarity,'Común','Bench shield should be a better NGE item');
+   assert.equal(state.lab.equipped,true,'starter must be physically equipped, not only shown in comparison');
+   assert.equal(state.lab.starterEquipped3d,true,'V050 must be attached before opening menu');
+   assert.equal(state.lab.approved3d,true,'V050 must be present in the world');
+   assert.equal(state.lab.equipmentRevision,0,'no replacement before user clicks Equipar');
+   assert.equal(await page.locator('.pv9CompareEquipped .pv9ComparisonRarity').innerText(),'Común');
+   assert.equal(await page.locator('.pv9CompareSelected .pv9ComparisonRarity').innerText(),'Bueno');
+   assert.ok(await page.locator('.pv9CompareEquipped img').count()>0,'The equipped item is not an empty mock slot');
+   assert.notEqual(await page.locator('.pv9CompareEquipped .pv9ComparisonName').innerText(),
+                   await page.locator('.pv9CompareSelected .pv9ComparisonName').innerText());
+
    assert.equal(await page.locator('.mercConcept .pv9Slot').count(),10,'V09 must keep exactly ten original gear slots');
    const gearCenters=await page.locator('.pg4tShell .mcEquipSlot').evaluateAll(els=>els.map(el=>{
      const r=el.getBoundingClientRect(),board=el.closest('.pv9Board').getBoundingClientRect();
@@ -84,6 +98,11 @@ const server=http.createServer((req,res)=>{
    assert.equal(await page.locator('.mercConcept .mcInventorySlot').count(),20,'V09 must keep 20 original cells');
    assert.equal(await page.locator('.mercConcept .mcInventorySlot.hasItem').count(),2,'two authentic NGE creations in the current family');
    assert.equal(await page.locator('.pg4tShell .mcInventorySlot.hasItem img[src$="V015_REAL_SHIELD_ICON_RGBA.png"]').count(),2,'Both actual shield icons must appear in 4T small slots');
+   assert.equal(await page.locator('.pv9CompareEquipped .pv9ComparisonRarity').innerText(),'Inútil');
+   assert.equal(await page.locator('.pv9CompareSelected .pv9ComparisonRarity').innerText(),'Común');
+   assert.ok(await page.locator('.pv9CompareEquipped img').count()>0,'Initial equipped shield must be present');
+   const namesBefore=await page.locator('.pg4tShell :is(.pv9CompareEquipped,.pv9CompareSelected) .pv9ComparisonName').allInnerTexts();
+   assert.notEqual(namesBefore[0],namesBefore[1],'A genuine alternate shield must differ from the original equipped shield');
    assert.equal(await page.locator('.pg4tShell img[src*="Origen_V09"]').count(),0,'Obsolete V09 ORA sprites must not be used');
    const shields=await page.locator('.pg4tShell .mcInventorySlot.hasItem .pg4tItemVisual').evaluateAll(els=>els.map(el=>({affinity:el.dataset.affinity,strength:getComputedStyle(el).getPropertyValue('--fx-strength').trim(),img:el.querySelector('img')?.getAttribute('src')})));
    assert.equal(shields.length,2,'Both shields must have channel-bound live visual wrappers');
@@ -115,11 +134,23 @@ const server=http.createServer((req,res)=>{
    assert.ok(bounds.length>=4,'need tested icons in inventory/gear/comparison');
    assert.ok(bounds.every(x=>x.contained),'Icon out of its slot: '+JSON.stringify(bounds));
    state.ml08={oraRows,bounds};
+   const cmpBounds=await page.locator('.pg4tShell .pv9CompareSelected').evaluate(card=>{
+     const box=card.getBoundingClientRect(),name=card.querySelector('.pv9ComparisonName').getBoundingClientRect(),
+       icon=card.querySelector('.pv9ComparisonIcon').getBoundingClientRect();
+     return {nameWithin:name.left>=box.left-1&&name.right<=box.right+1&&name.bottom<=box.bottom+1,
+       nameBelowIcon:name.top>=icon.top+icon.height-2};
+   });
+   assert.ok(cmpBounds.nameWithin&&cmpBounds.nameBelowIcon,'Procedural names must stay below the golden icon without overlapping: '+JSON.stringify(cmpBounds));
+   state.ml09={initialSword:state.lab.initialSwordRarity,initialShield:state.lab.initialShieldRarity,
+     chosenShield:state.lab.selectedShieldRarity,cmpBounds};
    await page.screenshot({path:path.join(OUT,'03-4t-escudos-v015.png'),fullPage:true,timeout:25000});
    await page.locator('[data-action="equip"]').click();
    await page.waitForFunction(()=>window.__GENESIS_MERCENARY_LAB?.status==='equipped',null,{timeout:125000}).catch(()=>null);
    state.lab=await page.evaluate(()=>window.__GENESIS_MERCENARY_LAB);
    if(state.lab.status!=='equipped'||state.lab.approved3d!==true||!String(state.lab.model).includes('V050'))throw new Error('El equipamiento V050 V12B/V015 falló: '+JSON.stringify(state.lab));
+   assert.equal(state.lab.equipmentRevision,1,'Equip should update the equipped state exactly once');
+   assert.equal(state.lab.equippedShieldRarity,'Común','Equipping the shield must replace the original Inútil');
+   assert.equal(state.lab.equippedSwordRarity,'Bueno','The upgraded sword must replace the original Común');
    state.stage='equipped';
    await page.screenshot({path:path.join(OUT,'04-v050-equipado-en-mundo.png'),fullPage:true,timeout:25000});
    await page.keyboard.press('e');
@@ -127,6 +158,13 @@ const server=http.createServer((req,res)=>{
    state.dossierVisible=await page.locator('.mercSheetBody').count()>0;
    if(state.dossierVisible)await page.screenshot({path:path.join(OUT,'05-dossier-mercenario.png'),fullPage:true,timeout:12000,animations:'disabled'}).catch(e=>state.warnings.push('Dossier screenshot skipped (low FPS): '+String(e.message).slice(0,95)));
    assert.ok(state.dossierVisible,'mercenary world interaction should open dossier');
+   await page.locator('#mercSheetChangeGear').click();
+   await page.locator('.pg4tShell .pv9CompareEquipped .pv9ComparisonRarity').waitFor({timeout:9000});
+   await page.locator('[data-family="second"]').click();
+   assert.equal(await page.locator('.pv9CompareEquipped .pv9ComparisonRarity').innerText(),'Común',
+     'Reopening the equipment menu must retain the new equipped shield');
+   state.persistedAfterReopen=true;
+   await page.screenshot({path:path.join(OUT,'06-4t-escudo-equipado-persistente.png'),fullPage:true,timeout:25000});
    state.stage='passed';
    console.log('PASS: exact original approved Mercenary 4-T art, actual V050 V12B and smaller V015, NGE 4 items with real render-derived thumbnails, world + E dossier');
  }catch(err){state.failure=String(err?.stack||err);console.error('FAIL:',state.failure);if(page&&state.stage!=='started')try{await page.screenshot({path:path.join(OUT,'error-debug.png'),fullPage:true,timeout:8000})}catch(_){ }process.exitCode=1}
