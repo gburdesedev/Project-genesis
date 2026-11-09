@@ -47,6 +47,12 @@ app.assets.loadFromUrlAndFilename(modelSource,
     states[name]=status;
   }
   manager.setItem({affinities:tests[4][1]});
+  const fitted=manager.status().localBounds;
+  if(fitted){
+    const distance=Math.max(3.2,Math.max(...fitted.span)*1.7);
+    camera.setPosition(fitted.center[0],fitted.center[1],fitted.center[2]+distance);
+    camera.lookAt(...fitted.center);
+  }
   sword.setEulerAngles(0,0,0);
   window.__vfxReady={triangles,states,modelSource,liveManager:manager.status()};
   console.log('GENESIS_V014040_VFX_REAL_V03_HARNESS_READY',JSON.stringify(window.__vfxReady));
