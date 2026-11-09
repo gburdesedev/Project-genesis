@@ -102,17 +102,34 @@ function attach(app,modelRoot){
    }
   }
  }
- let t=0;
+ let t=0,rafId=0,lastRafTime=null,lastAppTick=-Infinity;
  const report={status:'bound',model:'V050',ready:Object.keys(instances.sword).length+Object.keys(instances.shield).length,
-   originalModelUnchanged:true,effects:APPROVALS,errors,shieldSurface:'actual-V015-local-bounds-contour'};
- const update=dt=>{
+   originalModelUnchanged:true,effects:APPROVALS,errors,shieldSurface:'actual-V015-local-bounds-contour',
+   updateFrames:0,playCanvasFrames:0,previewClockFrames:0};
+ const update=(dt,source)=>{
   t+=Math.max(0,Math.min(.07,Number(dt)||0));
-  report.time=t;
-  report.updateFrames=(report.updateFrames||0)+1;
+  report.time=t;report.updateFrames++;
+  report.lastClock=source;
+  if(source==='playcanvas')report.playCanvasFrames++;
+  else report.previewClockFrames++;
   for(const kind of ['sword','shield'])for(const [name,fx] of Object.entries(instances[kind])){
     const value=rig?.levels?.[kind]?.[name]||0;
     try{fx.set(t,value)}catch(error){if(!report.runtimeError)report.runtimeError=String(error.message||error);}
   }
+ };
+ // PlayCanvas can suspend its world update while the modal is open.
+ // Keep shader uniforms advancing for the preview lifecycle on RAF, but
+ // distinguish clock-only updates from actual scene frames in the diagnostics.
+ const appTick=dt=>{
+   lastAppTick=performance.now();
+   update(dt,'playcanvas');
+ };
+ const rafTick=now=>{
+   if(lastRafTime!==null&&now-lastAppTick>220){
+     update((now-lastRafTime)/1000,'preview-clock');
+   }
+   lastRafTime=now;
+   rafId=requestAnimationFrame(rafTick);
  };
  const handle={app,modelRoot,instances,extras,report,levels:{sword:{},shield:{}},update,
   apply(sword,shield){
@@ -127,14 +144,17 @@ function attach(app,modelRoot){
    return {...report,active:report.active};
   },
   destroy(){
-   app.off('update',update);
+   app.off('update',appTick);
+   if(rafId)cancelAnimationFrame(rafId);
    for(const effect of Object.values(instances).flatMap(Object.values)){
     effect.entity?.destroy();effect.light?.destroy();effect.material?.destroy();
    }
    extras.forEach(e=>e.destroy());
   }
  };
- rig=handle;app.on('update',update);return handle;
+ rig=handle;app.on('update',appTick);
+ if(typeof requestAnimationFrame==='function')rafId=requestAnimationFrame(rafTick);
+ return handle;
 }
 export const MERCENARY_ML11_VFX=Object.freeze({channels:Object.keys(EFFECTS),approvals:APPROVALS});
 export function applyMercenaryVFX(sword,shield){
