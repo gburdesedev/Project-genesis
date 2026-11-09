@@ -789,7 +789,7 @@ if(new URLSearchParams(location.search).get('mercenario')==='1'){
 <script type="module">
 import { whenReady } from '@playcanvas/web-components';
 const GENESIS_MERCENARY_LAB=new URLSearchParams(location.search).get("mercenario")==="1"; // Solo rama experimental, no afecta main.
-import { Vec3 } from 'playcanvas';
+import { Vec3, Entity, Color } from 'playcanvas';
 import { mountVillage } from './village_world.js?v=0.14.022';
 import { mountGenesisMarket } from './genesis_market_v001.js?v=0.14.022';
 import './genesis_market_quest_v001.js?v=0.14.022';
@@ -1468,6 +1468,49 @@ function applyMercGearChannels(){if(!mercGearReady())return false;if(mercGearRou
 function verifyMercenaryHaloState(){if(!mercGearReady())return false;const ids=mercGearRoute()==='Curtidor'?['mercArmorLightA','mercBootsLightA']:['mercSwordLightA','mercShieldLightA'];const ok=ids.every(id=>{const c=C(id);return!!c&&c.enabled&&Number(c.intensity)>0});if(!ok)console.warn('Mercenary halo verification failed',ids.map(id=>({id,component:!!C(id),enabled:C(id)?.enabled,intensity:C(id)?.intensity})));return ok}
 
 function gearColors(item){const vis=itemVisual(item);return{a:vis.c1,b:(item.affinities?.length||0)>=2?vis.c2:vis.c1,dual:(item.affinities?.length||0)>=2,demo:item?.demoExperimental&&item?.demoMaterial?.color?item.demoMaterial.color:null}}
+
+/* ML08: real NGE channels illuminate actual sword/shield geometry in combined GLB.
+ * Old effects were applied only to entities hidden when V049 was enabled.
+ * No arbitrary affinities or changes to PBR textures.
+ */
+function mercML08Channels(item){
+ return (item?.affinities||[]).map(row=>({
+   name:String(row?.[0]||''),intensity:Math.max(0,Math.min(100,Number(row?.[1])||0))
+ })).filter(c=>c.intensity>0&&c.name!=='Base'&&AFFINITY_VISUAL[c.name])
+ .sort((a,b)=>b.intensity-a.intensity).slice(0,2);
+}
+function mercML08GearHalo(){
+ if(!GENESIS_MERCENARY_LAB)return false;
+ const root=mercNode('mercApprovedGearDisplay')?.contentEntity;
+ if(!root)return false;
+ const slots=[
+   {key:'sword',node:'GENESIS_V048_APPROVED_SWORD_V12B_IN_RIGHT_HAND_STATIC',item:mercSwordItem,range:.85},
+   {key:'shield',node:'GENESIS_V048_APPROVED_SHIELD_V015_IN_LEFT_HAND_STATIC',item:mercShieldItem,range:.72}
+ ];
+ const report={};
+ for(const slot of slots){
+   const node=root.findByName?.(slot.node);
+   if(!node){console.warn('ML08 missing real gear node',slot.node);report[slot.key]={error:'missing_node'};continue;}
+   for(const child of [...node.children])if(child.name?.startsWith('GENESIS_ML08_CHANNEL_'))child.destroy();
+   const channels=mercML08Channels(slot.item);
+   report[slot.key]={recipe:slot.item?.recipe||'',channels,attached:0,node:node.name};
+   for(const [i,c] of channels.entries()){
+     const [r,g,b]=hexRgb(AFFINITY_VISUAL[c.name]);
+     const fx=new Entity('GENESIS_ML08_CHANNEL_'+slot.key+'_'+c.name);
+     fx.addComponent('light',{
+       type:'omni',color:new Color(r,g,b),
+       intensity:(.30+2.60*c.intensity/100)*(i? .68:1),
+       range:slot.range*(.80+.55*c.intensity/100),castShadows:false
+     });
+     node.addChild(fx);
+     fx.setLocalPosition(i===0?0:.06,i===0?0:.07:-.07,i===0?0:.05:-.06);
+     report[slot.key].attached++;
+   }
+ }
+ window.__GENESIS_MERCENARY_LAB&&Object.assign(window.__GENESIS_MERCENARY_LAB,{halo:report,haloFromNGE:true});
+ return report.sword?.attached!==undefined&&report.shield?.attached!==undefined;
+}
+
 function mercBaseStats(){return MERC_CANDIDATES[mercCandidate]?.stats||{damage:0,protection:0,vitality:0,mobility:0}}
 const MERC_STAT_MODE='PROTOTYPE_BASE_1_TO_1_NON_CANON';
 function mercGearDelta(a=mercGearRoute()==='Curtidor'?mercArmorItem:mercSwordItem,b=mercGearRoute()==='Curtidor'?mercBootsItem:mercShieldItem){/* Demo 1:1 sólo para lectura del dossier; DS-012 no fija todavía la conversión final. */if(mercGearRoute()==='Curtidor')return{damage:0,protection:(a?Number(a.channels?.[0]?.[1]||0):0)+(b?Number(b.channels?.[0]?.[1]||0):0)};return{damage:a?Number(a.channels?.[0]?.[1]||0):0,protection:b?Number(b.channels?.[0]?.[1]||0):0}}
@@ -1680,6 +1723,7 @@ if(GENESIS_MERCENARY_LAB){
   ['mercBodyModel','mercBodyRangerModel','mercHeadModel','mercHairPartedModel','mercHairBuzzModel','mercHairLongModel','mercBeardModel','mercSwordModel','mercShieldModel'].forEach(id=>{const e=E(id);if(e)e.enabled=false});
   display.enabled=true;display.setLocalPosition(0,0,0);display.setLocalEulerAngles(0,0,0);display.setLocalScale(1,1,1);
   mercenaryRoot.syncHierarchy?.();
+  mercML08GearHalo(); // apply to actual V049 attachments, not hidden legacy meshes.
   if(window.__GENESIS_MERCENARY_LAB)Object.assign(window.__GENESIS_MERCENARY_LAB,{approved3d:true,model:'V049_SWORD_V12B_SHIELD_V015',modelNodeCount:source.contentEntity.children?.length||0});
 }
 return true}
