@@ -16,6 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # Avoid detached PR synthetic merge commit: push only the actual head branch.
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
           persist-credentials: true
       - name: Validate source references and unmodified approved shader snapshots
         run: |
