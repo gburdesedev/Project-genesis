@@ -239,7 +239,7 @@ window.__genesisAppError=function(event){
   <pc-asset id="mercHairLong10" type="container" src="https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/characters/hair_long.glb" lazy></pc-asset>
   <pc-asset id="mercSword10" type="container" src="https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/sword.glb" lazy></pc-asset>
   <pc-asset id="mercShield10" type="container" src="https://cdn.jsdelivr.net/gh/Genesara/genesara-web@main/public/models/props/shield_round.glb" lazy></pc-asset>
-  <pc-asset id="mercV049Exact" type="container" src="./assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb" lazy></pc-asset>
+  <pc-asset id="mercV049Exact" type="container" src="./assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_V12B_V015_BALANCED_ML06.glb" lazy></pc-asset>
 
   <!-- v0.8.8: props authored; sin squash falso ni animaciones físicamente absurdas. -->
   <pc-asset id="roofReal086" type="container" src="https://cdn.jsdelivr.net/gh/agentkaerf/FreeModels@main/Medieval%20Village%20MegaKit%5BStandard%5D/glTF/Roof_RoundTiles_6x10.gltf" lazy></pc-asset>
@@ -1623,7 +1623,7 @@ function showMercenaryEquipment(editing=false,reuseDraft=false){
     const activeFirst=tanner?mercArmorItem:mercSwordItem,activeSecond=tanner?mercBootsItem:mercShieldItem;
     return window.GenesisMercenaryConcept.open({
       modal,mercName:candidate.label,candidate:mercCandidate,body:candidate.body,editing,tanner,
-      modelUrl:GENESIS_MERCENARY_LAB?"./assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb":undefined,
+      modelUrl:GENESIS_MERCENARY_LAB?"./assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_V12B_V015_BALANCED_ML06.glb":undefined,
       onInventory:GENESIS_MERCENARY_LAB?showApprovedInventoryForMercenary:undefined,
       labelFirst:tanner?'Armadura':'Arma',labelSecond:tanner?'Botas':'Escudo',
       familyFirst:tanner?'Armaduras':'Espadas',familySecond:tanner?'Botas':'Escudos',
