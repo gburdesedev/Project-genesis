@@ -68,3 +68,23 @@ jobs:
           else
             echo 'Generated assets already present'
           fi
+
+      - name: Export exact rebuilt screen files for independent Chromium QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-fabricaciones-v004-ora-visual-source
+          retention-days: 7
+          path: |
+            assets/ui/approved/Fabricaciones_V07_APROBADA_1672x941.png
+            assets/ui/fabricaciones_ora_v004/
+            assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png
+            assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png
+            assets/playcanvas/approved/materials/charcoal/v011/carbon_vegetal_v011_poster.png
+            assets/playcanvas/approved/equipment/espada_v03_hierro_v175_v12b_cycles_hdri32.png
+            genesis_ui_approved.css
+            genesis_ui_approved.js
+            genesis_fabricacion_modular_v004.css
+            genesis_fabricacion_modular_v004.js
+            fabricaciones-v004-preview.html
+            tests/fabricaciones_v004_runtime_qa.cjs
