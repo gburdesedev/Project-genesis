@@ -334,7 +334,8 @@
   filter:drop-shadow(0 0 .2cqw #6ce5ff);
   animation:pg11-frost 2.4s linear infinite;
 }
-.pg4tShell .pv9Hero.pv9ModelReady .pg4tHeroAnimatedChannel{display:none!important}
+/* model-viewer uses a separate renderer; retain the 2D channel cue until its shader is ported. */
+.pg4tShell .pv9Hero.pv9ModelReady .pg4tHeroAnimatedChannel{display:block!important}
 @keyframes pg11-electric{from{transform:translateY(-16%) skewX(-5deg);opacity:.7}50%{opacity:1}to{transform:translateY(18%) skewX(8deg);opacity:.66}}
 @keyframes pg11-flame{from{transform:translateY(12%) scale(.90,1.05);opacity:.5}to{transform:translateY(-12%) scale(1.10,1.16);opacity:1}}
 @keyframes pg11-frost{from{transform:rotate(0deg) scale(.98);opacity:.48}50%{opacity:.92}to{transform:rotate(55deg) scale(1.04);opacity:.5}}
