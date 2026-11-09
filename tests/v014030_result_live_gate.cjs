@@ -21,18 +21,28 @@ assert.ok(!pending.includes('Hielo'),'No invented channel');
 assert.equal(viewer.approvedModel(item),null);
 const auth='e2228f078b2572768416c48c0e63c2d908f214e2c0625a2ab754c877a099112b';
 sandbox.window.GenesisApprovedRuntimeModels={espada_hierro:{
-  status:'approved',recipe:'espada_hierro',sha256:auth,
+  status:'approved',recipe:'espada_hierro',sourceSha256:auth,
+  exportSha256:'a'.repeat(64),gameExportApproved:true,distributionRightsConfirmed:true,
+  materialPreset:'Genesis_Espada_V03_Hierro_V175_V12B',
   url:'https://example.com/unrelated_sword.glb'
 }};
 assert.equal(viewer.approvedModel(item),null,'External replacement must be rejected');
 sandbox.window.GenesisApprovedRuntimeModels.espada_hierro.url='./assets/playcanvas/approved/equipment/GENESIS_V03_V175_V12B.glb';
-sandbox.window.GenesisApprovedRuntimeModels.espada_hierro.sha256='bad-provenance';
-assert.equal(viewer.approvedModel(item),null,'Wrong model hash must be rejected');
-sandbox.window.GenesisApprovedRuntimeModels.espada_hierro.sha256=auth;
+sandbox.window.GenesisApprovedRuntimeModels.espada_hierro.sourceSha256='bad-provenance';
+assert.equal(viewer.approvedModel(item),null,'Wrong source hash must be rejected');
+sandbox.window.GenesisApprovedRuntimeModels.espada_hierro.sourceSha256=auth;
+sandbox.window.GenesisApprovedRuntimeModels.espada_hierro.distributionRightsConfirmed=false;
+assert.equal(viewer.approvedModel(item),null,'No standalone redistribution before license check');
+sandbox.window.GenesisApprovedRuntimeModels.espada_hierro.distributionRightsConfirmed=true;
+sandbox.window.GenesisApprovedRuntimeModels.espada_hierro.gameExportApproved=false;
+assert.equal(viewer.approvedModel(item),null,'A Blender preset is not approval of the game GLB');
+sandbox.window.GenesisApprovedRuntimeModels.espada_hierro.gameExportApproved=true;
 const candidate=viewer.render(item,oldImage);
 assert.match(candidate,/<model-viewer/);
 assert.match(candidate,/GENESIS_V03_V175_V12B\.glb/);
 assert.match(candidate,/data-genesis-model-state="loading"/);
+assert.match(candidate,/data-genesis-real-src/);
+assert.ok(!/<model-viewer[^>]* src=/.test(candidate),'Do not load a model before GLB byte verification');
 assert.ok(candidate.includes(oldImage),'Keep true image until genuine GLB finishes loading');
 assert.ok(!candidate.includes('Hielo'),'Never create an effect not rolled by NGE');
 assert.match(html,/Project Genesis v0\.14\.030/);
