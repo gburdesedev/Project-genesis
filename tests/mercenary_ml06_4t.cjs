@@ -80,6 +80,32 @@ const server=http.createServer((req,res)=>{
    assert.equal(shields.length,2,'Both shields must have channel-bound live visual wrappers');
    assert.ok(shields.every(s=>s.img.includes('V015_REAL_SHIELD_ICON_RGBA.png')));
    state.channelFX={shield:shields,obsoleteOraLoaded:false};
+   // ML08: all displayed channels must load their actual recovered V3.2 ORA PNGs.
+   await page.locator('img[data-approved-ora="Base"]').waitFor({timeout:9000});
+   await page.waitForFunction(()=>[...document.querySelectorAll('.pg4tShell img[data-approved-ora]')].every(x=>x.complete&&x.naturalWidth>=980),null,{timeout:10000});
+   const oraRows=await page.locator('.pg4tShell .mcChannel').evaluateAll(els=>els.map(el=>{
+     const img=el.querySelector('img[data-approved-ora]');
+     return {name:el.dataset.channel,src:img?.getAttribute('src'),loaded:img?.naturalWidth>0};
+   }));
+   assert.ok(oraRows.length>0,'must show actual NGE channels in comparison');
+   assert.ok(oraRows.every(c=>c.loaded&&c.src.includes('assets/ui/resultado/oras/')),'No placeholder / old ORA');
+   assert.equal(await page.locator('.pg4tShell .pg4tChannelPending').count(),0);
+   assert.equal(await page.locator('.pg4tShell .pg4tOraLoadError').count(),0);
+   // Compare actual rectangles of each icon inner box against the live slot bounds.
+   const bounds=await page.locator('.pg4tShell').evaluate(root=>{
+     const groups=['.pv9Grid .mcInventorySlot.hasItem','.pv9Slot.mcEquipSlot','.pv9ComparisonIcon'];
+     const result=[];
+     for(const selector of groups)for(const slot of root.querySelectorAll(selector)){
+       const inner=slot.querySelector('.pg4tIconFit');if(!inner)continue;
+       const box=slot.getBoundingClientRect(),r=inner.getBoundingClientRect(),epsilon=1;
+       result.push({kind:selector,contained:r.left>=box.left-epsilon&&r.right<=box.right+epsilon&&r.top>=box.top-epsilon&&r.bottom<=box.bottom+epsilon,
+         ratio:+(r.width/Math.max(1,box.width)).toFixed(2)});
+     }
+     return result;
+   });
+   assert.ok(bounds.length>=4,'need tested icons in inventory/gear/comparison');
+   assert.ok(bounds.every(x=>x.contained),'Icon out of its slot: '+JSON.stringify(bounds));
+   state.ml08={oraRows,bounds};
    await page.screenshot({path:path.join(OUT,'03-4t-escudos-v015.png'),fullPage:true,timeout:25000});
    await page.locator('[data-action="equip"]').click();
    await page.waitForFunction(()=>window.__GENESIS_MERCENARY_LAB?.status==='equipped',null,{timeout:125000}).catch(()=>null);
