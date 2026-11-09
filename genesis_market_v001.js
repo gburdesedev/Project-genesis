@@ -4,6 +4,7 @@
 */
 import { Entity, StandardMaterial, Color } from 'playcanvas';
 import './genesis_market_domain_v001.js?v=0.14.022';
+import './genesis_ui_approved.js?v=market-v003';
 
 const POS = Object.freeze({x:25.5,y:0,z:36.3});
 const STALL = Object.freeze({x:28.35,y:0,z:37.6});
