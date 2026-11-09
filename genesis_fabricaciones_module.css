@@ -1,0 +1,53 @@
+/* Project Genesis — Fabricaciones module. Scoped; no rules outside .gfmBoard.
+   Existing 1672x941 approved PNG, master CSS and all other menus stay unchanged. */
+.gfmBoard{font-family:Georgia,"Times New Roman",serif}
+.gfmBoard *{box-sizing:border-box}
+.gfmBoard .gfmTab,.gfmBoard .gfmClose{position:absolute;z-index:9;border:0;background:transparent;cursor:pointer}
+.gfmBoard .gfmTab:hover,.gfmBoard .gfmTab:focus-visible{background:linear-gradient(transparent,#efab4825);outline:0}
+.gfmBoard .gfmTree,.gfmBoard .gfmDetails{position:absolute;z-index:5;background:linear-gradient(135deg,#130f0d 0%,#090808 55%,#130e0a 100%);overflow:hidden;color:#f0d5a1;border:1px solid #725025;box-shadow:inset 0 0 18px #000}
+.gfmBoard .gfmTree{display:flex;flex-direction:column;padding:0.8% 0.6% 1%}
+.gfmBoard .gfmTree header{font-size:1.36cqw;letter-spacing:.035em;color:#f2cd8f;text-align:center;min-height:7%;border-bottom:1px solid #8c6331;white-space:nowrap}
+.gfmBoard .gfmTree header span{color:#e0ae5c;font-size:1.6cqw}
+.gfmBoard .gfmTreeScroll{flex:1;overflow-y:auto;min-height:0;scrollbar-width:thin;scrollbar-color:#9a6c32 #19110a;padding:1% 0}
+.gfmBoard .gfmTreeFamily{margin-bottom:1.5%;border:0}
+.gfmBoard .gfmFamily{width:100%;min-height:3.4cqw;display:flex;align-items:center;gap:2%;padding:0 3%;border:1px solid #664725;background:linear-gradient(90deg,#130f0d,#231811,#0b0908);color:#f4dfb7;text-align:left;font-size:1.25cqw;cursor:pointer}
+.gfmBoard .gfmFamily i{font-style:normal;font-size:1.7cqw;margin:0 3%}
+.gfmBoard .gfmFamily strong,.gfmBoard .gfmMaterialFamily strong{font-weight:normal}
+.gfmBoard .gfmMaterialFamily{display:flex;align-items:center;gap:4%;padding:2.5% 2% 2.5% 8%;font-size:1.1cqw;min-height:2.4cqw}
+.gfmBoard .gfmRecipeChildren{padding-left:14%;border-left:1px solid #805b26;margin-left:9%}
+.gfmBoard .gfmRecipe{width:98%;display:flex;align-items:center;gap:7%;min-height:2.85cqw;margin:0 0 1.3%;padding:0 4%;border:1px solid #4c3d2d;background:linear-gradient(90deg,#0e0d0c,#1a1411);color:#f0dcc0;text-align:left;font-size:1.02cqw;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gfmBoard .gfmRecipeIcon{font-size:1.5cqw;flex:0 0 auto}
+.gfmBoard .gfmRecipe.is-current{border-color:#e1ab50;background:linear-gradient(90deg,#3e2512,#4d2b10b5,#22160e);box-shadow:inset 0 0 0 1px #e6a34f,0 0 12px #ffad4266;color:#fff0ce}
+.gfmBoard .gfmRecipe:hover{border-color:#f0bd6a}
+.gfmBoard .gfmViewer{position:absolute;z-index:5;overflow:hidden;border:1px solid #87612e;box-shadow:inset 0 0 8px #000}
+.gfmBoard .gfmForge{position:absolute;inset:0;background-color:#25150e;background-repeat:no-repeat;background-position:center;background-size:cover}
+.gfmBoard .gfmForge:after{content:"";position:absolute;inset:0;background:linear-gradient(#0002,transparent 30%,#0005)}
+.gfmBoard .gfmViewport{position:absolute;inset:0 0 7.4%;display:grid;place-items:center;overflow:hidden}
+.gfmBoard .gfmViewerModel{display:block;width:100%;height:100%;background:transparent;--progress-bar-color:transparent}
+.gfmBoard .gfmViewerEmpty{width:100%;height:100%}
+.gfmBoard .gfmViewerLabel{position:absolute;bottom:1.1%;left:16%;width:68%;height:5.5%;border:1px solid #bb8238;background:linear-gradient(90deg,#100a09e8,#26180de8,#100a09e8);text-align:center;display:flex;align-items:center;justify-content:center;color:#f6dca9;font-size:1.18cqw;box-shadow:0 3px 14px #000a}
+.gfmBoard .gfmDetails{display:flex;flex-direction:column;padding:1.1% 1.2% 1.2%}
+.gfmBoard .gfmDetailsHead{height:15%;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-bottom:1px solid #9b7031}
+.gfmBoard .gfmDetailsHead h2{font-size:1.65cqw;font-weight:normal;line-height:1.08;text-transform:uppercase;margin:0;color:#ffdcaa;white-space:normal}
+.gfmBoard .gfmDetailsHead p{font-size:1.07cqw;color:#ddc5a5;margin:2% 0 0}
+.gfmBoard .gfmMaterialsHeader{text-align:center;color:#efc990;font-size:1.15cqw;letter-spacing:.055em;padding:2.3% 0 1.5%}
+.gfmBoard .gfmMaterialsList{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#98622b #160e09;display:flex;flex-direction:column;gap:1%;padding:0 .5%}
+.gfmBoard .gfmMaterialRow{display:flex;gap:3%;align-items:center;flex:0 0 auto;min-height:4.45cqw;max-height:none;padding:1% 2%;border:1px solid #9e682c;background:linear-gradient(110deg,#110d0b,#1c1510,#110d0b)}
+.gfmBoard .gfmMaterialIcon{width:19%;aspect-ratio:1;flex:0 0 19%;display:grid;place-items:center;overflow:hidden;border:1px solid #76502a;background:#090807}
+.gfmBoard .gfmMaterialIcon img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 5px #000)}
+.gfmBoard .gfmUnknownMaterial{font-size:2cqw;color:#ad8655}
+.gfmBoard .gfmMaterialInfo{flex:1;min-width:0}
+.gfmBoard .gfmMaterialInfo strong{display:block;font-size:1.04cqw;font-weight:normal;color:#ffe0b4;margin-bottom:2%;overflow-wrap:anywhere}
+.gfmBoard .gfmMaterialInfo div{display:flex;justify-content:space-between;gap:2%;font-size:.85cqw;line-height:1.2;color:#e5cba5}
+.gfmBoard .gfmMaterialInfo b{font-weight:normal;color:#a9dcac;min-width:1.4em;text-align:right}
+.gfmBoard .gfmMaterialRow.missing .gfmMaterialInfo b{color:#ec9c74}
+.gfmBoard .gfmEmptyIngredients{font-size:1cqw}
+.gfmBoard .gfmStatus{min-height:12%;display:flex;flex-direction:column;align-items:center;justify-content:center;border-top:1px solid #8c6029;gap:2%;font-size:1.06cqw;color:#f1d6a2}
+.gfmBoard .gfmStatus strong{font-size:1.35cqw;font-weight:normal}
+.gfmBoard .gfmStatus .ready{color:#8fe3a4}
+.gfmBoard .gfmStatus .blocked{color:#e4a777}
+.gfmBoard .gfmCraft{flex:0 0 13%;border:2px ridge #bc8a47;box-shadow:inset 0 0 0 3px #2d1c0c,0 0 12px #b173287a;background:linear-gradient(120deg,#130d09,#452b0c,#1b0d09);color:#ffdfa9;font:normal 1.8cqw Georgia,serif;letter-spacing:.025em;cursor:pointer}
+.gfmBoard .gfmCraft span{font-size:2cqw;margin-right:5%}
+.gfmBoard .gfmCraft:disabled{opacity:.6;cursor:not-allowed;filter:grayscale(.3)}
+.gfmBoard .gfmCraft:not(:disabled):hover{filter:brightness(1.2)}
+@media(max-width:760px){.gfmBoard .gfmDetailsHead h2{font-size:1.6cqw}.gfmBoard .gfmRecipe{min-height:3.2cqw}.gfmBoard .gfmMaterialsList{gap:0}}
