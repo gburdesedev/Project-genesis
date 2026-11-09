@@ -58,8 +58,8 @@
         ' camera-controls interaction-prompt="none" shadow-intensity=".75" environment-image="neutral" exposure="1.16" camera-orbit="25deg 75deg auto" alt="'+esc(s.name)+'"></model-viewer>'+
         '<span class="grViewerStatus" aria-live="polite">Modelo GLB aprobado · arrastrá para rotar</span>';
     }
-    if(s.recipe==="espada_hierro")return '<img class="grSwordPoster" src="'+esc(approvedSwordPoster)+'" alt="Render original V175 V12B de espada de hierro">'+
-      '<span class="grViewerStatus" aria-live="polite">Render Cycles V175/V12B · GLB jugable pendiente</span>';
+    if(s.recipe==="espada_hierro")return '<iframe class="grSwordInteractive" data-sword-v12b="true" src="./genesis_sword_runtime_v001.html?v=016001" title="Inspección interactiva 3D de la espada V175 V12B" allow="fullscreen"></iframe>'+
+      '<span class="grViewerStatus" aria-live="polite">V12B · Arrastrá para girar · Rueda para zoom · Fuente 3D real experimental</span>';
     // Para otros objetos, emplear exclusivamente el adaptador del juego.
     const fallback=typeof renderAsset==="function"?renderAsset(s.source):"";
     return '<div class="grOtherItem">'+fallback+'</div><span class="grViewerStatus">Visual del objeto del inventario</span>';
