@@ -25,6 +25,7 @@ jobs:
           persist-credentials: false
       - name: Verify exact game commit and public version without modifying it
         working-directory: game
+        shell: bash
         run: |
           set -euo pipefail
           actual="$(git rev-parse HEAD)"
