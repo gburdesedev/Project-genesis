@@ -8,6 +8,14 @@
   // Legacy V09 channel images deliberately excluded: they are not final approved ORAs.
   const ART = 'assets/ui/mercenary/4t/';
   const CHANNELS = ['Base','Luz','Sombra','Fuego','Hielo','Naturaleza','Tierra','Rayo'];
+  // V3.2 originals recovered from the real Resultado de Creaciones branch.
+  // Paths and PNG checksums are retained in assets/ui/resultado/oras/manifest.sha256.json.
+  const ORA = Object.freeze({
+    Base:'01_Base.png',Luz:'02_Luz.png',Sombra:'03_Sombra.png',
+    Fuego:'04_Fuego.png',Hielo:'05_Hielo.png',Naturaleza:'06_Naturaleza.png',
+    Tierra:'07_Tierra.png',Rayo:'08_Rayo.png'
+  });
+  const ORA_ROOT='assets/ui/resultado/oras/';
   const COLOR = Object.freeze({Base:'#b7c2ca',Luz:'#ffffff',Sombra:'#8b5cf6',Fuego:'#ff3b30',Hielo:'#67d9ff',Naturaleza:'#69c66a',Tierra:'#8b5a2b',Rayo:'#1f3f8f'});
   function dominant(item) {
     const elements=readChannels(item).filter(c=>c.name!=='Base'&&COLOR[c.name]&&c.value>0).sort((a,b)=>b.value-a.value);
@@ -49,7 +57,7 @@
         : (typeof opts.itemIcon==='function' ? opts.itemIcon(item.recipe) : '');
       if(typeof url!=='string'||!url.trim())return '';
       const fx=dominant(item), glow=fx.strength;
-      return `<span class="pg4tItemVisual" data-affinity="${esc(fx.first)}" data-secondary="${esc(fx.second||'')}" style="--fx-color:${fx.color};--fx-color-2:${fx.color2};--fx-strength:${glow.toFixed(2)}"><img src="${esc(url)}" alt="${esc(item.recipe||'Objeto')}" draggable="false"></span>`;
+      return `<span class="pg4tItemVisual" data-affinity="${esc(fx.first)}" data-secondary="${esc(fx.second||'')}" style="--fx-color:${fx.color};--fx-color-2:${fx.color2};--fx-strength:${glow.toFixed(2)}"><span class="pg4tIconFit"><img src="${esc(url)}" alt="${esc(item.recipe||'Objeto')}" draggable="false"></span></span>`;
     }
     function pool() { return pools[state.family]; }
     function selected() { return state.item || (state.family === 'first' ? state.draftFirst : state.draftSecond); }
@@ -80,7 +88,8 @@
         const known=CHANNELS.includes(row.name);
         const delta = row.a && row.b ? row.b.value-row.a.value : null;
         const value=v=>v? (row.name==='Base'?String(v.value):'+'+v.value+'%') : '—';
-        return `<div class="mcChannel" data-channel="${esc(row.name)}" style="--fx-color:${COLOR[row.name]||COLOR.Base}"><span class="pv9ChannelArtwork pg4tChannelPending" title="ORA definitivo: fuente aún no integrada">${esc(row.name)}</span><span class="mcChannelNum">${value(row.a)}</span><span class="mcChannelNum ${delta===null?'':delta>0?'increase':delta<0?'decrease':'same'}">${value(row.b)}</span></div>`;
+        const src=ORA[row.name];
+        return `<div class="mcChannel" data-channel="${esc(row.name)}" style="--fx-color:${COLOR[row.name]||COLOR.Base}"><span class="pv9ChannelArtwork pg4tChannelApproved">${src?`<img data-approved-ora="${esc(row.name)}" src="${ORA_ROOT+src}" alt="${esc(row.name)}" decoding="async">`:`<span class="pg4tOraMissing" role="status">Canal no reconocido</span>`}</span><span class="mcChannelNum">${value(row.a)}</span><span class="mcChannelNum ${delta===null?'':delta>0?'increase':delta<0?'decrease':'same'}">${value(row.b)}</span></div>`;
       }).join('');
       const overlay = state.modal === 'sheet' ? `<div class="mcOverlay"><section><h2>FICHA DEL MERCENARIO</h2>${typeof opts.getStatsHTML==='function'?opts.getStatsHTML(state.draftFirst,state.draftSecond):opts.statsHTML || '<p>Sin datos registrados.</p>'}<button data-action="dismiss">VOLVER</button></section></div>` :
         state.modal === 'inventory' ? `<div class="mcOverlay"><section><h2>INVENTARIO DEL MERCENARIO</h2>${typeof opts.getMercInventoryHTML==='function'?opts.getMercInventoryHTML(state.draftFirst,state.draftSecond):'<p>Sin objetos asignados.</p>'}<button data-action="dismiss">VOLVER</button></section></div>` :
@@ -108,6 +117,12 @@
       const existingViewer=document.querySelector('.mercConcept .pv9Viewer');
       opts.modal(html,'mercenaryModal mercConceptModal');
       const board=document.querySelector('.pv9Board');if(!board)return;
+      // Never reintroduce temporary V09 channel art. A missing approved PNG is a
+      // diagnostic failure, rather than a green/yellow substitute invented in CSS.
+      board.querySelectorAll('img[data-approved-ora]').forEach(ora=>{
+        ora.addEventListener('error',()=>{ora.closest('.mcChannel')?.classList.add('pg4tOraLoadError');},{once:true});
+        if(ora.complete&&!ora.naturalWidth)ora.closest('.mcChannel')?.classList.add('pg4tOraLoadError');
+      });
       const placeholder=board.querySelector('.pv9Viewer');
       if(existingViewer&&placeholder&&existingViewer.getAttribute('data-asset-src')===placeholder.getAttribute('data-asset-src')){
         placeholder.replaceWith(existingViewer);
