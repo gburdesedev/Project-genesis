@@ -36,9 +36,25 @@
  color:#f4d5a1;font-size:1.45cqw;background:#110b09ed;
  border:1px solid #987041;border-radius:8px;text-shadow:0 2px 3px #000;
 }
-.gFabTitle{text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center}
-.gFabTitle h2{margin:0;color:#f9d9a0;font-size:2.35cqw!important;font-weight:normal;text-transform:uppercase;line-height:1.15}
-.gFabTitle span{font-size:1.12cqw;color:#e1c7a2;margin-top:3%}
+/* ORA V004: right title is a SINGLE dynamic text element on the CLEAN
+   title plate; never a box or a second text painted on top of baked text. */
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabTitle{
+ text-align:center;display:flex;flex-direction:column;
+ justify-content:center;align-items:center;
+ padding:0 3%;background:none!important;border:0!important;
+ box-shadow:none!important;overflow:hidden;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabTitle h2{
+ margin:0!important;max-width:100%;
+ color:#f0d2a2;font:normal 2.05cqw/1.16 Georgia,'Times New Roman',serif!important;
+ letter-spacing:.045em;text-transform:uppercase;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ text-shadow:0 2px 2px #000b;
+}
+.gApproved-Fabricaciones[data-ora-modular="V004"] .gFabTitle span{
+ color:#c5b7a3;font-size:1cqw;letter-spacing:.03em;
+ margin-top:2%;text-shadow:0 1px 2px #000b;
+}
 .gFabMaterialsLabel{color:#f3d5a0;text-align:center;display:flex;align-items:center;justify-content:center;font-size:1.35cqw;letter-spacing:.075em}
 .gFabMaterials{display:flex;flex-direction:column;gap:1.5%;overflow-y:auto;padding:1% 1.5%;scrollbar-color:#8c5d2d #160e09;pointer-events:auto}
 .gFabMat{display:flex;align-items:center;width:100%;min-height:30.5%;flex:1 0 auto;
