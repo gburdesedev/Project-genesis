@@ -1,0 +1,72 @@
+/* PROJECT GENESIS — ML06 runtime integration, NOT a redesign.
+   Background is the exact 1671x941 owner-approved 4-T PNG, sha256:
+   3e4236ca819ab449dce5ee6677b43a2684bd51f650d6cdbcd46a4868d6ebdbca
+   Original PNG is immutable; all responsive, item and hero content overlays it. */
+#modalLayer:has(.pg4tShell){padding:0!important}
+#modalLayer .mercConceptModal:has(.pg4tShell){
+  width:min(99vw,calc(99dvh * 1671 / 941))!important;
+  height:auto!important;aspect-ratio:1671/941!important;
+  max-width:none!important;max-height:99dvh!important;
+  padding:0!important;border:0!important;background:none!important;overflow:hidden!important
+}
+.mercConcept.pg4tShell{
+  display:block!important;aspect-ratio:1671/941!important;
+  width:100%!important;height:100%!important;
+  background-color:#100b07!important;
+  background-image:url('assets/ui/mercenary/4t/Genesis_Mercenario_4T_Estado_Vacio_APROBADO.png')!important;
+  background-position:center!important;background-size:100% 100%!important;background-repeat:no-repeat!important;
+  position:relative;isolation:isolate;overflow:hidden!important;
+  container-type:inline-size
+}
+.pg4tShell .pv9Board{position:relative;width:100%;height:100%;z-index:1}
+.pg4tShell .pv9Hero{
+  position:absolute!important;left:36.5%!important;top:22.5%!important;
+  width:22.8%!important;height:53.1%!important;overflow:hidden!important;z-index:4!important;
+  pointer-events:auto!important
+}
+/* The transparent Cycles reference is derived from the genuine V050 GLB, not a concept.
+   Display while the browser has not successfully created a visible 3-D WebGL frame. */
+.pg4tShell .pv9RealCyclesPoster{
+  display:block!important;position:absolute!important;inset:0!important;
+  width:100%!important;height:100%!important;object-fit:contain!important;object-position:50% 50%!important;
+  background:transparent!important;filter:drop-shadow(0 .2cqw .45cqw #0009)!important;
+  z-index:2!important;opacity:1!important
+}
+.pg4tShell .pv9Hero .pv9Viewer{
+  position:absolute!important;inset:0!important;
+  width:100%!important;height:100%!important;
+  background:transparent!important;--poster-color:transparent!important;
+  z-index:3!important;opacity:0!important;transition:opacity .25s ease!important
+}
+.pg4tShell .pv9Hero.pv9ModelReady .pv9Viewer{opacity:1!important}
+.pg4tShell .pv9Hero.pv9ModelReady .pv9RealCyclesPoster{opacity:0!important}
+/* Real render-derived V12B and V015 thumbnails in the original 4-T small slots. */
+.pg4tShell .pv9Grid{
+  left:2.67%!important;top:41.9%!important;width:24.1%!important;height:50.2%!important;
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  grid-template-rows:repeat(5,minmax(0,1fr))!important;gap:.39cqw!important
+}
+.pg4tShell .pv9Grid .mcInventorySlot{
+  display:flex!important;justify-content:center!important;align-items:center!important;
+  min-width:0!important;min-height:0!important;overflow:hidden!important;
+  padding:.22cqw!important;opacity:1!important
+}
+.pg4tShell .pv9Grid .mcInventorySlot.hasItem img{
+  width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;
+  object-fit:contain!important;object-position:center!important;
+  filter:drop-shadow(0 .13cqw .25cqw #000)!important
+}
+.pg4tShell .pv9Grid .mcInventorySlot.selected{outline:2px solid #f8c765!important;outline-offset:-2px!important;background:rgba(236,151,33,.13)!important}
+.pg4tShell .pv9Slot.isActive img{
+  display:block!important;width:84%!important;height:84%!important;max-width:84%!important;max-height:84%!important;
+  object-fit:contain!important;filter:drop-shadow(0 .12cqw .2cqw #000a)
+}
+.pg4tShell .pv9CompareEquipped img,.pg4tShell .pv9CompareSelected img{object-fit:contain!important}
+.pg4tShell .pv9CompareEquipped,.pg4tShell .pv9CompareSelected{overflow:hidden!important}
+/* Restrict long procedural NGE names and channels to their existing frames. */
+.pg4tShell .pv9ComparisonContents{max-width:100%!important;overflow:hidden!important}
+.pg4tShell .pv9ComparisonName{max-width:100%!important;overflow:hidden!important;overflow-wrap:anywhere!important}
+.pg4tShell .pv9Channels{overflow-x:hidden!important}
+.pg4tShell .mcChannelNum{white-space:nowrap!important}
+/* Do not block user interactions over original buttons, family rows, or slots. */
+.pg4tShell :is(.pv9Target,.pv9Slot,.mcInventorySlot){touch-action:manipulation}
