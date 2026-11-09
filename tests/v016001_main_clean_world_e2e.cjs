@@ -22,7 +22,7 @@ try{
  page.on('pageerror',e=>report.errors.push('JS '+e.message.slice(0,200)));
  page.on('response',r=>{if(r.status()>=400&&report.errors.length<20)report.errors.push('HTTP '+r.status()+' '+r.url().slice(0,160))});
  await page.goto('http://127.0.0.1:'+srv.address().port+'/index.html',{waitUntil:'domcontentloaded',timeout:50000});
- try{await page.locator('[data-profession="Herrero"]').waitFor({state:'visible',timeout:125000})}
+ try{await page.locator('[data-profession="Herrero"]').waitFor({state:'visible',timeout:45000})}
  catch(e){report.boot=await page.evaluate(()=>({state:document.getElementById('loadState')?.textContent,count:document.getElementById('loadCount')?.textContent,detail:document.getElementById('loadDetail')?.textContent,loading:document.querySelector('#loading')?.style.display,intro:document.getElementById('prototypeIntro')?.style.display,introComputed:getComputedStyle(document.getElementById('prototypeIntro')).display,button:(()=>{const el=document.querySelector('[data-profession="Herrero"]');const r=el.getBoundingClientRect(),st=getComputedStyle(el);return {rect:r.toJSON(),display:st.display,visibility:st.visibility,opacity:st.opacity,disabled:el.disabled,closestHidden:el.closest('[hidden]')?.id,scrollParent:document.querySelector('#prototypeIntro .protoIntroCard')?.scrollTop}})(),overlay:(()=>{const b=document.querySelector('[data-profession="Herrero"]').getBoundingClientRect();return document.elementFromPoint(b.x+b.width/2,b.y+b.height/2)?.outerHTML.slice(0,200)})(),boot:window.__genesisBoot}));throw Error('No visible Herrero selector after boot: '+JSON.stringify(report.boot))}
  report.events.push('MAIN HERRERO SELECTOR VISIBLE');
  await page.locator('[data-profession="Herrero"]').click({timeout:20000});
