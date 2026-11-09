@@ -1,0 +1,63 @@
+name: ML05 vendor approved UI and exact V12B-V015 equipment
+on:
+  push:
+    branches:
+      - experiment/v014027-mercenario-directo-equipamiento-20261108
+    paths:
+      - '.github/workflows/mercenary-lab-ml05-vendor.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  vendor-approved-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout ONLY experimental branch
+        uses: actions/checkout@v4
+        with:
+          ref: experiment/v014027-mercenario-directo-equipamiento-20261108
+          fetch-depth: 1
+          persist-credentials: true
+      - name: Checkout immutable V014031 artwork source (read-only)
+        uses: actions/checkout@v4
+        with:
+          repository: gburdesedev/Project-genesis
+          ref: 3c0a92f117adaa0d058fd3e0b01dd5f8db6838bb
+          path: .source-approved-v014031
+          persist-credentials: false
+      - name: Copy untouched V09 artwork and V05 approved artwork
+        run: |
+          set -euo pipefail
+          mkdir -p assets/ui/mercenary/v09 assets/ui/inventario
+          cp .source-approved-v014031/assets/ui/mercenary/v09/*.png assets/ui/mercenary/v09/
+          cp .source-approved-v014031/assets/ui/inventario/GENESIS_INVENTARIO_V05_CABECERA_PREPARACION_1820x1024.png assets/ui/inventario/
+          test -s assets/ui/mercenary/v09/Concept_V09_Original_INTACTO.png
+          test -s assets/ui/mercenary/v09/V09_Plantilla_Vacia_Referencia.png
+          sha256sum assets/ui/mercenary/v09/*.png assets/ui/inventario/GENESIS_INVENTARIO_V05_CABECERA_PREPARACION_1820x1024.png
+          rm -rf .source-approved-v014031
+      - name: Retrieve exact 3D equipment from the user's own Assets2 organization
+        run: |
+          set -euo pipefail
+          mkdir -p assets/playcanvas/candidates/mercenary/v049 assets/playcanvas/candidates/shield/v015
+          BASE=https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/6f2d179c8441ab7c2842d98ada030e843055a902
+          curl --fail --location --retry 3 --connect-timeout 25 --max-time 200 -o assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb "$BASE/candidates/mercenary/stand_v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb"
+          curl --fail --location --retry 3 --connect-timeout 25 --max-time 120 -o assets/playcanvas/candidates/shield/v015/escudo_hierro_v015_PBR2K_WEBP_v022.glb "$BASE/candidates/shield/iron_v015_pbr2k_v022/escudo_hierro_v015_PBR2K_WEBP_v022.glb"
+          echo 'e2466851abcdb0c925dcc17296c05d2aa9ea555500e21cc8d54c3a09e6199dd0  assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb' | sha256sum --check
+          python3 - <<'PY'
+          import struct, pathlib
+          for f in (pathlib.Path('assets/playcanvas/candidates/mercenary/v049').glob('*.glb')):
+              b=f.open('rb').read(12)
+              assert b[:4]==b'glTF' and struct.unpack_from('<I',b,4)[0]==2
+              assert struct.unpack_from('<I',b,8)[0]==f.stat().st_size
+              print('VALID GLB HEADER:',f,f.stat().st_size)
+          PY
+      - name: Commit ONLY experimental asset copies
+        run: |
+          set -euo pipefail
+          git config user.name 'genesis-experimental-asset-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/ui/mercenary/v09 assets/ui/inventario/GENESIS_INVENTARIO_V05_CABECERA_PREPARACION_1820x1024.png assets/playcanvas/candidates/mercenary/v049 assets/playcanvas/candidates/shield/v015
+          if git diff --staged --quiet; then echo 'Assets already present'; exit 0; fi
+          git commit -m 'assets(ML05): vendor original V09/V05 UI and exact V049 sword V12B shield V015 candidates [skip ci]'
+          git push origin HEAD:experiment/v014027-mercenario-directo-equipamiento-20261108
