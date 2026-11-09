@@ -1,0 +1,31 @@
+name: Genesis V016.001 | Abrir URL web en navegador
+on:
+  push:
+    branches:
+      - experiment/v016001-main-clean-20261109
+    paths:
+      - tests/v016001_preview_live_browser.cjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/preview playwright@1.56.1
+      - name: Open actual web link, require Herrero selector visible
+        run: NODE_PATH=/tmp/preview/node_modules node tests/v016001_preview_live_browser.cjs
+      - name: Upload screenshot and diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v016001-real-preview-browser
+          path: previews/v016001-main-clean-browser/
+          retention-days: 14
