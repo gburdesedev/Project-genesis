@@ -49,6 +49,23 @@ const server=http.createServer((req,res)=>{
    assert.equal(state.lab.selectedShieldRarity,'Común','Bench shield should be a better NGE item');
    assert.equal(state.lab.equipped,true,'starter must be physically equipped, not only shown in comparison');
    assert.equal(state.lab.starterEquipped3d,true,'V050 must be attached before opening menu');
+   assert.equal(state.lab.halo3d?.visible,true,'The visible V050 must carry active NGE-colored lights');
+   assert.equal(state.lab.halo3d?.shieldChannel,'Base','Inútil shield has neutral Base halo');
+   assert.ok(state.lab.halo3d?.swordIntensity>0 && state.lab.halo3d?.shieldIntensity>0);
+   const activeSlotHalos=await page.locator('.pg4tShell .mcEquipSlot .pg4tItemVisual').evaluateAll(els=>
+     els.map(el=>({affinity:el.dataset.affinity,strength:Number(getComputedStyle(el).getPropertyValue('--fx-strength')),
+       glow:getComputedStyle(el,'::before').backgroundImage})));
+   assert.equal(activeSlotHalos.length,2,'Both equipped weapon/defense icons must have channel halos');
+   assert.ok(activeSlotHalos.every(h=>h.strength>.1&&h.glow.includes('radial-gradient')),
+     'Equipped item halos must be visibly styled even for neutral Base: '+JSON.stringify(activeSlotHalos));
+   assert.equal(await page.locator('.pg4tHeroEquippedHalo').count(),2,
+     'The approved character poster must display both equipped channel auras');
+   assert.equal(await page.locator('.pg4tShell .pv9Grid .pg4tAlreadyEquipped').count(),1,
+     'Initial Common sword remains visible but disabled in the inventory');
+   assert.equal(await page.locator('.pg4tShell .pv9Grid .pg4tAlreadyEquipped').isDisabled(),true);
+   assert.equal(await page.locator('.pg4tShell .pv9Grid .mcInventorySlot.selected').count(),1,
+     'A different weapon is selected as a compare candidate');
+
    assert.equal(state.lab.approved3d,true,'V050 must be present in the world');
    assert.equal(state.lab.equipmentRevision,0,'no replacement before user clicks Equipar');
    assert.equal(await page.locator('.pv9CompareEquipped .pv9ComparisonRarity').innerText(),'Común');
@@ -103,6 +120,16 @@ const server=http.createServer((req,res)=>{
    assert.ok(await page.locator('.pv9CompareEquipped img').count()>0,'Initial equipped shield must be present');
    const namesBefore=await page.locator('.pg4tShell :is(.pv9CompareEquipped,.pv9CompareSelected) .pv9ComparisonName').allInnerTexts();
    assert.notEqual(namesBefore[0],namesBefore[1],'A genuine alternate shield must differ from the original equipped shield');
+   const shieldEquipped=page.locator('.pg4tShell .pv9Grid .pg4tAlreadyEquipped');
+   assert.equal(await shieldEquipped.count(),1,'Exactly one shield is equipped');
+   assert.equal(await shieldEquipped.isDisabled(),true,'Equipped shield must not be selectable');
+   const previousCandidateName=await page.locator('.pv9CompareSelected .pv9ComparisonName').innerText();
+   await shieldEquipped.evaluate(el=>el.dispatchEvent(new MouseEvent('click',{bubbles:true})));
+   assert.equal(await page.locator('.pv9CompareSelected .pv9ComparisonName').innerText(),
+     previousCandidateName,'Even a synthetic click must never compare an object against itself');
+   assert.notEqual(await page.locator('.pv9CompareEquipped .pv9ComparisonName').innerText(),
+     await page.locator('.pv9CompareSelected .pv9ComparisonName').innerText());
+
    assert.equal(await page.locator('.pg4tShell img[src*="Origen_V09"]').count(),0,'Obsolete V09 ORA sprites must not be used');
    const shields=await page.locator('.pg4tShell .mcInventorySlot.hasItem .pg4tItemVisual').evaluateAll(els=>els.map(el=>({affinity:el.dataset.affinity,strength:getComputedStyle(el).getPropertyValue('--fx-strength').trim(),img:el.querySelector('img')?.getAttribute('src')})));
    assert.equal(shields.length,2,'Both shields must have channel-bound live visual wrappers');
@@ -150,7 +177,11 @@ const server=http.createServer((req,res)=>{
    if(state.lab.status!=='equipped'||state.lab.approved3d!==true||!String(state.lab.model).includes('V050'))throw new Error('El equipamiento V050 V12B/V015 falló: '+JSON.stringify(state.lab));
    assert.equal(state.lab.equipmentRevision,1,'Equip should update the equipped state exactly once');
    assert.equal(state.lab.equippedShieldRarity,'Común','Equipping the shield must replace the original Inútil');
-   assert.equal(state.lab.equippedSwordRarity,'Bueno','The upgraded sword must replace the original Común');
+   assert.equal(state.lab.equippedSwordRarity,'Común',
+      'Equipping a shield MUST NOT silently replace the sword in the other family');
+   assert.equal(state.lab.halo3d?.visible,true,'V050 channel lights must survive equipment replacement');
+   assert.notEqual(state.lab.halo3d?.shieldChannel,'Base',
+      'After equipping the upgraded shield the light must switch to the actual NGE element');
    state.stage='equipped';
    await page.screenshot({path:path.join(OUT,'04-v050-equipado-en-mundo.png'),fullPage:true,timeout:25000});
    await page.keyboard.press('e');
@@ -163,8 +194,32 @@ const server=http.createServer((req,res)=>{
    await page.locator('[data-family="second"]').click();
    assert.equal(await page.locator('.pv9CompareEquipped .pv9ComparisonRarity').innerText(),'Común',
      'Reopening the equipment menu must retain the new equipped shield');
+   assert.equal(await page.locator('.pv9CompareSelected .pv9ComparisonRarity').innerText(),'Inútil',
+     'After replacement the former equipped item is the new alternative');
+   assert.equal(await page.locator('.pg4tShell .pv9Grid .pg4tAlreadyEquipped').count(),1);
+   assert.equal(await page.locator('.pg4tShell .pv9Grid .pg4tAlreadyEquipped').isDisabled(),true);
+   assert.notEqual(await page.locator('.pv9CompareEquipped .pv9ComparisonName').innerText(),
+     await page.locator('.pv9CompareSelected .pv9ComparisonName').innerText(),
+     'The current shield must never be compared with itself');
    state.persistedAfterReopen=true;
    await page.screenshot({path:path.join(OUT,'06-4t-escudo-equipado-persistente.png'),fullPage:true,timeout:25000});
+   await page.locator('[data-family="first"]').click();
+   assert.equal(await page.locator('.pv9CompareEquipped .pv9ComparisonRarity').innerText(),'Común');
+   assert.equal(await page.locator('.pv9CompareSelected .pv9ComparisonRarity').innerText(),'Bueno');
+   assert.equal(await page.locator('.pg4tShell .pv9Grid .pg4tAlreadyEquipped').isDisabled(),true);
+   await page.locator('[data-action="equip"]').click();
+   await page.waitForFunction(()=>window.__GENESIS_MERCENARY_LAB?.equipmentRevision===2,null,{timeout:30000});
+   state.lab=await page.evaluate(()=>window.__GENESIS_MERCENARY_LAB);
+   assert.equal(state.lab.equippedSwordRarity,'Bueno','Sword must now upgrade via real NGE item');
+   assert.equal(state.lab.equippedShieldRarity,'Común','Previously upgraded shield must remain equipped');
+   assert.equal(state.lab.halo3d?.visible,true);
+   await page.screenshot({path:path.join(OUT,'07-dossier-ambos-mejorados.png'),fullPage:true,timeout:25000});
+   await page.locator('#mercSheetChangeGear').click();
+   await page.locator('.pv9Board').waitFor({timeout:9000});
+   assert.equal(await page.locator('.pv9CompareEquipped .pv9ComparisonRarity').innerText(),'Bueno');
+   assert.equal(await page.locator('.pv9CompareSelected .pv9ComparisonRarity').innerText(),'Común');
+   assert.equal(await page.locator('.pg4tShell .pv9Grid .pg4tAlreadyEquipped').isDisabled(),true);
+   await page.screenshot({path:path.join(OUT,'08-comparacion-sin-objeto-contra-si-mismo.png'),fullPage:true,timeout:25000});
    state.stage='passed';
    console.log('PASS: exact original approved Mercenary 4-T art, actual V050 V12B and smaller V015, NGE 4 items with real render-derived thumbnails, world + E dossier');
  }catch(err){state.failure=String(err?.stack||err);console.error('FAIL:',state.failure);if(page&&state.stage!=='started')try{await page.screenshot({path:path.join(OUT,'error-debug.png'),fullPage:true,timeout:8000})}catch(_){ }process.exitCode=1}
