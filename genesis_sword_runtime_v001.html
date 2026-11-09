@@ -7,11 +7,13 @@ canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
 canvas:active{cursor:grabbing}
 #status{position:absolute;top:8px;left:8px;right:8px;padding:5px;background:#14110ac9;border:1px solid #86683c80;text-align:center;pointer-events:none}
 #help{position:absolute;bottom:6px;left:6px;right:6px;text-align:center;font-size:11px;background:#14110ab5;pointer-events:none}
+.embedded #help{display:none}
 </style></head>
 <body><canvas id="sword3d"></canvas><div id="status">Cargando geometría real de la espada V175/V12B…</div>
 <div id="help">Arrastrar: girar · Rueda: acercar/alejar · Doble clic: restablecer</div>
 <script type="module">
 import * as pc from 'https://cdn.jsdelivr.net/npm/playcanvas@2.22.1/build/playcanvas.mjs';
+if(window.parent!==window)document.documentElement.classList.add('embedded');
 const HDRI='https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/studio_small_09_2k.hdr';
 const MODEL='https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/experiment/mercenary-v050-ui-4t-shield-fit-20261109/candidates/mercenary/stand_v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb';
 const NODE='GENESIS_V048_APPROVED_SWORD_V12B_IN_RIGHT_HAND_STATIC';
@@ -44,6 +46,8 @@ try{
    const lighting=pc.EnvLighting.generateLightingSource(source);
    app.scene.envAtlas=pc.EnvLighting.generateAtlas(lighting);
    lighting.destroy();
+   // Use HDRI only for physically based illumination/reflections; no studio panorama behind the item.
+   app.scene.skybox=null;
    app.scene.skyboxIntensity=1.22;
    state.hdriReady=true;readyCheck();
   }catch(err){state.phase='error';state.error='HDRI '+String(err?.message||err);show(state.error);console.error(err)}
