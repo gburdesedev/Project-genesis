@@ -65,7 +65,7 @@ const issues=[];
   assert.equal(await page.locator('.gFabMatAsset img[src*="carbon_vegetal_v011_poster"]').count(),1);
   assert.equal(await page.locator('.gFabSwordPoster[src*="V12B_CYCLES_SOURCE_ALPHA"]').count(),1);
   assert.equal(await page.locator('.gFabTitle h2').count(),1,'Exactly one title element in right panel');
-  assert.equal((await page.locator('.gFabTitle h2').innerText()).trim(),'Espada de hierro');
+  assert.equal((await page.locator('.gFabTitle h2').textContent()).trim(),'Espada de hierro');
 
   assert.equal(await page.locator('button#gApprovedCraftAction:enabled').count(),1);
   await page.waitForTimeout(800);
@@ -83,7 +83,7 @@ const issues=[];
   assert.equal(await page.locator('.gFabShieldModel[src*="escudo_hierro_v015"]').count(),1);
   assert.equal(await page.locator('.gFabShieldPoster[src*="V015_REAL_SHIELD_CROPPED"]').count(),1);
   assert.equal(await page.locator('.gFabTitle h2').count(),1,'No duplicate right-side title for shield');
-  assert.equal((await page.locator('.gFabTitle h2').innerText()).trim(),'Escudo de hierro');
+  assert.equal((await page.locator('.gFabTitle h2').textContent()).trim(),'Escudo de hierro');
 
   assert.equal(await page.locator('.gFabSwordPoster').count(),0,'Never leave old sword on shield screen');
   assert.equal(await page.locator('.gFabMaterials[data-count="3"] .gFabMat').count(),3);
