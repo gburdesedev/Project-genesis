@@ -1,0 +1,33 @@
+name: Genesis V016.001 | Juego completo base main
+on:
+  push:
+    branches:
+      - experiment/v016001-main-clean-20261109
+    paths:
+      - tests/v016001_main_clean_world_e2e.cjs
+      - '.github/workflows/v016001-main-clean-world.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  juego-herrero:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check tests/v016001_main_clean_world_e2e.cjs
+      - run: npm install --prefix /tmp/genesis-main-world playwright@1.56.1
+      - name: Abrir mundo real, elegir Herrero y fabricar dos espadas
+        run: NODE_PATH=/tmp/genesis-main-world/node_modules node tests/v016001_main_clean_world_e2e.cjs
+      - name: Capturas y diagnostico
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v016001-main-clean-world-proof
+          path: previews/v016001-main-clean-world/
+          retention-days: 14
