@@ -164,3 +164,13 @@
   overflow:hidden!important;min-width:0!important;padding:0!important
 }
 .pg4tShell .pg4tOraMissing,.pg4tShell .pg4tOraLoadError{color:#ee8e6b!important}
+
+/* Source thumbnails carry different transparent margins (unchanged master pixels).
+   Compensate silhouette occupancy uniformly inside the same 74/76/66% viewport.
+   Sword visible length ~80% of canvas; shield diameter ~53% of canvas. */
+.pg4tShell .pg4tItemVisual[data-recipe="espada_hierro"] .pg4tIconFit img{
+  transform:scale(1.18)!important;transform-origin:center center!important
+}
+.pg4tShell .pg4tItemVisual[data-recipe="escudo_hierro"] .pg4tIconFit img{
+  transform:scale(1.80)!important;transform-origin:center center!important
+}
