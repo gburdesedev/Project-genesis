@@ -151,3 +151,39 @@
  box-shadow:inset 0 0 .7cqw #ffb33170!important
 }
 .pv9IntegratedML06 .pv9ComparisonIcon img{width:auto!important;height:100%!important;object-fit:contain!important}
+
+/* ML08 · Canales NGE reales: aura visual sobre el visor 3D; nunca reemplazar PBR.
+ * La intensidad por objeto procede de item.affinities en NGE (0-100).
+ * Es una vista previa independiente del VFX 3D aprobado.
+ */
+.pv9IntegratedML06 .pv9WeaponAura,
+.pv9IntegratedML06 .pv9ShieldAura{
+  position:absolute;pointer-events:none;z-index:4;
+  isolation:isolate;overflow:visible
+}
+.pv9IntegratedML06 .pv9WeaponAura{left:1%;top:19%;width:34%;height:56%;transform:rotate(-17deg)}
+.pv9IntegratedML06 .pv9ShieldAura{left:54%;top:38%;width:51%;height:40%}
+.pv9IntegratedML06 .pv9ElementAura{
+  --fx:#88b4ff;--power:0;--ring:0;
+  position:absolute;inset:0;display:block;pointer-events:none;
+  border-radius:50%;mix-blend-mode:screen;
+  opacity:calc(var(--power) * .45);
+  border:2px solid var(--fx);
+  box-shadow:0 0 .9cqw .16cqw var(--fx),inset 0 0 .65cqw .1cqw var(--fx);
+  filter:blur(.4cqw);
+  animation:genesis-ml08-aura 2.7s ease-in-out infinite alternate
+}
+.pv9IntegratedML06 .pv9ElementAura[data-affinity="Base"]{display:none}
+.pv9IntegratedML06 .pv9ElementAura[style*="--ring:1"]{inset:8%;animation-delay:-1.25s}
+@keyframes genesis-ml08-aura{
+  from{filter:blur(.48cqw);opacity:calc(var(--power) * .18)}
+  to{filter:blur(.23cqw);opacity:calc(var(--power) * .52)}
+}
+.pv9IntegratedML06 .pv9Slot .pv9ElementAura.slot,
+.pv9IntegratedML06 .mcInventorySlot .pv9ElementAura.slot{
+ position:absolute;inset:13%;z-index:0;border-radius:16%;
+ opacity:calc(var(--power) * .34);filter:blur(.2cqw);border-width:1px
+}
+.pv9IntegratedML06 .pv9Slot img,
+.pv9IntegratedML06 .mcInventorySlot img{position:relative;z-index:1}
+@media (prefers-reduced-motion:reduce){.pv9IntegratedML06 .pv9ElementAura{animation:none}}
