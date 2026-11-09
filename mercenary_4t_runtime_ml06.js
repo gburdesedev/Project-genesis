@@ -102,7 +102,7 @@
         <div class="mcHero pv9Hero">${modelHtml}</div>
         ${slot('Casco', 587,283,null,true)}${slot('Pechera',587,378,null,true)}${slot('Guantes',587,474,null,true)}${slot('Pantalón',587,571,null,true)}${slot('Botas',587,669,null,true)}
         ${slot('Collar',803,254,null,true)}
-        ${slot('Arma',1022,283,state.draftFirst || opts.equippedFirst,false,'mcEquipSlot')}${slot('Escudo',1022,377,state.draftSecond || opts.equippedSecond,false,'mcEquipSlot')}${slot('Anillo izquierdo',1022,476,null,true)}${slot('Anillo derecho',1022,573,null,true)}
+        ${slot('Arma',980,283,state.draftFirst || opts.equippedFirst,false,'mcEquipSlot')}${slot('Escudo',980,377,state.draftSecond || opts.equippedSecond,false,'mcEquipSlot')}${slot('Anillo izquierdo',1022,476,null,true)}${slot('Anillo derecho',1022,573,null,true)}
         <div class="pv9CompareEquipped mcItemImg" aria-label="Objeto equipado">${comparisonSlot(old,'Equipado')}</div>
         <div class="pv9CompareSelected mcItemImg" aria-label="Objeto seleccionado">${comparisonSlot(candidate,'Seleccionado')}</div>
         <div class="pv9ChannelsMask"></div><div class="mcChannels pv9Channels" role="region" aria-label="Canales de comparación">${channels}</div>
