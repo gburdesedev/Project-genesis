@@ -1,0 +1,34 @@
+name: Genesis Mercado ORA Native V002 QA
+on:
+  push:
+    branches: [experiment/mercado-ora-native-v002-20261109]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  syntax-and-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate market syntax
+        run: |
+          node --check genesis_market_v001.js
+          node --check genesis_market_domain_v001.js
+          node --test tests/genesis_market_domain_v001.cjs
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Capture game market
+        run: node tests/genesis_market_browser_v001.cjs
+      - name: Upload screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-market-ora-native-v002
+          path: previews/market-v014019-qa/
+          retention-days: 7
