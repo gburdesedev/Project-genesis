@@ -23,30 +23,12 @@ function escapeText(value){
   });
 }
 function attachStyle(){
-  if(document.getElementById('genesis-market-style-v001'))return;
-  const style=document.createElement('style');style.id='genesis-market-style-v001';
-  style.textContent=[
-   '.genesisMarketModal{width:min(960px,96vw);background:#121516;color:#eddfbb;border:1px solid #685032}',
-   '.genesisMarketBoard{padding:clamp(15px,3vw,28px);font-family:system-ui,Arial,sans-serif}',
-   '.genesisMarketTop{display:flex;gap:14px;justify-content:space-between;align-items:start}',
-   '.genesisMarketTop small{color:#b99760;font-size:11px;letter-spacing:.12em}',
-   '.genesisMarketTop h2{font:normal 28px Georgia,serif;margin:5px 0;color:#ead49f}',
-   '.genesisMarketBoard p{font-size:13px;line-height:1.5;color:#c8bda8;margin:8px 0 16px}',
-   '.genesisMarketGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;max-height:55vh;overflow:auto;overscroll-behavior:contain}',
-   '.genesisMarketCard{border:1px solid #6b5638;background:#222421;padding:13px;min-height:150px;display:flex;flex-direction:column;justify-content:space-between;gap:12px}',
-   '.genesisMarketCard strong{font:normal 17px Georgia,serif;color:#f2dfb7;overflow-wrap:anywhere}',
-   '.genesisMarketCard small{color:#b6b4aa;font-size:11px}',
-   '.genesisMarketQty{display:flex;gap:7px;align-items:center;justify-content:space-between}',
-   '.genesisMarketQty button{min-width:33px;height:34px;border:1px solid #9d7d47;background:#302b22;color:#f5dfb3;font-size:19px}',
-   '.genesisMarketQty b{font-size:14px}',
-   '.genesisMarketBuy{width:100%;background:#46341c;border:1px solid #d4ab65;color:#ffe2aa;padding:10px;font-weight:700;cursor:pointer}',
-   '.genesisMarketBuy:hover,.genesisMarketQty button:hover{filter:brightness(1.18)}',
-   '.genesisMarketClose{background:#2a2924;border:1px solid #886d48;color:#ebd7b0;padding:9px 14px;cursor:pointer}',
-   '.genesisMarketFoot{margin-top:14px;color:#c9aa70;font-size:12px;min-height:20px}',
-   '.genesisMarketModal button:focus-visible{outline:2px solid #f1c676;outline-offset:2px}',
-   '@media(max-width:580px){.genesisMarketGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.genesisMarketCard{padding:9px;min-height:141px}.genesisMarketTop h2{font-size:22px}}'
-  ].join('\n');
-  document.head.appendChild(style);
+  if(document.getElementById('genesis-market-ora-v001'))return;
+  const link=document.createElement('link');
+  link.id='genesis-market-ora-v001';
+  link.rel='stylesheet';
+  link.href='./genesis_market_ora_v001.css?v=0.1.001';
+  document.head.appendChild(link);
 }
 function buildStall(world){
   const wood=mat('Puesto de mercado - roble usado',.26,.16,.09);
@@ -208,6 +190,7 @@ export function mountGenesisMarket(options){
   loadMerchantV02(app,npc.entity,visual);
   const chosen=Object.create(null);
   let lastMessage='';
+  let selectedMaterial=null;
   const toRawStock=window.GenesisPreparation?.rawStock;
   function catalog(){return domain.catalog(getSession(),toRawStock);}
   function draw(){
@@ -216,26 +199,60 @@ export function mountGenesisMarket(options){
     const inv=getInventory();
     const needs=typeof getMarketNeeds==='function'?getMarketNeeds():[];
     const needByName=new Map(needs.map(n=>[n.material,n]));
-    const cards=names.map((name,index)=>{
-      const missing=needByName.get(name)?.missing||0;
-      const quantity=chosen[name]||Math.min(99,Math.max(1,missing)),now=Number(inv?.[name]||0);
-      return '<article class="genesisMarketCard" data-slot="'+index+'">'+
-       '<div><strong>'+escapeText(name)+'</strong><div><small>Tenés '+now+' · Precio: 0 oro</small></div>'+(needByName.has(name)?'<div><small>Para 2 escudos faltan '+missing+'</small></div>':'')+'</div>'+
-       '<div><div class="genesisMarketQty"><button data-dec="'+index+'" aria-label="Restar una unidad">−</button>'+
-       '<b>'+quantity+'</b><button data-inc="'+index+'" aria-label="Sumar una unidad">+</button></div>'+
-       '<button class="genesisMarketBuy" data-buy="'+index+'">Obtener '+quantity+' · GRATIS</button></div></article>';
+    if(!names.includes(selectedMaterial))selectedMaterial=names[0]||null;
+    const selectedIndex=names.indexOf(selectedMaterial);
+    const name=selectedMaterial;
+    const missing=needByName.get(name)?.missing||0;
+    const quantity=name?(chosen[name]||Math.min(99,Math.max(1,missing))):0;
+    const now=name?Number(inv?.[name]||0):0;
+    // Approved production posters only. Unknown materials remain labeled, never assigned a false image.
+    const posters={
+      'Mineral de hierro':'assets/playcanvas/approved/materials/iron_ore/v008_55k_pbr1536_v007/mineral_hierro_v008_transparent_0.png',
+      'Carbón vegetal':'assets/playcanvas/approved/materials/charcoal/v010/carbon_vegetal_v010_poster.png',
+      'Madera de roble':'assets/playcanvas/approved/materials/oak/v004/madera_roble_v004_poster.png',
+      'Madera de fresno':'assets/playcanvas/approved/materials/ash/v004/madera_fresno_v004_poster.png',
+      'Cuero caprino':'assets/playcanvas/approved/materials/leather_caprine/v003/cuero_caprino_v003_poster.png',
+      'Cuero bovino':'assets/playcanvas/approved/materials/leather_bovine/v003/cuero_bovino_v003_poster.png'
+    };
+    function itemImage(material){
+      const path=posters[material];
+      return path?'<img src="./'+escapeText(path)+'" alt="'+escapeText(material)+'" loading="lazy">':'';
+    }
+    const cards=names.map((material,index)=>{
+      const held=Number(inv?.[material]||0);
+      return '<button type="button" class="genesisMarketCard'+(material===name?' is-selected':'')+'" data-select="'+index+'" data-slot="'+index+'" aria-pressed="'+(material===name)+'">'+
+        '<span class="genesisMarketSlot">'+itemImage(material)+'</span>'+
+        '<span><strong>'+escapeText(material)+'</strong><small>Tenés '+held+' · Precio: 0 oro</small></span>'+
+        '<span class="price">0 oro</span></button>';
     }).join('');
     modal('<section class="genesisMarketBoard" id="genesisMarketBoard">'+
-      '<div class="genesisMarketTop"><div><small>MERCADO · DEMOSTRACIÓN DE COMPRA</small>'+
-      '<h2>Comerciante de materiales</h2></div>'+
-      '<button class="genesisMarketClose" id="genesisMarketClose">Cerrar ✕</button></div>'+
-      '<p>Solo materiales de las recetas conocidas y necesarias para la demo de <b>'+
-        escapeText(current?.profession||'la partida')+'</b>. Por ahora, todas las compras cuestan <b>0 oro</b>.</p>'+
-      '<div class="genesisMarketGrid">'+(cards||'<div class="genesisMarketCard">Esta partida todavía no tiene materiales conocidos.</div>')+
-      '</div><div class="genesisMarketFoot" aria-live="polite">'+escapeText(lastMessage)+'</div></section>',
+      '<header class="genesisMarketHeader"><div><small>PROJECT GENESIS · SUMINISTROS</small><h2>Mercado</h2></div>'+
+      '<div class="genesisMarketCoins"><span>DEMO · PRECIO</span> 0 oro</div>'+
+      '<button type="button" class="genesisMarketClose" id="genesisMarketClose" aria-label="Cerrar">✕</button></header>'+
+      '<nav class="genesisMarketTabs" aria-label="Operaciones"><button type="button" class="genesisMarketTab" aria-selected="true">Comprar</button>'+
+      '<button type="button" class="genesisMarketTab" disabled title="No disponible en esta demostración">Vender</button>'+
+      '<button type="button" class="genesisMarketTab" disabled title="No disponible en esta demostración">Recomprar</button></nav>'+
+      '<div class="genesisMarketColumns">'+
+      '<aside class="genesisMarketPane genesisMarketPortrait"><div class="genesisMarketPortraitTag" aria-hidden="true">⚒</div>'+
+      '<h3 class="genesisMarketPortraitHead">Comerciante</h3>'+
+      '<p>Bienvenido al mercado. Aquí encontrarás los materiales necesarios para tus recetas conocidas.</p></aside>'+
+      '<section class="genesisMarketPane"><h3>Materiales disponibles</h3><div class="genesisMarketCatalog">'+
+      (cards||'<p>Todavía no hay materiales conocidos para esta semilla.</p>')+'</div></section>'+
+      '<section class="genesisMarketPane genesisMarketDetails"><h3>Detalle del material</h3>'+
+      (name?'<div class="genesisMarketSlot genesisMarketSlot--large">'+itemImage(name)+'</div>'+
+      '<h4>'+escapeText(name)+'</h4><p>En inventario: '+now+
+      (needByName.has(name)?' · Para 2 escudos faltan '+missing:'')+'</p>'+
+      '<div class="genesisMarketPurchase"><div class="genesisMarketQty"><span>Cantidad</span>'+
+      '<button type="button" data-dec="'+selectedIndex+'" aria-label="Restar una unidad">−</button><b>'+quantity+'</b>'+
+      '<button type="button" data-inc="'+selectedIndex+'" aria-label="Sumar una unidad">+</button></div>'+
+      '<div class="genesisMarketTotal"><span>Precio total</span><b>0 oro</b></div>'+
+      '<button type="button" class="genesisMarketBuy" data-buy="'+selectedIndex+'">Obtener '+quantity+' · GRATIS</button></div>':
+      '<p>Seleccioná un material de la lista.</p>')+
+      '</section></div><div class="genesisMarketFoot" aria-live="polite">'+escapeText(lastMessage)+'</div></section>',
       'genesisMarketModal');
     const root=document.getElementById('genesisMarketBoard');
     root?.querySelector('#genesisMarketClose')?.addEventListener('click',()=>closeModal());
+    root?.querySelectorAll('[data-select]').forEach(btn=>btn.addEventListener('click',()=>{selectedMaterial=names[Number(btn.dataset.select)];draw();}));
     root?.querySelectorAll('[data-inc]').forEach(btn=>btn.addEventListener('click',()=>{
       const name=names[Number(btn.dataset.inc)];
       if(!name)return;const required=needByName.get(name)?.missing||0;chosen[name]=Math.min(99,(chosen[name]||Math.min(99,Math.max(1,required)))+1);draw();
@@ -263,7 +280,7 @@ export function mountGenesisMarket(options){
     if(typeof modal!=='function'||typeof closeModal!=='function')return false;
     if(!getSession()){toast?.('Elegí primero una profesión para crear la semilla.',1500);return false;}
     if(typeof canTrade==='function'&&!canTrade()){toast?.('Primero hablá con Ordan. Él te enseñará a reabastecerte en el mercado.',2100);return false;}
-    lastMessage='';draw();return true;
+    lastMessage='';selectedMaterial=null;draw();return true;
   }
   const interactable=Object.freeze({
     id:'marketMerchant',radius:2.85,
