@@ -1,0 +1,20 @@
+{
+  "schema": "Genesis_V014040_VFX01_ExperimentalPreview",
+  "source": "index.html",
+  "original_sha256": "2fbfef14d3c1ce2990b404cd3294dc34ed9c14df646e6711958c3d88bcd92f57",
+  "source_bytes": 2497332,
+  "preview": "index-v014040-channel-vfx-experimental.html",
+  "preview_sha256": "3ee26e8eb4ebe69fdb34f8fbe419e4279eacb0ada55a99b567efddac35f94e08",
+  "source_index_unchanged": true,
+  "experimental_flag": "?genesisChannelVfx=1",
+  "original_html_layout_preserved": true,
+  "approved_effects": {
+    "rayo": "V07"
+  },
+  "experimental_effects": {
+    "fuego": "V20C.1",
+    "hielo": "V21 WebGL (not Cycles V42)"
+  },
+  "equipped_sword_model": "mercSword10 placeholder (NOT V03 approved)",
+  "main_changed": false
+}
