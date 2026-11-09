@@ -204,11 +204,11 @@ const issues=[];
   assert.equal(await page.evaluate(()=>window.GenesisPreparation.navigate('Comparacion')),true);
   await page.waitForSelector('.genesisComparisonPair');
   assert.equal(await page.locator('[data-compare-item]').count(),2);
-  assert.equal(await page.locator('[data-compare-item="A"]').getAttribute('data-halo-channel'),'Canal Base');
+  assert.equal(await page.locator('[data-compare-item="A"]').getAttribute('data-halo-channel'),'Fuego');
   assert.equal(await page.locator('[data-compare-item="B"]').getAttribute('data-halo-channel'),'Rayo');
   const colors=await page.locator('.genesisComparisonSword').evaluateAll(els=>els.map(e=>getComputedStyle(e).getPropertyValue('--compare-halo').trim()));
   assert.notEqual(colors[0],colors[1],'Each sword must have an independent channel halo');
-  await page.screenshot({path:path.join(out,'08-comparacion-dos-espadas-halos-base-rayo-v014029.png'),animations:'disabled'});
+  await page.screenshot({path:path.join(out,'08-comparacion-dos-espadas-halos-fuego-rayo-v014029.png'),animations:'disabled'});
 
   assert.equal(await page.evaluate(()=>window.GenesisPreparation.navigate('Fabricaciones')),true);
   await page.waitForSelector('.gApproved-Fabricaciones');
