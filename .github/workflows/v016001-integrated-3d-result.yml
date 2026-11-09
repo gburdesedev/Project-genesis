@@ -1,0 +1,32 @@
+name: Genesis V016.001 | Resultado real integrado 3D PlayCanvas
+on:
+  push:
+    branches:
+      - experiment/v016001-main-clean-20261109
+    paths:
+      - tests/v016001_integrated_result_real3d.cjs
+      - '.github/workflows/v016001-integrated-3d-result.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  screenshot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/genesis-3d-result playwright@1.56.1
+      - name: Render original ORA bars and interactive GLB in result panel
+        run: NODE_PATH=/tmp/genesis-3d-result/node_modules node tests/v016001_integrated_result_real3d.cjs
+      - name: Screenshots and metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v016001-result-in-game-ui-3d
+          path: previews/v016001-integrated-result-3d/
+          retention-days: 14
