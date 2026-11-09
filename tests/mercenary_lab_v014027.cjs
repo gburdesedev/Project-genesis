@@ -53,6 +53,12 @@ const server=http.createServer((req,res)=>{
    assert.equal(await page.locator('.mercConcept .mcInventorySlot.hasItem').count(),2,'only two created items in current family');
    await page.locator('.pv9Viewer').evaluate(async(el)=>{try{await Promise.race([el.updateComplete||new Promise(()=>{}),new Promise(r=>setTimeout(r,4000))])}catch(_){}});
    state.hero=await page.locator('.pv9Viewer').evaluate(el=>({loaded:el.loaded,visible:el.modelIsVisible,src:el.getAttribute('src')}));
+   await page.evaluate(()=>{window.__GENESIS_LAB_VIEWER_PROBE=document.querySelector('.pv9Viewer')});
+   state.hero.poster=await page.locator('.pv9RealCyclesPoster').evaluate(el=>{
+     const r=el.getBoundingClientRect(),c=getComputedStyle(el);
+     return {complete:el.complete,naturalWidth:el.naturalWidth,naturalHeight:el.naturalHeight,
+       opacity:c.opacity,display:c.display,visibility:c.visibility,rect:{x:r.x,y:r.y,width:r.width,height:r.height}};
+   });
    // Con GLB de 27 MB, SwiftShader puede agotar el tiempo de captura aunque el DOM funcione.
    // Captura de diagnóstico opcional: no confundir fallo de screenshot con fallo jugable.
    try{await page.screenshot({path:path.join(OUT,'01-menu-espadas-v09-v049.png'),fullPage:false,animations:'disabled',timeout:12000})}
@@ -69,6 +75,8 @@ const server=http.createServer((req,res)=>{
    await page.locator('[data-nav="Preparacion"]').click();
    await page.locator('.pv9Board').waitFor({timeout:10000});
    await page.locator('[data-family="second"]').click();
+   state.heroPreserved=await page.evaluate(()=>window.__GENESIS_LAB_VIEWER_PROBE===document.querySelector('.pv9Viewer'));
+   assert.equal(state.heroPreserved,true,'3D model-viewer must not be destroyed on Espadas/Escudos tab change');
    assert.equal(await page.locator('.mercConcept .mcInventorySlot').count(),20,'V09 must keep 20 original cells');
    assert.equal(await page.locator('.mercConcept .mcInventorySlot.hasItem').count(),2,'only two created items in current family');
    try{await page.screenshot({path:path.join(OUT,'03-menu-escudos-v09.png'),fullPage:false,animations:'disabled',timeout:12000})}catch(e){state.warnings.push('Captura 03 no disponible por bajo FPS: '+String(e.message).slice(0,130))}
