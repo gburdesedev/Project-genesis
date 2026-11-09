@@ -65,7 +65,7 @@
         const item=itemAt(i); return `<button type="button" class="mcInventorySlot ${item?'hasItem':''} ${item && item===candidate?'selected':''}" data-item="${i}" aria-label="${esc(item?.name || 'Casilla vacía')}" title="${esc(item?.name || '')}" ${item?'':'disabled'}>${getIcon(item)}</button>`;
       }).join('');
       const poster=opts.modelUrl ? `<img class="pv9RealCyclesPoster" src="${ART}V050_REAL_CYCLES32_CHARACTER_RGBA.png" alt="Render Cycles EXR32 del mercenario real V050 con espada V175/V12B y escudo V015 proporcionado">` : '';
-      const modelHtml = poster + `<model-viewer src="${esc(model)}" camera-controls interaction-prompt="none" loading="eager" camera-orbit="15deg 80deg 5.1m" exposure="1.25" shadow-intensity=".32" alt="GLB real V050: espada V12B y escudo V015" class="pv9Viewer"></model-viewer>`;
+      const modelHtml = poster + `<model-viewer data-asset-src="${esc(model)}" camera-controls interaction-prompt="none" loading="lazy" camera-orbit="15deg 80deg 5.1m" exposure="1.25" shadow-intensity=".32" alt="GLB real V050: espada V12B y escudo V015" class="pv9Viewer"></model-viewer>`;
       const channels = rows.map(row => {
         const known=CHANNELS.includes(row.name) && row.name !== 'Rayo';
         const delta = row.a && row.b ? row.b.value-row.a.value : null;
@@ -99,11 +99,17 @@
       opts.modal(html,'mercenaryModal mercConceptModal');
       const board=document.querySelector('.pv9Board');if(!board)return;
       const placeholder=board.querySelector('.pv9Viewer');
-      if(existingViewer&&placeholder&&existingViewer.getAttribute('src')===placeholder.getAttribute('src')){
+      if(existingViewer&&placeholder&&existingViewer.getAttribute('data-asset-src')===placeholder.getAttribute('data-asset-src')){
         placeholder.replaceWith(existingViewer);
       }
       const viewer=board.querySelector('.pv9Viewer'),hero=board.querySelector('.pv9Hero');
       if(opts.modelUrl&&viewer&&hero){
+        // The world uses the genuine 27MB GLB on Equipar. In the modal, load the
+        // separate WebGL viewer only when the user clicks the character.
+        // This prevents two simultaneous expensive WebGL contexts during boot.
+        hero.setAttribute('title','Clic para girar el mercenario 3D real V050');
+        const activate3d=()=>{const asset=viewer.getAttribute('data-asset-src');if(asset&&!viewer.getAttribute('src'))viewer.setAttribute('src',asset);};
+        hero.addEventListener('click',activate3d,{once:true});
         viewer.addEventListener('load',()=>{if(viewer.loaded&&viewer.modelIsVisible)hero.classList.add('pv9ModelReady')},{once:true});
         viewer.addEventListener('error',()=>hero.classList.remove('pv9ModelReady'));
         if(viewer.loaded&&viewer.modelIsVisible)hero.classList.add('pv9ModelReady');
