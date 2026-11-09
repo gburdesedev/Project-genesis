@@ -1,0 +1,58 @@
+name: ML06 · Balance authentic V015 shield on original V049 3D
+on:
+  push:
+    branches: [experiment/v014027-mercenario-directo-equipamiento-20261108]
+    paths: ['.github/workflows/mercenary-ml06-shield-proportions.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  balance-shield-experimental:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: experiment/v014027-mercenario-directo-equipamiento-20261108
+          persist-credentials: true
+      - name: Preserve original meshes and PBR, scale only dedicated V015 shield transform
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct,json,hashlib
+          src=Path('assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb')
+          dst=src.with_name('GENESIS_MERCENARY_V049_V12B_V015_BALANCED_ML06.glb')
+          raw=src.read_bytes()
+          assert raw[:4]==b'glTF' and struct.unpack_from('<I',raw,4)[0]==2
+          assert struct.unpack_from('<I',raw,8)[0]==len(raw)
+          off=12;chunks=[]
+          while off<len(raw):
+            n,t=struct.unpack_from('<I4s',raw,off);off+=8;chunks.append((t,raw[off:off+n]));off+=n
+          j=json.loads(next(c for t,c in chunks if t==b'JSON'))
+          matches=[(i,n) for i,n in enumerate(j.get('nodes',[])) if 'SHIELD_V015' in n.get('name','').upper() and 'LEFT_HAND' in n.get('name','').upper()]
+          assert len(matches)==1, 'Shield root ambiguity: '+str([(i,n.get('name')) for i,n in enumerate(j.get('nodes',[])) if 'SHIELD_V015' in n.get('name','').upper()])
+          i,node=matches[0];scale=node.get('scale',[1.0,1.0,1.0]);node['scale']=[v*0.74 for v in scale]
+          dat=json.dumps(j,ensure_ascii=False,separators=(',',':')).encode();dat+=b' '*((-len(dat))%4)
+          out=bytearray(b'glTF')+struct.pack('<II',2,0)
+          for t,c in chunks:
+            new=dat if t==b'JSON' else c
+            out+=struct.pack('<I4s',len(new),t)+new
+          struct.pack_into('<I',out,8,len(out));dst.write_bytes(out)
+          assert src.read_bytes()==raw
+          with dst.open('rb') as f:assert struct.unpack_from('<I',f.read(12),8)[0]==dst.stat().st_size
+          # No mesh, image, material or animation modification allowed.
+          mutated=json.loads(dat)
+          assert len(mutated.get('meshes',[]))==len(j.get('meshes',[]))
+          assert len(mutated.get('images',[]))==len(j.get('images',[]))
+          assert len(mutated.get('skins',[]))==len(j.get('skins',[]))
+          print('ML06_BALANCED_REAL_SHIELD',node['name'],'scale',node['scale'],'output_bytes',len(out),'sha256',hashlib.sha256(out).hexdigest())
+          PY
+      - name: Commit reversible experimental variant only
+        shell: bash
+        run: |
+          git config user.name 'genesis-experimental-asset-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_V12B_V015_BALANCED_ML06.glb
+          git commit -m 'assets(ML06): 74% scaled V015 shield joint; preserve exact original V049 and V12B [skip ci]'
+          git push origin HEAD:experiment/v014027-mercenario-directo-equipamiento-20261108
