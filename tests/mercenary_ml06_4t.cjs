@@ -58,8 +58,14 @@ const server=http.createServer((req,res)=>{
    assert.equal(activeSlotHalos.length,2,'Both equipped weapon/defense icons must have channel halos');
    assert.ok(activeSlotHalos.every(h=>h.strength>.1&&h.glow.includes('radial-gradient')),
      'Equipped item halos must be visibly styled even for neutral Base: '+JSON.stringify(activeSlotHalos));
-   assert.equal(await page.locator('.pg4tHeroEquippedHalo').count(),2,
-     'The approved character poster must display both equipped channel auras');
+   assert.equal(await page.locator('.pg4tHeroEquippedHalo,.pg4tHeroAnimatedChannel').count(),2,
+     'The approved character preview must reflect both equipped NGE channel effects');
+   const previewChannels=await page.locator('.pg4tHeroAnimatedChannel').evaluateAll(els=>
+     els.map(e=>({channel:e.dataset.affinity,kind:e.dataset.equipmentHalo,
+       animation:getComputedStyle(e,'::before').animationName})));
+   assert.ok(previewChannels.every(x=>['Fuego','Hielo','Rayo'].includes(x.channel)&&x.animation!=='none'),
+     'Preview cues must animate only the three existing channel visuals: '+JSON.stringify(previewChannels));
+
    assert.equal(await page.locator('.pg4tShell .pv9Grid .pg4tAlreadyEquipped').count(),1,
      'Initial Common sword remains visible but disabled in the inventory');
    assert.equal(await page.locator('.pg4tShell .pv9Grid .pg4tAlreadyEquipped').isDisabled(),true);
@@ -68,6 +74,25 @@ const server=http.createServer((req,res)=>{
 
    assert.equal(state.lab.approved3d,true,'V050 must be present in the world');
    assert.equal(state.lab.equipmentRevision,0,'no replacement before user clicks Equipar');
+   assert.equal(state.lab.shaderAnimation?.status,'bound',
+     'Actual existing GLSL shader effects must bind to the V050 equipment subnodes: '+
+       JSON.stringify(state.lab.shaderAnimation));
+   assert.equal(state.lab.shaderAnimation?.ready,6,
+     'Three actual GLSL shaders for each V050 gear item must be instantiated: '+
+       JSON.stringify(state.lab.shaderAnimation?.errors));
+   assert.ok(state.lab.shaderAnimation?.originalModelUnchanged);
+   assert.equal(state.lab.shaderAnimation?.effects?.Rayo,'visual-approved-v07');
+   assert.equal(state.lab.shaderAnimation?.effects?.Fuego,'experimental-v18');
+   assert.equal(state.lab.shaderAnimation?.effects?.Hielo,'experimental-v21');
+   const realChannels=['Fuego','Hielo','Rayo'];
+   for(const kind of ['sword','shield']){
+      const current=state.lab.halo3d?.[kind+'Channel'];
+      if(realChannels.includes(current)){
+        assert.ok(Number(state.lab.shaderAnimation?.active?.[kind]?.[current])>0,
+          'NGE '+kind+' '+current+' animation must run at actual saved channel intensity');
+      }
+   }
+
    assert.equal(await page.locator('.pv9CompareEquipped .pv9ComparisonRarity').innerText(),'Común');
    assert.equal(await page.locator('.pv9CompareSelected .pv9ComparisonRarity').innerText(),'Bueno');
    assert.ok(await page.locator('.pv9CompareEquipped img').count()>0,'The equipped item is not an empty mock slot');
@@ -179,7 +204,11 @@ const server=http.createServer((req,res)=>{
    assert.equal(state.lab.equippedShieldRarity,'Común','Equipping the shield must replace the original Inútil');
    assert.equal(state.lab.equippedSwordRarity,'Común',
       'Equipping a shield MUST NOT silently replace the sword in the other family');
-   assert.equal(state.lab.halo3d?.visible,true,'V050 channel lights must survive equipment replacement');
+   assert.equal(state.lab.shaderAnimation?.status,'bound',
+     'GLSL shader layer must survive gear replacement');
+   assert.equal(state.lab.shaderAnimation?.active?.shield?.Fuego>0,true,
+     'Actual NGE Fuego shield must activate existing Fire shader, not generic halo');
+
    assert.notEqual(state.lab.halo3d?.shieldChannel,'Base',
       'After equipping the upgraded shield the light must switch to the actual NGE element');
    state.stage='equipped';
@@ -212,7 +241,10 @@ const server=http.createServer((req,res)=>{
    state.lab=await page.evaluate(()=>window.__GENESIS_MERCENARY_LAB);
    assert.equal(state.lab.equippedSwordRarity,'Bueno','Sword must now upgrade via real NGE item');
    assert.equal(state.lab.equippedShieldRarity,'Común','Previously upgraded shield must remain equipped');
-   assert.equal(state.lab.halo3d?.visible,true);
+   assert.equal(state.lab.shaderAnimation?.status,'bound');
+   const improvedSword=state.lab.halo3d?.swordChannel;
+   if(['Hielo','Fuego','Rayo'].includes(improvedSword))
+      assert.ok(Number(state.lab.shaderAnimation?.active?.sword?.[improvedSword])>0);
    await page.screenshot({path:path.join(OUT,'07-dossier-ambos-mejorados.png'),fullPage:true,timeout:25000});
    await page.locator('#mercSheetChangeGear').click();
    await page.locator('.pv9Board').waitFor({timeout:9000});
