@@ -1,0 +1,44 @@
+name: Genesis | Resultado de Creaciones V4 dinámico experimental
+on:
+  push:
+    branches:
+      - experiment/resultado-dinamico-v4-20261109
+    paths:
+      - index.html
+      - genesis_result_dynamic_v001.js
+      - genesis_result_dynamic_v001.css
+      - tests/resultado_dinamico_v4.cjs
+      - tests/resultado_dinamico_browser_v4.cjs
+      - '.github/workflows/resultado-dinamico-v4-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  resultado-v4-experimental:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validación de código y conexión al juego
+        run: |
+          set -euo pipefail
+          node --check genesis_result_dynamic_v001.js
+          node --check tests/resultado_dinamico_v4.cjs
+          node --check tests/resultado_dinamico_browser_v4.cjs
+          node tests/resultado_dinamico_v4.cjs
+      - name: Instalar Playwright de manera aislada
+        run: npm install --prefix /tmp/genesis-resultado-v4 playwright@1.56.1
+      - name: Capturas de resultado con Chromium
+        run: NODE_PATH=/tmp/genesis-resultado-v4/node_modules node tests/resultado_dinamico_browser_v4.cjs
+      - name: Conservar evidencia de capturas
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-resultado-v4-experimental-qa
+          path: previews/resultado-dinamico-v4/
+          retention-days: 14
