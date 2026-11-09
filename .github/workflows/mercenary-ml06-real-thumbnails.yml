@@ -1,0 +1,65 @@
+name: ML06 real weapon thumbnails for 4T equipment slots
+on:
+  push:
+    branches: [experiment/v014027-mercenario-directo-equipamiento-20261108]
+    paths: ['.github/workflows/mercenary-ml06-real-thumbnails.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  derive-real-thumbnails:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: experiment/v014027-mercenario-directo-equipamiento-20261108
+      - name: Install image tools
+        run: python3 -m pip install --break-system-packages --quiet Pillow==11.3.0
+      - name: Retrieve genuine Cycles-rendered V015 shield frame from Assets2
+        shell: bash
+        run: |
+          mkdir -p /tmp/genesis_ml06 assets/ui/mercenary/ml06
+          curl -fSL --retry 3 --max-time 90 \
+            'https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/4f1378c9f3e40250e87f730f0788577ee9e1f245/experiments/escudo-hierro-meshy-jajar-v015/previews/V015_01_frente_golpes_fuertes.jpg' \
+            -o /tmp/genesis_ml06/escudo_original_v015.jpg
+          test -s /tmp/genesis_ml06/escudo_original_v015.jpg
+      - name: Render exact item references into existing slot dimensions
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image,ImageOps,ImageEnhance
+          from hashlib import sha256
+          import json
+          out=Path('assets/ui/mercenary/ml06')
+          sources=[
+            ('espada_hierro','assets/playcanvas/approved/equipment/espada_v03_hierro_v175_v12b_cycles_hdri32.png'),
+            ('escudo_hierro','/tmp/genesis_ml06/escudo_original_v015.jpg'),
+          ]
+          records={}
+          for key,p in sources:
+            src=Path(p)
+            im=Image.open(src).convert('RGB')
+            # A contained full item, with original colors; never paint a different sword by rarity.
+            # Crop lightbox margins but preserve shape and metal from the approved render.
+            if key=='espada_hierro':
+              cropped=im.crop((int(im.width*.13),int(im.height*.07),int(im.width*.88),int(im.height*.95)))
+            else:
+              cropped=ImageOps.fit(im,(360,360),method=Image.Resampling.LANCZOS,centering=(.5,.5))
+            canvas=Image.new('RGB',(256,256),'#120d09')
+            thumb=ImageOps.contain(cropped,(226,226),method=Image.Resampling.LANCZOS)
+            canvas.paste(thumb,((256-thumb.width)//2,(256-thumb.height)//2))
+            dst=out/(key+'_original_3d_render.png')
+            canvas.save(dst,optimize=True)
+            records[key]={'source':str(src),'source_sha256':sha256(src.read_bytes()).hexdigest(),'output':str(dst),'output_sha256':sha256(dst.read_bytes()).hexdigest()}
+            print('ML06_REAL_ITEM_THUMBNAIL',key,records[key])
+          (out/'sources.json').write_text(json.dumps(records,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit genuine derived thumbs to experimental game only
+        shell: bash
+        run: |
+          git config user.name 'genesis-experimental-asset-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/ui/mercenary/ml06/
+          git commit -m 'assets(ML06): derived real V12B sword and V015 shield inventory thumbnails [skip ci]'
+          git push origin HEAD:experiment/v014027-mercenario-directo-equipamiento-20261108
