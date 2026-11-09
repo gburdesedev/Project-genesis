@@ -6,6 +6,8 @@ fs.mkdirSync(out,{recursive:true});
 for(const p of [
  'assets/ui/fabricaciones_ora_v004/Fabricaciones_Base_Limpia_V004.png',
  'assets/ui/fabricaciones_ora_v004/V015_REAL_SHIELD_ICON_RGBA.png',
+ 'assets/ui/fabricaciones_ora_v004/V015_REAL_SHIELD_CROPPED.png',
+ 'assets/ui/fabricaciones_ora_v004/V12B_CYCLES_SOURCE_ALPHA_EXPERIMENTAL.png',
  'assets/ui/fabricaciones_ora_v004/escudo_hierro_v015_PBR2K_WEBP_v022.glb',
  'assets/playcanvas/approved/equipment/espada_v03_hierro_v175_v12b_cycles_hdri32.png',
  'assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png',
@@ -55,7 +57,7 @@ const issues=[];
   assert.equal(await page.locator('.gFabMaterials[data-count="3"] .gFabMat').count(),3);
   assert.equal(await page.locator('.gFabMatAsset img[src*="iron_v175_transparent"]').count(),1);
   assert.equal(await page.locator('.gFabMatAsset img[src*="carbon_vegetal_v011_poster"]').count(),1);
-  assert.equal(await page.locator('.gFabSwordPoster[src*="v12b_cycles_hdri32"]').count(),1);
+  assert.equal(await page.locator('.gFabSwordPoster[src*="V12B_CYCLES_SOURCE_ALPHA"]').count(),1);
   assert.equal(await page.locator('button#gApprovedCraftAction:enabled').count(),1);
   await page.waitForTimeout(800);
   await page.screenshot({path:path.join(out,'01-fabricaciones-espada-v12b-real-v004.png'),animations:'allow',timeout:35000});
@@ -70,7 +72,7 @@ const issues=[];
   assert.equal(await recipe(),'escudo_hierro','Ordan changes quest from sword to shield');
   assert.equal(await page.locator('.gFabRecipe.is-selected').count(),1);
   assert.equal(await page.locator('.gFabShieldModel[src*="escudo_hierro_v015"]').count(),1);
-  assert.equal(await page.locator('.gFabShieldPoster[src*="V015_REAL_SHIELD_ICON"]').count(),1);
+  assert.equal(await page.locator('.gFabShieldPoster[src*="V015_REAL_SHIELD_CROPPED"]').count(),1);
   assert.equal(await page.locator('.gFabSwordPoster').count(),0,'Never leave old sword on shield screen');
   assert.equal(await page.locator('.gFabMaterials[data-count="3"] .gFabMat').count(),3);
   const overflow=await page.evaluate(()=>{
