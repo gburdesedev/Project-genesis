@@ -1,0 +1,39 @@
+name: Genesis V014040 verify playable experimental browser URL
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [release-candidate/v014038-public-qa-20261108]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  remote-preview-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify remote experiment HTML and source effects are reachable without touching Pages/main
+        shell: bash
+        run: |
+          set -euo pipefail
+          root='https://raw.githack.com/gburdesedev/Project-genesis/experiment/v014038-mercenario-canal-vfx-3d-20261108'
+          for name in index-v014040-channel-vfx-experimental.html genesis_channel_vfx/boot.mjs genesis_channel_vfx/vendor/Genesis_Rayo_Helicoidal_V07.mjs assets/vendor/genesis/externals/mercSword10/src/sword.glb; do
+            code="$(curl -L -sS -o /tmp/remote-preview-check -w '%{http_code}' --max-time 45 "$root/$name")"
+            echo "$name HTTP=$code BYTES=$(wc -c < /tmp/remote-preview-check)"
+            test "$code" = '200'
+            test "$(wc -c < /tmp/remote-preview-check)" -gt 2000
+          done
+          curl -fLsS --max-time 50 "$root/index-v014040-channel-vfx-experimental.html?genesisChannelVfx=1" -o /tmp/remote-preview-page
+          grep -q 'genesis_channel_vfx/boot.mjs' /tmp/remote-preview-page
+      - name: Inspect page load in real Chromium
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-fund --no-audit playwright@1.56.1
+          npx playwright install chromium
+          node tests/channel-vfx-v014040/remote_preview_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Genesis-V014040-Remote-Playable-URL-Evidence
+          path: vfx-v014040-remote-smoke/
+          retention-days: 7
