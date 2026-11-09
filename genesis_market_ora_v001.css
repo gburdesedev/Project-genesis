@@ -1,0 +1,46 @@
+/* Project Genesis — Mercado ORA V001. Experimental; no approved art edited.
+   All dynamic assets are DOM images below approved transparent slot frames. */
+.modal.genesisMarketModal{width:min(1460px,calc(100vw - 16px),calc((100dvh - 16px)*16/9))!important;max-width:100%!important;height:auto!important;max-height:calc(100dvh - 16px)!important;aspect-ratio:16/9!important;padding:0!important;overflow:hidden!important;border:0!important;background:#0a0705!important;box-shadow:0 20px 65px #000e!important}
+.genesisMarketBoard{position:relative;box-sizing:border-box;width:100%;height:100%;aspect-ratio:16/9;overflow:hidden;container-type:inline-size;color:#ead2a8;font-family:Georgia,'Times New Roman',serif;background:#0a0807 url('./assets/ui/preparacion/01_Capas/Fondo/FondoEstructural.png') center/100% 100% no-repeat}
+.genesisMarketBoard *{box-sizing:border-box}
+.genesisMarketBoard button{font-family:inherit;cursor:pointer;color:inherit}
+.genesisMarketBoard button:focus-visible{outline:2px solid #ffd28c;outline-offset:2px}
+.genesisMarketHeader{position:absolute;left:4%;top:2.2%;width:92%;height:11%;display:flex;justify-content:space-between;align-items:center;gap:2%;border-bottom:1px solid #9d7548;background:linear-gradient(90deg,transparent,#090706bb,transparent);padding:0 2%}
+.genesisMarketHeader h2{font-size:3.1cqw;line-height:1;margin:0;color:#f5dba9;text-shadow:0 3px 7px #000;letter-spacing:.045em}
+.genesisMarketHeader small{display:block;color:#c6a46e;font-size:1.05cqw;letter-spacing:.16em;margin-bottom:.5cqw}
+.genesisMarketClose{border:1px solid #ac7d45;background:#21150de5;font-size:1.5cqw;width:3.3cqw;height:3.3cqw}
+.genesisMarketCoins{margin-left:auto;font-size:1.5cqw;color:#ffe0a1;white-space:nowrap}
+.genesisMarketCoins span{color:#cdaa69;font-size:1cqw}
+.genesisMarketTabs{position:absolute;top:14%;left:25%;width:50%;display:flex;gap:1%}
+.genesisMarketTab{flex:1;text-align:center;border:1px solid #76532f;background:#110c08d9;color:#e0c294;padding:1.05% 0;font-size:1.55cqw}
+.genesisMarketTab[aria-selected=true]{border-color:#dca65b;background:linear-gradient(#65411b,#211308);box-shadow:inset 0 1px 0 #ffe0a151;color:#ffdfab}
+.genesisMarketTab:disabled{opacity:.47;cursor:not-allowed}
+.genesisMarketColumns{position:absolute;top:23%;left:3%;width:94%;height:68%;display:grid;grid-template-columns:23% 44% 31%;gap:1%}
+.genesisMarketPane{min-width:0;min-height:0;border:1px solid #73512f;background:linear-gradient(160deg,#17100eea,#070606f1);box-shadow:inset 0 0 0 2px #080605,inset 0 0 0 3px #8b65394d;padding:4%;overflow:hidden}
+.genesisMarketPortrait{background:#0f0b08 url('./assets/ui/preparacion/01_Capas/Paneles/FondoVisorHerreria.png') center/cover no-repeat;display:flex;flex-direction:column;justify-content:flex-end}
+.genesisMarketPortraitHead{font-size:1.9cqw;text-align:center;color:#f4d4a0;margin:0 0 4%;text-shadow:0 2px 6px #000}
+.genesisMarketPortrait p{font-size:1.1cqw;line-height:1.5;text-align:center;background:#0d0908dd;padding:5%;margin:0}
+.genesisMarketPortrait .genesisMarketPortraitTag{font-size:4cqw;text-align:center;margin:auto;opacity:.65;filter:sepia(1)}
+.genesisMarketPane h3{font-size:1.75cqw;margin:0 0 3%;padding-bottom:2%;font-weight:normal;color:#f3d09a;border-bottom:1px solid #99704470}
+.genesisMarketCatalog{overflow:auto;height:85%;padding-right:1.3%;scrollbar-color:#a57a41 #110c09;scrollbar-width:thin}
+.genesisMarketCard{width:100%;text-align:left;display:grid;grid-template-columns:6.1cqw minmax(0,1fr) auto;gap:2.5%;align-items:center;min-height:7.3cqw;padding:1.1%;margin:0 0 1.5%;border:1px solid #6b4c2d;background:#1d1610da;position:relative}
+.genesisMarketCard.is-selected{border-color:#f3b85f;background:linear-gradient(90deg,#483018e6,#15100c);box-shadow:inset 0 0 0 1px #ffcc7560,0 0 12px #c78d3355}
+.genesisMarketCard strong{display:block;font-size:1.38cqw;font-weight:normal;overflow-wrap:anywhere}
+.genesisMarketCard small{display:block;font-size:.95cqw;color:#bca88c;margin-top:.4cqw}
+.genesisMarketCard .price{font-size:1.3cqw;color:#f7cb7b;white-space:nowrap}
+.genesisMarketSlot{position:relative;display:grid;place-items:center;width:6.1cqw;height:6.1cqw;background:#0e0b09;border:0;overflow:hidden}
+.genesisMarketSlot img{display:block;width:83%;height:83%;object-fit:contain;filter:drop-shadow(0 2px 3px #000)}
+.genesisMarketSlot:after{content:'';position:absolute;inset:0;background:url('./assets/ui/preparacion/01_Capas/Casillas/Casilla_Basicos_01.png') center/100% 100% no-repeat;pointer-events:none}
+.genesisMarketSlot--large{width:13cqw;height:13cqw;margin:2% auto 3%}
+.genesisMarketSlot--large img{width:86%;height:86%}
+.genesisMarketDetails{display:flex;flex-direction:column}
+.genesisMarketDetails h4{text-align:center;font-size:1.9cqw;font-weight:normal;margin:1% 0 2%;overflow-wrap:anywhere}
+.genesisMarketDetails p{text-align:center;color:#c9b89c;font-size:1.1cqw;line-height:1.5}
+.genesisMarketPurchase{margin-top:auto;border-top:1px solid #846038;padding-top:5%;font-size:1.3cqw}
+.genesisMarketQty{display:flex;gap:7%;align-items:center;justify-content:center;margin-bottom:5%}
+.genesisMarketQty button{width:3cqw;height:3cqw;background:#342318;border:1px solid #b38850;font-size:2cqw}
+.genesisMarketQty b{min-width:3cqw;text-align:center}
+.genesisMarketTotal{display:flex;justify-content:space-between;margin-bottom:6%;font-size:1.3cqw}
+.genesisMarketBuy{display:block;width:100%;padding:3% 1%;font-size:1.7cqw;background:linear-gradient(#93632e,#422610);border:1px solid #efbd69;box-shadow:inset 0 0 0 2px #3a230f,0 3px 9px #000b;color:#ffe5b5}
+.genesisMarketFoot{position:absolute;bottom:2.3%;left:4%;right:4%;height:4%;text-align:center;font-size:1.12cqw;color:#ddbf8a}
+@media(max-width:750px){.genesisMarketHeader h2{font-size:3.5cqw}.genesisMarketPortrait p{font-size:1.2cqw}.genesisMarketCard strong{font-size:1.5cqw}}
