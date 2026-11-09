@@ -80,6 +80,10 @@ const server=http.createServer((req,res)=>{
    assert.equal(state.lab.shaderAnimation?.ready,6,
      'Three actual GLSL shaders for each V050 gear item must be instantiated: '+
        JSON.stringify(state.lab.shaderAnimation?.errors));
+   await page.waitForFunction(()=>Number(window.__GENESIS_MERCENARY_LAB?.shaderAnimation?.updateFrames)>2,
+       null,{timeout:25000});
+   assert.equal(await page.evaluate(()=>!!window.__GENESIS_MERCENARY_LAB?.shaderAnimation?.runtimeError),false,
+       'Animated GLSL programs must update on actual PlayCanvas frames without exceptions');
    assert.ok(state.lab.shaderAnimation?.originalModelUnchanged);
    assert.equal(state.lab.shaderAnimation?.effects?.Rayo,'visual-approved-v07');
    assert.equal(state.lab.shaderAnimation?.effects?.Fuego,'experimental-v18');
