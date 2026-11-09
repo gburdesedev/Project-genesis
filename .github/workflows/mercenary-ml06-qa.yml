@@ -1,10 +1,12 @@
-name: ML10 Mercenario NGE equipped halos and no-self comparison QA
+name: ML11 Mercenario V050 real shader VFX plus NGE preview QA
 on:
   push:
-    branches: [experiment/mercenario-4t-equipped-halo-no-self-ml10-20261109]
+    branches: [experiment/mercenario-ml11-vfx-preview-20261109]
     paths:
       - 'index.html'
       - 'mercenary_4t_runtime_ml06.js'
+      - 'mercenary_channel_vfx_ml11.mjs'
+      - 'vfx/**'
       - 'mercenary_4t_runtime_ml06.css'
       - 'tests/mercenary_ml06_4t.cjs'
       - 'tests/mercenary_ml08_slot_ora.cjs'
@@ -34,7 +36,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: genesis-mercenario-ml10-equipped-halos-no-self-qa
+          name: genesis-mercenario-ml11-v050-real-vfx-preview-qa
           path: previews/mercenary-lab-ml06-4t/
           retention-days: 14
           if-no-files-found: warn
