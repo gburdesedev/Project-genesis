@@ -1,0 +1,14 @@
+{
+  "espada_hierro": {
+    "source": "/tmp/genesis_ml06/espada_v12b_original_cycles.png",
+    "source_sha256": "b2cabab7db5905145ded4c40d120c89beb2dc88795e9c227463ce85e30978f50",
+    "output": "assets/ui/mercenary/ml06/espada_hierro_original_3d_render.png",
+    "output_sha256": "85d7b430feab272d2a116be56c941e0643e199592eadc77d56444484eef7bb20"
+  },
+  "escudo_hierro": {
+    "source": "/tmp/genesis_ml06/escudo_original_v015.jpg",
+    "source_sha256": "848cf75eea47b2fdcdbf23a3aa7830f54ade493bb72e6dbc5cc559b753a1791c",
+    "output": "assets/ui/mercenary/ml06/escudo_hierro_original_3d_render.png",
+    "output_sha256": "566264a5e769298317078bb0162f30a1a84eda5ac0970295f66c6377b0e0b421"
+  }
+}
