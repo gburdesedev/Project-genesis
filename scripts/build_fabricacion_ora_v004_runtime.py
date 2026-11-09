@@ -25,15 +25,15 @@ donor((98,282,433,345),(150,544,426,612),.88,1.6)
 donor((98,452,433,522),(150,544,426,612),.88,1.6)
 # Center: baked sword is removed from runtime (not an invented other sword).
 # Background is a blurred clone of the real source forge, as user approved.
-donor((472,117,1090,788),(860,180,1050,721),.91,5.0)
+donor((472,117,1090,804),(860,180,1050,721),.91,5.0)
 # Title, old two-material layout and status are baked in the V07 source.
 # Rebuild only their interiors and leave the gold boundaries untouched.
 donor((1173,128,1574,205),(49,541,422,723),.62,1.5)
 donor((1150,242,1589,280),(49,541,422,723),.63,1.2)
-donor((1151,289,1587,575),(49,541,422,723),.67,1.7)
-donor((1228,601,1568,643),(49,541,422,723),.70,1.1)
+donor((1151,286,1610,572),(49,541,422,723),.64,1.7)
+donor((1210,592,1579,667),(49,541,422,723),.69,1.1)
 # Original FABRICAR frame and original anvil are retained; clear baked label.
-donor((1304,685,1529,749),(49,541,422,723),.76,2)
+donor((1327,687,1537,744),(49,541,422,723),.76,2)
 # Keep screenshot's static PT until separately migrated to live PT.
 name='Fabricaciones_Base_Limpia_V004.png'
 im.save(OUT/name,optimize=True)
@@ -62,5 +62,38 @@ with zipfile.ZipFile(OUT/'Fabricaciones_Runtime_V004.ora','w') as z:
     z.writestr('stack.xml',ET.tostring(image,encoding='utf-8',xml_declaration=True))
     buf=io.BytesIO();im.save(buf,'PNG');z.writestr('mergedimage.png',buf.getvalue())
     thumb=im.copy();thumb.thumbnail((360,202));buf=io.BytesIO();thumb.save(buf,'PNG');z.writestr('Thumbnails/thumbnail.png',buf.getvalue())
+# Game-art ONLY: strip the original V12B render's navy preview backdrop.
+# This is alpha keying of the REAL approved Cycles source, not invented geometry.
+sword_path=Path('assets/playcanvas/approved/equipment/espada_v03_hierro_v175_v12b_cycles_hdri32.png')
+sword=Image.open(sword_path).convert('RGBA')
+sw,sh=sword.size
+p=sword.load()
+mask=Image.new('L',sword.size,0);m=mask.load()
+for yy in range(sh):
+    for xx in range(sw):
+        r,g,b,a=p[xx,yy]
+        brightness=max(r,g,b)
+        is_navy=(b-r>7 and b-g>1 and r<114)
+        if is_navy or brightness<50: alpha=0
+        elif brightness<90: alpha=min(255,max(0,int((brightness-48)*6)))
+        else: alpha=255
+        m[xx,yy]=min(a,alpha)
+mask=mask.filter(ImageFilter.GaussianBlur(.55))
+bbox=mask.getbbox()
+if bbox:
+    padded=(max(0,bbox[0]-18),max(0,bbox[1]-18),min(sw,bbox[2]+18),min(sh,bbox[3]+18))
+    sword.putalpha(mask)
+    sword=sword.crop(padded)
+    sword.save(OUT/'V12B_CYCLES_SOURCE_ALPHA_EXPERIMENTAL.png',optimize=True)
+    print('V12B_SOURCE_ALPHA',sw,sh,'bbox',padded,'rgba',sword.size)
+# V015 is fetched from the ORIGINAL Mercenary branch at a later workflow step.
+shield_path=OUT/'V015_REAL_SHIELD_ICON_RGBA.png'
+if shield_path.exists():
+    shield=Image.open(shield_path).convert('RGBA')
+    bbox=shield.getchannel('A').getbbox()
+    if bbox:
+        padded=(max(0,bbox[0]-6),max(0,bbox[1]-6),min(shield.width,bbox[2]+6),min(shield.height,bbox[3]+6))
+        shield.crop(padded).save(OUT/'V015_REAL_SHIELD_CROPPED.png',optimize=True)
+        print('V015_REAL_SHIELD_CROPPED',shield.size,padded)
 (OUT/'manifest.json').write_text(json.dumps({'source':str(SRC),'source_sha256':hashlib.sha256(SRC.read_bytes()).hexdigest(),'status':'experimental runtime candidate, artwork V07 remains untouched','layout':[1672,941],'method':'pixel crops and clone patches from same source; visor blurred by approved decision','assets':'authentic material posters and V12B image are loaded separately at runtime','notes':['not the historical local ORA V004 binary','gold outer decoration original source','no source geometry or model substitution']},ensure_ascii=False,indent=2))
 print('BUILD_FABRICACION_V004_RUNTIME_OK',str(OUT/name),sum(1 for _ in sections))
