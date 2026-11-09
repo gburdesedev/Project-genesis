@@ -38,12 +38,17 @@ fs.mkdirSync(out,{recursive:true});
   await show(model);
   assert.equal(await page.locator('.grChannelGroup').count(),1);
   assert.equal(await page.locator('[data-result-channel=Base]').count(),1);
+  await page.locator('.grChannelRow.grHasOra').first().waitFor({state:'attached'});
+  assert.equal(await page.locator('.grChannelRow.grHasOra').count(),1,'ORA Base no cargada');
+  assert.equal(await page.locator('.grOra').first().evaluate(img=>img.naturalWidth),990);
   await page.screenshot({path:path.join(out,'01-espada-base.png')});
   await show({...model,id:'craft-sword-2',rarity:'Bueno',channels:[['Daño',78],['Fuego',82],['Rayo',55.5]],
     channelTechniques:{Fuego:[{nombre:'Quemadura',valor:32}]}});
   assert.equal(await page.locator('.grChannelGroup').count(),3);
   assert.equal(await page.locator('.grSub').count(),1);
   assert.equal(await page.locator('[data-result-channel=Luz]').count(),0);
+  await page.waitForFunction(()=>document.querySelectorAll('.grChannelRow.grHasOra').length===3);
+  assert.equal(await page.locator('.grChannelRow.grHasOra').count(),3,'No aparecen las tres ORA originales');
   await page.screenshot({path:path.join(out,'02-espada-tres-canales.png')});
   const body=await page.locator('.grScreen').boundingBox();
   assert.ok(body?.width>1200&&body?.height>600);
