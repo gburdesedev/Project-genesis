@@ -106,7 +106,15 @@
       const heroHalo=(item,kind)=>{
         if(!item)return '';
         const fx=dominant(item);
-        return `<span class="pg4tHeroEquippedHalo pg4tHeroHalo-${kind}" data-equipment-halo="${kind}" data-affinity="${esc(fx.first)}" style="--fx-color:${fx.color};--fx-color-2:${fx.color2};--fx-strength:${fx.strength.toFixed(2)}" aria-hidden="true"></span>`;
+        // Show the same current equipped NGE affinity in the Cycles-poster fallback.
+        // This 2D cue animates the *preview only*. The actual PlayCanvas shader
+        // runs on the live V050 GLB through mercenary_channel_vfx_ml11.mjs.
+        const animated=readChannels(item).filter(c=>['Fuego','Hielo','Rayo'].includes(c.name)&&c.value>0)
+          .sort((a,b)=>b.value-a.value)[0]||null;
+        const name=animated?.name||fx.first;
+        const power=animated?Math.max(.02,Math.min(1,animated.value/100)):fx.strength;
+        const mode=animated?'pg4tHeroAnimatedChannel':'pg4tHeroEquippedHalo';
+        return `<span class="${mode} pg4tHeroHalo-${kind}" data-equipment-halo="${kind}" data-affinity="${esc(name)}" data-vfx-preview="${animated?'animated-reference':'fallback'}" style="--fx-color:${COLOR[name]||fx.color};--fx-color-2:${fx.color2};--fx-strength:${power.toFixed(2)}" aria-hidden="true"></span>`;
       };
       const modelHtml = poster + `<model-viewer data-asset-src="${esc(model)}" camera-controls interaction-prompt="none" loading="lazy" camera-orbit="15deg 80deg 5.1m" exposure="1.25" shadow-intensity=".32" alt="GLB real V050: espada V12B y escudo V015" class="pv9Viewer"></model-viewer>`+
         heroHalo(opts.equippedFirst,'sword')+heroHalo(opts.equippedSecond,'shield');
