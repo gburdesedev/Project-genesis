@@ -1,0 +1,51 @@
+name: Genesis | Paquete jugable aislado Resultado V4
+on:
+  push:
+    branches:
+      - experiment/resultado-dinamico-v4-20261109
+    paths:
+      - .github/workflows/resultado-v4-portable-game.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  empaquetar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar juego original V014.028 más resultado V4 sin main
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/project-genesis
+          cp -v -- *.html *.js *.css dist/project-genesis/
+          cp -a assets dist/project-genesis/
+          mkdir -p dist/project-genesis/previews
+          find previews -maxdepth 1 -type f \( -name '*.js' -o -name '*.css' \) -exec cp -v '{}' dist/project-genesis/previews/ \;
+          cat > dist/project-genesis/LEEME_RESULTADO_V4.txt <<'EOF'
+          EXPERIMENTO Project Genesis V014.029 — no fusionado a main.
+          El juego incluye la pantalla de Resultado V4 conectada a las
+          fabricaciones NGE reales (primera y segunda espada).
+          Para preservar calidad hay que añadir los ocho PNG ORA en:
+          assets/ui/resultado/oras/
+          El ZIP de ORA lo mantiene el usuario por separado.
+          Esta entrega no contiene el GLB original V12B porque su autorización
+          de distribución aún no está comprobada; se conserva el render Cycles.
+          Abrir con un servidor local HTTP, por ejemplo desde esta carpeta:
+          python -m http.server 8000
+          Luego navegar a http://localhost:8000/
+          EOF
+          python - <<'PY'
+          import pathlib,zipfile
+          root=pathlib.Path('dist/project-genesis')
+          with zipfile.ZipFile('dist/Genesis_Juego_V014029_Resultado_V4_Experimental.zip','w',zipfile.ZIP_DEFLATED,compresslevel=4,allowZip64=True) as z:
+           for f in sorted(root.rglob('*')):
+            if f.is_file():z.write(f,f.relative_to(root))
+          print('PAQUETE',pathlib.Path('dist/Genesis_Juego_V014029_Resultado_V4_Experimental.zip').stat().st_size)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: genesis-juego-v014029-resultado-v4
+          path: dist/Genesis_Juego_V014029_Resultado_V4_Experimental.zip
+          retention-days: 14
