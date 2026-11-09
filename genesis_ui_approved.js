@@ -225,6 +225,8 @@
    return true;
  }
  function fabrications(ctx,nav){
+   // Optional portable module: one adapter line; the legacy renderer is the fallback.
+   if(window.GenesisCraftingModule?.render(ctx,nav))return;
    const catalog=typeof ctx.getRecipeCatalog==='function'?(ctx.getRecipeCatalog()||[]):[];
    const recipes=catalog.filter(r=>r&&r.id&&r.formula);
    const ids=new Set(recipes.map(r=>String(r.id)));
