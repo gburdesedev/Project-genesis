@@ -41,7 +41,7 @@ jobs:
             const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
             try{
               const context=await browser.newContext({viewport:{width:1600,height:900},deviceScaleFactor:1});
-              await context.addCookies([{name:'__Http-phish',value:'1',url:'https://raw.githack.com',secure:true,httpOnly:true,path:'/'}]);
+              await context.addCookies([{name:'__Http-phish',value:'1',url:'https://raw.githack.com/',secure:true,httpOnly:true}]);
               const page=await context.newPage();
               const errors=[];page.on('pageerror',e=>errors.push(e.message));
               const url='https://raw.githack.com/gburdesedev/Project-genesis/experiment/v014030-created-result-live-asset-gate-20261109/index.html';
