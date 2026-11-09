@@ -1517,9 +1517,10 @@ function renderGenesisHistoricCreationResult(item){
   return `<div class="genesisHistoricChannel" style="--channel:${color}"><span class="genesisHistoricChannelName">${esc(m.label)}</span><span class="genesisHistoricChannelMeter"><i style="width:${pct}%"></i></span><strong>${esc(m.display)}</strong></div>`;
  }).join('');
  const ingredientRows=parts.map(p=>`<div class="genesisHistoricMaterial"><span>${esc(p.material)}</span><strong>${p.qty} ×</strong></div>`).join('');
+ const certifiedChannelCaption=(item.channels||[]).map(([name,value])=>`${esc(name)} ${esc(value)}${name==='Base'?'':'%'}`).join(' · ')||'Sin canales certificados';
  const canonicalArt=itemAssetMarkup(item);
  const itemArt=window.GenesisRealCraftViewer?.render(item,canonicalArt)||canonicalArt;
- return `<section class="genesisHistoricResult" data-result-art="historic-creation-v014030" data-approved-sword="V03-V175-V12B" style="--creation-halo:${visual.c1}">
+ return `<section class="genesisHistoricResult" data-result-art="historic-creation-v014030" data-approved-sword="${item.recipe==='espada_hierro'?'V03-V175-V12B':'none'}" style="--creation-halo:${visual.c1}">
   <header class="genesisHistoricTitle"><span>PROJECT GENESIS</span><div><strong>RESULTADO DE FABRICACIÓN</strong><small>Ficha completa del objeto</small></div></header>
   <div class="genesisHistoricColumns">
    <aside class="genesisHistoricLeft">
@@ -1531,8 +1532,8 @@ function renderGenesisHistoricCreationResult(item){
     <div class="genesisHistoricPanel genesisHistoricLog"><h3>HISTORIAL</h3><p>Creación registrada</p><small>El objeto ha sido fabricado correctamente.</small></div>
    </aside>
    <div class="genesisHistoricView"><div class="genesisHistoricAura" aria-hidden="true"></div>
-    <div class="genesisHistoricObject" aria-label="Vista de la espada aprobada">${itemArt}</div>
-    <div class="genesisHistoricViewerNote">${esc(visual.label)} · ${item.recipe==='espada_hierro'?'Render auténtico V175/V12B · HDRI EXR 32 bits':'Vista del objeto'}</div>
+    <div class="genesisHistoricObject" aria-label="Vista de ${esc(recipeKind(item.recipe))}">${itemArt}</div>
+    <div class="genesisHistoricViewerNote">${certifiedChannelCaption} · ${item.recipe==='espada_hierro'?'Render auténtico V175/V12B · HDRI EXR 32 bits':'Vista del objeto'}</div>
    </div>
    <aside class="genesisHistoricRight">
     <div class="genesisHistoricPanel genesisHistoricChannelPanel"><h3>CANALES DEL OBJETO</h3>
