@@ -75,6 +75,11 @@ const server=http.createServer((req,res)=>{
    assert.equal(await page.locator('.mercConcept .mcInventorySlot').count(),20,'V09 must keep 20 original cells');
    assert.equal(await page.locator('.mercConcept .mcInventorySlot.hasItem').count(),2,'two authentic NGE creations in the current family');
    assert.equal(await page.locator('.pg4tShell .mcInventorySlot.hasItem img[src$="V015_REAL_SHIELD_ICON_RGBA.png"]').count(),2,'Both actual shield icons must appear in 4T small slots');
+   assert.equal(await page.locator('.pg4tShell img[src*="Origen_V09"]').count(),0,'Obsolete V09 ORA sprites must not be used');
+   const shields=await page.locator('.pg4tShell .mcInventorySlot.hasItem .pg4tItemVisual').evaluateAll(els=>els.map(el=>({affinity:el.dataset.affinity,strength:getComputedStyle(el).getPropertyValue('--fx-strength').trim(),img:el.querySelector('img')?.getAttribute('src')})));
+   assert.equal(shields.length,2,'Both shields must have channel-bound live visual wrappers');
+   assert.ok(shields.every(s=>s.img.includes('V015_REAL_SHIELD_ICON_RGBA.png')));
+   state.channelFX={shield:shields,obsoleteOraLoaded:false};
    await page.screenshot({path:path.join(OUT,'03-4t-escudos-v015.png'),fullPage:true,timeout:25000});
    await page.locator('[data-action="equip"]').click();
    await page.waitForFunction(()=>window.__GENESIS_MERCENARY_LAB?.status==='equipped',null,{timeout:125000}).catch(()=>null);
