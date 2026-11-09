@@ -44,6 +44,15 @@ const server=http.createServer((req,res)=>{
    state.lab=await page.evaluate(()=>window.__GENESIS_MERCENARY_LAB);
    assert.equal(state.lab.items,4,'exactly four items generated from NGE');
    assert.equal(await page.locator('.mercConcept .pv9Slot').count(),10,'V09 must keep exactly ten original gear slots');
+   const gearCenters=await page.locator('.pg4tShell .mcEquipSlot').evaluateAll(els=>els.map(el=>{
+     const r=el.getBoundingClientRect(),board=el.closest('.pv9Board').getBoundingClientRect();
+     return {x:+((r.left+r.width/2-board.left)/board.width).toFixed(3),
+       y:+((r.top+r.height/2-board.top)/board.height).toFixed(3)};
+   }));
+   assert.equal(gearCenters.length,2);
+   assert.ok(gearCenters.every(x=>Math.abs(x.x-.587)<.008),
+     'Weapon/shield center must match 4-T right-hand gold frame (not V09): '+JSON.stringify(gearCenters));
+
    assert.equal(await page.locator('.mercConcept .pv9Viewer').count(),1,'real V049 GLB viewer must exist');
    assert.match(await page.locator('.pv9Viewer').getAttribute('data-asset-src'),/V050_4T_SHIELD_FIT_V12B_V015\.glb/);
    assert.match(await page.locator('.pg4tShell').evaluate(el=>getComputedStyle(el).backgroundImage),/Genesis_Mercenario_4T_Estado_Vacio_APROBADO/);
