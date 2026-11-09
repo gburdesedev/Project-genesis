@@ -1,0 +1,38 @@
+name: Genesis V016.002 | Resultado aprobado sobre main estable
+on:
+  push:
+    branches: [experiment/v016002-resultado-aprobado-main-safe-20261109]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  resultado:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Comprobar sintaxis y motor NGE real
+        run: |
+          node --check genesis_result_dynamic_v001.js
+          node --check tests/resultado_dinamico_v4.cjs
+          node tests/resultado_ora_assets_v016001.cjs
+          node tests/resultado_dinamico_v4.cjs
+      - name: Instalar Playwright
+        run: npm install --prefix /tmp/genesis-v016002 playwright@1.56.1
+      - name: Capturas de resultado con ORA
+        run: NODE_PATH=/tmp/genesis-v016002/node_modules node tests/resultado_dinamico_browser_v4.cjs
+      - name: Evidencia
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v016002-resultado-main-safe-capturas
+          path: previews/resultado-dinamico-v4/
+          retention-days: 14
