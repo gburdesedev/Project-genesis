@@ -38,6 +38,7 @@ assert.ok(!candidate.includes('Hielo'),'Never create an effect not rolled by NGE
 assert.match(html,/Project Genesis v0\.14\.030/);
 assert.match(html,/GenesisRealCraftViewer\?\.render\(item,canonicalArt\)/);
 assert.match(html,/GenesisRealCraftViewer\?\.activate\(item,modalBox\)/);
-assert.match(html,/const item=engine\.present\(raw,usedItemNames\);craftedItems\.push\(item\)/);
+assert.match(html,/const item=engine\.present\(raw,usedItemNames\)/);
+assert.match(html,/craftedItems\.push\(item\)/);
 assert.ok(!html.includes('GenesisApprovedRuntimeModels={espada_hierro'),'DO NOT ship an unlicensed model override');
 console.log('PASS V014.030: actual item channels, live GLB permission gate, safe certified fallback, no invented effect');
