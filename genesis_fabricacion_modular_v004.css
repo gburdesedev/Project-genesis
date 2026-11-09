@@ -75,3 +75,16 @@
  background:linear-gradient(#f9b33d10,#f9b33d15)!important;
  filter:none!important
 }
+
+
+/* Real V175 ingot replaces the baked generic category icon for BOTH iron
+   families. Deliberately confined to icon artwork, not the label or row. */
+.gFabV175Category{
+ z-index:5;pointer-events:none;display:flex;align-items:center;justify-content:center;
+ background:radial-gradient(ellipse at center,#1d1510 0%,#17110df5 70%,#16100caa 100%);
+ border-radius:2px;overflow:hidden;
+}
+.gFabV175Category img{
+ display:block;width:94%;height:94%;object-fit:contain;
+ filter:drop-shadow(0 2px 4px #000c)
+}
