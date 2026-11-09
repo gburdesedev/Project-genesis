@@ -44,6 +44,10 @@ jobs:
           curl --fail --location --retry 3 --connect-timeout 25 --max-time 200 -o assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb "$BASE/candidates/mercenary/stand_v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb"
           curl --fail --location --retry 3 --connect-timeout 25 --max-time 120 -o assets/playcanvas/candidates/shield/v015/escudo_hierro_v015_PBR2K_WEBP_v022.glb "$BASE/candidates/shield/iron_v015_pbr2k_v022/escudo_hierro_v015_PBR2K_WEBP_v022.glb"
           echo 'e2466851abcdb0c925dcc17296c05d2aa9ea555500e21cc8d54c3a09e6199dd0  assets/playcanvas/candidates/mercenary/v049/GENESIS_MERCENARY_V049_SWORD_V12B_SHIELD_V015_WEB.glb' | sha256sum --check
+          # Original Cycles EXR32 render-derived transparent poster; not an invented concept.
+          curl --fail --location --retry 3 --connect-timeout 25 --max-time 150 -o assets/ui/mercenary/v09/V049_REAL_CYCLES32_PREVIEW_ALPHA.png \
+            'https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/dad6cacf3141bc9dd2e09599a06974f333da2157/candidates/mercenary/stand_v049/V049_REAL_CYCLES32_APPROVED_GEAR_PREVIEW_ALPHA.png'
+          test "$(stat -c%s assets/ui/mercenary/v09/V049_REAL_CYCLES32_PREVIEW_ALPHA.png)" -gt 150000
           python3 - <<'PY'
           import struct, pathlib
           for f in (pathlib.Path('assets/playcanvas/candidates/mercenary/v049').glob('*.glb')):
