@@ -48,6 +48,16 @@ const report={status:'START',errors:[],samples:[]};
    assert(Math.abs(fx.time-time)<0.20,'Animated render clock deviated more than 200ms: '+fx.time+' vs '+time);
    report.samples.push({name:n,channels:state.channels,viewer:state.viewer});
    await page.screenshot({path:path.join(out,n),timeout:20000,animations:'allow'});
+   if(n==='02-fuego-25-rayo-80.png'){
+     const hashes=[];
+     for(const [k,t] of [0.25,1.35,2.45].entries()){
+       await iframe.locator('canvas#sword3d').evaluate(async (_c,sec)=>window.__genesisVfxStep(sec),t);
+       const screenshot=await page.locator('.grViewer').screenshot({path:path.join(out,'motion-0'+(k+1)+'.png'),timeout:20000,animations:'allow'});
+       hashes.push(require('crypto').createHash('sha256').update(screenshot).digest('hex'));
+     }
+     assert.equal(new Set(hashes).size,3,'Rayo/Fuego VFX visual frames did not change');
+     report.motionProof={times:[.25,1.35,2.45],uniqueFrameHashes:hashes.length,framesDiffer:true};
+   }
   }
   assert.equal(report.errors.length,0,JSON.stringify(report.errors));
   report.status='PASS_ORIGINAL_ORAS_V12B_INTERACTIVE_CHANNEL_INTENSITIES_AND_ANIMATIONS';
