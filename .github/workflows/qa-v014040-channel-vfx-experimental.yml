@@ -1,0 +1,104 @@
+name: Genesis V014.040 experimental sword channel VFX integration QA
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [release-candidate/v014038-public-qa-20261108]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: genesis-v014040-vfx-experiment
+  cancel-in-progress: false
+jobs:
+  vfx-bridge-and-original-sword-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 27
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Validate source references and unmodified approved shader snapshots
+        run: |
+          set -euo pipefail
+          node --check genesis_channel_vfx/boot.mjs
+          node --check tests/channel-vfx-v014040/scene.mjs
+          node --check tests/channel-vfx-v014040/verify.cjs
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          files = {
+            'genesis_channel_vfx/vendor/Genesis_Rayo_Helicoidal_V07.mjs':'61b55338c3a2bd5d0d89457e9061f54cd25b6da3',
+            'genesis_channel_vfx/vendor/Genesis_Fuego_V20C_CalorYFlamas.mjs':'fc4a3722e7c07b33d034b6d1ead5504f480a6345',
+            'genesis_channel_vfx/vendor/Genesis_AffinitySurfaceCore_V21.mjs':'365ac7ad266e4ab02e6ee27ebe292c72338cb1bc',
+            'genesis_channel_vfx/vendor/Genesis_Hielo_V21_Cristalizacion.mjs':'567b45563bd4dc020deaef2748423c32a0b64802',
+          }
+          for name,gitsha in files.items():
+            b=Path(name).read_bytes()
+            got=hashlib.sha1(f'blob {len(b)}\0'.encode()+b).hexdigest()
+            assert got==gitsha,(name,got)
+          print('GENESIS_VFX_APPROVED_SHADER_SNAPSHOTS_EXACT',len(files))
+          PY
+      - name: Build isolated V014040 preview from V014038 WITHOUT changing original index
+        run: |
+          set -euo pipefail
+          python3 scripts/qa/build_v014040_channel_vfx_preview.py
+          git diff --exit-code -- index.html
+          test -s index-v014040-channel-vfx-experimental.html
+          grep -Fq 'genesis_channel_vfx/boot.mjs' index-v014040-channel-vfx-experimental.html
+          grep -Fq 'genesisVfxActive' index-v014040-channel-vfx-experimental.html
+          grep -Fq 'window.GenesisChannelVFX?.destroy' index-v014040-channel-vfx-experimental.html
+      - name: Recover user approved original V03 GLB exact SHA only for standalone visual test
+        run: |
+          set -euo pipefail
+          curl -fSL --retry 3 --max-time 40 'https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/experiment/v45-trigger-hdri32-triple-video-20261108/scripts/fab_sword/hydrate_git_blobs_v03.py' -o /tmp/hydrate_v03.py
+          curl -fSL --retry 3 --max-time 40 'https://raw.githubusercontent.com/ProjectGenesisAssets2/genesis-equipment-assets/experiment/v45-trigger-hdri32-triple-video-20261108/render-input/v03-blob-manifest.json' -o /tmp/v03-manifest.json
+          GITHUB_REPOSITORY=ProjectGenesisAssets2/genesis-equipment-assets GITHUB_TOKEN='' python3 /tmp/hydrate_v03.py --manifest /tmp/v03-manifest.json --output tests/channel-vfx-v014040/source_original_v03.glb
+          echo 'e2228f078b2572768416c48c0e63c2d908f214e2c0625a2ab754c877a099112b  tests/channel-vfx-v014040/source_original_v03.glb' | sha256sum -c
+      - name: Install native PlayCanvas and Playwright on GitHub runner
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund --no-save playcanvas@2.23.3 playwright@1.56.1 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Serve original V03 3D preview and effects
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8792 --bind 127.0.0.1 >/tmp/genesis-vfx-test-server.log 2>&1 &
+          sleep 2
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8792/tests/channel-vfx-v014040/source_original_v03.glb)" = 200
+      - name: Verify actual GLB 3D renderer with Fuego Rayo Hielo on/off and weapon motion
+        timeout-minutes: 13
+        run: |
+          set -euo pipefail
+          node tests/channel-vfx-v014040/verify.cjs
+          test -s channel-vfx-v014040-qa/V014040_tres.png
+          test -s channel-vfx-v014040-qa/V014040_tres_swordrot36.png
+          test -s channel-vfx-v014040-qa/audit.json
+      - name: Upload genuine WebGL screenshots, QA results and experimental HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: Genesis-V014040-VFX-RealV03-Experimental-QA
+          path: |
+            channel-vfx-v014040-qa/*.png
+            channel-vfx-v014040-qa/audit.json
+            genesis_channel_vfx/experimental_preview_audit.json
+            index-v014040-channel-vfx-experimental.html
+          retention-days: 14
+      - name: Commit ONLY experimental preview HTML and metadata back to same branch
+        if: success()
+        run: |
+          set -euo pipefail
+          git diff --exit-code -- index.html
+          git config user.name 'genesis-qa-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index-v014040-channel-vfx-experimental.html genesis_channel_vfx/experimental_preview_audit.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'test(v014040): generated VFX preview, original Canvas unchanged, visual QA passed'
+            git push origin HEAD:refs/heads/experiment/v014038-mercenario-canal-vfx-3d-20261108
+          else
+            echo 'PREVIEW_UNCHANGED_NO_PUSH'
+          fi
+      - name: Remove original test GLB from runner (not committed nor redistributed)
+        if: always()
+        run: |
+          rm -f tests/channel-vfx-v014040/source_original_v03.glb
+          git diff --exit-code -- index.html
