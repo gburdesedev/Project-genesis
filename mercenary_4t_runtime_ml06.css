@@ -244,3 +244,37 @@
  position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;
  clip-path:inset(50%)!important;white-space:nowrap!important;padding:0!important;margin:0!important
 }
+
+/* ML10 — visible per-channel halo on ALL equipped equipment, including neutral Base.
+   The glow is drawn behind the icon, clipped inside the approved golden slot.
+   No new flat gray background plate, no stretched images or obsolete ORAs. */
+.pg4tShell .pg4tItemVisual::before{
+  z-index:0!important;inset:7%!important;opacity:calc(.40 + var(--fx-strength) * .35)!important;
+  background:radial-gradient(ellipse at 50% 50%,var(--fx-color) 0%,transparent 77%)!important;
+  filter:blur(.43cqw)!important;pointer-events:none!important;
+}
+.pg4tShell .pg4tItemVisual .pg4tIconFit{z-index:1!important}
+.pg4tShell .pg4tItemVisual .pg4tIconFit img{
+  filter:drop-shadow(0 0 .21cqw var(--fx-color))
+    drop-shadow(0 0 .36cqw var(--fx-color-2))!important;
+}
+.pg4tShell .mcEquipSlot .pg4tItemVisual::before,
+.pg4tShell .pv9CompareEquipped .pg4tItemVisual::before{
+  opacity:calc(.52 + var(--fx-strength) * .38)!important;
+}
+.pg4tShell .mcEquipSlot .pg4tItemVisual .pg4tIconFit img,
+.pg4tShell .pv9CompareEquipped .pg4tItemVisual .pg4tIconFit img{
+  filter:drop-shadow(0 0 .29cqw var(--fx-color))
+    drop-shadow(0 0 .51cqw var(--fx-color-2))!important;
+}
+/* Keep the equipped item in the inventory as a reference, not a possible pick. */
+.pg4tShell .pv9Grid .mcInventorySlot.pg4tAlreadyEquipped{
+  cursor:default!important;pointer-events:none!important;
+  outline:1px solid #d7ab6577;outline-offset:-2px;
+}
+.pg4tShell .pv9Grid .mcInventorySlot.pg4tAlreadyEquipped .pg4tItemVisual{
+  opacity:.85!important;
+}
+.pg4tShell .pv9Grid .mcInventorySlot.pg4tAlreadyEquipped:disabled{
+  filter:none!important;opacity:1!important;
+}
