@@ -515,10 +515,10 @@
     if(approvedUiLoadState==='loading')return false;
     approvedUiLoadState='loading';
     const style=document.createElement('link');
-    style.rel='stylesheet';style.href='genesis_ui_approved.css?v=014028';
+    style.rel='stylesheet';style.href='genesis_ui_approved.css?v=014029';
     document.head.append(style);
     const script=document.createElement('script');
-    script.src='genesis_ui_approved.js?v=014028';
+    script.src='genesis_ui_approved.js?v=014029';
     script.onload=()=>{
       approvedUiLoadState=window.GenesisApprovedUI?.render?'ready':'failed';
       if(approvedUiLoadState==='failed')console.error('[Genesis UI] Falta el módulo de arte aprobado');
@@ -533,6 +533,26 @@
     return false;
   }
   function approvedUiNav(){return {renderMenu,renderWorkspace,craft,start,close,sheetForItem};}
+  // Per-crafted-item halo. Each sword uses its OWN real channels from the
+  // procedural result; missing affinity means neutral Canal Base, not fire.
+  function comparisonHalo(item){
+    const affinities=Array.isArray(item?.affinities)?item.affinities:[];
+    const normalized=affinities.map(a=>Array.isArray(a)?a[0]:a).filter(Boolean);
+    const names=normalized.length?normalized:
+      (item?.channels||[]).slice(1).filter(ch=>Number(ch?.[1])>0).map(ch=>ch[0]).filter(Boolean);
+    const colors={Fuego:'#ff7f32',Rayo:'#75b9ff',Hielo:'#9eddf4',Escarcha:'#a1e8ff',
+      Luz:'#fff0b0',Sombra:'#bd9fd8',Naturaleza:'#75c993',Tierra:'#c4a078'};
+    return {color:colors[names[0]]||'#c5b7a4',label:names.length?names.join(' + '):'Canal Base'};
+  }
+  function comparisonAsset(item,label,ctx){
+    const halo=comparisonHalo(item);
+    return '<div class="genesisComparisonSword" data-compare-item="'+escape(label)+'" '+
+      'data-halo-channel="'+escape(halo.label)+'" style="--compare-halo:'+halo.color+'">'+
+      '<div class="genesisComparisonSwordGlow" aria-hidden="true"></div>'+
+      '<div class="genesisComparisonSwordAsset">'+ctx.renderAsset(item)+'</div>'+
+      '<p>'+escape(label)+' · '+escape(item.name)+'</p>'+
+      '<small>'+escape(halo.label)+'</small></div>';
+  }
   function renderWorkspace(tab) {
     const ctx=session;
     if(!ctx) return;
@@ -680,7 +700,7 @@
             keys.map(key=>'<div class="workspaceCompareRow"><span>'+escape(key)+'</span><b>'+escape(fmt(a,key))+'</b><b>'+escape(fmt(b,key))+'</b></div>').join('') +
             '<p class="workspaceFootnote">Misma familia y fórmula de sesión. Cada cierre conserva sus valores propios.</p>';
         } else details+='<p class="workspaceCompareHint">Elegí dos objetos distintos de la misma familia para comparar sus canales.</p>';
-        viewer=valid?'<div class="workspacePair"><div class="workspacePairA">'+ctx.renderAsset(a)+'<p>A · '+escape(a.name)+'</p></div><div class="workspacePairB">'+ctx.renderAsset(b)+'<p>B · '+escape(b.name)+'</p></div></div>':
+        viewer=valid?'<div class="workspacePair genesisComparisonPair">'+comparisonAsset(a,'A',ctx)+comparisonAsset(b,'B',ctx)+'</div>':
           '<p class="workspaceViewEmpty">Elegí dos creaciones compatibles</p>';
       } else {
         details+='<p class="workspaceEmptyText">Todavía no fabricaste objetos. Acá aparecerán sus propiedades reales al cerrar al menos dos creaciones.</p>';
