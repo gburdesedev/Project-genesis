@@ -1,0 +1,43 @@
+/* Module-only Fabricaciones V001: all coordinates in 1672x941 approved-UI canvas.
+ * Uses recovered frame crops from original approved V07 artwork. No global selectors.
+ */
+.gCraftModule {--gold:#cca065;--ink:#0e0b09;color:#f5e4c6;font-family:Georgia,'Times New Roman',serif}
+.gCraftModule .gCraftNav{position:absolute;z-index:15;border:0;background:transparent;cursor:pointer}
+.gCraftModule .gCraftNav:hover{background:#e2ab3116}
+.gCraftModule .gCraftNav:focus-visible,.gCraftModule .gCraftRecipe:focus-visible{outline:2px solid #fad18a;outline-offset:-2px}
+.gCraftModule .gCraftClose{position:absolute;z-index:17;right:1%;top:.1%;height:3.6%;width:3.5%;border:0;background:#080605ad;color:#e6b567;font-size:1.8cqw;cursor:pointer}
+.gCraftModule .gCraftTree{position:absolute;left:2.9%;top:18.2%;width:23.8%;height:67%;padding:.3% .3% 1%;overflow:auto;z-index:8;scrollbar-width:thin;scrollbar-color:#8a5528 #100b08}
+.gCraftModule .gCraftFamily{margin:0 0 1.4%;padding:0 0 2%}
+.gCraftModule .gCraftFamilyTitle{height:2.95cqw;margin-bottom:1%;display:flex;align-items:center;padding-left:13%;font-size:1.43cqw;color:#e8d5b5;background:linear-gradient(90deg,#231a13ec,#0d0c0be8);border:1px solid #604521;box-shadow:inset 0 0 0 1px #120e0b}
+.gCraftModule .gCraftFamilyTitle::before{content:'⌄';margin-right:7%;font-size:1.5cqw;color:#c7a575}
+.gCraftModule .gCraftTypeTitle{padding:1% 4% 1% 18%;font-size:1.2cqw;color:#e5cfb0;border-left:2px solid #7e551b;margin-left:8%;margin-bottom:1%;height:2.4cqw}
+.gCraftModule .gCraftRecipe{width:85%;height:3.05cqw;margin:0 0 .5% 14%;padding:0 3%;display:flex;gap:4%;align-items:center;position:relative;cursor:pointer;color:#e8d4b6;font-size:1.18cqw;text-align:left;white-space:nowrap;background:#17110d url('assets/ui/fabricaciones/module_v001/frame_receta_v001.png') center/100% 100% no-repeat;border:0}
+.gCraftModule .gCraftRecipe.active{background-image:url('assets/ui/fabricaciones/module_v001/frame_receta_activa_v001.png');color:#ffe2a9;text-shadow:0 0 7px #e7a53c}
+.gCraftModule .gCraftRecipe:hover{filter:brightness(1.2)}
+.gCraftModule .gCraftRecipe img{width:13%;height:80%;object-fit:contain}
+.gCraftModule .gCraftRecipeGlyph{font-size:1.5cqw;color:#cba878;width:14%}
+.gCraftModule .gCraftRecipe small{margin-left:auto;font-size:.85cqw}
+.gCraftModule .gCraftViewer{position:absolute;z-index:7;left:28.2%;top:12.8%;width:37.2%;height:66%;display:grid;place-items:center;overflow:hidden;pointer-events:auto}
+.gCraftModule .gCraftViewer model-viewer,.gCraftModule .gCraftViewer canvas{width:100%;height:100%;background:transparent}
+.gCraftModule .gCraftRecipeDetails{position:absolute;z-index:7;left:68.6%;top:12.8%;width:27.6%;height:9.2%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.gCraftModule .gCraftRecipeDetails h2{font:normal 2.03cqw Georgia,serif;color:#f5d19b;text-transform:uppercase;letter-spacing:.03em;margin:0 0 1%;line-height:1}
+.gCraftModule .gCraftRecipeDetails p{font-size:1.15cqw;margin:0;color:#d9c5aa}
+.gCraftModule .gCraftMaterials{position:absolute;z-index:7;left:68%;top:29.5%;width:28.7%;height:30.9%;overflow:hidden}
+.gCraftModule .gCraftMaterialScroll{height:100%;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#a47740 #0e0b0a}
+.gCraftModule .gCraftIngredient{display:flex;align-items:center;gap:4%;width:100%;min-height:6.15cqw;margin:0 0 .4%;padding:1.2% 2.6%;color:#ebd1a5;background:#080706 url('assets/ui/fabricaciones/module_v001/frame_material_v001.png') center/100% 100% no-repeat}
+.gCraftModule .gCraftIngredientIcon{height:5.0cqw;width:5.0cqw;flex:none;display:grid;place-items:center;overflow:hidden}
+.gCraftModule .gCraftIngredientIcon img{max-width:88%;max-height:88%;object-fit:contain;filter:drop-shadow(0 2px 3px #000)}
+.gCraftModule .gCraftIngredientData{min-width:0;display:flex;flex-direction:column;flex:1;gap:1%;font-size:1.03cqw}
+.gCraftModule .gCraftIngredientData strong{font:normal 1.21cqw Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gCraftModule .gCraftIngredientData span{display:flex;justify-content:space-between;gap:4%}
+.gCraftModule .gCraftIngredientData b{color:#f5ce8b;font-weight:normal}
+.gCraftModule .gCraftIngredientData b.enough{color:#b7ec9b}
+.gCraftModule .gCraftIngredientData b.missing{color:#ee977f}
+.gCraftModule .gCraftState{position:absolute;z-index:7;left:72%;top:64.7%;width:21%;text-align:center;padding:.8%;font-size:1.42cqw;background:#080705a6}
+.gCraftModule .gCraftState.ready{color:#a5e6a3}
+.gCraftModule .gCraftState.blocked{color:#ed9f7d}
+.gCraftModule .gCraftMake{position:absolute;z-index:8;left:68.3%;top:71%;width:28.2%;height:10.8%;border:0;cursor:pointer;background:transparent url('assets/ui/fabricaciones/module_v001/boton_fabricar_v001.png') center/100% 100% no-repeat}
+.gCraftModule .gCraftMake:not(:disabled):hover{filter:brightness(1.17)}
+.gCraftModule .gCraftMake:disabled{filter:grayscale(.7) brightness(.7);cursor:not-allowed}
+.gCraftModule .gCraftLiveProgress{position:absolute;z-index:9;left:6%;bottom:1%;color:#eec685;font-size:.85cqw}
+@media(max-width:740px){.gCraftModule .gCraftRecipeDetails h2{font-size:2cqw}.gCraftModule .gCraftTree{scrollbar-width:none}}
