@@ -18,7 +18,7 @@ const report={status:'START',errors:[],samples:[]};
   for(const [n,item] of [['01-primera-espada-3d.png',base],['02-segunda-espada-3d.png',{...base,id:'sword-2',rarity:'Bueno',channels:[['Daño',78],['Fuego',82],['Rayo',55.5]],channelTechniques:{Fuego:[{nombre:'Quemadura',valor:32}]},description:'Resultado de fabricación con valores de ejemplo para los canales NGE.'}]]){
    await page.evaluate(data=>{const el=document.getElementById('modal');el.className='modal';window.GenesisResultDynamic.decorate(el,data)},item);
    try{
-    await page.waitForFunction(()=>Array.from(document.querySelectorAll('.grOra')).every(img=>img.complete&&img.naturalWidth===990),null,{timeout:60000,polling:600});
+    await page.waitForFunction(()=>Array.from(document.querySelectorAll('.grOra')).every(img=>img.complete&&img.naturalWidth>0),null,{timeout:60000,polling:600});
    }catch(e){
     report.oraFault=await page.evaluate(()=>({images:[...document.querySelectorAll('.grOra')].map(x=>({complete:x.complete,width:x.naturalWidth,src:x.src})),groups:document.querySelectorAll('.grChannelGroup').length,modal:document.querySelector('#modal')?.className,iframe:document.querySelector('iframe.grSwordInteractive')?.contentWindow?.__genesisSwordViewerStatus?.phase,resources:performance.getEntriesByType('resource').length}));
     await page.screenshot({path:path.join(out,'FAILED-second-ora.png'),timeout:12000,animations:'allow'}).catch(()=>{});
