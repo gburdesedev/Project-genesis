@@ -5,9 +5,17 @@
  */
 (function (global) {
   'use strict';
-  const A = 'assets/ui/mercenary/v09/';
+  // Legacy V09 channel images deliberately excluded: they are not final approved ORAs.
   const ART = 'assets/ui/mercenary/4t/';
   const CHANNELS = ['Base','Luz','Sombra','Fuego','Hielo','Naturaleza','Tierra','Rayo'];
+  const COLOR = Object.freeze({Base:'#b7c2ca',Luz:'#ffffff',Sombra:'#8b5cf6',Fuego:'#ff3b30',Hielo:'#67d9ff',Naturaleza:'#69c66a',Tierra:'#8b5a2b',Rayo:'#1f3f8f'});
+  function dominant(item) {
+    const elements=readChannels(item).filter(c=>c.name!=='Base'&&COLOR[c.name]&&c.value>0).sort((a,b)=>b.value-a.value);
+    const a=elements[0], b=elements[1];
+    return {first:a?.name||'Base',color:COLOR[a?.name]||COLOR.Base,
+      second:b?.name||null, color2:COLOR[b?.name]||COLOR[a?.name]||COLOR.Base,
+      strength:a?Math.max(.15,Math.min(1,a.value/100)):0};
+  }
   function esc(x) { return String(x ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   function readChannels(item) {
     if (!item) return [];
@@ -39,7 +47,9 @@
         ? ART+'V12B_REAL_SWORD_ICON_RGBA.png'
         : item.recipe==='escudo_hierro' ? ART+'V015_REAL_SHIELD_ICON_RGBA.png'
         : (typeof opts.itemIcon==='function' ? opts.itemIcon(item.recipe) : '');
-      return typeof url==='string'&&url.trim()? `<img src="${esc(url)}" alt="${esc(item.recipe||'Objeto')}" draggable="false">`:'';
+      if(typeof url!=='string'||!url.trim())return '';
+      const fx=dominant(item), glow=fx.strength;
+      return `<span class="pg4tItemVisual" data-affinity="${esc(fx.first)}" data-secondary="${esc(fx.second||'')}" style="--fx-color:${fx.color};--fx-color-2:${fx.color2};--fx-strength:${glow.toFixed(2)}"><img src="${esc(url)}" alt="${esc(item.recipe||'Objeto')}" draggable="false"></span>`;
     }
     function pool() { return pools[state.family]; }
     function selected() { return state.item || (state.family === 'first' ? state.draftFirst : state.draftSecond); }
@@ -67,10 +77,10 @@
       const poster=opts.modelUrl ? `<img class="pv9RealCyclesPoster" src="${ART}V050_REAL_CYCLES32_CHARACTER_RGBA.png" alt="Render Cycles EXR32 del mercenario real V050 con espada V175/V12B y escudo V015 proporcionado">` : '';
       const modelHtml = poster + `<model-viewer data-asset-src="${esc(model)}" camera-controls interaction-prompt="none" loading="lazy" camera-orbit="15deg 80deg 5.1m" exposure="1.25" shadow-intensity=".32" alt="GLB real V050: espada V12B y escudo V015" class="pv9Viewer"></model-viewer>`;
       const channels = rows.map(row => {
-        const known=CHANNELS.includes(row.name) && row.name !== 'Rayo';
+        const known=CHANNELS.includes(row.name);
         const delta = row.a && row.b ? row.b.value-row.a.value : null;
         const value=v=>v? (row.name==='Base'?String(v.value):'+'+v.value+'%') : '—';
-        return `<div class="mcChannel" data-channel="${esc(row.name)}"><span class="pv9ChannelArtwork">${known?`<img src="${A}Canal_${row.name}_Origen_V09.png" alt="${esc(row.name)}">`:esc(row.name)}</span><span class="mcChannelNum">${value(row.a)}</span><span class="mcChannelNum ${delta===null?'':delta>0?'increase':delta<0?'decrease':'same'}">${value(row.b)}</span></div>`;
+        return `<div class="mcChannel" data-channel="${esc(row.name)}" style="--fx-color:${COLOR[row.name]||COLOR.Base}"><span class="pv9ChannelArtwork pg4tChannelPending" title="ORA definitivo: fuente aún no integrada">${esc(row.name)}</span><span class="mcChannelNum">${value(row.a)}</span><span class="mcChannelNum ${delta===null?'':delta>0?'increase':delta<0?'decrease':'same'}">${value(row.b)}</span></div>`;
       }).join('');
       const overlay = state.modal === 'sheet' ? `<div class="mcOverlay"><section><h2>FICHA DEL MERCENARIO</h2>${typeof opts.getStatsHTML==='function'?opts.getStatsHTML(state.draftFirst,state.draftSecond):opts.statsHTML || '<p>Sin datos registrados.</p>'}<button data-action="dismiss">VOLVER</button></section></div>` :
         state.modal === 'inventory' ? `<div class="mcOverlay"><section><h2>INVENTARIO DEL MERCENARIO</h2>${typeof opts.getMercInventoryHTML==='function'?opts.getMercInventoryHTML(state.draftFirst,state.draftSecond):'<p>Sin objetos asignados.</p>'}<button data-action="dismiss">VOLVER</button></section></div>` :
