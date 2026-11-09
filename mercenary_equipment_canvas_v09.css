@@ -119,7 +119,7 @@
  * en Chromium/software WebGL; el canvas 3D queda por encima cuando dibuja.
  */
 .pv9IntegratedML06 .pv9Hero{
- left:39.0%!important;top:25.0%!important;width:18.7%!important;height:49.5%!important;
+ left:39.0%!important;top:27.0%!important;width:18.7%!important;height:49.5%!important;
  overflow:visible!important
 }
 .pv9IntegratedML06 .pv9RealCyclesPoster{
@@ -132,7 +132,7 @@
  z-index:3!important;background:transparent!important;opacity:0!important
 }
 .pv9IntegratedML06 .pv9Hero.pv9ModelReady .pv9Viewer{opacity:1!important}
-.pv9IntegratedML06 .pv9Hero.pv9ModelReady .pv9RealCyclesPoster{opacity:1!important}
+.pv9IntegratedML06 .pv9Hero.pv9ModelReady .pv9RealCyclesPoster{opacity:0!important;pointer-events:none!important}
 .pv9IntegratedML06 .pv9Grid .mcInventorySlot{
  position:relative;overflow:hidden;display:grid;place-items:center
 }
