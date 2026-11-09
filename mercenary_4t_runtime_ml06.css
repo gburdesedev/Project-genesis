@@ -174,3 +174,23 @@
 .pg4tShell .pg4tItemVisual[data-recipe="escudo_hierro"] .pg4tIconFit img{
   transform:scale(1.80)!important;transform-origin:center center!important
 }
+
+/* ML08 forensic correction from actual 1600x900 Chromium screenshot:
+   live weapon/shield socket icons were centered at x≈979 although the approved
+   frame centers at x≈939. JS anchor moves them left; no approved art was changed.
+   Selected procedural names start beneath the framed icon, not across it. */
+.pg4tShell .pv9CompareEquipped,.pg4tShell .pv9CompareSelected{
+  top:25%!important;height:12.8%!important
+}
+.pg4tShell .pv9CompareEquipped .pv9ComparisonContents,
+.pg4tShell .pv9CompareSelected .pv9ComparisonContents{
+  grid-template-rows:minmax(0,77%) minmax(0,15%) minmax(0,8%)!important
+}
+.pg4tShell .pv9ComparisonName{
+  font-size:clamp(8px,.64cqw,11px)!important;
+  line-height:1!important;max-height:100%!important;
+  -webkit-line-clamp:2!important;line-clamp:2!important
+}
+.pg4tShell .pv9ComparisonRarity{
+  font-size:clamp(8px,.59cqw,10px)!important;line-height:1!important
+}
