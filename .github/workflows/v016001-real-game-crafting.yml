@@ -1,0 +1,38 @@
+name: Genesis V016.001 | Juego real Herrero dos espadas
+on:
+  push:
+    branches:
+      - integration/v016001-resultado-creaciones-20261109
+    paths:
+      - tests/v016001_real_game_browser.cjs
+      - '.github/workflows/v016001-real-game-crafting.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  jugar-herrero:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar sintaxis
+        run: node --check tests/v016001_real_game_browser.cjs
+      - name: Instalar Playwright
+        run: npm install --prefix /tmp/genesis-v016001-playwright playwright@1.56.1
+      - name: Iniciar mundo Herrero y fabricar dos espadas
+        run: NODE_PATH=/tmp/genesis-v016001-playwright/node_modules node tests/v016001_real_game_browser.cjs
+      - name: Capturas y diagnóstico
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-v016001-crafting-in-world-qa
+          path: previews/v016001-in-game/
+          retention-days: 14
