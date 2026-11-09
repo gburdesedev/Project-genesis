@@ -29,6 +29,13 @@ jobs:
           node-version: '22'
       - name: Validate original ORA V3.2 bytes + CSS fit
         run: node tests/mercenary_ml08_slot_ora.cjs
+      - name: Validate shader ES module source syntax
+        run: |
+          node --check mercenary_channel_vfx_ml11.mjs
+          node --check vfx/approved/Genesis_Rayo_Helicoidal_V07.mjs
+          node --check vfx/experimental/Genesis_Fuego_HaloFino_V18_WebGL.mjs
+          node --check vfx/experimental/Genesis_Hielo_V21_Cristalizacion.mjs
+          node --check vfx/experimental/Genesis_AffinitySurfaceCore_V21.mjs
       - run: npm install --prefix /tmp/genesis-ml06-test playwright@1.56.1
       - name: Test actual PlayCanvas gameplay + original 4T + exact V050 equipped model
         run: NODE_PATH=/tmp/genesis-ml06-test/node_modules node tests/mercenary_ml06_4t.cjs
