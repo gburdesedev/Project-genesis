@@ -5,6 +5,8 @@ on:
       - integration/v016001-resultado-creaciones-20261109
     paths:
       - tests/v016001_real_game_browser.cjs
+      - village_world.js
+      - index.html
       - '.github/workflows/v016001-real-game-crafting.yml'
   workflow_dispatch:
 permissions:
