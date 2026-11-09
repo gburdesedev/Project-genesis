@@ -57,7 +57,7 @@
         : (typeof opts.itemIcon==='function' ? opts.itemIcon(item.recipe) : '');
       if(typeof url!=='string'||!url.trim())return '';
       const fx=dominant(item), glow=fx.strength;
-      return `<span class="pg4tItemVisual" data-affinity="${esc(fx.first)}" data-secondary="${esc(fx.second||'')}" style="--fx-color:${fx.color};--fx-color-2:${fx.color2};--fx-strength:${glow.toFixed(2)}"><span class="pg4tIconFit"><img src="${esc(url)}" alt="${esc(item.recipe||'Objeto')}" draggable="false"></span></span>`;
+      return `<span class="pg4tItemVisual" data-recipe="${esc(item.recipe||'')}" data-affinity="${esc(fx.first)}" data-secondary="${esc(fx.second||'')}" style="--fx-color:${fx.color};--fx-color-2:${fx.color2};--fx-strength:${glow.toFixed(2)}"><span class="pg4tIconFit"><img src="${esc(url)}" alt="${esc(item.recipe||'Objeto')}" draggable="false"></span></span>`;
     }
     function pool() { return pools[state.family]; }
     function selected() { return state.item || (state.family === 'first' ? state.draftFirst : state.draftSecond); }
