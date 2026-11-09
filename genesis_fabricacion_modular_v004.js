@@ -40,12 +40,14 @@ function render(ctx,nav,mount){
  const allowed=available&&questActive&&ctx.canCraftRecipe?.(recipe.id)===true;
  const status=!questActive?'Bloqueada por la misión':!available?'Faltan materiales':!allowed?'No disponible':'Disponible';
  let html='<div class="gFabModular" data-ora="V004" data-canonical="NGE">';
- const locations={sword:{y:288,icon:'⚔'},shield:{y:463,icon:'◈'}};
+ const locations={sword:{y:288},shield:{y:463}};
+ const authenticSelectedFrame='assets/ui/fabricaciones_ora_v004/05_marco_receta_seleccionada_ORIGINAL.png';
  for(const rec of recipes){
    const shield=/escud/i.test(String(rec.id)),p=shield?locations.shield:locations.sword;
    const selected=String(rec.id)===String(recipe.id);
    html+='<button type="button" class="gFabRecipe'+(selected?' is-selected':'')+'" data-fab-recipe="'+esc(rec.id)+'" style="'+pos(101,p.y,335,57)+'" aria-label="'+esc(rec.subfamily||rec.id)+'">';
-   html+='<span class="gFabRecipeSymbol">'+p.icon+'</span><span>'+esc(rec.subfamily||rec.id)+'</span></button>';
+   if(selected)html+='<img class="gFabSelectedFrame" src="'+authenticSelectedFrame+'" alt="" aria-hidden="true" draggable="false">';
+   html+='<span class="gFabRecipeText">'+esc(rec.subfamily||rec.id)+'</span></button>';
  }
  html+='<div class="gFabHero" style="'+pos(478,122,611,657)+'" data-object="'+(isShield?'shield':'sword')+'">';
  if(isShield){
