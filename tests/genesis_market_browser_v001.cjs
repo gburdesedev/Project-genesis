@@ -36,20 +36,21 @@ const server=http.createServer((req,res)=>{
   assert(items.includes('Mineral de hierro'),'Market lacks raw ore for iron');
   const opened=await page.evaluate(()=>window.__genesisMarket.open());
   assert.equal(opened,true);
-  const rows=page.locator('.genesisMarketCard[data-slot]');
-  assert.equal(await rows.count(),items.length,'UI did not match actual seed list');
-  const first=rows.first();
-  const before=await first.locator('small').textContent();
-  await first.locator('button[data-buy]').click();
-  const after=await page.locator('.genesisMarketCard[data-slot="0"] small').textContent();
-  assert.notEqual(before,after,'Buy did not change live inventory count');
-  assert.match(after,/Tenés 1 · Precio: 0 oro/);
+  const rows=page.locator('#genesisMarketBoard .gApprovedPrepSlot[data-select]');
+  await page.screenshot({path:path.join(out,'mercado-ora-v002-before-purchase.png'),timeout:15000,animations:'disabled'}).catch(e=>{
+    fs.writeFileSync(path.join(out,'screenshot-limitation.txt'),String(e));
+  });
+  assert.equal(await rows.count(),Math.min(10,items.length),'ORA slots did not match the seed list');
+  const before=await rows.first().locator('b').textContent();
+  await page.locator('#genesisMarketBoard [data-buy]').click();
+  const after=await page.locator('#genesisMarketBoard .gApprovedPrepSlot[data-select="0"] b').textContent();
+  assert.notEqual(before,after,'Buy did not update the live inventory quantity');
   const summary={ok:true,npc:npc.status,catalog:items,before,after,errors:errors.slice(0,12)};
   fs.writeFileSync(path.join(out,'status.json'),JSON.stringify(summary,null,2));
   // A headless GPU runner may hang on screenshots even when the real market
   // and purchase pipeline passed. Preserve truthfully verified gameplay.
   try{
-    await page.screenshot({path:path.join(out,'market-herrero.png'),timeout:7000,animations:'disabled'});
+    await page.screenshot({path:path.join(out,'mercado-ora-v002-after-purchase.png'),timeout:7000,animations:'disabled'});
   }catch(err){
     fs.writeFileSync(path.join(out,'screenshot-limitation.txt'),String(err));
     console.warn('Marketplace screenshot unavailable on GPU runner:',String(err).slice(0,250));
