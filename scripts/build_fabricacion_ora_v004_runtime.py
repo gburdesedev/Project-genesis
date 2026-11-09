@@ -28,7 +28,32 @@ donor((98,452,433,522),(150,544,426,612),.88,1.6)
 donor((472,117,1090,804),(860,180,1050,721),.91,5.0)
 # Title, old two-material layout and status are baked in the V07 source.
 # Rebuild only their interiors and leave the gold boundaries untouched.
-donor((1173,128,1574,205),(49,541,422,723),.62,1.5)
+# IMPORTANT: replace the ORIGINAL baked right heading with a CLEAN ORA
+# surface from the very same approved art, never a CSS rectangle over old text.
+# The large source region includes old ESPADA DE HIERRO and its subtitle.
+# Feather toward the original gold frame; text is drawn only by the live UI.
+def clean_right_title():
+    rect=(1122,116,1602,214)
+    x1,y1,x2,y2=rect
+    # Take blacksmith UI's original neutral panel grain, not generative art.
+    donor_texture=original.crop((67,569,424,741)).resize((x2-x1,y2-y1),Image.Resampling.BICUBIC)
+    donor_texture=ImageEnhance.Brightness(donor_texture).enhance(.77)
+    donor_texture=donor_texture.filter(ImageFilter.GaussianBlur(1.0))
+    # Continuous coverage under the heading; smooth transition at the edges.
+    from PIL import ImageChops
+    m=Image.new('L',(x2-x1,y2-y1),0)
+    pix=m.load()
+    for y in range(y2-y1):
+        for x in range(x2-x1):
+            feather=min(x,y,(x2-x1-1-x),(y2-y1-1-y))
+            pix[x,y]=max(0,min(255,int(feather*255/12)))
+    patch=Image.new('RGBA',original.size,(0,0,0,0))
+    donor_texture.putalpha(m)
+    patch.alpha_composite(donor_texture,(x1,y1))
+    im.alpha_composite(patch)
+    return patch
+right_title_layer=clean_right_title()
+
 donor((1150,242,1589,280),(49,541,422,723),.63,1.2)
 donor((1151,286,1610,572),(49,541,422,723),.64,1.7)
 donor((1210,592,1579,667),(49,541,422,723),.69,1.1)
@@ -80,6 +105,10 @@ stack=ET.SubElement(image,'stack')
 with zipfile.ZipFile(OUT/'Fabricaciones_Runtime_V004.ora','w') as z:
     z.writestr('mimetype','image/openraster',compress_type=zipfile.ZIP_STORED)
     # Top to bottom: PT > panel right > viewer > recipes > header
+    # The previously baked right-side heading is cleaned in an editable layer.
+    buf=io.BytesIO();right_title_layer.save(buf,'PNG')
+    z.writestr('data/clean_right_title_panel.png',buf.getvalue(),compress_type=zipfile.ZIP_DEFLATED)
+    ET.SubElement(stack,'layer',{'name':'03 / PANEL DERECHO / TITULO LIMPIO · sin texto horneado','src':'data/clean_right_title_panel.png','x':'0','y':'0','opacity':'1.0','visibility':'visible','composite-op':'svg:src-over'})
     # The two authentic material sprites are a real editable ORA layer.
     buf=io.BytesIO();icon_layer.save(buf,'PNG')
     z.writestr('data/material_icons_v175.png',buf.getvalue(),compress_type=zipfile.ZIP_DEFLATED)
