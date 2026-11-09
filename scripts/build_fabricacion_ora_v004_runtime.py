@@ -21,8 +21,31 @@ def donor(rect,patch=(48,535,423,783),brightness=.82,blur=1):
 # Keep THE ORIGINAL upper navigation, gold filigree, header, outer panel borders,
 # side-list rows/metal icons and bottom PT. Erase only dynamic baked content.
 # The selected row and alternate row must not retain baked labels or selection.
-donor((98,282,433,345),(150,544,426,612),.88,1.6)
-donor((98,452,433,522),(150,544,426,612),.88,1.6)
+# Distinct editable skins: remove both baked texts/boxes entirely. The
+# active-state gold frame is cut as an original V07 sprite, NOT CSS border.
+# The source recipe border artwork survives as a transparent reusable layer.
+selection_source=original.crop((100,278,438,347)).convert('RGBA')
+sel_alpha=Image.new('L',selection_source.size,0)
+sa=sel_alpha.load()
+fw,fh=selection_source.size
+for yy in range(fh):
+    for xx in range(fw):
+        distance=min(xx,yy,fw-1-xx,fh-1-yy)
+        if distance<=11:
+            sa[xx,yy]=255 if distance<=9 else max(0,int((12-distance)*85))
+selection_source.putalpha(sel_alpha)
+selection_source.save(OUT/'05_marco_receta_seleccionada_ORIGINAL.png',optimize=True)
+# Both list rows are reset using the source image's own unlettered panel grain.
+# We include the former gold frame in the cleared bounds, then source the frame
+# from the exact approved art when (and only when) the item is selected.
+def clear_recipe_row(box):
+    x1,y1,x2,y2=box
+    tile=original.crop((150,558,422,748)).resize((x2-x1,y2-y1),Image.Resampling.BICUBIC)
+    tile=ImageEnhance.Brightness(tile).enhance(.9)
+    tile=tile.filter(ImageFilter.GaussianBlur(.7))
+    im.paste(tile,(x1,y1))
+clear_recipe_row((91,276,448,353))
+clear_recipe_row((91,444,448,528))
 # Center: baked sword is removed from runtime (not an invented other sword).
 # Background is a blurred clone of the real source forge, as user approved.
 donor((472,117,1090,804),(860,180,1050,721),.91,5.0)
@@ -56,7 +79,26 @@ right_title_layer=clean_right_title()
 
 donor((1150,242,1589,280),(49,541,422,723),.63,1.2)
 donor((1151,286,1610,572),(49,541,422,723),.64,1.7)
-donor((1210,592,1579,667),(49,541,422,723),.69,1.1)
+# Avoid the sharp BLACK RECTANGLE shown in user screenshot. Cover the
+# baked former state text using the right-side original artwork texture with
+# feathered transparency: no visible box boundaries at full resolution.
+def clean_state_inscription():
+    rect=(1193,580,1582,669)
+    x1,y1,x2,y2=rect
+    sample=original.crop((285,566,423,763))
+    soft=sample.resize((x2-x1,y2-y1),Image.Resampling.BICUBIC)
+    soft=ImageEnhance.Brightness(soft).enhance(.92)
+    soft=soft.filter(ImageFilter.GaussianBlur(.9)).convert('RGBA')
+    alpha=Image.new('L',soft.size,0)
+    ap=alpha.load()
+    for yy in range(soft.height):
+        for xx in range(soft.width):
+            d=min(xx,yy,soft.width-1-xx,soft.height-1-yy)
+            # Wide seam feather; the state title is then a separate live text.
+            ap[xx,yy]=max(0,min(255,round(d*255/24)))
+    soft.putalpha(alpha)
+    im.alpha_composite(soft,(x1,y1))
+clean_state_inscription()
 # Original FABRICAR frame and original anvil are retained; clear baked label.
 # Keep the ORIGINAL decorative FABRICAR button and original fixed label, pixel-identical.
 # The two iron material icons must be replaced INSIDE the ORA raster,
@@ -109,6 +151,10 @@ with zipfile.ZipFile(OUT/'Fabricaciones_Runtime_V004.ora','w') as z:
     buf=io.BytesIO();right_title_layer.save(buf,'PNG')
     z.writestr('data/clean_right_title_panel.png',buf.getvalue(),compress_type=zipfile.ZIP_DEFLATED)
     ET.SubElement(stack,'layer',{'name':'03 / PANEL DERECHO / TITULO LIMPIO · sin texto horneado','src':'data/clean_right_title_panel.png','x':'0','y':'0','opacity':'1.0','visibility':'visible','composite-op':'svg:src-over'})
+    # Original V07 active recipe frame, isolated as a hidden reusable sprite.
+    buf=io.BytesIO();selection_source.save(buf,'PNG')
+    z.writestr('data/active_recipe_frame.png',buf.getvalue(),compress_type=zipfile.ZIP_DEFLATED)
+    ET.SubElement(stack,'layer',{'name':'05 / RECUADRO SELECCION / ORIGINAL V07 · REUTILIZABLE','src':'data/active_recipe_frame.png','x':'100','y':'278','opacity':'1.0','visibility':'hidden','composite-op':'svg:src-over'})
     # The two authentic material sprites are a real editable ORA layer.
     buf=io.BytesIO();icon_layer.save(buf,'PNG')
     z.writestr('data/material_icons_v175.png',buf.getvalue(),compress_type=zipfile.ZIP_DEFLATED)
