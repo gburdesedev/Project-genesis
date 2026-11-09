@@ -60,7 +60,8 @@
       const grid = Array.from({length:20}, (_,i) => {
         const item=itemAt(i); return `<button type="button" class="mcInventorySlot ${item?'hasItem':''} ${item && item===candidate?'selected':''}" data-item="${i}" aria-label="${esc(item?.name || 'Casilla vacía')}" title="${esc(item?.name || '')}" ${item?'':'disabled'}>${getIcon(item)}</button>`;
       }).join('');
-      const modelHtml = `<model-viewer src="${esc(model)}" camera-controls auto-rotate interaction-prompt="none" camera-orbit="15deg 80deg 3.8m" exposure="1.05" shadow-intensity=".55" alt="Mercenario 3D real" class="pv9Viewer"></model-viewer>`;
+      const poster=opts.modelUrl ? '<img class="pv9RealCyclesPoster" src="assets/ui/mercenary/v09/V049_REAL_CYCLES32_PREVIEW_ALPHA.png" alt="Render original en Blender Cycles HDRI EXR 32 bits del mercenario V049 con espada V12B y escudo V015">' : '';
+      const modelHtml = poster + `<model-viewer src="${esc(model)}" camera-controls auto-rotate interaction-prompt="none" camera-orbit="15deg 80deg 3.8m" exposure="1.05" shadow-intensity=".55" alt="Mercenario 3D real V049 con espada V12B y escudo V015" class="pv9Viewer"></model-viewer>`;
       const channels = rows.map(row => {
         const known=CHANNELS.includes(row.name) && row.name !== 'Rayo';
         const delta = row.a && row.b ? row.b.value-row.a.value : null;
@@ -90,6 +91,12 @@
       </div></div>`;
       opts.modal(html,'mercenaryModal mercConceptModal');
       const board = document.querySelector('.pv9Board'); if (!board) return;
+      const viewer=board.querySelector('.pv9Viewer'),hero=board.querySelector('.pv9Hero');
+      if(opts.modelUrl&&viewer&&hero){
+        viewer.addEventListener('load',()=>{if(viewer.loaded)hero.classList.add('pv9ModelReady')},{once:true});
+        viewer.addEventListener('error',()=>hero.classList.remove('pv9ModelReady'));
+        if(viewer.loaded)hero.classList.add('pv9ModelReady');
+      }
       board.querySelectorAll('[data-family]').forEach(el=>{
         const fn=()=>{state.family=el.dataset.family;state.item=null;state.page=0;render();};
         el.addEventListener('click',fn);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fn();}});
