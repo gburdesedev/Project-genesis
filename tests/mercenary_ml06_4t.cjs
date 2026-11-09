@@ -33,7 +33,7 @@ const server=http.createServer((req,res)=>{
  try{
    browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--disable-software-rasterizer=false']});
    page=await browser.newPage({viewport:{width:1600,height:900},deviceScaleFactor:1});
-   page.on('pageerror',e=>state.errors.push(String(e.message).slice(0,350)));
+   page.on('pageerror',e=>state.errors.push(String(e.stack||e.message).slice(0,1400)));
    page.on('console',m=>{if(m.type()==='error'||m.type()==='warning')state.warnings.push(m.text().slice(0,300))});
    page.on('requestfailed',r=>{if(state.warnings.length<80)state.warnings.push('FAILED '+r.url().slice(0,200)+' '+(r.failure()?.errorText||''))});
    page.on('response',r=>{if(r.status()>=400&&state.responses.length<80)state.responses.push({url:r.url(),status:r.status()})});
