@@ -11,10 +11,10 @@ let result={url,started:null,success:false};
 try{
 await page.goto(url,{waitUntil:'domcontentloaded',timeout:50000});
 result.title=await page.title();
-await page.locator('[data-profession="Herrero"]').waitFor({state:'visible',timeout:75000});
+await page.locator('[data-profession="Herrero"]').waitFor({state:'visible',timeout:65000});
 result.success=true;console.log('GENESIS_V016001_LIVE_INTRO_VISIBLE');
 }catch(e){result.error=String(e.message).slice(0,300);console.error(result.error)}
-result.loader=await page.evaluate(()=>({status:document.querySelector('#loadState')?.textContent,detail:document.querySelector('#loadDetail')?.textContent,count:document.querySelector('#loadCount')?.textContent,intro:document.querySelector('#prototypeIntro')?.style.display,failed:document.querySelector('.loadingCard')?.className,boot:window.__genesisBoot}));
+result.loader=await page.evaluate(()=>({status:document.querySelector('#loadState')?.textContent,detail:document.querySelector('#loadDetail')?.textContent,count:document.querySelector('#loadCount')?.textContent,intro:document.querySelector('#prototypeIntro')?.style.display,failed:document.querySelector('.loadingCard')?.className,boot:window.__genesisBoot,ancestorChain:(()=>{let el=document.querySelector('[data-profession="Herrero"]');const out=[];while(el&&out.length<15){const cs=getComputedStyle(el),r=el.getBoundingClientRect();out.push({tag:el.tagName,id:el.id,className:String(el.className).slice(0,80),display:cs.display,visibility:cs.visibility,opacity:cs.opacity,position:cs.position,clientW:el.clientWidth,clientH:el.clientHeight,rect:[r.x,r.y,r.width,r.height]});el=el.parentElement}return out})(),viewport:[innerWidth,innerHeight]}));
 result.errors=errors;
 await page.screenshot({path:path.join(out,'live-browser.png'),timeout:5000,animations:'allow'}).catch(e=>{result.screenshot_error=e.message});
 fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(result,null,2));
