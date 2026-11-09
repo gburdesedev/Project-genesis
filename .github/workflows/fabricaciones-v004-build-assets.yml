@@ -60,6 +60,10 @@ jobs:
           git add assets/ui/fabricaciones_ora_v004/
           if ! git diff --cached --quiet; then
             git commit -m 'assets(fabricaciones V004): real V07 cropped modular ORA and V015, isolated'
+            # Another commit may have landed while Pillow generated sprites.
+            # Rebase safely; never force-push or discard the new GitHub head.
+            git fetch --no-tags origin "$BRANCH"
+            git rebase FETCH_HEAD
             git push origin "HEAD:refs/heads/$BRANCH"
           else
             echo 'Generated assets already present'
