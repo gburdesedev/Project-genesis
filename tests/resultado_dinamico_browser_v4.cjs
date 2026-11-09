@@ -45,7 +45,8 @@ fs.mkdirSync(out,{recursive:true});
   await show({...model,id:'craft-sword-2',rarity:'Bueno',channels:[['Daño',78],['Fuego',82],['Rayo',55.5]],
     channelTechniques:{Fuego:[{nombre:'Quemadura',valor:32}]}});
   assert.equal(await page.locator('.grChannelGroup').count(),3);
-  assert.equal(await page.locator('.grSub').count(),1);
+  assert.equal(await page.locator('.grSub').count(),0,'V016.001: técnicas secundarias excluidas');
+  assert.equal(await page.getByText('Quemadura').count(),0);
   assert.equal(await page.locator('[data-result-channel=Luz]').count(),0);
   await page.waitForFunction(()=>document.querySelectorAll('.grChannelRow.grHasOra').length===3);
   assert.equal(await page.locator('.grChannelRow.grHasOra').count(),3,'No aparecen las tres ORA originales');
