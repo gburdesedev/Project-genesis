@@ -7,7 +7,7 @@ const sourceSha='e2228f078b2572768416c48c0e63c2d908f214e2c0625a2ab754c877a099112
 const bytes=Buffer.alloc(20);
 bytes.writeUInt32LE(0x46546c67,0);bytes.writeUInt32LE(2,4);bytes.writeUInt32LE(bytes.byteLength,8);
 const exportSha=crypto.createHash('sha256').update(bytes).digest('hex');
-const item={recipe:'espada_hierro',channels:[['Base',44.2],['Rayo',81]],name:'Objeto NGE};
+const item={recipe:'espada_hierro',channels:[['Base',44.2],['Rayo',81]],name:'Objeto NGE'};
 async function trial(hash,expected){
  let hydrated=false,failed=false;
  const events={},wrap={dataset:{genesisModelState:'loading'},querySelector:selector=>fallback};
@@ -29,7 +29,7 @@ async function trial(hash,expected){
    materialPreset:'Genesis_Espada_V03_Hierro_V175_V12B',
    url:'./assets/playcanvas/approved/equipment/V12B_TRUE.glb'
  }};
- const sandbox={window:{
+ const sandbox={console,window:{
    GenesisApprovedRuntimeModels:manifest,crypto:crypto.webcrypto,
    fetch:async()=>({ok:true,arrayBuffer:async()=>Uint8Array.from(bytes).buffer}),
    URL:{createObjectURL:()=> 'blob:approved',revokeObjectURL:url=>assert.equal(url,'blob:approved')},
