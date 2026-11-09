@@ -1650,7 +1650,7 @@ function showMercenaryEquipment(editing=false,reuseDraft=false){
     const poolSecond=craftedItems.filter(x=>x.recipe===(tanner?'botas_cuero':'escudo_hierro'));
     const lab=GENESIS_MERCENARY_LAB&&mercLabEquipment&&!tanner;
     const chosenFirst=lab?mercLabDraft.sword:(editing?(tanner?mercEditArmorItem:mercEditSwordItem):(tanner?mercArmorItem:mercSwordItem));
-    const chosenSecond=lab?mercLabDraft.shield:(editing?(tanner?mercEditBootsItem:mercEditShieldItem):(tanner?mercBootsItem));
+    const chosenSecond=lab?mercLabDraft.shield:(editing?(tanner?mercEditBootsItem:mercEditShieldItem):(tanner?mercBootsItem:mercShieldItem));
     const activeFirst=lab?mercLabEquipment.sword:(tanner?mercArmorItem:mercSwordItem),
           activeSecond=lab?mercLabEquipment.shield:(tanner?mercBootsItem:mercShieldItem);
     return window.GenesisMercenaryConcept.open({
