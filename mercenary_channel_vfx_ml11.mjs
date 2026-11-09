@@ -107,6 +107,8 @@ function attach(app,modelRoot){
    originalModelUnchanged:true,effects:APPROVALS,errors,shieldSurface:'actual-V015-local-bounds-contour'};
  const update=dt=>{
   t+=Math.max(0,Math.min(.07,Number(dt)||0));
+  report.time=t;
+  report.updateFrames=(report.updateFrames||0)+1;
   for(const kind of ['sword','shield'])for(const [name,fx] of Object.entries(instances[kind])){
     const value=rig?.levels?.[kind]?.[name]||0;
     try{fx.set(t,value)}catch(error){if(!report.runtimeError)report.runtimeError=String(error.message||error);}
