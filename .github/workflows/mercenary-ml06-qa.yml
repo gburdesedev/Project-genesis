@@ -1,7 +1,7 @@
-name: ML12 Mercenario V050 shader frame clock and preview QA
+name: ML13 Mercenario V050 corrected shader animation clock
 on:
   push:
-    branches: [experiment/mercenario-ml12-vfx-animation-clock-20261109]
+    branches: [experiment/mercenario-ml13-vfx-preview-clock-fix-20261109]
     paths:
       - 'index.html'
       - 'mercenary_4t_runtime_ml06.js'
@@ -36,7 +36,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: genesis-mercenario-ml12-clock-vfx-preview-qa
+          name: genesis-mercenario-ml13-vfx-preview-clock-qa
           path: previews/mercenary-lab-ml06-4t/
           retention-days: 14
           if-no-files-found: warn
