@@ -22,7 +22,8 @@
     const a=elements[0], b=elements[1];
     return {first:a?.name||'Base',color:COLOR[a?.name]||COLOR.Base,
       second:b?.name||null, color2:COLOR[b?.name]||COLOR[a?.name]||COLOR.Base,
-      strength:a?Math.max(.15,Math.min(1,a.value/100)):0};
+      // Canal Base has a neutral steel halo, not an invented elemental affinity.
+      strength:a?Math.max(.24,Math.min(1,a.value/100)):.30};
   }
   function esc(x) { return String(x ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   function readChannels(item) {
@@ -43,9 +44,17 @@
     return names.map(name => ({ name, a:a.find(x=>x.name===name), b:b.find(x=>x.name===name) }));
   }
   function open(opts) {
-    const state = { family:'first', item:null, page:0, modal:null,
-      draftFirst:opts.selectedFirst ?? null, draftSecond:opts.selectedSecond ?? null };
     const pools = { first:opts.poolFirst || [], second:opts.poolSecond || [] };
+    function sameItem(a,b){
+      return !!(a&&b&&(a===b||(a.id!=null&&b.id!=null&&String(a.id)===String(b.id))));
+    }
+    const equippedByFamily = family=>family==='first'?opts.equippedFirst:opts.equippedSecond;
+    const eligible=(family,item)=>!!item&&!sameItem(item,equippedByFamily(family));
+    const alternative=(family,preferred)=>eligible(family,preferred)?preferred:
+      pools[family].find(item=>eligible(family,item))||null;
+    const state = { family:'first', item:null, page:0, modal:null,
+      draftFirst:alternative('first',opts.selectedFirst),
+      draftSecond:alternative('second',opts.selectedSecond) };
     const body = opts.body === 'ranger' ? 'rangerMale086/src/male_ranger.glb' : 'peasantMale086/src/male_peasant.glb';
     const defaultBodyUrl = './assets/vendor/genesis/externals/' + body;
     const model = opts.modelUrl || global.GenesisPreflight?.modelUrl(defaultBodyUrl) || defaultBodyUrl;
@@ -60,7 +69,10 @@
       return `<span class="pg4tItemVisual" data-recipe="${esc(item.recipe||'')}" data-affinity="${esc(fx.first)}" data-secondary="${esc(fx.second||'')}" style="--fx-color:${fx.color};--fx-color-2:${fx.color2};--fx-strength:${glow.toFixed(2)}"><span class="pg4tIconFit"><img src="${esc(url)}" alt="${esc(item.recipe||'Objeto')}" draggable="false"></span></span>`;
     }
     function pool() { return pools[state.family]; }
-    function selected() { return state.item || (state.family === 'first' ? state.draftFirst : state.draftSecond); }
+    function selected() {
+      const candidate=state.item||(state.family==='first'?state.draftFirst:state.draftSecond);
+      return eligible(state.family,candidate)?candidate:null;
+    }
     function equipped() { return state.family === 'first' ? opts.equippedFirst : opts.equippedSecond; }
     function slot(name, cx, cy, item, locked=true, kind='') {
       const x = 100 * cx / 1670, y=100*cy/942;
@@ -78,9 +90,14 @@
     }
     function render() {
       const candidate = selected(), old = equipped(), rows = compare(old, candidate);
-      const family = state.family, canEquip = opts.editing ? (!!(state.draftFirst || opts.equippedFirst) && !!(state.draftSecond || opts.equippedSecond)) : (!!state.draftFirst && !!state.draftSecond);
+      const family = state.family;
+      const canEquip=!!candidate&&!sameItem(candidate,old)&&
+        (opts.singleSlotEquip ? !!(opts.equippedFirst&&opts.equippedSecond)
+          : opts.editing ? !!(state.draftFirst||opts.equippedFirst)&&!!(state.draftSecond||opts.equippedSecond)
+          : !!state.draftFirst&&!!state.draftSecond);
       const grid = Array.from({length:20}, (_,i) => {
-        const item=itemAt(i); return `<button type="button" class="mcInventorySlot ${item?'hasItem':''} ${item && item===candidate?'selected':''}" data-item="${i}" aria-label="${esc(item?.name || 'Casilla vacía')}" title="${esc(item?.name || '')}" ${item?'':'disabled'}>${getIcon(item)}</button>`;
+        const item=itemAt(i),isEquipped=sameItem(item,old);
+        return `<button type="button" class="mcInventorySlot ${item?'hasItem':''} ${isEquipped?'pg4tAlreadyEquipped':''} ${item&&sameItem(item,candidate)?'selected':''}" data-item="${i}" data-item-id="${esc(item?.id||'')}" aria-label="${esc(isEquipped?'Equipado: '+item.name:(item?.name||'Casilla vacía'))}" title="${esc(isEquipped?'Ya equipado · '+item.name:(item?.name||''))}" ${(!item||isEquipped)?'disabled':''}>${getIcon(item)}</button>`;
       }).join('');
       const poster=opts.modelUrl ? `<img class="pv9RealCyclesPoster" src="${ART}V050_REAL_CYCLES32_CHARACTER_RGBA.png" alt="Render Cycles EXR32 del mercenario real V050 con espada V175/V12B y escudo V015 proporcionado">` : '';
       const modelHtml = poster + `<model-viewer data-asset-src="${esc(model)}" camera-controls interaction-prompt="none" loading="lazy" camera-orbit="15deg 80deg 5.1m" exposure="1.25" shadow-intensity=".32" alt="GLB real V050: espada V12B y escudo V015" class="pv9Viewer"></model-viewer>`;
@@ -102,7 +119,7 @@
         <div class="mcHero pv9Hero">${modelHtml}</div>
         ${slot('Casco', 587,283,null,true)}${slot('Pechera',587,378,null,true)}${slot('Guantes',587,474,null,true)}${slot('Pantalón',587,571,null,true)}${slot('Botas',587,669,null,true)}
         ${slot('Collar',803,254,null,true)}
-        ${slot('Arma',980,283,state.draftFirst || opts.equippedFirst,false,'mcEquipSlot')}${slot('Escudo',980,377,state.draftSecond || opts.equippedSecond,false,'mcEquipSlot')}${slot('Anillo izquierdo',1022,476,null,true)}${slot('Anillo derecho',1022,573,null,true)}
+        ${slot('Arma',980,283,opts.equippedFirst||state.draftFirst,false,'mcEquipSlot')}${slot('Escudo',980,377,opts.equippedSecond||state.draftSecond,false,'mcEquipSlot')}${slot('Anillo izquierdo',1022,476,null,true)}${slot('Anillo derecho',1022,573,null,true)}
         <div class="pv9CompareEquipped mcItemImg" aria-label="Objeto equipado">${comparisonSlot(old,'Equipado')}</div>
         <div class="pv9CompareSelected mcItemImg" aria-label="Objeto seleccionado">${comparisonSlot(candidate,'Seleccionado')}</div>
         <div class="pv9ChannelsMask"></div><div class="mcChannels pv9Channels" role="region" aria-label="Canales de comparación">${channels}</div>
@@ -144,7 +161,8 @@
         el.addEventListener('click',fn);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fn();}});
       });
       board.querySelectorAll('[data-item]').forEach(el=>el.addEventListener('click',()=>{
-        const item = itemAt(+el.dataset.item); if (!item) return;
+        const item = itemAt(+el.dataset.item);
+        if(!eligible(state.family,item))return; // equipped items may be viewed, never compared with themselves
         state.item=item;
         if (state.family==='first') state.draftFirst=item; else state.draftSecond=item;
         opts.onDraft?.(state.family,item); render();
@@ -162,7 +180,15 @@
           case 'inspect':if (candidate)state.modal='inspect';return render();
           case 'dismiss':state.modal=null;return render();
           case 'back':return opts.onBack?.();
-          case 'equip':if(canEquip)return opts.onConfirm?.(state.draftFirst||opts.equippedFirst,state.draftSecond||opts.equippedSecond);
+          case 'equip':
+            if(!canEquip)return;
+            if(opts.singleSlotEquip){
+              // Only the actively compared item is replaced. Never silently replace both slots.
+              return opts.onConfirm?.(family==='first'?candidate:opts.equippedFirst,
+                family==='second'?candidate:opts.equippedSecond);
+            }
+            return opts.onConfirm?.(state.draftFirst||opts.equippedFirst,
+              state.draftSecond||opts.equippedSecond);
         }
       }));
     }
