@@ -46,7 +46,7 @@
     let persistentViewer = null;
     function getIcon(item) {
       if (!item || typeof opts.itemIcon !== 'function') return '';
-      const approved3DThumbs={espada_hierro:'assets/ui/mercenary/ml06/espada_hierro_original_3d_render.png',escudo_hierro:'assets/ui/mercenary/ml06/escudo_hierro_original_3d_render.png'};
+      const approved3DThumbs={espada_hierro:'assets/ui/mercenary/ml06/espada_hierro_original_3d_render.png',escudo_hierro:'assets/ui/mercenary/ml06/escudo_hierro_v015_canal_alpha_ml08.png'};
       const url=(new URLSearchParams(location.search).get('mercenario')==='1'&&approved3DThumbs[item.recipe])||opts.itemIcon(item.recipe);
       return typeof url === 'string' && url.trim() ? `<img src="${esc(url)}" alt="${esc(item.name||item.recipe)}" loading="eager">${itemAura(item,'slot')}` : '';
     }
