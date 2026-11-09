@@ -30,9 +30,13 @@ jobs:
         run: npm install --prefix /tmp/genesis-playwright playwright@1.56.1
       - name: Render and verify real Chromium captures of both channel scenarios
         run: NODE_PATH=/tmp/genesis-playwright/node_modules node tests/v014029_historic_result_qa.cjs
+      - name: Verify two forged swords visible in Inventory and independent Base/Rayo halos
+        run: NODE_PATH=/tmp/genesis-playwright/node_modules node tests/approved_ui_four_screens.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: genesis-v014029-historic-creation-screen-evidence
-          path: previews/v014029-historic-result/
+          path: |
+            previews/v014029-historic-result/
+            previews/approved-ui-four-screens/
           retention-days: 14
