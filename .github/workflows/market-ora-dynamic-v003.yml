@@ -1,0 +1,23 @@
+name: "Mercado ORA dynamic V003"
+on:
+  push:
+    branches: [experiment/mercado-dinamico-v003-20261109]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax, catalog and approval registry
+        run: |
+          node --check genesis_market_v001.js
+          node --check genesis_ui_approved.js
+          node --check genesis_market_domain_v001.js
+          node tests/genesis_market_ora_dynamic_v003.cjs
+          node --test tests/genesis_market_domain_v001.cjs
