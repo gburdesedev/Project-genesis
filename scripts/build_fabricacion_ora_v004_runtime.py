@@ -34,6 +34,34 @@ donor((1151,286,1610,572),(49,541,422,723),.64,1.7)
 donor((1210,592,1579,667),(49,541,422,723),.69,1.1)
 # Original FABRICAR frame and original anvil are retained; clear baked label.
 # Keep the ORIGINAL decorative FABRICAR button and original fixed label, pixel-identical.
+# The two iron material icons must be replaced INSIDE the ORA raster,
+# never on top of the already-painted generic icons with CSS.
+# Recover the original row texture from the SAME source's empty right side.
+# The source master stays untouched, the transparent V175 sprite stays editable.
+ingot_path=Path('assets/playcanvas/approved/materials/iron/v175/iron_v175_transparent.png')
+approved_ingot=Image.open(ingot_path).convert('RGBA')
+# Keep authentic alpha. Avoid a flat background square when original has one.
+alpha=approved_ingot.getchannel('A')
+if alpha.getextrema()==(255,255):
+    print('NOTICE V175 poster is opaque: no unverified matting, crop and retain')
+a_bbox=alpha.getbbox() or (0,0,approved_ingot.width,approved_ingot.height)
+ingot_cut=approved_ingot.crop(a_bbox)
+icon_layer=Image.new('RGBA',original.size,(0,0,0,0))
+# Exact same background zone restored in both subcategory material icons.
+for x1,y1,x2,y2 in ((116,242,174,285),(116,421,174,463)):
+    donor_box=(336,y1,336+(x2-x1),y2)
+    tile=original.crop(donor_box)
+    im.paste(tile,(x1,y1))
+    # Fit the approved icon in the ORIGINAL icon slot, without covering "Hierro".
+    fitted=ingot_cut.copy()
+    fitted.thumbnail((50,32),Image.Resampling.LANCZOS)
+    place=(x1+(x2-x1-fitted.width)//2,y1+(y2-y1-fitted.height)//2)
+    icon_layer.alpha_composite(fitted,place)
+# Save the REAL replaceable V175 layer and its cleared underlay separately.
+background_no_ingots=im.copy()
+OUT.joinpath('01_iconos_material_hierro_v175_RGBA.png').parent.mkdir(parents=True,exist_ok=True)
+icon_layer.save(OUT/'01_iconos_material_hierro_v175_RGBA.png',optimize=True)
+im.alpha_composite(icon_layer)
 # Keep screenshot's static PT until separately migrated to live PT.
 name='Fabricaciones_Base_Limpia_V004.png'
 im.save(OUT/name,optimize=True)
@@ -52,8 +80,12 @@ stack=ET.SubElement(image,'stack')
 with zipfile.ZipFile(OUT/'Fabricaciones_Runtime_V004.ora','w') as z:
     z.writestr('mimetype','image/openraster',compress_type=zipfile.ZIP_STORED)
     # Top to bottom: PT > panel right > viewer > recipes > header
+    # The two authentic material sprites are a real editable ORA layer.
+    buf=io.BytesIO();icon_layer.save(buf,'PNG')
+    z.writestr('data/material_icons_v175.png',buf.getvalue(),compress_type=zipfile.ZIP_DEFLATED)
+    ET.SubElement(stack,'layer',{'name':'02 / MATERIAL HIERRO / ORIGINAL V175 · 2 posiciones','src':'data/material_icons_v175.png','x':'0','y':'0','opacity':'1.0','visibility':'visible','composite-op':'svg:src-over'})
     for i,(filename,rect) in enumerate(reversed(sections)):
-        x1,y1,x2,y2=rect;buf=io.BytesIO();im.crop(rect).save(buf,'PNG')
+        x1,y1,x2,y2=rect;buf=io.BytesIO();background_no_ingots.crop(rect).save(buf,'PNG')
         key=f'data/layer{i:02d}.png';z.writestr(key,buf.getvalue(),compress_type=zipfile.ZIP_DEFLATED)
         ET.SubElement(stack,'layer',{'name':filename,'src':key,'x':str(x1),'y':str(y1),'opacity':'1.0','visibility':'visible','composite-op':'svg:src-over'})
     key='data/source_original_untouched.png'
