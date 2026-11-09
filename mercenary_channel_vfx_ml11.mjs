@@ -102,7 +102,7 @@ function attach(app,modelRoot){
    }
   }
  }
- let t=0,rafId=0,lastRafTime=null,lastAppTick=-Infinity;
+ let t=0,rafId=0,lastRafTime=null,lastAppTick=-Infinity,timerId=0,lastTimerTick=null;
  const report={status:'bound',model:'V050',ready:Object.keys(instances.sword).length+Object.keys(instances.shield).length,
    originalModelUnchanged:true,effects:APPROVALS,errors,shieldSurface:'actual-V015-local-bounds-contour',
    updateFrames:0,playCanvasFrames:0,previewClockFrames:0};
@@ -125,11 +125,20 @@ function attach(app,modelRoot){
    update(dt,'playcanvas');
  };
  const rafTick=now=>{
-   if(lastRafTime!==null&&now-lastAppTick>220){
+   // Some headless WebGL environments do not schedule RAF while the modal is open.
+   // The interval below keeps NGE uniforms fresh, but this is NOT GPU-frame proof.
+   if(lastRafTime!==null&&now-lastAppTick>220&&now-(lastTimerTick??-Infinity)>150){
      update((now-lastRafTime)/1000,'preview-clock');
    }
    lastRafTime=now;
    rafId=requestAnimationFrame(rafTick);
+ };
+ const intervalTick=()=>{
+   const now=performance.now();
+   if(now-lastAppTick>220&&now-(lastRafTime??-Infinity)>150){
+     update(lastTimerTick==null?0.08:(now-lastTimerTick)/1000,'preview-clock');
+   }
+   lastTimerTick=now;
  };
  const handle={app,modelRoot,instances,extras,report,levels:{sword:{},shield:{}},update,
   apply(sword,shield){
@@ -146,6 +155,7 @@ function attach(app,modelRoot){
   destroy(){
    app.off('update',appTick);
    if(rafId)cancelAnimationFrame(rafId);
+   if(timerId)clearInterval(timerId);
    for(const effect of Object.values(instances).flatMap(Object.values)){
     effect.entity?.destroy();effect.light?.destroy();effect.material?.destroy();
    }
@@ -154,6 +164,7 @@ function attach(app,modelRoot){
  };
  rig=handle;app.on('update',appTick);
  if(typeof requestAnimationFrame==='function')rafId=requestAnimationFrame(rafTick);
+ timerId=setInterval(intervalTick,100);
  return handle;
 }
 export const MERCENARY_ML11_VFX=Object.freeze({channels:Object.keys(EFFECTS),approvals:APPROVALS});
