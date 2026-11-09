@@ -58,8 +58,13 @@
         ' camera-controls interaction-prompt="none" shadow-intensity=".75" environment-image="neutral" exposure="1.16" camera-orbit="25deg 75deg auto" alt="'+esc(s.name)+'"></model-viewer>'+
         '<span class="grViewerStatus" aria-live="polite">Modelo GLB aprobado · arrastrá para rotar</span>';
     }
-    if(s.recipe==="espada_hierro")return '<iframe class="grSwordInteractive" data-sword-v12b="true" src="./genesis_sword_runtime_v001.html?v=016001" title="Inspección interactiva 3D de la espada V175 V12B" allow="fullscreen"></iframe>'+
-      '<span class="grViewerStatus" aria-live="polite">V12B · Arrastrá para girar · Rueda para zoom · Fuente 3D real experimental</span>';
+    if(s.recipe==="espada_hierro"){
+      // Estos valores vienen del objeto fabricado por NGE, nunca de una rareza prefijada.
+      // Los efectos visuales soportados se limitan a Fuego V01 (experimental) y Rayo V07 (aprobado).
+      const payload=encodeURIComponent(JSON.stringify(Object.fromEntries(s.channels.map(c=>[c.key,c.value]))));
+      return '<iframe class="grSwordInteractive" data-sword-v12b="true" src="./genesis_sword_runtime_v001.html?v=014029&channels='+payload+'" title="Espada V175 V12B con canales 3D animados" allow="fullscreen"></iframe>'+
+      '<span class="grViewerStatus" aria-live="polite">Espada 3D · Arrastrá para rotar · Rueda: zoom · Fuego/Rayo según NGE</span>';
+    }
     // Para otros objetos, emplear exclusivamente el adaptador del juego.
     const fallback=typeof renderAsset==="function"?renderAsset(s.source):"";
     return '<div class="grOtherItem">'+fallback+'</div><span class="grViewerStatus">Visual del objeto del inventario</span>';
@@ -113,5 +118,5 @@
     },{once:true});
     return true;
   }
-  root.GenesisResultDynamic=Object.freeze({normalize,html,decorate,ORDER,version:"V4.1-experimental"});
+  root.GenesisResultDynamic=Object.freeze({normalize,html,decorate,ORDER,version:"V014.029-LIVE-VFX-candidate"});
 })(typeof window!=="undefined"?window:globalThis);
