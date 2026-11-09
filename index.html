@@ -657,7 +657,14 @@ window.__genesisAppError=function(event){
         <pc-entity id="mercSwordGlowA" position="0 .28 0"><pc-light id="mercSwordLightA" type="omni" color="#b7c2ca" intensity="0" range="1.45"></pc-light></pc-entity>
         <pc-entity id="mercSwordGlowB" position="0 -.18 0"><pc-light id="mercSwordLightB" type="omni" color="#b7c2ca" intensity="0" range="1.15"></pc-light></pc-entity>
       </pc-model>
-      <pc-model id="mercApprovedGearDisplay" name="Experimental actual GLB V050 · original V12B sword + fitted V015 shield" data-asset="mercV050Exact" data-route="SharedMercenary" data-priority="ondemand" position="0 -40 0"></pc-model>
+      <pc-model id="mercApprovedGearDisplay" name="Experimental actual GLB V050 · original V12B sword + fitted V015 shield" data-asset="mercV050Exact" data-route="SharedMercenary" data-priority="ondemand" position="0 -40 0">
+        <!-- ML10: channel lights are children of the V050 model that remains visible.
+             Former mercSword/ShieldGlow lights were nested under hidden older GLBs. -->
+        <pc-entity id="mercV050SwordHaloAnchorA" position="-.57 1.46 .20"><pc-light id="mercV050SwordHaloLightA" type="omni" color="#b7c2ca" intensity="0" range="1.05"></pc-light></pc-entity>
+        <pc-entity id="mercV050SwordHaloAnchorB" position="-.52 1.90 .18"><pc-light id="mercV050SwordHaloLightB" type="omni" color="#b7c2ca" intensity="0" range=".88"></pc-light></pc-entity>
+        <pc-entity id="mercV050ShieldHaloAnchorA" position=".56 1.12 .25"><pc-light id="mercV050ShieldHaloLightA" type="omni" color="#b7c2ca" intensity="0" range="1.05"></pc-light></pc-entity>
+        <pc-entity id="mercV050ShieldHaloAnchorB" position=".56 1.08 -.12"><pc-light id="mercV050ShieldHaloLightB" type="omni" color="#b7c2ca" intensity="0" range=".88"></pc-light></pc-entity>
+      </pc-model>
       <pc-model id="mercShieldModel" name="Equipped crafted shield visual" data-asset="mercShield10" data-route="SharedMercenary" data-priority="ondemand" position="0 -40 0">
         <pc-entity id="mercShieldGlowA" position="0 0 .08"><pc-light id="mercShieldLightA" type="omni" color="#b7c2ca" intensity="0" range="1.55"></pc-light></pc-entity>
         <pc-entity id="mercShieldGlowB" position="0 0 -.08"><pc-light id="mercShieldLightB" type="omni" color="#b7c2ca" intensity="0" range="1.20"></pc-light></pc-entity>
@@ -1466,6 +1473,29 @@ function applyMercPrimitiveAccent(ids,hex,strength=1.35){const [r,g,b]=hexRgb(he
 function setCurtidorWearableVisibility(visible,armorDual=false,bootsDual=false){const ids=['mercArmorVisual','mercBootLVisual','mercBootRVisual'];ids.forEach(id=>{const e=E(id);if(e)e.enabled=visible});for(const id of ['mercArmorAccentB']){const e=E(id);if(e)e.enabled=visible&&armorDual}for(const id of ['mercBootLAccentB','mercBootRAccentB']){const e=E(id);if(e)e.enabled=visible&&bootsDual}}
 function attachCurtidorWearables(){const armor=E('mercArmorVisual'),bootL=E('mercBootLVisual'),bootR=E('mercBootRVisual');if(!armor||!bootL||!bootR)return false;const chest=findMercBone(['spine_02','Spine2','spine_01','Spine1','chest','Chest','spine','Spine']),footL=findMercBone(['foot_l','Foot_L','foot.L','LeftFoot','ankle_l','Ankle_L']),footR=findMercBone(['foot_r','Foot_R','foot.R','RightFoot','ankle_r','Ankle_R']),pelvis=findMercBone(['hips','Hips','pelvis','Pelvis'])||mercenaryRoot;safeReparent(armor,chest||pelvis);armor.setLocalPosition(0,(chest?.name?.toLowerCase?.().includes('spine') ? .04 : .42),.07);armor.setLocalEulerAngles(0,0,0);armor.setLocalScale(.92,.92,.92);if(footL){safeReparent(bootL,footL);bootL.setLocalPosition(0,.01,.05);bootL.setLocalEulerAngles(0,0,0);bootL.setLocalScale(.92,.92,.92)}else{safeReparent(bootL,pelvis);bootL.setLocalPosition(-.16,-.78,.035);bootL.setLocalEulerAngles(0,0,0);bootL.setLocalScale(.92,.92,.92)}if(footR){safeReparent(bootR,footR);bootR.setLocalPosition(0,.01,.05);bootR.setLocalEulerAngles(0,0,0);bootR.setLocalScale(.92,.92,.92)}else{safeReparent(bootR,pelvis);bootR.setLocalPosition(.16,-.78,.035);bootR.setLocalEulerAngles(0,0,0);bootR.setLocalScale(.92,.92,.92)}const aGlowA=E('mercArmorGlowA'),aGlowB=E('mercArmorGlowB'),bGlowA=E('mercBootsGlowA'),bGlowB=E('mercBootsGlowB');safeReparent(aGlowA,armor);safeReparent(aGlowB,armor);if(aGlowA)aGlowA.setLocalPosition(0,.08,.28);if(aGlowB)aGlowB.setLocalPosition(0,-.12,-.18);safeReparent(bGlowA,pelvis);safeReparent(bGlowB,pelvis);if(bGlowA)bGlowA.setLocalPosition(0,-.72,.12);if(bGlowB)bGlowB.setLocalPosition(0,-.76,-.10);return true}
 function applyMercGearChannels(){if(!mercGearReady())return false;if(mercGearRoute()==='Curtidor'){const ac=gearColors(mercArmorItem),bc=gearColors(mercBootsItem),aGlowA=E('mercArmorGlowA'),aGlowB=E('mercArmorGlowB'),bGlowA=E('mercBootsGlowA'),bGlowB=E('mercBootsGlowB');setCurtidorWearableVisibility(true,ac.dual||!!ac.demo,bc.dual||!!bc.demo);applyMercPrimitiveAccent(['mercArmorAccentA'],ac.a,3.15);applyMercPrimitiveAccent(['mercArmorAccentB'],ac.demo||ac.b,3.15);applyMercPrimitiveAccent(['mercBootLAccentA','mercBootRAccentA'],bc.a,2.85);applyMercPrimitiveAccent(['mercBootLAccentB','mercBootRAccentB'],bc.demo||bc.b,2.85);if(aGlowA)aGlowA.enabled=true;if(aGlowB)aGlowB.enabled=!!(ac.dual||ac.demo);if(bGlowA)bGlowA.enabled=true;if(bGlowB)bGlowB.enabled=!!(bc.dual||bc.demo);setMercLight('mercArmorLightA',ac.a,2.85,1.72);setMercLight('mercArmorLightB',ac.demo||ac.b,(ac.dual||ac.demo)?2.95:0,1.62);setMercLight('mercBootsLightA',bc.a,2.20,1.12);setMercLight('mercBootsLightB',bc.demo||bc.b,(bc.dual||bc.demo)?2.22:0,1.06);return true}const sc=gearColors(mercSwordItem),hc=gearColors(mercShieldItem),sGlowA=E('mercSwordGlowA'),sGlowB=E('mercSwordGlowB'),hGlowA=E('mercShieldGlowA'),hGlowB=E('mercShieldGlowB');applyMercGearMaterial('mercSwordModel',sc.demo||sc.a,sc.demo?1.28:(sc.dual?1.18:1.02));applyMercGearMaterial('mercShieldModel',hc.demo||hc.a,hc.demo?1.24:(hc.dual?1.16:1.00));if(sGlowA)sGlowA.enabled=true;if(sGlowB)sGlowB.enabled=!!(sc.dual||sc.demo);if(hGlowA)hGlowA.enabled=true;if(hGlowB)hGlowB.enabled=!!(hc.dual||hc.demo);setMercLight('mercSwordLightA',sc.a,3.45,1.52);setMercLight('mercSwordLightB',sc.demo||sc.b,(sc.dual||sc.demo)?3.35:0,1.44);setMercLight('mercShieldLightA',hc.a,3.18,1.62);setMercLight('mercShieldLightB',hc.demo||hc.b,(hc.dual||hc.demo)?3.06:0,1.48);return true}
+/* ML10: live V050 mesh stays enabled, while legacy gear meshes are hidden.
+   Drive lights attached to V050 directly from the NGE items, including neutral Base.
+   The source GLB, textures and approved player art are unmodified. */
+function applyV050EquippedHalos(){
+  if(!GENESIS_MERCENARY_LAB||!mercSwordItem||!mercShieldItem)return false;
+  const sword=gearColors(mercSwordItem),shield=gearColors(mercShieldItem);
+  const power=item=>(item.affinities?.length||0)>0?2.90:1.05;
+  const swordP=power(mercSwordItem),shieldP=power(mercShieldItem);
+  setMercLight('mercV050SwordHaloLightA',sword.a,swordP,1.05);
+  setMercLight('mercV050SwordHaloLightB',sword.b,sword.dual?swordP*.7:0,.88);
+  setMercLight('mercV050ShieldHaloLightA',shield.a,shieldP,1.05);
+  setMercLight('mercV050ShieldHaloLightB',shield.b,shield.dual?shieldP*.7:0,.88);
+  const ids=['mercV050SwordHaloLightA','mercV050ShieldHaloLightA'];
+  const visible=ids.every(id=>{const light=C(id);return!!light&&light.enabled&&light.intensity>0})&&
+    !!E('mercApprovedGearDisplay')?.enabled;
+  if(window.__GENESIS_MERCENARY_LAB)
+    window.__GENESIS_MERCENARY_LAB.halo3d={
+      visible,model:'V050',swordChannel:(mercSwordItem.affinities?.[0]?.[0]||'Base'),
+      shieldChannel:(mercShieldItem.affinities?.[0]?.[0]||'Base'),
+      swordColor:sword.a,shieldColor:shield.a,swordIntensity:swordP,shieldIntensity:shieldP
+    };
+  return visible;
+}
 function verifyMercenaryHaloState(){if(!mercGearReady())return false;const ids=mercGearRoute()==='Curtidor'?['mercArmorLightA','mercBootsLightA']:['mercSwordLightA','mercShieldLightA'];const ok=ids.every(id=>{const c=C(id);return!!c&&c.enabled&&Number(c.intensity)>0});if(!ok)console.warn('Mercenary halo verification failed',ids.map(id=>({id,component:!!C(id),enabled:C(id)?.enabled,intensity:C(id)?.intensity})));return ok}
 
 function gearColors(item){const vis=itemVisual(item);return{a:vis.c1,b:(item.affinities?.length||0)>=2?vis.c2:vis.c1,dual:(item.affinities?.length||0)>=2,demo:item?.demoExperimental&&item?.demoMaterial?.color?item.demoMaterial.color:null}}
@@ -1555,7 +1585,7 @@ function candidateMiniStats(c){return `<div class="mercStatsMini"><div class="me
 
 async function launchMercenaryLab(){
   const status=window.__GENESIS_MERCENARY_LAB={
-    status:'initializing',branch:'experiment/mercenario-4t-fit-starter-ml09-20261109',
+    status:'initializing',branch:'experiment/mercenario-4t-equipped-halo-no-self-ml10-20261109',
     source:'NGE_DEMO_REDUCED_V4',items:0,approved:false,equipmentRevision:0
   };
   if(!gameStarted||selectedProfession!=='Herrero'||!craftSession)throw new Error('La ruta del Herrero todavía no está preparada');
@@ -1660,6 +1690,7 @@ function showMercenaryEquipment(editing=false,reuseDraft=false){
       labelFirst:tanner?'Armadura':'Arma',labelSecond:tanner?'Botas':'Escudo',
       familyFirst:tanner?'Armaduras':'Espadas',familySecond:tanner?'Botas':'Escudos',
       poolFirst,poolSecond,selectedFirst:chosenFirst,selectedSecond:chosenSecond,
+      singleSlotEquip:!!lab,
       equippedFirst:lab?activeFirst:(mercGearAttached?activeFirst:null),equippedSecond:lab?activeSecond:(mercGearAttached?activeSecond:null),
       itemIcon,defensive:tanner,statsHTML:renderMercStats(chosenFirst,chosenSecond),
       getStatsHTML:(a,b)=>renderMercStats(a,b),
@@ -1697,7 +1728,12 @@ function showMercenaryEquipment(editing=false,reuseDraft=false){
         }
         if(lab){
           mercLabEquipment={sword:first,shield:second};
-          mercLabDraft={sword:first,shield:second};
+          // After replacement, the previous item becomes the compare candidate.
+          // An equipped item must never be its own selected comparison.
+          const other=(recipe,equipped)=>craftedItems.find(x=>x.recipe===recipe&&
+            x.id!==equipped?.id)||null;
+          mercLabDraft={sword:other('espada_hierro',first),
+            shield:other('escudo_hierro',second)};
         }
         refreshInventorySummary();
         if(GENESIS_MERCENARY_LAB&&window.__GENESIS_MERCENARY_LAB){
@@ -1721,6 +1757,7 @@ if(GENESIS_MERCENARY_LAB){
   ['mercBodyModel','mercBodyRangerModel','mercHeadModel','mercHairPartedModel','mercHairBuzzModel','mercHairLongModel','mercBeardModel','mercSwordModel','mercShieldModel'].forEach(id=>{const e=E(id);if(e)e.enabled=false});
   display.enabled=true;display.setLocalPosition(0,0,0);display.setLocalEulerAngles(0,0,0);display.setLocalScale(1,1,1);
   mercenaryRoot.syncHierarchy?.();
+  if(!applyV050EquippedHalos())console.warn('ML10: V050 channel halos could not be activated');
   if(window.__GENESIS_MERCENARY_LAB)Object.assign(window.__GENESIS_MERCENARY_LAB,{approved3d:true,model:'V050_FITTED_SHIELD_V015_SWORD_V12B',modelNodeCount:source.contentEntity.children?.length||0});
 }
 return true}
