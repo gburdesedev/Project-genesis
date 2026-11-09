@@ -1,0 +1,55 @@
+name: Genesis V016.001 | Verificar publicación web independiente
+on:
+  push:
+    branches:
+      - experiment/v016001-main-clean-20261109
+    paths:
+      - '.github/workflows/v016001-live-pages-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/previewcheck playwright@1.56.1
+      - name: Verify public Pages preview has real game and root still V014.028
+        shell: bash
+        run: |
+          mkdir -p previews/v016001-live-published
+          NODE_PATH=/tmp/previewcheck/node_modules node - <<'NODE'
+          const fs=require('fs'),{chromium}=require('playwright');
+          const a='https://gburdesedev.github.io/Project-genesis/preview/v016001/';
+          const root='https://gburdesedev.github.io/Project-genesis/';
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
+            const p=await browser.newPage({viewport:{width:1280,height:720}});
+            const report={target:a};
+            try{
+              const rootR=await p.goto(root,{waitUntil:'domcontentloaded',timeout:40000});
+              report.root={http:rootR?.status(),title:await p.title()};
+              const prevR=await p.goto(a,{waitUntil:'domcontentloaded',timeout:40000});
+              report.preview={http:prevR?.status(),title:await p.title(),sword:await p.locator('script[src*="genesis_result_dynamic_v001.js"]').count(),introCount:await p.locator('#prototypeIntro').count()};
+              await p.screenshot({path:'previews/v016001-live-published/01-preview-boot.png',timeout:13000}).catch(e=>report.screenshot=e.message.slice(0,120));
+              if(report.preview.http!==200||!report.preview.title.includes('V016.001')||!report.preview.sword||!report.preview.introCount)throw Error('Preview not deployed yet or missing game');
+              if(!report.root.title.includes('v0.14.028'))throw Error('Root public V014.028 unexpectedly replaced');
+              report.status='PASS_PUBLIC_URL_EXPERIMENTAL_GAME_HTML';
+            }catch(e){report.status='FAIL';report.error=e.message}
+            fs.writeFileSync('previews/v016001-live-published/report.json',JSON.stringify(report,null,2));
+            console.log('GENESIS_PAGES_PUBLIC_PROOF',JSON.stringify(report));
+            await browser.close();
+            if(report.status!=='PASS_PUBLIC_URL_EXPERIMENTAL_GAME_HTML')process.exitCode=1;
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v016001-pages-live-proof
+          path: previews/v016001-live-published/
