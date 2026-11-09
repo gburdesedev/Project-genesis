@@ -798,6 +798,7 @@ if(new URLSearchParams(location.search).get('mercenario')==='1'){
 import { whenReady } from '@playcanvas/web-components';
 const GENESIS_MERCENARY_LAB=new URLSearchParams(location.search).get("mercenario")==="1"; // Solo rama experimental, no afecta main.
 import { Vec3 } from 'playcanvas';
+import { applyMercenaryVFX, MERCENARY_ML11_VFX } from './mercenary_channel_vfx_ml11.mjs';
 import { mountVillage } from './village_world.js?v=0.14.022';
 import { mountGenesisMarket } from './genesis_market_v001.js?v=0.14.022';
 import './genesis_market_quest_v001.js?v=0.14.022';
@@ -1585,7 +1586,7 @@ function candidateMiniStats(c){return `<div class="mercStatsMini"><div class="me
 
 async function launchMercenaryLab(){
   const status=window.__GENESIS_MERCENARY_LAB={
-    status:'initializing',branch:'experiment/mercenario-4t-equipped-halo-no-self-ml10-20261109',
+    status:'initializing',branch:'experiment/mercenario-ml11-vfx-preview-20261109',
     source:'NGE_DEMO_REDUCED_V4',items:0,approved:false,equipmentRevision:0
   };
   if(!gameStarted||selectedProfession!=='Herrero'||!craftSession)throw new Error('La ruta del Herrero todavía no está preparada');
@@ -1757,8 +1758,30 @@ if(GENESIS_MERCENARY_LAB){
   ['mercBodyModel','mercBodyRangerModel','mercHeadModel','mercHairPartedModel','mercHairBuzzModel','mercHairLongModel','mercBeardModel','mercSwordModel','mercShieldModel'].forEach(id=>{const e=E(id);if(e)e.enabled=false});
   display.enabled=true;display.setLocalPosition(0,0,0);display.setLocalEulerAngles(0,0,0);display.setLocalScale(1,1,1);
   mercenaryRoot.syncHierarchy?.();
-  if(!applyV050EquippedHalos())console.warn('ML10: V050 channel halos could not be activated');
-  if(window.__GENESIS_MERCENARY_LAB)Object.assign(window.__GENESIS_MERCENARY_LAB,{approved3d:true,model:'V050_FITTED_SHIELD_V015_SWORD_V12B',modelNodeCount:source.contentEntity.children?.length||0});
+  if(!applyV050EquippedHalos())console.warn('ML11: V050 fallback channel lights not available');
+  // Prioritize actual V07/V18/V21 shader animation on the visible 3D model.
+  // Retain light fallback for Base and affinities without a qualified shader.
+  const shader=applyMercenaryVFX(mercSwordItem,mercShieldItem);
+  const originalAffinities=(item)=>new Set((item?.affinities||[]).filter(a=>Number(a[1])>0).map(a=>a[0]));
+  const animated=(kind,item)=>[...originalAffinities(item)].some(name=>
+    Number(shader.active?.[kind]?.[name]||0)>0);
+  if(shader.status==='bound'){
+    if(animated('sword',mercSwordItem)){
+      setMercLight('mercV050SwordHaloLightA','#b7c2ca',0,1.05);
+      setMercLight('mercV050SwordHaloLightB','#b7c2ca',0,.88);
+    }
+    if(animated('shield',mercShieldItem)){
+      setMercLight('mercV050ShieldHaloLightA','#b7c2ca',0,1.05);
+      setMercLight('mercV050ShieldHaloLightB','#b7c2ca',0,.88);
+    }
+  }
+  if(window.__GENESIS_MERCENARY_LAB)
+    Object.assign(window.__GENESIS_MERCENARY_LAB,{
+      approved3d:true,model:'V050_FITTED_SHIELD_V015_SWORD_V12B',
+      modelNodeCount:source.contentEntity.children?.length||0,
+      shaderAnimation:shader,shaderLibrary:MERCENARY_ML11_VFX,
+      vfxOverGenericHalo:shader.status==='bound'});
+
 }
 return true}
 
