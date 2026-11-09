@@ -1,0 +1,55 @@
+name: Genesis V016.001 | Paquete jugable experimental
+on:
+  push:
+    branches:
+      - integration/v016001-resultado-creaciones-20261109
+    paths:
+      - '.github/workflows/v016001-playable-package.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  empaquetar-v016001:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Crear juego independiente reproducible
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/Project_Genesis_V016001
+          cp -- *.html *.js *.css *.mjs dist/Project_Genesis_V016001/ 2>/dev/null || true
+          cp -a assets dist/Project_Genesis_V016001/
+          if [ -d previews ]; then cp -a previews dist/Project_Genesis_V016001/; fi
+          cat > dist/Project_Genesis_V016001/INICIAR_WINDOWS.bat <<'EOF'
+          @echo off
+          cd /d "%~dp0"
+          start "" "http://localhost:8000/index.html"
+          python -m http.server 8000
+          pause
+          EOF
+          cat > dist/Project_Genesis_V016001/LEEME.txt <<'EOF'
+          PROJECT GENESIS V016.001 - PRUEBA EXPERIMENTAL NO APROBADA
+          Descomprimir este paquete e iniciar INICIAR_WINDOWS.bat con Python instalado.
+          Es el juego original V014.028 con cambios acotados en el resultado
+          de fabricación, los ocho PNG ORA originales y correcciones del
+          arranque del mundo; requiere conexión para recursos externos.
+          Habilidades secundarias de daño (Quemadura, Veneno, etc.) EXCLUIDAS.
+          Incluye render Cycles V175 V12B, NO el GLB jugable autenticado.
+          Si falla un recurso externo, conservar el mensaje y el enlace;
+          no se ha modificado main.
+          EOF
+          python - <<'PY'
+          import zipfile,pathlib
+          p=pathlib.Path('dist/Project_Genesis_V016001')
+          with zipfile.ZipFile('dist/Project_Genesis_V016001_Experimental.zip','w',zipfile.ZIP_DEFLATED,compresslevel=4,allowZip64=True) as z:
+              for f in sorted(p.rglob('*')):
+                  if f.is_file():z.write(f,f.relative_to(p))
+          print('zip bytes',pathlib.Path('dist/Project_Genesis_V016001_Experimental.zip').stat().st_size)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Genesis_V016001_Juego_Experimental
+          path: dist/Project_Genesis_V016001_Experimental.zip
+          retention-days: 14
