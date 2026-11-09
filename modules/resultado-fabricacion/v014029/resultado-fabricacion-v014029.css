@@ -1,0 +1,61 @@
+/* Approved V014.029 Resultado de Fabricación — module only. DO NOT apply to main without validation. */
+/* Layout recovered from the historical 1672×941 Resultado de fabricación,
+   implemented as live fields rather than baking fake channel values into PNG. */
+.craftModal:has(.genesisHistoricResult){width:min(1400px,98vw);max-height:95vh}
+.craftModal:has(.genesisHistoricResult)>.craftHeader{display:none}
+.genesisHistoricResult{display:flex;flex-direction:column;min-height:570px;color:#e9d6b6;
+ font-family:Georgia,"Times New Roman",serif; background:#090807;border:2px solid #a7753a;
+ box-shadow:inset 0 0 0 4px #17100b,0 0 0 2px #000;overflow:hidden}
+.genesisHistoricTitle{height:64px;flex:none;display:flex;align-items:center;justify-content:space-between;
+ background:linear-gradient(#17110b,#090807);padding:0 2%;border-bottom:2px ridge #b28243;color:#f5d49a;letter-spacing:.10em}
+.genesisHistoricTitle>span{font-size:20px}
+.genesisHistoricTitle>div{text-align:right}.genesisHistoricTitle strong{display:block;font-size:22px;font-weight:400}
+.genesisHistoricTitle small{display:block;color:#d2c0a8;font-size:12px;letter-spacing:.025em}
+.genesisHistoricColumns{display:grid;grid-template-columns:29% 39% 32%;min-height:500px;flex:1}
+.genesisHistoricLeft,.genesisHistoricRight{min-width:0;display:flex;flex-direction:column;gap:10px;
+ padding:12px;background:radial-gradient(circle at center,#1a130d,#080706 90%)}
+.genesisHistoricLeft{border-right:4px ridge #8b6539}
+.genesisHistoricRight{border-left:4px ridge #8b6539}
+.genesisHistoricPanel{border:2px ridge #9f713c;min-width:0;padding:10px 12px;
+ background:linear-gradient(130deg,#1b140f,#080706 60%,#140d0a)}
+.genesisHistoricPanel h3{margin:0 0 12px;font-size:16px;font-weight:400;letter-spacing:.08em;
+ color:#efcd91;border-bottom:1px solid #946d3b;padding-bottom:7px}
+.genesisHistoricPanel h4{font-size:19px;color:#f8ddb1;margin:12px 0;font-weight:400}
+.genesisHistoricPanel dl{margin:0;display:grid;grid-template-columns:1fr auto;gap:8px;font-size:14px}
+.genesisHistoricPanel dt{color:#c9b9a3}.genesisHistoricPanel dd{margin:0;color:#f0dfc6;text-align:right}
+.genesisHistoricMaterial{display:flex;justify-content:space-between;align-items:center;gap:8px;
+ border-bottom:1px solid #78552e;min-height:40px;padding:8px 2px;font-size:14px}
+.genesisHistoricMaterial strong{color:#f4d29c;white-space:nowrap}
+.genesisHistoricLog{margin-top:auto;font-size:14px}.genesisHistoricLog p{margin:2px 0}.genesisHistoricLog small{color:#cbb6a0}
+.genesisHistoricView{position:relative;min-width:0;overflow:hidden;isolation:isolate;
+ display:flex;align-items:center;justify-content:center;
+ background:radial-gradient(ellipse at 50% 52%,#382b21 0%,#160f0c 44%,#070706 92%)}
+.genesisHistoricAura{position:absolute;inset:0;pointer-events:none;
+ background:radial-gradient(ellipse at 50% 46%,color-mix(in srgb,var(--creation-halo) 33%,transparent),transparent 52%);
+ filter:blur(14px)}
+.genesisHistoricObject{position:absolute;inset:2% 1% 8%;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.genesisHistoricObject img.genesisSwordV12BCycles{display:block;position:relative;inset:auto!important;
+ width:100%!important;height:100%!important;max-height:100%!important;max-width:100%!important;
+ object-fit:contain!important;object-position:center!important;transform:none!important;
+ filter:none!important;mix-blend-mode:screen}
+.genesisHistoricObject model-viewer{height:100%;width:100%;display:block}
+.genesisHistoricViewerNote{position:absolute;bottom:10px;z-index:2;font-size:12px;text-align:center;
+ color:#f0d9b8;background:#100c0acb;border:1px solid #604629;border-radius:20px;padding:7px 12px;max-width:95%}
+.genesisHistoricChannelPanel{flex:1;min-height:0;overflow-y:auto}
+.genesisHistoricMuted{margin:0 0 12px;text-align:center;color:#c1af96;font-size:13px}
+.genesisHistoricChannel{display:grid;grid-template-columns:minmax(90px,1fr) 1.2fr auto;gap:10px;
+ align-items:center;border:1px solid #997140;margin:7px 0;padding:11px 10px;
+ background:linear-gradient(135deg,#1e1410,#100e0d)}
+.genesisHistoricChannelName{font-size:13px;color:#f1ddbd}
+.genesisHistoricChannelMeter{height:13px;border:1px solid #97734b;background:#0c0a08;border-radius:8px;overflow:hidden}
+.genesisHistoricChannelMeter i{display:block;height:100%;background:var(--channel);box-shadow:0 0 8px var(--channel)}
+.genesisHistoricChannel strong{font-size:16px;font-weight:400;min-width:45px;text-align:right}
+.genesisHistoricSummary{margin-top:auto}
+.craftModal:has(.genesisHistoricResult) .actions{margin-top:0;padding:10px;background:#0a0907;border:1px solid #9b6a37}
+@media(max-width:850px){.genesisHistoricColumns{grid-template-columns:30% 37% 33%}
+ .genesisHistoricLeft,.genesisHistoricRight{padding:5px;gap:5px}
+ .genesisHistoricPanel{padding:5px}.genesisHistoricPanel h3{font-size:11px}
+ .genesisHistoricChannel{grid-template-columns:1fr;gap:4px;padding:5px}
+ .genesisHistoricTitle>span{font-size:14px}.genesisHistoricTitle strong{font-size:15px}
+ .genesisHistoricPanel dl{font-size:11px}
+ .genesisHistoricMaterial{font-size:11px;min-height:30px}}
