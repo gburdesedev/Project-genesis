@@ -1,0 +1,28 @@
+name: Fabricaciones modular | QA aislada
+on:
+  push:
+    branches:
+      - experiment/fabricaciones-modulo-aislado-20261109
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  module:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax validate module and module tests
+        run: |
+          node --check genesis_fabricaciones_module.js
+          node --check tests/fabricaciones_module_qa.cjs
+      - name: Test real recipe and inventory contract
+        run: node tests/fabricaciones_module_qa.cjs
+      - name: Ensure main remains untouched and approved PNG not changed
+        run: |
+          test -f assets/ui/approved/Fabricaciones_V07_APROBADA_1672x941.png
+          sha256sum assets/ui/approved/Fabricaciones_V07_APROBADA_1672x941.png
+          git diff --exit-code HEAD -- assets/ui/approved/Fabricaciones_V07_APROBADA_1672x941.png
