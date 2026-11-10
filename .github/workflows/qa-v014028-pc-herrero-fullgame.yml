@@ -1,0 +1,48 @@
+name: Project Genesis V014.028 - PC real Herrero gameplay from intro to expedition
+on:
+  push:
+    branches:
+      - experiment/v014028-jugabilidad-pc-e2e-20261108
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  play-real-game:
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Create disposable QA HTML, leave original game and all assets unchanged
+        run: |
+          set -eu
+          sha256sum index.html > /tmp/original-main-game.sha256
+          python3 scripts/qa/build_gameplay_qa_copy.py
+          sha256sum -c /tmp/original-main-game.sha256
+          node --check tests/pc_herrero_gameplay_assisted_v014028.cjs
+      - name: Install browser test harness
+        run: npm install --prefix /tmp/genesis-pc-qa playwright@1.56.1
+      - name: Test original gameplay from real Herrero button to finished expedition
+        timeout-minutes: 21
+        run: |
+          NODE_PATH=/tmp/genesis-pc-qa/node_modules node tests/pc_herrero_gameplay_assisted_v014028.cjs
+      - name: Enforce non-destructive QA
+        if: always()
+        run: |
+          sha256sum -c /tmp/original-main-game.sha256
+          if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+            git diff --exit-code -- index.html preparacion_control.js genesis_ui_approved.js genesis_ui_approved.css
+          else
+            echo 'Git working tree unavailable in container; original SHA256 verification passed'
+          fi
+      - name: Upload concrete gameplay audit and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Genesis-PC-V014028-Actual-Gameplay-4Crafts-Mercenary-QA
+          path: previews/pc-herrero-end-to-end/
+          retention-days: 14

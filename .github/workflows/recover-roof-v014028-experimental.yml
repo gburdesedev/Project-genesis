@@ -1,0 +1,44 @@
+name: Genesis diagnostic - recover exact approved original local roof asset into PC QA branch
+on:
+  push:
+    branches:
+      - experiment/v014028-jugabilidad-pc-e2e-20261108
+    paths:
+      - .github/workflows/recover-roof-v014028-experimental.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  recover-identical-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: experiment/v014028-jugabilidad-pc-e2e-20261108
+          persist-credentials: true
+      - name: Recover exact existing source roof glTF+PBR from the already preserved V014039 branch
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin experiment/v014039-consolidacion-qa-20261108
+          git checkout FETCH_HEAD -- assets/vendor/genesis/externals/roofReal086/
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,hashlib
+          p=Path('assets/vendor/genesis/externals/roofReal086/src/Roof_RoundTiles_6x10.gltf')
+          doc=json.loads(p.read_text())
+          images=[x['uri'] for x in doc['images']]
+          bins=[doc['buffers'][0]['uri']]
+          for name in images+bins:
+              file=p.parent/name
+              assert file.is_file() and file.stat().st_size>1000,(name,file)
+              print('VERIFIED_PRESERVED_LOCAL_SOURCE',name,file.stat().st_size,hashlib.sha256(file.read_bytes()).hexdigest(),flush=True)
+          assert len(images)==6
+          PY
+          git config user.name 'genesis-game-qa'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/vendor/genesis/externals/roofReal086/
+          if git diff --cached --quiet; then echo 'ROOF_LOCAL_ALREADY_RESTORED'; else
+            git commit -m 'assets(PC QA): copy exact preserved local roof source from V014039 candidate for boot diagnosis'
+            git push origin HEAD:experiment/v014028-jugabilidad-pc-e2e-20261108
+          fi
