@@ -1,0 +1,41 @@
+name: Genesis V014.030 | Certified crafted-item 3D gate QA
+on:
+  push:
+    branches:
+      - experiment/v014030-created-result-live-asset-gate-20261109
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  result-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify genuine V12B asset provenance and no invented channel data
+        run: |
+          node --check genesis_result_live_v014030.js
+          node --check tests/v014030_result_live_gate.cjs
+          node --check tests/v014030_verified_glb_bytes.cjs
+          node tests/v014030_result_live_gate.cjs
+          node tests/v014030_verified_glb_bytes.cjs
+          node tests/v014028_approved_sword_result.cjs
+      - name: Install Chromium test harness
+        run: npm install --prefix /tmp/genesis-v014030 playwright@1.56.1
+      - name: Compare real Cycles screenshot with historic result layout
+        run: NODE_PATH=/tmp/genesis-v014030/node_modules node tests/v014029_historic_result_qa.cjs
+      - name: Confirm original approved interface and NGE inventory data
+        run: NODE_PATH=/tmp/genesis-v014030/node_modules node tests/approved_ui_four_screens.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-v014030-real-craft-viewer-evidence
+          path: |
+            previews/v014029-historic-result/
+            previews/approved-ui-four-screens/
+          retention-days: 14
