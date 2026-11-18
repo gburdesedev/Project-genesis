@@ -1,0 +1,38 @@
+name: Anuario plaza - isolated PlayCanvas renderer
+on:
+  push:
+    branches: [experiment/anuario-village-photo-20261117]
+    paths: [.github/workflows/anuario-village-isolated.yml, tests/anuario_village_photo.cjs]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  photo:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PlayCanvas and Chromium
+        run: |
+          npm install --no-save playwright playcanvas
+          npx playwright install --with-deps chromium
+      - name: Capture original module 3D screenshots
+        timeout-minutes: 6
+        continue-on-error: true
+        run: |
+          GENESIS_TEST_DESKTOP=1 node tests/anuario_village_photo.cjs
+      - name: Capture original 14-tree layout
+        timeout-minutes: 3
+        continue-on-error: true
+        run: |
+          GENESIS_TEST_DESKTOP=1 node tests/village_trees_browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genesis-village-and-trees-genuine-20261117
+          path: |
+            /tmp/genesis-responsive/*.png
+            /tmp/*tree*.png
+            /tmp/*village*.png
+          retention-days: 7
+          if-no-files-found: warn
