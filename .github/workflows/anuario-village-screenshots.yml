@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install original game's browser-test dependencies (isolated)
         run: |
-          npm install --no-save playwright@1.58.2 playcanvas@2.15.4
+          npm install --no-save playwright playcanvas
           npx playwright install --with-deps chromium
       - name: Render real PlayCanvas village through existing browser test
         continue-on-error: true
