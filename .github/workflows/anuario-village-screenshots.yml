@@ -1,0 +1,37 @@
+name: Anuario 2026 - genuine PlayCanvas village screenshots
+on:
+  push:
+    branches: [experiment/anuario-village-photo-20261117]
+    paths: [.github/workflows/anuario-village-screenshots.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install original game's browser-test dependencies (isolated)
+        run: |
+          npm install --no-save playwright@1.58.2 playcanvas@2.15.4
+          npx playwright install --with-deps chromium
+      - name: Render real PlayCanvas village through existing browser test
+        continue-on-error: true
+        run: |
+          GENESIS_TEST_DESKTOP=1 node tests/village_render.cjs
+      - name: Render real trees in the original isolated scene
+        continue-on-error: true
+        run: |
+          GENESIS_TEST_DESKTOP=1 node tests/village_trees_browser.cjs
+      - name: Upload actual screenshots even if game full boot fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-anuario-village-authentic-captures
+          path: |
+            /tmp/genesis-responsive/*.png
+            /tmp/*village*.png
+            /tmp/*tree*.png
+          retention-days: 7
+          if-no-files-found: warn
